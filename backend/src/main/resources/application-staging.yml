@@ -1,0 +1,18 @@
+# Profile staging (Render + Neon). Chỉ đọc biến môi trường do nền tảng triển khai cấp,
+# không đọc file .env. Thiếu biến bắt buộc thì ứng dụng dừng khi khởi động.
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?sslmode=${DB_SSLMODE:require}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  jwt:
+    secret: ${JWT_SECRET}
+
+springdoc:
+  # Swagger vẫn mở ở staging để demo; tắt trước khi bảo vệ nếu giảng viên yêu cầu.
+  swagger-ui:
+    enabled: true

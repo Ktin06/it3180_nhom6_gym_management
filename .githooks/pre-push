@@ -1,0 +1,22 @@
+#!/bin/sh
+# Chặn đẩy thẳng lên nhánh main. Bật hook bằng: git config core.hooksPath .githooks
+# Git truyền vào stdin mỗi dòng: <local ref> <local sha> <remote ref> <remote sha>
+# Viết bằng sh thuần để chạy được trên Git Bash (Windows), macOS và Linux.
+
+remote="$1"
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    # remote sha toàn số 0 nghĩa là main chưa có trên GitHub: cho phép duy nhất lần tạo main
+    # khi repo còn trống (commit đầu tiên). Khi main đã có thì luôn chặn, kể cả xóa main.
+    case "$remote_sha" in
+      *[!0]*)
+        echo "Không được đẩy thẳng lên main, hãy tạo nhánh và mở pull request." >&2
+        echo "(remote: $remote, nhánh nguồn: $local_ref)" >&2
+        exit 1
+        ;;
+    esac
+  fi
+done
+
+exit 0

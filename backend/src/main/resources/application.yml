@@ -1,0 +1,49 @@
+# Cấu hình dùng chung cho mọi môi trường.
+# Kết nối cơ sở dữ liệu khai báo trong application-local.yml và application-staging.yml;
+# khi chạy kiểm thử, Testcontainers tự cung cấp kết nối (@ServiceConnection).
+spring:
+  application:
+    name: gym-management
+  jpa:
+    # Schema chỉ tạo và sửa bằng Flyway; Hibernate chỉ kiểm tra entity khớp bảng.
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jackson:
+    time-zone: UTC
+
+server:
+  port: ${PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  swagger-ui:
+    operations-sorter: alpha
+    tags-sorter: alpha
+
+app:
+  cors:
+    # Danh sách origin được gọi API, phân tách bằng dấu phẩy.
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  jwt:
+    # Khóa ký JWT, dùng từ F1. Không có giá trị mặc định ở staging.
+    secret: ${JWT_SECRET:}

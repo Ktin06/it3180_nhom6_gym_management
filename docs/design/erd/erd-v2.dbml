@@ -1,0 +1,818 @@
+// ERD – Web quản lý chuỗi phòng tập Gym – bản 2 (01/11/2026, cập nhật sau review), thay thế bản 27/10. Trạng thái: chờ nhóm duyệt.
+// 39 bảng, 8 nhóm. Dán vào https://dbdiagram.io để vẽ. Giải thích từng bảng: docs/design/erd/thiet-ke-du-lieu.md
+// Quy ước:
+//   - Khóa chính id kiểu bigint tự tăng (khớp kiểu Long trong entity Java).
+//   - Thời gian lưu kiểu timestamptz (có múi giờ), giá trị theo UTC; hiển thị theo giờ Việt Nam.
+//   - Tiền là số nguyên VND (int; tổng hóa đơn lớn vẫn dưới 2,1 tỷ).
+//   - Mọi bảng có created_at, updated_at (ghi đủ ở từng bảng bên dưới).
+//   - Người thao tác (lễ tân, quản lý, chủ chuỗi) luôn trỏ tới users.id, đặt tên *_by.
+//     Huấn luyện viên với vai trò nghiệp vụ (dạy lớp, dạy PT) trỏ tới staff.id, đặt tên trainer_id.
+//   - Dữ liệu nghiệp vụ không xóa cứng: dùng trạng thái hoặc deleted_at. Ngoại lệ duy nhất: face_embeddings
+//     xóa thật khi hội viên rút lại đồng ý (S8).
+//   - Bảng hay bị sửa đồng thời (memberships, invoices, inventories, promotions) có cột version
+//     cho khóa lạc quan (@Version của JPA), để hai người sửa cùng lúc không ghi đè nhau.
+//   - Chỉ mục duy nhất trên cột có thể rỗng dùng NULLS NOT DISTINCT (PostgreSQL 15+), để giá trị rỗng
+//     (= toàn chuỗi) cũng bị kiểm tra trùng.
+//   - Các Enum dưới đây chỉ để vẽ sơ đồ. Trong migration, cột trạng thái là varchar kèm
+//     CHECK (cot IN ('GIA_TRI_1', ...)); entity Java dùng @Enumerated(EnumType.STRING). (chốt 31/10)
+//   - Mỗi thông tin chỉ lưu ở một nơi: vai trò ở users.role, email ở users.email, chi nhánh nhân viên
+//     ở staff.branch_id, số điện thoại ở members.phone hoặc staff.phone (chốt 31/10).
+//     Cột chép lại có chủ đích (ảnh chụp lúc bán hoặc lúc sinh buổi, không đổi về sau) ghi rõ 'chép từ'.
+//   - Hội viên được giữ đồng thời gói TIME và gói PT (chốt 31/10). Lớp nhóm đã gồm trong gói TIME;
+//     gói PT chỉ dùng cho buổi tập 1-1 với huấn luyện viên, không dùng để check-in vào phòng tập (chốt 01/11).
+
+Enum user_role {
+  SUPER_ADMIN
+  BRANCH_MANAGER
+  RECEPTIONIST
+  TRAINER
+  MEMBER
+}
+Enum user_status {
+  ACTIVE
+  LOCKED
+  DISABLED
+}
+Enum package_type {
+  TIME
+  SESSION
+  PT
+}
+Enum membership_status {
+  PENDING [note: 'đã tạo hóa đơn, chưa thanh toán']
+  UPCOMING [note: 'đã thanh toán, chưa đến ngày bắt đầu (gia hạn nối tiếp)']
+  ACTIVE
+  FROZEN
+  EXPIRED
+  TRANSFERRED
+  CANCELLED
+}
+Enum freeze_status {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+Enum checkin_method {
+  MANUAL
+  FACE
+}
+Enum session_status {
+  SCHEDULED
+  RESCHEDULED
+  CANCELLED
+  COMPLETED
+}
+Enum booking_status {
+  BOOKED
+  WAITLIST
+  PENDING_RECONFIRM
+  CANCELLED
+  ATTENDED
+  NO_SHOW
+}
+Enum cancel_reason {
+  BY_MEMBER
+  BY_STAFF
+  NOT_RECONFIRMED
+  SESSION_CANCELLED
+}
+Enum pt_session_status {
+  BOOKED
+  DONE
+  CANCELLED
+  NO_SHOW
+}
+Enum invoice_status {
+  PENDING
+  PAID
+  CANCELLED
+  REFUNDED
+}
+Enum invoice_source {
+  COUNTER [note: 'lễ tân lập tại quầy']
+  MEMBER_PORTAL [note: 'hội viên gửi yêu cầu mua/gia hạn từ cổng hội viên (F7)']
+}
+Enum transfer_status {
+  PENDING [note: 'đã lập hóa đơn phí, chưa thanh toán']
+  COMPLETED
+  CANCELLED
+}
+Enum invoice_item_type {
+  PACKAGE
+  PRODUCT
+  TRANSFER_FEE
+}
+Enum payment_method {
+  CASH
+  BANK_TRANSFER
+}
+Enum payment_status {
+  CONFIRMED
+  CANCELLED
+}
+Enum promotion_type {
+  PERCENT
+  FIXED
+}
+Enum stock_movement_type {
+  IN
+  OUT
+  ADJUST
+}
+Enum equipment_status {
+  GOOD
+  BROKEN
+  MAINTENANCE
+  RETIRED
+}
+Enum maintenance_status {
+  REPORTED
+  SCHEDULED
+  IN_PROGRESS
+  DONE
+}
+Enum notification_channel {
+  IN_APP
+  EMAIL
+}
+Enum notification_status {
+  PENDING
+  SENT
+  FAILED
+}
+Enum attendance_status {
+  ON_TIME
+  LATE
+  EARLY_LEAVE
+  ABSENT
+}
+Enum payroll_status {
+  DRAFT
+  CONFIRMED
+  PAID
+}
+Enum active_status {
+  ACTIVE
+  INACTIVE
+}
+
+// =====================================================================
+// 1. Tài khoản và hệ thống (6 bảng)
+// =====================================================================
+Table users {
+  id bigint [pk, increment]
+  email varchar(255) [unique, not null, note: 'tên đăng nhập (chỉ đăng nhập bằng email) và địa chỉ nhận email thông báo; nơi duy nhất lưu email (chốt 31/10). Lưu chữ thường, CHECK email = lower(email)']
+  password_hash varchar(255) [not null, note: 'bcrypt (S1)']
+  role user_role [not null, note: 'nguồn duy nhất của vai trò; chi nhánh làm việc lấy từ staff.branch_id']
+  status user_status [not null, default: 'ACTIVE', note: 'LOCKED = quản trị viên khóa tay, đến khi mở lại; DISABLED = hội viên hoặc nhân viên ngừng hoạt động. Khóa tạm do sai mật khẩu (S4) không đổi cột này mà dùng locked_until']
+  failed_login_count int [not null, default: 0, note: 'S4: khóa 15 phút sau 5 lần sai']
+  locked_until timestamptz [note: 'khóa tạm theo S4; hết thời điểm này thì tự đăng nhập lại được']
+  last_login_at timestamptz
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table refresh_tokens {
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.id]
+  token_hash varchar(255) [unique, not null]
+  expires_at timestamptz [not null]
+  revoked_at timestamptz
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    user_id [note: 'thu hồi mọi phiên khi đổi mật khẩu hoặc khóa tài khoản']
+  }
+}
+
+Table password_resets {
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.id]
+  token_hash varchar(255) [unique, not null]
+  expires_at timestamptz [not null]
+  used_at timestamptz
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table audit_logs {
+  id bigint [pk, increment]
+  user_id bigint [ref: > users.id, note: 'rỗng nếu do tác vụ nền của hệ thống']
+  branch_id bigint [ref: > branches.id]
+  action varchar(50) [not null, note: 'CREATE, UPDATE, DELETE, REFUND, CHANGE_ROLE, ...']
+  entity varchar(50) [not null, note: 'tên bảng, ví dụ packages']
+  entity_id bigint
+  old_value jsonb
+  new_value jsonb
+  ip varchar(45)
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (entity, entity_id)
+    created_at
+    (branch_id, created_at) [note: 'xem nhật ký theo chi nhánh']
+  }
+}
+
+Table notifications {
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.id]
+  type varchar(50) [not null, note: 'CLASS_PROMOTED, CLASS_RESCHEDULED, CLASS_CANCELLED, CLASS_REMINDER, MEMBERSHIP_EXPIRING, ...']
+  title varchar(255) [not null]
+  content text
+  channel notification_channel [not null]
+  related_entity varchar(50) [note: 'ví dụ class_bookings, để bấm vào thông báo mở đúng màn hình']
+  related_id bigint
+  status notification_status [not null, default: 'PENDING']
+  scheduled_at timestamptz [note: 'email ngoài giờ mở cửa được hẹn tới giờ mở cửa']
+  sent_at timestamptz
+  read_at timestamptz
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (user_id, read_at)
+    (status, scheduled_at) [note: 'tác vụ nền quét email cần gửi']
+  }
+}
+
+Table system_configs {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id, note: 'rỗng = áp dụng toàn chuỗi; giá trị của chi nhánh ghi đè giá trị toàn chuỗi']
+  config_key varchar(100) [not null, note: 'BOOKING_WINDOW_DAYS=7, PROMOTION_CUTOFF_MIN=30, PROMOTION_GRACE_MIN=15, RECONFIRM_TTL_MIN=60, LATE_CANCEL_HOURS=2, PENALTY_LIMIT_PER_MONTH=3, PENALTY_LOCK_DAYS=7, PT_MIN_LEAD_HOURS=12, FREEZE_MIN_DAYS=7, FREEZE_MAX_DAYS=30, FREEZE_MAX_TIMES=2, TRANSFER_MIN_DAYS=30, TRANSFER_FEE=..., PENDING_INVOICE_TTL_DAYS=3']
+  config_value varchar(255) [not null]
+  description varchar(255)
+  updated_by bigint [ref: > users.id]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (branch_id, config_key) [unique, note: 'UNIQUE NULLS NOT DISTINCT, để mỗi config_key toàn chuỗi (branch_id rỗng) cũng chỉ có một dòng']
+  }
+}
+
+// =====================================================================
+// 2. Chi nhánh và cơ sở vật chất (4 bảng)
+// =====================================================================
+Table branches {
+  id bigint [pk, increment]
+  code varchar(20) [unique, not null, note: 'ví dụ CN01']
+  name varchar(255) [not null]
+  address varchar(255)
+  phone varchar(20)
+  open_time time [not null, note: 'giờ mở cửa; check-in và email chỉ trong khung open_time–close_time']
+  close_time time [not null]
+  capacity int
+  status active_status [not null, default: 'ACTIVE']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table rooms {
+  id bigint [pk, increment]
+  branch_id bigint [not null, ref: > branches.id]
+  name varchar(100) [not null]
+  type varchar(50) [note: 'GYM_FLOOR, STUDIO, PT_ROOM']
+  capacity int [not null, note: 'CHECK capacity > 0']
+  status active_status [not null, default: 'ACTIVE']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (branch_id, name) [unique]
+  }
+}
+
+Table equipment {
+  id bigint [pk, increment]
+  branch_id bigint [not null, ref: > branches.id]
+  room_id bigint [ref: > rooms.id]
+  code varchar(50) [unique, note: 'mã tài sản dán trên máy']
+  name varchar(255) [not null]
+  type varchar(50)
+  status equipment_status [not null, default: 'GOOD']
+  purchased_at date
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table maintenance_logs {
+  id bigint [pk, increment]
+  equipment_id bigint [not null, ref: > equipment.id]
+  reported_by bigint [not null, ref: > users.id]
+  issue text [not null]
+  status maintenance_status [not null, default: 'REPORTED']
+  scheduled_date date
+  completed_date date
+  cost int [note: 'VND, CHECK cost >= 0']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+// =====================================================================
+// 3. Hội viên và gói tập (7 bảng)
+// =====================================================================
+Table members {
+  id bigint [pk, increment]
+  user_id bigint [unique, ref: - users.id, note: 'rỗng nếu lễ tân tạo hồ sơ mà hội viên chưa có tài khoản']
+  home_branch_id bigint [not null, ref: > branches.id]
+  member_code varchar(20) [unique, not null, note: 'dùng để check-in (F4)']
+  full_name varchar(255) [not null]
+  gender varchar(10)
+  dob date
+  phone varchar(20) [unique, not null, note: 'nơi duy nhất lưu số điện thoại hội viên; duy nhất vì F4 tìm theo số điện thoại. Lưu dạng chuẩn 10 chữ số bắt đầu bằng 0, CHECK phone ~ \'^0[0-9]{9}$\'. Email lấy từ users.email qua user_id. Tự đăng ký bằng số đã có hồ sơ thì bị từ chối, lễ tân tạo tài khoản cho hồ sơ có sẵn (chốt 01/11)']
+  avatar_url varchar(500)
+  face_consent_at timestamptz [note: 'thời điểm đồng ý dùng khuôn mặt (S8); rỗng = chưa đồng ý']
+  booking_locked_until timestamptz [note: 'khóa đặt lớp do hủy muộn hoặc vắng mặt']
+  status active_status [not null, default: 'ACTIVE', note: 'chuyển INACTIVE thì đồng thời chuyển users.status = DISABLED trong cùng giao dịch']
+  deleted_at timestamptz
+  created_by bigint [ref: > users.id]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    full_name
+  }
+}
+
+Table face_embeddings {
+  id bigint [pk, increment]
+  member_id bigint [not null, ref: > members.id]
+  embedding "real[]" [not null, note: 'vector 128 chiều do face-api.js trích xuất, CHECK cardinality(embedding) = 128; so khớp bằng khoảng cách Euclid; không lưu ảnh gốc (F20)']
+  model_version varchar(50) [note: 'phiên bản mô hình face-api.js, để biết khi nào phải đăng ký lại']
+  created_by bigint [ref: > users.id]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    member_id
+  }
+  Note: 'Ngoại lệ của quy tắc không xóa cứng (S8): hội viên rút lại đồng ý thì xóa thật mọi dòng của họ và đặt members.face_consent_at = rỗng trong cùng giao dịch; nhật ký hoạt động chỉ ghi việc xóa, không ghi vector.'
+}
+
+Table body_metrics {
+  id bigint [pk, increment]
+  member_id bigint [not null, ref: > members.id]
+  recorded_by bigint [ref: > users.id]
+  measured_at date [not null]
+  weight decimal(5,2) [note: 'kg']
+  height decimal(5,2) [note: 'cm']
+  body_fat decimal(4,2) [note: '%']
+  muscle_mass decimal(5,2) [note: 'kg']
+  note text
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (member_id, measured_at)
+  }
+}
+
+Table packages {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id, note: 'rỗng = dùng toàn chuỗi']
+  code varchar(30) [unique, not null]
+  name varchar(255) [not null]
+  type package_type [not null]
+  duration_days int [not null, note: 'số ngày hiệu lực, CHECK > 0; gói theo buổi và gói PT vẫn có hạn dùng. Gói TIME "1 tháng" = 30 ngày; quản lý nhập số ngày khi tạo gói (chốt 01/11)']
+  session_count int [note: 'bắt buộc với SESSION và PT, rỗng với TIME (CHECK)']
+  price int [not null, note: 'VND, CHECK price >= 0']
+  description text
+  status active_status [not null, default: 'ACTIVE', note: 'INACTIVE = ngừng bán, không xóa']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table memberships {
+  id bigint [pk, increment]
+  member_id bigint [not null, ref: > members.id]
+  package_id bigint [not null, ref: > packages.id]
+  package_type package_type [not null, note: 'chép từ packages.type để làm chỉ mục duy nhất bên dưới']
+  branch_id bigint [ref: > branches.id, note: 'chi nhánh được dùng; rỗng = toàn chuỗi (chép từ packages.branch_id)']
+  sold_branch_id bigint [not null, ref: > branches.id, note: 'chi nhánh bán, dùng cho báo cáo doanh thu']
+  invoice_item_id bigint [ref: > invoice_items.id, note: 'dòng hóa đơn tạo ra gói; rỗng với gói nhận chuyển nhượng']
+  start_date date [not null, note: 'gói PENDING mang ngày dự kiến; tính lại lúc hóa đơn chuyển PAID (nối tiếp gói cũ nếu còn hạn)']
+  end_date date [not null, note: 'CHECK end_date >= start_date; cộng thêm số ngày bảo lưu. Khi bảo lưu được duyệt, gói UPCOMING cùng loại nối tiếp phía sau cũng được dời start_date và end_date thêm đúng số ngày đó, trong cùng giao dịch (chốt 01/11)']
+  total_sessions int [note: 'chép từ packages.session_count lúc mua']
+  remaining_sessions int [note: 'CHECK remaining_sessions >= 0']
+  freeze_count int [not null, default: 0]
+  status membership_status [not null, default: 'PENDING']
+  version int [not null, default: 0, note: 'khóa lạc quan (@Version): trừ buổi, bảo lưu, kích hoạt']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (member_id, status)
+    end_date [note: 'tác vụ nền nhắc sắp hết hạn, chuyển EXPIRED']
+    start_date [name: 'ix_memberships_upcoming', note: 'chỉ mục có điều kiện WHERE status = UPCOMING: tác vụ nền chuyển UPCOMING thành ACTIVE']
+    (member_id, package_type, branch_id) [unique, name: 'uq_one_active_per_type', note: 'chỉ mục duy nhất có điều kiện, NULLS NOT DISTINCT (gói toàn chuỗi có branch_id rỗng): WHERE status IN (ACTIVE, FROZEN)']
+    package_id
+    invoice_item_id [note: 'tìm gói cần kích hoạt khi hóa đơn chuyển PAID']
+  }
+}
+
+Table membership_freezes {
+  id bigint [pk, increment]
+  membership_id bigint [not null, ref: > memberships.id]
+  requested_by bigint [not null, ref: > users.id]
+  approved_by bigint [ref: > users.id, note: 'quản lý chi nhánh']
+  from_date date [not null]
+  to_date date [not null, note: 'CHECK số ngày trong khoảng FREEZE_MIN_DAYS–FREEZE_MAX_DAYS (kiểm tra trong code)']
+  reason text
+  status freeze_status [not null, default: 'PENDING', note: 'APPROVED thì cộng số ngày vào end_date của gói, và dời gói UPCOMING cùng loại nối tiếp phía sau']
+  decided_at timestamptz
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    membership_id
+  }
+}
+
+Table membership_transfers {
+  id bigint [pk, increment]
+  from_membership_id bigint [not null, ref: > memberships.id, note: 'gói cũ chuyển sang TRANSFERRED']
+  to_membership_id bigint [ref: > memberships.id, note: 'gói mới tạo cho người nhận, giữ nguyên ngày hết hạn và số buổi còn lại; rỗng khi còn PENDING']
+  from_member_id bigint [not null, ref: > members.id]
+  to_member_id bigint [not null, ref: > members.id, note: 'CHECK khác from_member_id']
+  invoice_id bigint [ref: > invoices.id, note: 'hóa đơn thu phí chuyển nhượng']
+  fee int [not null, note: 'VND']
+  status transfer_status [not null, default: 'PENDING', note: 'hóa đơn phí PAID thì chuyển COMPLETED: gói cũ TRANSFERRED, tạo gói mới, trong cùng giao dịch. Hóa đơn bị hủy thì CANCELLED, gói cũ giữ nguyên. CHECK status = COMPLETED khi và chỉ khi to_membership_id có giá trị']
+  approved_by bigint [ref: > users.id]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+// =====================================================================
+// 4. Check-in và lớp học (5 bảng)
+// =====================================================================
+Table checkins {
+  id bigint [pk, increment]
+  member_id bigint [not null, ref: > members.id, note: 'phải trùng memberships.member_id của gói dùng (kiểm tra trong code)']
+  membership_id bigint [not null, ref: > memberships.id, note: 'chỉ gói TIME hoặc SESSION đang ACTIVE; gói PT không dùng để check-in. Có cả hai thì dùng gói TIME, không trừ buổi (chốt 01/11)']
+  branch_id bigint [not null, ref: > branches.id]
+  created_by bigint [not null, ref: > users.id, note: 'lễ tân thực hiện']
+  method checkin_method [not null, default: 'MANUAL']
+  match_score decimal(5,4) [note: 'chỉ có khi method = FACE']
+  checkin_date date [not null, note: 'ngày theo giờ Việt Nam, để xác định lần check-in đầu tiên trong ngày']
+  session_deducted boolean [not null, default: false, note: 'true nếu lượt này trừ 1 buổi của gói theo buổi']
+  checked_in_at timestamptz [not null]
+  checked_out_at timestamptz
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (branch_id, checked_in_at) [note: 'dashboard theo ngày, theo giờ (F6)']
+    (member_id, checked_in_at)
+    (membership_id, checkin_date) [unique, name: 'uq_one_deduction_per_day', note: 'chỉ mục duy nhất có điều kiện: WHERE session_deducted = true']
+  }
+}
+
+Table class_types {
+  id bigint [pk, increment]
+  name varchar(100) [unique, not null, note: 'Yoga, Zumba, Boxing...']
+  description text
+  status active_status [not null, default: 'ACTIVE']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table class_schedules {
+  id bigint [pk, increment]
+  branch_id bigint [not null, ref: > branches.id]
+  class_type_id bigint [not null, ref: > class_types.id]
+  trainer_id bigint [not null, ref: > staff.id, note: 'tài khoản của nhân viên này phải có role = TRAINER (kiểm tra trong code)']
+  room_id bigint [not null, ref: > rooms.id]
+  day_of_week int [not null, note: '1 = thứ Hai ... 7 = Chủ nhật (theo ISO), CHECK 1..7']
+  start_time time [not null]
+  end_time time [not null, note: 'CHECK end_time > start_time']
+  capacity int [not null, note: 'CHECK 0 < capacity <= sức chứa phòng (kiểm tra trong code)']
+  valid_from date [not null]
+  valid_to date
+  status active_status [not null, default: 'ACTIVE']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table class_sessions {
+  id bigint [pk, increment]
+  class_schedule_id bigint [not null, ref: > class_schedules.id]
+  branch_id bigint [not null, ref: > branches.id]
+  trainer_id bigint [not null, ref: > staff.id, note: 'chép từ lịch lặp; đổi được khi có PT dạy thay']
+  room_id bigint [not null, ref: > rooms.id]
+  occurrence_date date [not null, note: 'ngày (giờ Việt Nam) của buổi theo lịch lặp lúc sinh ra; không bao giờ đổi, kể cả khi đổi giờ']
+  start_at timestamptz [not null]
+  end_at timestamptz [not null]
+  original_start_at timestamptz [note: 'giờ cũ khi đổi giờ, để ghi vào thông báo']
+  capacity int [not null]
+  status session_status [not null, default: 'SCHEDULED']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (class_schedule_id, occurrence_date) [unique, note: 'không sinh trùng một buổi hai lần, kể cả khi buổi đã đổi giờ (start_at đổi nhưng occurrence_date giữ nguyên)']
+    (branch_id, start_at)
+    (trainer_id, start_at) [note: 'kiểm tra trùng giờ với buổi PT']
+  }
+}
+
+Table class_bookings {
+  id bigint [pk, increment]
+  class_session_id bigint [not null, ref: > class_sessions.id]
+  member_id bigint [not null, ref: > members.id]
+  created_by bigint [ref: > users.id, note: 'lễ tân nếu thao tác hộ']
+  status booking_status [not null, note: 'chỉ được đặt chỗ hoặc vào chờ khi có gói TIME đang ACTIVE dùng được tại chi nhánh; gói SESSION và PT không dùng cho lớp nhóm (chốt 31/10)']
+  waitlisted_at timestamptz [note: 'căn cứ thứ tự chờ: đến trước, xếp trước']
+  booked_at timestamptz
+  promoted_at timestamptz [note: 'thời điểm được tự động đưa từ danh sách chờ vào lớp']
+  grace_until timestamptz [note: 'hết ân hạn hủy không phạt = thời điểm gửi email báo + 15 phút']
+  reconfirm_expires_at timestamptz [note: 'hạn xác nhận lại khi đổi giờ']
+  arrived_at timestamptz [note: 'đánh dấu "đã đến" khi check-in tại quầy']
+  cancelled_at timestamptz
+  cancel_reason cancel_reason
+  is_late_cancel boolean [not null, default: false]
+  attendance_marked_by bigint [ref: > users.id, note: 'huấn luyện viên điểm danh']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (class_session_id, member_id) [unique, name: 'uq_active_booking', note: 'chỉ mục duy nhất có điều kiện: WHERE status <> CANCELLED (hủy rồi vẫn đặt lại được)']
+    (class_session_id, status, waitlisted_at) [note: 'lấy người đứng đầu danh sách chờ']
+    (member_id, status)
+  }
+  Note: 'NF6: khi đặt chỗ, khóa (SELECT ... FOR UPDATE) dòng class_sessions để không vượt sĩ số, và dòng members của hội viên để hai yêu cầu đặt đồng thời không lọt kiểm tra trùng giờ. Thứ tự khóa cố định: members trước, class_sessions sau, để tránh deadlock.'
+}
+
+// =====================================================================
+// 5. Huấn luyện viên (4 bảng)
+// =====================================================================
+Table trainer_availabilities {
+  id bigint [pk, increment]
+  trainer_id bigint [not null, ref: > staff.id]
+  branch_id bigint [not null, ref: > branches.id]
+  day_of_week int [not null, note: '1..7 theo ISO']
+  start_time time [not null]
+  end_time time [not null, note: 'CHECK end_time > start_time']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (trainer_id, day_of_week)
+  }
+}
+
+Table pt_sessions {
+  id bigint [pk, increment]
+  trainer_id bigint [not null, ref: > staff.id]
+  member_id bigint [not null, ref: > members.id, note: 'phải trùng memberships.member_id (kiểm tra trong code)']
+  membership_id bigint [not null, ref: > memberships.id, note: 'gói loại PT']
+  branch_id bigint [not null, ref: > branches.id]
+  start_at timestamptz [not null, note: 'đặt trước ít nhất PT_MIN_LEAD_HOURS']
+  end_at timestamptz [not null]
+  status pt_session_status [not null, default: 'BOOKED']
+  confirmed_at timestamptz [note: 'PT xác nhận buổi đã diễn ra; chỉ lúc này mới trừ buổi']
+  commission_amount int [note: 'VND, chụp lúc chuyển DONE, không đổi về sau: staff.commission_rate × (invoice_items.amount - invoice_items.discount_amount) ÷ memberships.total_sessions, làm tròn đến đồng. Gói nhận chuyển nhượng lấy dòng hóa đơn của gói gốc qua membership_transfers (chốt 01/11). CHECK có giá trị khi và chỉ khi status = DONE']
+  cancelled_at timestamptz
+  created_by bigint [ref: > users.id]
+  note text
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (trainer_id, start_at)
+    (member_id, start_at)
+    membership_id
+  }
+  Note: 'NF6: khi đặt buổi, khóa (SELECT ... FOR UPDATE) dòng members của hội viên rồi dòng staff của huấn luyện viên, sau đó mới kiểm tra trùng giờ với pt_sessions và class_sessions. Buổi mới chưa có dòng để khóa, nên phải khóa dòng cha.'
+}
+
+Table workout_plans {
+  id bigint [pk, increment]
+  trainer_id bigint [not null, ref: > staff.id]
+  member_id bigint [not null, ref: > members.id]
+  title varchar(255) [not null]
+  content jsonb [note: 'danh sách bài tập theo buổi']
+  start_date date
+  end_date date
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table workout_logs {
+  id bigint [pk, increment]
+  member_id bigint [not null, ref: > members.id]
+  pt_session_id bigint [ref: > pt_sessions.id, note: 'rỗng nếu hội viên tự ghi']
+  logged_at date [not null]
+  exercise varchar(100) [not null]
+  sets int
+  reps int
+  weight decimal(6,2) [note: 'kg']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (member_id, logged_at)
+  }
+}
+
+// =====================================================================
+// 6. Bán hàng và thanh toán (7 bảng)
+// =====================================================================
+Table products {
+  id bigint [pk, increment]
+  sku varchar(50) [unique, not null]
+  name varchar(255) [not null]
+  price int [not null, note: 'VND, CHECK price >= 0']
+  unit varchar(20)
+  status active_status [not null, default: 'ACTIVE']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table inventories {
+  id bigint [pk, increment]
+  branch_id bigint [not null, ref: > branches.id]
+  product_id bigint [not null, ref: > products.id]
+  quantity int [not null, default: 0, note: 'CHECK quantity >= 0']
+  min_quantity int [not null, default: 0, note: 'dưới mức này thì cảnh báo sắp hết']
+  version int [not null, default: 0, note: 'khóa lạc quan (@Version): hai quầy bán cùng lúc']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (branch_id, product_id) [unique]
+  }
+}
+
+Table stock_movements {
+  id bigint [pk, increment]
+  branch_id bigint [not null, ref: > branches.id]
+  product_id bigint [not null, ref: > products.id]
+  invoice_id bigint [ref: > invoices.id, note: 'có khi xuất kho do bán hàng']
+  created_by bigint [not null, ref: > users.id]
+  type stock_movement_type [not null]
+  quantity int [not null, note: 'IN, OUT: số dương, chiều do cột type quyết định. ADJUST: số có dấu (dương = tăng, âm = giảm khi kiểm kê). CHECK (type = ADJUST AND quantity <> 0) OR quantity > 0']
+  unit_cost int [note: 'giá nhập, chỉ có khi type = IN']
+  note text
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (branch_id, product_id, created_at) [note: 'lịch sử kho theo chi nhánh và sản phẩm']
+    invoice_id
+  }
+}
+
+Table promotions {
+  id bigint [pk, increment]
+  branch_id bigint [ref: > branches.id, note: 'rỗng = toàn chuỗi']
+  code varchar(50) [unique, not null]
+  type promotion_type [not null]
+  value int [not null, note: 'PERCENT: 1..100; FIXED: số tiền VND']
+  max_discount int [note: 'mức giảm tối đa khi type = PERCENT']
+  min_amount int [note: 'giá trị hóa đơn tối thiểu']
+  start_at timestamptz [not null]
+  end_at timestamptz [not null]
+  usage_limit int
+  used_count int [not null, default: 0, note: 'CHECK used_count <= usage_limit']
+  status active_status [not null, default: 'ACTIVE']
+  version int [not null, default: 0, note: 'khóa lạc quan (@Version): nhiều hóa đơn dùng cùng mã một lúc']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table invoices {
+  id bigint [pk, increment]
+  code varchar(30) [unique, not null]
+  branch_id bigint [not null, ref: > branches.id]
+  member_id bigint [ref: > members.id, note: 'rỗng nếu khách lẻ mua tại quầy; bắt buộc có khi hóa đơn chứa dòng PACKAGE hoặc TRANSFER_FEE (kiểm tra trong code); báo cáo doanh thu phải dùng LEFT JOIN với members']
+  created_by bigint [not null, ref: > users.id, note: 'lễ tân lập tại quầy, hoặc tài khoản hội viên khi tự gửi yêu cầu mua/gia hạn trên web (F7, hóa đơn PENDING, chốt 01/11)']
+  source invoice_source [not null, note: 'COUNTER hoặc MEMBER_PORTAL (F7); chỉ hóa đơn MEMBER_PORTAL bị tự hủy khi quá hạn (chốt 01/11)']
+  promotion_id bigint [ref: > promotions.id, note: 'tối đa một mã mỗi hóa đơn']
+  subtotal int [not null]
+  discount int [not null, default: 0, note: 'bằng tổng invoice_items.discount_amount (kiểm tra trong code)']
+  total int [not null, note: 'CHECK total = subtotal - discount, total >= 0']
+  status invoice_status [not null, default: 'PENDING', note: 'hóa đơn MEMBER_PORTAL còn PENDING quá PENDING_INVOICE_TTL_DAYS thì tác vụ nền chuyển CANCELLED; chỉ lễ tân hoặc quản lý ghi nhận thanh toán (S7)']
+  paid_at timestamptz
+  refunded_by bigint [ref: > users.id, note: 'chỉ quản lý chi nhánh']
+  refunded_at timestamptz
+  refund_reason text
+  version int [not null, default: 0, note: 'khóa lạc quan (@Version): hai người cùng xác nhận thanh toán thì một người bị từ chối']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (branch_id, created_at)
+    (member_id, created_at)
+    created_at [name: 'ix_invoices_pending_portal', note: 'chỉ mục có điều kiện WHERE status = PENDING AND source = MEMBER_PORTAL: tác vụ nền hủy hóa đơn chờ quá hạn']
+  }
+}
+
+Table invoice_items {
+  id bigint [pk, increment]
+  invoice_id bigint [not null, ref: > invoices.id]
+  item_type invoice_item_type [not null]
+  package_id bigint [ref: > packages.id, note: 'bắt buộc khi item_type = PACKAGE']
+  product_id bigint [ref: > products.id, note: 'bắt buộc khi item_type = PRODUCT']
+  description varchar(255) [not null, note: 'tên hiển thị trên hóa đơn PDF, chép lúc bán']
+  quantity int [not null, default: 1, note: 'CHECK quantity > 0']
+  unit_price int [not null, note: 'giá lúc bán, lấy từ server']
+  amount int [not null, note: 'CHECK amount = quantity * unit_price (trước giảm giá)']
+  discount_amount int [not null, default: 0, note: 'phần giảm giá của hóa đơn phân bổ xuống dòng này, server tính theo tỷ lệ amount; CHECK 0 <= discount_amount <= amount. Doanh thu theo gói (F16) và hoa hồng PT dùng amount - discount_amount']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    invoice_id
+  }
+}
+
+Table payments {
+  id bigint [pk, increment]
+  invoice_id bigint [not null, ref: > invoices.id]
+  method payment_method [not null]
+  amount int [not null, note: 'CHECK amount > 0']
+  status payment_status [not null, default: 'CONFIRMED']
+  transaction_ref varchar(100) [note: 'nội dung chuyển khoản VietQR, nếu có']
+  received_by bigint [not null, ref: > users.id, note: 'lễ tân hoặc quản lý xác nhận đã nhận tiền (S7)']
+  paid_at timestamptz [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    invoice_id
+  }
+}
+
+// =====================================================================
+// 7. Nhân sự (4 bảng)
+// =====================================================================
+Table staff {
+  id bigint [pk, increment]
+  user_id bigint [unique, not null, ref: - users.id, note: 'chức vụ lấy từ users.role; chủ chuỗi không có dòng ở bảng này']
+  branch_id bigint [not null, ref: > branches.id]
+  staff_code varchar(20) [unique, not null]
+  full_name varchar(255) [not null]
+  phone varchar(20) [note: 'nơi duy nhất lưu số điện thoại nhân viên; cùng định dạng chuẩn với members.phone (CHECK); email lấy từ users.email']
+  base_salary int [not null, default: 0]
+  hourly_rate int
+  commission_rate decimal(5,4) [note: 'hoa hồng PT, ví dụ 0.1000 = 10%']
+  specialties varchar(255)
+  hired_at date
+  status active_status [not null, default: 'ACTIVE']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table shifts {
+  id bigint [pk, increment]
+  staff_id bigint [not null, ref: > staff.id]
+  branch_id bigint [not null, ref: > branches.id]
+  start_at timestamptz [not null]
+  end_at timestamptz [not null, note: 'CHECK end_at > start_at']
+  created_by bigint [ref: > users.id]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (staff_id, start_at)
+  }
+}
+
+Table attendances {
+  id bigint [pk, increment]
+  staff_id bigint [not null, ref: > staff.id]
+  shift_id bigint [not null, ref: > shifts.id]
+  check_in_at timestamptz
+  check_out_at timestamptz
+  status attendance_status [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    shift_id [unique, note: 'mỗi ca một bản ghi chấm công']
+  }
+}
+
+Table payrolls {
+  id bigint [pk, increment]
+  staff_id bigint [not null, ref: > staff.id]
+  branch_id bigint [not null, ref: > branches.id, note: 'chép từ staff.branch_id lúc tính lương, để báo cáo lương theo chi nhánh không đổi khi nhân viên chuyển chi nhánh (v4)']
+  month varchar(7) [not null, note: 'YYYY-MM']
+  base_amount int [not null]
+  commission_amount int [not null, default: 0, note: 'tổng pt_sessions.commission_amount của các buổi DONE trong tháng']
+  deduction int [not null, default: 0]
+  total int [not null]
+  status payroll_status [not null, default: 'DRAFT']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (staff_id, month) [unique]
+  }
+}
+
+// =====================================================================
+// 8. Gamification (2 bảng) – tính theo quy tắc, không dùng AI
+// =====================================================================
+Table badges {
+  id bigint [pk, increment]
+  code varchar(50) [unique, not null]
+  name varchar(100) [not null]
+  description text
+  icon_url varchar(500)
+  rule jsonb [not null, note: 'ví dụ {"type":"STREAK","days":7} hoặc {"type":"CHECKIN_COUNT","count":50}']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table member_badges {
+  id bigint [pk, increment]
+  member_id bigint [not null, ref: > members.id]
+  badge_id bigint [not null, ref: > badges.id]
+  earned_at timestamptz [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (member_id, badge_id) [unique]
+  }
+}

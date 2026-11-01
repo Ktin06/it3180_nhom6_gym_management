@@ -1,0 +1,44 @@
+{
+  "info": {
+    "name": "Gym Management – IT3180 Nhóm 6",
+    "description": "Bộ request kiểm thử API. Mỗi chức năng một thư mục (F1, F2, ...). Dùng kèm environment local.postman_environment.json.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Hệ thống",
+      "item": [
+        {
+          "name": "Health check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Trả mã 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Trạng thái UP', function () {",
+                  "  pm.expect(pm.response.json().status).to.eql('UP');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["actuator", "health"]
+            },
+            "description": "Kiểm tra backend đang chạy. Không cần đăng nhập."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

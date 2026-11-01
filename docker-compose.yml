@@ -1,0 +1,28 @@
+# PostgreSQL cho môi trường phát triển. Chạy: docker compose up -d
+# Biến lấy từ file .env ở cùng thư mục (tạo từ .env.example).
+name: gym-management
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: gym-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:?Thiếu DB_NAME trong .env}
+      POSTGRES_USER: ${DB_USERNAME:?Thiếu DB_USERNAME trong .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Thiếu DB_PASSWORD trong .env}
+      TZ: UTC
+      PGTZ: UTC
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - gym-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  gym-postgres-data:

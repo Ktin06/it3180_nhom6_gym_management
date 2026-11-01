@@ -1,0 +1,13 @@
+# CODEOWNERS – tự động yêu cầu người duyệt khi pull request sửa vào vùng mã tương ứng.
+# Hiện CHƯA gán ai; bỏ dấu # và thay bằng tên tài khoản GitHub thật khi nhóm đã phân công.
+#
+# Cú pháp: <mẫu đường dẫn>  <tên tài khoản GitHub, có ký tự @ ở đầu> ...
+# Dòng ở dưới được ưu tiên hơn dòng ở trên.
+#
+# Ví dụ (thay ten-tai-khoan bằng tài khoản thật):
+# *                                           ten-tai-khoan-truong-nhom
+# /backend/src/main/resources/db/migration/   ten-tai-khoan-phu-trach-csdl
+# /backend/src/main/java/vn/edu/hust/nhom6/gym/feature/auth/   ten-tai-khoan-F1
+# /frontend/                                  ten-tai-khoan-phu-trach-frontend
+# /docs/                                      ten-tai-khoan-phu-trach-tai-lieu
+# /.github/                                   ten-tai-khoan-truong-nhom

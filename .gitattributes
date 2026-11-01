@@ -1,0 +1,24 @@
+# Mặc định: Git tự nhận file văn bản và lưu với xuống dòng LF.
+* text=auto eol=lf
+
+# Script Windows cần CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Script shell phải là LF để chạy được trên Git Bash, macOS, Linux và trong Docker.
+mvnw text eol=lf
+.githooks/* text eol=lf
+*.sh text eol=lf
+
+# File nhị phân: không đổi xuống dòng, không so sánh nội dung.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pdf binary
+*.jar binary
+*.xlsx binary
+*.docx binary
+*.pptx binary

@@ -1,0 +1,44 @@
+# ===== Java / Maven =====
+target/
+*.class
+
+# ===== Node / Vite =====
+node_modules/
+dist/
+dist-ssr/
+coverage/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===== IDE =====
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.sw?
+
+# ===== Hệ điều hành =====
+.DS_Store
+Thumbs.db
+
+# ===== Biến môi trường (chứa khóa bí mật) =====
+.env
+.env.*
+!.env.example
+
+# ===== LaTeX =====
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.nav
+*.snm
+*.bbl
+*.blg

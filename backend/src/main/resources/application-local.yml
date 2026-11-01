@@ -1,0 +1,15 @@
+# Profile chạy trên máy cá nhân: ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+# Đọc biến từ file .env ở thư mục gốc repo (chạy lệnh từ thư mục backend/).
+spring:
+  config:
+    import: optional:file:../.env[.properties]
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:gym_management}
+    username: ${DB_USERNAME:gym}
+    password: ${DB_PASSWORD:}
+  jpa:
+    show-sql: false
+
+logging:
+  level:
+    vn.edu.hust.nhom6.gym: DEBUG
