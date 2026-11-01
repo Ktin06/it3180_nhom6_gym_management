@@ -20,6 +20,8 @@ Mục lục thư mục `docs/`. Khi các tài liệu mâu thuẫn nhau, thứ t�
 | [activity/](design/activity/) | Sơ đồ hoạt động (sẽ bổ sung) |
 | [wireframe/](design/wireframe/) | Wireframe màn hình (sẽ bổ sung) |
 
+Sơ đồ UML và wireframe vẽ bằng draw.io (trong VS Code dùng tiện ích *Draw.io Integration*), lưu dạng `.drawio.svg` trong thư mục tương ứng, tên file chữ thường không dấu nối gạch ngang (ví dụ `wireframe/check-in-tai-quay.drawio.svg`). File này vừa mở ra sửa được bằng draw.io, vừa xem ngay trên GitHub và chèn được vào báo cáo LaTeX.
+
 ## Quyết định kiến trúc (ADR) – [decisions/](decisions/)
 
 | Số | Quyết định |
@@ -39,6 +41,7 @@ Mục lục thư mục `docs/`. Khi các tài liệu mâu thuẫn nhau, thứ t�
 | Thư mục | Nội dung |
 | --- | --- |
 | [meetings/](meetings/) | Biên bản họp ([mẫu](meetings/0000-mau-bien-ban.md)) |
+| [plans/](plans/) | Tiến độ sprint so với kế hoạch ([Sprint 1](plans/sprint-1-tien-do.md)) |
 | [testing/](testing/) | Kế hoạch và báo cáo kiểm thử (sẽ bổ sung) |
 | [guides/cai-dat-moi-truong.md](guides/cai-dat-moi-truong.md) | Hướng dẫn cài đặt môi trường cho Windows và macOS |
 | [guides/quy-tac-ma-nguon.md](guides/quy-tac-ma-nguon.md) | Quy tắc mã nguồn bắt buộc, quy tắc nghiệp vụ dễ làm sai, quy trình làm một chức năng |

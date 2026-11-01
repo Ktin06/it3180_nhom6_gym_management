@@ -59,7 +59,7 @@ vn.edu.hust.nhom6.gym
 
 ## Cơ sở dữ liệu
 
-Chỉ đổi schema bằng migration Flyway trong `src/main/resources/db/migration/`. Quy ước đặt tên và dải phiên bản: [db/migration/README.md](src/main/resources/db/migration/README.md). `ddl-auto` luôn là `validate`.
+Chỉ đổi schema bằng migration Flyway trong `src/main/resources/db/migration/`. Quy ước đặt tên và dải phiên bản: [db/migration/README.md](src/main/resources/db/migration/README.md). `ddl-auto` luôn là `validate`. Dữ liệu mẫu cho demo để riêng ở [db/seed](src/main/resources/db/seed/README.md), chỉ profile `local` và `staging` nạp.
 
 ## Docker
 

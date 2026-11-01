@@ -8,7 +8,7 @@ Hiện chưa có migration nghiệp vụ: ERD bản 2 đang chờ nhóm duyệt.
 
 Flyway **từ chối chạy** migration có số phiên bản nhỏ hơn số đã chạy trên cơ sở dữ liệu. Ví dụ staging đã chạy `V6_01` thì một file `V3_05` thêm sau sẽ làm backend không khởi động được. CI không phát hiện lỗi này vì Testcontainers luôn tạo cơ sở dữ liệu mới. Vì vậy:
 
-1. **Schema ban đầu (Sprint 1):** sau khi ERD được duyệt, **một** pull request tạo đủ 39 bảng theo dải `V1_xx` … `V8_xx` bên dưới, kể cả bảng của chức năng v3–v5. Entity chỉ viết khi làm chức năng tương ứng; `ddl-auto: validate` chỉ kiểm tra bảng có entity.
+1. **Schema ban đầu (Sprint 1):** sau khi ERD được duyệt, **một** pull request tạo đủ 39 bảng theo dải `V1_xx` … `V8_xx` bên dưới, kể cả bảng của chức năng v3–v5. Entity chỉ viết khi làm chức năng tương ứng; `ddl-auto: validate` chỉ kiểm tra bảng có entity. Cách nhiều người cùng viết: xem [Làm schema ban đầu qua nhánh chung](#làm-schema-ban-đầu-qua-nhánh-chung).
 2. **Sau khi schema ban đầu đã gộp vào `main`:** mọi migration mới dùng dải tuần tự chung `V9_01`, `V9_02`, … (hết `V9_99` thì sang `V10_01`), bất kể sửa bảng thuộc nhóm nào. **Không** thêm file mới vào dải `V1_xx` … `V8_xx`.
 
 ## Đặt tên
@@ -40,6 +40,21 @@ Flyway đọc `V1_01` là phiên bản `1.01` và `V9_01` là `9.01`, nên mọi
 | `V8_xx` | 8. Gamification | badges, member_badges |
 
 **Khóa ngoại trỏ sang nhóm bảng khác** (ví dụ `audit_logs.branch_id` → `branches`, `memberships.invoice_item_id` → `invoice_items`) đặt trong migration cuối của dải `V8_xx`, sau khi mọi bảng đã có. Khóa ngoại trong cùng nhóm đặt ngay trong migration tạo bảng.
+
+## Làm schema ban đầu qua nhánh chung
+
+Mỗi người viết migration cho nhóm bảng được giao, nhưng `main` chỉ nhận **một** pull request cho đủ 39 bảng:
+
+1. Người giữ nhánh chung tạo `chore/db-schema-ban-dau` từ `main` và đẩy lên GitHub.
+2. Mỗi người tách nhánh từ nhánh chung (ví dụ `chore/db-nhom-3`), chỉ viết file trong dải số của nhóm mình, rồi mở pull request **vào `chore/db-schema-ban-dau`**, không vào `main`. Người giữ nhánh chung duyệt.
+3. Khóa ngoại trong cùng nhóm đặt ngay trong file tạo bảng. Khóa ngoại sang nhóm khác do người giữ nhánh chung đặt ở cuối dải `V8_xx`. Trước khi có khóa ngoại đó, migration từng nhóm vẫn phải chạy được độc lập.
+4. Khi đủ 39 bảng và `./mvnw -B verify` qua, người giữ nhánh chung mở **một** pull request từ `chore/db-schema-ban-dau` vào `main`.
+5. Sau khi gộp vào `main`, xóa nhánh chung. Từ đây mọi migration mới theo giai đoạn 2.
+
+## Dữ liệu tham chiếu và dữ liệu mẫu
+
+- **Dữ liệu tham chiếu** cần có ở mọi môi trường (chi nhánh mặc định, giá trị mặc định của `system_configs`, danh mục huy hiệu) là migration bình thường trong thư mục này.
+- **Dữ liệu mẫu cho demo** (tài khoản thử, hội viên giả, gói, lịch lớp) để trong [db/seed](../seed/README.md), không để ở đây.
 
 ## Quy tắc
 
