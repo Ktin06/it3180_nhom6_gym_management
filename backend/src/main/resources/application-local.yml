@@ -9,6 +9,9 @@ spring:
     password: ${DB_PASSWORD:}
   jpa:
     show-sql: false
+  flyway:
+    # Thêm dữ liệu mẫu cho demo (db/seed/README.md); môi trường khác chỉ chạy db/migration.
+    locations: classpath:db/migration,classpath:db/seed
 
 logging:
   level:

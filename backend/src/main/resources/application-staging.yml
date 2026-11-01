@@ -5,6 +5,9 @@ spring:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?sslmode=${DB_SSLMODE:require}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+  flyway:
+    # Thêm dữ liệu mẫu cho demo (db/seed/README.md); môi trường khác chỉ chạy db/migration.
+    locations: classpath:db/migration,classpath:db/seed
 
 app:
   cors:

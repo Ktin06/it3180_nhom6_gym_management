@@ -160,6 +160,8 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 - [x] Chỉ hóa đơn chờ do hội viên tạo từ F7 (`source = MEMBER_PORTAL`) tự hủy khi quá hạn (01/11).
 - [x] Hoa hồng PT: phần trăm giá mỗi buổi, chụp vào `pt_sessions.commission_amount` lúc DONE (01/11).
 - [x] Gói TIME tính theo số ngày (`duration_days`); "1 tháng" = 30 ngày (01/11).
+- [x] Mã hội viên dạng `HV` + 6 chữ số (`HV000123`), sinh từ sequence `member_code_seq` dùng chung cả chuỗi (01/11).
+- [ ] Ảnh đại diện hội viên lưu ở đâu: ổ đĩa Render bản miễn phí bị xóa khi triển khai lại nên không lưu file trên Render. Sprint 1 làm F2 chưa có ảnh (`avatar_url` để rỗng); chốt trước khi làm F4 ở Sprint 2.
 
 ## Lịch sử thay đổi
 
@@ -168,5 +170,6 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 | 27/10/2026 | Bản đầu: 39 bảng, 8 nhóm |
 | 31/10/2026 | ERD bản 2: khóa chính `bigint`, thời gian `timestamptz`; người thao tác trỏ `users.id`; bỏ `users.branch_id`, `users.phone`, `staff.position`, `members.email`; thêm trạng thái gói UPCOMING; `memberships.invoice_item_id`, `memberships.package_type`; `invoice_items.item_type`; `checkins.checkin_date`; `class_sessions.trainer_id`; chỉ mục duy nhất có điều kiện cho đặt chỗ, trừ buổi, gói đang hiệu lực |
 | 01/11/2026 | Ghi các quyết định check-in, F7 hóa đơn chờ, trùng số điện thoại khi đăng ký; thêm tham số `PENDING_INVOICE_TTL_DAYS`; bỏ mã DBML nhúng trong tài liệu, dùng `erd-v2.dbml` làm bản chuẩn duy nhất |
+| 01/11/2026 | Định dạng mã hội viên `HV` + 6 chữ số; để mở câu hỏi nơi lưu ảnh đại diện đến Sprint 2 |
 | 01/11/2026 | Sau review ERD: `NULLS NOT DISTINCT` cho `uq_one_active_per_type` và `system_configs`; thêm `class_sessions.occurrence_date`, `invoices.source`, `invoice_items.discount_amount`, `pt_sessions.commission_amount`, `membership_transfers.status`, `payrolls.branch_id`, cột `version` cho 4 bảng; ADJUST kho mang dấu; CHECK chuẩn hóa email, số điện thoại, vector 128 chiều; thêm chỉ mục khóa ngoại; ghi rõ cách khóa bản ghi (NF6), ngoại lệ xóa cứng `face_embeddings`, phân biệt `users.status = LOCKED` với `locked_until` |
 | 01/11/2026 | Sau review toàn dự án: schema ban đầu tạo đủ 39 bảng một lần, migration về sau dùng dải `V9_xx`; sĩ số tính cả chỗ ATTENDED, NO_SHOW |

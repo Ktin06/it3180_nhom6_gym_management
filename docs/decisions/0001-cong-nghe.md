@@ -19,7 +19,7 @@ Nhóm 8 người làm web quản lý chuỗi phòng tập trong 4 sprint. Giản
 | Kiểm thử | JUnit 5, Mockito, Testcontainers, Postman; Vitest + Testing Library cho frontend | Kiểm thử đơn vị, kiểm thử với PostgreSQL thật, kiểm thử API |
 | Triển khai | Vercel (frontend), Render (backend chạy bằng Docker), Neon (cơ sở dữ liệu) | Có gói miễn phí, đủ cho demo |
 
-Các thành phần sau đã chốt nhưng **chưa thêm** vào khung, sẽ thêm khi làm chức năng tương ứng: Spring Mail (F10), WebSocket STOMP (F10), face-api.js (F20), thư viện JWT (F1).
+Các thành phần sau đã chốt nhưng **chưa thêm** vào khung, sẽ thêm khi làm chức năng tương ứng: Spring Mail (F10), WebSocket STOMP (F10), face-api.js (F20), thư viện JWT (F1). Thư viện JWT là `spring-boot-starter-oauth2-resource-server`, ký HS256 bằng `JWT_SECRET` (chốt 01/11/2026): thư viện chính thức của Spring Security, không phải tự viết bộ lọc đọc token.
 
 ## Phiên bản đã dùng khi khởi tạo repo (01/11/2026)
 

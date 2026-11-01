@@ -314,7 +314,7 @@ Table members {
   id bigint [pk, increment]
   user_id bigint [unique, ref: - users.id, note: 'rỗng nếu lễ tân tạo hồ sơ mà hội viên chưa có tài khoản']
   home_branch_id bigint [not null, ref: > branches.id]
-  member_code varchar(20) [unique, not null, note: 'dùng để check-in (F4)']
+  member_code varchar(20) [unique, not null, note: 'dùng để check-in (F4). Định dạng HV + 6 chữ số (HV000123), sinh từ sequence member_code_seq dùng chung cả chuỗi, CHECK member_code ~ \'^HV[0-9]{6}$\' (chốt 01/11)']
   full_name varchar(255) [not null]
   gender varchar(10)
   dob date
