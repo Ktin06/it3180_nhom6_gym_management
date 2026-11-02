@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1100px" height="920px" viewBox="-0.5 -0.5 1100 920" content="&lt;mxfile host=&quot;app.diagrams.net&quot; version=&quot;24.0.0&quot;&gt;
+  &lt;diagram id=&quot;diag_so_do_hoat_dong_danh_sach_cho&quot; name=&quot;so_do_hoat_dong_danh_sach_cho&quot;&gt;
+    &lt;mxGraphModel dx=&quot;1100&quot; dy=&quot;920&quot; grid=&quot;1&quot; gridSize=&quot;10&quot; guides=&quot;1&quot; tooltips=&quot;1&quot; connect=&quot;1&quot; arrows=&quot;1&quot; fold=&quot;1&quot; page=&quot;1&quot; pageScale=&quot;1&quot; pageWidth=&quot;1100&quot; pageHeight=&quot;920&quot;&gt;
+      &lt;root&gt;
+        &lt;mxCell id=&quot;0&quot;/&gt;
+        &lt;mxCell id=&quot;1&quot; parent=&quot;0&quot;/&gt;
+        
+      &lt;/root&gt;
+    &lt;/mxGraphModel&gt;
+  &lt;/diagram&gt;
+&lt;/mxfile&gt;">
+  <defs>
+    <style type="text/css">
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+      text { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+      .title { font-size: 18px; font-weight: 700; fill: #1E293B; }
+      .subtitle { font-size: 12px; font-weight: 500; fill: #64748B; }
+      .actor-head { fill: #FEF3C7; stroke: #D97706; stroke-width: 2; }
+      .actor-body { stroke: #D97706; stroke-width: 2; stroke-linecap: round; }
+      .actor-label { font-size: 13px; font-weight: 600; fill: #0F172A; text-anchor: middle; }
+      .sys-rect { fill: #F8FAFC; stroke: #94A3B8; stroke-width: 2; stroke-dasharray: 6 6; rx: 12; }
+      .sys-header { font-size: 15px; font-weight: 700; fill: #334155; }
+      .pkg-rect { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; rx: 8; }
+      .pkg-title { font-size: 13px; font-weight: 700; fill: #0284C7; }
+      .uc-el { fill: #F0F9FF; stroke: #0284C7; stroke-width: 1.8; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05)); }
+      .uc-el-core { fill: #F0FDF4; stroke: #16A34A; stroke-width: 2; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.06)); }
+      .uc-text { font-size: 11px; font-weight: 600; fill: #0369A1; text-anchor: middle; }
+      .uc-text-core { font-size: 11px; font-weight: 700; fill: #15803D; text-anchor: middle; }
+      .line { stroke: #64748B; stroke-width: 1.5; fill: none; }
+      .dash-inc { stroke: #0D9488; stroke-width: 1.5; stroke-dasharray: 4 3; fill: none; }
+      .dash-ext { stroke: #EA580C; stroke-width: 1.5; stroke-dasharray: 4 3; fill: none; }
+      .lbl-inc { font-size: 10px; font-weight: 600; fill: #0F766E; text-anchor: middle; }
+      .lbl-ext { font-size: 10px; font-weight: 600; fill: #C2410C; text-anchor: middle; }
+      .act-node { fill: #F0FDF4; stroke: #16A34A; stroke-width: 1.8; rx: 14; ry: 14; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.04)); }
+      .act-text { font-size: 11px; font-weight: 600; fill: #166534; text-anchor: middle; }
+      .diamond { fill: #FEF9C3; stroke: #CA8A04; stroke-width: 1.8; }
+      .guard { font-size: 11px; font-weight: 600; fill: #B45309; }
+      .swimlane { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; }
+      .swimlane-hdr { fill: #F1F5F9; stroke: #CBD5E1; stroke-width: 1.5; }
+      .swimlane-txt { font-size: 13px; font-weight: 700; fill: #1E293B; text-anchor: middle; }
+    </style>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748B" />
+    </marker>
+    <marker id="arr-inc" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0D9488" />
+    </marker>
+    <marker id="arr-ext" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#EA580C" />
+    </marker>
+    <marker id="arr-act" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#16A34A" />
+    </marker>
+  </defs>
+  <rect width="1100" height="920" fill="#FFFFFF"/>
+
+    <text x="40" y="45" class="title">Sơ đồ Hoạt động (Activity Diagram): Danh sách chờ tự động đưa vào lớp (ADR 0003)</text>
+    <text x="40" y="70" class="subtitle">Giải phóng chỗ khi có người hủy, kiểm tra mốc 30 phút, đôn hội viên đầu hàng chờ và ân hạn 15 phút</text>
+
+    <!-- Swimlanes -->
+    <rect x="40" y="100" width="320" height="780" class="swimlane"/>
+    <rect x="40" y="100" width="320" height="40" class="swimlane-hdr"/>
+    <text x="200" y="125" class="swimlane-txt">Hội viên / Người hủy chỗ</text>
+
+    <rect x="360" y="100" width="430" height="780" class="swimlane"/>
+    <rect x="360" y="100" width="430" height="40" class="swimlane-hdr"/>
+    <text x="575" y="125" class="swimlane-txt">Hệ thống Xử lý Tự động (Spring Boot)</text>
+
+    <rect x="790" y="100" width="280" height="780" class="swimlane"/>
+    <rect x="790" y="100" width="280" height="40" class="swimlane-hdr"/>
+    <text x="930" y="125" class="swimlane-txt">CSDL &amp; Thông báo</text>
+
+    <circle cx="190" cy="170" r="12" fill="#1E293B"/>
+
+    <rect x="100" y="210" width="180" height="45" class="act-node"/>
+    <text x="190" y="237" class="act-text">Hội viên bấm "Hủy chỗ đặt"</text>
+
+    <line x1="190" y1="182" x2="190" y2="210" class="line" marker-end="url(#arr)"/>
+    <line x1="280" y1="232" x2="460" y2="232" class="line" marker-end="url(#arr-act)"/>
+
+    <rect x="460" y="210" width="220" height="45" class="act-node"/>
+    <text x="570" y="237" class="act-text">Hủy chỗ đặt: status = CANCELLED</text>
+
+    <line x1="570" y1="255" x2="570" y2="290" class="line" marker-end="url(#arr)"/>
+
+    <!-- Decision 1: Thời gian còn lại -->
+    <polygon points="570,290 630,315 570,340 510,315" class="diamond"/>
+    <text x="570" y="320" font-size="10" font-weight="700" fill="#CA8A04" text-anchor="middle">&lt; 30 phút?</text>
+
+    <!-- Branch < 30 min -->
+    <line x1="630" y1="315" x2="720" y2="315" class="line"/>
+    <text x="655" y="305" class="guard">[&lt; 30 phút]</text>
+    <rect x="720" y="295" width="60" height="40" class="act-node" fill="#FEF2F2" stroke="#EF4444"/>
+    <text x="750" y="315" font-size="10" font-weight="600" fill="#991B1B" text-anchor="middle">Giữ trống</text>
+    <text x="750" y="328" font-size="9" fill="#991B1B" text-anchor="middle">chỗ học</text>
+    <line x1="750" y1="335" x2="750" y2="360" class="line"/>
+    <circle cx="750" cy="370" r="10" fill="none" stroke="#EF4444" stroke-width="2"/>
+    <circle cx="750" cy="370" r="6" fill="#EF4444"/>
+
+    <!-- Branch >= 30 min -->
+    <line x1="570" y1="340" x2="570" y2="385" class="line" marker-end="url(#arr-act)"/>
+    <text x="580" y="360" class="guard">[&gt;= 30 phút]</text>
+
+    <rect x="460" y="385" width="230" height="45" class="act-node"/>
+    <text x="575" y="412" class="act-text">Lấy người đầu danh sách chờ</text>
+
+    <line x1="690" y1="407" x2="840" y2="407" class="line" marker-end="url(#arr-act)"/>
+    <rect x="840" y="385" width="180" height="45" class="act-node" fill="#F8FAFC"/>
+    <text x="930" y="405" class="act-text" fill="#0369A1">SELECT class_bookings</text>
+    <text x="930" y="418" font-size="10" fill="#64748B" text-anchor="middle">ORDER BY waitlisted_at ASC</text>
+
+    <!-- Return to Backend to Check conditions -->
+    <line x1="930" y1="430" x2="930" y2="465" class="line"/>
+    <line x1="930" y1="465" x2="690" y2="465" class="line" marker-end="url(#arr-act)"/>
+
+    <rect x="460" y="445" width="230" height="45" class="act-node"/>
+    <text x="575" y="465" class="act-text">Kiểm tra: Gói TIME còn hạn,</text>
+    <text x="575" y="480" class="act-text">không trùng lịch, không bị phạt</text>
+
+    <!-- Decision 2: Đủ điều kiện? -->
+    <line x1="575" y1="490" x2="575" y2="520" class="line" marker-end="url(#arr)"/>
+    <polygon points="575,520 635,545 575,570 515,545" class="diamond"/>
+    <text x="575" y="550" font-size="10" font-weight="700" fill="#CA8A04" text-anchor="middle">Đủ Đ/K?</text>
+
+    <!-- Không đủ điều kiện: lặp lại -->
+    <line x1="635" y1="545" x2="720" y2="545" class="line"/>
+    <text x="650" y="535" class="guard">[Không]</text>
+    <line x1="720" y1="545" x2="720" y2="407" class="line"/>
+    <line x1="720" y1="407" x2="690" y2="407" class="line" marker-end="url(#arr-act)"/>
+
+    <!-- Đủ điều kiện: Đôn vào lớp -->
+    <line x1="575" y1="570" x2="575" y2="610" class="line" marker-end="url(#arr-act)"/>
+    <text x="585" y="590" class="guard">[Đủ điều kiện]</text>
+
+    <rect x="450" y="610" width="250" height="50" class="act-node"/>
+    <text x="575" y="632" class="act-text">Cập nhật status = BOOKED</text>
+    <text x="575" y="648" font-size="10" fill="#15803D" text-anchor="middle">promoted_at = now(), grace_until = +15p</text>
+
+    <!-- Gửi thông báo -->
+    <line x1="700" y1="635" x2="840" y2="635" class="line" marker-end="url(#arr-act)"/>
+    <rect x="840" y="610" width="180" height="50" class="act-node" fill="#F8FAFC"/>
+    <text x="930" y="632" class="act-text" fill="#0369A1">Gửi Email &amp; In-app</text>
+    <text x="930" y="648" font-size="10" fill="#64748B" text-anchor="middle">Thông báo được vào lớp</text>
+
+    <!-- Hội viên nhận thông báo -->
+    <line x1="840" y1="645" x2="280" y2="645" class="line" marker-end="url(#arr-act)"/>
+    <rect x="100" y="620" width="180" height="50" class="act-node"/>
+    <text x="190" y="642" class="act-text">Hội viên nhận thông báo</text>
+    <text x="190" y="658" font-size="10" fill="#15803D" text-anchor="middle">(Có 15 phút ân hạn hủy)</text>
+
+    <!-- Quyết định hủy trong ân hạn -->
+    <line x1="190" y1="670" x2="190" y2="705" class="line" marker-end="url(#arr)"/>
+    <polygon points="190,705 245,730 190,755 135,730" class="diamond"/>
+    <text x="190" y="735" font-size="10" font-weight="700" fill="#CA8A04" text-anchor="middle">Hủy ân hạn?</text>
+
+    <!-- Có hủy: hủy không phạt, đôn tiếp -->
+    <line x1="245" y1="730" x2="390" y2="730" class="line"/>
+    <text x="270" y="720" class="guard">[Có hủy]</text>
+    <line x1="390" y1="730" x2="390" y2="407" class="line"/>
+    <line x1="390" y1="407" x2="460" y2="407" class="line" marker-end="url(#arr-act)"/>
+
+    <!-- Không hủy: Giữ chỗ thành công -->
+    <line x1="190" y1="755" x2="190" y2="800" class="line" marker-end="url(#arr-act)"/>
+    <text x="200" y="780" class="guard">[Không hủy]</text>
+
+    <rect x="100" y="800" width="180" height="40" class="act-node"/>
+    <text x="190" y="825" class="act-text">Giữ chỗ thành công</text>
+
+    <line x1="190" y1="840" x2="190" y2="860" class="line"/>
+    <circle cx="190" cy="872" r="12" fill="none" stroke="#16A34A" stroke-width="2"/>
+    <circle cx="190" cy="872" r="7" fill="#16A34A"/>
+    
+</svg>
