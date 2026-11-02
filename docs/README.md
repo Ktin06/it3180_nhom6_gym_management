@@ -35,6 +35,7 @@ Sơ đồ UML và wireframe vẽ bằng draw.io (trong VS Code dùng tiện ích
 | [0006](decisions/0006-git-workflow.md) | Quy trình Git: main + nhánh tính năng, squash merge |
 | [0007](decisions/0007-cau-truc-ma-nguon.md) | Cấu trúc mã nguồn: đóng gói theo chức năng |
 | [0008](decisions/0008-goi-api-cung-domain.md) | Gọi API cùng domain qua proxy của Vercel (cookie refresh token) |
+| [0009](decisions/0009-bo-so-do-phan-tich-thiet-ke.md) | Bộ 8 loại sơ đồ UML cho phân tích và thiết kế, không dùng DFD |
 
 ## Khác
 

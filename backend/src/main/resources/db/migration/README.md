@@ -2,7 +2,7 @@
 
 Schema cơ sở dữ liệu **chỉ** được tạo và sửa bằng các file migration trong thư mục này. Hibernate chạy với `ddl-auto: validate` nên không tự sinh bảng. Bản chuẩn của ERD: [docs/design/erd/erd-v2.dbml](../../../../../../docs/design/erd/erd-v2.dbml); giải thích: [thiet-ke-du-lieu.md](../../../../../../docs/design/erd/thiet-ke-du-lieu.md).
 
-Hiện chưa có migration nghiệp vụ: ERD bản 2 đang chờ nhóm duyệt.
+ERD bản 2 đã được cả nhóm duyệt ngày 02/11/2026; schema ban đầu đang được viết trên nhánh chung `chore/db-schema-ban-dau`.
 
 ## Hai giai đoạn
 

@@ -83,7 +83,7 @@ Các giá trị có dấu \* là tham số cấu hình (bảng `system_configs`)
 - Gia hạn khi gói cũ còn hạn thì gói mới bắt đầu ngay sau ngày hết hạn của gói cũ; trong thời gian chờ, gói mới ở trạng thái UPCOMING.
 - Hội viên mua hoặc gia hạn từ cổng hội viên (F7): hội viên chọn gói, hệ thống tạo hóa đơn chờ thanh toán (PENDING) và gói PENDING; hội viên ra quầy trả tiền, lễ tân xác nhận thì gói được kích hoạt. Ngày bắt đầu gói tính lại tại thời điểm thanh toán. Hóa đơn chờ do hội viên tạo từ cổng hội viên quá 3 ngày\* tự động bị hủy; hóa đơn lễ tân lập tại quầy không tự hủy.
 - Bảo lưu: mỗi lần từ 7 đến 30 ngày\*, tối đa 2 lần mỗi gói\*, cần quản lý chi nhánh duyệt; ngày hết hạn được cộng thêm đúng số ngày bảo lưu. Nếu gói đang có gói gia hạn nối tiếp (UPCOMING) thì gói nối tiếp cũng được dời thêm đúng số ngày đó.
-- Chuyển nhượng: chỉ gói còn ít nhất 30 ngày\*, người nhận phải có hồ sơ hội viên, thu phí chuyển nhượng\* bằng hóa đơn; gói cũ chuyển trạng thái TRANSFERRED, người nhận nhận một gói mới giữ nguyên ngày hết hạn và số buổi còn lại.
+- Chuyển nhượng: chỉ gói còn ít nhất 30 ngày\*, người nhận phải có hồ sơ hội viên, thu phí chuyển nhượng\* (mặc định 200.000 đ) bằng hóa đơn; gói cũ chuyển trạng thái TRANSFERRED, người nhận nhận một gói mới giữ nguyên ngày hết hạn và số buổi còn lại.
 
 **Check-in (F4, F20)**
 
@@ -179,11 +179,11 @@ Nhóm đã chốt ReactJS + Java Spring Boot + PostgreSQL. Spring Boot được 
 
 ## Câu hỏi cần chốt ở buổi kick-off
 
-- [ ] Giữ đủ 20 chức năng, hay bỏ trước F12 (POS và kho) và F13 (lương)? Đề xuất: giữ trong danh sách, xếp cuối v3 để cắt đầu tiên nếu trễ.
-- [ ] Các con số trong phần quy tắc nghiệp vụ có cần sửa không? Đề xuất: giữ mặc định, vì đều là tham số cấu hình.
-- [ ] Môn học yêu cầu sơ đồ UML, DFD, hay cả hai? Cần hỏi giảng viên trước ngày 3/11.
-- [ ] Có khảo sát được một phòng gym thật để lấy biểu mẫu và quy trình As-Is không? Ai phụ trách?
-- [x] Phân công Sprint 1: theo file kế hoạch Sprint 1 (Ke_hoach_Sprint1_Nhom6.xlsx).
+- [x] Giữ đủ 20 chức năng; F12 (POS và kho) và F13 (lương) xếp cuối v3. Giữa Sprint 3 xem lại tiến độ, trễ thì cắt F13 trước rồi đến F12 (02/11).
+- [x] Giữ nguyên các con số trong phần quy tắc nghiệp vụ; phí chuyển nhượng mặc định 200.000 đ (02/11).
+- [x] Dùng bộ 8 loại sơ đồ UML, không dùng DFD ([ADR 0009](../decisions/0009-bo-so-do-phan-tich-thiet-ke.md), 02/11).
+- [x] Không khảo sát phòng gym thật; quy trình As-Is lấy từ tìm hiểu trên mạng và kinh nghiệm đi tập của thành viên (02/11).
+- [x] Phân công Sprint 1: theo [sprint-1-tien-do.md](../plans/sprint-1-tien-do.md), cả nhóm nhận việc tại buổi kick-off 02/11.
 - [x] Thời gian: tuần 9 bắt đầu 27/10/2026; bàn giao Sprint 1 ngày 10/11/2026; bàn giao cuối ở tuần 16.
 - [x] Tech stack: ReactJS + Java Spring Boot + PostgreSQL, nhận diện khuôn mặt bằng face-api.js.
 - [x] Các câu hỏi mở về dữ liệu: đã đóng, xem tài liệu "Thiết kế dữ liệu".
@@ -196,3 +196,4 @@ Nhóm đã chốt ReactJS + Java Spring Boot + PostgreSQL. Spring Boot được 
 | 31/10/2026 | Hội viên được giữ đồng thời gói TIME và gói PT; chỉ gói TIME được đặt lớp nhóm; khách lẻ mua hàng không cần hồ sơ; đăng nhập bằng email |
 | 01/11/2026 | Thời gian chuyển sang 4 sprint (27/10 – 21/12); gói PT không dùng để check-in; có cả gói TIME và SESSION thì dùng gói TIME; F7 tạo hóa đơn chờ, tự hủy sau 3 ngày; trùng số điện thoại khi tự đăng ký thì từ chối, lễ tân tạo tài khoản cho hồ sơ có sẵn; trạng thái gói UPCOMING cho gia hạn nối tiếp |
 | 01/11/2026 | Sau review ERD: chỉ hóa đơn chờ từ cổng hội viên tự hủy; bảo lưu dời gói gia hạn nối tiếp; công thức hoa hồng PT; gói TIME tính theo ngày (1 tháng = 30 ngày) |
+| 02/11/2026 | Kick-off: giữ đủ 20 chức năng (F12, F13 cuối v3); giữ các con số mặc định, phí chuyển nhượng 200.000 đ; bộ sơ đồ UML theo ADR 0009; không khảo sát phòng gym thật ([biên bản](../meetings/2026-11-02-kick-off.md)) |
