@@ -81,7 +81,7 @@ Chức năng **F1 – Tài khoản và phân quyền** cung cấp cơ chế xác
   - **E1 – Sai email hoặc mật khẩu (401 Unauthorized):**
     - Nếu email tồn tại, tăng `failed_login_count` thêm 1. Nếu `failed_login_count >= 5`, đặt `locked_until = now() + 15 phút` (S4 – hoàn thiện ở Sprint 2, cột và cấu trúc xử lý có sẵn).
     - Trả `ProblemDetail` (401) với thông báo chung: *"Email hoặc mật khẩu không đúng."* (không tiết lộ email có tồn tại hay không).
-  - **E2 – Tài khoản bị khóa tạm thời do nhập sai quá 5 lần (423 Locked / 403 Forbidden):** Khi `locked_until > now()`, từ chối đăng nhập và báo thời gian còn lại.
+  - **E2 – Tài khoản bị khóa tạm thời do nhập sai quá 5 lần (403 Forbidden):** Khi `locked_until > now()`, từ chối đăng nhập và trả `ProblemDetail` (403) thông báo tài khoản đang bị khóa tạm thời kèm thời gian mở khóa còn lại (không dùng mã `423 Locked` vì `GlobalExceptionHandler` thống nhất trả `403 Forbidden`).
   - **E3 – Tài khoản bị khóa hoặc ngừng hoạt động (403 Forbidden):** Khi `status` là `LOCKED` hoặc `DISABLED`, trả `ProblemDetail` (403): *"Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên."*
 
 ---
@@ -109,13 +109,13 @@ Chức năng **F1 – Tài khoản và phân quyền** cung cấp cơ chế xác
 - **Tiền điều kiện:** Người dùng đã xác thực bằng JWT hợp lệ.
 - **Luồng chính (`POST /api/v1/auth/change-password`):**
   1. Người dùng gửi mật khẩu hiện tại (`currentPassword`) và mật khẩu mới (`newPassword`).
-  2. Hệ thống kiểm tra `newPassword` đạt chuẩn bảo mật S1 (tối thiểu 8 ký tự, gồm cả chữ và số) và khác `currentPassword`.
-  3. Hệ thống kiểm tra `currentPassword` khớp với `users.password_hash`.
+  2. Hệ thống kiểm tra định dạng dữ liệu đầu vào bằng Bean Validation (`currentPassword` không được để trống; `newPassword` tối thiểu 8 ký tự, bao gồm cả chữ cái và chữ số theo S1).
+  3. Hệ thống kiểm tra quy tắc nghiệp vụ: `currentPassword` phải khớp với `users.password_hash` và `newPassword` phải khác `currentPassword`.
   4. Hệ thống cập nhật `password_hash` mới và **thu hồi toàn bộ các phiên đăng nhập hiện có** của người dùng (`UPDATE refresh_tokens SET revoked_at = now() WHERE user_id = ? AND revoked_at IS NULL`).
   5. Trả `204 No Content`.
 - **Luồng ngoại lệ:**
-  - **E1 – Mật khẩu hiện tại không đúng (400/422):** Trả lỗi thông báo mật khẩu hiện tại không chính xác.
-  - **E2 – Mật khẩu mới trùng mật khẩu cũ hoặc không đủ độ mạnh (400/422):** Trả lỗi chi tiết.
+  - **E1 – Dữ liệu đầu vào sai định dạng (400 Bad Request):** Để trống trường bắt buộc hoặc `newPassword` dưới 8 ký tự / thiếu chữ cái hoặc chữ số (Bean Validation) → Trả `ProblemDetail` (400) kèm danh sách lỗi theo từng trường (`errors`).
+  - **E2 – Vi phạm quy tắc nghiệp vụ (422 Unprocessable Content):** Mật khẩu hiện tại (`currentPassword`) không đúng, hoặc mật khẩu mới (`newPassword`) trùng với mật khẩu hiện tại (`BusinessRuleException`) → Trả `ProblemDetail` (422) thông báo chi tiết lý do.
 
 ---
 
