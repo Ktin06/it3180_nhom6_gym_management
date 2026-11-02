@@ -1,6 +1,6 @@
 # Thiết kế dữ liệu – Web quản lý chuỗi phòng tập Gym
 
-Cập nhật: 01/11/2026 (bản đầu: 27/10/2026) · Hoàng Kim Tiến · Trạng thái: ERD bản 2, chờ nhóm duyệt
+Cập nhật: 01/11/2026 (bản đầu: 27/10/2026) · Hoàng Kim Tiến · Trạng thái: ERD bản 2, cả nhóm đã duyệt ngày 02/11/2026
 
 Tài liệu này giải thích thiết kế cơ sở dữ liệu. **Mã nguồn chuẩn của ERD là file `erd-v2.dbml`** (cùng thư mục); khi hai nơi mâu thuẫn thì file DBML là đúng. Dán file đó vào [dbdiagram.io](https://dbdiagram.io) để xem sơ đồ đầy đủ cột và đường quan hệ, rồi xuất ảnh PNG hoặc PDF cho báo cáo LaTeX. Quy tắc nghiệp vụ nằm trong "Bản chốt phạm vi".
 
@@ -171,5 +171,6 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 | 31/10/2026 | ERD bản 2: khóa chính `bigint`, thời gian `timestamptz`; người thao tác trỏ `users.id`; bỏ `users.branch_id`, `users.phone`, `staff.position`, `members.email`; thêm trạng thái gói UPCOMING; `memberships.invoice_item_id`, `memberships.package_type`; `invoice_items.item_type`; `checkins.checkin_date`; `class_sessions.trainer_id`; chỉ mục duy nhất có điều kiện cho đặt chỗ, trừ buổi, gói đang hiệu lực |
 | 01/11/2026 | Ghi các quyết định check-in, F7 hóa đơn chờ, trùng số điện thoại khi đăng ký; thêm tham số `PENDING_INVOICE_TTL_DAYS`; bỏ mã DBML nhúng trong tài liệu, dùng `erd-v2.dbml` làm bản chuẩn duy nhất |
 | 01/11/2026 | Định dạng mã hội viên `HV` + 6 chữ số; để mở câu hỏi nơi lưu ảnh đại diện đến Sprint 2 |
+| 02/11/2026 | Cả nhóm duyệt ERD bản 2 tại buổi kick-off; `TRANSFER_FEE` mặc định 200.000 đ |
 | 01/11/2026 | Sau review ERD: `NULLS NOT DISTINCT` cho `uq_one_active_per_type` và `system_configs`; thêm `class_sessions.occurrence_date`, `invoices.source`, `invoice_items.discount_amount`, `pt_sessions.commission_amount`, `membership_transfers.status`, `payrolls.branch_id`, cột `version` cho 4 bảng; ADJUST kho mang dấu; CHECK chuẩn hóa email, số điện thoại, vector 128 chiều; thêm chỉ mục khóa ngoại; ghi rõ cách khóa bản ghi (NF6), ngoại lệ xóa cứng `face_embeddings`, phân biệt `users.status = LOCKED` với `locked_until` |
 | 01/11/2026 | Sau review toàn dự án: schema ban đầu tạo đủ 39 bảng một lần, migration về sau dùng dải `V9_xx`; sĩ số tính cả chỗ ATTENDED, NO_SHOW |

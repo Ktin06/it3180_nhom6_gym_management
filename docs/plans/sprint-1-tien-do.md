@@ -221,7 +221,7 @@ Ký hiệu: ✅ xong · 🟡 xong một phần · ⬜ chưa làm.
 
 | WBS | Việc | Trạng thái | Người |
 | --- | --- | --- | --- |
-| 1.1.1 | Họp kick-off | ⬜ | Kim Tiến |
+| 1.1.1 | Họp kick-off | ✅ 02/11 ([biên bản](../meetings/2026-11-02-kick-off.md)) | Kim Tiến |
 | 1.1.2 | Kế hoạch, backlog | ✅ | Kim Tiến |
 | 1.1.3 | GitHub Projects | 🟡 | Kim Tiến |
 | 1.1.4 | Slide, bàn giao | ⬜ | Gia Bảo |
@@ -237,7 +237,7 @@ Ký hiệu: ✅ xong · 🟡 xong một phần · ⬜ chưa làm.
 | 1.2.9 | Đặc tả F8 | ⬜ | Gia Bảo |
 | 1.2.10 | Đặc tả F9 | ⬜ | Trọng Việt |
 | 1.2.11 | Sơ đồ hoạt động | ⬜ | Minh Quân |
-| 1.3.1 | Chốt ERD | 🟡 | Kim Tiến; còn bước cả nhóm duyệt ở kick-off |
+| 1.3.1 | Chốt ERD | ✅ cả nhóm duyệt 02/11 | Kim Tiến |
 | 1.3.2 | Migration nhóm 1, 2 | ⬜ | Đức Việt |
 | 1.3.3 | Migration nhóm 3 | ⬜ | Lân |
 | 1.3.4 | Migration nhóm 4 | ⬜ | Minh Quân |
@@ -353,7 +353,6 @@ gantt
     Khung dự án, ERD (đã xong)           :done, kt0, 2026-10-27, 2026-11-01
     Ruleset, mời, Projects               :crit, kt1, 2026-11-01, 2026-11-02
     Kick-off, duyệt ERD                  :crit, kt2, 2026-11-01, 2026-11-02
-    Hỏi giảng viên UML/DFD               :kt3, 2026-11-02, 2026-11-03
     Kết nối Vercel, Render với repo      :kt4, 2026-11-03, 2026-11-04
 
     section Đức Việt
@@ -465,7 +464,7 @@ Những chỗ một người phải giao trước cho người khác. Bỏ sót 
 
 **Minh Quân**
 
-- Câu trả lời UML hay DFD chỉ có trước 03/11. Cứ vẽ use case trước, vì UML gần như chắc chắn được yêu cầu. Nếu môn cần thêm DFD, báo trưởng nhóm để chia thêm việc ở Sprint 2.
+- Bộ sơ đồ đã chốt theo [ADR 0009](../decisions/0009-bo-so-do-phan-tich-thiet-ke.md): UML, không dùng DFD. Sprint 1 chỉ làm sơ đồ use case và sơ đồ hoạt động.
 - Mẫu đặc tả use case đặt ở `docs/requirements/srs/mau-dac-ta-use-case.md`, gồm:
   - tác nhân và tiền điều kiện;
   - luồng chính;
