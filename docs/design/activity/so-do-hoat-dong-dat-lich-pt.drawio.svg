@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1100px" height="920px" viewBox="-0.5 -0.5 1100 920" content="&lt;mxfile host=&quot;app.diagrams.net&quot; version=&quot;24.0.0&quot;&gt;
+  &lt;diagram id=&quot;diag_so_do_hoat_dong_dat_lich_pt&quot; name=&quot;so_do_hoat_dong_dat_lich_pt&quot;&gt;
+    &lt;mxGraphModel dx=&quot;1100&quot; dy=&quot;920&quot; grid=&quot;1&quot; gridSize=&quot;10&quot; guides=&quot;1&quot; tooltips=&quot;1&quot; connect=&quot;1&quot; arrows=&quot;1&quot; fold=&quot;1&quot; page=&quot;1&quot; pageScale=&quot;1&quot; pageWidth=&quot;1100&quot; pageHeight=&quot;920&quot;&gt;
+      &lt;root&gt;
+        &lt;mxCell id=&quot;0&quot;/&gt;
+        &lt;mxCell id=&quot;1&quot; parent=&quot;0&quot;/&gt;
+        
+      &lt;/root&gt;
+    &lt;/mxGraphModel&gt;
+  &lt;/diagram&gt;
+&lt;/mxfile&gt;">
+  <defs>
+    <style type="text/css">
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+      text { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+      .title { font-size: 18px; font-weight: 700; fill: #1E293B; }
+      .subtitle { font-size: 12px; font-weight: 500; fill: #64748B; }
+      .actor-head { fill: #FEF3C7; stroke: #D97706; stroke-width: 2; }
+      .actor-body { stroke: #D97706; stroke-width: 2; stroke-linecap: round; }
+      .actor-label { font-size: 13px; font-weight: 600; fill: #0F172A; text-anchor: middle; }
+      .sys-rect { fill: #F8FAFC; stroke: #94A3B8; stroke-width: 2; stroke-dasharray: 6 6; rx: 12; }
+      .sys-header { font-size: 15px; font-weight: 700; fill: #334155; }
+      .pkg-rect { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; rx: 8; }
+      .pkg-title { font-size: 13px; font-weight: 700; fill: #0284C7; }
+      .uc-el { fill: #F0F9FF; stroke: #0284C7; stroke-width: 1.8; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05)); }
+      .uc-el-core { fill: #F0FDF4; stroke: #16A34A; stroke-width: 2; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.06)); }
+      .uc-text { font-size: 11px; font-weight: 600; fill: #0369A1; text-anchor: middle; }
+      .uc-text-core { font-size: 11px; font-weight: 700; fill: #15803D; text-anchor: middle; }
+      .line { stroke: #64748B; stroke-width: 1.5; fill: none; }
+      .dash-inc { stroke: #0D9488; stroke-width: 1.5; stroke-dasharray: 4 3; fill: none; }
+      .dash-ext { stroke: #EA580C; stroke-width: 1.5; stroke-dasharray: 4 3; fill: none; }
+      .lbl-inc { font-size: 10px; font-weight: 600; fill: #0F766E; text-anchor: middle; }
+      .lbl-ext { font-size: 10px; font-weight: 600; fill: #C2410C; text-anchor: middle; }
+      .act-node { fill: #F0FDF4; stroke: #16A34A; stroke-width: 1.8; rx: 14; ry: 14; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.04)); }
+      .act-text { font-size: 11px; font-weight: 600; fill: #166534; text-anchor: middle; }
+      .diamond { fill: #FEF9C3; stroke: #CA8A04; stroke-width: 1.8; }
+      .guard { font-size: 11px; font-weight: 600; fill: #B45309; }
+      .swimlane { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; }
+      .swimlane-hdr { fill: #F1F5F9; stroke: #CBD5E1; stroke-width: 1.5; }
+      .swimlane-txt { font-size: 13px; font-weight: 700; fill: #1E293B; text-anchor: middle; }
+    </style>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748B" />
+    </marker>
+    <marker id="arr-inc" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0D9488" />
+    </marker>
+    <marker id="arr-ext" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#EA580C" />
+    </marker>
+    <marker id="arr-act" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#16A34A" />
+    </marker>
+  </defs>
+  <rect width="1100" height="920" fill="#FFFFFF"/>
+
+    <text x="40" y="45" class="title">Sơ đồ Hoạt động (Activity Diagram): Đặt lịch Huấn luyện viên cá nhân PT (F9)</text>
+    <text x="40" y="70" class="subtitle">Kiểm tra gói PT, thời gian trước 12h, khóa bi quan (NF6) chống trùng lịch cho cả PT và hội viên</text>
+
+    <!-- Swimlanes -->
+    <rect x="40" y="100" width="310" height="780" class="swimlane"/>
+    <rect x="40" y="100" width="310" height="40" class="swimlane-hdr"/>
+    <text x="195" y="125" class="swimlane-txt">Hội viên</text>
+
+    <rect x="350" y="100" width="450" height="780" class="swimlane"/>
+    <rect x="350" y="100" width="450" height="40" class="swimlane-hdr"/>
+    <text x="575" y="125" class="swimlane-txt">Hệ thống Backend (Spring Boot)</text>
+
+    <rect x="800" y="100" width="270" height="780" class="swimlane"/>
+    <rect x="800" y="100" width="270" height="40" class="swimlane-hdr"/>
+    <text x="935" y="125" class="swimlane-txt">Cơ sở dữ liệu (PostgreSQL)</text>
+
+    <circle cx="190" cy="170" r="12" fill="#1E293B"/>
+
+    <rect x="90" y="210" width="200" height="45" class="act-node"/>
+    <text x="190" y="237" class="act-text">Chọn PT, ngày &amp; khung giờ</text>
+
+    <line x1="190" y1="182" x2="190" y2="210" class="line" marker-end="url(#arr)"/>
+    <line x1="290" y1="232" x2="460" y2="232" class="line" marker-end="url(#arr-act)"/>
+
+    <rect x="460" y="210" width="230" height="45" class="act-node"/>
+    <text x="575" y="232" class="act-text">Kiểm tra: Đặt trước &gt;= 12h &amp;</text>
+    <text x="575" y="247" class="act-text">Gói PT còn buổi (remaining &gt; 0)</text>
+
+    <line x1="575" y1="255" x2="575" y2="290" class="line" marker-end="url(#arr)"/>
+
+    <!-- Decision 1 -->
+    <polygon points="575,290 635,315 575,340 515,315" class="diamond"/>
+    <text x="575" y="320" font-size="10" font-weight="700" fill="#CA8A04" text-anchor="middle">Thỏa mãn?</text>
+
+    <line x1="635" y1="315" x2="720" y2="315" class="line"/>
+    <text x="655" y="305" class="guard">[Không]</text>
+    <rect x="720" y="295" width="60" height="40" class="act-node" fill="#FEF2F2" stroke="#EF4444"/>
+    <text x="750" y="320" font-size="11" font-weight="600" fill="#991B1B" text-anchor="middle">Lỗi 422</text>
+    <line x1="750" y1="335" x2="750" y2="360" class="line"/>
+    <circle cx="750" cy="370" r="10" fill="none" stroke="#EF4444" stroke-width="2"/>
+    <circle cx="750" cy="370" r="6" fill="#EF4444"/>
+
+    <!-- Thỏa mãn: Khóa bi quan NF6 -->
+    <line x1="575" y1="340" x2="575" y2="385" class="line" marker-end="url(#arr-act)"/>
+    <text x="585" y="360" class="guard">[Có]</text>
+
+    <rect x="450" y="385" width="250" height="50" class="act-node"/>
+    <text x="575" y="407" class="act-text">Bắt đầu Transaction: Khóa bi quan</text>
+    <text x="575" y="423" font-size="10" fill="#15803D" text-anchor="middle">Khóa members trước, staff sau (NF6)</text>
+
+    <line x1="700" y1="410" x2="840" y2="410" class="line" marker-end="url(#arr-act)"/>
+    <rect x="840" y="385" width="190" height="50" class="act-node" fill="#F8FAFC"/>
+    <text x="935" y="407" class="act-text" fill="#0369A1">SELECT FOR UPDATE</text>
+    <text x="935" y="423" font-size="10" fill="#64748B" text-anchor="middle">Chống deadlock &amp; tranh chấp</text>
+
+    <!-- Kiểm tra trùng lịch -->
+    <line x1="935" y1="435" x2="935" y2="475" class="line"/>
+    <line x1="935" y1="475" x2="700" y2="475" class="line" marker-end="url(#arr-act)"/>
+
+    <rect x="450" y="455" width="250" height="55" class="act-node"/>
+    <text x="575" y="475" class="act-text">Kiểm tra trùng lịch chi tiết:</text>
+    <text x="575" y="490" font-size="10" fill="#15803D" text-anchor="middle">1. PT rảnh (trainer_availabilities)?</text>
+    <text x="575" y="503" font-size="10" fill="#15803D" text-anchor="middle">2. PT &amp; HV không trùng lớp nhóm / PT khác</text>
+
+    <line x1="575" y1="510" x2="575" y2="540" class="line" marker-end="url(#arr)"/>
+    <polygon points="575,540 635,565 575,590 515,565" class="diamond"/>
+    <text x="575" y="570" font-size="10" font-weight="700" fill="#CA8A04" text-anchor="middle">Trùng lịch?</text>
+
+    <!-- Trùng lịch: Rollback -->
+    <line x1="635" y1="565" x2="720" y2="565" class="line"/>
+    <text x="655" y="555" class="guard">[Bị trùng]</text>
+    <rect x="720" y="545" width="60" height="40" class="act-node" fill="#FEF2F2" stroke="#EF4444"/>
+    <text x="750" y="570" font-size="11" font-weight="600" fill="#991B1B" text-anchor="middle">Lỗi 409</text>
+    <line x1="750" y1="585" x2="750" y2="610" class="line"/>
+    <circle cx="750" cy="620" r="10" fill="none" stroke="#EF4444" stroke-width="2"/>
+    <circle cx="750" cy="620" r="6" fill="#EF4444"/>
+
+    <!-- Không trùng: Lưu CSDL -->
+    <line x1="575" y1="590" x2="575" y2="630" class="line" marker-end="url(#arr-act)"/>
+    <text x="585" y="610" class="guard">[Không trùng]</text>
+
+    <rect x="460" y="630" width="230" height="50" class="act-node"/>
+    <text x="575" y="652" class="act-text">Tạo buổi PT: status = BOOKED</text>
+    <text x="575" y="668" font-size="10" fill="#15803D" text-anchor="middle">Commit Transaction CSDL</text>
+
+    <line x1="690" y1="655" x2="840" y2="655" class="line" marker-end="url(#arr-act)"/>
+    <rect x="840" y="630" width="190" height="50" class="act-node" fill="#F8FAFC"/>
+    <text x="935" y="652" class="act-text" fill="#0369A1">INSERT INTO pt_sessions</text>
+    <text x="935" y="668" font-size="10" fill="#64748B" text-anchor="middle">Gửi thông báo PT &amp; Hội viên</text>
+
+    <!-- Return to Member -->
+    <line x1="840" y1="665" x2="290" y2="665" class="line" marker-end="url(#arr-act)"/>
+    <rect x="90" y="640" width="200" height="50" class="act-node"/>
+    <text x="190" y="662" class="act-text">Nhận thông báo đặt lịch</text>
+    <text x="190" y="678" font-size="10" fill="#15803D" text-anchor="middle">thành công trên ứng dụng</text>
+
+    <line x1="190" y1="690" x2="190" y2="730" class="line"/>
+    <circle cx="190" cy="742" r="12" fill="none" stroke="#16A34A" stroke-width="2"/>
+    <circle cx="190" cy="742" r="7" fill="#16A34A"/>
+    
+</svg>
