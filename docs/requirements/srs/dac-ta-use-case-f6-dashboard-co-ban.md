@@ -7,7 +7,7 @@
 - **Tài liệu chuẩn tham chiếu:** 
   - [Bản chốt phạm vi](../ban-chot-pham-vi.md) (mục F6 – Dashboard cơ bản; yêu cầu phi chức năng NF1, NF4)
   - [ERD v2 (`erd-v2.dbml`)](../../design/erd/erd-v2.dbml)
-  - [Thiết kế dữ liệu](../../design/erd/thiet-ke-du-lieu.md) (Chỉ mục `ix_checkins_branch_checked_in`, bảng `invoices`, `memberships`)
+  - [Thiết kế dữ liệu](../../design/erd/thiet-ke-du-lieu.md) (bảng `checkins`, `invoices`, `payments`, `memberships`)
   - [Quy tắc mã nguồn](../../guides/quy-tac-ma-nguon.md) (Quy tắc số 6: Tiền là số nguyên VND; Báo cáo doanh thu dùng `LEFT JOIN` với `members`)
   - [ADR 0001](../../decisions/0001-cong-nghe.md), [ADR 0007](../../decisions/0007-cau-truc-ma-nguon.md)
 
@@ -18,7 +18,7 @@
 Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu tiên mà nhân viên lễ tân (`RECEPTIONIST`) và quản lý chi nhánh (`BRANCH_MANAGER`) nhìn thấy khi đăng nhập vào hệ thống:
 - Cung cấp cái nhìn toàn diện, tức thời về tình hình vận hành phòng tập gym tại chi nhánh trong ngày.
 - **Thống kê theo thời gian thực số lượng hội viên đang có mặt:** Đếm số lượt check-in trong ngày mà chưa có mốc thời gian check-out (`checked_out_at IS NULL`).
-- **Tổng số lượt check-in trong ngày:** Đếm tổng số lượt khách đến tập từ đầu ngày đến thời điểm hiện tại, kèm biểu đồ cột thể hiện mật độ check-in theo từng khung giờ (từ 06:00 đến 22:00) nhằm nhận biết giờ cao điểm.
+- **Tổng số lượt check-in trong ngày:** Đếm tổng số lượt khách đến tập từ đầu ngày đến thời điểm hiện tại, kèm biểu đồ cột thể hiện mật độ check-in theo từng khung giờ (trong giờ mở cửa của chi nhánh, `branches.open_time` – `branches.close_time`) nhằm nhận biết giờ cao điểm.
 - **Tổng doanh thu trong ngày tại quầy:** Tính tổng số tiền thu được từ các hóa đơn có trạng thái `PAID` phát sinh trong ngày tại chi nhánh. **Bắt buộc sử dụng `LEFT JOIN` với bảng `members`** vì các hóa đơn bán lẻ hàng hóa/nước uống tại quầy cho khách vãng lai (`POS` - F12) có thể có `member_id` để trống (`NULL`). Doanh thu được phân loại chi tiết theo phương thức thanh toán: Tiền mặt (`CASH`) và Chuyển khoản ngân hàng (`BANK_TRANSFER` qua VietQR).
 - **Cảnh báo gói tập sắp hết hạn:** Tự động lọc và hiển thị danh sách các gói tập của hội viên sẽ hết hạn trong vòng **7 ngày tới** để nhân viên chủ động nhắc nhở, tư vấn gia hạn kịp thời trước khi hội viên gián đoạn việc tập luyện.
 - **Dòng dữ liệu check-in gần nhất (Live Feed):** Bảng hiển thị danh sách 5–10 lượt check-in mới nhất kèm trạng thái, ảnh đại diện và thời gian vào.
@@ -29,11 +29,11 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 
 | Mã UC | Tên Use Case | Tác nhân chính | Mức ưu tiên | Sprint thực hiện |
 | --- | --- | --- | --- | --- |
-| **UC-F6.1** | Xem số lượng hội viên đang có mặt tại phòng tập | Lễ tân, Quản lý chi nhánh | Cao | Sprint 1 |
-| **UC-F6.2** | Xem tổng lượt check-in và biểu đồ phân bổ theo giờ | Lễ tân, Quản lý chi nhánh | Cao | Sprint 1 |
-| **UC-F6.3** | Xem tổng doanh thu trong ngày tại quầy | Lễ tân, Quản lý chi nhánh | Cao | Sprint 1 |
-| **UC-F6.4** | Xem danh sách cảnh báo gói tập sắp hết hạn | Lễ tân, Quản lý chi nhánh | Cao | Sprint 1 |
-| **UC-F6.5** | Xem danh sách lượt check-in mới nhất (Live Feed) | Lễ tân, Quản lý chi nhánh | Trung bình | Sprint 1 |
+| **UC-F6.1** | Xem số lượng hội viên đang có mặt tại phòng tập | Lễ tân, Quản lý chi nhánh | Cao | Sprint 2 |
+| **UC-F6.2** | Xem tổng lượt check-in và biểu đồ phân bổ theo giờ | Lễ tân, Quản lý chi nhánh | Cao | Sprint 2 |
+| **UC-F6.3** | Xem tổng doanh thu trong ngày tại quầy | Lễ tân, Quản lý chi nhánh | Cao | Sprint 2 |
+| **UC-F6.4** | Xem danh sách cảnh báo gói tập sắp hết hạn | Lễ tân, Quản lý chi nhánh | Cao | Sprint 2 |
+| **UC-F6.5** | Xem danh sách lượt check-in mới nhất (Live Feed) | Lễ tân, Quản lý chi nhánh | Trung bình | Sprint 2 |
 
 ---
 
@@ -64,7 +64,7 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
    SELECT count(*) 
    FROM checkins 
    WHERE branch_id = :branchId 
-     AND checkin_date = CURRENT_DATE 
+     AND checked_in_at >= :dayStart AND checked_in_at < :dayEnd
      AND checked_out_at IS NULL;
    ```
 4. Hệ thống trả về con số đếm và hiển thị trên thẻ Stat Card "Hội viên đang tập" kèm chỉ báo trạng thái hoạt động (chấm xanh nhấp nháy).
@@ -76,7 +76,7 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 - **Mã UC:** UC-F6.2
 - **Tên Use Case:** Xem tổng lượt check-in và biểu đồ phân bổ theo giờ
 - **Tác nhân chính:** Lễ tân, Quản lý chi nhánh
-- **Mô tả ngắn gọn:** Hiển thị tổng số lượt check-in từ đầu ngày và biểu đồ cột biểu diễn số lượt check-in theo từng khung giờ từ 06:00 đến 22:00.
+- **Mô tả ngắn gọn:** Hiển thị tổng số lượt check-in từ đầu ngày và biểu đồ cột biểu diễn số lượt check-in theo từng khung giờ trong giờ mở cửa của chi nhánh.
 
 #### A. Tiền điều kiện
 - Người dùng đã đăng nhập và truy cập trang Dashboard.
@@ -90,19 +90,19 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
    SELECT count(*) 
    FROM checkins 
    WHERE branch_id = :branchId 
-     AND checkin_date = CURRENT_DATE;
+     AND checked_in_at >= :dayStart AND checked_in_at < :dayEnd;
    ```
-2. Hệ thống tổng hợp số lượt check-in theo từng khung giờ (từ 06:00 đến 22:00 theo múi giờ `Asia/Ho_Chi_Minh`):
+2. Hệ thống tổng hợp số lượt check-in theo từng khung giờ (theo múi giờ `Asia/Ho_Chi_Minh`):
    ```sql
    SELECT extract(hour FROM (checked_in_at AT TIME ZONE 'Asia/Ho_Chi_Minh')) AS hour_bucket,
           count(*) AS checkin_count
    FROM checkins
    WHERE branch_id = :branchId
-     AND checkin_date = CURRENT_DATE
+     AND checked_in_at >= :dayStart AND checked_in_at < :dayEnd
    GROUP BY hour_bucket
    ORDER BY hour_bucket;
    ```
-3. Hệ thống chuẩn bị dữ liệu 17 khung giờ (từ 06h đến 22h, khung giờ nào không có lượt check-in thì gán giá trị 0).
+3. Hệ thống chuẩn bị đủ các khung giờ từ giờ của `branches.open_time` đến giờ của (`branches.close_time` trừ 1 phút), vì đúng giờ đóng cửa là ngoài giờ (F4). Ví dụ chi nhánh mặc định mở 05:30, đóng 22:00 thì có 17 khung 05h–21h. Khung giờ nào không có lượt check-in thì gán giá trị 0. Tổng các khung luôn bằng tổng lượt check-in ở bước 1, vì F4 chỉ nhận check-in trong giờ mở cửa.
 4. Hệ thống hiển thị biểu đồ cột (Bar Chart) giúp lễ tân nhận diện các khung giờ cao điểm (thường từ 17:00 – 20:00).
 
 ---
@@ -132,7 +132,7 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
    WHERE i.branch_id = :branchId
      AND i.status = 'PAID'
      AND p.status = 'CONFIRMED'
-     AND (p.paid_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::date = CURRENT_DATE;
+     AND (p.paid_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::date = :today;
    ```
 2. **Quy tắc bắt buộc:** Truy vấn sử dụng `LEFT JOIN members m ON i.member_id = m.id` vì đối với các hóa đơn khách lẻ mua nước, khăn, phụ kiện tại quầy, trường `member_id` có giá trị `NULL`. Nếu dùng `INNER JOIN` sẽ làm thất thoát số liệu doanh thu bán lẻ (Quy tắc nghiệp vụ dễ làm sai số 8).
 3. Hệ thống định dạng tiền tệ theo tiêu chuẩn Việt Nam (ví dụ: `15.450.000 đ`) và hiển thị trên thẻ Stat Card "Doanh thu hôm nay".
@@ -191,7 +191,7 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
    JOIN memberships ms ON c.membership_id = ms.id
    JOIN packages pkg ON ms.package_id = pkg.id
    WHERE c.branch_id = :branchId
-     AND c.checkin_date = CURRENT_DATE
+     AND c.checked_in_at >= :dayStart AND c.checked_in_at < :dayEnd
    ORDER BY c.checked_in_at DESC
    LIMIT 10;
    ```
@@ -206,17 +206,17 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 - **BR-F6.1 (Thời gian thực):** Chỉ số hội viên đang có mặt phải phản ánh trạng thái tức thời của các lượt check-in chưa check-out trong ngày (`checked_out_at IS NULL`).
 - **BR-F6.2 (Toàn vẹn doanh thu):** Mọi tính toán doanh thu phải dựa trên các khoản thanh toán đã xác nhận (`payments.status = 'CONFIRMED'`) thuộc hóa đơn đã thanh toán (`invoices.status = 'PAID'`). Bắt buộc dùng `LEFT JOIN` với bảng `members` để không bỏ sót các hóa đơn khách lẻ (Quy tắc số 8).
 - **BR-F6.3 (Đơn vị tiền tệ):** Tiền là số nguyên VND (kiểu `integer`), không dùng số thực để tránh sai số dấu phẩy động (Quy tắc số 6).
-- **BR-F6.4 (Khung ngày giờ):** Toàn bộ phân nhóm ngày và giờ trên Dashboard được chuyển đổi theo múi giờ Việt Nam (`UTC+7`, `Asia/Ho_Chi_Minh`), dù dữ liệu lưu trữ trong CSDL dưới dạng UTC (`timestamptz`).
-- **BR-F6.5 (Quy tắc lọc cảnh báo gói sắp hết hạn):** Khoảng thời gian cảnh báo là 7 ngày tính theo công thức nửa mở `end_date >= :today AND end_date < :today + 7` ngày. Bắt buộc loại trừ các hội viên đã có gói `UPCOMING` cùng loại. Với gói dùng toàn chuỗi (`packages.branch_id IS NULL`), chỉ hiển thị cảnh báo tại chi nhánh gốc của hội viên (`members.home_branch_id = :branchId`).
+- **BR-F6.4 (Khung ngày giờ):** Toàn bộ phân nhóm ngày và giờ trên Dashboard được chuyển đổi theo múi giờ Việt Nam (`UTC+7`, `Asia/Ho_Chi_Minh`), dù dữ liệu lưu trữ trong CSDL dưới dạng UTC (`timestamptz`). Tham số `:today` là ngày hiện tại theo giờ Việt Nam; `:dayStart`, `:dayEnd` là 00:00 hôm nay và 00:00 ngày mai theo giờ Việt Nam (đổi sang `OffsetDateTime`). Cả ba do ứng dụng tính (`ZoneId.of("Asia/Ho_Chi_Minh")`) rồi truyền vào truy vấn; không dùng `CURRENT_DATE` của PostgreSQL vì máy chủ chạy theo UTC.
+- **BR-F6.5 (Quy tắc lọc cảnh báo gói sắp hết hạn):** Khoảng thời gian cảnh báo là 7 ngày đặt thành hằng số trong mã nguồn (bản chốt không có dấu `*` và ERD không có cấu hình này). Khoảng lọc tính theo công thức nửa mở `end_date >= :today AND end_date < :today + 7` ngày. Bắt buộc loại trừ các hội viên đã có gói `UPCOMING` cùng loại. Với gói dùng toàn chuỗi (`packages.branch_id IS NULL`), chỉ hiển thị cảnh báo tại chi nhánh gốc của hội viên (`members.home_branch_id = :branchId`).
 
 ---
 
 ## 5. Dữ liệu và bảng cơ sở dữ liệu liên quan
 
 - **Bảng tác động / đọc:** `checkins`, `members`, `memberships`, `packages`, `invoices`, `payments`
-- **Chỉ mục tối ưu hóa:**
-  - `ix_checkins_branch_checked_in`: Tối ưu hóa truy vấn đếm và lọc theo giờ.
-  - `ix_invoices_branch_status`: Tối ưu hóa tính toán doanh thu chi nhánh.
+- **Chỉ mục có sẵn trong ERD (`erd-v2.dbml`):**
+  - `checkins (branch_id, checked_in_at)`: ghi chú trong ERD là dùng cho dashboard theo ngày, theo giờ (F6). Vì vậy các truy vấn `checkins` ở UC-F6.1, F6.2, F6.5 lọc theo khoảng `checked_in_at` (`:dayStart`, `:dayEnd`) chứ không theo `checkin_date`, để dùng được chỉ mục này mà không cần migration mới. Cột `checkin_date` vẫn dùng cho quy tắc trừ buổi của F4.
+  - `invoices (branch_id, created_at)`. Truy vấn doanh thu lọc theo `payments.paid_at`, chỉ mục này không phủ; với quy mô v1 (một chi nhánh mặc định) chấp nhận được. Nếu đo thấy chậm thì đề xuất chỉ mục bằng migration mới dải `V9_xx`, không tự đặt tên chỉ mục ngoài ERD.
 
 ---
 
@@ -243,6 +243,7 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 
 ### 6.2. Lấy dữ liệu biểu đồ check-in theo khung giờ
 - **Endpoint:** `GET /api/v1/dashboard/hourly-checkins`
+- **Quyền truy cập:** giống mục 6.1; chỉ trả dữ liệu của chi nhánh được xác định như ở UC-F6.1. Vai trò khác (`MEMBER`, `TRAINER`) nhận 403.
 - **Response Success (200 OK):**
   ```json
   [
@@ -259,6 +260,7 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 
 ### 6.3. Lấy danh sách gói tập sắp hết hạn
 - **Endpoint:** `GET /api/v1/dashboard/expiring-memberships?limit=5`
+- **Quyền truy cập:** giống mục 6.1; chỉ trả dữ liệu của chi nhánh được xác định như ở UC-F6.1. Vai trò khác (`MEMBER`, `TRAINER`) nhận 403, vì API này trả họ tên và số điện thoại của hội viên (S3).
 - **Response Success (200 OK):**
   ```json
   [

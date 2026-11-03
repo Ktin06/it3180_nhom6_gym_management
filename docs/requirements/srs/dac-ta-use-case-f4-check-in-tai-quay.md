@@ -33,11 +33,11 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 
 | Mã UC | Tên Use Case | Tác nhân chính | Mức ưu tiên | Sprint thực hiện |
 | --- | --- | --- | --- | --- |
-| **UC-F4.1** | Tra cứu hội viên và đối chiếu thông tin/ảnh tại quầy | Lễ tân, Quản lý chi nhánh | Cao | Sprint 1 |
-| **UC-F4.2** | Thực hiện check-in thủ công tại quầy | Lễ tân, Quản lý chi nhánh | Cao | Sprint 1 |
-| **UC-F4.3** | Tự động đánh dấu có mặt lớp học nhóm khi check-in | Hệ thống (tự động) | Cao | Sprint 1 / Sprint 2 |
-| **UC-F4.4** | Ghi nhận check-out cho hội viên | Lễ tân, Quản lý chi nhánh | Trung bình | Sprint 1 |
-| **UC-F4.5** | Xem lịch sử lượt check-in theo ngày tại quầy | Lễ tân, Quản lý chi nhánh | Trung bình | Sprint 1 |
+| **UC-F4.1** | Tra cứu hội viên và đối chiếu thông tin/ảnh tại quầy | Lễ tân, Quản lý chi nhánh | Cao | Sprint 2 |
+| **UC-F4.2** | Thực hiện check-in thủ công tại quầy | Lễ tân, Quản lý chi nhánh | Cao | Sprint 2 |
+| **UC-F4.3** | Tự động đánh dấu có mặt lớp học nhóm khi check-in | Hệ thống (tự động) | Cao | Sprint 2 |
+| **UC-F4.4** | Ghi nhận check-out cho hội viên | Lễ tân, Quản lý chi nhánh | Trung bình | Sprint 2 |
+| **UC-F4.5** | Xem lịch sử lượt check-in theo ngày tại quầy | Lễ tân, Quản lý chi nhánh | Trung bình | Sprint 2 |
 
 ---
 
@@ -61,9 +61,9 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 1. Lễ tân nhập từ khóa tìm kiếm (Mã hội viên ví dụ `HV000001` hoặc Số điện thoại ví dụ `0912345678`) vào thanh tìm kiếm check-in.
 2. Hệ thống chuẩn hóa chuỗi tìm kiếm (xóa khoảng trắng thừa, chuẩn hóa SĐT về 10 chữ số).
 3. Hệ thống kiểm tra vai trò người thao tác (phải là `RECEPTIONIST` hoặc `BRANCH_MANAGER` tại chi nhánh; không cho phép `SUPER_ADMIN` check-in tại quầy vì không thuộc biên chế chi nhánh cụ thể).
-4. Hệ thống tra cứu bảng `members` kết hợp với bảng `memberships` theo `home_branch_id` và trả về thông tin trong vòng dưới 2 giây (NF1):
+4. Hệ thống tra cứu bảng `members` chỉ trong chi nhánh của nhân viên (`members.home_branch_id = current_branch_id`, theo quyết định kick-off 02/11; tra cứu và check-in liên chi nhánh để đến v4) kết hợp với bảng `memberships`, và trả về thông tin trong vòng dưới 2 giây (NF1):
    - Thông tin cá nhân: Họ tên, Mã hội viên, Số điện thoại, Giới tính, Ảnh đại diện (`avatar_url`), Trạng thái tài khoản.
-   - Danh sách các gói tập (`memberships`): Tên gói, Loại gói (`TIME`, `SESSION`, `PT`), Trạng thái gói (`ACTIVE`, `UPCOMING`, `EXPIRED`, `FROZEN`), Ngày bắt đầu, Ngày hết hạn, Số buổi còn lại (với gói `SESSION`/`PT`).
+   - Danh sách **mọi** gói tập của hội viên ở mọi trạng thái (không lọc như bước 4 của UC-F4.2), để lễ tân giải thích được khi check-in bị từ chối: Tên gói, Loại gói (`TIME`, `SESSION`, `PT`), Trạng thái gói (`ACTIVE`, `UPCOMING`, `EXPIRED`, `FROZEN`), Ngày bắt đầu, Ngày hết hạn, Số buổi còn lại (với gói `SESSION`/`PT`).
    - Lịch học nhóm trong ngày (nếu có buổi học sắp bắt đầu).
 5. Lễ tân đối chiếu ảnh đại diện hiển thị trên màn hình với khách hàng đang đứng tại quầy để xác minh danh tính.
 
@@ -72,11 +72,12 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
   - Từ khóa rỗng hoặc không khớp định dạng mã `HV\d{6}` hoặc SĐT `^0\d{9}$`.
   - Hệ thống báo lỗi: *"Vui lòng nhập mã hội viên hợp lệ (ví dụ: HV000123) hoặc số điện thoại 10 chữ số."*
 - **E2 – Không tìm thấy hội viên (404 Not Found):**
-  - Không có bản ghi nào khớp trong hệ thống.
+  - Không có bản ghi nào khớp trong hệ thống, hoặc hội viên thuộc chi nhánh khác (xử lý như không tìm thấy, không tiết lộ hồ sơ của chi nhánh khác – S3).
   - Hệ thống trả về `ProblemDetail` (404): *"Không tìm thấy thông tin hội viên trong hệ thống. Vui lòng kiểm tra lại mã hoặc số điện thoại."*
-- **E3 – Hội viên đang bị ngừng hoạt động (422 Unprocessable Content):**
+- **E3 – Hội viên đang bị ngừng hoạt động (vẫn trả 200 OK):**
   - Bản ghi `members.status = 'INACTIVE'` hoặc tài khoản liên kết `users.status = 'DISABLED'`.
-  - Hệ thống hiển thị cảnh báo màu đỏ: *"Hồ sơ hội viên này đã ngừng hoạt động. Vui lòng liên hệ quản lý để được hỗ trợ."* (vẫn hiển thị thông tin để lễ tân giải thích cho hội viên nhưng nút Check-in bị vô hiệu hóa).
+  - Tra cứu vẫn trả 200 kèm trường `status` để màn hình hiện hồ sơ, giúp lễ tân giải thích cho hội viên. Giao diện hiển thị cảnh báo màu đỏ: *"Hồ sơ hội viên này đã ngừng hoạt động. Vui lòng liên hệ quản lý để được hỗ trợ."* và vô hiệu hóa nút Check-in.
+  - Nếu vẫn gửi `POST /api/v1/checkins` cho hội viên này, backend từ chối theo E7 của UC-F4.2 (kiểm tra ở backend, không dựa vào nút bị vô hiệu hóa).
 
 ---
 
@@ -90,11 +91,11 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 
 #### A. Tiền điều kiện
 - Lễ tân đã tra cứu thành công hồ sơ hội viên tại UC-F4.1.
-- Thời điểm check-in nằm trong khung giờ mở cửa của phòng tập (đọc từ cấu hình hệ thống: `06:00` – `22:00`).
+- Thời điểm check-in nằm trong khung giờ mở cửa của chi nhánh: từ `branches.open_time` đến trước `branches.close_time`.
 
 #### B. Hậu điều kiện
 - **Thành công:**
-  - Một bản ghi mới được tạo trong bảng `checkins` với `checked_in_at = now()`, `method = 'MANUAL'`, `checkin_date = CURRENT_DATE` (theo múi giờ Việt Nam UTC+7).
+  - Một bản ghi mới được tạo trong bảng `checkins` với `checked_in_at = now()`, `method = 'MANUAL'`, `checkin_date = :today` (ngày hiện tại theo giờ Việt Nam, xem BR-F4.3).
   - Nếu sử dụng gói `SESSION` và đây là lần đầu tiên check-in trong ngày: `session_deducted = true`, đồng thời giảm `memberships.remaining_sessions` đi 1 đơn vị. Nếu số buổi còn lại về 0, gói **vẫn giữ trạng thái `ACTIVE` đến hết ngày** (để hội viên có thể quay lại tập tiếp trong ngày mà không bị trừ thêm/từ chối); tác vụ nền ban đêm (batch job 23:59:59) sẽ chuyển gói về `EXPIRED`.
   - Nếu sử dụng gói `TIME` hoặc gói `SESSION` đã trừ buổi trong ngày: `session_deducted = false`, không thay đổi số buổi.
   - Nếu hội viên có lịch lớp học nhóm trong khung giờ từ `now() - 15 phút` đến `now() + 60 phút`: cập nhật `class_bookings.arrived_at = now()`.
@@ -103,17 +104,17 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 
 #### C. Luồng sự kiện chính
 1. Lễ tân bấm nút **"Xác nhận Check-in"** trên giao diện chi tiết hội viên.
-2. Hệ thống kiểm tra thời gian hiện tại có thuộc khung giờ mở cửa chi nhánh (`system_configs.config_key = 'OPENING_HOURS'`) hay không.
-3. Hệ thống kiểm tra quyền thao tác của nhân viên tại chi nhánh hiện tại.
+2. Hệ thống kiểm tra giờ hiện tại (theo giờ Việt Nam) có thỏa `open_time <= giờ hiện tại < close_time` của chi nhánh hay không (đúng giờ đóng cửa là ngoài giờ; migration bảo đảm `close_time > open_time` nên không có khung qua nửa đêm).
+3. Hệ thống kiểm tra quyền thao tác của nhân viên tại chi nhánh hiện tại, và kiểm tra hồ sơ hội viên thuộc chi nhánh này (`members.home_branch_id = current_branch_id`, nếu không trả 404 như E2 của UC-F4.1) và còn hoạt động (`members.status = 'ACTIVE'`; khi hồ sơ chuyển `INACTIVE` thì `users.status` cũng chuyển `DISABLED` cùng lúc). Hồ sơ ngừng hoạt động thì từ chối theo E7.
 4. Hệ thống tải toàn bộ gói tập của hội viên (`memberships`) thỏa mãn:
    - `member_id = member.id`
    - `status = 'ACTIVE'`
-   - `start_date <= CURRENT_DATE` và `end_date >= CURRENT_DATE`
+   - `start_date <= :today` và `end_date >= :today`
    - Có phạm vi sử dụng tại chi nhánh hiện tại (`branch_id IS NULL` - toàn chuỗi hoặc `branch_id = current_branch_id`).
 5. **Hệ thống lựa chọn gói tập theo thứ tự ưu tiên nghiệp vụ:**
    - **Trường hợp 1 (Có gói TIME):** Nếu hội viên có gói `package_type = 'TIME'` đang `ACTIVE` → Chọn gói `TIME` này. Đặt `membership_id = gói_TIME.id`, `session_deducted = false`. (Quy tắc nghiệp vụ: Có cả gói TIME và SESSION thì dùng gói TIME, không trừ buổi).
    - **Trường hợp 2 (Chỉ có gói SESSION):** Nếu hội viên không có gói `TIME`, nhưng có gói `package_type = 'SESSION'` đang `ACTIVE`:
-     - Kiểm tra trong bảng `checkins`: xem hội viên với gói này đã có lượt check-in nào trong ngày (`checkin_date = CURRENT_DATE`) mà `session_deducted = true` hay chưa.
+     - Kiểm tra trong bảng `checkins`: xem hội viên với gói này đã có lượt check-in nào trong ngày (`checkin_date = :today`) mà `session_deducted = true` hay chưa.
      - Nếu **chưa có lượt trừ buổi nào trong ngày**:
        - Nếu `remaining_sessions > 0`: Hệ thống trừ 1 buổi (`remaining_sessions = remaining_sessions - 1`), đặt `session_deducted = true`. **Lưu ý nghiệp vụ:** Kể cả khi số buổi còn lại giảm về 0, gói tập **vẫn giữ trạng thái `ACTIVE` đến hết ngày** (để hội viên có thể check-in lại trong ngày). Tác vụ nền ban đêm sẽ chuyển sang `EXPIRED`.
        - Nếu `remaining_sessions <= 0`: Hệ thống từ chối check-in với mã lỗi 422 (xem luồng ngoại lệ E4).
@@ -135,8 +136,8 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 
 #### D. Các luồng thay thế và ngoại lệ
 - **E1 – Ngoài giờ mở cửa phòng tập (422 Unprocessable Content):**
-  - Thời gian check-in nằm ngoài khung giờ mở cửa (mặc định 06:00 – 22:00).
-  - Hệ thống từ chối: *"Phòng tập hiện đang đóng cửa (Giờ mở cửa: 06:00 - 22:00). Không thể thực hiện check-in."*
+  - Thời gian check-in trước `branches.open_time` hoặc từ `branches.close_time` trở đi.
+  - Hệ thống từ chối: *"Phòng tập hiện đang đóng cửa (Giờ mở cửa: {open_time} - {close_time}). Không thể thực hiện check-in."*
 - **E2 – Không có gói tập nào đang hoạt động (422 Unprocessable Content):**
   - Hội viên chưa mua gói nào hoặc mọi gói đều đã hết hạn (`EXPIRED`), bị hủy (`CANCELLED`), hoặc đang bảo lưu (`FROZEN`).
   - Hệ thống từ chối: *"Hội viên không có gói tập nào đang hoạt động. Vui lòng đăng ký hoặc gia hạn gói tập tại quầy."*
@@ -150,8 +151,12 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
   - Gói tập duy nhất của hội viên đang ở trạng thái `FROZEN`.
   - Hệ thống từ chối: *"Gói tập của hội viên đang trong thời gian bảo lưu (từ ngày... đến ngày...). Vui lòng liên hệ quản lý để hủy bảo lưu sớm nếu muốn tập tiếp."*
 - **E6 – Xung đột lượt trừ buổi đồng thời (409 Conflict):**
+- **E6 – Xung đột lượt trừ buổi đồng thời (409 Conflict):**
   - Hai yêu cầu check-in cùng lúc vi phạm khóa lạc quan `@Version` trên bảng `memberships` hoặc vi phạm chỉ mục duy nhất có điều kiện `uq_one_deduction_per_day` (`WHERE session_deducted = true`).
   - Hệ thống hủy giao dịch bị xung đột và trả về mã lỗi **409 Conflict** (thông qua `GlobalExceptionHandler` có sẵn) với thông báo: *"Dữ liệu lượt check-in đang được xử lý đồng thời bởi một thao tác khác. Vui lòng thử lại."* Khi nhân viên bấm thử lại (retry), hệ thống sẽ nhận diện đã có lượt trừ buổi và cho phép check-in thành công với `session_deducted = false`.
+- **E7 – Hồ sơ hội viên ngừng hoạt động (422 Unprocessable Content):**
+  - `members.status = 'INACTIVE'` (kiểm tra ở bước 3), kể cả khi hội viên vẫn còn gói tập `ACTIVE`.
+  - Hệ thống từ chối: *"Hồ sơ hội viên này đã ngừng hoạt động. Vui lòng liên hệ quản lý để được hỗ trợ."*
 
 ---
 
@@ -196,13 +201,13 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 #### C. Luồng sự kiện chính
 1. Lễ tân tìm kiếm hội viên hoặc chọn từ danh sách "Hội viên đang tập".
 2. Lễ tân bấm nút **"Check-out"**.
-3. Hệ thống tìm bản ghi `checkins` mới nhất của hội viên trong ngày tại chi nhánh có `checked_out_at IS NULL`.
+3. Hệ thống tìm bản ghi `checkins` theo `id` được gửi lên, kèm điều kiện `branch_id` bằng chi nhánh của nhân viên thao tác và `checked_out_at IS NULL`. Lượt check-in của chi nhánh khác được xử lý như không tìm thấy (E1), không tiết lộ là bản ghi có tồn tại (S3).
 4. Hệ thống cập nhật `checked_out_at = now()`, `updated_at = now()`.
 5. Hệ thống hiển thị thông báo check-out thành công kèm tổng thời gian tập luyện của hội viên (tính theo phút/giờ).
 
 #### D. Các luồng thay thế và ngoại lệ
 - **E1 – Không tìm thấy lượt check-in chưa check-out (404 Not Found):**
-  - Hội viên chưa thực hiện check-in trước đó hoặc đã check-out rồi.
+  - Hội viên chưa thực hiện check-in trước đó, đã check-out rồi, hoặc lượt check-in thuộc chi nhánh khác.
   - Hệ thống báo: *"Hội viên không có lượt tập nào đang diễn ra cần check-out."*
 
 ---
@@ -232,8 +237,8 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 
 - **BR-F4.1 (Gói tập hợp lệ):** Check-in chỉ chấp nhận gói có loại `TIME` hoặc `SESSION` ở trạng thái `ACTIVE`, còn trong thời hạn sử dụng và hợp lệ tại chi nhánh. Gói `PT` không được dùng để check-in tự do (chốt ngày 01/11).
 - **BR-F4.2 (Ưu tiên gói TIME):** Nếu hội viên sở hữu cả gói `TIME` và `SESSION` đang cùng `ACTIVE`, hệ thống bắt buộc sử dụng gói `TIME` và không trừ buổi của gói `SESSION` (chốt ngày 01/11).
-- **BR-F4.3 (Quy tắc trừ buổi một lần mỗi ngày):** Với gói `SESSION`, một ngày dương lịch theo giờ Việt Nam (`UTC+7`) chỉ bị trừ tối đa 1 buổi tại lượt check-in đầu tiên. Các lượt check-in kế tiếp trong ngày không bị trừ thêm (`session_deducted = false`). Ràng buộc CSDL bằng chỉ mục duy nhất có điều kiện: `CREATE UNIQUE INDEX uq_one_deduction_per_day ON checkins (membership_id, checkin_date) WHERE session_deducted = true;`.
-- **BR-F4.4 (Giờ mở cửa phòng tập):** Giờ mở cửa và đóng cửa đọc từ bảng `system_configs` (`OPENING_HOURS`, mặc định `06:00-22:00`), không viết cứng mã nguồn.
+- **BR-F4.3 (Quy tắc trừ buổi một lần mỗi ngày):** Với gói `SESSION`, một ngày dương lịch theo giờ Việt Nam (`UTC+7`) chỉ bị trừ tối đa 1 buổi tại lượt check-in đầu tiên. Các lượt check-in kế tiếp trong ngày không bị trừ thêm (`session_deducted = false`). Ràng buộc CSDL bằng chỉ mục duy nhất có điều kiện: `CREATE UNIQUE INDEX uq_one_deduction_per_day ON checkins (membership_id, checkin_date) WHERE session_deducted = true;`. Ngày hiện tại (`:today`) do ứng dụng tính theo `ZoneId.of("Asia/Ho_Chi_Minh")` rồi truyền vào truy vấn; không dùng `CURRENT_DATE` của PostgreSQL, vì máy chủ chạy theo UTC nên từ 00:00 đến 07:00 giờ Việt Nam `CURRENT_DATE` vẫn là ngày hôm trước.
+- **BR-F4.4 (Giờ mở cửa phòng tập):** Giờ mở cửa và đóng cửa đọc từ `branches.open_time`, `branches.close_time` của chi nhánh (theo ERD), không viết cứng mã nguồn. Được check-in khi `open_time <= giờ hiện tại < close_time`.
 - **BR-F4.5 (Hiệu năng):** Phản hồi tra cứu hội viên và xác nhận check-in phải đạt dưới 2 giây trên tập dữ liệu 10.000 hội viên (NF1).
 - **BR-F4.6 (Phân quyền):** Chỉ tài khoản nhân viên gắn với chi nhánh mới được thực hiện check-in cho chi nhánh đó (S3). Dữ liệu check-in được tự động gắn `branch_id` của nhân viên thao tác.
 
@@ -324,7 +329,7 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 
 ### 6.3. Ghi nhận check-out
 - **Endpoint:** `POST /api/v1/checkins/{id}/checkout`
-- **Quyền truy cập:** `RECEPTIONIST`, `BRANCH_MANAGER`
+- **Quyền truy cập:** `RECEPTIONIST`, `BRANCH_MANAGER`; lượt check-in `{id}` phải thuộc chi nhánh của nhân viên thao tác, nếu không trả 404 (xem UC-F4.4).
 - **Response Success (200 OK):**
   ```json
   {

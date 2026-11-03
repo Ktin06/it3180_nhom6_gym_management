@@ -1,7 +1,7 @@
 # Mẫu Đặc tả Use Case (Use Case Specification Template)
 
 > **Tài liệu hướng dẫn và mẫu chuẩn dùng chung** cho cả 5 thành viên phụ trách viết đặc tả SRS trong dự án (Đức Việt – F1, F2; Lân – F3, F5; Minh Quân – F4, F6; Trọng Việt – F7, F9, F10; Gia Bảo – F8).  
-> **Quy định:** Không dùng GitHub Spec Kit ([ADR 0009](../../decisions/0009-bo-so-do-phan-tich-thiet-ke.md)). Mọi file đặc tả lưu tại thư mục `docs/requirements/srs/`, đặt tên dạng `dac-ta-use-case-f<số>-<ten-chuc-nang>.md`.  
+> **Quy định:** Không dùng GitHub Spec Kit ([kế hoạch Sprint 1, mục 4](../../plans/sprint-1-tien-do.md#4-chỉnh-lại-so-với-kế-hoạch-cũ)). Mọi file đặc tả lưu tại thư mục `docs/requirements/srs/`, đặt tên dạng `dac-ta-use-case-f<số>-<ten-chuc-nang>.md`.  
 > Khi viết đặc tả, hãy sao chép toàn bộ cấu trúc từ **Mục 2: Khung mẫu đặc tả** bên dưới, điền đầy đủ thông tin và xóa bỏ các đoạn chú thích gợi ý trong ngoặc vuông `[...]`.
 
 ---
