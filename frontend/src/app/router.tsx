@@ -8,6 +8,7 @@ import { ForbiddenPage } from '../pages/ForbiddenPage'
 import { GuestHomePage } from '../pages/home/GuestHomePage'
 import { RoleHomePage } from '../pages/home/RoleHomePage'
 import { LoginPage } from '../features/auth/pages/LoginPage'
+import { RegisterPage } from '../features/auth/pages/RegisterPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { ProtectedRoute } from '../routes/ProtectedRoute'
 
@@ -22,7 +23,10 @@ export const routes: RouteObject[] = [
   },
   {
     element: <AuthLayout />,
-    children: [{ path: '/login', element: <LoginPage /> }],
+    children: [
+      { path: '/login', element: <LoginPage /> },
+      { path: '/register', element: <RegisterPage /> },
+    ],
   },
   {
     element: (

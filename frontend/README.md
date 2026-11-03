@@ -25,7 +25,7 @@ Biến môi trường (nếu có) đọc từ file `.env` ở **thư mục gốc
 
 ## Xác thực F1
 
-Frontend đã nối trang đăng nhập với adapter API; access token chỉ giữ trong bộ nhớ tab, refresh token do backend đặt vào cookie `HttpOnly`. Adapter hiện dùng DTO tạm vì backend F1 chưa có trên `main`; xem [ghi chú tích hợp](../docs/guides/tich-hop-frontend-f1.md) trước khi nối API thật. Vitest mock không thay thế kiểm tra backend hoặc staging.
+Frontend có trang đăng ký và đăng nhập; access token chỉ giữ trong bộ nhớ tab, refresh token do backend đặt vào cookie `HttpOnly`. Adapter hiện dùng DTO tạm vì backend F1 chưa có trên `main`; xem [ghi chú tích hợp](../docs/guides/tich-hop-frontend-f1.md) trước khi nối API thật. Vitest mock không thay thế kiểm tra backend hoặc staging.
 
 ## Quy ước thư mục
 
