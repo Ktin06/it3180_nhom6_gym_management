@@ -47,15 +47,18 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 - **Mô tả ngắn gọn:** Hiển thị thẻ chỉ số trực quan đếm số hội viên đang ở trong phòng tập tại chi nhánh theo thời gian thực.
 
 #### A. Tiền điều kiện
-- Người dùng đã đăng nhập với vai trò hợp lệ.
-- Tài khoản được phân quyền xem dữ liệu của chi nhánh (nhân viên xem chi nhánh của mình; chủ chuỗi chọn chi nhánh hoặc xem toàn chuỗi).
+- Người dùng đã đăng nhập với vai trò hợp lệ (`RECEPTIONIST`, `BRANCH_MANAGER`, hoặc `SUPER_ADMIN`).
+- Với `RECEPTIONIST` và `BRANCH_MANAGER`: Tài khoản gắn với chi nhánh cụ thể thông qua bảng `staff` (`staff.branch_id`).
+- Với `SUPER_ADMIN` (Chủ chuỗi): Không thuộc biên chế cố định của một chi nhánh nào trong bảng `staff`, bắt buộc phải chọn chi nhánh cụ thể thông qua tham số truy vấn `?branchId=`.
 
 #### B. Hậu điều kiện
-- Con số hội viên đang có mặt được cập nhật chính xác và nổi bật trên thẻ KPI.
+- Con số hội viên đang có mặt được cập nhật chính xác và nổi bật trên thẻ KPI của chi nhánh được chọn.
 
 #### C. Luồng sự kiện chính
 1. Người dùng mở trang Dashboard.
-2. Hệ thống xác định `branch_id` từ phiên làm việc của người dùng.
+2. Hệ thống xác định chi nhánh cần lấy dữ liệu (`branch_id`):
+   - **Với `RECEPTIONIST` và `BRANCH_MANAGER`:** Hệ thống luôn sử dụng `staff.branch_id` từ hồ sơ nhân viên trong phiên làm việc, tự động bỏ qua tham số `branchId` nếu có truyền từ giao diện.
+   - **Với `SUPER_ADMIN`:** Bắt buộc phải truyền tham số query `?branchId=UUID` trên URL để chỉ định chi nhánh muốn xem. Nếu thiếu tham số `branchId`, hệ thống trả về mã lỗi `400 Bad Request` với thông báo: *"Chủ chuỗi cần chọn chi nhánh cụ thể để xem Dashboard."*
 3. Hệ thống thực hiện truy vấn đếm:
    ```sql
    SELECT count(*) 
@@ -150,11 +153,14 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 - Bảng danh sách hội viên sắp hết hạn hiển thị kèm số ngày còn lại và thông tin liên hệ.
 
 #### C. Luồng sự kiện chính
-1. Hệ thống tìm kiếm các gói tập thỏa mãn điều kiện:
-   - `memberships.status = 'ACTIVE'`
-   - Gói thuộc chi nhánh hiện tại hoặc gói dùng toàn chuỗi
-   - `memberships.end_date BETWEEN CURRENT_DATE AND (CURRENT_DATE + interval '7 days')`
-2. Hệ thống liên kết với bảng `members` để lấy: Mã hội viên, Họ tên, Số điện thoại, Ảnh đại diện, Tên gói tập, Ngày hết hạn, Số ngày còn lại.
+1. Hệ thống tìm kiếm các gói tập thỏa mãn toàn bộ các điều kiện nghiệp vụ:
+   - **Trạng thái gói:** `memberships.status = 'ACTIVE'`.
+   - **Khoảng ngày hết hạn (chuẩn 7 ngày tới):** `memberships.end_date >= CURRENT_DATE AND memberships.end_date < (CURRENT_DATE + interval '7 days')` (không dùng `BETWEEN` để tránh lấy cả 2 đầu mút dẫn tới 8 ngày).
+   - **Phân định theo chi nhánh:**
+     - Nếu gói gắn với chi nhánh cụ thể (`packages.branch_id IS NOT NULL`): `packages.branch_id = :branchId`.
+     - Nếu là gói toàn chuỗi (`packages.branch_id IS NULL`): Chỉ hiển thị cảnh báo tại chi nhánh gốc đăng ký ban đầu của hội viên (`members.home_branch_id = :branchId`), tránh việc nhiều chi nhánh cùng nhìn thấy một hội viên và gọi điện trùng lặp gây phiền toái cho khách.
+   - **Loại trừ hội viên đã mua gói gia hạn mới:** Không hiển thị các gói mà hội viên đó đã có sẵn một gói tập khác cùng loại (`packages.package_type`) ở trạng thái `memberships.status = 'UPCOMING'` (đã mua để nối tiếp sau khi gói hiện tại hết hạn).
+2. Hệ thống liên kết với bảng `members` để lấy: Mã hội viên, Họ tên, Số điện thoại, Ảnh đại diện, Tên gói tập, Ngày hết hạn, Số ngày còn lại (`end_date - CURRENT_DATE`).
 3. Sắp xếp danh sách theo ngày hết hạn tăng dần (gói nào hết hạn sớm nhất xếp lên đầu).
 4. Hệ thống hiển thị bảng cảnh báo trên giao diện Dashboard.
 5. Khi lễ tân bấm nút **"Gia hạn"** tại một dòng hội viên, hệ thống điều hướng sang màn hình bán/gia hạn gói tập (F3) với thông tin hội viên đã được điền sẵn.
@@ -201,7 +207,7 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 - **BR-F6.2 (Toàn vẹn doanh thu):** Mọi tính toán doanh thu phải dựa trên các khoản thanh toán đã xác nhận (`payments.status = 'CONFIRMED'`) thuộc hóa đơn đã thanh toán (`invoices.status = 'PAID'`). Bắt buộc dùng `LEFT JOIN` với bảng `members` để không bỏ sót các hóa đơn khách lẻ (Quy tắc số 8).
 - **BR-F6.3 (Đơn vị tiền tệ):** Tiền là số nguyên VND (kiểu `integer`), không dùng số thực để tránh sai số dấu phẩy động (Quy tắc số 6).
 - **BR-F6.4 (Khung ngày giờ):** Toàn bộ phân nhóm ngày và giờ trên Dashboard được chuyển đổi theo múi giờ Việt Nam (`UTC+7`, `Asia/Ho_Chi_Minh`), dù dữ liệu lưu trữ trong CSDL dưới dạng UTC (`timestamptz`). Tham số `:today` là ngày hiện tại theo giờ Việt Nam; `:dayStart`, `:dayEnd` là 00:00 hôm nay và 00:00 ngày mai theo giờ Việt Nam (đổi sang `OffsetDateTime`). Cả ba do ứng dụng tính (`ZoneId.of("Asia/Ho_Chi_Minh")`) rồi truyền vào truy vấn; không dùng `CURRENT_DATE` của PostgreSQL vì máy chủ chạy theo UTC.
-- **BR-F6.5 (Khoảng cảnh báo hết hạn):** Khoảng thời gian cảnh báo gói sắp hết hạn là 7 ngày, đặt thành hằng số trong mã. Bản chốt phạm vi không đánh dấu `*` cho con số này nên không đọc từ `system_configs`; ERD cũng không có khóa cấu hình tương ứng.
+- **BR-F6.5 (Quy tắc lọc cảnh báo gói sắp hết hạn):** Khoảng thời gian cảnh báo là 7 ngày đặt thành hằng số trong mã nguồn (bản chốt không có dấu `*` và ERD không có cấu hình này). Khoảng lọc tính theo công thức nửa mở `end_date >= :today AND end_date < :today + 7` ngày. Bắt buộc loại trừ các hội viên đã có gói `UPCOMING` cùng loại. Với gói dùng toàn chuỗi (`packages.branch_id IS NULL`), chỉ hiển thị cảnh báo tại chi nhánh gốc của hội viên (`members.home_branch_id = :branchId`).
 
 ---
 
@@ -217,8 +223,11 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 ## 6. Thiết kế API nháp
 
 ### 6.1. Lấy tổng hợp chỉ số KPI Dashboard
-- **Endpoint:** `GET /api/v1/dashboard/stats`
+- **Endpoint:** `GET /api/v1/dashboard/stats?branchId={branchId}`
 - **Quyền truy cập:** `RECEPTIONIST`, `BRANCH_MANAGER`, `SUPER_ADMIN`
+- **Quy tắc tham số `branchId`:**
+  - Với `SUPER_ADMIN`: Tham số `?branchId=` là **bắt buộc** (trả về 400 Bad Request nếu không truyền).
+  - Với `RECEPTIONIST` và `BRANCH_MANAGER`: Tham số `?branchId=` là tùy chọn và luôn bị ghi đè bởi `staff.branch_id` từ hồ sơ của chính nhân viên đó.
 - **Response Success (200 OK):**
   ```json
   {
@@ -285,6 +294,23 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
   - **Then** Tổng doanh thu hiển thị là 2.050.000 đ, trong đó Tiền mặt là 50.000 đ và Chuyển khoản là 2.000.000 đ. Không bị mất 50.000 đ của khách lẻ.
 
 - **Scenario 3: Lọc chính xác các gói hết hạn trong vòng 7 ngày**
-  - **Given** Hôm nay là ngày 02/11/2026. Có gói A hết hạn ngày 05/11/2026 (còn 3 ngày) và gói B hết hạn ngày 20/11/2026 (còn 18 ngày).
+  - **Given** Hôm nay là ngày 02/11/2026. Có gói A hết hạn ngày 05/11/2026 (còn 3 ngày, `end_date < 09/11/2026`) và gói B hết hạn ngày 20/11/2026 (còn 18 ngày).
   - **When** Lễ tân xem danh sách cảnh báo gói hết hạn.
   - **Then** Gói A xuất hiện trong danh sách cảnh báo; gói B không xuất hiện.
+
+- **Scenario 4: Loại trừ hội viên đã có gói gia hạn UPCOMING khỏi bảng cảnh báo**
+  - **Given** Hội viên Nam có gói `TIME` (Gói 1 tháng) sẽ hết hạn sau 3 ngày nữa. Nam đã mua trước gói gia hạn mới và gói mới đang ở trạng thái `UPCOMING`.
+  - **When** Lễ tân truy cập Dashboard xem danh sách gói sắp hết hạn.
+  - **Then** Hệ thống không hiển thị gói của Nam trong danh sách cảnh báo, giúp lễ tân không gọi điện tư vấn trùng lặp cho khách hàng đã gia hạn.
+
+- **Scenario 5: Gói toàn chuỗi chỉ hiển thị cảnh báo tại chi nhánh gốc (home branch)**
+  - **Given** Hội viên Mai mua gói tập toàn chuỗi (`packages.branch_id IS NULL`), Mai đăng ký hồ sơ tại cơ sở Cầu Giấy (`members.home_branch_id = Cầu Giấy`), gói sẽ hết hạn sau 2 ngày nữa.
+  - **When** Lễ tân cơ sở Đống Đa truy cập Dashboard.
+  - **Then** Gói của Mai không xuất hiện trong bảng cảnh báo tại cơ sở Đống Đa. Gói chỉ xuất hiện trên Dashboard của cơ sở Cầu Giấy.
+
+- **Scenario 6: Phân quyền xem Dashboard theo chi nhánh**
+  - **Given** Chủ chuỗi (`SUPER_ADMIN`) đăng nhập vào hệ thống.
+  - **When** Gửi request `GET /api/v1/dashboard/stats` không kèm tham số `branchId`.
+  - **Then** Hệ thống trả về lỗi 400 Bad Request yêu cầu chọn chi nhánh.
+  - **And When** Gửi request `GET /api/v1/dashboard/stats?branchId={chi_nhánh_1}`.
+  - **Then** Hệ thống trả về các chỉ số KPI đúng của chi nhánh 1.

@@ -60,7 +60,7 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 #### C. Luồng sự kiện chính
 1. Lễ tân nhập từ khóa tìm kiếm (Mã hội viên ví dụ `HV000001` hoặc Số điện thoại ví dụ `0912345678`) vào thanh tìm kiếm check-in.
 2. Hệ thống chuẩn hóa chuỗi tìm kiếm (xóa khoảng trắng thừa, chuẩn hóa SĐT về 10 chữ số).
-3. Hệ thống kiểm tra vai trò người thao tác (phải là `RECEPTIONIST`, `BRANCH_MANAGER`, hoặc `SUPER_ADMIN`).
+3. Hệ thống kiểm tra vai trò người thao tác (phải là `RECEPTIONIST` hoặc `BRANCH_MANAGER` tại chi nhánh; không cho phép `SUPER_ADMIN` check-in tại quầy vì không thuộc biên chế chi nhánh cụ thể).
 4. Hệ thống tra cứu bảng `members` chỉ trong chi nhánh của nhân viên (`members.home_branch_id = current_branch_id`, theo quyết định kick-off 02/11; tra cứu và check-in liên chi nhánh để đến v4) kết hợp với bảng `memberships`, và trả về thông tin trong vòng dưới 2 giây (NF1):
    - Thông tin cá nhân: Họ tên, Mã hội viên, Số điện thoại, Giới tính, Ảnh đại diện (`avatar_url`), Trạng thái tài khoản.
    - Danh sách **mọi** gói tập của hội viên ở mọi trạng thái (không lọc như bước 4 của UC-F4.2), để lễ tân giải thích được khi check-in bị từ chối: Tên gói, Loại gói (`TIME`, `SESSION`, `PT`), Trạng thái gói (`ACTIVE`, `UPCOMING`, `EXPIRED`, `FROZEN`), Ngày bắt đầu, Ngày hết hạn, Số buổi còn lại (với gói `SESSION`/`PT`).
@@ -96,9 +96,9 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 #### B. Hậu điều kiện
 - **Thành công:**
   - Một bản ghi mới được tạo trong bảng `checkins` với `checked_in_at = now()`, `method = 'MANUAL'`, `checkin_date = :today` (ngày hiện tại theo giờ Việt Nam, xem BR-F4.3).
-  - Nếu sử dụng gói `SESSION` và đây là lần đầu tiên check-in trong ngày: `session_deducted = true`, đồng thời giảm `memberships.remaining_sessions` đi 1 đơn vị. Nếu số buổi còn lại về 0, chuyển trạng thái gói sang `EXPIRED`.
-  - Nếu sử dụng gói `TIME`: `session_deducted = false`, không thay đổi số buổi.
-  - Nếu hội viên có lịch lớp học nhóm trong vòng 60 phút tới: cập nhật `class_bookings.arrived_at = now()`.
+  - Nếu sử dụng gói `SESSION` và đây là lần đầu tiên check-in trong ngày: `session_deducted = true`, đồng thời giảm `memberships.remaining_sessions` đi 1 đơn vị. Nếu số buổi còn lại về 0, gói **vẫn giữ trạng thái `ACTIVE` đến hết ngày** (để hội viên có thể quay lại tập tiếp trong ngày mà không bị trừ thêm/từ chối); tác vụ nền ban đêm (batch job 23:59:59) sẽ chuyển gói về `EXPIRED`.
+  - Nếu sử dụng gói `TIME` hoặc gói `SESSION` đã trừ buổi trong ngày: `session_deducted = false`, không thay đổi số buổi.
+  - Nếu hội viên có lịch lớp học nhóm trong khung giờ từ `now() - 15 phút` đến `now() + 60 phút`: cập nhật `class_bookings.arrived_at = now()`.
   - Màn hình hiển thị thông báo check-in thành công màu xanh lá, kèm âm thanh thông báo và thông tin gói tập được áp dụng.
 - **Thất bại:** Giao dịch bị rollback, không tạo bản ghi `checkins`, không trừ số buổi của gói.
 
@@ -113,10 +113,13 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
    - Có phạm vi sử dụng tại chi nhánh hiện tại (`branch_id IS NULL` - toàn chuỗi hoặc `branch_id = current_branch_id`).
 5. **Hệ thống lựa chọn gói tập theo thứ tự ưu tiên nghiệp vụ:**
    - **Trường hợp 1 (Có gói TIME):** Nếu hội viên có gói `package_type = 'TIME'` đang `ACTIVE` → Chọn gói `TIME` này. Đặt `membership_id = gói_TIME.id`, `session_deducted = false`. (Quy tắc nghiệp vụ: Có cả gói TIME và SESSION thì dùng gói TIME, không trừ buổi).
-   - **Trường hợp 2 (Chỉ có gói SESSION):** Nếu hội viên không có gói `TIME`, nhưng có gói `package_type = 'SESSION'` đang `ACTIVE` với `remaining_sessions > 0`:
+   - **Trường hợp 2 (Chỉ có gói SESSION):** Nếu hội viên không có gói `TIME`, nhưng có gói `package_type = 'SESSION'` đang `ACTIVE`:
      - Kiểm tra trong bảng `checkins`: xem hội viên với gói này đã có lượt check-in nào trong ngày (`checkin_date = :today`) mà `session_deducted = true` hay chưa.
-     - Nếu **chưa có lượt trừ buổi nào trong ngày**: Hệ thống trừ 1 buổi (`remaining_sessions = remaining_sessions - 1`), nếu `remaining_sessions = 0` thì cập nhật `status = 'EXPIRED'`, và đặt `session_deducted = true`.
-     - Nếu **đã có lượt trừ buổi trong ngày**: Giữ nguyên số buổi, đặt `session_deducted = false`.
+     - Nếu **chưa có lượt trừ buổi nào trong ngày**:
+       - Nếu `remaining_sessions > 0`: Hệ thống trừ 1 buổi (`remaining_sessions = remaining_sessions - 1`), đặt `session_deducted = true`. **Lưu ý nghiệp vụ:** Kể cả khi số buổi còn lại giảm về 0, gói tập **vẫn giữ trạng thái `ACTIVE` đến hết ngày** (để hội viên có thể check-in lại trong ngày). Tác vụ nền ban đêm sẽ chuyển sang `EXPIRED`.
+       - Nếu `remaining_sessions <= 0`: Hệ thống từ chối check-in với mã lỗi 422 (xem luồng ngoại lệ E4).
+     - Nếu **đã có lượt trừ buổi trong ngày**:
+       - Kể cả khi `remaining_sessions = 0`, hệ thống vẫn cho phép check-in vào phòng tập bình thường theo quy tắc một ngày chỉ trừ tối đa một buổi. Giữ nguyên số buổi (0 buổi) và đặt `session_deducted = false`.
    - **Trường hợp 3 (Chỉ có gói PT hoặc không có gói hợp lệ):** Hệ thống từ chối check-in (xem luồng ngoại lệ E3, E4).
 6. Hệ thống tạo bản ghi mới vào bảng `checkins`:
    - `member_id`: ID hội viên
@@ -142,14 +145,15 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
   - Hội viên chỉ sở hữu gói `package_type = 'PT'`.
   - Hệ thống từ chối theo quy tắc nghiệp vụ: *"Gói huấn luyện viên cá nhân (PT) chỉ dùng cho các buổi tập 1-1 có lịch hẹn, không dùng để check-in tự do vào phòng tập. Hội viên cần có thêm gói theo thời gian hoặc theo lượt."*
 - **E4 – Gói theo lượt đã hết số buổi (422 Unprocessable Content):**
-  - Gói `SESSION` có `remaining_sessions <= 0`.
+  - Gói `SESSION` có `remaining_sessions <= 0` và trong ngày hôm nay hội viên chưa có lượt check-in nào được ghi nhận trừ buổi (`session_deducted = true`).
   - Hệ thống từ chối: *"Gói tập theo buổi của hội viên đã hết lượt sử dụng. Vui lòng gia hạn thêm gói mới."*
 - **E5 – Gói tập đang bị bảo lưu (422 Unprocessable Content):**
   - Gói tập duy nhất của hội viên đang ở trạng thái `FROZEN`.
   - Hệ thống từ chối: *"Gói tập của hội viên đang trong thời gian bảo lưu (từ ngày... đến ngày...). Vui lòng liên hệ quản lý để hủy bảo lưu sớm nếu muốn tập tiếp."*
 - **E6 – Xung đột lượt trừ buổi đồng thời (409 Conflict):**
-  - Hai yêu cầu check-in cùng lúc vi phạm chỉ mục duy nhất có điều kiện `uq_one_deduction_per_day` (`WHERE session_deducted = true`).
-  - Giao dịch thứ hai phát hiện đã có lượt trừ trong ngày, tự động chuyển về `session_deducted = false` mà không trừ thêm buổi của hội viên.
+- **E6 – Xung đột lượt trừ buổi đồng thời (409 Conflict):**
+  - Hai yêu cầu check-in cùng lúc vi phạm khóa lạc quan `@Version` trên bảng `memberships` hoặc vi phạm chỉ mục duy nhất có điều kiện `uq_one_deduction_per_day` (`WHERE session_deducted = true`).
+  - Hệ thống hủy giao dịch bị xung đột và trả về mã lỗi **409 Conflict** (thông qua `GlobalExceptionHandler` có sẵn) với thông báo: *"Dữ liệu lượt check-in đang được xử lý đồng thời bởi một thao tác khác. Vui lòng thử lại."* Khi nhân viên bấm thử lại (retry), hệ thống sẽ nhận diện đã có lượt trừ buổi và cho phép check-in thành công với `session_deducted = false`.
 - **E7 – Hồ sơ hội viên ngừng hoạt động (422 Unprocessable Content):**
   - `members.status = 'INACTIVE'` (kiểm tra ở bước 3), kể cả khi hội viên vẫn còn gói tập `ACTIVE`.
   - Hệ thống từ chối: *"Hồ sơ hội viên này đã ngừng hoạt động. Vui lòng liên hệ quản lý để được hỗ trợ."*
@@ -161,7 +165,7 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 - **Mã UC:** UC-F4.3
 - **Tên Use Case:** Tự động đánh dấu có mặt lớp học nhóm khi check-in
 - **Tác nhân chính:** Hệ thống (tự động kích hoạt sau khi UC-F4.2 thành công)
-- **Mô tả ngắn gọn:** Kiểm tra xem hội viên có đặt chỗ lớp học nhóm (`class_bookings`) bắt đầu trong vòng 60 phút tới hay không. Nếu có, tự động ghi nhận thời điểm đến (`arrived_at = now()`) để huấn luyện viên dễ dàng điểm danh tại lớp.
+- **Mô tả ngắn gọn:** Kiểm tra xem hội viên có đặt chỗ lớp học nhóm (`class_bookings`) bắt đầu trong khung giờ từ `now() - 15 phút` đến `now() + 60 phút` hay không (đến sớm tối đa 60 phút hoặc đến trễ tối đa 15 phút so với giờ bắt đầu). Nếu có, tự động ghi nhận thời điểm đến (`arrived_at = now()`) để huấn luyện viên dễ dàng điểm danh tại lớp.
 
 #### A. Tiền điều kiện
 - Lượt check-in tại UC-F4.2 vừa được tạo thành công.
@@ -216,7 +220,7 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 - **Mô tả ngắn gọn:** Lễ tân/quản lý xem danh sách các lượt check-in trong ngày hoặc khoảng ngày tại chi nhánh, hỗ trợ lọc theo trạng thái (đang tập / đã về) và tìm kiếm theo tên hội viên.
 
 #### A. Tiền điều kiện
-- Người dùng đã đăng nhập với vai trò `RECEPTIONIST`, `BRANCH_MANAGER`, hoặc `SUPER_ADMIN`.
+- Người dùng đã đăng nhập với vai trò `RECEPTIONIST` hoặc `BRANCH_MANAGER`.
 
 #### B. Hậu điều kiện
 - Danh sách check-in được hiển thị phân trang (`PageResponse`), sắp xếp theo thời gian check-in giảm dần.
@@ -265,7 +269,7 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 
 ### 6.1. Tra cứu hội viên cho màn hình check-in
 - **Endpoint:** `GET /api/v1/checkins/search-member?keyword={keyword}`
-- **Quyền truy cập:** `RECEPTIONIST`, `BRANCH_MANAGER`, `SUPER_ADMIN`
+- **Quyền truy cập:** `RECEPTIONIST`, `BRANCH_MANAGER`
 - **Response Success (200 OK):**
   ```json
   {
@@ -297,7 +301,7 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 
 ### 6.2. Thực hiện check-in thủ công
 - **Endpoint:** `POST /api/v1/checkins`
-- **Quyền truy cập:** `RECEPTIONIST`, `BRANCH_MANAGER`, `SUPER_ADMIN`
+- **Quyền truy cập:** `RECEPTIONIST`, `BRANCH_MANAGER`
 - **Request Body:**
   ```json
   {
@@ -325,7 +329,7 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 
 ### 6.3. Ghi nhận check-out
 - **Endpoint:** `POST /api/v1/checkins/{id}/checkout`
-- **Quyền truy cập:** `RECEPTIONIST`, `BRANCH_MANAGER`, `SUPER_ADMIN`; lượt check-in `{id}` phải thuộc chi nhánh của nhân viên thao tác, nếu không trả 404 (xem UC-F4.4).
+- **Quyền truy cập:** `RECEPTIONIST`, `BRANCH_MANAGER`; lượt check-in `{id}` phải thuộc chi nhánh của nhân viên thao tác, nếu không trả 404 (xem UC-F4.4).
 - **Response Success (200 OK):**
   ```json
   {
@@ -364,3 +368,16 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
   - **Given** Hội viên sở hữu đồng thời gói `TIME` 1 tháng (ACTIVE) và gói `SESSION` 30 buổi (ACTIVE).
   - **When** Lễ tân bấm xác nhận check-in.
   - **Then** Hệ thống tự động áp dụng gói `TIME`, ghi nhận `session_deducted = false`, giữ nguyên 30 buổi của gói `SESSION`.
+
+- **Scenario 6: Hội viên dùng hết buổi cuối nhưng quay lại tập lần 2 trong ngày (Trường hợp chị Lan)**
+  - **Given** Hội viên Lan sở hữu gói `SESSION` còn đúng 1 buổi.
+  - **And** Vào lúc 08:00 sáng, chị Lan check-in thành công: gói bị trừ còn 0 buổi (`session_deducted = true`), gói vẫn duy trì trạng thái `ACTIVE` đến hết ngày.
+  - **When** Đến 17:00 chiều cùng ngày, chị Lan quay lại phòng tập check-in lần thứ 2.
+  - **Then** Hệ thống phát hiện hôm nay đã có lượt trừ buổi cho gói này, cho phép check-in thành công với mã 201 Created, `session_deducted = false`, số buổi giữ nguyên là 0, gói vẫn là `ACTIVE` (không bị từ chối E4).
+
+- **Scenario 7: Xung đột check-in đồng thời và thử lại thành công (Xử lý E6)**
+  - **Given** Hai lễ tân cùng lúc bấm xác nhận check-in cho hội viên Nam (đang dùng gói `SESSION` còn 5 buổi).
+  - **When** Cả hai yêu cầu gửi đồng thời đến máy chủ và cạnh tranh trừ buổi.
+  - **Then** Một yêu cầu thành công (201 Created, trừ 1 buổi còn 4, `session_deducted = true`). Yêu cầu còn lại gặp xung đột trả về mã **409 Conflict**.
+  - **And When** Lễ tân của yêu cầu bị lỗi 409 bấm thử lại (retry) ngay sau đó.
+  - **Then** Hệ thống phát hiện đã có lượt trừ buổi trong ngày, xử lý thành công trả về mã **201 Created**, ghi nhận `session_deducted = false` và không trừ thêm buổi nào của hội viên Nam.
