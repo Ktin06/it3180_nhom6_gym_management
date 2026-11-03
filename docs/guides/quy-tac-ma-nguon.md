@@ -100,4 +100,4 @@ Tóm tắt; chi tiết và ngoại lệ xem [bản chốt phạm vi](../requirem
 2. Lên kế hoạch (API, service, migration, màn hình, kiểm thử). Khi dùng công cụ AI: yêu cầu AI đề xuất kế hoạch trước, đọc và đồng ý rồi mới cho sinh mã.
 3. Viết kiểm thử cho quy tắc nghiệp vụ cùng lúc với mã.
 4. Chạy `./mvnw -B verify` và/hoặc `npm run lint && npm test -- --run && npm run build`; sửa đến khi qua, không tắt hay bỏ qua kiểm thử.
-5. Tự đọc lại toàn bộ thay đổi, rồi mở pull request theo [CONTRIBUTING.md](../../CONTRIBUTING.md).
+5. Tự đọc lại toàn bộ thay đổi theo [checklist tự review](checklist-review.md), rồi mở pull request theo [CONTRIBUTING.md](../../CONTRIBUTING.md).
