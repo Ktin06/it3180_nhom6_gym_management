@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1050px" height="850px" viewBox="-0.5 -0.5 1050 850" content="&lt;mxfile host=&quot;app.diagrams.net&quot; version=&quot;24.0.0&quot;&gt;
+  &lt;diagram id=&quot;diag_use_case_hoi_vien&quot; name=&quot;use_case_hoi_vien&quot;&gt;
+    &lt;mxGraphModel dx=&quot;1050&quot; dy=&quot;850&quot; grid=&quot;1&quot; gridSize=&quot;10&quot; guides=&quot;1&quot; tooltips=&quot;1&quot; connect=&quot;1&quot; arrows=&quot;1&quot; fold=&quot;1&quot; page=&quot;1&quot; pageScale=&quot;1&quot; pageWidth=&quot;1050&quot; pageHeight=&quot;850&quot;&gt;
+      &lt;root&gt;
+        &lt;mxCell id=&quot;0&quot;/&gt;
+        &lt;mxCell id=&quot;1&quot; parent=&quot;0&quot;/&gt;
+        
+      &lt;/root&gt;
+    &lt;/mxGraphModel&gt;
+  &lt;/diagram&gt;
+&lt;/mxfile&gt;">
+  <defs>
+    <style type="text/css">
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+      text { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+      .title { font-size: 18px; font-weight: 700; fill: #1E293B; }
+      .subtitle { font-size: 12px; font-weight: 500; fill: #64748B; }
+      .actor-head { fill: #FEF3C7; stroke: #D97706; stroke-width: 2; }
+      .actor-body { stroke: #D97706; stroke-width: 2; stroke-linecap: round; }
+      .actor-label { font-size: 13px; font-weight: 600; fill: #0F172A; text-anchor: middle; }
+      .sys-rect { fill: #F8FAFC; stroke: #94A3B8; stroke-width: 2; stroke-dasharray: 6 6; rx: 12; }
+      .sys-header { font-size: 15px; font-weight: 700; fill: #334155; }
+      .pkg-rect { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; rx: 8; }
+      .pkg-title { font-size: 13px; font-weight: 700; fill: #0284C7; }
+      .uc-el { fill: #F0F9FF; stroke: #0284C7; stroke-width: 1.8; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05)); }
+      .uc-el-core { fill: #F0FDF4; stroke: #16A34A; stroke-width: 2; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.06)); }
+      .uc-text { font-size: 11px; font-weight: 600; fill: #0369A1; text-anchor: middle; }
+      .uc-text-core { font-size: 11px; font-weight: 700; fill: #15803D; text-anchor: middle; }
+      .line { stroke: #64748B; stroke-width: 1.5; fill: none; }
+      .dash-inc { stroke: #0D9488; stroke-width: 1.5; stroke-dasharray: 4 3; fill: none; }
+      .dash-ext { stroke: #EA580C; stroke-width: 1.5; stroke-dasharray: 4 3; fill: none; }
+      .lbl-inc { font-size: 10px; font-weight: 600; fill: #0F766E; text-anchor: middle; }
+      .lbl-ext { font-size: 10px; font-weight: 600; fill: #C2410C; text-anchor: middle; }
+      .act-node { fill: #F0FDF4; stroke: #16A34A; stroke-width: 1.8; rx: 14; ry: 14; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.04)); }
+      .act-text { font-size: 11px; font-weight: 600; fill: #166534; text-anchor: middle; }
+      .diamond { fill: #FEF9C3; stroke: #CA8A04; stroke-width: 1.8; }
+      .guard { font-size: 11px; font-weight: 600; fill: #B45309; }
+      .swimlane { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; }
+      .swimlane-hdr { fill: #F1F5F9; stroke: #CBD5E1; stroke-width: 1.5; }
+      .swimlane-txt { font-size: 13px; font-weight: 700; fill: #1E293B; text-anchor: middle; }
+    </style>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748B" />
+    </marker>
+    <marker id="arr-inc" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0D9488" />
+    </marker>
+    <marker id="arr-ext" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#EA580C" />
+    </marker>
+    <marker id="arr-act" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#16A34A" />
+    </marker>
+  </defs>
+  <rect width="1050" height="850" fill="#FFFFFF"/>
+
+    <text x="40" y="45" class="title">Sơ đồ Use Case Phân Rã: Tác nhân Hội viên (Member)</text>
+    <text x="40" y="70" class="subtitle">Phân hệ Cổng Hội viên tự phục vụ | F1, F2, F3, F7, F8, F9, F10, F15, F19</text>
+
+    
+    <g transform="translate(90,420)">
+      <circle cx="0" cy="-22" r="13" class="actor-head"/>
+      <line x1="0" y1="-9" x2="0" y2="18" class="actor-body"/>
+      <line x1="-16" y1="2" x2="16" y2="2" class="actor-body"/>
+      <line x1="0" y1="18" x2="-12" y2="42" class="actor-body"/>
+      <line x1="0" y1="18" x2="12" y2="42" class="actor-body"/>
+      <text x="0" y="58" class="actor-label">Hội viên\n(Đã đăng nhập)</text>
+    </g>
+
+    <rect x="210" y="100" width="800" height="720" class="sys-rect"/>
+    <text x="235" y="135" class="sys-header">Ranh giới: Cổng Hội viên (Member Portal)</text>
+
+    
+    <g>
+      <ellipse cx="380" cy="175" rx="95" ry="30" class="uc-el"/>
+      <text class="uc-text"><tspan x="380" y="165" font-size="9" fill="#64748B">«UC-F1.2»</tspan><tspan x="380" y="175">Đăng nhập bằng email\n(JWT 15 phút)</tspan></text>
+    </g>
+    
+    <g>
+      <ellipse cx="380" cy="245" rx="95" ry="30" class="uc-el"/>
+      <text class="uc-text"><tspan x="380" y="235" font-size="9" fill="#64748B">«UC-F2.3/2.5»</tspan><tspan x="380" y="245">Xem hồ sơ &amp; lịch sử\nchỉ số cơ thể</tspan></text>
+    </g>
+    
+    <g>
+      <ellipse cx="380" cy="315" rx="95" ry="30" class="uc-el"/>
+      <text class="uc-text"><tspan x="380" y="305" font-size="9" fill="#64748B">«UC-F7.1»</tspan><tspan x="380" y="315">Xem gói tập hiện có &amp;\nlịch sử tập luyện</tspan></text>
+    </g>
+    
+    <g>
+      <ellipse cx="380" cy="395" rx="100" ry="32" class="uc-el-core"/>
+      <text class="uc-text-core"><tspan x="380" y="385" font-size="9" fill="#64748B">«UC-F7.2»</tspan><tspan x="380" y="395">Yêu cầu mua / gia hạn\ngói (Thanh toán tại quầy)</tspan></text>
+    </g>
+    
+    <g>
+      <ellipse cx="700" cy="395" rx="95" ry="30" class="uc-el"/>
+      <text class="uc-text"><tspan x="700" y="385" font-size="9" fill="#64748B">«UC-F5.4»</tspan><tspan x="700" y="395">Tạo hóa đơn PENDING\n(Tự hủy sau 3 ngày)</tspan></text>
+    </g>
+
+    
+    <g>
+      <ellipse cx="380" cy="480" rx="95" ry="30" class="uc-el-core"/>
+      <text class="uc-text-core"><tspan x="380" y="470" font-size="9" fill="#64748B">«UC-F8.1»</tspan><tspan x="380" y="480">Đặt chỗ lớp nhóm\n(Chỉ gói TIME)</tspan></text>
+    </g>
+    
+    <g>
+      <ellipse cx="700" cy="460" rx="95" ry="30" class="uc-el"/>
+      <text class="uc-text"><tspan x="700" y="450" font-size="9" fill="#64748B">«UC-F8.2»</tspan><tspan x="700" y="460">Tự động vào danh sách\nchờ khi lớp đầy</tspan></text>
+    </g>
+    
+    <g>
+      <ellipse cx="700" cy="520" rx="95" ry="30" class="uc-el"/>
+      <text class="uc-text"><tspan x="700" y="510" font-size="9" fill="#64748B">«UC-F8.3»</tspan><tspan x="700" y="520">Hủy chỗ đặt lớp\n(Ân hạn 15 phút)</tspan></text>
+    </g>
+
+    
+    <g>
+      <ellipse cx="380" cy="580" rx="95" ry="30" class="uc-el-core"/>
+      <text class="uc-text-core"><tspan x="380" y="570" font-size="9" fill="#64748B">«UC-F9.1»</tspan><tspan x="380" y="580">Đặt lịch tập 1-1 với PT\n(Chỉ gói PT)</tspan></text>
+    </g>
+    
+    <g>
+      <ellipse cx="700" cy="580" rx="95" ry="30" class="uc-el"/>
+      <text class="uc-text"><tspan x="700" y="570" font-size="9" fill="#64748B">«NF6»</tspan><tspan x="700" y="580">Kiểm tra trùng lịch &amp;\nkhóa bi quan (NF6)</tspan></text>
+    </g>
+
+    
+    <g>
+      <ellipse cx="380" cy="660" rx="95" ry="30" class="uc-el"/>
+      <text class="uc-text"><tspan x="380" y="650" font-size="9" fill="#64748B">«UC-F9.3»</tspan><tspan x="380" y="660">Xem giáo án &amp;\nnhật ký tập luyện</tspan></text>
+    </g>
+    
+    <g>
+      <ellipse cx="380" cy="730" rx="95" ry="30" class="uc-el"/>
+      <text class="uc-text"><tspan x="380" y="720" font-size="9" fill="#64748B">«UC-F15.1»</tspan><tspan x="380" y="730">Yêu cầu bảo lưu gói\n(Chờ quản lý duyệt)</tspan></text>
+    </g>
+    
+    <g>
+      <ellipse cx="700" cy="730" rx="95" ry="30" class="uc-el"/>
+      <text class="uc-text"><tspan x="700" y="720" font-size="9" fill="#64748B">«UC-F19.1»</tspan><tspan x="700" y="730">Theo dõi chuỗi ngày tập\n&amp; huy hiệu đạt được</tspan></text>
+    </g>
+
+    <!-- Actor lines -->
+    <line x1="140" y1="400" x2="285" y2="175" class="line" marker-end="url(#arr)"/>
+    <line x1="140" y1="405" x2="285" y2="245" class="line" marker-end="url(#arr)"/>
+    <line x1="140" y1="410" x2="285" y2="315" class="line" marker-end="url(#arr)"/>
+    <line x1="140" y1="420" x2="280" y2="395" class="line" marker-end="url(#arr)"/>
+    <line x1="140" y1="430" x2="285" y2="480" class="line" marker-end="url(#arr)"/>
+    <line x1="140" y1="440" x2="285" y2="580" class="line" marker-end="url(#arr)"/>
+    <line x1="140" y1="450" x2="285" y2="660" class="line" marker-end="url(#arr)"/>
+    <line x1="140" y1="460" x2="285" y2="730" class="line" marker-end="url(#arr)"/>
+
+    <!-- includes / extends -->
+    <line x1="480" y1="395" x2="605" y2="395" class="dash-inc" marker-end="url(#arr-inc)"/>
+    <text x="540" y="388" class="lbl-inc">«include»</text>
+
+    <line x1="605" y1="465" x2="475" y2="475" class="dash-ext" marker-end="url(#arr-ext)"/>
+    <text x="540" y="463" class="lbl-ext">«extend»</text>
+
+    <line x1="475" y1="580" x2="605" y2="580" class="dash-inc" marker-end="url(#arr-inc)"/>
+    <text x="540" y="573" class="lbl-inc">«include»</text>
+    
+</svg>
