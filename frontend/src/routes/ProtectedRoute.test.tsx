@@ -5,9 +5,22 @@ import { AuthContext, type AuthUser } from '../auth/AuthContext'
 import type { Role } from '../auth/roles'
 import { ProtectedRoute } from './ProtectedRoute'
 
-function renderAt(path: string, user: AuthUser | null, allowedRoles: Role[]) {
+function renderAt(
+  path: string,
+  user: AuthUser | null,
+  allowedRoles: Role[],
+  status: 'initializing' | 'authenticated' | 'anonymous' = user ? 'authenticated' : 'anonymous',
+) {
   return render(
-    <AuthContext.Provider value={{ user, loginAs: () => {}, logout: () => {} }}>
+    <AuthContext.Provider
+      value={{
+        status,
+        user,
+        login: async () => user!,
+        register: async () => user!,
+        logout: async () => {},
+      }}
+    >
       <MemoryRouter initialEntries={[path]}>
         <Routes>
           <Route path="/login" element={<p>Trang đăng nhập</p>} />
@@ -32,6 +45,13 @@ describe('ProtectedRoute', () => {
 
     expect(screen.getByText('Trang đăng nhập')).toBeInTheDocument()
     expect(screen.queryByText('Nội dung lễ tân')).not.toBeInTheDocument()
+  })
+
+  it('đợi bootstrap phiên trước khi chuyển hướng', () => {
+    renderAt('/reception', null, ['RECEPTIONIST'], 'initializing')
+
+    expect(screen.getByRole('status')).toHaveTextContent('Đang kiểm tra phiên đăng nhập')
+    expect(screen.queryByText('Trang đăng nhập')).not.toBeInTheDocument()
   })
 
   it('chuyển về /403 khi sai vai trò', () => {

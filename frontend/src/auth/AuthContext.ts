@@ -1,5 +1,6 @@
 import { createContext } from 'react'
 import type { Role } from './roles'
+import type { LoginRequest, RegisterRequest } from '../features/auth/types/auth'
 
 export interface AuthUser {
   email: string
@@ -7,10 +8,11 @@ export interface AuthUser {
 }
 
 export interface AuthContextValue {
+  status: 'initializing' | 'authenticated' | 'anonymous'
   user: AuthUser | null
-  /** Chỉ dùng ở chế độ phát triển để giả lập đăng nhập. Sẽ thay bằng đăng nhập thật ở F1. */
-  loginAs: (role: Role) => void
-  logout: () => void
+  login: (request: LoginRequest) => Promise<AuthUser>
+  register: (request: RegisterRequest) => Promise<AuthUser>
+  logout: () => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

@@ -7,7 +7,7 @@ import { StaffLayout } from '../layouts/StaffLayout'
 import { ForbiddenPage } from '../pages/ForbiddenPage'
 import { GuestHomePage } from '../pages/home/GuestHomePage'
 import { RoleHomePage } from '../pages/home/RoleHomePage'
-import { LoginPage } from '../pages/LoginPage'
+import { LoginPage } from '../features/auth/pages/LoginPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { ProtectedRoute } from '../routes/ProtectedRoute'
 

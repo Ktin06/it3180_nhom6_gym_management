@@ -23,9 +23,9 @@ Frontend gọi API theo đường dẫn cùng domain `/api/v1` ([ADR 0008](../do
 
 Biến môi trường (nếu có) đọc từ file `.env` ở **thư mục gốc repo** (`envDir: '..'`). `VITE_API_URL` chỉ dùng khi muốn gọi thẳng một backend khác.
 
-## Đăng nhập giả lập
+## Xác thực F1
 
-Ở chế độ phát triển (`npm run dev`) có ô **"Giả lập vai trò"** trên trang đăng nhập và thanh tiêu đề, để thử menu và phân quyền giao diện theo 5 vai trò. Ô này không có trong bản build. Sẽ thay bằng đăng nhập thật ở F1.
+Frontend đã nối trang đăng nhập với adapter API; access token chỉ giữ trong bộ nhớ tab, refresh token do backend đặt vào cookie `HttpOnly`. Adapter hiện dùng DTO tạm vì backend F1 chưa có trên `main`; xem [ghi chú tích hợp](../docs/guides/tich-hop-frontend-f1.md) trước khi nối API thật. Vitest mock không thay thế kiểm tra backend hoặc staging.
 
 ## Quy ước thư mục
 
@@ -36,9 +36,9 @@ src/
 │                 ngăn kéo trên màn hình hẹp), MemberLayout (ưu tiên điện thoại)
 ├── routes/       ProtectedRoute: chưa đăng nhập → /login, sai vai trò → /403
 ├── features/     mỗi chức năng một thư mục (xem features/README.md)
-├── pages/        trang không thuộc chức năng nào: đăng nhập, 403, 404, trang chủ tạm theo vai trò
+├── pages/        trang không thuộc chức năng nào: 403, 404, trang chủ tạm theo vai trò
 ├── services/     http.ts – axios dùng chung
-├── auth/         vai trò (Role), AuthContext, useAuth, DevRoleSwitcher
+├── auth/         vai trò (Role), AuthContext/AuthProvider, useAuth, session-store
 ├── components/   component dùng chung nhiều chức năng
 ├── hooks/        hook dùng chung
 ├── utils/        hàm tiện ích (định dạng tiền VND, ngày giờ...)
