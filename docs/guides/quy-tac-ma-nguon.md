@@ -90,6 +90,9 @@ Tóm tắt; chi tiết và ngoại lệ xem [bản chốt phạm vi](../requirem
 - **Hóa đơn chờ do F7 tạo tự hủy sau `PENDING_INVOICE_TTL_DAYS`** (mặc định 3 ngày), kèm gói PENDING đi cùng.
 - **Tự đăng ký bằng số điện thoại đã có hồ sơ thì từ chối** và hướng dẫn liên hệ quầy; không tự gắn tài khoản mới vào hồ sơ cũ (F1, F2).
 - **Báo cáo doanh thu dùng `LEFT JOIN` với `members`**, vì hóa đơn khách lẻ có `member_id` rỗng (F6, F16).
+- **`end_date = start_date + duration_days - 1`**: `end_date` là ngày cuối còn dùng được, không cộng thẳng số ngày (F3).
+- **Gói SESSION về 0 buổi vẫn ACTIVE đến hết ngày** (check-in lại được, không trừ thêm); ngay lúc trừ buổi cuối, gói UPCOMING nối tiếp được kéo về bắt đầu từ ngày mai (F4). Gói PT hết buổi thì EXPIRED ngay và gói PT nối tiếp bắt đầu hôm nay (F9).
+- **Tác vụ nền chuyển EXPIRED chạy trước tác vụ kích hoạt UPCOMING** (00:00 giờ Việt Nam, chạy bù khi khởi động); gói SESSION 0 buổi chỉ EXPIRED khi hôm nay chưa trừ buổi.
 
 ## Quy trình làm một chức năng
 
