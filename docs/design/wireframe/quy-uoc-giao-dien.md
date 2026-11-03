@@ -55,7 +55,7 @@ Các trạng thái bắt buộc để kiểm tra khi triển khai: form ban đ�
 
 ## Bảng giá và lịch lớp — WBS 1.4.2
 
-Hai wireframe còn lại thuộc WBS 1.4.2. Chức năng công khai tương ứng được thiết kế ở Sprint 1 và triển khai theo phân công Sprint 2; không thêm màn hình chạy thật vào nhiệm vụ tài liệu #17.
+Wireframe chỉnh sửa được: [bảng giá công khai](bang-gia-cong-khai.drawio.svg) và [lịch lớp công khai](lich-lop-cong-khai.drawio.svg), thuộc WBS 1.4.2. Chức năng công khai tương ứng được thiết kế ở Sprint 1 và triển khai theo phân công Sprint 2; không thêm màn hình chạy thật vào nhiệm vụ tài liệu #17.
 
 **Bảng giá:** hiển thị danh mục đang bán, loại `TIME`/`SESSION`/`PT`, thời hạn hoặc số buổi và giá từ server. TIME có quyền lợi lớp nhóm; SESSION/PT không được đặt lớp; PT chỉ tập 1–1, không dùng để vào phòng tập. CTA đăng ký chỉ tạo tài khoản; thanh toán tại quầy. Không có giỏ hàng, cổng thanh toán online hoặc khuyến mãi tự phát ngoài phạm vi. Endpoint public phải được owner F3 xác nhận; không giả định API quản trị #29 được công khai.
 
