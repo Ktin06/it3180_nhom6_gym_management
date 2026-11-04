@@ -1,7 +1,7 @@
 # Đặc tả Use Case – F7: Cổng hội viên
 
 - **Mã chức năng:** F7
-- **Version:** v2 (xác nhận Bắt buộc / Mục tiêu theo bản chốt phạm vi)
+- **Version:** v2 (Bắt buộc)
 - **Người biên soạn:** Nguyễn Trọng Việt
 - **Người duyệt chéo:** Lê Phước Minh Quân
 - **Tài liệu chuẩn tham chiếu:**
@@ -130,7 +130,7 @@ Vai trò được phép dùng: **Hội viên** (đã đăng nhập, có hồ sơ
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
 - **BR-F7.1:** Hội viên chỉ xem được lịch sử check-in của chính mình (S3).
 - **[Yêu cầu phi chức năng]:**
-  - Hiệu năng (NF1): thời gian phản hồi API dưới 2 giây (theo SRS chung).
+  - Hiệu năng (NF1): tải trang danh sách dưới 2 giây.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
 - **Bảng tác động (chỉ đọc):** `checkins`, `branches`, `members`
