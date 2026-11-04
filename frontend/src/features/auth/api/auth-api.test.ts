@@ -5,6 +5,8 @@ const { get, post } = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn() }))
 vi.mock('../../../services/http', () => ({ http: { get, post } }))
 
 import { getCurrentUser, getProblemDetail, login, register } from './auth-api'
+import { ROLES } from '../../../auth/roles'
+import type { RegisterRequest } from '../types/auth'
 
 describe('auth-api', () => {
   beforeEach(() => {
@@ -27,14 +29,14 @@ describe('auth-api', () => {
 
   it('gửi request đăng ký với DTO camelCase và không thêm trường giới tính', async () => {
     post.mockResolvedValue({ data: { accessToken: 'jwt-memory' } })
-    const request = {
+    const request: RegisterRequest = {
       fullName: 'Đặng Thị Ánh',
       email: 'anh@example.com',
       phone: '0912345678',
       password: 'Secret123',
     }
 
-    await register(request)
+    await expect(register(request)).resolves.toEqual({ accessToken: 'jwt-memory' })
 
     expect(post).toHaveBeenCalledWith('/auth/register', request, {
       skipBearer: true,
@@ -42,11 +44,22 @@ describe('auth-api', () => {
     })
   })
 
-  it('đọc AuthUser tạm từ /me và từ chối role lạ', async () => {
-    get.mockResolvedValueOnce({ data: { email: 'anh@example.com', role: 'MEMBER' } })
-    await expect(getCurrentUser()).resolves.toEqual({ email: 'anh@example.com', role: 'MEMBER' })
+  it.each(ROLES)('đọc DTO /me phẳng và ánh xạ vai trò %s', async (role) => {
+    get.mockResolvedValueOnce({ data: { userId: 15, email: 'anh@example.com', role } })
 
-    get.mockResolvedValueOnce({ data: { email: 'anh@example.com', role: 'UNKNOWN' } })
+    await expect(getCurrentUser()).resolves.toEqual({ email: 'anh@example.com', role })
+    expect(get).toHaveBeenCalledWith('/auth/me')
+  })
+
+  it('từ chối role lạ trong phản hồi /me', async () => {
+    get.mockResolvedValueOnce({ data: { userId: 15, email: 'anh@example.com', role: 'UNKNOWN' } })
+
+    await expect(getCurrentUser()).rejects.toThrow('Thông tin tài khoản từ máy chủ không hợp lệ.')
+  })
+
+  it.each([undefined, null, '15', 0, 1.5])('từ chối userId không hợp lệ: %s', async (userId) => {
+    get.mockResolvedValueOnce({ data: { userId, email: 'anh@example.com', role: 'MEMBER' } })
+
     await expect(getCurrentUser()).rejects.toThrow('Thông tin tài khoản từ máy chủ không hợp lệ.')
   })
 

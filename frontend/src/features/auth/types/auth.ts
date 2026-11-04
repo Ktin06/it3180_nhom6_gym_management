@@ -5,23 +5,25 @@ export interface LoginRequest {
   password: string
 }
 
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER'
+
 export interface RegisterRequest {
   fullName: string
   email: string
   phone: string
   password: string
   dob?: string
-  /** Chưa gửi từ giao diện đến khi backend chốt tập giá trị giới tính. */
-  gender?: string
+  gender?: Gender | null
 }
 
-/** DTO tạm: SRS xác nhận trường accessToken, backend chưa công bố JSON response cụ thể. */
+/** Hợp đồng F1 mục 6.1: login/register/refresh trả JSON phẳng. */
 export interface AccessTokenResponse {
   accessToken: string
 }
 
-/** DTO tạm cho GET /auth/me; chỉ lấy email/role đang cần cho AuthUser và menu. */
+/** GET /api/v1/auth/me; AuthUser/menu chỉ sử dụng email và role. */
 export interface AuthMeResponse {
+  userId: number
   email: string
   role: Role
 }

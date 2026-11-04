@@ -31,8 +31,14 @@ export function register(request: RegisterRequest) {
 
 export async function getCurrentUser(): Promise<AuthUser> {
   const response = await http.get<AuthMeResponse>('/auth/me')
-  const { email, role } = response.data
-  if (typeof email !== 'string' || !isRole(role)) {
+  const { userId, email, role } = response.data
+  if (
+    typeof userId !== 'number' ||
+    !Number.isInteger(userId) ||
+    userId <= 0 ||
+    typeof email !== 'string' ||
+    !isRole(role)
+  ) {
     throw new Error('Thông tin tài khoản từ máy chủ không hợp lệ.')
   }
   return { email, role }

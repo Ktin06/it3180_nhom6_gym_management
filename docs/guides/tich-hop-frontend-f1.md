@@ -1,32 +1,51 @@
-# Tích hợp frontend F1 (tạm thời)
+# Tích hợp frontend F1
 
-Tài liệu này ghi lại adapter frontend được triển khai trong khi API F1 backend chưa có trên `main`. Đây là **giả định để viết UI và kiểm thử Vitest**, không phải hợp đồng API đã được hai phía duyệt. Trước khi nối backend thật, người phụ trách F1 backend cần xác nhận DTO response và cập nhật adapter cùng tài liệu.
+Cập nhật 04/11/2026. Hợp đồng JSON đã được Bùi Trần Đức Việt (`VietBTD306`, phụ trách backend F1) xác nhận tại [comment PR #80](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80#issuecomment-6624574276) và bổ sung vào [SRS F1 mục 6.1 tại commit a2fa017](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/a2fa01764b377fad74dac68cbeee97dce8c569d1/docs/requirements/srs/dac-ta-use-case-f1-tai-khoan-va-phan-quyen.md). PR backend [#87](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/87) cho #25 còn mở; #26 cũng chưa merge. Hợp đồng đã rõ, còn tích hợp HTTP/cookie thật chưa được xác minh.
 
-## Đường dẫn đã có trong SRS
+## Đường dẫn và dữ liệu đã thống nhất
 
 Axios dùng base `/api/v1`; các hàm trong `features/auth/api/` truyền phần đường dẫn `/auth/...`. Trình duyệt gọi cùng domain để cookie refresh đi qua proxy Vite/Vercel theo ADR 0008.
 
-| Request                      | Contract request đã nêu trong SRS                                                                      | Dùng ở frontend                                                         |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
-| `POST /api/v1/auth/register` | `fullName`, `email`, `phone`, `password`, `dob?`, `gender?`; trả `201`, access token và cookie refresh | Gửi `fullName`, `email`, `phone`, `password`, `dob?`; chưa gửi `gender` |
-| `POST /api/v1/auth/login`    | `email`, `password`; trả `200`, access token và cookie refresh                                         | Gửi email/mật khẩu; không hỗ trợ đăng nhập bằng số điện thoại           |
-| `POST /api/v1/auth/refresh`  | Cookie `refresh_token`; xoay refresh token                                                             | Dùng riêng client cùng domain, không gắn bearer                         |
-| `POST /api/v1/auth/logout`   | Thu hồi cookie refresh và trả `204`                                                                    | Gọi trước khi kết thúc logout trên server; giao diện xóa token ngay     |
-| `GET /api/v1/auth/me`        | Lấy tài khoản hiện tại; trả `200`                                                                      | Bootstrap và lấy role/email cho menu                                    |
+| API | Yêu cầu / phản hồi | Dùng ở frontend |
+| --- | --- | --- |
+| `POST /api/v1/auth/register` | `fullName`, `email`, `phone`, `password`, `dob?`, `gender?`; trả `201`, `{accessToken}` và cookie refresh | Form gửi trường bắt buộc và `dob?`; không gửi `gender` vì trường này tùy chọn |
+| `POST /api/v1/auth/login` | `email`, `password`; trả `200`, `{accessToken}` và cookie refresh | Đăng nhập bằng email/mật khẩu |
+| `POST /api/v1/auth/refresh` | Không có body, dùng cookie `refresh_token`; trả `200`, `{accessToken}`, xoay cookie | Client riêng cùng domain, không gắn bearer |
+| `POST /api/v1/auth/logout` | Thu hồi cookie refresh, trả `204` | Gọi backend; giao diện xóa token ngay |
+| `GET /api/v1/auth/me` | Bearer access token; trả `200`, `{userId,email,role}` | Sau lấy token, đọc tài khoản và ánh xạ email/role cho menu |
 
-## DTO tạm trong frontend
+## DTO xác nhận
 
-SRS chốt trường request và tên `accessToken`, nhưng chưa định nghĩa JSON shape của đối tượng tài khoản trong login/register/me. Adapter hiện tại tạm coi login/register/refresh trả `{ "accessToken": "..." }`, sau đó gọi `/auth/me` và tạm coi response là `{ "email": "...", "role": "MEMBER" }`. Các response này có thể còn trường khác; frontend chỉ dùng access token và email/role.
+Login/register/refresh trả JSON phẳng, không bọc thêm đối tượng:
 
-**Cần backend owner xác nhận trước khi tích hợp thật:** envelope có bọc `user` hay không; chính xác shape/casing của `/me`; role có đúng năm giá trị hiện ở `auth/roles.ts`; giá trị hợp lệ của `gender`; phone DTO nhận chuỗi đã chuẩn hóa hay chấp nhận cả dạng `+84`. Backend phải tự chuẩn hóa và validate request dù frontend đã làm kiểm tra trải nghiệm.
+```json
+{ "accessToken": "<jwt>" }
+```
 
-Refresh cookie theo SRS: `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`. Access JWT sống 15 phút và chỉ lưu trong memory; frontend không đọc cookie hoặc ghi token vào Web Storage. Form mật khẩu xác nhận chỉ dùng phía frontend và không nằm trong request.
+`GET /api/v1/auth/me` trả JSON phẳng:
 
-## Còn thiếu để xác minh với backend thật
+```json
+{ "userId": 15, "email": "reception@example.com", "role": "RECEPTIONIST" }
+```
 
-- Migration/schema `users`, `members`, `refresh_tokens` và seed chi nhánh mặc định `CN01`.
-- Public routes cho register/login/refresh/logout, JWT resource server cho API bảo vệ, `/auth/me`, và mapping role trong backend.
-- Quy tắc chuẩn hóa +84, kiểm tra trùng phone/email, `ProblemDetail.errors`, cookie flags theo môi trường.
-- Request Postman và JUnit theo user stories [#46 đăng ký](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/46), [#47 login/refresh/logout](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/47), [#48 phân quyền](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/48).
+- `AuthMeResponse.userId` là số trong JSON, ánh xạ khóa `bigint` backend. Adapter kiểm tra số nguyên dương; `AuthUser` hiện chỉ giữ email/role vì các màn hình hiện tại chưa dùng ID.
+- Vai trò hợp lệ: `SUPER_ADMIN`, `BRANCH_MANAGER`, `RECEPTIONIST`, `TRAINER`, `MEMBER`.
+- `RegisterRequest.gender?`: `MALE`, `FEMALE`, `OTHER` hoặc `null`. Form hiện để trống/không gửi trường tùy chọn này; kiểu TypeScript hỗ trợ đầy đủ tập giá trị đã chốt, không còn dùng chuỗi bất kỳ.
+- Backend nhận số điện thoại `0912345678` hoặc `+84 912 345 678`, tự chuẩn hóa về 10 chữ số bắt đầu bằng `0` trước khi kiểm tra. Frontend vẫn chuẩn hóa để hỗ trợ người dùng; backend chịu trách nhiệm kiểm tra và tính duy nhất.
 
-Các bài Vitest mock ở frontend kiểm tra hành vi giao diện, luồng token và adapter; chúng **không thay thế** kiểm thử HTTP với backend, cookie thật, migration hoặc xác minh response DTO. Cần chạy Postman/staging sau khi backend F1 sẵn sàng.
+Refresh cookie: `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`. JWT sống 15 phút và chỉ lưu trong bộ nhớ tab; frontend không đọc cookie hoặc ghi token vào Web Storage. Mật khẩu xác nhận chỉ dùng phía giao diện, không nằm trong request.
+
+## Điều kiện để kiểm tra tích hợp thật
+
+Theo [review của trưởng nhóm](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80#pullrequestreview-5756512423), **PR #80 phải giữ Draft tới khi #25 và #26 merge vào main và tích hợp thật được xác minh**. Main vẫn giữ công cụ giả lập vai trò để đồng đội tiếp tục phát triển giao diện; nhánh này không được merge trước backend.
+
+Sau khi các phụ thuộc sẵn sàng, fetch main và kiểm tra:
+
+1. Schema `users`, `members`, `refresh_tokens`, seed chi nhánh mặc định `CN01` và backend F1 chạy được theo quy trình nhóm.
+2. Đăng ký tạo tài khoản/hồ sơ thật; trùng số điện thoại/email và lỗi trường trả đúng `ProblemDetail`.
+3. Đăng nhập cho các vai trò; `/me` trả đúng JSON và điều hướng đúng quyền.
+4. Refresh xoay token, tải lại trang giữ phiên; kiểm tra `Set-Cookie` và hành vi cookie thực tế qua domain/proxy.
+5. Đăng xuất thu hồi refresh token; refresh token cũ không tiếp tục dùng, route bảo vệ quay về đăng nhập.
+6. Chạy Postman/staging theo các story [#46](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/46), [#47](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/47), [#48](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/48) cùng người phụ trách backend/triển khai.
+
+Vitest mock kiểm tra giao diện, luồng token và adapter theo DTO đã xác nhận; **không chứng minh backend, cookie thật hay staging hoạt động**. Chưa thực hiện các bước tích hợp trên vì #25/#26 chưa merge; không thay backend hoặc quy trình phát triển trên main để vượt phụ thuộc này.
