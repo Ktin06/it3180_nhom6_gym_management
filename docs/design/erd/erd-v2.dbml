@@ -239,7 +239,7 @@ Table notifications {
 Table system_configs {
   id bigint [pk, increment]
   branch_id bigint [ref: > branches.id, note: 'rỗng = áp dụng toàn chuỗi; giá trị của chi nhánh ghi đè giá trị toàn chuỗi']
-  config_key varchar(100) [not null, note: 'BOOKING_WINDOW_DAYS=7, PROMOTION_CUTOFF_MIN=30, PROMOTION_GRACE_MIN=15, RECONFIRM_TTL_MIN=60, LATE_CANCEL_HOURS=2, PENALTY_LIMIT_PER_MONTH=3, PENALTY_LOCK_DAYS=7, PT_MIN_LEAD_HOURS=12, FREEZE_MIN_DAYS=7, FREEZE_MAX_DAYS=30, FREEZE_MAX_TIMES=2, TRANSFER_MIN_DAYS=30, TRANSFER_FEE=200000, PENDING_INVOICE_TTL_DAYS=3']
+  config_key varchar(100) [not null, note: 'BOOKING_WINDOW_DAYS=7, PROMOTION_CUTOFF_MIN=30, PROMOTION_GRACE_MIN=15, RECONFIRM_TTL_MIN=60, LATE_CANCEL_HOURS=2, PENALTY_LIMIT_PER_MONTH=3, PENALTY_LOCK_DAYS=7, PT_MIN_LEAD_HOURS=12, FREEZE_MIN_DAYS=7, FREEZE_MAX_DAYS=30, FREEZE_MAX_TIMES=2, TRANSFER_MIN_DAYS=30, TRANSFER_FEE=200000, PENDING_INVOICE_TTL_DAYS=3, SESSION_WARNING_THRESHOLD=2']
   config_value varchar(255) [not null]
   description varchar(255)
   updated_by bigint [ref: > users.id]
@@ -386,8 +386,8 @@ Table memberships {
   branch_id bigint [ref: > branches.id, note: 'chi nhánh được dùng; rỗng = toàn chuỗi (chép từ packages.branch_id)']
   sold_branch_id bigint [not null, ref: > branches.id, note: 'chi nhánh bán, dùng cho báo cáo doanh thu']
   invoice_item_id bigint [ref: > invoice_items.id, note: 'dòng hóa đơn tạo ra gói; rỗng với gói nhận chuyển nhượng']
-  start_date date [not null, note: 'gói PENDING mang ngày dự kiến; tính lại lúc hóa đơn chuyển PAID (nối tiếp gói cũ nếu còn hạn)']
-  end_date date [not null, note: 'CHECK end_date >= start_date; cộng thêm số ngày bảo lưu. Khi bảo lưu được duyệt, gói UPCOMING cùng loại nối tiếp phía sau cũng được dời start_date và end_date thêm đúng số ngày đó, trong cùng giao dịch (chốt 01/11)']
+  start_date date [not null, note: 'gói PENDING mang ngày dự kiến; tính lại lúc hóa đơn chuyển PAID: ngày sau ngày gói cũ cùng loại hết hiệu lực (gói SESSION cũ đã về 0 buổi thì là ngày mai). Gói UPCOMING nối sau gói SESSION được kéo về ngày mai khi gói SESSION bị trừ buổi cuối, trong cùng giao dịch check-in; gói UPCOMING nối sau gói PT được kéo về hôm nay và kích hoạt khi buổi PT cuối được xác nhận (chốt 03/11)']
+  end_date date [not null, note: 'ngày cuối còn dùng được: start_date + packages.duration_days - 1; CHECK end_date >= start_date; cộng thêm số ngày bảo lưu. Khi bảo lưu được duyệt, gói UPCOMING cùng loại nối tiếp phía sau cũng được dời start_date và end_date thêm đúng số ngày đó, trong cùng giao dịch (chốt 01/11)']
   total_sessions int [note: 'chép từ packages.session_count lúc mua']
   remaining_sessions int [note: 'CHECK remaining_sessions >= 0']
   freeze_count int [not null, default: 0]
@@ -397,7 +397,7 @@ Table memberships {
   updated_at timestamptz [not null]
   indexes {
     (member_id, status)
-    end_date [note: 'tác vụ nền nhắc sắp hết hạn, chuyển EXPIRED']
+    end_date [note: 'tác vụ nền chạy lúc 00:00 giờ Việt Nam, và chạy bù mỗi khi máy chủ khởi động: chuyển EXPIRED gói ACTIVE có end_date < hôm nay, và gói SESSION ACTIVE có remaining_sessions = 0 mà hôm nay chưa có lượt check-in trừ buổi; chạy trước tác vụ kích hoạt UPCOMING']
     start_date [name: 'ix_memberships_upcoming', note: 'chỉ mục có điều kiện WHERE status = UPCOMING: tác vụ nền chuyển UPCOMING thành ACTIVE']
     (member_id, package_type, branch_id) [unique, name: 'uq_one_active_per_type', note: 'chỉ mục duy nhất có điều kiện, NULLS NOT DISTINCT (gói toàn chuỗi có branch_id rỗng): WHERE status IN (ACTIVE, FROZEN)']
     package_id
