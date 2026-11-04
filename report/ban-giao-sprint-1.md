@@ -149,7 +149,9 @@ Theo [chỉ đạo của Ktin06 tại #32](https://github.com/Ktin06/it3180_nhom
 - [`mau-slide-hust/images/hust-blue-169-title.png`](mau-slide-hust/images/hust-blue-169-title.png) — nền trang bìa.
 - [`mau-slide-hust/images/hust-blue-169-content-full.png`](mau-slide-hust/images/hust-blue-169-content-full.png) — nền nội dung, thanh mảnh.
 
-Đây là **ảnh nguồn của mẫu do trưởng nhóm cung cấp**, không phải PDF/PNG xuất từ slide/wireframe. Giữ nguyên logic theme và hai ảnh nguồn; `.sty` chỉ bỏ khoảng trắng cuối một dòng trống để qua `git diff --check`, giữ attribution của người cung cấp. Không nhập commit/backend/nội dung ví dụ từ nhánh #88. Slide đã tự chứa các nguồn cần build, không cần checkout PR #88; Nếu PR #88 được merge từ commit này, hai ảnh nguồn trùng nội dung; `.sty` chỉ khác chuẩn hóa khoảng trắng đã nêu. Các kiểu nền khác của theme không dùng ở deck này; nếu đổi kiểu, lấy thêm đúng ảnh nguồn tương ứng từ bộ mẫu.
+Đây là **ảnh nguồn của mẫu do trưởng nhóm cung cấp**, không phải PDF/PNG xuất từ slide/wireframe. Giữ nguyên logic theme và hai ảnh nguồn; `.sty` chỉ bỏ khoảng trắng cuối dòng trống 168 và thêm xuống dòng cuối tệp để qua `git diff --check`, giữ attribution của người cung cấp. Không nhập commit/backend/nội dung ví dụ từ nhánh #88. Slide đã tự chứa các nguồn cần build, không cần checkout PR #88; Nếu PR #88 được merge từ commit này, hai ảnh nguồn trùng nội dung; `.sty` chỉ khác chuẩn hóa khoảng trắng đã nêu. `git merge-tree` với nhánh #88 hiện báo một xung đột thêm/thêm ở `.sty` do chuẩn hóa khoảng trắng này; worktree hiện tại không có xung đột và build vẫn qua. Sau khi #88 merge, cần đồng bộ `origin/main` vào nhánh #81 và đối chiếu lại `.sty`, giữ nguyên logic theme.
+
+Các kiểu nền khác của theme không dùng ở deck này; nếu đổi kiểu, lấy thêm đúng ảnh nguồn tương ứng từ bộ mẫu.
 
 ### Biên dịch slide
 
