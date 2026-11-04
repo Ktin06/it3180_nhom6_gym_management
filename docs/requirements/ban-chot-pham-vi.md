@@ -1,6 +1,6 @@
 # Bản chốt phạm vi – Web quản lý chuỗi phòng tập Gym
 
-Cập nhật: 01/11/2026 (bản đầu: 27/10/2026) · Hoàng Kim Tiến
+Cập nhật: 03/11/2026 (bản đầu: 27/10/2026) · Hoàng Kim Tiến
 
 ## Tổng quan
 
@@ -80,19 +80,26 @@ Các giá trị có dấu \* là tham số cấu hình (bảng `system_configs`)
 - Có 3 loại gói: theo thời gian (TIME: 1, 3, 6, 12 tháng; hạn gói tính theo số ngày, 1 tháng = 30 ngày), theo số buổi (SESSION), và gói PT (số buổi tập 1-1 với huấn luyện viên).
 - Một hội viên được giữ đồng thời nhiều gói khác loại, ví dụ một gói TIME và một gói PT; mỗi loại tối đa một gói đang hiệu lực tại mỗi chi nhánh.
 - Lớp học nhóm đã gồm trong gói TIME. Gói PT chỉ dùng cho buổi tập 1-1, không dùng để vào phòng tập hay đặt lớp.
-- Gia hạn khi gói cũ còn hạn thì gói mới bắt đầu ngay sau ngày hết hạn của gói cũ; trong thời gian chờ, gói mới ở trạng thái UPCOMING.
+- Gói SESSION và gói PT cũng có hạn dùng. Ngày hết hạn là ngày cuối còn dùng được: ngày hết hạn = ngày bắt đầu + số ngày của gói − 1 (gói 30 ngày bắt đầu 01/11 thì hết hạn 30/11). Gói hết hạn mà còn buổi thì số buổi còn lại bị hủy, không hoàn tiền.
+- Gói hết hiệu lực khi qua ngày hết hạn; riêng gói SESSION còn hết hiệu lực từ ngày sau ngày bị trừ buổi cuối cùng, gói PT hết hiệu lực ngay khi buổi cuối được xác nhận (tùy điều nào đến trước).
+- Gia hạn khi gói cũ còn hiệu lực thì gói mới bắt đầu ngay sau ngày gói cũ hết hiệu lực; trong thời gian chờ, gói mới ở trạng thái UPCOMING. Ngày bắt đầu tính lúc hóa đơn được thanh toán: khi đó gói SESSION cũ đã về 0 buổi thì gói mới bắt đầu từ ngày mai.
+- Gói SESSION cũ dùng hết buổi trước ngày hết hạn trong khi đã có gói nối tiếp (UPCOMING) cùng loại: ngay khi trừ buổi cuối, gói nối tiếp được kéo lịch về bắt đầu từ ngày mai, giữ nguyên số ngày hiệu lực.
 - Hội viên mua hoặc gia hạn từ cổng hội viên (F7): hội viên chọn gói, hệ thống tạo hóa đơn chờ thanh toán (PENDING) và gói PENDING; hội viên ra quầy trả tiền, lễ tân xác nhận thì gói được kích hoạt. Ngày bắt đầu gói tính lại tại thời điểm thanh toán. Hóa đơn chờ do hội viên tạo từ cổng hội viên quá 3 ngày\* tự động bị hủy; hóa đơn lễ tân lập tại quầy không tự hủy.
-- Bảo lưu: mỗi lần từ 7 đến 30 ngày\*, tối đa 2 lần mỗi gói\*, cần quản lý chi nhánh duyệt; ngày hết hạn được cộng thêm đúng số ngày bảo lưu. Nếu gói đang có gói gia hạn nối tiếp (UPCOMING) thì gói nối tiếp cũng được dời thêm đúng số ngày đó.
-- Chuyển nhượng: chỉ gói còn ít nhất 30 ngày\*, người nhận phải có hồ sơ hội viên, thu phí chuyển nhượng\* (mặc định 200.000 đ) bằng hóa đơn; gói cũ chuyển trạng thái TRANSFERRED, người nhận nhận một gói mới giữ nguyên ngày hết hạn và số buổi còn lại.
+- Bảo lưu: không áp dụng cho gói SESSION, PT đã hết buổi (kiểm tra cả lúc tạo yêu cầu và lúc quản lý duyệt); mỗi lần từ 7 đến 30 ngày\*, tối đa 2 lần mỗi gói\*, cần quản lý chi nhánh duyệt; ngày hết hạn được cộng thêm đúng số ngày bảo lưu. Nếu gói đang có gói gia hạn nối tiếp (UPCOMING) thì gói nối tiếp cũng được dời thêm đúng số ngày đó.
+- Chuyển nhượng: chỉ gói còn ít nhất 30 ngày\* (gói SESSION, PT phải còn ít nhất 1 buổi, kiểm tra cả lúc tạo yêu cầu và lúc xác nhận thanh toán phí; gói hết buổi giữa chừng thì không nhận phí, hủy yêu cầu và hóa đơn phí), người nhận phải có hồ sơ hội viên, thu phí chuyển nhượng\* (mặc định 200.000 đ) bằng hóa đơn; gói cũ chuyển trạng thái TRANSFERRED, người nhận nhận một gói mới giữ nguyên ngày hết hạn và số buổi còn lại.
 
 **Check-in (F4, F20)**
 
-- Check-in thành công khi: xác định được hội viên; có gói TIME hoặc SESSION đang ACTIVE dùng được tại chi nhánh đó (còn hạn; gói SESSION còn buổi); và trong giờ mở cửa. Hội viên chỉ có gói PT thì không check-in được.
+- Check-in thành công khi: xác định được hội viên; có gói TIME hoặc SESSION đang ACTIVE dùng được tại chi nhánh đó (còn hạn; gói SESSION còn buổi, hoặc đã trừ buổi trong hôm nay); và trong giờ mở cửa. Hội viên chỉ có gói PT thì không check-in được.
 - Hội viên có cả gói TIME và gói SESSION thì hệ thống dùng gói TIME và không trừ buổi.
 - F4 (từ v1): lễ tân tìm hội viên theo mã hội viên hoặc số điện thoại; màn hình luôn hiện ảnh đại diện để đối chiếu, chống mượn thẻ.
-- Gói SESSION bị trừ 1 buổi ở lần check-in đầu tiên trong ngày (tính theo giờ Việt Nam); check-in lại trong ngày không bị trừ thêm. Nếu hội viên có buổi lớp sắp bắt đầu, chỗ đặt được đánh dấu "đã đến"; huấn luyện viên vẫn xác nhận có mặt tại lớp.
+- Gói SESSION bị trừ 1 buổi ở lần check-in đầu tiên trong ngày (tính theo giờ Việt Nam); check-in lại trong ngày không bị trừ thêm. Buổi đã trừ có giá trị đến hết ngày đó: mỗi ngày trừ tối đa 1 buổi, gói vừa về 0 buổi vẫn check-in lại được trong ngày, từ ngày hôm sau mới bị từ chối. Nếu hội viên có buổi lớp sắp bắt đầu, chỗ đặt được đánh dấu "đã đến"; huấn luyện viên vẫn xác nhận có mặt tại lớp.
 - F20 (v5): chỉ đăng ký khuôn mặt khi hội viên đã đánh dấu đồng ý. face-api.js chạy trên trình duyệt ở quầy, trích vector đặc trưng 128 chiều và gửi về máy chủ để so khớp; không lưu ảnh gốc; hội viên có quyền yêu cầu xóa.
 - Không nhận diện được thì quay về cách của F4; hệ thống ghi rõ phương thức check-in (MANUAL hoặc FACE).
+
+**Dashboard (F6)**
+
+- Cảnh báo gói sắp hết: gói ACTIVE hết hạn trong 7 ngày tới, hoặc gói SESSION còn không quá 2 buổi\*. Không cảnh báo gói mà hội viên đã có gói gia hạn nối tiếp (UPCOMING) cùng loại.
 
 **Lớp học nhóm (F8)**
 
@@ -106,9 +113,9 @@ Các giá trị có dấu \* là tham số cấu hình (bảng `system_configs`)
 
 **Huấn luyện viên (F9)**
 
-- Hội viên có gói PT đang ACTIVE mới đặt được buổi PT; chỉ đặt vào khung giờ huấn luyện viên đã khai báo rảnh, trước ít nhất 12 giờ\*.
+- Hội viên có gói PT đang ACTIVE mới đặt được buổi PT; chỉ đặt vào khung giờ huấn luyện viên đã khai báo rảnh, trước ít nhất 12 giờ\*. Số buổi PT đã đặt mà chưa diễn ra phải ít hơn số buổi còn lại của gói thì mới đặt thêm được, để không bao giờ đặt quá số buổi.
 - Hệ thống chặn trùng lịch cho cả huấn luyện viên (kể cả với giờ dạy lớp nhóm) và hội viên.
-- Gói PT chỉ bị trừ buổi khi huấn luyện viên xác nhận buổi tập đã diễn ra.
+- Gói PT chỉ bị trừ buổi khi huấn luyện viên xác nhận buổi tập đã diễn ra. Xác nhận buổi cuối thì gói PT chuyển EXPIRED ngay; nếu có gói PT nối tiếp (UPCOMING) cùng phạm vi, gói đó được kéo về bắt đầu và kích hoạt ngay hôm đó, giữ nguyên số ngày hiệu lực.
 - Hoa hồng PT (F13) tính cho mỗi buổi đã xác nhận: tỷ lệ hoa hồng của huấn luyện viên × giá một buổi (giá gói PT sau giảm giá ÷ số buổi của gói). Số tiền được chốt lúc xác nhận, không đổi khi tỷ lệ hay giá gói thay đổi về sau.
 
 **Thanh toán (F5, F7, F12, F14)**
@@ -197,3 +204,4 @@ Nhóm đã chốt ReactJS + Java Spring Boot + PostgreSQL. Spring Boot được 
 | 01/11/2026 | Thời gian chuyển sang 4 sprint (27/10 – 21/12); gói PT không dùng để check-in; có cả gói TIME và SESSION thì dùng gói TIME; F7 tạo hóa đơn chờ, tự hủy sau 3 ngày; trùng số điện thoại khi tự đăng ký thì từ chối, lễ tân tạo tài khoản cho hồ sơ có sẵn; trạng thái gói UPCOMING cho gia hạn nối tiếp |
 | 01/11/2026 | Sau review ERD: chỉ hóa đơn chờ từ cổng hội viên tự hủy; bảo lưu dời gói gia hạn nối tiếp; công thức hoa hồng PT; gói TIME tính theo ngày (1 tháng = 30 ngày) |
 | 02/11/2026 | Kick-off: giữ đủ 20 chức năng (F12, F13 cuối v3); giữ các con số mặc định, phí chuyển nhượng 200.000 đ; bộ sơ đồ UML theo ADR 0009; không khảo sát phòng gym thật ([biên bản](../meetings/2026-11-02-kick-off.md)) |
+| 03/11/2026 | Sau review đặc tả F4, F6 (trưởng nhóm chốt, xem [ADR 0005](../decisions/0005-erd-v2.md) mục 25–32): buổi của gói SESSION tính theo ngày, mỗi ngày trừ tối đa 1 buổi, gói về 0 buổi vẫn check-in lại được đến hết ngày; gói SESSION, PT giữ hạn dùng, ngày hết hạn = ngày bắt đầu + số ngày − 1, hết hạn mà còn buổi thì mất buổi, không hoàn tiền; hết buổi trước hạn thì gói nối tiếp được kéo lịch (SESSION về ngày mai, PT về hôm nay); không bảo lưu, chuyển nhượng gói hết buổi; số buổi PT đặt trước không vượt số buổi còn lại; F6 cảnh báo gói SESSION còn không quá 2 buổi\* |
