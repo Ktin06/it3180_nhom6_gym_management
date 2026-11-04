@@ -57,7 +57,7 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 - **Thất bại:** Không có khung giờ nào được lưu hoặc thay đổi (rollback giao dịch); lịch của PT khác không bị ảnh hưởng.
 
 #### C. Luồng sự kiện chính (Basic Flow / Happy Path)
-1. PT mở mục "Lịch của tôi", chọn ngày, giờ bắt đầu, giờ kết thúc của khung rảnh.
+1. PT mở mục "Lịch của tôi", chọn thứ trong tuần, giờ bắt đầu, giờ kết thúc và chi nhánh áp dụng cho khung giờ rảnh.
 2. Hệ thống kiểm tra tính hợp lệ của dữ liệu đầu vào (Bean Validation), gồm giờ kết thúc sau giờ bắt đầu.
 3. Hệ thống kiểm tra quyền và vai trò (S3); mã PT lấy từ token, PT chỉ thao tác trên lịch của chính mình.
 4. Hệ thống lưu khung giờ rảnh trong một giao dịch (`@Transactional`).
@@ -80,11 +80,21 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
 - **Bảng tác động:** `trainer_availabilities`, `staff`; đọc `pt_sessions`, `class_sessions`
-- **Chi tiết trường dữ liệu:** *(điền từ `erd-v2.dbml`)*
+- **Chi tiết trường dữ liệu:**
+
   | Tên bảng | Tên cột | Kiểu dữ liệu | Ràng buộc | Ý nghĩa / Ghi chú |
   | --- | --- | --- | --- | --- |
-  | `trainer_availabilities` | `[...]` | `[...]` | `[...]` | PT sở hữu khung rảnh (trỏ `staff`) |
-  | `trainer_availabilities` | `[...]` | `[...]` | `[...]` | Giờ bắt đầu, giờ kết thúc |
+  | `trainer_availabilities` | `id` | `bigint` | PK, tự tăng | Mã khung giờ rảnh |
+  | `trainer_availabilities` | `trainer_id` | `bigint` | NOT NULL, FK → `staff.id` | PT sở hữu khung giờ rảnh |
+  | `trainer_availabilities` | `branch_id` | `bigint` | NOT NULL, FK → `branches.id` | Chi nhánh áp dụng |
+  | `trainer_availabilities` | `day_of_week` | `int` | NOT NULL, giá trị 1–7 theo ISO | Thứ trong tuần (1 = thứ Hai, 7 = Chủ nhật) |
+  | `trainer_availabilities` | `start_time` | `time` | NOT NULL | Giờ bắt đầu |
+  | `trainer_availabilities` | `end_time` | `time` | NOT NULL, CHECK `end_time > start_time` | Giờ kết thúc |
+  | `trainer_availabilities` | `created_at` | `timestamptz` | NOT NULL | Thời điểm tạo |
+  | `trainer_availabilities` | `updated_at` | `timestamptz` | NOT NULL | Thời điểm cập nhật |
+
+- **Chỉ mục:** `(trainer_id, day_of_week)`.
+- **Lưu ý:** Đây là lịch rảnh lặp lại theo thứ trong tuần, không phải một khung giờ gắn với ngày cụ thể.
 
 #### G. Thiết kế giao diện và API liên quan
 - **API Endpoint:** `POST /api/v1/pt/availabilities`, `GET /api/v1/pt/schedule` *(đề xuất, thống nhất với người làm API)*
@@ -152,13 +162,50 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
 - **Bảng tác động:** `pt_sessions`; đọc `trainer_availabilities`, `memberships`, `staff`, `members`, `class_sessions`, `system_configs`
-- **Chi tiết trường dữ liệu:** *(điền từ `erd-v2.dbml`)*
+- **Chi tiết trường dữ liệu:**
+
   | Tên bảng | Tên cột | Kiểu dữ liệu | Ràng buộc | Ý nghĩa / Ghi chú |
   | --- | --- | --- | --- | --- |
-  | `pt_sessions` | `[...]` | `[...]` | `[...]` | Giờ bắt đầu, giờ kết thúc |
-  | `pt_sessions` | `[...]` | `[...]` | `[...]` | Trạng thái buổi (đã đặt / DONE) |
-  | `memberships` | `[...]` | `[...]` | `[...]` | Trạng thái gói (ACTIVE) và số buổi còn lại |
+  | `pt_sessions` | `id` | `bigint` | PK, tự tăng | Mã buổi PT |
+  | `pt_sessions` | `trainer_id` | `bigint` | NOT NULL, FK → `staff.id` | PT phụ trách |
+  | `pt_sessions` | `member_id` | `bigint` | NOT NULL, FK → `members.id` | Hội viên đặt buổi |
+  | `pt_sessions` | `membership_id` | `bigint` | NOT NULL, FK → `memberships.id` | Gói PT được sử dụng |
+  | `pt_sessions` | `branch_id` | `bigint` | NOT NULL, FK → `branches.id` | Chi nhánh diễn ra buổi tập |
+  | `pt_sessions` | `start_at` | `timestamptz` | NOT NULL | Thời điểm bắt đầu |
+  | `pt_sessions` | `end_at` | `timestamptz` | NOT NULL | Thời điểm kết thúc |
+  | `pt_sessions` | `status` | `pt_session_status` | NOT NULL, DEFAULT `BOOKED` | Trạng thái buổi: BOOKED, DONE, CANCELLED, NO_SHOW |
+  | `pt_sessions` | `confirmed_at` | `timestamptz` | Có thể NULL | Thời điểm PT xác nhận buổi đã diễn ra |
+  | `pt_sessions` | `commission_amount` | `int` | Có thể NULL | Hoa hồng tính bằng VND, chốt khi buổi chuyển DONE |
+  | `pt_sessions` | `cancelled_at` | `timestamptz` | Có thể NULL | Thời điểm hủy buổi |
+  | `pt_sessions` | `created_by` | `bigint` | FK → `users.id`, có thể NULL | Người tạo buổi |
+  | `pt_sessions` | `note` | `text` | Có thể NULL | Ghi chú |
+  | `pt_sessions` | `created_at` | `timestamptz` | NOT NULL | Thời điểm tạo |
+  | `pt_sessions` | `updated_at` | `timestamptz` | NOT NULL | Thời điểm cập nhật |
 
+- **Chỉ mục:** `(trainer_id, start_at)`, `(member_id, start_at)`, `membership_id`.
+- **Bảng `memberships`:**
+
+  | Tên bảng | Tên cột | Kiểu dữ liệu | Ràng buộc | Ý nghĩa / Ghi chú |
+  | --- | --- | --- | --- | --- |
+  | `memberships` | `id` | `bigint` | PK, tự tăng | Mã gói hội viên |
+  | `memberships` | `member_id` | `bigint` | NOT NULL, FK → `members.id` | Hội viên sở hữu gói |
+  | `memberships` | `package_id` | `bigint` | NOT NULL, FK → `packages.id` | Gói được mua |
+  | `memberships` | `package_type` | `package_type` | NOT NULL | Loại gói, sao chép từ `packages.type` |
+  | `memberships` | `branch_id` | `bigint` | Có thể NULL, FK → `branches.id` | Chi nhánh được sử dụng; NULL nghĩa là toàn chuỗi |
+  | `memberships` | `sold_branch_id` | `bigint` | NOT NULL, FK → `branches.id` | Chi nhánh bán gói |
+  | `memberships` | `invoice_item_id` | `bigint` | Có thể NULL, FK → `invoice_items.id` | Dòng hóa đơn tạo ra gói |
+  | `memberships` | `start_date` | `date` | NOT NULL | Ngày bắt đầu hiệu lực |
+  | `memberships` | `end_date` | `date` | NOT NULL, CHECK `end_date >= start_date` | Ngày cuối cùng còn hiệu lực |
+  | `memberships` | `total_sessions` | `int` | Có thể NULL | Tổng số buổi của gói |
+  | `memberships` | `remaining_sessions` | `int` | Có thể NULL, CHECK `remaining_sessions >= 0` | Số buổi còn lại |
+  | `memberships` | `freeze_count` | `int` | NOT NULL, DEFAULT `0` | Số lần bảo lưu |
+  | `memberships` | `status` | `membership_status` | NOT NULL, DEFAULT `PENDING` | Trạng thái gói |
+  | `memberships` | `version` | `int` | NOT NULL, DEFAULT `0` | Phiên bản khóa lạc quan (@Version) |
+  | `memberships` | `created_at` | `timestamptz` | NOT NULL | Thời điểm tạo |
+  | `memberships` | `updated_at` | `timestamptz` | NOT NULL | Thời điểm cập nhật |
+
+- **Chỉ mục của `memberships`:** `(member_id, status)`, `end_date`, `start_date` (chỉ mục có điều kiện `WHERE status = UPCOMING`).
+- **Lưu ý:** `pt_sessions.member_id` phải trùng với `memberships.member_id`; hệ thống kiểm tra điều kiện này trong code. Gói được sử dụng phải là gói loại PT.
 #### G. Thiết kế giao diện và API liên quan
 - **API Endpoint:** `POST /api/v1/pt-sessions` *(đề xuất)*
 - **Header:** `Authorization: Bearer <access_token>`
@@ -216,12 +263,34 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
 - **Bảng tác động:** `pt_sessions`, `memberships`
-- **Chi tiết trường dữ liệu:** *(điền từ `erd-v2.dbml`)*
+- **Chi tiết trường dữ liệu:**
+
   | Tên bảng | Tên cột | Kiểu dữ liệu | Ràng buộc | Ý nghĩa / Ghi chú |
   | --- | --- | --- | --- | --- |
-  | `pt_sessions` | `[...]` | `[...]` | `[...]` | Trạng thái buổi (DONE) |
-  | `pt_sessions` | `commission_amount` | `[...]` | `[...]` | Hoa hồng, chỉ có giá trị khi DONE |
-  | `memberships` | `[...]` | `[...]` | `[...]` | Trạng thái gói, số buổi còn lại, ngày hiệu lực |
+  | `pt_sessions` | `id` | `bigint` | PK, tự tăng | Mã buổi PT |
+  | `pt_sessions` | `status` | `pt_session_status` | NOT NULL, DEFAULT `BOOKED` | Trạng thái buổi; chuyển thành DONE khi PT xác nhận |
+  | `pt_sessions` | `confirmed_at` | `timestamptz` | Có thể NULL | Thời điểm xác nhận hoàn thành |
+  | `pt_sessions` | `commission_amount` | `int` | Có thể NULL | Hoa hồng tính bằng VND; chỉ có giá trị khi status = DONE |
+  | `pt_sessions` | `updated_at` | `timestamptz` | NOT NULL | Thời điểm cập nhật |
+
+- **Bảng `memberships`:**
+
+  | Tên bảng | Tên cột | Kiểu dữ liệu | Ràng buộc | Ý nghĩa / Ghi chú |
+  | --- | --- | --- | --- | --- |
+  | `memberships` | `id` | `bigint` | PK, tự tăng | Mã gói |
+  | `memberships` | `total_sessions` | `int` | Có thể NULL | Tổng số buổi của gói |
+  | `memberships` | `remaining_sessions` | `int` | Có thể NULL, CHECK >= 0 | Số buổi còn lại; giảm 1 khi xác nhận buổi PT |
+  | `memberships` | `start_date` | `date` | NOT NULL | Ngày bắt đầu hiệu lực |
+  | `memberships` | `end_date` | `date` | NOT NULL | Ngày kết thúc hiệu lực |
+  | `memberships` | `status` | `membership_status` | NOT NULL, DEFAULT `PENDING` | Trạng thái gói: PENDING, UPCOMING, ACTIVE, FROZEN, EXPIRED, TRANSFERRED, CANCELLED |
+  | `memberships` | `version` | `int` | NOT NULL, DEFAULT `0` | Phiên bản khóa lạc quan (@Version) |
+  | `memberships` | `updated_at` | `timestamptz` | NOT NULL | Thời điểm cập nhật |
+
+- **Quy tắc dữ liệu:**
+  - `commission_amount` có kiểu `int`, đơn vị VND.
+  - `commission_amount` chỉ có giá trị khi `pt_sessions.status = DONE`.
+  - `remaining_sessions` không được nhỏ hơn 0.
+  - Khi xác nhận buổi PT cuối cùng, hệ thống cập nhật gói hiện tại sang EXPIRED và kích hoạt gói PT UPCOMING nối tiếp theo quy tắc nghiệp vụ BR-F9.7.
 
 #### G. Thiết kế giao diện và API liên quan
 - **API Endpoint:** `PATCH /api/v1/pt-sessions/{id}/confirm` *(đề xuất)*
@@ -265,7 +334,19 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
 - **Bảng tác động:** `workout_plans`; đọc `members`, `pt_sessions`, `class_sessions`
-- **Chi tiết trường dữ liệu:** *(điền từ `erd-v2.dbml`, cần đối chiếu tên bảng khi triển khai)*
+- **Chi tiết trường dữ liệu:**
+
+  | Tên bảng | Tên cột | Kiểu dữ liệu | Ràng buộc | Ý nghĩa / Ghi chú |
+  | --- | --- | --- | --- | --- |
+  | `workout_plans` | `id` | `bigint` | PK, tự tăng | Mã giáo án |
+  | `workout_plans` | `trainer_id` | `bigint` | NOT NULL, FK → `staff.id` | PT soạn giáo án |
+  | `workout_plans` | `member_id` | `bigint` | NOT NULL, FK → `members.id` | Hội viên nhận giáo án |
+  | `workout_plans` | `title` | `varchar(255)` | NOT NULL | Tên giáo án |
+  | `workout_plans` | `content` | `jsonb` | Có thể NULL | Nội dung giáo án, danh sách bài tập theo buổi |
+  | `workout_plans` | `start_date` | `date` | Có thể NULL | Ngày bắt đầu áp dụng |
+  | `workout_plans` | `end_date` | `date` | Có thể NULL | Ngày kết thúc áp dụng |
+  | `workout_plans` | `created_at` | `timestamptz` | NOT NULL | Thời điểm tạo |
+  | `workout_plans` | `updated_at` | `timestamptz` | NOT NULL | Thời điểm cập nhật |
 
 #### G. Thiết kế giao diện và API liên quan
 - **API Endpoint:** `POST /api/v1/pt/members/{memberId}/workout-plans` *(đề xuất)*
@@ -273,9 +354,12 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 - **Request Body (DTO):**
   ```json
   {
-    "content": "..."
-  }
-  ```
+  "branchId": 1,
+  "dayOfWeek": 2,
+  "startTime": "08:00:00",
+  "endTime": "12:00:00"
+}
+  
 
 ---
 
@@ -359,8 +443,43 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 - **[Cần chốt với nhóm]:** các chỉ số được vẽ trên biểu đồ.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
-- **Bảng tác động (chỉ đọc):** `workout_logs`, `body_metrics`, `members`
-- **Chi tiết trường dữ liệu:** *(điền từ `erd-v2.dbml`)*
+- **Bảng tác động:** `workout_logs`, `body_metrics`; đọc `members`
+
+- **Bảng `workout_logs`:**
+
+  | Tên bảng | Tên cột | Kiểu dữ liệu | Ràng buộc | Ý nghĩa / Ghi chú |
+  | --- | --- | --- | --- | --- |
+  | `workout_logs` | `id` | `bigint` | PK, tự tăng | Mã nhật ký tập |
+  | `workout_logs` | `member_id` | `bigint` | NOT NULL, FK → `members.id` | Hội viên thực hiện bài tập |
+  | `workout_logs` | `pt_session_id` | `bigint` | Có thể NULL, FK → `pt_sessions.id` | Buổi PT liên quan; NULL nếu hội viên tự ghi |
+  | `workout_logs` | `logged_at` | `date` | NOT NULL | Ngày ghi nhật ký |
+  | `workout_logs` | `exercise` | `varchar(100)` | NOT NULL | Tên bài tập |
+  | `workout_logs` | `sets` | `int` | Có thể NULL | Số hiệp |
+  | `workout_logs` | `reps` | `int` | Có thể NULL | Số lần lặp |
+  | `workout_logs` | `weight` | `decimal(6,2)` | Có thể NULL | Mức tạ sử dụng, đơn vị kg |
+  | `workout_logs` | `created_at` | `timestamptz` | NOT NULL | Thời điểm tạo |
+  | `workout_logs` | `updated_at` | `timestamptz` | NOT NULL | Thời điểm cập nhật |
+
+- **Chỉ mục:** `(member_id, logged_at)`.
+
+- **Bảng `body_metrics`:**
+
+  | Tên bảng | Tên cột | Kiểu dữ liệu | Ràng buộc | Ý nghĩa / Ghi chú |
+  | --- | --- | --- | --- | --- |
+  | `body_metrics` | `id` | `bigint` | PK, tự tăng | Mã bản ghi chỉ số cơ thể |
+  | `body_metrics` | `member_id` | `bigint` | NOT NULL, FK → `members.id` | Hội viên được đo |
+  | `body_metrics` | `recorded_by` | `bigint` | Có thể NULL, FK → `users.id` | Người ghi nhận chỉ số |
+  | `body_metrics` | `measured_at` | `date` | NOT NULL | Ngày đo |
+  | `body_metrics` | `weight` | `decimal(5,2)` | Có thể NULL | Cân nặng, đơn vị kg |
+  | `body_metrics` | `height` | `decimal(5,2)` | Có thể NULL | Chiều cao, đơn vị cm |
+  | `body_metrics` | `body_fat` | `decimal(4,2)` | Có thể NULL | Tỷ lệ mỡ cơ thể, đơn vị % |
+  | `body_metrics` | `muscle_mass` | `decimal(5,2)` | Có thể NULL | Khối lượng cơ, đơn vị kg |
+  | `body_metrics` | `note` | `text` | Có thể NULL | Ghi chú |
+  | `body_metrics` | `created_at` | `timestamptz` | NOT NULL | Thời điểm tạo |
+  | `body_metrics` | `updated_at` | `timestamptz` | NOT NULL | Thời điểm cập nhật |
+
+- **Chỉ mục:** `(member_id, measured_at)`.
+- **Lưu ý:** Các chỉ số cơ thể gồm cân nặng, chiều cao, tỷ lệ mỡ và khối lượng cơ. Các trường chỉ số có thể NULL theo ERD.
 
 #### G. Thiết kế giao diện và API liên quan
 - **API Endpoint:** `GET /api/v1/members/{memberId}/progress?from=...&to=...` *(đề xuất)*
