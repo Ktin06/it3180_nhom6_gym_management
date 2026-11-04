@@ -1,7 +1,19 @@
 \documentclass[aspectratio=169,10pt]{beamer}
 
-% Draft presentation source. Use XeLaTeX or Tectonic with Noto Sans installed.
-\usetheme{default}
+% Theme source pinned to PR #88/dca1fc4, per the leader's comment on issue #32.
+% Noto Sans is required. Only the two used theme backgrounds are included.
+\def\slideContentLeftMargin{0.5cm}
+\def\slideContentRightMargin{0.5cm}
+\def\hustHeaderHeight{1cm}
+\def\slideContentTopPadding{0cm}
+\IfFileExists{report/mau-slide-hust/beamerthemeHUST.sty}{
+  \usepackage[blue,169]{report/mau-slide-hust/beamerthemeHUST}
+}{
+  \usepackage[blue,169]{mau-slide-hust/beamerthemeHUST}
+}
+\graphicspath{{report/mau-slide-hust/images/}{mau-slide-hust/images/}}
+\useThinBar
+\useStyleFull
 \usefonttheme{professionalfonts}
 \usepackage{fontspec}
 \setmainfont{Noto Sans}
@@ -19,40 +31,47 @@
 \setbeamercolor{subtitle}{fg=black!65}
 \setbeamercolor{author in head/foot}{fg=black!70,bg=black!4}
 \setbeamercolor{date in head/foot}{fg=gymblue,bg=black!4}
-\setbeamercolor{frametitle}{fg=gymblue,bg=blue!5}
+\setbeamercolor{frametitle}{fg=white}
 \setbeamercolor{block title}{fg=white,bg=gymblue}
 \setbeamercolor{block body}{bg=blue!4}
 \setbeamertemplate{navigation symbols}{}
 \setbeamertemplate{itemize item}{\color{gymblue}\small$\blacktriangleright$}
 \setbeamertemplate{itemize subitem}{\color{gymgreen}\scriptsize$\bullet$}
+% Keep the theme's HUST logo visible; status/footer sits to its right.
 \setbeamertemplate{footline}{%
-  \leavevmode%
-  \hbox{%
-    \begin{beamercolorbox}[wd=.78\paperwidth,ht=2.6ex,dp=1.1ex,leftskip=1em]{author in head/foot}%
-      \normalfont\scriptsize\color{draftred}\bfseries DRAFT\color{black!70} --- Beamer theme tạm; chưa phải template HUST đã duyệt
-    \end{beamercolorbox}%
-    \begin{beamercolorbox}[wd=.22\paperwidth,ht=2.6ex,dp=1.1ex,rightskip=1em plus 1fil]{date in head/foot}%
-      \normalfont\scriptsize\insertframenumber/\inserttotalframenumber
-    \end{beamercolorbox}%
-  }%
+  \hbox to \paperwidth{\hskip4.7cm%
+    \normalfont\fontsize{5.5}{6.5}\selectfont\color{draftred}%
+    DRAFT — chờ bộ tài liệu và kiểm chứng bàn giao\hfill%
+    \color{gymblue}\insertframenumber/\inserttotalframenumber\hskip.3cm}%
+  \vskip2pt%
 }
 
 \title[Bàn giao Sprint 1]{Bàn giao Sprint 1\\Web quản lý chuỗi phòng tập Gym}
-\subtitle{Nhóm 6 · IT3180 · snapshot main 91a8b4a}
+\subtitle{Nhóm 6 · IT3180 · snapshot main 446ceb3}
 \author{Nhóm 6}
 \institute{Đại học Bách khoa Hà Nội}
-\date{04/11/2026 · nội dung snapshot 03/11}
+\date{04/11/2026}
 
 \begin{document}
 
-\begin{frame}[plain]
-  \titlepage
-  \vspace{-1.1em}
-  \begin{center}
-    \colorbox{red!8}{\parbox{.82\linewidth}{\centering\color{draftred}\bfseries
-      DRAFT — theme default tạm. Nhóm chưa cung cấp mẫu Beamer HUST đã duyệt (issue \#32).}}
-  \end{center}
-\end{frame}
+% Place project text in the white area of the supplied cover background.
+{
+  \setbeamertemplate{background}{\includegraphics[width=\paperwidth,height=\paperheight]{\hustbg{title}}}
+  \begin{frame}[plain]
+    \begin{tikzpicture}[remember picture,overlay]
+      \node[anchor=west,text width=.43\paperwidth,align=left,inner sep=0]
+        at ([xshift=.55cm,yshift=-.1cm]current page.west) {
+          {\Large\bfseries\color{hustprimary} BÀN GIAO SPRINT 1\par}
+          \vspace{.3cm}
+          {\large\bfseries Web quản lý chuỗi\\phòng tập Gym\par}
+          \vspace{.3cm}
+          {\small Nhóm 6 · IT3180\par Đại học Bách khoa Hà Nội\par 04/11/2026\par}
+          \vspace{.3cm}
+          {\scriptsize\color{draftred} DRAFT — chờ tài liệu và kiểm chứng bàn giao.\par}
+      };
+    \end{tikzpicture}
+  \end{frame}
+}
 
 \begin{frame}{Snapshot bàn giao}
   \begin{columns}[T,onlytextwidth]
@@ -61,7 +80,7 @@
         \item Phạm vi nghiệp vụ và ERD v2 đã được nhóm chốt.
         \item Use case, activity và một wireframe đã có trong \texttt{main}.
         \item Mã hiện là khung FE/BE; đăng nhập thật và API nghiệp vụ còn làm.
-        \item CI của snapshot \texttt{91a8b4a} xanh; chưa có bằng chứng staging, Postman hay E2E.
+        \item CI của snapshot \texttt{446ceb3} xanh; chưa có bằng chứng staging, Postman hay E2E.
       \end{itemize}
     \column{.42\textwidth}
       \begin{block}{Mốc cần nhớ}
@@ -77,8 +96,8 @@
 \end{frame}
 
 \begin{frame}{Phạm vi: 20 chức năng trong 5 version}
-  \small
-  \begin{tabularx}{\textwidth}{>{\bfseries}p{1.4cm} X p{2.6cm}}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{>{\bfseries\raggedright\arraybackslash}p{1.4cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{2.6cm}}
     \toprule
     Version & Nhóm chức năng & Cam kết \\
     \midrule
@@ -243,7 +262,7 @@
       \vspace{1em}
 
       \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/78}{PR \#78: đăng ký, bảng giá, lịch lớp}]\\
-      Nguồn ghim tại commit \texttt{464a31a}; CI tài liệu xanh, chưa có human review.
+      Nguồn ghim tại commit \texttt{464a31a}; CI xanh, chờ Anh Tú review.
   \end{columns}
 \end{frame}
 
@@ -277,7 +296,7 @@
         Trên main: router/layout và đăng nhập giả lập. Trên PR \#80 chưa merge: thay giả lập bằng adapter xác thực và token memory.
       \end{block}
       \begin{block}{Issue \#30}
-        PR nháp \#80 có form đăng ký, login/refresh và menu theo role; backend thật còn chờ Đức Việt xác nhận DTO/API.
+        PR nháp \#80 có form đăng ký, login/refresh và menu theo role; DTO đã được Đức Việt xác nhận; backend thật còn chờ \#25/\#26 merge.
       \end{block}
     \column{.49\textwidth}
       \begin{block}{Backend}
@@ -287,15 +306,15 @@
         Có Docker Compose và quy trình Flyway; migration nghiệp vụ chưa có trên snapshot này.
       \end{block}
   \end{columns}
-  \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/30}{Issue \#30}] · Snapshot checkout: \texttt{main} 91a8b4a. PR \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80}{\#80} chưa merge.
+  \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/30}{Issue \#30}] · Snapshot đối chiếu: \texttt{main} 446ceb3. PR \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80}{\#80} chưa merge.
 \end{frame}
 
 \begin{frame}{Bằng chứng hiện có — và giới hạn của bằng chứng}
   \begin{itemize}
-    \item CI run \href{https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/41609330773}{\#41609330773}: success trên \texttt{main} commit 91a8b4a.
-    \item PR \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80}{\#80}: local lint/build qua; Vitest 35 test qua; browser mock API ở 360/768/1280 px qua, không tràn ngang. CI \href{https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/41646954979}{\#41646954979} xanh. Chưa kiểm thử backend thật.
+    \item CI run \href{https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/41772233543}{\#41772233543}: success trên \texttt{main} commit 446ceb3.
+    \item PR \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80}{\#80}: local lint/build qua; Vitest 45 test qua; browser mock baseline \texttt{27693ab} ngày 03/11 ở 360/768/1280 px qua. CI \href{https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/41847056463}{\#41847056463} xanh. Chưa kiểm thử backend thật.
     \item Tài liệu đã merge: PRs \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/34}{\#34}, \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/38}{\#38}, \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/40}{\#40}, \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/41}{\#41}, \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/42}{\#42}, \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/44}{\#44}, \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/45}{\#45}.
-    \item PR \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/77}{\#77} draft tạo 31 story (\#46--\#76) với 86 GWT; PR \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/78}{\#78} wireframe và PR \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79}{\#79} SRS F8 đều đang mở, chưa review/merge, CI xanh.
+    \item PR \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/77}{\#77} Ready, chỉ mục 31 story (\#46--\#76), issue là bản chuẩn; PR \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/78}{\#78} wireframe và PR \href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79}{\#79} SRS F8 đều đang mở, chưa merge, CI xanh; \#77/\#79 đã có góp ý và được sửa.
   \end{itemize}
   \begin{alertblock}{Không suy diễn}
     CI green không phải bằng chứng E2E, Postman, bảo mật đạt yêu cầu hay hệ thống đã được deploy.
@@ -310,11 +329,11 @@
     \item \textbf{Tài liệu:} SRS tổng quan \#13 và ảnh ERD/từ điển \#15 còn phụ thuộc; F8 \#79 đang review.
     \item \textbf{Giao diện:} PR \#78 chưa merge; wireframe khác và UI thật vẫn theo phân công Sprint Plan.
     \item \textbf{Dependency audit baseline:} 13 moderate ở tooling ESLint/minimatch; không có high/critical.
-    \item \textbf{Trình bày:} mẫu Beamer HUST chưa được cung cấp; bản này dùng default tạm, DRAFT trên mọi trang.
+    \item \textbf{Trình bày:} đã áp theme HUST từ PR \#88 theo chỉ đạo trưởng nhóm; còn DRAFT vì phụ thuộc bàn giao khác.
     \item \textbf{Quyền board:} chưa xác minh được GitHub Projects; status ở đây lấy từ issue/PR và Sprint Plan.
   \end{itemize}
   \vfill
-  \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/31}{Issue \#31 staging}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/13}{\#13 SRS}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/15}{\#15 ERD}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/32}{\#32 mẫu Beamer}]
+  \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/31}{Issue \#31 staging}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/13}{\#13 SRS}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/15}{\#15 ERD}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/32}{\#32 bàn giao}]
 \end{frame}
 
 \begin{frame}{Ma trận bàn giao — giữ nguyên người phụ trách}
@@ -325,7 +344,7 @@
     \midrule
     SRS / truy vết & \#13 tổng quan; F8 ở PR \#79 chờ review & Nguyễn Anh Tú; Phạm Gia Bảo (F8) \\
     ERD / dữ liệu & DBML đã duyệt; xuất ảnh + từ điển ở \#15 & Nguyễn Anh Tú \\
-    Stories / wireframe & \#77 draft; \#78 open; \#17 còn mở & Phạm Gia Bảo và các chủ wireframe trong kế hoạch \\
+    Stories / wireframe & \#77 Ready; \#78 open; \#17 còn mở & Phạm Gia Bảo và các chủ wireframe trong kế hoạch \\
     Migration / API & Các issue \#22/\#25/\#26/\#28/\#29 và kiểm thử theo WBS & Chủ issue/WBS trong Sprint Plan \\
     UI đăng nhập & PR \#80 nháp; mock tests qua, chờ API thật & Phạm Gia Bảo; phụ thuộc Bùi Trần Đức Việt \\
     Staging / Postman & \#31 còn mở, chưa có URL thật & Nguyễn Phú Trọng; Hoàng Kim Tiến hỗ trợ \\
@@ -342,7 +361,7 @@
     \item Hoàn tất schema/API và giao diện; triển khai Neon, Render, Vercel; thay placeholder, xác minh health.
     \item Chạy Postman trên staging và ghi lại kết quả; không gọi CI là E2E.
     \item Xuất ERD/từ điển từ DBML canonical; hoàn thành phần SRS/truy vết theo kế hoạch.
-    \item Thay theme tạm nếu nhóm cung cấp mẫu HUST được duyệt; rehearsal với một URL demo thật và đường lui bằng sơ đồ/wireframe.
+    \item Theme HUST đã áp dụng từ PR \#88; rehearsal với một URL demo thật và đường lui bằng sơ đồ/wireframe.
   \end{enumerate}
   \vfill
   \small

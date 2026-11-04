@@ -1,6 +1,6 @@
 # Gói bàn giao Sprint 1 — Web quản lý chuỗi phòng tập Gym
 
-> **Trạng thái tài liệu: DRAFT.** Đây là bản bàn giao theo snapshot `main` tại `91a8b4a` và trạng thái GitHub được đọc ngày 03/11/2026. Slide đang dùng theme Beamer tạm; nhóm chưa cung cấp mẫu HUST đã duyệt. Tài liệu này không chứng minh hệ thống đã triển khai, có staging, hay đã hoàn tất kiểm thử đầu cuối.
+> **Trạng thái tài liệu: DRAFT.** Đây là bản bàn giao theo snapshot `main` tại `446ceb3` và trạng thái GitHub được đọc ngày 04/11/2026. Slide đã áp theme HUST do trưởng nhóm cung cấp ở PR #88 theo chỉ đạo tại #32; bản bàn giao vẫn nháp do các phần SRS/ERD xuất/staging chưa đủ. Tài liệu này không chứng minh hệ thống đã triển khai, có staging, hay đã hoàn tất kiểm thử đầu cuối.
 
 ## 1. Tóm tắt cho buổi bàn giao
 
@@ -82,32 +82,28 @@ Hai minh họa rút gọn được viết trực tiếp bằng TikZ trong `slide
 | Bố cục đăng ký mobile 360 px | [dang-ky.drawio.svg @ 464a31a](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/464a31a41b78820e41b5657a8e6d39f06903fc47/docs/design/wireframe/dang-ky.drawio.svg) |
 | Bảng lịch công khai; tên lớp/giờ chỉ là dữ liệu mẫu | [lich-lop-cong-khai.drawio.svg @ 464a31a](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/464a31a41b78820e41b5657a8e6d39f06903fc47/docs/design/wireframe/lich-lop-cong-khai.drawio.svg) |
 
-**Cập nhật 04/11/2026:** bỏ PDF và hai PNG xuất sẵn theo yêu cầu chỉ lưu mã nguồn. Nội dung tiến độ bên dưới vẫn ghi rõ snapshot 03/11; phải cập nhật bằng chứng trước buổi bàn giao. Chưa có template HUST đã duyệt.
+**Cập nhật 04/11/2026:** bỏ PDF và hai PNG wireframe xuất sẵn theo yêu cầu chỉ lưu mã nguồn. Sau đó áp theme HUST được trưởng nhóm cung cấp; ảnh nguồn của theme được giữ riêng theo chỉ đạo, không phải ảnh xuất wireframe. Snapshot/bằng chứng bên dưới được đối chiếu lại ngày 04/11 và vẫn cần cập nhật trước demo.
 
 ## 6. Trạng thái mã nguồn và bằng chứng kiểm tra
 
-Checkout làm nền cho tài liệu này là `main` commit `91a8b4a`. Phần triển khai hiện thấy trong cây mã:
+Snapshot đối chiếu cho tài liệu này là `main` commit `446ceb3`. Phần triển khai hiện thấy trong cây mã:
 
 - Frontend có router/layout, trang đăng nhập/điều hướng và công tắc giả lập vai trò chỉ xuất hiện ở chế độ dev. Chưa có trang đăng ký nối backend.
 - Backend có Spring Boot, cấu hình bảo mật, xử lý lỗi chung và cấu trúc gói; hiện chưa có feature API hội viên/gói tập trong cây nguồn.
 - Thư mục migration mới có hướng dẫn; chưa có migration nghiệp vụ trên `main` snapshot.
 - [Issue #30](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/30) về giao diện đăng ký và nối đăng nhập với API thật còn mở. Không mô tả issue này như tính năng đã hoàn tất.
 
-**Bằng chứng CI:** [CI run #41609330773](https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/41609330773) hoàn tất `success` cho commit `91a8b4a`. Điều này xác nhận các job CI của snapshot chạy thành công; không xác nhận Postman, E2E, deploy hoặc toàn bộ quy tắc nghiệp vụ.
+**Bằng chứng CI:** [CI run #41772233543](https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/41772233543) hoàn tất `success` cho commit `446ceb3`. Điều này xác nhận các job CI của snapshot chạy thành công; không xác nhận Postman, E2E, deploy hoặc toàn bộ quy tắc nghiệp vụ.
 
-**Backlog:** PR [#77](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/77) đang mở ở trạng thái draft, các check CI hiện xanh. PR tạo 31 user story issue **#46–#76** với tổng 86 tiêu chí Given/When/Then theo nội dung draft. PR [#79](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79) bổ sung SRS F8; PR [#78](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/78) bổ sung quy ước/wireframe công khai. Tại lần kiểm tra 03/11, cả ba PR đều chưa được review hoặc merge; #77 và #79 là draft, review được yêu cầu tới `natus26` trên cả ba. Cả ba có CI xanh: [run #41642345573](https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/41642345573), [run #41643707041](https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/41643707041), [run #41644055872](https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/41644055872). PR #79 dùng commit `801afc8`; đây vẫn là nhánh riêng, chưa thuộc snapshot `main` `91a8b4a`. Không coi các PR draft/open là nội dung đã merge hoặc trạng thái dự án đã cập nhật trên GitHub Projects. Chưa đủ quyền GitHub Projects để xác minh board, nên báo cáo chỉ dùng file kế hoạch và trạng thái issue/PR đọc được.
+**Backlog và tài liệu:** [#77](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/77) đã sửa theo review của Ktin06: Issues #46–#76 là nguồn chuẩn, file chỉ giữ chỉ mục 31 story và đã chuyển Ready (`df27aa2`), chưa merge. [#78](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/78) giữ Ready/chờ `natus26`, không có góp ý mới; [#79](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79) đã sửa review (`ccae3cf`) nhưng còn Draft do quyết định nghiệp vụ F8. CI từng PR xanh: [#77 run 41844424169](https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/41844424169), [#78 run 41643707041](https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/41643707041), [#79 run 41846335262](https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/41846335262). Chưa có phê duyệt/merge; không coi là nội dung đã có trên main. Projects vẫn chưa xác minh được do scope token.
 
 ### Frontend F1 ngoài snapshot: PR nháp #80
 
-PR [#80](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80) nằm trên nhánh `feature/f1-dang-ky-dang-nhap`, **chưa merge**. Các commit `adbddcb` (login/phiên), `02037ce` (đăng ký), `27693ab` (tests) thay công tắc giả lập bằng adapter HTTP, token memory, refresh một lần, loại request/response cũ và điều hướng đúng role. Main vẫn giữ phiên bản trước PR.
+PR [#80](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80) chưa merge. Các commit `adbddcb` (phiên), `02037ce` (đăng ký), `27693ab` (tests) và `74fc936` (sửa DTO theo backend) bổ sung form, adapter/token memory và menu theo role. Main vẫn giữ công cụ giả lập vai trò để đồng đội phát triển UI.
 
-Kiểm tra local trên commit `27693ab`:
+Kiểm tra local ngày 04/11 trên `74fc936`: lint qua, **9 file/45 Vitest qua**, build TypeScript/Vite qua; còn cảnh báo JS **968.56 kB** vượt 500 kB. [CI run 41847056463](https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/41847056463) xanh; Frontend chạy lint/Vitest/build. Kiểm tra Chromium với API mock ở 360/768/1280 px thuộc baseline `27693ab` ngày 03/11, không chạy lại trong sửa DTO.
 
-- `npm run lint`: qua; GitHub CI [run #41646954979](https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/41646954979) cũng xanh, Frontend chạy lint/Vitest/build. Backend job bỏ qua vì PR không thay backend.
-- `npm test -- --run`: **9 file, 35 test qua**; có bootstrap, single-flight refresh, logout/session race, stale 200/401, terminal 401, redirect khác role và validation.
-- `npm run build`: qua; còn cảnh báo JS bundle **968.50 kB** vượt ngưỡng 500 kB; chưa tối ưu trong scope F1.
-- Chromium chạy React/axios với **API mock cô lập** tại 360/768/1280 px: form rỗng, `+84`, 409 SĐT, 401/403 login, đăng ký → MEMBER, logout và đăng nhập RECEPTIONIST → đúng home đều qua; không tràn ngang, không ghi Web Storage.
-- Những kết quả này **không chứng minh backend/cookie thật hoạt động**. Backend F1/schema/CN01 chưa có trên main. Response `{accessToken}` và `/me {email,role}` là adapter tạm, cần Đức Việt xác nhận; `gender` chưa có tập giá trị nên chưa bật lựa chọn.
+[Đức Việt đã xác nhận hợp đồng](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80#issuecomment-6624574276): login/register/refresh trả `{accessToken}`, `/me` trả `{userId,email,role}`, gender tùy chọn MALE/FEMALE/OTHER/null; backend tự chuẩn hóa số điện thoại. SRS mục 6.1 nằm trên PR backend #87 chưa merge. **Giữ Draft theo trưởng nhóm đến khi #25/#26 merge và kiểm tra HTTP thật**: đăng ký, login, refresh, logout, role và cookie. Mock tests/CI chưa chứng minh backend/cookie thật hoạt động.
 
 ## 7. Ma trận bàn giao và việc còn lại
 
@@ -116,14 +112,14 @@ Phân công dưới đây giữ nguyên [kế hoạch Sprint 1](../docs/plans/sp
 | Hạng mục | Trạng thái / bằng chứng | Người phụ trách theo kế hoạch | Việc tiếp theo / phụ thuộc |
 | --- | --- | --- | --- |
 | Phạm vi và quyết định | Phạm vi đã chốt; biên bản kick-off và ERD được ghi nhận trong PR [#34](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/34) đã merge | Hoàng Kim Tiến điều phối; cả nhóm duyệt ERD | Giữ bản chốt phạm vi là nguồn chuẩn khi cập nhật SRS |
-| Use case / activity | PR #38 và #41 đã merge; các SRS F1/F2/F4/F6 đang có trong main; SRS F8 ở PR draft [#79](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79), CI run #41644055872 xanh | Minh Quân: sơ đồ/activity; tác giả SRS theo từng chức năng; Gia Bảo: F8 theo Sprint Plan | Review/merge PR #79; hoàn thiện SRS tổng quan #13 và phần còn lại theo kế hoạch |
+| Use case / activity | PR #38 và #41 đã merge; các SRS F1/F2/F4/F6 đang có trong main; SRS F8 ở PR draft [#79](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79), CI run #41846335262 xanh | Minh Quân: sơ đồ/activity; tác giả SRS theo từng chức năng; Gia Bảo: F8 theo Sprint Plan | Review/merge PR #79; hoàn thiện SRS tổng quan #13 và phần còn lại theo kế hoạch |
 | ERD xuất bản | DBML 39 bảng/8 nhóm đã duyệt; [issue #15](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/15) còn mở | Nguyễn Anh Tú | Xuất hình ERD và từ điển dữ liệu, đối chiếu với DBML canonical |
-| User story F1–F10 | 31 issue #46–#76; PR #77 còn draft/open, 86 GWT theo draft; CI run #41642345573 xanh | Phạm Gia Bảo | Chờ review/merge; xác minh board khi quyền Projects sẵn sàng |
+| User story F1–F10 | 31 issue #46–#76; PR #77 Ready, Issues là bản chuẩn, chỉ mục 31 story; CI run #41844424169 xanh | Phạm Gia Bảo | Chờ review/merge; xác minh board khi quyền Projects sẵn sàng |
 | Wireframe | Dashboard ở PR #42 đã merge; PR [#78](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/78) mở, CI run #41643707041 xanh, đang chờ review; issue [#17](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/17) còn mở | Gia Bảo: trang khách/đăng ký; các wireframe khác giữ người trong Sprint Plan | Review/merge PR #78; hoàn thiện các wireframe F2/F3, check-in/hóa đơn, cổng hội viên, trainer theo kế hoạch |
 | Schema / API | Migration, API F1–F3 và tích hợp được giao theo issues [#22](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/22), [#25](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/25), [#26](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/26), [#28](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/28), [#29](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/29); chưa được coi là có trên main snapshot | Chủ issue/WBS hiện tại trong Sprint Plan | Hoàn tất schema chung và API thật trước khi kết nối UI; chạy kiểm thử theo quy trình nhóm |
-| FE đăng ký/đăng nhập | PR nháp [#80](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80), chưa merge; form/token/role + 35 Vitest và browser mock qua; #30 còn mở | Phạm Gia Bảo; phụ thuộc API/auth của Bùi Trần Đức Việt | Chốt DTO với Đức Việt, tích hợp HTTP/cookie backend thật, staging; role simulator chỉ bị thay khi PR được merge |
+| FE đăng ký/đăng nhập | PR nháp [#80](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80), chưa merge; form/token/role + 45 Vitest qua, browser mock ở baseline 03/11; #30 còn mở | Phạm Gia Bảo; phụ thuộc API/auth của Bùi Trần Đức Việt | DTO đã chốt; chờ #25/#26 merge, tích hợp HTTP/cookie backend thật, staging; role simulator chỉ bị thay khi PR được merge |
 | Staging / Postman | Issue [#31](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/31) còn mở; chưa có URL staging thật | Nguyễn Phú Trọng triển khai và chạy Postman; Hoàng Kim Tiến hỗ trợ nối Vercel/Render | Tạo Neon/Render/Vercel, thay placeholder `.invalid`, xác nhận biến môi trường, sau đó mới ghi URL và kết quả Postman |
-| Slide / bàn giao | Tài liệu này và `slide-sprint-1.tex` là bản draft; xem [comment yêu cầu mẫu Beamer HUST](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/32#issuecomment-6604918947) trong issue #32 | Phạm Gia Bảo, hạn theo kế hoạch 09/11 | Thay theme tạm bằng template được duyệt nếu nhóm cung cấp; cập nhật snapshot/evidence trước lần trình bày cuối |
+| Slide / bàn giao | Tài liệu này và `slide-sprint-1.tex` là bản draft; đã áp mẫu HUST theo [chỉ đạo của trưởng nhóm](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/32#issuecomment-6633041875) | Phạm Gia Bảo, hạn theo kế hoạch 09/11 | Theme HUST đã áp dụng từ PR #88; cập nhật snapshot/bằng chứng trước lần trình bày cuối |
 
 **Giữ nguyên phân công kỹ thuật theo Sprint Plan:** migration nhóm 1/2 — Bùi Trần Đức Việt; nhóm 3 — Thái Hùng Lân; nhóm 4 — Lê Phước Minh Quân; nhóm 5/7 — Nguyễn Trọng Việt; nhóm 6/8, khóa ngoại và gộp schema — Nguyễn Phú Trọng. API F1 — Đức Việt; API F2/F3 — Lân. Các issue schema/API [#22](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/22), [#25](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/25), [#26](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/26), [#28](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/28), [#29](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/29) cần tiếp tục theo đúng chủ issue/WBS tương ứng.
 
@@ -132,8 +128,8 @@ Phân công dưới đây giữ nguyên [kế hoạch Sprint 1](../docs/plans/sp
 1. **Chưa có staging URL.** `frontend/vercel.json` hiện dùng domain `.invalid` làm placeholder; lần kiểm tra không thấy deployment được công bố, `repository.homepage` trống và GitHub Pages trả 404. Issue #31 chưa có comment cung cấp link staging. Không ghi đây là môi trường đang chạy và không đưa URL giả vào slide như link demo.
 2. **Chưa có kiểm thử đầu-cuối được báo cáo.** CI thành công chỉ là CI; issue #31 theo dõi triển khai và Postman F1–F3.
 3. **Chưa có hình ERD xuất từ bản chuẩn.** Dùng liên kết DBML và nói rõ issue #15 còn mở; không tự vẽ một sơ đồ khác rồi gọi là ERD được duyệt.
-4. **Các nhánh/PR đang mở không phải `main`.** Tại lúc kiểm tra, PR #77 (user story) và #79 (SRS F8) là draft; PR #78 (wireframe công khai) mở, CI xanh và chờ review. Chỉ trình bày chúng như phần đang chờ review.
-5. **Theme HUST chưa được xác nhận.** Issue #32 có yêu cầu cung cấp mẫu đã duyệt; slide hiện dùng theme default của Beamer tạm thời, có nhãn DRAFT trên mọi trang.
+4. **Các nhánh/PR đang mở không phải `main`.** Tại lúc kiểm tra, PR #77 (chỉ mục story) Ready, #79 (SRS F8) và #80 (frontend F1) là Draft; #78 (wireframe công khai) Ready. Các PR đã được kiểm tra CI xanh, vẫn cần phê duyệt/merge. Chỉ trình bày chúng như phần đang chờ review.
+5. **Theme HUST đã áp dụng.** Trưởng nhóm cung cấp ở PR #88 và cho phép lấy source trước merge tại comment #32; slide dùng bộ xanh 16:9. DRAFT còn giữ vì các tài liệu/bằng chứng bàn giao chưa đủ, không phải vì thiếu theme.
 6. **S1–S3/NF4/NF6 là yêu cầu đã duyệt, không phải chứng cứ đã đáp ứng.** Chỉ trình bày tiêu chí và chỉ rõ việc triển khai/kiểm chứng còn lại.
 7. **Audit dependency:** kết quả `npm ci` baseline ghi nhận 13 moderate advisories, đều thuộc tooling ESLint/minimatch; không có high/critical. Không thay dependency trong nhánh tài liệu này; nhóm xem xét theo quy trình riêng.
 
@@ -145,9 +141,19 @@ Phân công dưới đây giữ nguyên [kế hoạch Sprint 1](../docs/plans/sp
 4. Cho xem mã khung và CI green nếu được hỏi về tiến độ kỹ thuật; nói rõ chưa có staging/Postman/E2E.
 5. Chốt các mốc còn lại: hoàn tất migrations/API, SRS và ERD xuất bản, UI, staging/Postman, rồi cập nhật slide từ bằng chứng mới nhất.
 
+### Nguồn theme HUST
+
+Theo [chỉ đạo của Ktin06 tại #32](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/32#issuecomment-6633041875), áp mẫu trong [PR #88](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/88) ngay khi PR đó chưa merge. Lấy ba tệp đang sử dụng từ commit `dca1fc4e3707c03854ba080e67ae334b690b3bb7`:
+
+- [`mau-slide-hust/beamerthemeHUST.sty`](mau-slide-hust/beamerthemeHUST.sty).
+- [`mau-slide-hust/images/hust-blue-169-title.png`](mau-slide-hust/images/hust-blue-169-title.png) — nền trang bìa.
+- [`mau-slide-hust/images/hust-blue-169-content-full.png`](mau-slide-hust/images/hust-blue-169-content-full.png) — nền nội dung, thanh mảnh.
+
+Đây là **ảnh nguồn của mẫu do trưởng nhóm cung cấp**, không phải PDF/PNG xuất từ slide/wireframe. Giữ nguyên logic theme và hai ảnh nguồn; `.sty` chỉ bỏ khoảng trắng cuối một dòng trống để qua `git diff --check`, giữ attribution của người cung cấp. Không nhập commit/backend/nội dung ví dụ từ nhánh #88. Slide đã tự chứa các nguồn cần build, không cần checkout PR #88; Nếu PR #88 được merge từ commit này, hai ảnh nguồn trùng nội dung; `.sty` chỉ khác chuẩn hóa khoảng trắng đã nêu. Các kiểu nền khác của theme không dùng ở deck này; nếu đổi kiểu, lấy thêm đúng ảnh nguồn tương ứng từ bộ mẫu.
+
 ### Biên dịch slide
 
-Nguồn: [`slide-sprint-1.tex`](slide-sprint-1.tex), gồm cả hai minh họa TikZ. Cần XeLaTeX hoặc Tectonic, các gói Beamer/fontspec/TikZ/booktabs/tabularx/array và font Noto Sans. Không phụ thuộc ảnh sinh sẵn hoặc nội dung một nhánh chưa merge để build.
+Nguồn: [`slide-sprint-1.tex`](slide-sprint-1.tex), gồm hai minh họa TikZ và theme HUST nêu trên. Cần XeLaTeX hoặc Tectonic, các gói Beamer/fontspec/TikZ/booktabs/tabularx/array và font Noto Sans. Không phụ thuộc ảnh sinh sẵn hoặc nội dung một nhánh chưa merge để build.
 
 ```bash
 # Từ thư mục gốc repository; output nằm trong thư mục bị bỏ qua bởi Git.
@@ -159,8 +165,8 @@ xelatex -interaction=nonstopmode -halt-on-error -output-directory=report/build r
 tectonic --outdir report/build report/slide-sprint-1.tex
 ```
 
-Lần chạy XeLaTeX thứ hai cập nhật số trang và liên kết. Mở `report/build/slide-sprint-1.pdf` để xem; PDF, PNG và tệp phụ trợ là sản phẩm build, không đưa vào Git. Thư mục `report/build/` và tệp PDF/PNG trong `report/` đã được bỏ qua qua `report/.gitignore`.
+Lần chạy XeLaTeX thứ hai cập nhật số trang và liên kết. Mở `report/build/slide-sprint-1.pdf` để xem; PDF, PNG và tệp phụ trợ là sản phẩm build, không đưa vào Git. `report/.gitignore` bỏ qua build/PDF/PNG sinh ra; chỉ cho phép đúng hai ảnh nguồn HUST đang dùng. Bản PDF nộp cuối do trưởng nhóm đính kèm vào GitHub Release, không commit vào nhánh.
 
 ### Kiểm tra sản phẩm bản nháp
 
-Đã biên dịch bản nguồn ngày 04/11 bằng Tectonic 0.17.0 với Noto Sans, kiểm tra PDF 15 trang và render các trang minh họa để rà soát. Kết quả chỉ xác nhận tài liệu build và mở được; chưa đáp ứng mẫu HUST hoặc nghiệm thu chức năng. Các output chỉ lưu local trong `report/build/`.
+Đã biên dịch bản nguồn ngày 04/11 bằng Tectonic 0.17.0 với Noto Sans, kiểm tra PDF 15 trang render và xem đủ 15 trang sau khi đổi theme để rà soát. Kết quả chỉ xác nhận tài liệu build và mở được; chưa thay thế nghiệm thu chức năng hoặc bộ bàn giao đầy đủ. Các output chỉ lưu local trong `report/build/`.
