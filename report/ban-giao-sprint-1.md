@@ -73,16 +73,16 @@ Trạng thái và loại dữ liệu trong CSDL vật lý lưu bằng `varchar` 
 
 Các sơ đồ use case, activity, ERD và wireframe mô tả thiết kế; chúng không chứng minh giao diện/API tương ứng đã được lập trình.
 
-### Provenance hai hình wireframe trong slide
+### Nguồn minh họa wireframe trong slide
 
-Hai PNG trong `report/assets/` là crop của **sơ đồ wireframe draw.io**, render bằng Playwright Chromium; đây không phải screenshot của UI hoặc backend đang chạy. Nguồn được ghim tại commit `464a31a41b78820e41b5657a8e6d39f06903fc47` trên PR #78, hiện chưa merge. Sơ đồ gốc vẫn có thể chỉnh sửa ở PR:
+Hai minh họa rút gọn được viết trực tiếp bằng TikZ trong `slide-sprint-1.tex`, biên dịch cùng slide; không cần PDF/PNG xuất sẵn hay tải tài nguyên từ mạng. Đây là hình phục vụ trình chiếu, không thay các wireframe chuẩn chỉnh sửa bằng Draw.io ở PR #78 và không phải ảnh giao diện đang chạy.
 
-| Asset trình chiếu | Nguồn SVG editable | Render/crop |
-| --- | --- | --- |
-| `wireframe-dang-ky.png` | [dang-ky.drawio.svg @ 464a31a](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/464a31a41b78820e41b5657a8e6d39f06903fc47/docs/design/wireframe/dang-ky.drawio.svg) | Viewport 1520×1300; crop x=1120, y=124, w=360, h=940 (mobile 360 px) |
-| `wireframe-lich-lop.png` | [lich-lop-cong-khai.drawio.svg @ 464a31a](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/464a31a41b78820e41b5657a8e6d39f06903fc47/docs/design/wireframe/lich-lop-cong-khai.drawio.svg) | Viewport 1520×1300; crop x=56, y=300, w=996, h=422 (bộ lọc và bảng lịch desktop) |
+| Minh họa | Wireframe chuẩn tham chiếu (PR #78 chưa merge) |
+| --- | --- |
+| Bố cục đăng ký mobile 360 px | [dang-ky.drawio.svg @ 464a31a](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/464a31a41b78820e41b5657a8e6d39f06903fc47/docs/design/wireframe/dang-ky.drawio.svg) |
+| Bảng lịch công khai; tên lớp/giờ chỉ là dữ liệu mẫu | [lich-lop-cong-khai.drawio.svg @ 464a31a](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/464a31a41b78820e41b5657a8e6d39f06903fc47/docs/design/wireframe/lich-lop-cong-khai.drawio.svg) |
 
-PNG chỉ để đặt vào frame trình bày; không thay file `.drawio.svg` nguồn và không được dùng làm bằng chứng chức năng đã triển khai.
+**Cập nhật 04/11/2026:** bỏ PDF và hai PNG xuất sẵn theo yêu cầu chỉ lưu mã nguồn. Nội dung tiến độ bên dưới vẫn ghi rõ snapshot 03/11; phải cập nhật bằng chứng trước buổi bàn giao. Chưa có template HUST đã duyệt.
 
 ## 6. Trạng thái mã nguồn và bằng chứng kiểm tra
 
@@ -147,19 +147,20 @@ Phân công dưới đây giữ nguyên [kế hoạch Sprint 1](../docs/plans/sp
 
 ### Biên dịch slide
 
-Nguồn slide: [`slide-sprint-1.tex`](slide-sprint-1.tex). Slide dùng hai crop wireframe đã mô tả ở trên trong `report/assets/`.
+Nguồn: [`slide-sprint-1.tex`](slide-sprint-1.tex), gồm cả hai minh họa TikZ. Cần XeLaTeX hoặc Tectonic, các gói Beamer/fontspec/TikZ/booktabs/tabularx/array và font Noto Sans. Không phụ thuộc ảnh sinh sẵn hoặc nội dung một nhánh chưa merge để build.
 
 ```bash
-# Từ thư mục gốc repository; XeLaTeX cần font Noto Sans.
-xelatex -interaction=nonstopmode -halt-on-error -output-directory=report report/slide-sprint-1.tex
-xelatex -interaction=nonstopmode -halt-on-error -output-directory=report report/slide-sprint-1.tex
+# Từ thư mục gốc repository; output nằm trong thư mục bị bỏ qua bởi Git.
+mkdir -p report/build
+xelatex -interaction=nonstopmode -halt-on-error -output-directory=report/build report/slide-sprint-1.tex
+xelatex -interaction=nonstopmode -halt-on-error -output-directory=report/build report/slide-sprint-1.tex
 
-# Hoặc dùng Tectonic nếu đã cài.
-tectonic --outdir report report/slide-sprint-1.tex
+# Hoặc dùng Tectonic (tự lấy gói TeX vào cache ở lần chạy đầu).
+tectonic --outdir report/build report/slide-sprint-1.tex
 ```
 
-Lần biên dịch thứ hai giúp cập nhật liên kết/trang. PDF và file phụ trợ là sản phẩm build, không phải bằng chứng nghiệm thu.
+Lần chạy XeLaTeX thứ hai cập nhật số trang và liên kết. Mở `report/build/slide-sprint-1.pdf` để xem; PDF, PNG và tệp phụ trợ là sản phẩm build, không đưa vào Git. Thư mục `report/build/` và tệp PDF/PNG trong `report/` đã được bỏ qua qua `report/.gitignore`.
 
 ### Kiểm tra sản phẩm bản nháp
 
-Nguồn và PDF gồm 15 trang; biên dịch bằng Tectonic 0.17.0 với font Noto Sans. Bản PDF được lưu tại [slide-sprint-1.pdf](slide-sprint-1.pdf), cùng hai ảnh nguồn crop dùng để trình bày. Đã kiểm tra liên kết tương đối, parse PDF và render toàn bộ trang để rà soát chữ/hình. Việc này chỉ xác nhận sản phẩm tài liệu mở và trình bày được; chưa đáp ứng mẫu HUST hoặc nghiệm thu các chức năng dự án.
+Đã biên dịch bản nguồn ngày 04/11 bằng Tectonic 0.17.0 với Noto Sans, kiểm tra PDF 15 trang và render các trang minh họa để rà soát. Kết quả chỉ xác nhận tài liệu build và mở được; chưa đáp ứng mẫu HUST hoặc nghiệm thu chức năng. Các output chỉ lưu local trong `report/build/`.

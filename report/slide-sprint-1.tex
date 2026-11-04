@@ -7,8 +7,7 @@
 \setmainfont{Noto Sans}
 \setsansfont{Noto Sans}
 \setmonofont{Noto Sans}
-\usepackage{booktabs,tabularx,array,graphicx}
-\graphicspath{{report/assets/}{assets/}}
+\usepackage{booktabs,tabularx,array}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning}
 
@@ -42,7 +41,7 @@
 \subtitle{Nhóm 6 · IT3180 · snapshot main 91a8b4a}
 \author{Nhóm 6}
 \institute{Đại học Bách khoa Hà Nội}
-\date{03/11/2026}
+\date{04/11/2026 · nội dung snapshot 03/11}
 
 \begin{document}
 
@@ -219,16 +218,28 @@
   \begin{columns}[T,onlytextwidth]
     \column{.30\textwidth}
       \centering
-      \includegraphics[height=.76\textheight,width=\linewidth,keepaspectratio]{wireframe-dang-ky.png}
+      % Minh họa rút gọn bằng mã TikZ; sơ đồ chuẩn ở PR #78.
+      \begin{tikzpicture}[x=1cm,y=1cm,font=\tiny]
+        \draw[rounded corners,fill=black!2] (0,0) rectangle (3.5,6.3);
+        \node[font=\scriptsize\bfseries] at (1.75,5.95) {Tạo tài khoản hội viên};
+        \node[align=center] at (1.75,5.55) {Chi nhánh mặc định\\Chưa bao gồm mua gói tập};
+        \foreach \label/\y in {Họ và tên */4.9,Email */4.25,Số điện thoại */3.6,Mật khẩu */2.95,Xác nhận mật khẩu */2.3,Ngày sinh (tùy chọn)/1.65,Giới tính (tùy chọn)/1.0} {
+          \node[anchor=west] at (.2,\y+.17) {\label};
+          \draw[fill=white,draw=black!35] (.2,\y-.18) rectangle (3.3,\y+.02);
+        }
+        \draw[fill=gymblue,draw=gymblue,rounded corners] (.2,.25) rectangle (3.3,.58);
+        \node[text=white] at (1.75,.415) {Đăng ký};
+        \node at (1.75,.08) {Đã có tài khoản? Đăng nhập};
+      \end{tikzpicture}
     \column{.66\textwidth}
       \begin{itemize}
-        \item Bản vẽ mobile rộng 360 px; nguồn vẫn là \texttt{.drawio.svg} chỉnh sửa được.
+        \item Bố cục tham chiếu mobile 360 px; bản chuẩn là \texttt{.drawio.svg} chỉnh sửa được.
         \item Họ tên, email, SĐT, mật khẩu; không cho tự chọn role hoặc chi nhánh.
         \item SĐT đã có hồ sơ: từ chối và hướng dẫn liên hệ quầy, không tự gắn tài khoản.
         \item Đăng ký tài khoản chưa phải mua hay kích hoạt gói tập.
       \end{itemize}
       \vspace{1em}
-      \small Hình là crop từ \textbf{wireframe}; không phải screenshot UI hoặc backend đang chạy.
+      \small Hình TikZ rút gọn để trình chiếu; không thay wireframe chỉnh sửa được và không phải UI đang chạy.
       \vspace{1em}
 
       \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/78}{PR \#78: đăng ký, bảng giá, lịch lớp}]\\
@@ -238,11 +249,24 @@
 
 \begin{frame}{Lịch lớp công khai — wireframe, PR \#78 chưa merge}
   \centering
-  \includegraphics[width=.96\textwidth,height=.61\textheight,keepaspectratio]{wireframe-lich-lop.png}
+  % Các tên lớp/giờ chỉ minh họa cấu trúc từ PR #78.
+  \begin{tikzpicture}[x=1cm,y=1cm,font=\scriptsize]
+    \draw[fill=black!2,rounded corners] (0,0) rectangle (13.8,3.9);
+    \node[anchor=west,font=\small\bfseries] at (.2,3.6) {Lịch lớp học nhóm};
+    \node[anchor=west] at (.2,3.15) {< Tuần trước \qquad [Ngày đầu] -- [Ngày cuối] \qquad Tuần sau >};
+    \node[anchor=east] at (13.5,3.15) {Loại lớp: Tất cả};
+    \foreach \day/\x in {Thứ Hai/0,Thứ Ba/1,Thứ Tư/2,Thứ Năm/3,Thứ Sáu/4,Thứ Bảy/5,Chủ nhật/6} {
+      \draw[draw=black!30,fill=white] (.2+\x*1.92,.35) rectangle (2.12+\x*1.92,2.7);
+      \node[align=center] at (1.16+\x*1.92,2.4) {\day\\{[dd/mm]}};
+    }
+    \foreach \title/\time/\state/\x in {Yoga/18:00--19:00/Theo lịch/0,Zumba/17:30--18:30/Đã đổi giờ/2,Boxing/18:00--19:00/Đã hủy/4} {
+      \node[font=\tiny,align=center,fill=blue!5,inner sep=3pt,text width=1.65cm] at (1.16+\x*1.92,1.25) {\textbf{\title}\\\time\\{[Phòng]}\\{[PT phụ trách]}\\\state};
+    }
+  \end{tikzpicture}
   \par\vspace{.4em}
   \small Khách xem lịch không cần tài khoản. Đặt lớp cần TIME ACTIVE hợp lệ; không công khai danh sách hội viên.\par
   \vspace{.4em}
-  \scriptsize Crop bảng lịch từ sơ đồ editable commit \texttt{464a31a}; không phải màn hình vận hành thật.\par
+  \scriptsize Minh họa TikZ rút gọn theo sơ đồ commit \texttt{464a31a}; tên lớp/giờ là dữ liệu mẫu, không phải lịch vận hành thật.\par
   [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/78}{PR \#78 chưa merge}] · Dashboard đã merge ở [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/42}{PR \#42}].
 \end{frame}
 
