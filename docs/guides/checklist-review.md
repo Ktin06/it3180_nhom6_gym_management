@@ -14,10 +14,12 @@ Review các thay đổi của nhánh hiện tại so với main (git diff main..
 Đọc hết các file liên quan trước khi kết luận; khi tìm kiếm thì xem đủ kết quả, không dừng ở vài dòng đầu.
 Với mỗi lỗi: ghi file:dòng, vì sao sai, căn cứ ở tài liệu chuẩn nào (bản chốt phạm vi, erd-v2.dbml, ADR, biên bản họp), và cách sửa.
 Chỉ báo lỗi có căn cứ; điều tài liệu chuẩn chưa nói thì ghi là "cần trưởng nhóm chốt", không tự đặt quy tắc.
+Cuối kết quả, liệt kê: (1) các file và nhánh đã đọc; (2) các file, nhánh, đường link không đọc được hoặc chưa đọc (kể cả kết quả tìm kiếm bị cắt).
+Kết luận nào dựa trên việc "không tìm thấy" thì ghi rõ đã tìm ở đâu.
 Chưa sửa gì, chỉ liệt kê.
 ```
 
-Đọc kết quả và tự kiểm tra lại từng lỗi trước khi sửa. Công cụ AI có thể báo sai, nhất là khi nó chỉ đọc một phần file hoặc chỉ tìm trên `main`. Đã có lần AI kết luận "điều kiện lọc theo chi nhánh nhà là sai" và sửa ngược, trong khi biên bản kick-off đã chốt đúng như vậy. Thấy kết luận nào ngược với bản gốc thì tìm căn cứ trước khi sửa.
+Xem danh sách "chưa đọc" và tự kiểm tra lại những phần đó; kết luận "không có" chỉ đúng trong phạm vi công cụ đã tìm. Đọc kết quả và tự kiểm tra lại từng lỗi trước khi sửa. Công cụ AI có thể báo sai, nhất là khi nó chỉ đọc một phần file hoặc chỉ tìm trên `main`. Đã có lần AI kết luận "điều kiện lọc theo chi nhánh nhà là sai" và sửa ngược, trong khi biên bản kick-off đã chốt đúng như vậy. Thấy kết luận nào ngược với bản gốc thì tìm căn cứ trước khi sửa.
 
 ## 1. Đối chiếu tài liệu chuẩn
 
