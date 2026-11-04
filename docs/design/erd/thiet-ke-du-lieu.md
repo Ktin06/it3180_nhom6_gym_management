@@ -1,6 +1,6 @@
 # Thiết kế dữ liệu – Web quản lý chuỗi phòng tập Gym
 
-Cập nhật: 01/11/2026 (bản đầu: 27/10/2026) · Hoàng Kim Tiến · Trạng thái: ERD bản 2, cả nhóm đã duyệt ngày 02/11/2026
+Cập nhật: 03/11/2026 (bản đầu: 27/10/2026) · Hoàng Kim Tiến · Trạng thái: ERD bản 2, cả nhóm đã duyệt ngày 02/11/2026
 
 Tài liệu này giải thích thiết kế cơ sở dữ liệu. **Mã nguồn chuẩn của ERD là file `erd-v2.dbml`** (cùng thư mục); khi hai nơi mâu thuẫn thì file DBML là đúng. Dán file đó vào [dbdiagram.io](https://dbdiagram.io) để xem sơ đồ đầy đủ cột và đường quan hệ, rồi xuất ảnh PNG hoặc PDF cho báo cáo LaTeX. Quy tắc nghiệp vụ nằm trong "Bản chốt phạm vi".
 
@@ -34,7 +34,7 @@ Mọi bảng tuân theo cùng một quy ước, để mã do 8 người (và AI)
 | `password_resets` | Mã đặt lại mật khẩu, dùng một lần | `user_id`, `token_hash`, `expires_at`, `used_at` | F1 |
 | `audit_logs` | Ai làm gì, trên bảng nào, giá trị cũ và mới | `user_id`, `branch_id`, `action`, `entity`, `entity_id`, `old_value`, `new_value`, `ip` | F17 |
 | `notifications` | Thông báo trong web và email | `user_id`, `type`, `channel`, `status`, `scheduled_at`, `sent_at`, `read_at`, `related_entity`, `related_id` | F10 |
-| `system_configs` | Tham số cấu hình (các giá trị có dấu \* trong bản chốt phạm vi) | `branch_id` (rỗng = toàn chuỗi), `config_key`, `config_value` | F8, F9, F15, F18 |
+| `system_configs` | Tham số cấu hình (các giá trị có dấu \* trong bản chốt phạm vi) | `branch_id` (rỗng = toàn chuỗi), `config_key`, `config_value` | F6, F8, F9, F15, F18 |
 
 ### 2. Chi nhánh và cơ sở vật chất (4 bảng)
 
@@ -118,6 +118,12 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 | `members.phone`, `members.member_code` duy nhất | Cơ sở dữ liệu | F4 tìm hội viên theo hai cột này phải ra đúng một người; tự đăng ký bằng số đã có hồ sơ thì bị từ chối |
 | Email, số điện thoại ở dạng chuẩn | Cơ sở dữ liệu (CHECK) và mã nghiệp vụ | `A@x.com` và `a@x.com` là một email; số điện thoại 10 chữ số bắt đầu bằng 0 |
 | Mỗi loại gói tối đa một gói đang hiệu lực | Cơ sở dữ liệu (chỉ mục duy nhất có điều kiện, `NULLS NOT DISTINCT`) | Duy nhất trên (`member_id`, `package_type`, `branch_id`) với các dòng ACTIVE hoặc FROZEN; hai gói toàn chuỗi (`branch_id` rỗng) cùng loại cũng bị chặn |
+| Ngày hết hạn gói | Mã nghiệp vụ | `end_date = start_date + duration_days - 1` (`end_date` là ngày cuối còn dùng được); hết hạn mà còn buổi thì mất buổi |
+| Gói SESSION hết buổi kéo gói nối tiếp | Mã nghiệp vụ | Check-in trừ buổi cuối (`remaining_sessions` về 0) thì các gói UPCOMING cùng `package_type`, cùng `branch_id` của hội viên được dời để gói đầu tiên bắt đầu từ ngày mai, giữ nguyên số ngày hiệu lực, trong cùng giao dịch check-in |
+| Gói PT hết buổi kéo gói nối tiếp | Mã nghiệp vụ | Xác nhận buổi PT cuối thì gói PT chuyển EXPIRED và flush trước; rồi mọi gói PT UPCOMING cùng `branch_id` được trừ cùng `D` ngày (`D` = `start_date` gói sớm nhất − hôm nay, như BR-F4.7 nhưng đích là hôm nay), gói đầu tiên chuyển ACTIVE; tất cả trong cùng giao dịch (F9) |
+| Không đặt quá số buổi PT | Mã nghiệp vụ | Chỉ đặt buổi PT mới khi số `pt_sessions` BOOKED chưa diễn ra của gói nhỏ hơn `remaining_sessions` (khóa dòng như NF6) |
+| Không bảo lưu, chuyển nhượng gói hết buổi | Mã nghiệp vụ | Gói SESSION, PT có `remaining_sessions = 0` thì từ chối bảo lưu và chuyển nhượng (422); kiểm tra lại lúc duyệt bảo lưu và lúc xác nhận thanh toán phí chuyển nhượng |
+| Tác vụ nền chuyển EXPIRED | Mã nghiệp vụ (tác vụ nền) | Chạy 00:00 giờ Việt Nam và chạy bù khi máy chủ khởi động; gói SESSION 0 buổi chỉ chuyển EXPIRED khi hôm nay chưa có lượt trừ buổi; chuyển EXPIRED trước rồi mới kích hoạt UPCOMING, ngược lại thì vi phạm `uq_one_active_per_type` |
 | Bảo lưu dời gói nối tiếp | Mã nghiệp vụ | Duyệt bảo lưu N ngày thì cộng N ngày vào `end_date` của gói, đồng thời vào `start_date`, `end_date` của gói UPCOMING cùng loại nối tiếp, trong cùng giao dịch |
 | Gói chỉ ACTIVE khi hóa đơn đã PAID | Mã nghiệp vụ | Tổng các lần thanh toán thành công bằng tổng hóa đơn thì hóa đơn chuyển PAID và gói được kích hoạt; hai người cùng xác nhận thì một người bị từ chối (`version`) |
 | Hóa đơn chờ F7 quá hạn tự hủy | Mã nghiệp vụ (tác vụ nền) | Chỉ hóa đơn `source = MEMBER_PORTAL`: sau `PENDING_INVOICE_TTL_DAYS` ngày, hóa đơn và gói PENDING đi kèm chuyển CANCELLED; hóa đơn `COUNTER` không bị hủy tự động |
@@ -161,6 +167,7 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 - [x] Hoa hồng PT: phần trăm giá mỗi buổi, chụp vào `pt_sessions.commission_amount` lúc DONE (01/11).
 - [x] Gói TIME tính theo số ngày (`duration_days`); "1 tháng" = 30 ngày (01/11).
 - [x] Mã hội viên dạng `HV` + 6 chữ số (`HV000123`), sinh từ sequence `member_code_seq` dùng chung cả chuỗi (01/11).
+- [ ] Tác vụ chuyển EXPIRED lúc 00:00 bị lỗi trong khi máy chủ vẫn chạy (không có lần chạy bù): gói SESSION 0 buổi còn ACTIVE, gói nối tiếp chưa kích hoạt, hội viên bị từ chối check-in cả ngày. Trường hợp ngoại vi, để xử lý sau (hướng đã bàn: cho tác vụ chạy lại mỗi giờ, chạy lặp không gây sai) (03/11).
 - [ ] Ảnh đại diện hội viên lưu ở đâu: ổ đĩa Render bản miễn phí bị xóa khi triển khai lại nên không lưu file trên Render. Sprint 1 làm F2 chưa có ảnh (`avatar_url` để rỗng); chốt trước khi làm F4 ở Sprint 2.
 
 ## Lịch sử thay đổi
@@ -174,3 +181,4 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 | 01/11/2026 | Sau review ERD: `NULLS NOT DISTINCT` cho `uq_one_active_per_type` và `system_configs`; thêm `class_sessions.occurrence_date`, `invoices.source`, `invoice_items.discount_amount`, `pt_sessions.commission_amount`, `membership_transfers.status`, `payrolls.branch_id`, cột `version` cho 4 bảng; ADJUST kho mang dấu; CHECK chuẩn hóa email, số điện thoại, vector 128 chiều; thêm chỉ mục khóa ngoại; ghi rõ cách khóa bản ghi (NF6), ngoại lệ xóa cứng `face_embeddings`, phân biệt `users.status = LOCKED` với `locked_until` |
 | 01/11/2026 | Sau review toàn dự án: schema ban đầu tạo đủ 39 bảng một lần, migration về sau dùng dải `V9_xx`; sĩ số tính cả chỗ ATTENDED, NO_SHOW |
 | 02/11/2026 | Cả nhóm duyệt ERD bản 2 tại buổi kick-off; `TRANSFER_FEE` mặc định 200.000 đ |
+| 03/11/2026 | Theo [ADR 0005](../decisions/0005-erd-v2.md) mục 25–32: tham số `SESSION_WARNING_THRESHOLD`; công thức `end_date`; gói SESSION, PT hết buổi kéo gói nối tiếp; tác vụ nền chuyển EXPIRED (00:00, chạy bù khi khởi động) trước khi kích hoạt UPCOMING; chặn bảo lưu, chuyển nhượng gói hết buổi; giới hạn số buổi PT đặt trước; để mở trường hợp tác vụ 00:00 bị lỗi |
