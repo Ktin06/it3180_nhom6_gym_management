@@ -5,7 +5,7 @@
 - Mốc đối chiếu local: `main` tại `fcf6d8c`.
 - Trạng thái: đã rà soát nguồn; các đề xuất bố cục và câu hỏi bên dưới chưa phải quyết định của nhóm.
 
-> Cập nhật 04/11/2026: nhánh đã cập nhật main `446ceb3`. Nội dung ngày rà soát 03/11 bên dưới là ảnh chụp trước PR #82/#84; quy tắc gia hạn SESSION/PT và yêu cầu kiểm tra bằng Draw.io đã có bổ sung. Xem [điểm cần hoàn tất trước khi duyệt](huong-dan-wireframe-f2-f3.md) và ưu tiên bản chốt phạm vi hiện hành khi triển khai.
+> Cập nhật 04/11/2026: nhánh đã cập nhật main `446ceb3`. Quy tắc gia hạn SESSION/PT theo PR #82 đã được phản ánh trong sơ đồ bán/gia hạn; cả bốn file đã qua vòng mở/xuất/mở lại bằng Draw.io theo checklist #84. Xem [kết quả kiểm tra trước khi bàn giao](huong-dan-wireframe-f2-f3.md); trạng thái issue/PR trong lần rà soát 03/11 bên dưới là ảnh chụp lịch sử.
 - Tài liệu này chuẩn bị cho wireframe, không thay thế đặc tả, user story hay hợp đồng API.
 
 > Phạm vi đang thực hiện là **wireframe #18**: đủ danh sách/tìm kiếm hội viên, form hồ sơ, danh mục gói, bán và gia hạn. Các câu hỏi về phạm vi code, DTO và tích hợp #27 bên dưới là việc cần chuẩn bị cho giai đoạn triển khai, **không phải điều kiện chặn việc vẽ #18**. Bố cục và thao tác được đề xuất trong wireframe để nhóm review; không tự coi đó là hợp đồng API đã chốt.
@@ -69,7 +69,7 @@ Trạng thái issue/PR là ảnh chụp tại ngày rà soát, cần kiểm tra 
 - Ngừng bán là `packages.status = INACTIVE`, không xóa cứng. Gói toàn chuỗi để v4 theo #6, không đưa lựa chọn này vào form Sprint 1.
 - `packages.status = ACTIVE` nghĩa là sản phẩm đang bán, khác việc kích hoạt `memberships` sau thanh toán.
 - Khi vẽ bán/gia hạn: giá và tổng tiền lấy từ server; thanh toán tại quầy; gói mua chỉ được kích hoạt sau khi hóa đơn PAID. Không tự dựng thanh toán online.
-- Gia hạn khi gói cũ còn hạn: gói mới bắt đầu sau ngày hết hạn của gói cũ, có trạng thái UPCOMING trong thời gian chờ. Cách thể hiện các bước chờ thanh toán/UPCOMING cần đối chiếu đặc tả F3/F5 trước khi hoàn tất luồng.
+- Gia hạn: TIME nối tiếp sau ngày hết hạn gói cũ; SESSION/PT có thể hết hiệu lực trước ngày hết hạn vì hết buổi. SESSION hết buổi thì gói UPCOMING được kéo về ngày mai; PT xác nhận buổi cuối thì kéo về hôm đó, giữ nguyên số ngày hiệu lực. Chỉ kích hoạt/xếp UPCOMING sau khi hóa đơn PAID; ngày và trạng thái được xác định lại ở thời điểm thanh toán theo bản chốt phạm vi hiện hành.
 
 ## 4. Danh sách màn hình đề xuất cho bước vẽ
 

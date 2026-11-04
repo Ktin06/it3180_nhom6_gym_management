@@ -36,10 +36,12 @@ Mỗi file có khung desktop bên trái, khung mobile rộng 360px bên phải, 
 
 Khi review, kiểm tra bố cục và đủ luồng của #18, quyền thao tác, nội dung thông báo, phương án mobile và điểm bàn giao F3 → F5. Các câu hỏi DTO/API được giữ trong bản rà soát cho #27; chưa gửi yêu cầu xác nhận cho người khác và chưa đóng issue.
 
-## Điểm cần hoàn tất trước khi chuyển PR sang sẵn sàng duyệt
+## Kết quả kiểm tra trước khi bàn giao
 
-- Main vừa cập nhật quy tắc SESSION/PT hết buổi trước hạn (PR #82). Ví dụ TIME hết hạn 20/11 và nối tiếp 21/11 trong hình vẫn đúng. Tuy nhiên, ghi chú chung “gói mới bắt đầu sau ngày hết hạn gói cũ” trong sơ đồ bán/gia hạn cần đổi thành “sau khi gói cũ hết hiệu lực”: SESSION hết buổi kéo gói UPCOMING về ngày mai; PT hết buổi kéo gói UPCOMING về hôm nay, giữ nguyên số ngày hiệu lực. Quyết định chuẩn nằm trong bản chốt phạm vi và ADR 0005, không dùng ghi chú cũ để triển khai hai loại này.
-- Mở sơ đồ trong Draw.io Editor để chỉnh ghi chú trên, lưu lại `.drawio.svg` và kiểm tra cả hình xuất lẫn mô hình nhúng. Checklist review mới của nhóm yêu cầu sửa sơ đồ bằng Draw.io; chưa thực hiện kiểm tra mở/lưu thực tế trong editor ở lượt bàn giao này.
-- Đã kiểm tra XML và mô hình không rỗng, nội dung nhúng khớp hình SVG, ảnh render desktop/mobile và tiếng Việt. Chưa đánh dấu kiểm tra Draw.io thực tế là đạt.
+- Đã cập nhật ghi chú bán/gia hạn theo bản chốt phạm vi và ADR 0005 sau PR #82: phân biệt TIME với SESSION/PT dùng hết buổi trước hạn; gói nối tiếp chỉ được kích hoạt/xếp UPCOMING sau khi hóa đơn PAID. Ví dụ TIME hết hạn 20/11 và nối tiếp 21/11 trong hình vẫn đúng.
+- Đã mở cả bốn `.drawio.svg` trong Draw.io ở chế độ nhúng, xuất SVG có dữ liệu sơ đồ và mở lại các bản xuất thành công. Mô hình mở lại lần lượt có 38 ô ở bán/gia hạn, 53 ô ở danh sách, 46 ô ở form hội viên và 65 ô ở danh mục gói.
+- Ghi chú gia hạn được cập nhật bằng chức năng merge của editor Draw.io rồi xuất lại file bán/gia hạn; nội dung thay đổi vẫn đúng sau khi mở lại bản xuất. Ba file khác giữ bản đã review; bản xuất của chúng chỉ phục vụ kiểm tra trong thư mục tạm.
+- Đã kiểm tra XML, dữ liệu sơ đồ nhúng, ảnh render và tiếng Việt. Tài nguyên editor chính thức được chạy tạm qua localhost; không thêm dependency vào dự án.
+- PR #89 giữ nguyên nhánh và lịch sử review; bản cập nhật được push lên cùng nhánh. Người duyệt chính là Gia Bảo (`GamBug`). Chỉ merge sau khi đủ điều kiện của repo.
 
-PR được nộp dạng draft để nhóm xem trước; hoàn tất hai bước trên trước khi yêu cầu merge. Các file frontend/backend không thay đổi, nên không chạy lại build hoặc kiểm thử ứng dụng cho thay đổi tài liệu này.
+Các file frontend/backend không thay đổi, nên không chạy lại build hoặc kiểm thử ứng dụng cho thay đổi tài liệu này. Kết quả CI của PR theo GitHub; không suy ra CI xanh từ kiểm tra local.
