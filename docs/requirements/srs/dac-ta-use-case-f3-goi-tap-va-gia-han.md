@@ -26,7 +26,7 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 | 3 | Sửa thông tin gói tập | Quản lý chi nhánh |
 | 4 | Ngừng bán gói tập | Quản lý chi nhánh |
 | 5 | Bán gói tập tại quầy (đăng ký mới hoặc gia hạn) | Lễ tân |
-| 6 | Xem gói tập của một hội viên | Lễ tân, Quản lý, Chủ chuỗi (theo chi nhánh); Hội viên (chỉ gói của mình – F7) |
+| 6 | Xem gói tập của một hội viên | Lễ tân, Quản lý (xem trong hồ sơ hội viên – phạm vi F2/F4); Hội viên (chỉ xem gói của mình – phạm vi F7 cổng hội viên). F3 không có use case riêng cho năng lực này vì chỉ tập trung vào quản lý danh mục và bán gói. |
 
 **Phạm vi Sprint 1:** Thực hiện UC-F3.1 đến UC-F3.5 (quản lý danh mục và bán gói tại quầy). Chức năng hội viên tự mua/gia hạn từ cổng hội viên (tạo hóa đơn PENDING) thực hiện ở F7 – Sprint 2.
 
@@ -436,19 +436,25 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
    - a. Hội viên `memberId` tồn tại và `status = ACTIVE`.
    - b. Gói `packageId` tồn tại, `status = ACTIVE`, và có thể dùng tại chi nhánh này (`branch_id` khớp hoặc rỗng).
    - c. Kiểm tra ràng buộc gói đang hiệu lực và gói gia hạn nối tiếp:
-     - *Trường hợp 1 (Mua mới):* Hội viên chưa có gói cùng loại (`package_type`) đang `ACTIVE` hoặc `FROZEN` tại chi nhánh này: hệ thống cho phép tạo gói (ràng buộc đảm bảo qua chỉ mục CSDL `uq_one_active_per_type`).
+     - *Trường hợp 1 (Mua mới):* Hội viên chưa có gói cùng loại (`package_type`) đang `ACTIVE` hoặc `FROZEN` tại chi nhánh này (hoặc toàn chuỗi, xét theo `branch_id IS NOT DISTINCT FROM`): hệ thống kiểm tra thêm điều kiện hội viên **chưa có gói nào cùng loại ở trạng thái `PENDING`** đang chờ thanh toán. Nếu đã có gói `PENDING` cùng loại, từ chối và chuyển sang ngoại lệ **E6d** (422 Unprocessable Content); nếu chưa có, cho phép tạo gói (ràng buộc đảm bảo qua chỉ mục CSDL `uq_one_active_per_type` và kiểm tra ứng dụng).
      - *Trường hợp 2 (Gia hạn nối tiếp):* Hội viên đã có gói cùng loại đang `ACTIVE` hoặc `FROZEN`: hệ thống kiểm tra bằng mã nghiệp vụ xem hội viên đã có gói nào khác cùng loại ở trạng thái `UPCOMING` hoặc `PENDING` chưa. Nếu **đã có**, từ chối và chuyển sang ngoại lệ **E6d** (422 Unprocessable Content); nếu **chưa có**, cho phép tạo gói gia hạn (xem luồng A1 và BR-F3-11).
 5. Hệ thống tính tổng tiền ở server (S7): `subtotal = package.price`; ở v1 (Sprint 1) chưa áp dụng khuyến mãi F14 nên `discount = 0`; `total = subtotal`.
 6. Hệ thống tạo trong một giao dịch `@Transactional`:
    - Dòng `invoices` với `status = PENDING`, `source = COUNTER`, `code` sinh tự động (`discount = 0`, `total = subtotal`, `promotion_id = NULL`).
    - Dòng `invoice_items` với `unit_price = packages.price` tại thời điểm bán, `description` chép từ `packages.name`, `discount_amount = 0`.
-   - Dòng `memberships` với `status = PENDING`, `package_type` chép từ `packages.type`, `total_sessions` chép từ `packages.session_count`, `remaining_sessions = total_sessions`, `freeze_count = 0`, `start_date` dự kiến = ngày hôm nay (hoặc ngay sau `end_date` của gói cũ cùng loại nếu đang gia hạn nối tiếp).
+   - Dòng `memberships` với `status = PENDING`, `package_type` chép từ `packages.type`, `total_sessions` chép từ `packages.session_count`, `remaining_sessions = total_sessions`, `freeze_count = 0`:
+     - `start_date` dự kiến = `:today` (nếu mua mới; hoặc ngay sau `end_date` của gói cũ nếu đang gia hạn gói TIME hoặc gói SESSION còn buổi; hoặc `:today + 1 ngày` nếu gói SESSION cũ đã về 0 buổi).
+     - `end_date` dự kiến = `start_date + packages.duration_days - 1`.
 7. Hệ thống trả `201 Created` kèm `InvoiceDto` bao gồm `invoiceId` và `membershipId` để lễ tân chuyển sang màn hình thanh toán (F5).
 8. Sau khi F5 xác nhận thu tiền: hệ thống cập nhật `invoices.status = PAID`, `memberships.status = ACTIVE` hoặc `UPCOMING`, tính lại `start_date` và `end_date` theo số ngày hiệu lực đã chốt lúc tạo hóa đơn (`số ngày = memberships.end_date - memberships.start_date + 1`), tuyệt đối không đọc lại `packages.duration_days` tại thời điểm thanh toán để bảo đảm tính toàn vẹn nếu gói tập bị sửa trong thời gian chờ (BR-F3-06, BR-F5-04).
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
 - **A1 – Gia hạn gói khi gói cũ còn hạn (UPCOMING):**
-  - Tại bước 4c, hội viên đã có gói cùng loại đang ACTIVE. Nếu bán thêm gói mới cùng loại, hệ thống cho phép nhưng gói mới ở trạng thái PENDING; khi thanh toán xong gói mới chuyển UPCOMING (không phải ACTIVE), `start_date` = `end_date + 1 ngày` của gói cũ.
+  - Tại bước 4c, hội viên đã có gói cùng loại đang `ACTIVE` hoặc `FROZEN`. Nếu bán thêm gói mới cùng loại, hệ thống cho phép nhưng gói mới ở trạng thái `PENDING`:
+    - Nếu gói cũ là gói `TIME` (hoặc `SESSION`/`PT` còn buổi `remaining_sessions > 0`): `start_date` dự kiến = `end_date_gói_cũ + 1 ngày`.
+    - Nếu gói cũ là gói `SESSION` (hoặc `PT`) đã về 0 buổi (`remaining_sessions = 0`, vẫn giữ `ACTIVE` đến hết ngày hôm nay): `start_date` dự kiến = ngày mai (`:today + 1 ngày`).
+    - `end_date` dự kiến = `start_date + packages.duration_days - 1`.
+  - Khi thanh toán xong (F5), gói mới chuyển `UPCOMING` (chờ đến `start_date` để tự động kích hoạt `ACTIVE`).
   - Luồng tiếp tục từ bước 5.
 - **E1 – Dữ liệu đầu vào không hợp lệ (400 Bad Request):**
   - Tại bước 3, thiếu `memberId` hoặc `packageId`, hoặc vi phạm Bean Validation.
@@ -462,9 +468,9 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 - **E4 – Hội viên hoặc gói không tồn tại (404 Not Found):**
   - Tại bước 4a hoặc 4b, `memberId` hoặc `packageId` không tìm thấy.
   - Hệ thống trả `ProblemDetail` (404): *"Hội viên không tồn tại trên hệ thống."* hoặc *"Gói tập không tồn tại trên hệ thống."*
-- **E5 – Xung đột phiên bản (409 Conflict):**
-  - Tại bước 6, hai lễ tân cùng bán cho hội viên cùng lúc, `memberships.version` bị xung đột (`@Version`).
-  - Hệ thống trả `ProblemDetail` (409): *"Dữ liệu gói tập vừa được cập nhật bởi người khác. Vui lòng thử lại."*
+- **E5 – Xung đột dữ liệu khi hai nhân viên thao tác đồng thời (409 Conflict / 422):**
+  - Tại bước 4c, hệ thống thực hiện khóa bi quan bản ghi hội viên `members` bằng `SELECT ... FOR UPDATE` (NF6). Nếu hai lễ tân cùng thao tác tạo gói cho cùng một hội viên tại cùng một thời điểm, request thứ hai phải chờ request đầu hoàn tất giao dịch. Sau khi request đầu commit (đã tạo 1 gói `PENDING`), request thứ hai đọc lại dữ liệu sẽ bị chặn tại bước 4c và trả về lỗi **422 Unprocessable Content (E6d)** do đã có gói `PENDING` cùng loại.
+  - Ngoại lệ `409 Conflict` chỉ phát sinh khi có xung đột khóa lạc quan `@Version` trên dữ liệu hội viên `members` (nếu thông tin hội viên bị cập nhật đồng thời bởi tiến trình khác).
 - **E6a – Hội viên không hoạt động (422 Unprocessable Content):**
   - Tại bước 4a, hội viên có `status = INACTIVE`.
   - Hệ thống trả `ProblemDetail` (422): *"Hội viên đã ngừng hoạt động, không thể bán gói tập."*
@@ -474,18 +480,22 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 - **E6c – Gói không áp dụng cho chi nhánh (422 Unprocessable Content):**
   - Tại bước 4b, `packages.branch_id` không rỗng và không khớp với chi nhánh lễ tân.
   - Hệ thống trả `ProblemDetail` (422): *"Gói tập này không áp dụng tại chi nhánh của bạn."*
-- **E6d – Hội viên đã có gói UPCOMING cùng loại (422 Unprocessable Content):**
-  - Tại bước 4c, hội viên đã có gói cùng loại ở trạng thái UPCOMING (đã gia hạn nối tiếp một lần). Không cho gia hạn thêm lần nữa khi gói UPCOMING vẫn còn.
-  - Hệ thống trả `ProblemDetail` (422): *"Hội viên đã có gói gia hạn nối tiếp đang chờ kích hoạt. Không thể gia hạn thêm."*
+- **E6d – Hội viên đã có gói UPCOMING hoặc PENDING cùng loại (422 Unprocessable Content):**
+  - Tại bước 4c, hội viên đã có gói cùng loại ở trạng thái `UPCOMING` (đã gia hạn nối tiếp một lần) hoặc đang có một gói `PENDING` chờ thanh toán. Không cho phép tạo thêm gói khi gói `UPCOMING` hoặc `PENDING` vẫn còn để tránh xung đột quyền lợi và vi phạm quy tắc một gói gia hạn.
+  - Hệ thống trả `ProblemDetail` (422): *"Hội viên đã có gói cùng loại đang chờ thanh toán hoặc chờ kích hoạt. Không thể tạo thêm gói mới."*
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
 - **BR-F3-10:** Một hội viên được giữ đồng thời nhiều gói khác loại (TIME + PT), nhưng mỗi loại tối đa một gói ACTIVE hoặc FROZEN tại mỗi chi nhánh. Ràng buộc này thực thi trực tiếp tại cơ sở dữ liệu qua chỉ mục duy nhất có điều kiện `uq_one_active_per_type` (`UNIQUE NULLS NOT DISTINCT` trên `member_id, package_type, branch_id` WHERE `status IN ('ACTIVE','FROZEN')`). ([Bản chốt phạm vi – Gói tập](../ban-chot-pham-vi.md))
-- **BR-F3-11:** Gia hạn khi gói cũ còn hạn: gói mới sau khi thanh toán ở trạng thái UPCOMING, `start_date = end_date_gói_cũ + 1 ngày`. Trong thời gian chờ, hội viên vẫn dùng gói cũ. Vì chỉ mục CSDL `uq_one_active_per_type` chỉ lọc trên ACTIVE/FROZEN, mã nghiệp vụ (Service) bắt buộc phải kiểm tra để chặn: hội viên không thể có đồng thời từ hai gói UPCOMING hoặc PENDING cùng loại (chỉ cho phép tối đa 1 gói gia hạn đang chờ kích hoạt). ([Bản chốt phạm vi – Gói tập](../ban-chot-pham-vi.md))
+- **BR-F3-11:** Gia hạn khi gói cũ còn hạn: gói mới sau khi thanh toán ở trạng thái `UPCOMING`.
+  - Quy tắc xác định ngày bắt đầu (`start_date`):
+    - *Trường hợp thông thường:* Nếu gói cũ là gói `TIME` hoặc gói `SESSION`/`PT` vẫn còn buổi (`remaining_sessions > 0`), gói mới bắt đầu nối tiếp: `start_date = end_date_gói_cũ + 1 ngày`.
+    - *Trường hợp đặc biệt (gói `SESSION` đã hết buổi):* Nếu gói `ACTIVE` cũ là gói `SESSION` đã hết buổi (`remaining_sessions = 0`, vẫn giữ `ACTIVE` đến hết ngày hôm nay để bảo đảm quyền lợi check-in trong ngày theo `ban-chot-pham-vi.md` dòng 93), khi gia hạn gói mới bắt đầu từ **ngày mai** (`start_date = :today + 1 ngày`) thay vì chờ đến hết `end_date_gói_cũ + 1 ngày`.
+  - Trong thời gian chờ đến `start_date`, gói mới ở trạng thái `UPCOMING`, hội viên vẫn dùng gói cũ. Vì chỉ mục CSDL `uq_one_active_per_type` chỉ lọc trên `ACTIVE`/`FROZEN`, mã nghiệp vụ (Service) bắt buộc phải kiểm tra để chặn: hội viên không thể có đồng thời từ hai gói `UPCOMING` hoặc `PENDING` cùng loại (chỉ cho phép tối đa 1 gói gia hạn đang chờ kích hoạt). ([Bản chốt phạm vi – Gói tập](../ban-chot-pham-vi.md), [ADR 0005](../../decisions/0005-erd-v2.md) mục 27)
 - **BR-F3-12:** Gói PENDING chuyển UPCOMING hoặc ACTIVE khi hóa đơn chuyển PAID (do F5 kích hoạt). Ngày bắt đầu (`start_date`) và ngày kết thúc (`end_date`) tính lại tại thời điểm thanh toán, không phải thời điểm tạo hóa đơn. ([Bản chốt phạm vi – Gói tập](../ban-chot-pham-vi.md))
 - **BR-F3-13:** `invoice_items.unit_price` chép từ `packages.price` tại thời điểm tạo hóa đơn và không thay đổi kể cả khi giá gói được sửa sau đó (S7). ([Thiết kế dữ liệu](../../design/erd/thiet-ke-du-lieu.md))
 - **BR-F3-14:** Hóa đơn tại quầy (`source = COUNTER`) **không tự hủy**; chỉ hóa đơn từ cổng hội viên (`source = MEMBER_PORTAL`) mới tự hủy sau `PENDING_INVOICE_TTL_DAYS` ngày. ([Bản chốt phạm vi – Gói tập](../ban-chot-pham-vi.md))
 - **CONFIG-01:** `PENDING_INVOICE_TTL_DAYS` – đọc từ `system_configs` với key `PENDING_INVOICE_TTL_DAYS` (giá trị mặc định: `3`). Không áp dụng cho hóa đơn tại quầy (quy tắc số 15).
-- **Toàn vẹn đồng thời (NF6):** Khi tạo `memberships`, khóa dòng `members` bằng `SELECT ... FOR UPDATE` để tránh hai giao dịch đồng thời tạo hai gói ACTIVE cùng loại cho cùng hội viên. Nếu `@Version` xung đột → trả 409.
+- **Toàn vẹn đồng thời (NF6):** Khi tạo `memberships` (bước 4), Service thực hiện khóa bi quan dòng cha `members` bằng `SELECT ... FOR UPDATE` (theo `ADR 0005` mục 21). Nhờ đó, hai giao dịch đồng thời tạo gói cho cùng một hội viên sẽ tuần tự hóa: giao dịch thứ hai đợi giao dịch thứ nhất commit rồi mới kiểm tra bước 4c, phát hiện đã có gói `PENDING` cùng loại và từ chối 422 (E6d). Vì bản ghi `memberships` được tạo mới (`INSERT`), nó không gây xung đột `@Version` trên `memberships.version`.
 - **Bảo mật (S7):** Tổng tiền (`total`) luôn tính ở server; không tin giá trị `total` do client gửi lên.
 - **Hiệu năng (NF1):** API tạo hóa đơn phản hồi dưới 2 giây trong điều kiện bình thường.
 
@@ -589,10 +599,10 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
   - **Given** Hội viên `id=123` có gói TIME `status=ACTIVE` nhưng chưa có gói PT
   - **When** Gọi `POST /api/v1/invoices` với `memberId=123`, `packageId=5` (gói PT); xác nhận thu tiền
   - **Then** `memberships.status = ACTIVE` với `package_type = PT`; gói TIME cũ không bị ảnh hưởng
-- **Kịch bản 5: Xung đột phiên bản khi hai lễ tân bán cùng lúc (409)**
-  - **Given** Hai lễ tân cùng bán gói TIME cho hội viên `id=123` đúng lúc hội viên chưa có gói nào
-  - **When** Cả hai request gần như đồng thời đến server
-  - **Then** Một request thành công `201`; request kia nhận `409 Conflict`: *"Dữ liệu gói tập vừa được cập nhật bởi người khác. Vui lòng thử lại."*
+- **Kịch bản 5: Hai lễ tân cùng bán gói cùng loại cho một hội viên tại cùng thời điểm (422 chặn tuần tự qua SELECT FOR UPDATE)**
+  - **Given** Hội viên `id=123` chưa có gói TIME nào; hai lễ tân A và B cùng mở form và bấm tạo gói TIME cho hội viên này gần như đồng thời
+  - **When** Cả hai request đến server; request A nhận khóa `SELECT ... FOR UPDATE` trên dòng `members id=123` trước, request B đợi
+  - **Then** Request A thành công trả về `201 Created` tạo hóa đơn và gói `PENDING`; request B sau đó đọc lại thấy hội viên đã có gói TIME `status=PENDING` nên bị từ chối và trả về `422 Unprocessable Content`: *"Hội viên đã có gói cùng loại đang chờ thanh toán hoặc chờ kích hoạt. Không thể tạo thêm gói mới."*
 
 ---
 

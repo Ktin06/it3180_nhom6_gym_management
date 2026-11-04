@@ -32,7 +32,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 | --- | --- | --- | --- | --- |
 | **UC-F5.1** | Sinh mã VietQR và xem chi tiết thanh toán hóa đơn | Lễ tân, Quản lý chi nhánh | Cao | Sprint 1 |
 | **UC-F5.2** | Ghi nhận thanh toán tại quầy và kích hoạt dịch vụ | Lễ tân, Quản lý chi nhánh | Cao | Sprint 1 |
-| **UC-F5.3** | Tra cứu và quản lý hóa đơn tại quầy | Lễ tân, Quản lý chi nhánh | Cao | Sprint 1 |
+| **UC-F5.3** | Tra cứu và quản lý hóa đơn tại quầy | Lễ tân, Quản lý chi nhánh, Chủ chuỗi | Cao | Sprint 1 |
 | **UC-F5.4** | In và xuất hóa đơn PDF | Lễ tân, Quản lý chi nhánh, Hội viên | Trung bình | Sprint 1 |
 | **UC-F5.5** | Hoàn tiền hóa đơn (Refund) | Quản lý chi nhánh | Trung bình | Sprint 1 / Sprint 2 |
 
@@ -150,8 +150,11 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   - Bảng `invoices`: Cập nhật `status = PAID`, `paid_at = now()`.
   - Bảng `memberships` (nếu hóa đơn chứa dòng gói tập `PACKAGE`):
     - Xác định số ngày hiệu lực của gói từ chính bản ghi `memberships` PENDING: `số ngày = (memberships.end_date - memberships.start_date + 1)` (không đọc lại `packages.duration_days` từ bảng `packages` để tránh bị ảnh hưởng nếu danh mục gói bị sửa đổi sau khi lập hóa đơn).
-    - Chuyển `status = ACTIVE` (nếu hội viên mua mới, chưa có gói cùng loại đang `ACTIVE` hoặc `FROZEN` tại chi nhánh); `start_date` cập nhật bằng ngày thanh toán, `end_date = start_date + số ngày - 1`.
-    - Chuyển `status = UPCOMING` (nếu là gói gia hạn nối tiếp khi hội viên đã có gói cùng loại đang `ACTIVE` hoặc `FROZEN` theo BR-F3-11); `start_date = end_date_gói_cũ + 1 ngày`, `end_date = start_date + số ngày - 1`.
+    - Chuyển `status = ACTIVE` (nếu hội viên mua mới, chưa có gói cùng loại đang `ACTIVE` hoặc `FROZEN` tại chi nhánh); `start_date` cập nhật bằng ngày thanh toán (`:today` theo giờ Việt Nam `Asia/Ho_Chi_Minh`), `end_date = start_date + số ngày - 1`.
+    - Chuyển `status = UPCOMING` (nếu là gói gia hạn nối tiếp khi hội viên đã có gói cùng loại đang `ACTIVE` hoặc `FROZEN` theo BR-F3-11):
+      + Nếu gói cũ là gói `TIME` hoặc gói `SESSION`/`PT` còn buổi (`remaining_sessions > 0`): `start_date = end_date_gói_cũ + 1 ngày`.
+      + Nếu gói cũ là gói `SESSION`/`PT` đã hết buổi (`remaining_sessions = 0`, vẫn giữ `ACTIVE` đến hết ngày hôm nay): `start_date = :today + 1 ngày` (bắt đầu từ ngày mai theo `ban-chot-pham-vi.md` dòng 85 và `ADR 0005` mục 27).
+      + `end_date = start_date + số ngày - 1`.
 - **Thất bại:** Dữ liệu giữ nguyên vẹn (rollback giao dịch); không có bản ghi `payments` rác.
 
 #### C. Luồng sự kiện chính (Basic Flow / Happy Path)
@@ -162,12 +165,16 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 5. Hệ thống thực hiện các thay đổi dữ liệu trong cùng một giao dịch an toàn `@Transactional`:
    - a. Khóa lạc quan kiểm tra phiên bản `@Version` trên bản ghi `invoices` để chống ghi đè đồng thời.
    - b. Tạo bản ghi `payments`: `invoice_id`, `method`, `amount = invoices.total`, `status = CONFIRMED`, `transaction_ref`, `received_by = current_user.id`, `paid_at = now()`.
-   - c. Cập nhật `invoices`: `status = PAID`, `paid_at = now()`.
+   - c. Cập nhật `invoices`: `status = PAID`, `paid_at = now()`. Trong Service, gọi `invoiceRepository.saveAndFlush(invoice)` để kích hoạt kiểm tra khóa lạc quan ngay lập tức; nếu xung đột phiên bản, bắt `OptimisticLockingFailureException` và ném `ConflictException` (409).
    - d. Kích hoạt dịch vụ: Tra cứu các dòng `invoice_items` của hóa đơn:
      - Nếu có dòng `item_type = PACKAGE`: Tra cứu bản ghi `memberships` liên kết qua `invoice_item_id`.
+     - **Kiểm tra lại điều kiện tại thời điểm thanh toán (Re-check):** Hệ thống kiểm tra xem hội viên đã có gói nào khác cùng loại ở trạng thái `UPCOMING` chưa (do một hóa đơn khác vừa được thanh toán trước đó). Nếu đã có, từ chối giao dịch và chuyển sang ngoại lệ **E6b** (422 Unprocessable Content).
      - Xác định số ngày hiệu lực của gói đã chốt lúc tạo hóa đơn: `số ngày = (memberships.end_date - memberships.start_date + 1)` (hệ thống tính toán từ 2 mốc ngày dự kiến đã lưu lúc tạo PENDING, **tuyệt đối không đọc lại `packages.duration_days`** từ bảng `packages` để tránh trường hợp quản lý chi nhánh chỉnh sửa cấu hình gói trong danh mục trong thời gian hóa đơn đang chờ thanh toán).
-     - Nếu hội viên chưa có gói cùng loại đang `ACTIVE` hoặc `FROZEN`: cập nhật `memberships.status = ACTIVE`, `start_date = current_date`, `end_date = start_date + số ngày - 1`.
-     - Nếu hội viên đã có gói cùng loại đang `ACTIVE` hoặc `FROZEN`: cập nhật `memberships.status = UPCOMING`, `start_date = end_date_gói_cũ + 1 ngày`, `end_date = start_date + số ngày - 1` (theo BR-F3-11).
+     - Nếu hội viên chưa có gói cùng loại đang `ACTIVE` hoặc `FROZEN`: cập nhật `memberships.status = ACTIVE`, `start_date = :today` (ngày hiện tại tính theo múi giờ `Asia/Ho_Chi_Minh`, không dùng `CURRENT_DATE` UTC của PostgreSQL), `end_date = start_date + số ngày - 1`.
+     - Nếu hội viên đã có gói cùng loại đang `ACTIVE` hoặc `FROZEN`: cập nhật `memberships.status = UPCOMING`:
+       + Nếu gói cũ là `TIME` hoặc `SESSION`/`PT` còn buổi (`remaining_sessions > 0`): `start_date = end_date_gói_cũ + 1 ngày`.
+       + Nếu gói cũ là `SESSION`/`PT` đã hết buổi (`remaining_sessions = 0`): `start_date = :today + 1 ngày` (bắt đầu từ ngày mai).
+       + `end_date = start_date + số ngày - 1` (theo BR-F3-11, BR-F5-04).
 6. Hệ thống trả về `200 OK` kèm `PaymentConfirmationDto` thông báo xác nhận thanh toán thành công và trạng thái gói tập đã được kích hoạt.
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
@@ -184,16 +191,20 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   - Tại bước 4, không tìm thấy hóa đơn theo `id`.
   - Hệ thống trả `ProblemDetail` (404): *"Hóa đơn không tồn tại trên hệ thống."*
 - **E5 – Xung đột dữ liệu đồng thời (409 Conflict):**
-  - Tại bước 5a, hai lễ tân cùng mở màn hình và cùng bấm xác nhận thu tiền cho cùng một hóa đơn; phiên bản `invoices.version` bị xung đột (`@Version`).
-  - Hệ thống hủy giao dịch của người bấm sau và trả `ProblemDetail` (409): *"Hóa đơn này vừa được xác nhận thanh toán bởi một nhân viên khác."*
-- **E6 – Hóa đơn không ở trạng thái chờ thanh toán (422 Unprocessable Content):**
+  - Tại bước 5a/5c, hai lễ tân cùng mở màn hình và cùng bấm xác nhận thu tiền cho cùng một hóa đơn; phiên bản `invoices.version` bị xung đột (`@Version`).
+  - Trong Service, hệ thống gọi `invoiceRepository.saveAndFlush(invoice)`, bắt `OptimisticLockingFailureException` và ném `ConflictException` (409) với thông báo riêng: *"Hóa đơn này vừa được xác nhận thanh toán bởi một nhân viên khác."* (thay vì thông báo chung của GlobalExceptionHandler).
+- **E6a – Hóa đơn không ở trạng thái chờ thanh toán (422 Unprocessable Content):**
   - Tại bước 4, hóa đơn không có `status = PENDING` (đã là `PAID`, `CANCELLED` hoặc `REFUNDED`).
   - Hệ thống trả `ProblemDetail` (422): *"Hóa đơn đã được thanh toán hoặc đã bị hủy trước đó."*
+- **E6b – Hội viên đã có gói cùng loại đang chờ kích hoạt (422 Unprocessable Content):**
+  - Tại bước 5d, kiểm tra lại điều kiện kích hoạt: nếu hội viên đã có một gói khác cùng loại ở trạng thái `UPCOMING` (do một hóa đơn khác vừa được xác nhận thanh toán trước đó), hệ thống từ chối kích hoạt và trả `ProblemDetail` (422): *"Hội viên đã có gói cùng loại đang chờ kích hoạt (UPCOMING). Không thể kích hoạt thêm gói này. Vui lòng liên hệ quản lý để kiểm tra hoặc hoàn tiền hóa đơn."*
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
 - **BR-F5-03:** Chỉ Lễ tân và Quản lý chi nhánh mới có quyền xác nhận đã thu tiền tại quầy (S7, [ADR 0004](../../decisions/0004-thanh-toan-chi-tai-quay.md)).
-- **BR-F5-04:** Gói tập chỉ kích hoạt (`ACTIVE` hoặc `UPCOMING`) khi và chỉ khi hóa đơn chuyển sang trạng thái `PAID`. Ngày bắt đầu và ngày kết thúc của gói được tính toán lại tại chính thời điểm thanh toán thành công (BR-F3-12). Số ngày hiệu lực của gói được bảo toàn nguyên vẹn dựa trên khoảng ngày dự kiến đã lưu lúc lập hóa đơn (`memberships.end_date - memberships.start_date + 1`), không bị ảnh hưởng nếu Quản lý chi nhánh thay đổi `packages.duration_days` trong danh mục sau đó (BR-F3-06). Nếu hội viên đã có gói cùng loại đang `ACTIVE` hoặc `FROZEN`, gói mới bắt buộc chuyển `UPCOMING` nối tiếp ngày hết hạn của gói cũ để đảm bảo ràng buộc duy nhất `uq_one_active_per_type` (BR-F3-10, BR-F3-11).
-- **BR-F5-05:** Toàn vẹn đồng thời (NF6): Bảng `invoices` sử dụng khóa lạc quan `@Version`. Nếu hai nhân viên cùng xác nhận một hóa đơn, chỉ một giao dịch thành công, giao dịch còn lại nhận lỗi 409.
+- **BR-F5-04:** Gói tập chỉ kích hoạt (`ACTIVE` hoặc `UPCOMING`) khi và chỉ khi hóa đơn chuyển sang trạng thái `PAID`. Ngày bắt đầu và ngày kết thúc của gói được tính toán lại tại chính thời điểm thanh toán thành công theo ngày hiện tại (`:today` theo múi giờ `Asia/Ho_Chi_Minh` – BR-F3-12). Số ngày hiệu lực của gói được bảo toàn nguyên vẹn dựa trên khoảng ngày dự kiến đã lưu lúc lập hóa đơn (`memberships.end_date - memberships.start_date + 1`), không bị ảnh hưởng nếu Quản lý chi nhánh thay đổi `packages.duration_days` trong danh mục sau đó (BR-F3-06).
+  - Nếu hội viên đã có gói cùng loại đang `ACTIVE` hoặc `FROZEN`, gói mới bắt buộc chuyển `UPCOMING` để đảm bảo ràng buộc duy nhất `uq_one_active_per_type` (BR-F3-10, BR-F3-11).
+  - Quy tắc xác định `start_date` cho gói `UPCOMING`: nếu gói cũ là `TIME` hoặc `SESSION`/`PT` còn buổi, `start_date = end_date_gói_cũ + 1 ngày`; nếu gói cũ là `SESSION`/`PT` đã về 0 buổi (`remaining_sessions = 0`, vẫn giữ `ACTIVE` hết hôm nay), gói mới bắt đầu từ ngày mai: `start_date = :today + 1 ngày` (`ban-chot-pham-vi.md` dòng 85, `ADR 0005` mục 27).
+- **BR-F5-05:** Toàn vẹn đồng thời (NF6): Bảng `invoices` sử dụng khóa lạc quan `@Version`. Service sử dụng `invoiceRepository.saveAndFlush(invoice)`, bắt `OptimisticLockingFailureException` và ném `ConflictException` (409) để trả thông báo xung đột cụ thể. Nếu hai nhân viên cùng xác nhận một hóa đơn, chỉ một giao dịch thành công, giao dịch còn lại nhận lỗi 409.
 - **NF1:** Phản hồi xác nhận thanh toán và kích hoạt gói dưới 2 giây.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
@@ -205,7 +216,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   | `payments` | `invoice_id` | `bigint` | NOT NULL, FK → `invoices.id` | Hóa đơn được thanh toán |
   | `payments` | `method` | `varchar(20)` | NOT NULL, CHECK IN ('CASH','BANK_TRANSFER') | Hình thức thanh toán |
   | `payments` | `amount` | `int` | NOT NULL, CHECK amount > 0 | Số tiền thu (bằng `invoices.total`) |
-  | `payments` | `status` | `varchar(20)` | NOT NULL, default 'CONFIRMED' | Trạng thái phiếu thu |
+  | `payments` | `status` | `varchar(20)` | NOT NULL, default 'CONFIRMED', CHECK IN ('CONFIRMED','CANCELLED') | Trạng thái phiếu thu (CONFIRMED khi thu tiền, CANCELLED khi hoàn tiền) |
   | `payments` | `transaction_ref` | `varchar(100)` | nullable | Mã giao dịch ngân hàng / tham chiếu VietQR |
   | `payments` | `received_by` | `bigint` | NOT NULL, FK → `users.id` | Nhân viên xác nhận thu tiền |
   | `payments` | `paid_at` | `timestamptz` | NOT NULL | Thời điểm xác nhận thu tiền (UTC) |
@@ -268,16 +279,16 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 
 ---
 
-### 3.3. UC-F5.3: Tra cứu và quản lý hóa đơn tại quầy
+### 3.3. UC-F5.3: Tra cứu và quản lý hóa đơn tại quầy (và toàn chuỗi)
 
 - **Mã UC:** UC-F5.3
-- **Tên Use Case:** Tra cứu và quản lý hóa đơn tại quầy
-- **Tác nhân chính:** Lễ tân (`RECEPTIONIST`), Quản lý chi nhánh (`BRANCH_MANAGER`)
+- **Tên Use Case:** Tra cứu và quản lý hóa đơn tại quầy (và toàn chuỗi)
+- **Tác nhân chính:** Lễ tân (`RECEPTIONIST`), Quản lý chi nhánh (`BRANCH_MANAGER`), Chủ chuỗi (`SUPER_ADMIN`)
 - **Tác nhân phụ:** Không có
-- **Mô tả ngắn gọn:** Nhân viên xem danh sách hóa đơn theo chi nhánh, tìm kiếm theo mã hóa đơn, hội viên, trạng thái hoặc khoảng thời gian. Cho phép hủy hóa đơn chờ `PENDING` khi khách đổi ý không mua.
+- **Mô tả ngắn gọn:** Nhân viên xem danh sách hóa đơn theo chi nhánh (hoặc toàn hệ thống đối với Chủ chuỗi), tìm kiếm theo mã hóa đơn, hội viên, trạng thái hoặc khoảng thời gian. Cho phép hủy hóa đơn chờ `PENDING` khi khách đổi ý không mua.
 
 #### A. Tiền điều kiện (Preconditions)
-- Người dùng đã đăng nhập với vai trò Lễ tân hoặc Quản lý chi nhánh (JWT hợp lệ – S2).
+- Người dùng đã đăng nhập với vai trò Lễ tân, Quản lý chi nhánh hoặc Chủ chuỗi (JWT hợp lệ – S2).
 
 #### B. Hậu điều kiện (Postconditions)
 - **Thành công (Xem):** Danh sách hóa đơn phân trang được trả về kèm trạng thái và tổng tiền.
@@ -286,7 +297,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 #### C. Luồng sự kiện chính (Basic Flow / Happy Path)
 1. Nhân viên truy cập danh sách hóa đơn, chọn các tiêu chí lọc: `status` (`PENDING`, `PAID`, `CANCELLED`, `REFUNDED`), `source` (`COUNTER`, `MEMBER_PORTAL`), `fromDate`, `toDate`, hoặc từ khóa tìm kiếm (`keyword` = mã hóa đơn, tên hoặc số điện thoại hội viên).
 2. Hệ thống kiểm tra JWT (S2) và vai trò người dùng (S3).
-3. Hệ thống tự động gắn điều kiện lọc theo `branch_id` của chi nhánh người dùng đang làm việc (không cho xem chéo chi nhánh – S3).
+3. Hệ thống kiểm tra vai trò: nếu là Chủ chuỗi (`SUPER_ADMIN`), cho phép xem hóa đơn toàn chuỗi hoặc lọc theo bất kỳ chi nhánh nào; nếu là Lễ tân hoặc Quản lý chi nhánh, hệ thống tự động gắn điều kiện lọc theo `branch_id` của chi nhánh người dùng đang làm việc (không cho xem chéo chi nhánh – S3).
 4. Hệ thống truy vấn CSDL và trả về `PageResponse<InvoiceSummaryDto>` sắp xếp giảm dần theo thời gian tạo (`created_at DESC`).
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
@@ -299,7 +310,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   - Tại bước 2, JWT không có hoặc hết hạn.
   - Hệ thống trả `ProblemDetail` (401): *"Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại."*
 - **E2 – Không có quyền thao tác (403 Forbidden):**
-  - Người dùng truy cập ngoài phạm vi chi nhánh của mình hoặc không đúng vai trò cho phép.
+  - Người dùng không thuộc các vai trò Lễ tân, Quản lý chi nhánh, Chủ chuỗi (ví dụ Hội viên, Huấn luyện viên cố truy cập API này), hoặc Lễ tân/Quản lý chi nhánh cố tình truy cập hóa đơn của chi nhánh khác (S3).
   - Hệ thống trả `ProblemDetail` (403): *"Bạn không có quyền thực hiện thao tác này."*
 - **E3 – Không tìm thấy hóa đơn (404 Not Found):**
   - Hóa đơn yêu cầu hủy không tồn tại trên hệ thống.
@@ -473,6 +484,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 #### B. Hậu điều kiện (Postconditions)
 - **Thành công:**
   - `invoices.status = REFUNDED`, `refunded_by = user_id`, `refunded_at = now()`, `refund_reason` được cập nhật.
+  - `payments.status`: Cập nhật bản ghi phiếu thu của hóa đơn này sang `status = CANCELLED` (ghi nhận hủy phiếu thu).
   - Các gói tập (`memberships`) liên kết với hóa đơn này chuyển trạng thái `status = CANCELLED`.
   - Một bản ghi vết kiểm toán được thêm mới vào bảng `audit_logs` (S9).
 - **Thất bại:** Trạng thái hóa đơn và gói tập giữ nguyên vẹn; giao dịch rollback.
@@ -484,9 +496,10 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 4. Hệ thống kiểm tra trạng thái hóa đơn: Bắt buộc là `PAID` và thuộc chi nhánh quản lý.
 5. Trong một giao dịch an toàn `@Transactional`:
    - a. Khóa lạc quan kiểm tra `invoices.version` để chống xung đột xử lý.
-   - b. Cập nhật `invoices`: `status = REFUNDED`, `refunded_by = current_user.id`, `refunded_at = now()`, `refund_reason = refundReason`.
-   - c. Vô hiệu hóa gói tập: Tra cứu các dòng `invoice_items` kiểu `PACKAGE` của hóa đơn, cập nhật các bản ghi `memberships` liên kết sang `status = CANCELLED`.
-   - d. Ghi nhật ký kiểm toán vào bảng `audit_logs`: `user_id`, `branch_id`, `action = 'REFUND'`, `entity = 'invoices'`, `entity_id = invoice.id`, `old_value`, `new_value`, địa chỉ IP (S9).
+   - b. Cập nhật `invoices`: `status = REFUNDED`, `refunded_by = current_user.id`, `refunded_at = now()`, `refund_reason = refundReason`. Trong Service, gọi `invoiceRepository.saveAndFlush(invoice)` để kích hoạt kiểm tra khóa lạc quan ngay lập tức; nếu xung đột, bắt `OptimisticLockingFailureException` và ném `ConflictException` (409).
+   - c. Cập nhật phiếu thu: Tra cứu bản ghi phiếu thu liên kết trong bảng `payments`, cập nhật `status = CANCELLED`.
+   - d. Vô hiệu hóa gói tập: Tra cứu các dòng `invoice_items` kiểu `PACKAGE` của hóa đơn, cập nhật các bản ghi `memberships` liên kết sang `status = CANCELLED`.
+   - e. Ghi nhật ký kiểm toán vào bảng `audit_logs`: `user_id`, `branch_id`, `action = 'REFUND'`, `entity = 'invoices'`, `entity_id = invoice.id`, `old_value`, `new_value`, địa chỉ IP (S9).
 6. Hệ thống trả về `200 OK` thông báo hoàn tiền thành công.
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
@@ -503,8 +516,8 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   - Không tìm thấy hóa đơn theo `id`.
   - Hệ thống trả `ProblemDetail` (404): *"Hóa đơn không tồn tại trên hệ thống."*
 - **E5 – Xung đột dữ liệu đồng thời (409 Conflict):**
-  - Phiên bản hóa đơn bị thay đổi đồng thời.
-  - Hệ thống trả `ProblemDetail` (409): *"Dữ liệu hóa đơn vừa được cập nhật bởi thao tác khác. Vui lòng thử lại."*
+  - Tại bước 5a/5b, hai thao tác cập nhật hóa đơn diễn ra đồng thời dẫn đến xung đột phiên bản `invoices.version` (`@Version`).
+  - Trong Service, hệ thống gọi `invoiceRepository.saveAndFlush(invoice)`, bắt `OptimisticLockingFailureException` và ném `ConflictException` (409) trả về thông báo: *"Dữ liệu hóa đơn vừa được cập nhật bởi thao tác khác. Vui lòng thử lại."*
 - **E6 – Hóa đơn không đủ điều kiện hoàn tiền (422 Unprocessable Content):**
   - Tại bước 4, hóa đơn không ở trạng thái `PAID` (ví dụ: đang `PENDING`, đã `CANCELLED`, hoặc đã được `REFUNDED` trước đó).
   - Hệ thống từ chối và trả `ProblemDetail` (422): *"Chỉ có thể hoàn tiền cho hóa đơn đã thanh toán thành công."*
@@ -512,10 +525,10 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
 - **BR-F5-11:** Phân quyền hoàn tiền: Chỉ có vai trò Quản lý chi nhánh (`BRANCH_MANAGER`) mới được quyền hoàn tiền. Lễ tân không có quyền này ([Bản chốt phạm vi](../ban-chot-pham-vi.md)).
 - **BR-F5-12:** Truy vết kiểm toán bắt buộc (S9): Mọi hành động hoàn tiền bắt buộc phải lưu vết vào bảng `audit_logs` gồm người duyệt, thời gian, số tiền và lý do hoàn tiền.
-- **BR-F5-13:** Tính nhất quán dữ liệu: Khi hóa đơn bị hoàn tiền, tất cả các gói tập `memberships` sinh ra từ hóa đơn đó lập tức chuyển sang `CANCELLED` để hội viên không thể tiếp tục check-in (F4) hay đặt lịch (F8, F9).
+- **BR-F5-13:** Tính nhất quán dữ liệu: Khi hóa đơn bị hoàn tiền, tất cả các gói tập `memberships` sinh ra từ hóa đơn đó lập tức chuyển sang `CANCELLED` để hội viên không thể tiếp tục check-in (F4) hay đặt lịch (F8, F9); bản ghi phiếu thu `payments` tương ứng chuyển `CANCELLED`.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
-- **Bảng tác động:** `invoices`, `memberships`, `audit_logs`
+- **Bảng tác động:** `invoices`, `payments`, `memberships`, `audit_logs`
 - **Chi tiết trường dữ liệu:**
   | Tên bảng | Tên cột | Kiểu dữ liệu | Ràng buộc | Ý nghĩa / Ghi chú |
   | --- | --- | --- | --- | --- |
@@ -523,6 +536,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   | `invoices` | `refunded_by` | `bigint` | nullable, FK → `users.id` | Quản lý duyệt hoàn tiền |
   | `invoices` | `refunded_at` | `timestamptz` | nullable | Thời điểm hoàn tiền |
   | `invoices` | `refund_reason` | `text` | nullable | Lý do hoàn tiền bắt buộc |
+  | `payments` | `status` | `varchar(20)` | NOT NULL, CHECK IN ('CONFIRMED','CANCELLED') | Chuyển sang `CANCELLED` khi hoàn tiền |
   | `memberships` | `status` | `varchar(20)` | NOT NULL | Chuyển sang `CANCELLED` |
   | `audit_logs` | `user_id` | `bigint` | nullable, FK → `users.id` | Quản lý thực hiện hoàn tiền |
   | `audit_logs` | `branch_id` | `bigint` | nullable, FK → `branches.id` | Chi nhánh phát sinh hoàn tiền |
