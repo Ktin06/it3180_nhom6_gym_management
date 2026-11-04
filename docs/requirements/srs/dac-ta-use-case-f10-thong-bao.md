@@ -15,12 +15,16 @@
 
 ## 1. Tổng quan chức năng
 
-Thông báo giúp hội viên nắm kịp các sự kiện liên quan đến gói tập và lớp học mà không cần hỏi quầy lễ tân. Hệ thống tự động gửi thông báo khi có sự kiện, qua hai kênh:
+Thông báo giúp hội viên nắm kịp các sự kiện liên quan đến gói tập và lớp học mà không cần hỏi quầy lễ tân. Hệ thống tự động tạo thông báo khi có sự kiện, qua hai kênh:
 
-- **Email.**
-- **Trong web:** hiển thị trong cổng hội viên.
+- **Trong web (`IN_APP`):** hiển thị trong cổng hội viên.
+- **Email (`EMAIL`):** gửi tới địa chỉ `users.email` của hội viên, chỉ trong giờ mở cửa của chi nhánh liên quan (`branches.open_time` đến `close_time`); thông báo email phát sinh ngoài giờ được hẹn gửi vào giờ mở cửa (`scheduled_at`).
 
-Có 4 loại thông báo: sắp hết hạn gói, nhắc lịch lớp, được đưa vào lớp từ danh sách chờ, đổi giờ lớp. Người nhận là **Hội viên**. Ở Sprint 1, tài liệu này chỉ đặc tả; phần hiện thực làm ở Sprint 2.
+Có 4 loại thông báo: sắp hết hạn gói (`MEMBERSHIP_EXPIRING`), nhắc lịch lớp (`CLASS_REMINDER`), được đưa vào lớp từ danh sách chờ (`CLASS_PROMOTED`), đổi giờ lớp (`CLASS_RESCHEDULED`). ERD còn khai báo loại `CLASS_CANCELLED` (hủy buổi lớp); loại này không nằm trong yêu cầu của F10, thuộc phạm vi F8.
+
+Người nhận là **Hội viên có tài khoản** (thông báo gắn với `users.id`). Ở Sprint 1, tài liệu này chỉ đặc tả; phần hiện thực làm ở Sprint 2.
+
+Mỗi sự kiện tạo **hai dòng** trong bảng `notifications`: một dòng kênh `IN_APP`, một dòng kênh `EMAIL`.
 
 ---
 
@@ -44,43 +48,57 @@ Có 4 loại thông báo: sắp hết hạn gói, nhắc lịch lớp, được 
 - **Tên Use Case:** Gửi thông báo sắp hết hạn gói
 - **Tác nhân chính:** Hệ thống (tác vụ chạy định kỳ)
 - **Tác nhân phụ (nếu có):** Dịch vụ gửi email; Hội viên (người nhận)
-- **Mô tả ngắn gọn:** Hệ thống báo cho hội viên biết gói tập sắp hết hạn để kịp gia hạn.
+- **Mô tả ngắn gọn:** Hệ thống báo cho hội viên biết gói tập sắp hết hạn hoặc sắp hết buổi để kịp gia hạn.
 
 #### A. Tiền điều kiện (Preconditions)
-- Hội viên có gói đang hoạt động, ngày hết hạn còn **[cần chốt với nhóm: bao nhiêu ngày]**.
-- Gói này chưa có thông báo hết hạn nào được gửi cho hội viên.
+- Hội viên có tài khoản (`members.user_id` có giá trị) và có một trong hai loại gói sau:
+  - Gói ACTIVE hết hạn trong 7 ngày tới (theo `ban-chot-pham-vi.md`, mục "Cảnh báo gói sắp hết").
+  - Gói SESSION ACTIVE còn không quá `SESSION_WARNING_THRESHOLD` buổi (mặc định 2).
+- Gói này chưa có thông báo `MEMBERSHIP_EXPIRING` nào gắn với nó.
 
 #### B. Hậu điều kiện (Postconditions)
-- **Thành công:** Một thông báo trong web được tạo và một email được gửi cho hội viên. Hệ thống ghi nhận đã gửi để không gửi lặp.
-- **Thất bại:** Không có thông báo nào được ghi nhận là đã gửi; lần chạy sau thử lại.
+- **Thành công:** Hai dòng `notifications` được tạo (kênh `IN_APP` và `EMAIL`, `type` = `MEMBERSHIP_EXPIRING`, `related_entity` = `memberships`, `related_id` = mã gói). Email được gửi trong giờ mở cửa, sau đó dòng email chuyển `SENT`.
+- **Thất bại:** Dòng email chuyển `FAILED`; thông báo trong web vẫn có.
 
 #### C. Luồng sự kiện chính (Basic Flow / Happy Path)
-1. Tác vụ định kỳ chạy và truy vấn các gói sắp hết hạn.
-2. Hệ thống loại những gói đã có thông báo hết hạn.
-3. Hệ thống tạo thông báo trong web cho từng hội viên.
-4. Hệ thống gửi email cho hội viên.
-5. Hệ thống ghi nhận trạng thái đã gửi trong một giao dịch (`@Transactional`).
+1. Tác vụ định kỳ chạy và truy vấn `memberships`: gói ACTIVE có `end_date` trong 7 ngày tới, và gói SESSION ACTIVE có `remaining_sessions` không quá `SESSION_WARNING_THRESHOLD`.
+2. Hệ thống loại những gói đã có thông báo `MEMBERSHIP_EXPIRING` (tìm theo `related_entity`, `related_id`) và những gói đã được gia hạn.
+3. Hệ thống xác định tài khoản nhận qua `members.user_id`; hội viên chưa có tài khoản thì bỏ qua.
+4. Hệ thống tạo trong một giao dịch (`@Transactional`) hai dòng `notifications`: kênh `IN_APP` và kênh `EMAIL` (`status` = `PENDING`, `scheduled_at` = thời điểm gửi cho phép theo giờ mở cửa chi nhánh).
+5. Tác vụ gửi email quét các dòng `EMAIL` có `status` = `PENDING` và `scheduled_at` đã đến, gửi tới `users.email`, rồi cập nhật `status` = `SENT` và `sent_at`.
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
-- **A1 – Hội viên không có email:**
-  - Tại bước 4, hệ thống chỉ tạo thông báo trong web, bỏ qua email.
+- **A1 – Hội viên chưa có tài khoản:**
+  - Tại bước 3, vì `notifications.user_id` bắt buộc có giá trị, hệ thống không tạo thông báo cho hội viên này.
+- **A2 – Email phát sinh ngoài giờ mở cửa:**
+  - Tại bước 4, hệ thống đặt `scheduled_at` vào giờ mở cửa kế tiếp; thông báo trong web hiển thị ngay.
 - **E1 – Gửi email thất bại:**
-  - Tại bước 4, dịch vụ email lỗi. Thông báo trong web vẫn được tạo; email ghi nhận lỗi và được thử lại ở lần chạy sau *(đề xuất, cần nhóm xác nhận)*.
+  - Tại bước 5, dịch vụ email lỗi. Dòng email chuyển `FAILED`, thông báo trong web không bị ảnh hưởng *(cơ chế thử lại là đề xuất, cần nhóm xác nhận)*.
 - **E5 – Vi phạm quy tắc nghiệp vụ:**
-  - Gói đã được gia hạn trước khi tác vụ chạy: hệ thống không gửi thông báo.
+  - Gói đã được gia hạn trước khi tác vụ chạy (có gói cùng loại nối tiếp ở trạng thái PENDING hoặc UPCOMING *(đề xuất điều kiện)*): hệ thống không gửi thông báo.
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
-- **BR-F10.1:** Mỗi sự kiện tạo một thông báo trong web và một email.
-- **BR-F10.2:** Không gửi trùng: một gói chỉ có một thông báo sắp hết hạn cho mỗi lần hết hạn.
-- **CONFIG-F10.1:** Số ngày báo trước đọc từ bảng `system_configs`, không viết cứng (Quy tắc số 15). Tên khóa và giá trị mặc định: **[cần chốt với nhóm]**.
+- **BR-F10.1:** Mỗi sự kiện tạo một thông báo trong web và một email (hai dòng `notifications`).
+- **BR-F10.2:** Không gửi trùng: mỗi gói chỉ có một thông báo `MEMBERSHIP_EXPIRING` (xác định qua `related_entity`, `related_id`).
+- **BR-F10.3:** Email chỉ gửi trong giờ mở cửa của chi nhánh (`branches.open_time` đến `close_time`).
+- **CONFIG-F10.1:** Ngưỡng cảnh báo gói SESSION đọc từ bảng `system_configs` với key `SESSION_WARNING_THRESHOLD` (giá trị mặc định: `2`), không viết cứng (Quy tắc số 15). Mốc 7 ngày với gói ACTIVE theo `ban-chot-pham-vi.md`; danh sách khóa cấu hình trong ERD chưa có khóa riêng cho mốc này.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
-- **Bảng tác động:** `[bảng thông báo]`, `[bảng gói đã đăng ký của hội viên]`, `members`, `system_configs` (đọc)
-- **Chi tiết trường dữ liệu:** *(điền từ `erd-v2.dbml`)*
+- **Bảng tác động:** `notifications`; đọc `memberships`, `members`, `users`, `branches`, `system_configs`
+- **Chi tiết trường dữ liệu:**
   | Tên bảng | Tên cột | Kiểu dữ liệu | Ràng buộc | Ý nghĩa / Ghi chú |
   | --- | --- | --- | --- | --- |
-  | `[...]` | `[...]` | `[...]` | `[...]` | Loại thông báo |
-  | `[...]` | `[...]` | `[...]` | `[...]` | Nội dung thông báo |
+  | `notifications` | `user_id` | `bigint` | NOT NULL, FK → `users.id` | Tài khoản nhận |
+  | `notifications` | `type` | `varchar(50)` | NOT NULL | Giá trị `MEMBERSHIP_EXPIRING` |
+  | `notifications` | `title` | `varchar(255)` | NOT NULL | Tiêu đề |
+  | `notifications` | `content` | `text` | | Nội dung (tên gói, ngày hết hạn hoặc số buổi còn lại) |
+  | `notifications` | `channel` | `varchar` | NOT NULL, CHECK (IN_APP, EMAIL) | Kênh |
+  | `notifications` | `related_entity`, `related_id` | `varchar(50)`, `bigint` | | `memberships` và mã gói, để mở đúng màn hình và chống gửi trùng |
+  | `notifications` | `status` | `varchar` | NOT NULL, default `PENDING`, CHECK (PENDING, SENT, FAILED) | Trạng thái gửi |
+  | `notifications` | `scheduled_at` | `timestamptz` | | Hẹn gửi email tới giờ mở cửa |
+  | `notifications` | `sent_at` | `timestamptz` | | Thời điểm đã gửi |
+  | `memberships` | `end_date`, `remaining_sessions`, `package_type`, `status` | `date`, `int`, `varchar`, `varchar` | | Điều kiện chọn gói sắp hết |
+  | `system_configs` | `config_key`, `config_value` | `varchar(100)`, `varchar(255)` | NOT NULL | `SESSION_WARNING_THRESHOLD` = `2` |
 
 #### G. Thiết kế giao diện và API liên quan
 - **API Endpoint:** Không có; đây là tác vụ nền của hệ thống.
@@ -97,33 +115,42 @@ Có 4 loại thông báo: sắp hết hạn gói, nhắc lịch lớp, được 
 - **Mô tả ngắn gọn:** Hệ thống nhắc hội viên về lớp đã đặt sắp diễn ra.
 
 #### A. Tiền điều kiện (Preconditions)
-- Hội viên có chỗ trong một lớp, lớp bắt đầu sau **[cần chốt với nhóm: bao lâu]**.
-- Lớp chưa bị hủy.
+- Hội viên có tài khoản và một lượt đặt chỗ `class_bookings` ở trạng thái BOOKED cho một buổi lớp sắp bắt đầu **[cần chốt: nhắc trước bao lâu; ERD chưa có khóa cấu hình cho mốc này, đối chiếu `ban-chot-pham-vi.md`]**.
+- Buổi lớp chưa bị hủy (`class_sessions.status` là SCHEDULED hoặc RESCHEDULED).
 
 #### B. Hậu điều kiện (Postconditions)
-- **Thành công:** Một thông báo trong web được tạo và một email được gửi; ghi nhận đã nhắc.
-- **Thất bại:** Không ghi nhận đã gửi; lần chạy sau thử lại.
+- **Thành công:** Hai dòng `notifications` được tạo (`type` = `CLASS_REMINDER`, `related_entity` = `class_bookings`, `related_id` = mã đặt chỗ); email gửi theo UC-F10.1 bước 5.
+- **Thất bại:** Dòng email chuyển `FAILED`; thông báo trong web vẫn có.
 
 #### C. Luồng sự kiện chính (Basic Flow / Happy Path)
-1. Tác vụ định kỳ chạy và truy vấn các lớp sắp diễn ra.
-2. Hệ thống lấy danh sách hội viên đã có chỗ trong lớp, loại người đã được nhắc.
-3. Hệ thống tạo thông báo trong web cho từng hội viên.
-4. Hệ thống gửi email cho hội viên.
-5. Hệ thống ghi nhận đã nhắc trong một giao dịch (`@Transactional`).
+1. Tác vụ định kỳ chạy và truy vấn các buổi lớp (`class_sessions`) sắp bắt đầu.
+2. Hệ thống lấy các lượt đặt chỗ BOOKED của buổi đó, loại các lượt đã có thông báo `CLASS_REMINDER` (theo `related_entity`, `related_id`).
+3. Hệ thống xác định tài khoản nhận qua `members.user_id`.
+4. Hệ thống tạo hai dòng `notifications` (kênh `IN_APP` và `EMAIL`) trong một giao dịch (`@Transactional`).
+5. Email được gửi như UC-F10.1 bước 5.
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
-- **A1 – Hội viên không có email:** chỉ tạo thông báo trong web.
-- **E1 – Gửi email thất bại:** thông báo trong web vẫn được tạo; email thử lại ở lần chạy sau *(đề xuất)*.
-- **E5 – Lớp đã bị hủy hoặc hội viên đã hủy chỗ:** hệ thống không gửi nhắc.
+- **A1 – Hội viên chưa có tài khoản:** hệ thống không tạo thông báo cho hội viên này.
+- **E1 – Gửi email thất bại:** dòng email chuyển `FAILED`; thông báo trong web vẫn có *(cơ chế thử lại là đề xuất)*.
+- **E5 – Lớp đã bị hủy hoặc hội viên đã hủy chỗ:** hệ thống không gửi nhắc (buổi CANCELLED hoặc lượt đặt chỗ CANCELLED).
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
 - **BR-F10.1:** Mỗi sự kiện tạo một thông báo trong web và một email.
-- **BR-F10.2:** Mỗi hội viên chỉ được nhắc một lần cho mỗi buổi lớp.
-- **CONFIG-F10.2:** Thời điểm nhắc trước giờ lớp đọc từ `system_configs`. Tên khóa và giá trị mặc định: **[cần chốt với nhóm]**.
+- **BR-F10.4:** Mỗi lượt đặt chỗ chỉ được nhắc một lần (xác định qua `related_entity`, `related_id`).
+- **BR-F10.3:** Email chỉ gửi trong giờ mở cửa của chi nhánh.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
-- **Bảng tác động:** `[bảng thông báo]`, `[bảng lớp học và chỗ đăng ký]`, `members`, `system_configs` (đọc)
-- **Chi tiết trường dữ liệu:** *(điền từ `erd-v2.dbml`)*
+- **Bảng tác động:** `notifications`; đọc `class_bookings`, `class_sessions`, `members`, `users`, `branches`
+- **Chi tiết trường dữ liệu:**
+  | Tên bảng | Tên cột | Kiểu dữ liệu | Ràng buộc | Ý nghĩa / Ghi chú |
+  | --- | --- | --- | --- | --- |
+  | `notifications` | `type` | `varchar(50)` | NOT NULL | Giá trị `CLASS_REMINDER` |
+  | `notifications` | `channel`, `status`, `scheduled_at`, `sent_at` | như UC-F10.1 | | |
+  | `class_bookings` | `class_session_id` | `bigint` | NOT NULL, FK → `class_sessions.id` | Buổi lớp đã đặt |
+  | `class_bookings` | `member_id` | `bigint` | NOT NULL, FK → `members.id` | Hội viên đặt chỗ |
+  | `class_bookings` | `status` | `varchar` | NOT NULL, CHECK (BOOKED, WAITLIST, PENDING_RECONFIRM, CANCELLED, ATTENDED, NO_SHOW) | Chỉ nhắc khi BOOKED |
+  | `class_sessions` | `start_at` | `timestamptz` | NOT NULL | Giờ bắt đầu buổi lớp |
+  | `class_sessions` | `status` | `varchar` | NOT NULL, default `SCHEDULED` | Không nhắc khi CANCELLED |
 
 #### G. Thiết kế giao diện và API liên quan
 - **API Endpoint:** Không có; tác vụ nền.
@@ -136,37 +163,46 @@ Có 4 loại thông báo: sắp hết hạn gói, nhắc lịch lớp, được 
 - **Tên Use Case:** Gửi thông báo được đưa vào lớp từ danh sách chờ
 - **Tác nhân chính:** Hệ thống (kích hoạt khi có chỗ trống)
 - **Tác nhân phụ (nếu có):** Dịch vụ gửi email; Hội viên (người nhận)
-- **Mô tả ngắn gọn:** Khi có chỗ trống và một hội viên trong danh sách chờ được chuyển vào lớp, hệ thống báo cho hội viên đó.
+- **Mô tả ngắn gọn:** Khi có chỗ trống và một hội viên trong danh sách chờ được tự động đưa vào lớp, hệ thống báo cho hội viên đó.
 
 #### A. Tiền điều kiện (Preconditions)
-- Hội viên đang trong danh sách chờ của một lớp.
-- Lớp có chỗ trống và hội viên đến lượt được chuyển vào.
+- Hội viên có tài khoản và đang ở trạng thái WAITLIST trong `class_bookings` của một buổi lớp.
+- Buổi lớp có chỗ trống và hội viên đứng đầu danh sách chờ (xếp theo `waitlisted_at`, đến trước xếp trước).
 
 #### B. Hậu điều kiện (Postconditions)
-- **Thành công:** Hội viên được ghi nhận vào lớp; một thông báo trong web được tạo và một email được gửi.
-- **Thất bại:** Việc chuyển vào lớp không bị ảnh hưởng nếu chỉ riêng việc gửi thông báo lỗi.
+- **Thành công:** Lượt đặt chỗ chuyển sang BOOKED, `promoted_at` được ghi nhận. Hai dòng `notifications` được tạo (`type` = `CLASS_PROMOTED`, `related_entity` = `class_bookings`, `related_id` = mã đặt chỗ). Thông báo nêu lớp, giờ học và thời hạn hủy không phạt (`grace_until`).
+- **Thất bại:** Việc đưa vào lớp không bị ảnh hưởng nếu chỉ riêng việc gửi thông báo lỗi.
 
 #### C. Luồng sự kiện chính (Basic Flow / Happy Path)
-1. Có chỗ trống trong lớp (ví dụ hội viên khác hủy chỗ).
-2. Hệ thống chọn hội viên đến lượt trong danh sách chờ theo quy tắc danh sách chờ (xem ADR về danh sách chờ).
-3. Hệ thống chuyển hội viên từ danh sách chờ vào lớp.
-4. Hệ thống tạo thông báo trong web cho hội viên.
-5. Hệ thống gửi email cho hội viên.
+1. Có chỗ trống trong buổi lớp (ví dụ hội viên khác hủy chỗ).
+2. Hệ thống chọn lượt WAITLIST đứng đầu theo `waitlisted_at` và đưa vào lớp theo quy tắc danh sách chờ của F8 (xem ADR liên quan), có khóa bản ghi để chống xung đột (NF6).
+3. Hệ thống cập nhật lượt đặt chỗ sang BOOKED, ghi `promoted_at`.
+4. Hệ thống tạo hai dòng `notifications` (kênh `IN_APP` và `EMAIL`) trong cùng giao dịch.
+5. Email được gửi như UC-F10.1 bước 5; hạn hủy không phạt `grace_until` bằng thời điểm gửi email cộng `PROMOTION_GRACE_MIN` (mặc định 15 phút), theo ERD.
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
-- **A1 – Hội viên không có email:** chỉ tạo thông báo trong web.
-- **E1 – Gửi email thất bại:** hội viên vẫn ở trong lớp; thông báo trong web được tạo; email thử lại sau *(đề xuất)*.
-- **E4 – Xung đột đồng thời (409):** hai chỗ trống xuất hiện cùng lúc; hệ thống xử lý theo cơ chế chống xung đột (NF6) để không đưa cùng một người vào hai lần.
+- **A1 – Hội viên chưa có tài khoản:** hệ thống không tạo thông báo (hội viên vẫn được đưa vào lớp).
+- **E1 – Gửi email thất bại:** hội viên vẫn ở trong lớp; dòng email chuyển `FAILED`; thông báo trong web vẫn có *(cơ chế thử lại là đề xuất)*.
+- **E4 – Xung đột đồng thời (409):** hai chỗ trống xuất hiện cùng lúc; hệ thống khóa `members` rồi `class_sessions` (NF6) để không đưa cùng một người vào hai lần hoặc vượt sĩ số.
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
-- **BR-F10.3:** Thứ tự và điều kiện chuyển từ danh sách chờ vào lớp theo ADR danh sách chờ, mục **[ghi số mục sau khi đối chiếu]**.
+- **BR-F10.5:** Thứ tự đưa từ danh sách chờ vào lớp: đến trước xếp trước (`waitlisted_at`); điều kiện chi tiết theo ADR liên quan của F8.
 - **BR-F10.1:** Mỗi sự kiện tạo một thông báo trong web và một email.
+- **CONFIG-F10.2:** `PROMOTION_GRACE_MIN` (mặc định `15`) và `PROMOTION_CUTOFF_MIN` (mặc định `30`) đọc từ `system_configs`, không viết cứng (Quy tắc số 15).
 - **[Yêu cầu phi chức năng]:**
   - Toàn vẹn đồng thời (NF6): không đưa cùng một hội viên vào lớp hai lần.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
-- **Bảng tác động:** `[bảng thông báo]`, `[bảng danh sách chờ]`, `[bảng đăng ký lớp]`, `members`
-- **Chi tiết trường dữ liệu:** *(điền từ `erd-v2.dbml`)*
+- **Bảng tác động:** `class_bookings`, `notifications`; đọc `class_sessions`, `members`, `users`, `branches`, `system_configs`
+- **Chi tiết trường dữ liệu:**
+  | Tên bảng | Tên cột | Kiểu dữ liệu | Ràng buộc | Ý nghĩa / Ghi chú |
+  | --- | --- | --- | --- | --- |
+  | `class_bookings` | `status` | `varchar` | NOT NULL | WAITLIST chuyển sang BOOKED |
+  | `class_bookings` | `waitlisted_at` | `timestamptz` | | Căn cứ thứ tự chờ |
+  | `class_bookings` | `promoted_at` | `timestamptz` | | Thời điểm được tự động đưa vào lớp |
+  | `class_bookings` | `grace_until` | `timestamptz` | | Hết ân hạn hủy không phạt |
+  | `notifications` | `type` | `varchar(50)` | NOT NULL | Giá trị `CLASS_PROMOTED` |
+  | `notifications` | `channel`, `status`, `scheduled_at`, `sent_at` | như UC-F10.1 | | |
 
 #### G. Thiết kế giao diện và API liên quan
 - **API Endpoint:** Không có; kích hoạt bởi nghiệp vụ lớp học (F8).
@@ -177,35 +213,44 @@ Có 4 loại thông báo: sắp hết hạn gói, nhắc lịch lớp, được 
 
 - **Mã UC:** UC-F10.4
 - **Tên Use Case:** Gửi thông báo đổi giờ lớp
-- **Tác nhân chính:** Hệ thống (kích hoạt khi lớp bị đổi giờ)
+- **Tác nhân chính:** Hệ thống (kích hoạt khi buổi lớp bị đổi giờ)
 - **Tác nhân phụ (nếu có):** Dịch vụ gửi email; Hội viên (người nhận)
-- **Mô tả ngắn gọn:** Khi giờ của lớp đã đặt bị thay đổi, hệ thống báo cho các hội viên có chỗ trong lớp đó.
+- **Mô tả ngắn gọn:** Khi giờ của buổi lớp đã đặt bị thay đổi, hệ thống báo cho các hội viên có chỗ trong buổi đó.
 
 #### A. Tiền điều kiện (Preconditions)
-- Một lớp có hội viên đã đăng ký bị đổi giờ bởi người có quyền.
+- Một buổi lớp (`class_sessions`) có hội viên đã đặt chỗ bị đổi giờ bởi người có quyền (trạng thái buổi chuyển RESCHEDULED).
 
 #### B. Hậu điều kiện (Postconditions)
-- **Thành công:** Mỗi hội viên có chỗ trong lớp nhận một thông báo trong web và một email, nêu rõ giờ cũ và giờ mới.
+- **Thành công:** Mỗi hội viên có tài khoản và có chỗ trong buổi lớp nhận hai dòng `notifications` (`type` = `CLASS_RESCHEDULED`) nêu rõ giờ cũ (`original_start_at`) và giờ mới (`start_at`).
 - **Thất bại:** Việc đổi giờ lớp không bị rollback chỉ vì gửi thông báo lỗi.
 
 #### C. Luồng sự kiện chính (Basic Flow / Happy Path)
-1. Người có quyền đổi giờ lớp và lưu thành công.
-2. Hệ thống lấy danh sách hội viên có chỗ trong lớp đó.
-3. Hệ thống tạo thông báo trong web cho từng hội viên, ghi giờ cũ và giờ mới.
-4. Hệ thống gửi email cho từng hội viên.
+1. Người có quyền đổi giờ buổi lớp và lưu thành công; hệ thống ghi giờ cũ vào `original_start_at`.
+2. Hệ thống lấy danh sách hội viên có chỗ trong buổi lớp đó (`class_bookings`).
+3. Hệ thống tạo hai dòng `notifications` (kênh `IN_APP` và `EMAIL`) cho từng hội viên có tài khoản, ghi giờ cũ và giờ mới; nếu quy trình F8 yêu cầu hội viên xác nhận lại thì nêu cả hạn xác nhận (`reconfirm_expires_at`).
+4. Email được gửi như UC-F10.1 bước 5.
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
-- **A1 – Lớp chưa có hội viên nào:** không có thông báo nào được gửi.
-- **A2 – Hội viên không có email:** chỉ tạo thông báo trong web.
-- **E1 – Gửi email thất bại:** giờ lớp vẫn được lưu; thông báo trong web được tạo; email thử lại sau *(đề xuất)*.
+- **A1 – Buổi lớp chưa có hội viên nào:** không có thông báo nào được tạo.
+- **A2 – Hội viên chưa có tài khoản:** hệ thống không tạo thông báo cho hội viên này.
+- **E1 – Gửi email thất bại:** giờ lớp vẫn được lưu; dòng email chuyển `FAILED`; thông báo trong web vẫn có *(cơ chế thử lại là đề xuất)*.
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
 - **BR-F10.1:** Mỗi sự kiện tạo một thông báo trong web và một email.
-- **BR-F10.4:** Thông báo phải nêu cả giờ cũ và giờ mới của lớp.
+- **BR-F10.6:** Thông báo phải nêu cả giờ cũ và giờ mới của buổi lớp.
+- **BR-F10.3:** Email chỉ gửi trong giờ mở cửa của chi nhánh.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
-- **Bảng tác động:** `[bảng thông báo]`, `[bảng lớp học]`, `[bảng đăng ký lớp]`, `members`
-- **Chi tiết trường dữ liệu:** *(điền từ `erd-v2.dbml`)*
+- **Bảng tác động:** `notifications`; đọc `class_sessions`, `class_bookings`, `members`, `users`, `branches`
+- **Chi tiết trường dữ liệu:**
+  | Tên bảng | Tên cột | Kiểu dữ liệu | Ràng buộc | Ý nghĩa / Ghi chú |
+  | --- | --- | --- | --- | --- |
+  | `class_sessions` | `start_at` | `timestamptz` | NOT NULL | Giờ bắt đầu mới |
+  | `class_sessions` | `original_start_at` | `timestamptz` | | Giờ cũ, để ghi vào thông báo |
+  | `class_sessions` | `status` | `varchar` | NOT NULL, default `SCHEDULED` | Chuyển RESCHEDULED khi đổi giờ |
+  | `class_bookings` | `reconfirm_expires_at` | `timestamptz` | | Hạn xác nhận lại khi đổi giờ |
+  | `notifications` | `type` | `varchar(50)` | NOT NULL | Giá trị `CLASS_RESCHEDULED` |
+  | `notifications` | `related_entity`, `related_id` | `varchar(50)`, `bigint` | | `class_bookings` và mã đặt chỗ |
 
 #### G. Thiết kế giao diện và API liên quan
 - **API Endpoint:** Không có; kích hoạt bởi chức năng đổi giờ lớp (F8).
@@ -218,36 +263,47 @@ Có 4 loại thông báo: sắp hết hạn gói, nhắc lịch lớp, được 
 - **Tên Use Case:** Xem thông báo trong web
 - **Tác nhân chính:** Hội viên
 - **Tác nhân phụ (nếu có):** Không
-- **Mô tả ngắn gọn:** Hội viên xem các thông báo đã nhận trong cổng hội viên.
+- **Mô tả ngắn gọn:** Hội viên xem các thông báo đã nhận trong cổng hội viên và biết thông báo nào chưa đọc.
 
 #### A. Tiền điều kiện (Preconditions)
 - Người dùng đã đăng nhập với vai trò Hội viên.
 
 #### B. Hậu điều kiện (Postconditions)
-- **Thành công:** Hệ thống hiển thị danh sách thông báo của hội viên.
+- **Thành công:** Hệ thống hiển thị danh sách thông báo kênh `IN_APP` của hội viên. Khi hội viên mở một thông báo, `read_at` được ghi nhận.
 - **Thất bại:** Không có dữ liệu nào bị thay đổi.
 
 #### C. Luồng sự kiện chính (Basic Flow / Happy Path)
 1. Hội viên mở mục "Thông báo" trong cổng hội viên.
 2. Hệ thống kiểm tra tham số phân trang (Bean Validation).
-3. Hệ thống kiểm tra quyền và vai trò (S3); mã hội viên lấy từ token.
-4. Hệ thống truy vấn thông báo của hội viên, mới nhất trước.
-5. Hệ thống trả về kết quả (200 OK) dạng `PageResponse` gồm: loại, nội dung, thời điểm.
+3. Hệ thống kiểm tra quyền và vai trò (S3); tài khoản lấy từ token.
+4. Hệ thống truy vấn các thông báo kênh `IN_APP` có `user_id` là tài khoản đó, mới nhất trước.
+5. Hệ thống trả về kết quả (200 OK) dạng `PageResponse` gồm: loại, tiêu đề, nội dung, thời điểm, trạng thái đã đọc (`read_at` khác rỗng là đã đọc), và đối tượng liên quan (`related_entity`, `related_id`) để mở đúng màn hình.
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
 - **A1 – Chưa có thông báo nào:** trả danh sách rỗng; giao diện hiển thị "Bạn chưa có thông báo".
+- **A2 – Đánh dấu đã đọc:**
+  - Khi hội viên mở một thông báo chưa đọc, hệ thống ghi `read_at` bằng thời điểm hiện tại (chỉ ghi nếu thông báo thuộc về chính hội viên đó).
 - **E1 – Dữ liệu đầu vào không hợp lệ (400 Bad Request):** tham số phân trang sai; trả `ProblemDetail` (400).
-- **E2 – Không có quyền truy cập (403 Forbidden):** người thao tác không phải Hội viên; trả `ProblemDetail` (403).
+- **E2 – Không có quyền truy cập (403 Forbidden):** người thao tác không phải Hội viên, hoặc đánh dấu đã đọc thông báo của người khác; trả `ProblemDetail` (403).
+- **E3 – Không tìm thấy (404 Not Found):** thông báo cần đánh dấu đã đọc không tồn tại.
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
-- **BR-F10.5:** Hội viên chỉ xem được thông báo của chính mình (S3).
-- **[Cần chốt với nhóm]:** có cần trạng thái "đã đọc / chưa đọc" trong Sprint 2 hay không.
+- **BR-F10.7:** Hội viên chỉ xem và đánh dấu đã đọc thông báo của chính mình (S3).
+- **BR-F10.8:** Trạng thái đã đọc lưu ở cột `read_at` (`timestamptz`) của bảng `notifications`: khác rỗng là đã đọc, rỗng là chưa đọc.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
-- **Bảng tác động (chỉ đọc):** `[bảng thông báo]`, `members`
-- **Chi tiết trường dữ liệu:** *(điền từ `erd-v2.dbml`)*
+- **Bảng tác động:** `notifications` (đọc; ghi `read_at` khi đánh dấu đã đọc)
+- **Chi tiết trường dữ liệu:**
+  | Tên bảng | Tên cột | Kiểu dữ liệu | Ràng buộc | Ý nghĩa / Ghi chú |
+  | --- | --- | --- | --- | --- |
+  | `notifications` | `user_id` | `bigint` | NOT NULL, FK → `users.id` | Chủ thông báo |
+  | `notifications` | `channel` | `varchar` | NOT NULL, CHECK (IN_APP, EMAIL) | Chỉ lấy `IN_APP` |
+  | `notifications` | `type`, `title`, `content` | `varchar(50)`, `varchar(255)`, `text` | `type`, `title` NOT NULL | Nội dung hiển thị |
+  | `notifications` | `related_entity`, `related_id` | `varchar(50)`, `bigint` | | Đối tượng liên quan |
+  | `notifications` | `read_at` | `timestamptz` | | Rỗng = chưa đọc |
+  | `notifications` | `created_at` | `timestamptz` | NOT NULL | Thời điểm tạo; chỉ mục `(user_id, read_at)` hỗ trợ lọc chưa đọc |
 
 #### G. Thiết kế giao diện và API liên quan
-- **API Endpoint:** `GET /api/v1/me/notifications?page=0&size=20` *(đề xuất)*
+- **API Endpoint:** `GET /api/v1/me/notifications?page=0&size=20`; `PATCH /api/v1/me/notifications/{id}/read` *(đề xuất)*
 - **Header:** `Authorization: Bearer <access_token>`
 - **Request Body:** Không có.
