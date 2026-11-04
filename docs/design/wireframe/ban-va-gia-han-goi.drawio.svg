@@ -1,0 +1,164 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1450" viewBox="0 0 1600 1450" content="&lt;mxfile host=&quot;app.diagrams.net&quot; version=&quot;24.7.17&quot;&gt;&lt;diagram id=&quot;ban-va-gia-han-goi&quot; name=&quot;04 / Bán và gia hạn gói&quot;&gt;&lt;mxGraphModel grid=&quot;1&quot; gridSize=&quot;10&quot; page=&quot;1&quot; pageWidth=&quot;1600&quot; pageHeight=&quot;1450&quot;&gt;&lt;root&gt;&lt;mxCell id=&quot;0&quot; /&gt;&lt;mxCell id=&quot;1&quot; parent=&quot;0&quot; /&gt;&lt;mxCell id=&quot;2&quot; value=&quot;&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f4f5f7;strokeColor=#f4f5f7;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;0&quot; y=&quot;0&quot; width=&quot;1600&quot; height=&quot;1450&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;3&quot; value=&quot;04 / Bán và gia hạn gói&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f4f5f7;strokeColor=#f4f5f7;fontColor=#26313e;fontFamily=Arial;fontSize=27;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;24&quot; width=&quot;1536&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;4&quot; value=&quot;Issue #18 · F3 → F5 · Wireframe chuẩn bị cho Sprint 2 · Luồng tại quầy, không phải thanh toán online&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f4f5f7;strokeColor=#f4f5f7;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;76&quot; width=&quot;1536&quot; height=&quot;52&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;5&quot; value=&quot;&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;140&quot; width=&quot;1140&quot; height=&quot;680&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;6&quot; value=&quot;&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;140&quot; width=&quot;190&quot; height=&quot;680&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;7&quot; value=&quot;GYM NHÓM 6&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#eceef1;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;44&quot; y=&quot;150&quot; width=&quot;166&quot; height=&quot;50&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;8&quot; value=&quot;Trang chủ&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;44&quot; y=&quot;220&quot; width=&quot;166&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;9&quot; value=&quot;Hội viên&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;44&quot; y=&quot;272&quot; width=&quot;166&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;10&quot; value=&quot;Gói tập&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;44&quot; y=&quot;324&quot; width=&quot;166&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;11&quot; value=&quot;Thanh toán&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;44&quot; y=&quot;376&quot; width=&quot;166&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;12&quot; value=&quot;CN01  /  Không gian làm việc tại quầy&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f1f2f4;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;152&quot; width=&quot;918&quot; height=&quot;42&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;13&quot; value=&quot;&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1200&quot; y=&quot;140&quot; width=&quot;360&quot; height=&quot;680&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;14&quot; value=&quot;☰  Gym Nhóm 6                Tài khoản&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1200&quot; y=&quot;140&quot; width=&quot;360&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;15&quot; value=&quot;MOBILE · chiều rộng 360 px&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f4f5f7;strokeColor=#f4f5f7;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1200&quot; y=&quot;832&quot; width=&quot;360&quot; height=&quot;42&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;16&quot; value=&quot;[BÁN GÓI MỚI]          [GIA HẠN GÓI]&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=19;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;212&quot; width=&quot;918&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;17&quot; value=&quot;Bán mới: chọn hội viên → chọn gói mua → kiểm tra → hóa đơn&amp;#10;Gia hạn: chọn hội viên → chọn gói đang sở hữu → chọn gói nối tiếp → kiểm tra&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;274&quot; width=&quot;918&quot; height=&quot;52&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;18&quot; value=&quot;1. Hội viên: HV000001 · Nguyễn Minh An · 0900000001   [Tìm / Đổi hội viên]&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;340&quot; width=&quot;918&quot; height=&quot;46&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;19&quot; value=&quot;2. GIA HẠN: chọn một gói đang sở hữu (bán mới bỏ qua bước này)&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;398&quot; width=&quot;918&quot; height=&quot;34&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;20&quot; value=&quot;● TIME 30 · Mã gói đã mua: HVG001&amp;#10;Hết hạn: 20/11/2026 · Đang hiệu lực&amp;#10;[Đã chọn gia hạn]&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;444&quot; width=&quot;440&quot; height=&quot;90&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;21&quot; value=&quot;○ PT 10 buổi · Mã gói đã mua: HVG002&amp;#10;Còn 4 buổi · Hết hạn: 10/12/2026&amp;#10;[Gia hạn gói này]&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f1f2f4;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;702&quot; y=&quot;444&quot; width=&quot;454&quot; height=&quot;90&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;22&quot; value=&quot;4. Kiểm tra gia hạn HVG001 → TIME 30 ngày&amp;#10;Gói cũ hết hạn 20/11/2026; gói mới dự kiến bắt đầu 21/11/2026.&amp;#10;Sau khi thanh toán: UPCOMING nếu chưa tới ngày bắt đầu. Giá/ngày do hệ thống xác định.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;606&quot; width=&quot;918&quot; height=&quot;94&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;23&quot; value=&quot;← Quay lại lựa chọn&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;716&quot; width=&quot;300&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;24&quot; value=&quot;Tiếp tục sang hóa đơn F5 →&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#e3e6eb;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;774&quot; y=&quot;716&quot; width=&quot;382&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;25&quot; value=&quot;Bán mới | Gia hạn (đang chọn)&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;204&quot; width=&quot;336&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;26&quot; value=&quot;1. HV000001 · Nguyễn Minh An&amp;#10;[Tìm / Đổi hội viên]&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;258&quot; width=&quot;336&quot; height=&quot;62&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;27&quot; value=&quot;● HVG001 · TIME 30&amp;#10;Hết hạn 20/11/2026&amp;#10;[Đã chọn gia hạn]&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;370&quot; width=&quot;336&quot; height=&quot;84&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;28&quot; value=&quot;○ HVG002 · PT · còn 4 buổi&amp;#10;Hết hạn 10/12/2026&amp;#10;[Gia hạn gói này]&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;466&quot; width=&quot;336&quot; height=&quot;84&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;29&quot; value=&quot;3. Gói nối tiếp: TIME 30 ngày&amp;#10;500.000 đ · [Chọn gói khác]&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;562&quot; width=&quot;336&quot; height=&quot;66&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;30&quot; value=&quot;Tiếp tục sang hóa đơn F5 →&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#e3e6eb;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;740&quot; width=&quot;336&quot; height=&quot;56&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;31&quot; value=&quot;Điểm nối thanh toán và trạng thái nghiệp vụ&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#e3e6eb;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;886&quot; width=&quot;1528&quot; height=&quot;42&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;32&quot; value=&quot;F3 chuyển hội viên/gói đã chọn sang luồng hóa đơn F5. Tại F5: thu tiền mặt hoặc chuyển khoản VietQR và xác nhận đã nhận tiền theo quyền. Không đặt nút “Đã thanh toán” ngay trong form chọn gói.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=16;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;942&quot; width=&quot;1528&quot; height=&quot;72&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;33&quot; value=&quot;Trước thanh toán: chưa kích hoạt gói. Khi hóa đơn PAID: hệ thống xác định ngày/trạng thái; gói đủ điều kiện bắt đầu có thể ACTIVE, gói gia hạn nối tiếp còn phải chờ có trạng thái UPCOMING. Hiển thị kết quả server.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=16;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;1026&quot; width=&quot;1528&quot; height=&quot;72&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;34&quot; value=&quot;Bán mới: không cho hai gói cùng loại đồng thời có hiệu lực tại cùng chi nhánh. Gia hạn: ĐƯỢC mua nối tiếp gói cùng loại còn hạn; gói mới bắt đầu sau ngày hết hạn gói cũ. Không chặn gia hạn chỉ vì đã có gói cùng loại.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=16;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;1110&quot; width=&quot;1528&quot; height=&quot;72&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;35&quot; value=&quot;Chưa chọn hội viên/gói: báo bước còn thiếu. Không có gói để gia hạn: thông báo và cho chuyển Bán mới. Lỗi tải: Thử lại, giữ lựa chọn. Đổi hội viên phải chọn lại gói sở hữu. Giá/ngày thay đổi: kiểm tra lại trước khi sang hóa đơn.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=16;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;1194&quot; width=&quot;1528&quot; height=&quot;72&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;36&quot; value=&quot;Nguồn: #18, bản chốt phạm vi và ERD. Mã HVG001/HVG002 chỉ là nhãn phân biệt gói đã mua trong hình, không quy định mã mới. Ngày/giá là ví dụ. F5 do Lân phụ trách; bán/gia hạn triển khai Sprint 2.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=16;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;1278&quot; width=&quot;1528&quot; height=&quot;72&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;37&quot; value=&quot;3. Gói mua / nối tiếp: TIME 30 ngày · 500.000 đ   [Chọn gói khác]&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;546&quot; width=&quot;918&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;38&quot; value=&quot;2. Chọn gói đang sở hữu&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;328&quot; width=&quot;336&quot; height=&quot;34&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;39&quot; value=&quot;4. Kiểm tra: bắt đầu 21/11/2026&amp;#10;Sau thanh toán: UPCOMING&amp;#10;nếu chưa tới ngày bắt đầu.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;640&quot; width=&quot;336&quot; height=&quot;84&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;/root&gt;&lt;/mxGraphModel&gt;&lt;/diagram&gt;&lt;/mxfile&gt;">
+  <title>04 / Bán và gia hạn gói</title>
+  <rect x="0.0" y="0.0" width="1600.0" height="1450.0" fill="#f4f5f7" stroke="#f4f5f7" />
+  <rect x="32.0" y="24.0" width="1536.0" height="44.0" fill="#f4f5f7" stroke="#f4f5f7" />
+  <text font-family="Arial, sans-serif" font-size="27.0" font-weight="700" x="44.0" y="54.1" fill="#26313e">
+    <tspan x="44.0" dy="0">04 / Bán và gia hạn gói</tspan>
+  </text>
+  <rect x="32.0" y="76.0" width="1536.0" height="52.0" fill="#f4f5f7" stroke="#f4f5f7" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="400" x="44.0" y="106.5" fill="#26313e">
+    <tspan x="44.0" dy="0">Issue #18 · F3 → F5 · Wireframe chuẩn bị cho Sprint 2 · Luồng tại quầy, không phải thanh toán online</tspan>
+  </text>
+  <rect x="32.0" y="140.0" width="1140.0" height="680.0" fill="#ffffff" stroke="#9aa1aa" />
+  <rect x="32.0" y="140.0" width="190.0" height="680.0" fill="#eceef1" stroke="#9aa1aa" />
+  <rect x="44.0" y="150.0" width="166.0" height="50.0" fill="#eceef1" stroke="#eceef1" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="700" x="56.0" y="179.5" fill="#26313e">
+    <tspan x="56.0" dy="0">GYM NHÓM 6</tspan>
+  </text>
+  <rect x="44.0" y="220.0" width="166.0" height="40.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="400" x="56.0" y="244.5" fill="#26313e">
+    <tspan x="56.0" dy="0">Trang chủ</tspan>
+  </text>
+  <rect x="44.0" y="272.0" width="166.0" height="40.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="400" x="56.0" y="296.5" fill="#26313e">
+    <tspan x="56.0" dy="0">Hội viên</tspan>
+  </text>
+  <rect x="44.0" y="324.0" width="166.0" height="40.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="400" x="56.0" y="348.5" fill="#26313e">
+    <tspan x="56.0" dy="0">Gói tập</tspan>
+  </text>
+  <rect x="44.0" y="376.0" width="166.0" height="40.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="400" x="56.0" y="400.5" fill="#26313e">
+    <tspan x="56.0" dy="0">Thanh toán</tspan>
+  </text>
+  <rect x="238.0" y="152.0" width="918.0" height="42.0" fill="#f1f2f4" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="400" x="250.0" y="177.5" fill="#26313e">
+    <tspan x="250.0" dy="0">CN01  /  Không gian làm việc tại quầy</tspan>
+  </text>
+  <rect x="1200.0" y="140.0" width="360.0" height="680.0" fill="#ffffff" stroke="#9aa1aa" />
+  <rect x="1200.0" y="140.0" width="360.0" height="48.0" fill="#eceef1" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="1212.0" y="168.2" fill="#26313e">
+    <tspan x="1212.0" dy="0">☰  Gym Nhóm 6                Tài khoản</tspan>
+  </text>
+  <rect x="1200.0" y="832.0" width="360.0" height="42.0" fill="#f4f5f7" stroke="#f4f5f7" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="700" x="1212.0" y="857.5" fill="#26313e">
+    <tspan x="1212.0" dy="0">MOBILE · chiều rộng 360 px</tspan>
+  </text>
+  <rect x="238.0" y="212.0" width="918.0" height="44.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="19.0" font-weight="700" x="250.0" y="239.7" fill="#26313e">
+    <tspan x="250.0" dy="0">[BÁN GÓI MỚI]          [GIA HẠN GÓI]</tspan>
+  </text>
+  <rect x="238.0" y="274.0" width="918.0" height="52.0" fill="#eceef1" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="250.0" y="294.4" fill="#26313e">
+    <tspan x="250.0" dy="0">Bán mới: chọn hội viên → chọn gói mua → kiểm tra → hóa đơn</tspan>
+    <tspan x="250.0" dy="19.599999999999998">Gia hạn: chọn hội viên → chọn gói đang sở hữu → chọn gói nối tiếp → kiểm tra</tspan>
+  </text>
+  <rect x="238.0" y="340.0" width="918.0" height="46.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="250.0" y="367.2" fill="#26313e">
+    <tspan x="250.0" dy="0">1. Hội viên: HV000001 · Nguyễn Minh An · 0900000001   [Tìm / Đổi hội viên]</tspan>
+  </text>
+  <rect x="238.0" y="398.0" width="918.0" height="34.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="250.0" y="419.2" fill="#26313e">
+    <tspan x="250.0" dy="0">2. GIA HẠN: chọn một gói đang sở hữu (bán mới bỏ qua bước này)</tspan>
+  </text>
+  <rect x="238.0" y="444.0" width="440.0" height="90.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="250.0" y="473.6" fill="#26313e">
+    <tspan x="250.0" dy="0">● TIME 30 · Mã gói đã mua: HVG001</tspan>
+    <tspan x="250.0" dy="19.599999999999998">Hết hạn: 20/11/2026 · Đang hiệu lực</tspan>
+    <tspan x="250.0" dy="19.599999999999998">[Đã chọn gia hạn]</tspan>
+  </text>
+  <rect x="702.0" y="444.0" width="454.0" height="90.0" fill="#f1f2f4" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="714.0" y="473.6" fill="#26313e">
+    <tspan x="714.0" dy="0">○ PT 10 buổi · Mã gói đã mua: HVG002</tspan>
+    <tspan x="714.0" dy="19.599999999999998">Còn 4 buổi · Hết hạn: 10/12/2026</tspan>
+    <tspan x="714.0" dy="19.599999999999998">[Gia hạn gói này]</tspan>
+  </text>
+  <rect x="238.0" y="606.0" width="918.0" height="94.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="250.0" y="637.6" fill="#26313e">
+    <tspan x="250.0" dy="0">4. Kiểm tra gia hạn HVG001 → TIME 30 ngày</tspan>
+    <tspan x="250.0" dy="19.599999999999998">Gói cũ hết hạn 20/11/2026; gói mới dự kiến bắt đầu 21/11/2026.</tspan>
+    <tspan x="250.0" dy="19.599999999999998">Sau khi thanh toán: UPCOMING nếu chưa tới ngày bắt đầu. Giá/ngày do hệ thống xác định.</tspan>
+  </text>
+  <rect x="238.0" y="716.0" width="300.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="400" x="250.0" y="744.5" fill="#26313e">
+    <tspan x="250.0" dy="0">← Quay lại lựa chọn</tspan>
+  </text>
+  <rect x="774.0" y="716.0" width="382.0" height="48.0" fill="#e3e6eb" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="700" x="786.0" y="744.5" fill="#26313e">
+    <tspan x="786.0" dy="0">Tiếp tục sang hóa đơn F5 →</tspan>
+  </text>
+  <rect x="1212.0" y="204.0" width="336.0" height="44.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="700" x="1224.0" y="230.2" fill="#26313e">
+    <tspan x="1224.0" dy="0">Bán mới | Gia hạn (đang chọn)</tspan>
+  </text>
+  <rect x="1212.0" y="258.0" width="336.0" height="62.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="1224.0" y="283.4" fill="#26313e">
+    <tspan x="1224.0" dy="0">1. HV000001 · Nguyễn Minh An</tspan>
+    <tspan x="1224.0" dy="19.599999999999998">[Tìm / Đổi hội viên]</tspan>
+  </text>
+  <rect x="1212.0" y="370.0" width="336.0" height="84.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="1224.0" y="396.6" fill="#26313e">
+    <tspan x="1224.0" dy="0">● HVG001 · TIME 30</tspan>
+    <tspan x="1224.0" dy="19.599999999999998">Hết hạn 20/11/2026</tspan>
+    <tspan x="1224.0" dy="19.599999999999998">[Đã chọn gia hạn]</tspan>
+  </text>
+  <rect x="1212.0" y="466.0" width="336.0" height="84.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="1224.0" y="492.6" fill="#26313e">
+    <tspan x="1224.0" dy="0">○ HVG002 · PT · còn 4 buổi</tspan>
+    <tspan x="1224.0" dy="19.599999999999998">Hết hạn 10/12/2026</tspan>
+    <tspan x="1224.0" dy="19.599999999999998">[Gia hạn gói này]</tspan>
+  </text>
+  <rect x="1212.0" y="562.0" width="336.0" height="66.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="1224.0" y="589.4" fill="#26313e">
+    <tspan x="1224.0" dy="0">3. Gói nối tiếp: TIME 30 ngày</tspan>
+    <tspan x="1224.0" dy="19.599999999999998">500.000 đ · [Chọn gói khác]</tspan>
+  </text>
+  <rect x="1212.0" y="740.0" width="336.0" height="56.0" fill="#e3e6eb" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="700" x="1224.0" y="772.2" fill="#26313e">
+    <tspan x="1224.0" dy="0">Tiếp tục sang hóa đơn F5 →</tspan>
+  </text>
+  <rect x="32.0" y="886.0" width="1528.0" height="42.0" fill="#e3e6eb" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="700" x="44.0" y="911.5" fill="#26313e">
+    <tspan x="44.0" dy="0">Điểm nối thanh toán và trạng thái nghiệp vụ</tspan>
+  </text>
+  <rect x="32.0" y="942.0" width="1528.0" height="72.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="16.0" font-weight="400" x="44.0" y="971.6" fill="#26313e">
+    <tspan x="44.0" dy="0">F3 chuyển hội viên/gói đã chọn sang luồng hóa đơn F5. Tại F5: thu tiền mặt hoặc chuyển khoản VietQR và xác nhận đã nhận tiền theo quyền. Không đặt nút “Đã thanh</tspan>
+    <tspan x="44.0" dy="22.4">toán” ngay trong form chọn gói.</tspan>
+  </text>
+  <rect x="32.0" y="1026.0" width="1528.0" height="72.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="16.0" font-weight="400" x="44.0" y="1055.6" fill="#26313e">
+    <tspan x="44.0" dy="0">Trước thanh toán: chưa kích hoạt gói. Khi hóa đơn PAID: hệ thống xác định ngày/trạng thái; gói đủ điều kiện bắt đầu có thể ACTIVE, gói gia hạn nối tiếp còn phải</tspan>
+    <tspan x="44.0" dy="22.4">chờ có trạng thái UPCOMING. Hiển thị kết quả server.</tspan>
+  </text>
+  <rect x="32.0" y="1110.0" width="1528.0" height="72.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="16.0" font-weight="400" x="44.0" y="1139.6" fill="#26313e">
+    <tspan x="44.0" dy="0">Bán mới: không cho hai gói cùng loại đồng thời có hiệu lực tại cùng chi nhánh. Gia hạn: ĐƯỢC mua nối tiếp gói cùng loại còn hạn; gói mới bắt đầu sau ngày hết hạn</tspan>
+    <tspan x="44.0" dy="22.4">gói cũ. Không chặn gia hạn chỉ vì đã có gói cùng loại.</tspan>
+  </text>
+  <rect x="32.0" y="1194.0" width="1528.0" height="72.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="16.0" font-weight="400" x="44.0" y="1223.6" fill="#26313e">
+    <tspan x="44.0" dy="0">Chưa chọn hội viên/gói: báo bước còn thiếu. Không có gói để gia hạn: thông báo và cho chuyển Bán mới. Lỗi tải: Thử lại, giữ lựa chọn. Đổi hội viên phải chọn lại</tspan>
+    <tspan x="44.0" dy="22.4">gói sở hữu. Giá/ngày thay đổi: kiểm tra lại trước khi sang hóa đơn.</tspan>
+  </text>
+  <rect x="32.0" y="1278.0" width="1528.0" height="72.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="16.0" font-weight="400" x="44.0" y="1307.6" fill="#26313e">
+    <tspan x="44.0" dy="0">Nguồn: #18, bản chốt phạm vi và ERD. Mã HVG001/HVG002 chỉ là nhãn phân biệt gói đã mua trong hình, không quy định mã mới. Ngày/giá là ví dụ. F5 do Lân phụ trách;</tspan>
+    <tspan x="44.0" dy="22.4">bán/gia hạn triển khai Sprint 2.</tspan>
+  </text>
+  <rect x="238.0" y="546.0" width="918.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="250.0" y="574.2" fill="#26313e">
+    <tspan x="250.0" dy="0">3. Gói mua / nối tiếp: TIME 30 ngày · 500.000 đ   [Chọn gói khác]</tspan>
+  </text>
+  <rect x="1212.0" y="328.0" width="336.0" height="34.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="1224.0" y="349.2" fill="#26313e">
+    <tspan x="1224.0" dy="0">2. Chọn gói đang sở hữu</tspan>
+  </text>
+  <rect x="1212.0" y="640.0" width="336.0" height="84.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="1224.0" y="666.6" fill="#26313e">
+    <tspan x="1224.0" dy="0">4. Kiểm tra: bắt đầu 21/11/2026</tspan>
+    <tspan x="1224.0" dy="19.599999999999998">Sau thanh toán: UPCOMING</tspan>
+    <tspan x="1224.0" dy="19.599999999999998">nếu chưa tới ngày bắt đầu.</tspan>
+  </text>
+</svg>
