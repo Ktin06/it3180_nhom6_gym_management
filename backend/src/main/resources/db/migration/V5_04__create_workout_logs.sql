@@ -10,7 +10,6 @@ CREATE TABLE workout_logs (
   weight        decimal(6,2),
   created_at    timestamptz  NOT NULL DEFAULT now(),
   updated_at    timestamptz  NOT NULL DEFAULT now(),
-  CONSTRAINT fk_workout_logs_member     FOREIGN KEY (member_id)     REFERENCES members (id),
   CONSTRAINT fk_workout_logs_pt_session FOREIGN KEY (pt_session_id) REFERENCES pt_sessions (id)
 );
 CREATE INDEX ix_workout_logs_member_logged ON workout_logs (member_id, logged_at);

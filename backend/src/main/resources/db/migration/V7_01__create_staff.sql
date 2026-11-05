@@ -16,8 +16,6 @@ CREATE TABLE staff (
   updated_at      timestamptz  NOT NULL DEFAULT now(),
   CONSTRAINT uq_staff_user_id    UNIQUE (user_id),
   CONSTRAINT uq_staff_staff_code UNIQUE (staff_code),
-  CONSTRAINT fk_staff_user   FOREIGN KEY (user_id)   REFERENCES users (id),
-  CONSTRAINT fk_staff_branch FOREIGN KEY (branch_id) REFERENCES branches (id),
   CONSTRAINT ck_staff_status CHECK (status IN ('ACTIVE', 'INACTIVE')),
   -- cùng định dạng chuẩn với members.phone: 10 chữ số bắt đầu bằng 0
   CONSTRAINT ck_staff_phone  CHECK (phone ~ '^0[0-9]{9}$')

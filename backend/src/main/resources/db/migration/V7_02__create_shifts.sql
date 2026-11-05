@@ -9,8 +9,6 @@ CREATE TABLE shifts (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT fk_shifts_staff      FOREIGN KEY (staff_id)   REFERENCES staff (id),
-  CONSTRAINT fk_shifts_branch     FOREIGN KEY (branch_id)  REFERENCES branches (id),
-  CONSTRAINT fk_shifts_created_by FOREIGN KEY (created_by) REFERENCES users (id),
   CONSTRAINT ck_shifts_time CHECK (end_at > start_at)
 );
 CREATE INDEX ix_shifts_staff_start ON shifts (staff_id, start_at);

@@ -9,7 +9,6 @@ CREATE TABLE trainer_availabilities (
   end_time    time        NOT NULL,
   created_at  timestamptz NOT NULL DEFAULT now(),
   updated_at  timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT fk_trainer_availabilities_branch FOREIGN KEY (branch_id) REFERENCES branches (id),
   CONSTRAINT ck_trainer_availabilities_day CHECK (day_of_week BETWEEN 1 AND 7),
   CONSTRAINT ck_trainer_availabilities_time CHECK (end_time > start_time)
 );

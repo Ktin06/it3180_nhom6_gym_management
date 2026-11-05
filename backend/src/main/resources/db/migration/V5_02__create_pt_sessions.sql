@@ -16,10 +16,6 @@ CREATE TABLE pt_sessions (
   note              text,
   created_at        timestamptz NOT NULL DEFAULT now(),
   updated_at        timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT fk_pt_sessions_member     FOREIGN KEY (member_id)     REFERENCES members (id),
-  CONSTRAINT fk_pt_sessions_membership FOREIGN KEY (membership_id) REFERENCES memberships (id),
-  CONSTRAINT fk_pt_sessions_branch     FOREIGN KEY (branch_id)     REFERENCES branches (id),
-  CONSTRAINT fk_pt_sessions_created_by FOREIGN KEY (created_by)    REFERENCES users (id),
   CONSTRAINT ck_pt_sessions_status CHECK (status IN ('BOOKED', 'DONE', 'CANCELLED', 'NO_SHOW')),
   -- commission_amount có giá trị khi và chỉ khi status = DONE (chụp lúc xác nhận buổi)
   CONSTRAINT ck_pt_sessions_commission CHECK ((status = 'DONE') = (commission_amount IS NOT NULL))

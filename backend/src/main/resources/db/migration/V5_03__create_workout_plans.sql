@@ -9,6 +9,5 @@ CREATE TABLE workout_plans (
   start_date date,
   end_date   date,
   created_at timestamptz  NOT NULL DEFAULT now(),
-  updated_at timestamptz  NOT NULL DEFAULT now(),
-  CONSTRAINT fk_workout_plans_member FOREIGN KEY (member_id) REFERENCES members (id)
+  updated_at timestamptz  NOT NULL DEFAULT now()
 );

@@ -12,7 +12,6 @@ CREATE TABLE payrolls (
   created_at        timestamptz NOT NULL DEFAULT now(),
   updated_at        timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT fk_payrolls_staff  FOREIGN KEY (staff_id)  REFERENCES staff (id),
-  CONSTRAINT fk_payrolls_branch FOREIGN KEY (branch_id) REFERENCES branches (id),
   CONSTRAINT ck_payrolls_status CHECK (status IN ('DRAFT', 'CONFIRMED', 'PAID'))
 );
 CREATE UNIQUE INDEX uq_payrolls_staff_month ON payrolls (staff_id, month);
