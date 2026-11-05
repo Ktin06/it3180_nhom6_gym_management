@@ -8,7 +8,8 @@ Mục lục thư mục `docs/`. Khi các tài liệu mâu thuẫn nhau, thứ t�
 | --- | --- |
 | [ban-chot-pham-vi.md](requirements/ban-chot-pham-vi.md) | **Bản chuẩn** về phạm vi, 20 chức năng, 5 version, quy tắc nghiệp vụ, yêu cầu phi chức năng |
 | [boi-canh-de-tai.md](requirements/boi-canh-de-tai.md) | Tóm tắt đề tài, thành viên, các quyết định chính |
-| [srs/](requirements/srs/) | Đặc tả yêu cầu phần mềm (sẽ bổ sung) |
+| [srs/srs-tong-quan.md](requirements/srs/srs-tong-quan.md) | SRS tổng quan: bối cảnh và quy trình hiện tại, phạm vi, 6 vai trò, NF1–NF6, S1–S10 và nguồn tham khảo |
+| [srs/](requirements/srs/) | Đặc tả use case chi tiết theo chức năng và mẫu dùng chung |
 
 ## Thiết kế – [design/](design/)
 
