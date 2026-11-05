@@ -143,6 +143,19 @@ class MemberApiIntegrationTest {
     }
 
     @Test
+    void invalidPhoneSearchAndUpdateStillReturn400WithSharedUtility() throws Exception {
+        Long id = profile("HV000901", "0912345601", branch, null, "An");
+        RequestPostProcessor auth = identity(receptionist, Role.RECEPTIONIST);
+        mvc.perform(get("/api/v1/members").with(auth).param("keyword", "+84 123"))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400));
+        mvc.perform(put("/api/v1/members/{id}", id).with(auth)
+                .contentType(MediaType.APPLICATION_JSON).content(updateBody("123", "ACTIVE")))
+            .andExpect(status().isBadRequest());
+        assertThat(jdbc.queryForObject("SELECT phone FROM members WHERE id = ?", String.class, id))
+            .isEqualTo("0912345601");
+    }
+
+    @Test
     void updateSamePhoneAndDisableRevokeAndActivate() throws Exception {
         Long id = profile("HV000901", "0912345601", branch, memberUser, "An");
         refreshToken(memberUser);

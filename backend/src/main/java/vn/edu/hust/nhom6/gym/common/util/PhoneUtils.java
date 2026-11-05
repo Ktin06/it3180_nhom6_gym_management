@@ -1,28 +1,33 @@
 package vn.edu.hust.nhom6.gym.common.util;
 
-import vn.edu.hust.nhom6.gym.common.exception.InvalidRequestException;
+import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 
-/** Dạng lưu và tìm kiếm duy nhất: 10 chữ số bắt đầu bằng 0. */
+/**
+ * Tiện ích chuẩn hóa số điện thoại dùng chung cho toàn bộ hệ thống (F1, F2, F4...).
+ *
+ * <p>Chuẩn hóa số điện thoại về đúng 10 chữ số bắt đầu bằng số 0 theo ràng buộc CSDL {@code ^0[0-9]{9}$}.
+ */
 public final class PhoneUtils {
-    private PhoneUtils() { }
 
-    public static String normalize(String raw) {
-        if (raw == null || raw.isBlank()) {
-            throw new InvalidRequestException("Số điện thoại không được để trống.");
-        }
-        String phone = raw.replaceAll("[\\s.\\-]", "");
-        if (phone.startsWith("+84")) {
-            phone = "0" + phone.substring(3);
-        } else if (phone.startsWith("84") && phone.length() == 11) {
-            phone = "0" + phone.substring(2);
-        }
-        if (!phone.matches("^0[0-9]{9}$")) {
-            throw new InvalidRequestException("Số điện thoại không hợp lệ. Phải gồm 10 chữ số bắt đầu bằng số 0.");
-        }
-        return phone;
+    private PhoneUtils() {
     }
 
-    public static boolean isPhoneKeyword(String keyword) {
-        return keyword.matches("[+0-9\\s.\\-]+") && keyword.matches(".*[0-9].*");
+    /**
+     * Chuẩn hóa số điện thoại về 10 chữ số bắt đầu bằng số 0 (ví dụ {@code +84 912 345 678} thành {@code 0912345678}).
+     */
+    public static String normalizePhone(String rawPhone) {
+        if (rawPhone == null || rawPhone.isBlank()) {
+            throw new BusinessRuleException("Số điện thoại không được để trống.");
+        }
+        String cleaned = rawPhone.replaceAll("[\\s\\-\\.]", "");
+        if (cleaned.startsWith("+84")) {
+            cleaned = "0" + cleaned.substring(3);
+        } else if (cleaned.startsWith("84") && cleaned.length() == 11) {
+            cleaned = "0" + cleaned.substring(2);
+        }
+        if (!cleaned.matches("^0\\d{9}$")) {
+            throw new BusinessRuleException("Số điện thoại không hợp lệ. Phải gồm 10 chữ số bắt đầu bằng số 0.");
+        }
+        return cleaned;
     }
 }

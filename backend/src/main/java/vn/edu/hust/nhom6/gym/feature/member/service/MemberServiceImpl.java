@@ -12,7 +12,6 @@ import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import vn.edu.hust.nhom6.gym.common.dto.PageResponse;
 import vn.edu.hust.nhom6.gym.common.exception.*;
-import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
 import vn.edu.hust.nhom6.gym.feature.member.service.MemberActor.Role;
 import vn.edu.hust.nhom6.gym.feature.member.dto.*;
 import vn.edu.hust.nhom6.gym.feature.member.entity.*;
@@ -55,7 +54,7 @@ public class MemberServiceImpl implements MemberManagementService, MemberRegistr
     private Member newProfile(Long userId, Long createdBy, Long branchId, String fullName,
             String rawPhone, LocalDate dob, Gender gender) {
         validateName(fullName);
-        String phone = PhoneUtils.normalize(rawPhone);
+        String phone = MemberPhoneSupport.normalize(rawPhone);
         if (members.existsByPhone(phone)) {
             throw new ConflictException("Số điện thoại đã có hồ sơ hội viên. Vui lòng liên hệ quầy lễ tân.");
         }
@@ -97,7 +96,7 @@ public class MemberServiceImpl implements MemberManagementService, MemberRegistr
         Member member = members.findForUpdate(id).orElseThrow(MemberServiceImpl::notFound);
         requireBranch(actor, member);
         validateName(request.fullName());
-        String phone = PhoneUtils.normalize(request.phone());
+        String phone = MemberPhoneSupport.normalize(request.phone());
         if (members.existsByPhoneAndIdNot(phone, id)) {
             throw new ConflictException("Số điện thoại đã được đăng ký cho hội viên khác.");
         }
@@ -127,8 +126,8 @@ public class MemberServiceImpl implements MemberManagementService, MemberRegistr
         Long branchId = actor.role() == Role.SUPER_ADMIN ? null : integrations.staffBranchId(actor.userId());
         String term = keyword == null ? "" : keyword.trim();
         boolean code = term.matches("^HV[0-9]{6}$");
-        boolean phone = !term.isEmpty() && PhoneUtils.isPhoneKeyword(term);
-        String value = phone ? PhoneUtils.normalize(term) : term;
+        boolean phone = !term.isEmpty() && MemberPhoneSupport.isPhoneKeyword(term);
+        String value = phone ? MemberPhoneSupport.normalize(term) : term;
         Specification<Member> spec = (root, query, cb) -> {
             List<Predicate> filters = new ArrayList<>();
             filters.add(cb.isNull(root.get("deletedAt")));

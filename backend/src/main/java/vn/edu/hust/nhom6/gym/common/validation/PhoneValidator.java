@@ -2,7 +2,7 @@ package vn.edu.hust.nhom6.gym.common.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import vn.edu.hust.nhom6.gym.common.exception.InvalidRequestException;
+import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
 
 public class PhoneValidator implements ConstraintValidator<ValidPhone, String> {
@@ -10,9 +10,9 @@ public class PhoneValidator implements ConstraintValidator<ValidPhone, String> {
     public boolean isValid(String value, ConstraintValidatorContext context) {
         if (value == null || value.isBlank()) { return true; } // @NotBlank xử lý trường bắt buộc.
         try {
-            PhoneUtils.normalize(value);
+            PhoneUtils.normalizePhone(value);
             return true;
-        } catch (InvalidRequestException ex) {
+        } catch (BusinessRuleException ex) {
             return false;
         }
     }
