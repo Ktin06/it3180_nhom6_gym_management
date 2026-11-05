@@ -28,9 +28,3 @@ CREATE TABLE membership_transfers (
     )
 );
 
-CREATE INDEX ix_membership_transfers_from_member ON membership_transfers (from_member_id);
-CREATE INDEX ix_membership_transfers_to_member ON membership_transfers (to_member_id);
-CREATE INDEX ix_membership_transfers_from_membership ON membership_transfers (from_membership_id);
-CREATE INDEX ix_membership_transfers_to_membership ON membership_transfers (to_membership_id);
-CREATE INDEX ix_membership_transfers_invoice_id ON membership_transfers (invoice_id);
-

@@ -26,5 +26,3 @@ CREATE TABLE packages (
     CONSTRAINT ck_packages_status CHECK (status IN ('ACTIVE', 'INACTIVE'))
 );
 
-CREATE INDEX ix_packages_branch_id ON packages (branch_id);
-
