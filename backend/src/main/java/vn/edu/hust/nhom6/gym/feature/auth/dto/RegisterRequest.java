@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Size;
 /** Yêu cầu đăng ký tài khoản hội viên qua {@code POST /api/v1/auth/register}. */
 public record RegisterRequest(
     @NotBlank(message = "Họ và tên không được để trống")
+    @Size(max = 255, message = "Họ và tên không được vượt quá 255 ký tự")
     String fullName,
 
     @NotBlank(message = "Email không được để trống")

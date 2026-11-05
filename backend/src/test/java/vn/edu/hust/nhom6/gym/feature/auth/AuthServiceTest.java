@@ -26,6 +26,7 @@ import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.ForbiddenException;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
+import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.RegisterRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.RefreshToken;
@@ -271,10 +272,10 @@ class AuthServiceTest {
 
     @Test
     void chuanHoaSoDienThoaiCacDangPhoBien() {
-        assertThat(AuthService.normalizePhone("0912345678")).isEqualTo("0912345678");
-        assertThat(AuthService.normalizePhone("+84 912 345 678")).isEqualTo("0912345678");
-        assertThat(AuthService.normalizePhone("84912345678")).isEqualTo("0912345678");
-        assertThat(AuthService.normalizePhone("0912.345.678")).isEqualTo("0912345678");
-        assertThat(AuthService.normalizePhone("0912-345-678")).isEqualTo("0912345678");
+        assertThat(PhoneUtils.normalizePhone("0912345678")).isEqualTo("0912345678");
+        assertThat(PhoneUtils.normalizePhone("+84 912 345 678")).isEqualTo("0912345678");
+        assertThat(PhoneUtils.normalizePhone("84912345678")).isEqualTo("0912345678");
+        assertThat(PhoneUtils.normalizePhone("0912.345.678")).isEqualTo("0912345678");
+        assertThat(PhoneUtils.normalizePhone("0912-345-678")).isEqualTo("0912345678");
     }
 }

@@ -6,10 +6,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.ForbiddenException;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
+import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.RegisterRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.RefreshToken;
@@ -58,7 +58,7 @@ public class AuthService {
             throw new ConflictException("Email đã được đăng ký trong hệ thống.");
         }
 
-        String normalizedPhone = normalizePhone(request.phone());
+        String normalizedPhone = PhoneUtils.normalizePhone(request.phone());
 
         User user = User.builder()
             .email(email)
@@ -167,24 +167,5 @@ public class AuthService {
             .build();
         refreshTokenRepository.save(entity);
         return rawToken;
-    }
-
-    /**
-     * Chuẩn hóa số điện thoại về 10 chữ số bắt đầu bằng số 0 (ví dụ {@code +84 912 345 678} thành {@code 0912345678}).
-     */
-    public static String normalizePhone(String rawPhone) {
-        if (rawPhone == null || rawPhone.isBlank()) {
-            throw new BusinessRuleException("Số điện thoại không được để trống.");
-        }
-        String cleaned = rawPhone.replaceAll("[\\s\\-\\.]", "");
-        if (cleaned.startsWith("+84")) {
-            cleaned = "0" + cleaned.substring(3);
-        } else if (cleaned.startsWith("84") && cleaned.length() == 11) {
-            cleaned = "0" + cleaned.substring(2);
-        }
-        if (!cleaned.matches("^0\\d{9}$")) {
-            throw new BusinessRuleException("Số điện thoại không hợp lệ. Phải gồm 10 chữ số bắt đầu bằng số 0.");
-        }
-        return cleaned;
     }
 }
