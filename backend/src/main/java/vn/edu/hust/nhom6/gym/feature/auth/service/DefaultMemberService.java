@@ -18,7 +18,7 @@ import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
  */
 @Service
 @Fallback
-@ConditionalOnMissingBean(MemberService.class)
+@ConditionalOnMissingBean(value = MemberService.class, ignored = DefaultMemberService.class)
 public class DefaultMemberService implements MemberService {
 
     private final Set<String> registeredPhones = ConcurrentHashMap.newKeySet();

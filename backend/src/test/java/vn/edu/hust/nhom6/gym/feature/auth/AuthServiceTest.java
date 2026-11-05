@@ -20,6 +20,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
@@ -36,6 +40,7 @@ import vn.edu.hust.nhom6.gym.feature.auth.entity.UserStatus;
 import vn.edu.hust.nhom6.gym.feature.auth.repository.RefreshTokenRepository;
 import vn.edu.hust.nhom6.gym.feature.auth.repository.UserRepository;
 import vn.edu.hust.nhom6.gym.feature.auth.service.AuthService;
+import vn.edu.hust.nhom6.gym.feature.auth.service.DefaultMemberService;
 import vn.edu.hust.nhom6.gym.feature.auth.service.JwtTokenService;
 import vn.edu.hust.nhom6.gym.feature.auth.service.MemberService;
 import vn.edu.hust.nhom6.gym.feature.auth.service.TokenHashUtil;
@@ -277,5 +282,32 @@ class AuthServiceTest {
         assertThat(PhoneUtils.normalizePhone("84912345678")).isEqualTo("0912345678");
         assertThat(PhoneUtils.normalizePhone("0912.345.678")).isEqualTo("0912345678");
         assertThat(PhoneUtils.normalizePhone("0912-345-678")).isEqualTo("0912345678");
+    }
+
+    @Test
+    void defaultMemberServiceTuDongDangKyKhiChuaCoF2VaNhuongQuyenKhiCoF2() {
+        try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ScanOnlyDefaultConfig.class)) {
+            assertThat(ctx.getBean(MemberService.class)).isInstanceOf(DefaultMemberService.class);
+        }
+
+        try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+                ScanOnlyDefaultConfig.class, CustomMemberServiceStub.class)) {
+            assertThat(ctx.getBean(MemberService.class)).isInstanceOf(CustomMemberServiceStub.class);
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @ComponentScan(
+        basePackageClasses = DefaultMemberService.class,
+        useDefaultFilters = false,
+        includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = DefaultMemberService.class)
+    )
+    static class ScanOnlyDefaultConfig {
+    }
+
+    static class CustomMemberServiceStub implements MemberService {
+        @Override
+        public void registerMemberProfile(Long userId, String fullName, String phone, LocalDate dob, String gender) {
+        }
     }
 }
