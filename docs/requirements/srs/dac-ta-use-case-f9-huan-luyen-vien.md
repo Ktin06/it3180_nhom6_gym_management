@@ -102,8 +102,10 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 - **Request Body (DTO):**
   ```json
   {
-    "startTime": "2026-11-10T08:00:00Z",
-    "endTime": "2026-11-10T12:00:00Z"
+    "branchId": 1,
+    "dayOfWeek": 2,
+    "startTime": "08:00:00",
+    "endTime": "12:00:00"
   }
   ```
 
@@ -206,6 +208,7 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 
 - **Chỉ mục của `memberships`:** `(member_id, status)`, `end_date`, `start_date` (chỉ mục có điều kiện `WHERE status = UPCOMING`).
 - **Lưu ý:** `pt_sessions.member_id` phải trùng với `memberships.member_id`; hệ thống kiểm tra điều kiện này trong code. Gói được sử dụng phải là gói loại PT.
+
 #### G. Thiết kế giao diện và API liên quan
 - **API Endpoint:** `POST /api/v1/pt-sessions` *(đề xuất)*
 - **Header:** `Authorization: Bearer <access_token>`
@@ -354,14 +357,19 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 - **Request Body (DTO):**
   ```json
   {
-  "branchId": 1,
-  "dayOfWeek": 2,
-  "startTime": "08:00:00",
-  "endTime": "12:00:00"
-}
-  
-
----
+    "title": "Giáo án tăng cơ 4 tuần",
+    "content": [
+      {
+        "session": 1,
+        "exercises": [
+          { "name": "Squat", "sets": 4, "reps": 10 }
+        ]
+      }
+    ],
+    "startDate": "2026-11-10",
+    "endDate": "2026-12-07"
+  }
+  ```
 
 ### 3.5. UC-F9.5: Ghi nhật ký tập và chỉ số cơ thể
 
@@ -381,7 +389,7 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 
 #### C. Luồng sự kiện chính (Basic Flow / Happy Path)
 1. PT chọn học viên và mở mục "Nhật ký" hoặc "Chỉ số cơ thể".
-2. PT nhập nội dung nhật ký tập và các chỉ số cơ thể **[cần chốt: danh sách chỉ số, ví dụ cân nặng]**.
+2. PT nhập nhật ký tập (bài tập, số hiệp, số lần, mức tạ) và các chỉ số cơ thể (cân nặng, chiều cao, tỷ lệ mỡ, khối lượng cơ).
 3. Hệ thống kiểm tra tính hợp lệ của dữ liệu đầu vào.
 4. Hệ thống kiểm tra quyền (S3) và quan hệ dạy giữa PT và hội viên.
 5. Hệ thống lưu dữ liệu trong một giao dịch.
@@ -398,14 +406,89 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 - **[Cần chốt với nhóm]:** quan hệ với chỉ số cơ thể hội viên tự nhập ở F2, nếu có.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
-- **Bảng tác động:** `workout_logs`, `body_metrics`; đọc `members`
-- **Chi tiết trường dữ liệu:** *(điền từ `erd-v2.dbml`)*
+- **Bảng tác động:** `workout_logs`, `body_metrics`; đọc `members`, `staff`, `pt_sessions`, `class_sessions`, `class_bookings`
+- **Chi tiết trường dữ liệu:**
+
+- **Bảng `workout_logs`** (ghi mới, mỗi bài tập một dòng):
+
+  | Tên bảng | Tên cột | Kiểu dữ liệu | Ràng buộc | Ý nghĩa / Ghi chú |
+  | --- | --- | --- | --- | --- |
+  | `workout_logs` | `id` | `bigint` | PK, tự tăng | Mã nhật ký tập |
+  | `workout_logs` | `member_id` | `bigint` | NOT NULL, FK → `members.id` | Học viên được ghi nhật ký; lấy từ `{memberId}` trên đường dẫn, phải là học viên PT đang dạy |
+  | `workout_logs` | `pt_session_id` | `bigint` | Có thể NULL, FK → `pt_sessions.id` | Buổi PT mà nhật ký thuộc về; NULL nếu ghi ngoài buổi PT (ví dụ buổi lớp nhóm). Nếu có giá trị, buổi đó phải thuộc đúng PT và đúng hội viên (kiểm tra trong code) |
+  | `workout_logs` | `logged_at` | `date` | NOT NULL | Ngày tập |
+  | `workout_logs` | `exercise` | `varchar(100)` | NOT NULL | Tên bài tập |
+  | `workout_logs` | `sets` | `int` | Có thể NULL | Số hiệp |
+  | `workout_logs` | `reps` | `int` | Có thể NULL | Số lần |
+  | `workout_logs` | `weight` | `decimal(6,2)` | Có thể NULL | Mức tạ, đơn vị kg |
+  | `workout_logs` | `created_at` | `timestamptz` | NOT NULL | Thời điểm tạo (hệ thống ghi) |
+  | `workout_logs` | `updated_at` | `timestamptz` | NOT NULL | Thời điểm cập nhật (hệ thống ghi) |
+
+- **Chỉ mục của `workout_logs`:** `(member_id, logged_at)`, phục vụ biểu đồ tiến độ (UC-F9.6).
+
+- **Bảng `body_metrics`** (ghi mới, mỗi lần đo một dòng):
+
+  | Tên bảng | Tên cột | Kiểu dữ liệu | Ràng buộc | Ý nghĩa / Ghi chú |
+  | --- | --- | --- | --- | --- |
+  | `body_metrics` | `id` | `bigint` | PK, tự tăng | Mã bản ghi chỉ số cơ thể |
+  | `body_metrics` | `member_id` | `bigint` | NOT NULL, FK → `members.id` | Học viên được đo; lấy từ `{memberId}` trên đường dẫn |
+  | `body_metrics` | `recorded_by` | `bigint` | Có thể NULL, FK → `users.id` | `users.id` của PT đang đăng nhập, lấy từ token, không nhận từ client |
+  | `body_metrics` | `measured_at` | `date` | NOT NULL | Ngày đo |
+  | `body_metrics` | `weight` | `decimal(5,2)` | Có thể NULL | Cân nặng, đơn vị kg |
+  | `body_metrics` | `height` | `decimal(5,2)` | Có thể NULL | Chiều cao, đơn vị cm |
+  | `body_metrics` | `body_fat` | `decimal(4,2)` | Có thể NULL | Tỷ lệ mỡ cơ thể, đơn vị % (tối đa 99,99) |
+  | `body_metrics` | `muscle_mass` | `decimal(5,2)` | Có thể NULL | Khối lượng cơ, đơn vị kg |
+  | `body_metrics` | `note` | `text` | Có thể NULL | Ghi chú |
+  | `body_metrics` | `created_at` | `timestamptz` | NOT NULL | Thời điểm tạo (hệ thống ghi) |
+  | `body_metrics` | `updated_at` | `timestamptz` | NOT NULL | Thời điểm cập nhật (hệ thống ghi) |
+
+- **Chỉ mục của `body_metrics`:** `(member_id, measured_at)`.
+
+- **Các bảng chỉ đọc** (kiểm tra hội viên tồn tại và quan hệ dạy, BR-F9.10):
+
+  | Tên bảng | Tên cột dùng | Mục đích |
+  | --- | --- | --- |
+  | `members` | `id`, `status`, `deleted_at` | Trả 404 (E3) nếu hội viên không tồn tại hoặc đã xóa mềm (`deleted_at` có giá trị) |
+  | `staff` | `id`, `user_id`, `status` | Đổi `users.id` của PT đang đăng nhập (từ token) thành `staff.id` (`trainer_id`) |
+  | `pt_sessions` | `trainer_id`, `member_id`, `status` | Có buổi PT giữa PT và hội viên thì có quan hệ dạy |
+  | `class_sessions` | `id`, `trainer_id` | Tìm các buổi lớp nhóm do PT dạy |
+  | `class_bookings` | `class_session_id`, `member_id`, `status` | Hội viên có đặt chỗ ở buổi lớp do PT dạy (booking chưa `CANCELLED`) thì có quan hệ dạy |
+
+- **Ràng buộc và kiểm tra áp dụng:**
+  - Ghi cả hai bảng trong cùng một giao dịch (bước 5); lỗi ở bảng nào thì không lưu bảng nào.
+  - Thiếu `exercise`, thiếu `logged_at` hoặc `measured_at`, hoặc giá trị âm hoặc ngoài khoảng cho phép thì trả 400 (E1). Khoảng cho phép của từng chỉ số do code kiểm tra; ERD chỉ quy định độ rộng cột.
+  - Không có quan hệ dạy giữa PT và hội viên thì trả 403 (E2); hội viên không tồn tại thì trả 404 (E3).
+  - Dữ liệu không xóa cứng; nếu cần sửa thì cập nhật dòng cũ hoặc ghi dòng mới.
+  - Có thể ghi `audit_logs` với `entity` = `workout_logs` hoặc `body_metrics`, `action` = `CREATE`.
+- **Lưu ý (khớp mục "[Cần chốt với nhóm]" ở phần E):**
+  - `body_metrics` dùng chung cho PT ghi (UC này) và hội viên tự nhập (F2). Hai nguồn phân biệt qua `recorded_by` (là `users.id` của PT hay của chính hội viên). Bảng không có ràng buộc duy nhất `(member_id, measured_at)`, nên một ngày có thể có nhiều dòng; cần chốt biểu đồ tiến độ (UC-F9.6) lấy dòng nào hoặc hiển thị cả hai.
+  - `workout_logs` không có cột người ghi, chỉ có `pt_session_id`. Với nhật ký PT ghi ngoài buổi PT, dấu vết PT nào ghi chỉ còn trong `audit_logs`. Nếu cần hiển thị "PT nào ghi", nên đề xuất thêm cột `recorded_by` vào ERD; nếu không thì chấp nhận tra qua `audit_logs`.
 
 #### G. Thiết kế giao diện và API liên quan
 - **API Endpoint:** `POST /api/v1/pt/members/{memberId}/workout-logs`, `POST /api/v1/pt/members/{memberId}/body-metrics` *(đề xuất)*
 - **Header:** `Authorization: Bearer <access_token>`
-- **Request Body:** *(điền theo danh sách chỉ số sau khi chốt)*
-
+- **Request Body (DTO) cho `workout-logs`:**
+  ```json
+  {
+    "ptSessionId": 1,
+    "loggedAt": "2026-11-10",
+    "exercise": "Squat",
+    "sets": 4,
+    "reps": 10,
+    "weight": 60.0
+  }
+  ```
+- **Request Body (DTO) cho `body-metrics`:**
+  ```json
+  {
+    "measuredAt": "2026-11-10",
+    "weight": 65.5,
+    "height": 170.0,
+    "bodyFat": 18.5,
+    "muscleMass": 30.2,
+    "note": ""
+  }
+  ```
 ---
 
 ### 3.6. UC-F9.6: Xem tiến độ học viên
