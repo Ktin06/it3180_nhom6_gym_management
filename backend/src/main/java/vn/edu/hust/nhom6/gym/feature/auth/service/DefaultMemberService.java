@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Fallback;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +17,6 @@ import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
  */
 @Service
 @Fallback
-@ConditionalOnMissingBean(value = MemberService.class, ignored = DefaultMemberService.class)
 public class DefaultMemberService implements MemberService {
 
     private final Set<String> registeredPhones = ConcurrentHashMap.newKeySet();
