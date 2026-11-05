@@ -1,5 +1,5 @@
--- Nhóm 6: Bán hàng và thanh toán. Tạo bảng invoice_items.
--- Khóa ngoại liên nhóm được thêm ở V8_03.
+-- Nhóm 6: Bán hàng và thanh toán
+-- Bảng invoice_items: Dòng hóa đơn
 
 CREATE TABLE invoice_items (
     id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -14,6 +14,8 @@ CREATE TABLE invoice_items (
     discount_amount integer NOT NULL DEFAULT 0,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT fk_invoice_items_invoice FOREIGN KEY (invoice_id) REFERENCES invoices (id),
+    CONSTRAINT fk_invoice_items_product FOREIGN KEY (product_id) REFERENCES products (id),
     CONSTRAINT ck_invoice_items_type CHECK (item_type IN ('PACKAGE', 'PRODUCT', 'TRANSFER_FEE')),
     CONSTRAINT ck_invoice_items_type_reference CHECK (
         (item_type = 'PACKAGE' AND package_id IS NOT NULL AND product_id IS NULL)
@@ -27,9 +29,6 @@ CREATE TABLE invoice_items (
     ),
     CONSTRAINT ck_invoice_items_discount CHECK (
         discount_amount >= 0 AND discount_amount <= amount
-    ),
-    CONSTRAINT fk_invoice_items_invoice FOREIGN KEY (invoice_id) REFERENCES invoices(id),
-    CONSTRAINT fk_invoice_items_product FOREIGN KEY (product_id) REFERENCES products(id)
+    )
 );
-CREATE INDEX ix_invoice_items_invoice_id ON invoice_items(invoice_id);
-CREATE INDEX ix_invoice_items_product_id ON invoice_items(product_id);
+CREATE INDEX ix_invoice_items_invoice_id ON invoice_items (invoice_id);

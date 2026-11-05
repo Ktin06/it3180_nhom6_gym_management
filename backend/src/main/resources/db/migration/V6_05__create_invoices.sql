@@ -1,5 +1,5 @@
--- Nhóm 6: Bán hàng và thanh toán. Tạo bảng invoices.
--- Khóa ngoại liên nhóm được thêm ở V8_03.
+-- Nhóm 6: Bán hàng và thanh toán (F5, F7, F12, F14)
+-- Bảng invoices: Hóa đơn
 
 CREATE TABLE invoices (
     id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -25,12 +25,9 @@ CREATE TABLE invoices (
     CONSTRAINT ck_invoices_amounts CHECK (
         subtotal >= 0 AND discount >= 0 AND total >= 0 AND total = subtotal - discount
     ),
-    CONSTRAINT fk_invoices_promotion FOREIGN KEY (promotion_id) REFERENCES promotions(id)
+    CONSTRAINT fk_invoices_promotion FOREIGN KEY (promotion_id) REFERENCES promotions (id)
 );
-CREATE INDEX ix_invoices_branch_created_at ON invoices(branch_id, created_at);
-CREATE INDEX ix_invoices_member_created_at ON invoices(member_id, created_at);
-CREATE INDEX ix_invoices_created_by ON invoices(created_by);
-CREATE INDEX ix_invoices_promotion_id ON invoices(promotion_id);
-CREATE INDEX ix_invoices_refunded_by ON invoices(refunded_by);
-CREATE INDEX ix_invoices_pending_portal ON invoices(created_at)
+CREATE INDEX ix_invoices_branch_created_at ON invoices (branch_id, created_at);
+CREATE INDEX ix_invoices_member_created_at ON invoices (member_id, created_at);
+CREATE INDEX ix_invoices_pending_portal ON invoices (created_at)
     WHERE status = 'PENDING' AND source = 'MEMBER_PORTAL';
