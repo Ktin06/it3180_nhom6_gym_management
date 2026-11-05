@@ -32,5 +32,4 @@ CREATE TABLE members (
 );
 
 CREATE INDEX ix_members_full_name ON members (full_name);
-CREATE INDEX ix_members_home_branch ON members (home_branch_id);
 

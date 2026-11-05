@@ -21,7 +21,7 @@ CREATE TABLE packages (
     CONSTRAINT ck_packages_price CHECK (price >= 0),
     CONSTRAINT ck_packages_session_count CHECK (
         (type = 'TIME' AND session_count IS NULL) OR
-        (type IN ('SESSION', 'PT') AND session_count IS NOT NULL AND session_count > 0)
+        (type IN ('SESSION', 'PT') AND session_count IS NOT NULL)
     ),
     CONSTRAINT ck_packages_status CHECK (status IN ('ACTIVE', 'INACTIVE'))
 );

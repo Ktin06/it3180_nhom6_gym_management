@@ -23,7 +23,8 @@ CREATE TABLE membership_transfers (
     CONSTRAINT ck_membership_transfers_different_members CHECK (from_member_id <> to_member_id),
     CONSTRAINT ck_membership_transfers_fee CHECK (fee >= 0),
     CONSTRAINT ck_membership_transfers_completed_has_to_membership CHECK (
-        (status = 'COMPLETED' AND to_membership_id IS NOT NULL) OR (status <> 'COMPLETED')
+        (status = 'COMPLETED' AND to_membership_id IS NOT NULL) OR
+        (status <> 'COMPLETED' AND to_membership_id IS NULL)
     )
 );
 

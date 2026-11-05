@@ -10,7 +10,7 @@ CREATE TABLE face_embeddings (
     created_by bigint,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT fk_face_embeddings_member FOREIGN KEY (member_id) REFERENCES members (id) ON DELETE CASCADE,
+    CONSTRAINT fk_face_embeddings_member FOREIGN KEY (member_id) REFERENCES members (id),
     CONSTRAINT ck_face_embeddings_cardinality CHECK (cardinality(embedding) = 128)
 );
 

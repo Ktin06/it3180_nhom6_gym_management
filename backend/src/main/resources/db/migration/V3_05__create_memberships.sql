@@ -36,5 +36,4 @@ CREATE INDEX ix_memberships_upcoming ON memberships (start_date) WHERE status = 
 CREATE UNIQUE INDEX uq_one_active_per_type ON memberships (member_id, package_type, branch_id) NULLS NOT DISTINCT WHERE status IN ('ACTIVE', 'FROZEN');
 CREATE INDEX ix_memberships_package_id ON memberships (package_id);
 CREATE INDEX ix_memberships_invoice_item_id ON memberships (invoice_item_id);
-CREATE INDEX ix_memberships_sold_branch ON memberships (sold_branch_id);
 

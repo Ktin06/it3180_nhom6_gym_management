@@ -7,10 +7,10 @@ CREATE TABLE body_metrics (
     member_id bigint NOT NULL,
     recorded_by bigint,
     measured_at date NOT NULL,
-    weight numeric(5, 2),
-    height numeric(5, 2),
-    body_fat numeric(4, 2),
-    muscle_mass numeric(5, 2),
+    weight decimal(5, 2),
+    height decimal(5, 2),
+    body_fat decimal(4, 2),
+    muscle_mass decimal(5, 2),
     note text,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
@@ -21,5 +21,5 @@ CREATE TABLE body_metrics (
     CONSTRAINT ck_body_metrics_muscle_mass CHECK (muscle_mass IS NULL OR muscle_mass > 0)
 );
 
-CREATE INDEX ix_body_metrics_member_measured ON body_metrics (member_id, measured_at DESC);
+CREATE INDEX ix_body_metrics_member_measured ON body_metrics (member_id, measured_at);
 
