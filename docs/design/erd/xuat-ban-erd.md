@@ -2,20 +2,25 @@
 
 - **Người biên soạn:** Nguyễn Anh Tú (`natus26`) · [#15](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/15) · WBS 1.3.11.
 - **Người duyệt:** Phạm Gia Bảo (`GamBug`), theo phân công Sprint 1.
-- **Cập nhật:** 05/11/2026.
+- **Cập nhật:** 06/11/2026.
 - **Nguồn chuẩn:** [erd-v2.dbml](erd-v2.dbml), đủ 39 bảng thuộc 8 nhóm.
 
 ## 1. Sản phẩm và nguồn sinh
 
 | Tệp | Cách dùng |
 | --- | --- |
+| [ERD xuất dbdiagram.io – PDF](hinh/dbdiagram-erd-v2.pdf) | Bản xuất trực tiếp ngày 06/11/2026; dùng trang 1 cho sơ đồ tổng quan; trang 2 là sơ đồ có liên kết tô nổi, trang 3–5 là Enum |
+| [ERD xuất dbdiagram.io – PNG](hinh/dbdiagram-erd-v2.png) | Ảnh tổng quan 4956 × 4945 px xuất trực tiếp cùng nguồn DBML |
+| [Nguồn bản xuất dbdiagram.io](hinh/dbdiagram-nguon-hinh.json) | Người/ngày xuất, SHA-256 nguồn và từng file, kích thước, số trang và kết quả đối chiếu |
 | [Từ điển dữ liệu](tu-dien-du-lieu.md) | Tra cứu đủ 422 cột: kiểu, NULL, mặc định, khóa, ý nghĩa và ghi chú; kèm 44 khai báo chỉ mục và 25 tập giá trị Enum |
 | [ERD tổng quan PDF](hinh/erd-v2.pdf) | Hình vector, có thể phóng to hoặc chèn vào LaTeX bằng `\includegraphics` |
 | [ERD tổng quan PNG](hinh/erd-v2.png) | Xem ảnh trực tiếp hoặc chèn vào trình soạn thảo báo cáo |
 | [ERD tổng quan SVG](hinh/erd-v2.svg) | Bản vector để xem trong trình duyệt; muốn đổi cấu trúc thì sửa nguồn chuẩn và sinh lại |
 | [Thông tin nguồn hình](hinh/nguon-hinh.json) | SHA-256 DBML chuẩn hóa LF, công cụ dựng, số bảng/cột/quan hệ và phạm vi từng hình |
 
-**Bộ hình hiện tại được dựng cục bộ bằng bộ phân tích DBML chính thức và Graphviz**, không phải bản xuất từ dbdiagram.io. Trong lần thực hiện ngày 05/11, website tải được nhưng editor không render trong các phiên trình duyệt sạch, nên chưa xuất được bằng chức năng PDF/PNG của website. Mục 3 hướng dẫn thực hiện bước xuất dbdiagram.io còn lại của #15; bản dựng cục bộ vẫn dùng cùng DBML chuẩn để kiểm tra nội dung và chuẩn bị báo cáo.
+**Đã có bản PDF/PNG xuất trực tiếp từ dbdiagram.io ngày 06/11/2026**, do Nguyễn Anh Tú xuất và cung cấp. Hai file được lưu nguyên vẹn, chỉ đổi tên; PDF có chữ và đường nét vector, gồm 5 trang. Đã đối chiếu đủ 39 bảng, tên/kiểu của 422 cột, số đầu quan hệ tương ứng 89 liên kết và 25 tập giá trị Enum với DBML. Bản PNG đã được xem cùng bố cục sơ đồ, không thấy bảng bị cắt.
+
+Bộ hình `erd-v2.*` và `nhom-*.pdf/svg` bên dưới vẫn là bản dựng cục bộ bằng bộ phân tích DBML chính thức và Graphviz. Hai nguồn xuất có thông tin nguồn riêng, dùng cùng DBML chuẩn; hình nhóm giúp đọc rõ hơn khi đưa vào báo cáo khổ giấy nhỏ.
 
 Hình tổng quan chứa đủ **39 bảng, 422 cột và 89 quan hệ**. Vì sơ đồ lớn, khi trình bày ở khổ giấy nhỏ nên dùng các hình theo nhóm bên dưới thay vì thu toàn bộ sơ đồ vào một trang A4.
 
@@ -42,10 +47,12 @@ Các hình nhóm giữ đầy đủ cột của bảng trong nhóm và mọi FK 
 
 ## 3. Xuất trực tiếp bằng dbdiagram.io
 
+Lần xuất ngày 06/11/2026 đã hoàn tất; các bước dưới đây dùng khi cần xuất lại. Website yêu cầu đăng nhập để dùng Export.
+
 1. Mở [dbdiagram.io](https://dbdiagram.io/d), tạo sơ đồ mới và dán toàn bộ nội dung `erd-v2.dbml` vào editor DBML.
 2. Kiểm tra không có lỗi cú pháp; đối chiếu đủ 39 bảng và 89 quan hệ. Có thể kéo vị trí bảng để bố cục dễ đọc, giữ nguyên tên, cột, kiểu và liên kết.
 3. Dùng **Export → PDF/PNG** theo [hướng dẫn chính thức](https://docs.dbdiagram.io/basic-editing-experience/). Xuất đủ sơ đồ; kiểm tra không mất bảng ở rìa và đọc được tên bảng/cột khi phóng to.
-4. Lưu thành tệp riêng mang tiền tố `dbdiagram-erd-v2`, ghi ngày xuất và SHA-256 của DBML đã dùng, rồi bổ sung liên kết vào mục 1. Giữ rõ nguồn công cụ của từng hình; không đổi nhãn bản dựng cục bộ thành bản xuất website.
+4. Lưu thành `hinh/dbdiagram-erd-v2.pdf` và `hinh/dbdiagram-erd-v2.png`; cập nhật ngày xuất, SHA-256 nguồn/file và kết quả kiểm tra trong `hinh/dbdiagram-nguon-hinh.json`. Giữ nguyên bản xuất và đối chiếu lại nội dung nếu nguồn DBML đổi. Không đổi nhãn bản dựng cục bộ thành bản xuất website.
 
 Nếu DBML chưa thay đổi, nội dung cột/quan hệ trong hai cách dựng phải giống nhau; bố cục và màu sắc có thể khác. Không đưa dữ liệu hội viên, tài khoản đăng nhập hoặc bí mật môi trường vào sơ đồ.
 
@@ -74,7 +81,18 @@ Có thể thay đường dẫn Chrome bằng trình duyệt Chromium tương th�
 
 ## 5. Đưa vào báo cáo LaTeX
 
-Từ thư mục `report/`, ví dụ chèn một hình nhóm với gói `graphicx`:
+Từ thư mục `report/`, ví dụ chèn trang sơ đồ tổng quan xuất trực tiếp với gói `graphicx`:
+
+```latex
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[page=1,width=\textwidth]{../docs/design/erd/hinh/dbdiagram-erd-v2.pdf}
+  \caption{ERD v2 tổng quan, xuất từ dbdiagram.io ngày 06/11/2026.}
+  \label{fig:erd-tong-quan}
+\end{figure}
+```
+
+Sơ đồ tổng quan có nhiều bảng và khoảng trống trong bản PDF gốc; chữ sẽ nhỏ khi thu về A4. Dùng để xem cấu trúc chung, kèm các hình nhóm khi cần đọc chi tiết. Ví dụ chèn hình nhóm:
 
 ```latex
 \begin{figure}[htbp]
@@ -92,3 +110,4 @@ Hình PDF giữ chữ vector khi phóng to; nhóm nhiều bảng có thể cần
 | Ngày | Nội dung |
 | --- | --- |
 | 05/11/2026 | Xuất từ điển và bộ ERD cục bộ từ DBML; bổ sung hướng dẫn tái tạo, sử dụng trong LaTeX và bước xuất dbdiagram.io còn lại |
+| 06/11/2026 | Bổ sung PDF/PNG xuất trực tiếp từ dbdiagram.io do Nguyễn Anh Tú cung cấp; kiểm tra bảng/cột/kiểu, số quan hệ và Enum; ghi nguồn/checksum và ví dụ LaTeX dùng trang 1 PDF |
