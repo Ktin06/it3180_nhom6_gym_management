@@ -25,7 +25,7 @@ Biến môi trường (nếu có) đọc từ file `.env` ở **thư mục gốc
 
 ## Xác thực F1
 
-Frontend có trang đăng ký và đăng nhập; access token chỉ giữ trong bộ nhớ tab, refresh token do backend đặt vào cookie `HttpOnly`. Adapter dùng hợp đồng JSON F1 mục 6.1 do Đức Việt xác nhận ngày 04/11/2026 (`/me` gồm `userId`, `email`, `role`); backend auth #25/#26 chưa merge vào `main`, nên PR #80 vẫn Draft và chưa xác minh tích hợp thật. Xem [ghi chú tích hợp](../docs/guides/tich-hop-frontend-f1.md) trước khi nối API thật. Vitest mock không thay thế kiểm tra backend hoặc staging.
+Frontend có trang đăng ký và đăng nhập; access token chỉ giữ trong bộ nhớ tab, refresh token do backend đặt vào cookie `HttpOnly`. Adapter dùng hợp đồng JSON F1 mục 6.1 do Đức Việt xác nhận ngày 04/11/2026 (`/me` gồm `userId`, `email`, `role`). Backend auth #25/#26 đã merge qua #87/#91; PR #80 vẫn Draft vì chưa kiểm chứng tích hợp thật, còn phụ thuộc schema và service F2 ghi hồ sơ bền vững. Xem [ghi chú tích hợp](../docs/guides/tich-hop-frontend-f1.md) trước khi nối API thật. Vitest mock không thay thế kiểm tra backend hoặc staging.
 
 ## Quy ước thư mục
 
