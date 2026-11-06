@@ -134,7 +134,7 @@
     <line x1="280" y1="390" x2="1130" y2="390" stroke="#F1F5F9" stroke-width="1" stroke-dasharray="3 3"/>
     <line x1="280" y1="340" x2="1130" y2="340" stroke="#F1F5F9" stroke-width="1" stroke-dasharray="3 3"/>
 
-    <!-- Bars for 17 hours (06h - 22h) -->
+    <!-- Bars for 16 hours (06h - 21h); 22:00 là giờ đóng cửa nên không có khung 22h -->
     <!-- 06h: 5 --> <rect x="300" y="425" width="28" height="15" rx="3" fill="#93C5FD"/><text x="314" y="455" font-size="10" fill="#64748B" text-anchor="middle">06h</text>
     <!-- 07h: 14 --> <rect x="350" y="398" width="28" height="42" rx="3" fill="#60A5FA"/><text x="364" y="455" font-size="10" fill="#64748B" text-anchor="middle">07h</text>
     <!-- 08h: 8 --> <rect x="400" y="416" width="28" height="24" rx="3" fill="#93C5FD"/><text x="414" y="455" font-size="10" fill="#64748B" text-anchor="middle">08h</text>
@@ -151,7 +151,6 @@
     <!-- 19h: 30 --> <rect x="950" y="350" width="28" height="90" rx="3" fill="#2563EB"/><text x="964" y="455" font-size="10" fill="#64748B" text-anchor="middle">19h</text>
     <!-- 20h: 16 --> <rect x="1000" y="392" width="28" height="48" rx="3" fill="#60A5FA"/><text x="1014" y="455" font-size="10" fill="#64748B" text-anchor="middle">20h</text>
     <!-- 21h: 6 --> <rect x="1050" y="422" width="28" height="18" rx="3" fill="#93C5FD"/><text x="1064" y="455" font-size="10" fill="#64748B" text-anchor="middle">21h</text>
-    <!-- 22h: 2 --> <rect x="1100" y="434" width="28" height="6" rx="3" fill="#CBD5E1"/><text x="1114" y="455" font-size="10" fill="#64748B" text-anchor="middle">22h</text>
 
     <!-- Section 2: Two Lower Tables -->
     <!-- Table Left: Hội viên vừa Check-in (Live Feed) -->
@@ -203,7 +202,7 @@
 
     <!-- Table Right: Cảnh báo gói sắp hết hạn -->
     <rect x="720" y="515" width="440" height="290" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
-    <text x="740" y="545" font-size="14" font-weight="700" fill="#1E293B">Gói tập sắp hết hạn (7 ngày tới)</text>
+    <text x="740" y="545" font-size="14" font-weight="700" fill="#1E293B">Gói sắp hết hạn hoặc sắp hết buổi</text>
     <text x="1055" y="545" font-size="11" font-weight="600" fill="#EA580C">Xem tất cả (8) →</text>
 
     <!-- Table Header Right -->

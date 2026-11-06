@@ -177,6 +177,61 @@ Chi tiết đối chiếu với [Bản chốt phạm vi](../ban-chot-pham-vi.md)
 | `GET /api/v1/auth/me` | Mọi vai trò đã đăng nhập | Lấy thông tin tài khoản hiện tại từ JWT | `200`, `401` |
 | `POST /api/v1/auth/change-password` | Mọi vai trò đã đăng nhập | Đổi mật khẩu và thu hồi toàn bộ refresh token | `204`, `400`, `401`, `422` |
 
+### 6.1. Định dạng JSON Request / Response chuẩn (dùng chung Backend & Frontend)
+
+1. **Đăng ký hội viên (`POST /api/v1/auth/register`):**
+   - **Request Body:**
+     ```json
+     {
+       "fullName": "Nguyễn Văn A",
+       "email": "member@example.com",
+       "phone": "0912345678",
+       "password": "Password123",
+       "dob": "2000-05-15",
+       "gender": "MALE"
+     }
+     ```
+     *(Lưu ý: `dob` và `gender` là tùy chọn; `gender` nhận `"MALE"`, `"FEMALE"`, `"OTHER"` hoặc `null`. Trường `phone` chấp nhận cả dạng `"0912345678"` và `"+84 912 345 678"`, backend tự chuẩn hóa về 10 chữ số bắt đầu bằng `0` trước khi kiểm tra).*
+   - **Response (`201 Created`):** Trả kèm header `Set-Cookie: refresh_token=<token>; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth` và JSON body giống `POST /api/v1/auth/login` bên dưới.
+
+2. **Đăng nhập (`POST /api/v1/auth/login`) và Làm mới phiên (`POST /api/v1/auth/refresh`):**
+   - **Request Body (`POST /api/v1/auth/login`):**
+     ```json
+     {
+       "email": "reception@example.com",
+       "password": "Password123"
+     }
+     ```
+     *(`POST /api/v1/auth/refresh` không có request body, đọc trực tiếp từ cookie `refresh_token`).*
+   - **Response (`200 OK`):** Đặt/xoay vòng cookie `refresh_token` (`HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`) và trả JSON phẳng không bọc thêm envelope:
+     ```json
+     {
+       "accessToken": "<jwt_hs256_token>"
+     }
+     ```
+
+3. **Lấy thông tin tài khoản hiện tại (`GET /api/v1/auth/me`):**
+   - **Header:** `Authorization: Bearer <access_token>`
+   - **Response (`200 OK` – `AuthMeResponse`):** Trả đối tượng JSON phẳng ở cấp gốc (không bọc trong `user`), khớp với 5 giá trị `role` trong `users.role` (`SUPER_ADMIN`, `BRANCH_MANAGER`, `RECEPTIONIST`, `TRAINER`, `MEMBER`):
+     ```json
+     {
+       "userId": 15,
+       "email": "reception@example.com",
+       "role": "RECEPTIONIST"
+     }
+     ```
+
+4. **Đổi mật khẩu (`POST /api/v1/auth/change-password`):**
+   - **Header:** `Authorization: Bearer <access_token>`
+   - **Request Body:**
+     ```json
+     {
+       "currentPassword": "Password123",
+       "newPassword": "NewPassword456"
+     }
+     ```
+   - **Response:** `204 No Content`.
+
 ---
 
 ## 7. Tiêu chí chấp nhận (Acceptance Criteria – Given/When/Then)
