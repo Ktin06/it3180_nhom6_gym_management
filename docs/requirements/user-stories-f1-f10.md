@@ -7,7 +7,7 @@
 - 31 story; nội dung và số tiêu chí chấp nhận hiện hành được duy trì trong từng issue. Nhãn dùng nhãn hiện có: `type:feature`, `F<n>`, `v1`/`v2`; milestone theo #16: phần cơ bản F1–F3 ở Sprint 1, còn lại Sprint 2. Mốc là kế hoạch, không xác nhận đã triển khai.
 - Bảng này chỉ truy vết **story → issue → chức năng/phụ thuộc**, không thay bảng chức năng–use case–dữ liệu do Anh Tú phụ trách ở #14.
 - Projects: trưởng nhóm Hoàng Kim Tiến đã kiểm tra và [xác nhận ngày 04/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/16#issuecomment-6633043096) đủ 31 story #46–#76 trên bảng; phần này không còn chặn #16.
-- Các quyết định F8 đã được trưởng nhóm [chốt ngày 04/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6633040706) được phản ánh trong các issue tương ứng. Không tự tạo giá trị nghiệp vụ mới trong backlog; quy tắc chưa được nguồn chuẩn định nghĩa phải được trưởng nhóm xác nhận.
+- Các quyết định nghiệp vụ F8 đã được trưởng nhóm [chốt ngày 04/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6633040706) được phản ánh trong các issue tương ứng. Không tự tạo giá trị nghiệp vụ mới trong backlog; quyết định nghiệp vụ chưa có nguồn chuẩn cần trưởng nhóm xác nhận. Thiết kế API, DTO và khóa giao dịch do người triển khai backend F8 chốt theo phân công trong cùng bình luận.
 
 **Nội dung và tiêu chí chấp nhận xem trong issue tương ứng; issue là bản chuẩn.** File này chỉ giữ quy ước và chỉ mục, không chép lại nội dung story để tránh hai bản lệch nhau. Các cập nhật nghiệp vụ sau ADR 0005, bao gồm #56, #58, #61, #72 và #73, được giữ tại các issue tương ứng.
 
