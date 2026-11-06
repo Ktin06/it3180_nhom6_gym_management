@@ -1,6 +1,15 @@
 # Gói bàn giao Sprint 1 — Web quản lý chuỗi phòng tập Gym
 
-> **Trạng thái tài liệu: DRAFT.** Đây là bản bàn giao theo snapshot `main` tại `446ceb3` và trạng thái GitHub được đọc ngày 04/11/2026. Slide đã áp theme HUST do trưởng nhóm cung cấp ở PR #88 theo chỉ đạo tại #32; bản bàn giao vẫn nháp do các phần SRS/ERD xuất/staging chưa đủ. Tài liệu này không chứng minh hệ thống đã triển khai, có staging, hay đã hoàn tất kiểm thử đầu cuối.
+> **Trạng thái tài liệu: DRAFT.** Slide và các mục 1–9 bên dưới lưu snapshot `main` tại `446ceb3` ngày 04/11/2026. Mục cập nhật 06/11 ghi nhận thay đổi sau snapshot; không dùng các trạng thái cũ làm hiện trạng cho demo. Tài liệu này không chứng minh hệ thống đã triển khai, có staging, hay đã hoàn tất kiểm thử đầu cuối.
+
+## Cập nhật 06/11/2026 sau review và tích hợp
+
+- Đã đồng bộ `origin/main` tại `4928b2e8c8e76ced999df815a3f0e346854bf59c`. Theme HUST đã vào main qua PR #88; xung đột thêm/thêm ở `.sty` chỉ do khoảng trắng dòng 168 và xuống dòng cuối tệp, đã giữ bản chuẩn hóa với cùng nội dung. Các tài nguyên mẫu đã được duyệt trên main được bảo toàn.
+- [SRS tổng quan](../docs/requirements/srs/srs-tong-quan.md) đã vào main qua [#95](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/95); [ERD xuất bản và từ điển](../docs/design/erd/xuat-ban-erd.md) qua [#96](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/96); wireframe F2/F3 qua [#89](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/89). #13 và #15 không còn là phụ thuộc chưa cung cấp sản phẩm. Bản trình bày cuối cần dùng các nguồn đã duyệt này thay ghi chú chờ trong snapshot 04/11.
+- Backend F1 đã merge qua #87/#91 (#25/#26); frontend #80 vẫn Draft, chưa kiểm chứng HTTP/cookie với backend thật. Schema chung [#101](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/101) còn chờ tích hợp. `DefaultMemberService` trên main mới giữ số điện thoại trong bộ nhớ, chưa ghi hồ sơ hội viên bền vững; cần service F2 thật trước khi nghiệm thu đăng ký. Không nhập schema chưa duyệt hoặc sửa backend của đồng đội để làm demo.
+- Trưởng nhóm đã [xác nhận đủ 31 story trên Projects ngày 04/11](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/16#issuecomment-6633043096). #77 đã cập nhật ghi chú tại `bfc238d` và chờ `natus26` review lại. #79 còn Draft vì các điểm cần đồng bộ nguồn và làm rõ ở mục 7.6; không coi hai quy tắc đặt chỗ cũ là chưa chốt.
+- Giữ #81 Draft: cần cập nhật slide theo bằng chứng cuối, kết quả tích hợp và bàn giao staging/Postman của #31 trước buổi demo. CI main sau ba merge #89/#95/#96 đều thành công; các job ứng dụng bỏ qua vì chỉ thay tài liệu, không phải bằng chứng kiểm thử chức năng.
+- Kiểm tra sau đồng bộ: Tectonic 0.17 biên dịch lại nguồn slide hiện có thành PDF 15 trang; `pdfinfo` đọc được. Output ở thư mục tạm ngoài repo, không đưa vào Git. Nội dung slide vẫn là snapshot 04/11; lần chạy này xác minh source/theme không bị hỏng bởi merge, không xác nhận bộ bàn giao cuối đã hoàn tất.
 
 ## 1. Tóm tắt cho buổi bàn giao
 
@@ -151,7 +160,7 @@ Theo [chỉ đạo của Ktin06 tại #32](https://github.com/Ktin06/it3180_nhom
 - [`mau-slide-hust/images/hust-blue-169-title.png`](mau-slide-hust/images/hust-blue-169-title.png) — nền trang bìa.
 - [`mau-slide-hust/images/hust-blue-169-content-full.png`](mau-slide-hust/images/hust-blue-169-content-full.png) — nền nội dung, thanh mảnh.
 
-Đây là **ảnh nguồn của mẫu do trưởng nhóm cung cấp**, không phải PDF/PNG xuất từ slide/wireframe. Giữ nguyên logic theme và hai ảnh nguồn; `.sty` chỉ bỏ khoảng trắng cuối dòng trống 168 và thêm xuống dòng cuối tệp để qua `git diff --check`, giữ attribution của người cung cấp. Không nhập commit/backend/nội dung ví dụ từ nhánh #88. Slide đã tự chứa các nguồn cần build, không cần checkout PR #88; Nếu PR #88 được merge từ commit này, hai ảnh nguồn trùng nội dung; `.sty` chỉ khác chuẩn hóa khoảng trắng đã nêu. `git merge-tree` với nhánh #88 hiện báo một xung đột thêm/thêm ở `.sty` do chuẩn hóa khoảng trắng này; worktree hiện tại không có xung đột và build vẫn qua. Sau khi #88 merge, cần đồng bộ `origin/main` vào nhánh #81 và đối chiếu lại `.sty`, giữ nguyên logic theme.
+Đây là **ảnh nguồn của mẫu do trưởng nhóm cung cấp**, không phải PDF/PNG xuất từ slide/wireframe. Hai ảnh đang dùng giữ nguyên byte; `.sty` chỉ bỏ khoảng trắng cuối dòng trống 168 và thêm xuống dòng cuối tệp, không đổi logic hoặc attribution. Khi lấy source ban đầu, chưa nhập các phần khác của nhánh #88. Ngày 06/11, sau khi #88 đã merge, đã đồng bộ main và giải quyết đúng xung đột khoảng trắng này; bộ mẫu đầy đủ từ main được bảo toàn. Slide không cần checkout một PR chưa merge để build.
 
 Các kiểu nền khác của theme không dùng ở deck này; nếu đổi kiểu, lấy thêm đúng ảnh nguồn tương ứng từ bộ mẫu.
 
