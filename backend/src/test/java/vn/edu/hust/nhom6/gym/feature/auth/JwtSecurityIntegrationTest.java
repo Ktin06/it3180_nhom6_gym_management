@@ -19,11 +19,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import vn.edu.hust.nhom6.gym.config.SecurityConfig;
 import vn.edu.hust.nhom6.gym.feature.auth.controller.AuthController;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
+import vn.edu.hust.nhom6.gym.feature.auth.service.AuthCookieHelper;
+import vn.edu.hust.nhom6.gym.feature.auth.service.AuthService;
 
 /**
  * Kiểm thử tích hợp tầng bảo mật cho UC-F1.6 (Đọc JWT HS256 và chặn API theo vai trò).
@@ -38,6 +41,12 @@ class JwtSecurityIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private AuthService authService;
+
+    @MockitoBean
+    private AuthCookieHelper cookieHelper;
 
     @TestConfiguration(proxyBeanMethods = false)
     static class TestRoleEndpointConfig {
