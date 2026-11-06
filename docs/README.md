@@ -17,6 +17,8 @@ Mục lục thư mục `docs/`. Khi các tài liệu mâu thuẫn nhau, thứ t�
 | --- | --- |
 | [erd/erd-v2.dbml](design/erd/erd-v2.dbml) | **Bản chuẩn** của ERD (39 bảng, 8 nhóm); dán vào dbdiagram.io để xem sơ đồ |
 | [erd/thiet-ke-du-lieu.md](design/erd/thiet-ke-du-lieu.md) | Giải thích thiết kế dữ liệu, quy ước, ràng buộc cần kiểm thử |
+| [erd/tu-dien-du-lieu.md](design/erd/tu-dien-du-lieu.md) | Từ điển đủ 39 bảng, 422 cột, khóa, chỉ mục và ghi chú từ DBML |
+| [erd/xuat-ban-erd.md](design/erd/xuat-ban-erd.md) | Bản xuất dbdiagram.io PDF/PNG và hình theo nhóm; cách tái tạo và đưa vào báo cáo LaTeX |
 | [use-case/](design/use-case/) | Sơ đồ use case (sẽ bổ sung) |
 | [activity/](design/activity/) | Sơ đồ hoạt động (sẽ bổ sung) |
 | [wireframe/](design/wireframe/) | Wireframe màn hình (sẽ bổ sung) |
