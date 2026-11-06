@@ -1,6 +1,6 @@
 # Bảng truy vết chức năng – use case – bảng dữ liệu
 
-Cập nhật: 06/11/2026 · Nguyễn Anh Tú · Nhiệm vụ [#14](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/14) · WBS 1.2.2
+Cập nhật: 07/11/2026 · Nguyễn Anh Tú · Nhiệm vụ [#14](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/14) · WBS 1.2.2
 
 ## 1. Phạm vi và cách đọc
 
@@ -11,7 +11,7 @@ Bảng này nối 20 chức năng F1–F20 với 56 use case đã có đặc t�
 - Mục 3 bổ sung truy vết từng use case từ luồng, mục dữ liệu và quan hệ ERD. Danh sách gồm bảng đọc, ghi hoặc kiểm tra quyền; không có nghĩa mọi bảng đều bị cập nhật. Các phụ thuộc dùng chung như người thao tác/chi nhánh chỉ nêu khi cần giải thích luồng, không thay thế thiết kế truy vấn chi tiết.
 - F8 dùng [bản nháp cố định tại commit 5233c53](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/5233c53ab4d014f5344ac6de112e67d467f25c29/docs/requirements/srs/dac-ta-use-case-f8-lop-hoc-nhom.md) của [PR #79](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79), đang mở và Draft lúc đối chiếu. Sau khi merge cần đổi nguồn sang file trong main và rà lại các dòng F8.
 - F11–F20 chưa có đặc tả UC trong cây main được đối chiếu; giữ ánh xạ bảng gốc, ghi “Chưa đặc tả”, không tự đặt mã UC. Version là lộ trình chức năng, không phải số sprint.
-- TV-01…TV-12 ở mục 5 là các điểm cần đồng bộ hoặc cần chốt; việc ghi nhận tại đây chưa đồng nghĩa đã báo qua comment hay đã được trưởng nhóm duyệt.
+- TV-01…TV-13 ở mục 5 là các điểm cần đồng bộ hoặc cần chốt; việc ghi nhận tại đây chưa đồng nghĩa đã báo qua comment hay đã được trưởng nhóm duyệt.
 
 ## 2. Tổng quan F1–F20 theo ánh xạ gốc
 
@@ -134,8 +134,8 @@ Nguồn: [đặc tả F8](https://github.com/Ktin06/it3180_nhom6_gym_management/
 | Mã UC và mục nguồn | Nội dung | Bảng liên quan | Ghi chú truy vết |
 | --- | --- | --- | --- |
 | UC-F8.0 · 3.1 | Xem lịch lớp học nhóm công khai | `class_sessions`, `class_types`, `class_schedules`, `branches`, `rooms`, `staff` | Bản nháp. Theo mục dữ liệu của đặc tả. |
-| UC-F8.1 · 3.2 | Đặt chỗ lớp nhóm | `class_bookings`, `class_sessions`, `class_schedules`, `class_types`, `members`, `memberships`, `packages`, `rooms`, `system_configs`, `staff`, `users` | Bản nháp; TV-02 (người tạo). |
-| UC-F8.2 · 3.3 | Tự động đưa hội viên từ danh sách chờ vào lớp | `class_bookings`, `notifications`, `class_sessions`, `members`, `memberships`, `packages`, `system_configs`, `branches`, `users` | Bản nháp; TV-01, TV-03, TV-04. |
+| UC-F8.1 · 3.2 | Đặt chỗ lớp nhóm | `class_bookings`, `class_sessions`, `class_schedules`, `class_types`, `members`, `memberships`, `packages`, `rooms`, `system_configs`, `staff`, `users` | Bản nháp; TV-02 (người tạo), TV-13 (thứ tự FIFO). |
+| UC-F8.2 · 3.3 | Tự động đưa hội viên từ danh sách chờ vào lớp | `class_bookings`, `notifications`, `class_sessions`, `members`, `memberships`, `packages`, `system_configs`, `branches`, `users` | Bản nháp; TV-01, TV-03, TV-04, TV-13. |
 | UC-F8.3 · 3.4 | Hủy chỗ lớp nhóm | `class_bookings`, `members`, `class_sessions`, `system_configs`, `notifications`, `users` | Bản nháp; TV-01, TV-03. |
 | UC-F8.4 · 3.5 | Xác nhận lại hoặc từ chối khi đổi giờ lớp | `class_sessions`, `class_bookings`, `notifications`, `members`, `system_configs`, `users` | Bản nháp. Theo mục dữ liệu của đặc tả. |
 | UC-F8.5 · 3.6 | Xem lịch dạy lớp nhóm | `staff`, `users`, `class_sessions`, `class_schedules`, `class_types`, `rooms`, `class_bookings` | Bản nháp. Theo mục dữ liệu của đặc tả. |
@@ -232,12 +232,13 @@ Các dòng dưới đây là kết quả rà soát tài liệu, chưa phải k�
 | TV-10 | UC-F1.6; `users.status` | [F1 mục 2](dac-ta-use-case-f1-tai-khoan-va-phan-quyen.md) đặt tên UC gồm “Quản lý trạng thái tài khoản & Phân quyền truy cập API”, nhưng mục 3.6 chỉ mô tả kiểm tra JWT/vai trò/quyền sở hữu. Ngừng hoạt động qua UC-F2.4 đã có; luồng quản trị trạng thái tài khoản tổng quát chưa được mô tả trong UC-F1.6. | Người phụ trách F1 cùng trưởng nhóm thống nhất tên/phạm vi UC hoặc bổ sung luồng còn thiếu; không suy ra endpoint quản trị từ riêng tên UC. |
 | TV-11 | UC-F2.1; `members.home_branch_id`, `staff.branch_id` | [F2 mục 3.1](dac-ta-use-case-f2-ho-so-hoi-vien.md) liệt kê tác nhân lễ tân/quản lý nhưng tiền điều kiện thêm SUPER_ADMIN; chi nhánh tạo hồ sơ lấy từ nhân viên thao tác. [Thiết kế dữ liệu](../../design/erd/thiet-ke-du-lieu.md) xác định chủ chuỗi không có dòng `staff`. | Người phụ trách F2 và Hoàng Kim Tiến thống nhất quyền tạo của chủ chuỗi và nguồn chi nhánh nếu được phép; không tự giả định chủ chuỗi có `staff.branch_id`. |
 | TV-12 | UC-F10.2; thời điểm gửi nhắc lịch lớp | [F10 mục 3.2.A](dac-ta-use-case-f10-thong-bao.md) để mở việc gửi nhắc trước giờ bắt đầu lớp tập nhóm bao lâu; bản chốt phạm vi và danh sách khóa system_configs trong ERD chưa quy định mốc này. Chưa chốt thời gian cố định hay tham số cấu hình, nên chưa thể xác định thời điểm kích hoạt gửi nhắc. | Hoàng Kim Tiến cùng người phụ trách F10 chốt khoảng thời gian nhắc và cách quản lý giá trị này. Sau đó cập nhật đặc tả F10 và tiêu chí chấp nhận; nếu dùng cấu hình thì bổ sung khóa, giá trị mặc định và phạm vi áp dụng vào tài liệu dữ liệu, rồi thêm system_configs vào truy vết. Không tự chọn thời gian hoặc đặt tên khóa cấu hình. |
+| TV-13 | UC-F8.1, UC-F8.2; `class_bookings.waitlisted_at`, `class_bookings.id` | F8 nháp tại commit `5233c53`, mục 3.2–3.3 và 7.1, đã chốt FIFO theo `waitlisted_at ASC, id ASC`; [ADR 0003](../../decisions/0003-danh-sach-cho-tu-dong-dua-vao-lop.md) chỉ nêu `waitlisted_at` tăng dần. Khi thời điểm vào chờ trùng nhau, nguồn ADR chưa ghi tiêu chí phụ để xác định thứ tự. | Hoàng Kim Tiến cùng người phụ trách ADR/F8 đồng bộ tiêu chí phụ `id ASC` theo quyết định đã chốt; đối chiếu kịch bản hai booking trùng `waitlisted_at` thì ID nhỏ hơn được xét trước. Đây là điểm thiếu ghi chú ở nguồn chuẩn, không phải đề xuất đổi quy tắc FIFO. |
 
 ## 6. Cách cập nhật và tự kiểm tra
 
 1. Khi thêm/sửa use case, giữ mã đã được đặc tả; cập nhật dòng ở mục 3, tổng quan mục 2 và chiều ngược mục 4.
 2. Kiểm tra mọi tên bảng tồn tại trong `erd-v2.dbml`. Đối chiếu cả luồng đọc/ghi, không chỉ cột “Chức năng” của thiết kế dữ liệu.
-3. Khi F8 được merge, thay liên kết commit nháp bằng nguồn đã gộp; rà lại TV-01…TV-06 cùng đặc tả F10. Không tự đánh dấu các điểm này đã xử lý chỉ vì PR F8 được merge.
+3. Khi F8 được merge, thay liên kết commit nháp bằng nguồn đã gộp; rà lại TV-01…TV-06 cùng đặc tả F10 và TV-13 cùng ADR 0003. Không tự đánh dấu các điểm này đã xử lý chỉ vì PR F8 được merge.
 4. Khi nguồn liên quan thay đổi, ghi ngày/mốc đối chiếu mới. Điểm TV chỉ chuyển sang đã xử lý khi có nguồn chốt và các tài liệu liên quan đã đồng bộ.
 
 Kiểm tra tại lần lập bảng: đủ 20 chức năng; đủ 56 mã UC trong 10 đặc tả đã nêu; đủ 39 bảng trong chiều ngược; các tên bảng tồn tại trong DBML. Các kiểm tra này xác nhận tính đầy đủ của bảng truy vết, không chứng minh đã giải quyết các điểm TV hoặc đã triển khai các chức năng.

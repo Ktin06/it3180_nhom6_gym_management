@@ -8,7 +8,8 @@ Mục lục thư mục `docs/`. Khi các tài liệu mâu thuẫn nhau, thứ t�
 | --- | --- |
 | [ban-chot-pham-vi.md](requirements/ban-chot-pham-vi.md) | **Bản chuẩn** về phạm vi, 20 chức năng, 5 version, quy tắc nghiệp vụ, yêu cầu phi chức năng |
 | [boi-canh-de-tai.md](requirements/boi-canh-de-tai.md) | Tóm tắt đề tài, thành viên, các quyết định chính |
-| [srs/](requirements/srs/) | Đặc tả yêu cầu phần mềm (sẽ bổ sung) |
+| [srs/srs-tong-quan.md](requirements/srs/srs-tong-quan.md) | SRS tổng quan: bối cảnh và quy trình hiện tại, phạm vi, 6 vai trò, NF1–NF6, S1–S10 và nguồn tham khảo |
+| [srs/](requirements/srs/) | Đặc tả use case chi tiết theo chức năng và mẫu dùng chung |
 | [Bảng truy vết yêu cầu](requirements/srs/bang-truy-vet-yeu-cau.md) | Liên kết F1–F20, use case và 39 bảng ERD; ghi nhận nguồn nháp và các điểm cần đồng bộ |
 
 ## Thiết kế – [design/](design/)
@@ -17,6 +18,8 @@ Mục lục thư mục `docs/`. Khi các tài liệu mâu thuẫn nhau, thứ t�
 | --- | --- |
 | [erd/erd-v2.dbml](design/erd/erd-v2.dbml) | **Bản chuẩn** của ERD (39 bảng, 8 nhóm); dán vào dbdiagram.io để xem sơ đồ |
 | [erd/thiet-ke-du-lieu.md](design/erd/thiet-ke-du-lieu.md) | Giải thích thiết kế dữ liệu, quy ước, ràng buộc cần kiểm thử |
+| [erd/tu-dien-du-lieu.md](design/erd/tu-dien-du-lieu.md) | Từ điển đủ 39 bảng, 422 cột, khóa, chỉ mục và ghi chú từ DBML |
+| [erd/xuat-ban-erd.md](design/erd/xuat-ban-erd.md) | Bản xuất dbdiagram.io PDF/PNG và hình theo nhóm; cách tái tạo và đưa vào báo cáo LaTeX |
 | [use-case/](design/use-case/) | Sơ đồ use case (sẽ bổ sung) |
 | [activity/](design/activity/) | Sơ đồ hoạt động (sẽ bổ sung) |
 | [wireframe/](design/wireframe/) | Wireframe màn hình (sẽ bổ sung) |
