@@ -1,0 +1,212 @@
+{
+  "source": "../erd-v2.dbml",
+  "sha256LF": "ba6237cd2f2f49fca0272958876514761611ad78071f899a7d92eadba0062b8d",
+  "generator": "scripts/export-erd.cjs",
+  "renderer": "Graphviz qua @viz-js/viz (cục bộ)",
+  "graphvizVersion": "16.1.0",
+  "tables": 39,
+  "columns": 422,
+  "relationships": 89,
+  "figures": [
+    {
+      "file": "erd-v2.svg",
+      "tables": [
+        "users",
+        "refresh_tokens",
+        "password_resets",
+        "audit_logs",
+        "notifications",
+        "system_configs",
+        "branches",
+        "rooms",
+        "equipment",
+        "maintenance_logs",
+        "members",
+        "face_embeddings",
+        "body_metrics",
+        "packages",
+        "memberships",
+        "membership_freezes",
+        "membership_transfers",
+        "checkins",
+        "class_types",
+        "class_schedules",
+        "class_sessions",
+        "class_bookings",
+        "trainer_availabilities",
+        "pt_sessions",
+        "workout_plans",
+        "workout_logs",
+        "products",
+        "inventories",
+        "stock_movements",
+        "promotions",
+        "invoices",
+        "invoice_items",
+        "payments",
+        "staff",
+        "shifts",
+        "attendances",
+        "payrolls",
+        "badges",
+        "member_badges"
+      ],
+      "externalTables": [],
+      "relationships": 89,
+      "widthPt": 5845,
+      "heightPt": 3179,
+      "pdf": "erd-v2.pdf"
+    },
+    {
+      "file": "nhom-1.svg",
+      "tables": [
+        "users",
+        "refresh_tokens",
+        "password_resets",
+        "audit_logs",
+        "notifications",
+        "system_configs"
+      ],
+      "externalTables": [
+        "branches"
+      ],
+      "relationships": 7,
+      "widthPt": 938,
+      "heightPt": 1623,
+      "pdf": "nhom-1.pdf"
+    },
+    {
+      "file": "nhom-2.svg",
+      "tables": [
+        "branches",
+        "rooms",
+        "equipment",
+        "maintenance_logs"
+      ],
+      "externalTables": [
+        "users"
+      ],
+      "relationships": 5,
+      "widthPt": 999,
+      "heightPt": 553,
+      "pdf": "nhom-2.pdf"
+    },
+    {
+      "file": "nhom-3.svg",
+      "tables": [
+        "members",
+        "face_embeddings",
+        "body_metrics",
+        "packages",
+        "memberships",
+        "membership_freezes",
+        "membership_transfers"
+      ],
+      "externalTables": [
+        "users",
+        "branches",
+        "invoice_items",
+        "invoices"
+      ],
+      "relationships": 22,
+      "widthPt": 1048,
+      "heightPt": 1411,
+      "pdf": "nhom-3.pdf"
+    },
+    {
+      "file": "nhom-4.svg",
+      "tables": [
+        "checkins",
+        "class_types",
+        "class_schedules",
+        "class_sessions",
+        "class_bookings"
+      ],
+      "externalTables": [
+        "members",
+        "memberships",
+        "branches",
+        "users",
+        "staff",
+        "rooms"
+      ],
+      "relationships": 16,
+      "widthPt": 1067,
+      "heightPt": 1307,
+      "pdf": "nhom-4.pdf"
+    },
+    {
+      "file": "nhom-5.svg",
+      "tables": [
+        "trainer_availabilities",
+        "pt_sessions",
+        "workout_plans",
+        "workout_logs"
+      ],
+      "externalTables": [
+        "staff",
+        "branches",
+        "members",
+        "memberships",
+        "users"
+      ],
+      "relationships": 11,
+      "widthPt": 938,
+      "heightPt": 1094,
+      "pdf": "nhom-5.pdf"
+    },
+    {
+      "file": "nhom-6.svg",
+      "tables": [
+        "products",
+        "inventories",
+        "stock_movements",
+        "promotions",
+        "invoices",
+        "invoice_items",
+        "payments"
+      ],
+      "externalTables": [
+        "branches",
+        "users",
+        "members",
+        "packages"
+      ],
+      "relationships": 17,
+      "widthPt": 967,
+      "heightPt": 1574,
+      "pdf": "nhom-6.pdf"
+    },
+    {
+      "file": "nhom-7.svg",
+      "tables": [
+        "staff",
+        "shifts",
+        "attendances",
+        "payrolls"
+      ],
+      "externalTables": [
+        "users",
+        "branches"
+      ],
+      "relationships": 9,
+      "widthPt": 965,
+      "heightPt": 765,
+      "pdf": "nhom-7.pdf"
+    },
+    {
+      "file": "nhom-8.svg",
+      "tables": [
+        "badges",
+        "member_badges"
+      ],
+      "externalTables": [
+        "members"
+      ],
+      "relationships": 2,
+      "widthPt": 938,
+      "heightPt": 492,
+      "pdf": "nhom-8.pdf"
+    }
+  ]
+}
