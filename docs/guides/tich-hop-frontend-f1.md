@@ -41,6 +41,12 @@ Theo [review của trưởng nhóm](https://github.com/Ktin06/it3180_nhom6_gym_m
 
 Tại main `4928b2e` ngày 06/11, phần auth có migration `users`, `refresh_tokens`, nhưng chưa có schema `members`, `branches` và dữ liệu chi nhánh mặc định; schema chung ở [PR #101](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/101) còn mở. Ngoài ra, [DefaultMemberService](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/4928b2e8c8e76ced999df815a3f0e346854bf59c/backend/src/main/java/vn/edu/hust/nhom6/gym/feature/auth/service/DefaultMemberService.java) hiện chỉ giữ số điện thoại trong bộ nhớ, chưa ghi hồ sơ hội viên bền vững. Backend auth có thể khởi động với hai bảng auth và cấu hình phù hợp; điều đó chưa đủ để nghiệm thu đăng ký theo UC-F1.1. Cần service F2 thật cùng schema liên quan; chỉ merge schema chưa thay được phần service này. Phần triển khai thuộc người phụ trách backend F1/F2, không thuộc PR frontend.
 
+**Phụ thuộc được kiểm tra lại lúc 19:53 ngày 06/11 (giờ Việt Nam):**
+
+- Schema #101 chưa merge. Trưởng nhóm yêu cầu bổ sung các nhóm CHECK và đồng bộ ghi chú ERD, sửa chú thích migration và điền mô tả PR trước khi gộp: [review ràng buộc](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/101#issuecomment-6685207011), [các việc còn lại](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/101#issuecomment-6685207661). Phần này thuộc người phụ trách schema.
+- [PR F2 #97](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/97) chưa merge. Tác giả ghi rõ adapter production cho dịch vụ tài khoản/chi nhánh chưa có; kết quả tích hợp trong PR dùng adapter kiểm thử. Không coi các kết quả đó là bằng chứng frontend đã đăng ký hồ sơ thật trên main hoặc staging.
+- Proxy staging còn phụ thuộc #99. Theo [review của trưởng nhóm](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/99#issuecomment-6685208195), destination phải giữ `/api/:path*`; nhánh hiện còn mang schema chưa merge nên tác giả cần tách thay đổi Vercel sau khi #101 được gộp. Chờ cấu hình đúng vào main trước khi kiểm tra cookie qua domain/proxy; không lấy nguyên nhánh #99 để vượt phụ thuộc schema.
+
 Sau khi các phụ thuộc sẵn sàng, fetch main và kiểm tra:
 
 1. Schema `users`, `members`, `refresh_tokens`, seed chi nhánh mặc định `CN01` và backend F1 chạy được theo quy trình nhóm.
