@@ -31,7 +31,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 /** Kiểm thử riêng F2 với Authentication và adapter test; không kiểm thử triển khai hay JWT của F1. */
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(MemberTestConfiguration.class)
+@Import({MemberTestConfiguration.class, StandaloneMemberAccountTestConfiguration.class})
 @Sql("/db/fixtures/f2-staff.sql")
 class MemberApiIntegrationTest {
     @Autowired MockMvc mvc;
