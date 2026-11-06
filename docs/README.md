@@ -9,6 +9,7 @@ Mục lục thư mục `docs/`. Khi các tài liệu mâu thuẫn nhau, thứ t�
 | [ban-chot-pham-vi.md](requirements/ban-chot-pham-vi.md) | **Bản chuẩn** về phạm vi, 20 chức năng, 5 version, quy tắc nghiệp vụ, yêu cầu phi chức năng |
 | [boi-canh-de-tai.md](requirements/boi-canh-de-tai.md) | Tóm tắt đề tài, thành viên, các quyết định chính |
 | [srs/](requirements/srs/) | Đặc tả yêu cầu phần mềm (sẽ bổ sung) |
+| [Bảng truy vết yêu cầu](requirements/srs/bang-truy-vet-yeu-cau.md) | Liên kết F1–F20, use case và 39 bảng ERD; ghi nhận nguồn nháp và các điểm cần đồng bộ |
 
 ## Thiết kế – [design/](design/)
 
