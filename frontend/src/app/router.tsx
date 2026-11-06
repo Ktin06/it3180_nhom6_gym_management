@@ -11,6 +11,10 @@ import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { ProtectedRoute } from '../routes/ProtectedRoute'
+import { MembersPage } from '../features/members/pages/MembersPage'
+import { PackagesPage } from '../features/packages/pages/PackagesPage'
+
+const memberManagementRoles = ['SUPER_ADMIN', 'BRANCH_MANAGER', 'RECEPTIONIST'] as const
 
 export const routes: RouteObject[] = [
   {
@@ -34,14 +38,32 @@ export const routes: RouteObject[] = [
         <StaffLayout />
       </ProtectedRoute>
     ),
-    children: STAFF_ROLES.map((role) => ({
-      path: HOME_PATH_BY_ROLE[role],
-      element: (
-        <ProtectedRoute allowedRoles={[role]}>
-          <RoleHomePage role={role} />
-        </ProtectedRoute>
-      ),
-    })),
+    children: [
+      ...STAFF_ROLES.map((role) => ({
+        path: HOME_PATH_BY_ROLE[role],
+        element: (
+          <ProtectedRoute allowedRoles={[role]}>
+            <RoleHomePage role={role} />
+          </ProtectedRoute>
+        ),
+      })),
+      {
+        path: '/members',
+        element: (
+          <ProtectedRoute allowedRoles={[...memberManagementRoles]}>
+            <MembersPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/packages',
+        element: (
+          <ProtectedRoute allowedRoles={[...memberManagementRoles]}>
+            <PackagesPage />
+          </ProtectedRoute>
+        ),
+      },
+    ],
   },
   {
     element: (
