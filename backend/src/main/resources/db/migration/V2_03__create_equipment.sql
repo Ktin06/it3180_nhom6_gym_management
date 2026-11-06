@@ -17,6 +17,3 @@ CREATE TABLE equipment (
     CONSTRAINT fk_equipment_room FOREIGN KEY (room_id) REFERENCES rooms (id),
     CONSTRAINT ck_equipment_status CHECK (status IN ('GOOD', 'BROKEN', 'MAINTENANCE', 'RETIRED'))
 );
-
-CREATE INDEX ix_equipment_branch_id ON equipment (branch_id);
-CREATE INDEX ix_equipment_room_id ON equipment (room_id);
