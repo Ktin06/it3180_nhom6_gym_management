@@ -10,8 +10,9 @@ import {
   getAccessToken,
   getSessionEpoch,
   setAccessToken,
+  subscribeToSessionRecovery,
 } from '../auth/session-store'
-import { http } from './http'
+import { http, refreshAccessToken } from './http'
 
 function response(config: Parameters<AxiosAdapter>[0], data: unknown, status = 200): AxiosResponse {
   return {
@@ -26,6 +27,13 @@ function response(config: Parameters<AxiosAdapter>[0], data: unknown, status = 2
 function unauthorized(config: Parameters<AxiosAdapter>[0]) {
   return new AxiosError('Unauthorized', AxiosError.ERR_BAD_REQUEST, config, undefined, {
     ...response(config, { detail: 'Chưa xác thực' }, 401),
+  })
+}
+
+function refreshFailure(status: number) {
+  return Object.assign(new Error(`Refresh failed (${status})`), {
+    isAxiosError: true,
+    response: { status },
   })
 }
 
@@ -142,8 +150,8 @@ describe('http auth interceptors', () => {
     expect(getAccessToken()).toBe('new-login-jwt')
   })
 
-  it('refresh lỗi xóa access token và trả lỗi gốc không đệ quy', async () => {
-    requestRefresh.mockRejectedValue(new Error('Refresh không hợp lệ'))
+  it('refresh 401 xác nhận phiên hết hạn và xóa access token', async () => {
+    requestRefresh.mockRejectedValue(refreshFailure(401))
     http.defaults.adapter = (async (config) => {
       throw unauthorized(config)
     }) as AxiosAdapter
@@ -151,6 +159,29 @@ describe('http auth interceptors', () => {
     await expect(http.get('/private')).rejects.toMatchObject({ response: { status: 401 } })
     expect(requestRefresh).toHaveBeenCalledTimes(1)
     expect(getAccessToken()).toBeNull()
+  })
+
+  it('refresh lỗi mạng/5xx chuyển sang recoverable và có thể refresh lại', async () => {
+    requestRefresh.mockRejectedValue(refreshFailure(503))
+    http.defaults.adapter = (async (config) => {
+      throw unauthorized(config)
+    }) as AxiosAdapter
+    const startingEpoch = getSessionEpoch()
+    const onRecovery = vi.fn()
+    const unsubscribe = subscribeToSessionRecovery(onRecovery)
+
+    try {
+      await expect(http.get('/private')).rejects.toMatchObject({ response: { status: 503 } })
+
+      expect(getAccessToken()).toBeNull()
+      expect(getSessionEpoch()).toBeGreaterThan(startingEpoch)
+      expect(onRecovery).toHaveBeenCalledOnce()
+      requestRefresh.mockResolvedValue({ accessToken: 'recovered-jwt' })
+      await expect(refreshAccessToken()).resolves.toBe('recovered-jwt')
+      expect(getAccessToken()).toBe('recovered-jwt')
+    } finally {
+      unsubscribe()
+    }
   })
 
   it('không refresh thêm lần nữa nếu response lỗi của auth endpoint', async () => {

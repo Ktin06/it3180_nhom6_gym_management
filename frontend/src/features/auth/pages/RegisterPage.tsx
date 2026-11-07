@@ -1,6 +1,7 @@
 import { Alert, Button, Form, Input, Typography } from 'antd'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { AuthCompletionError } from '../../../auth/AuthContext'
 import { HOME_PATH_BY_ROLE } from '../../../auth/roles'
 import { useAuth } from '../../../auth/useAuth'
 import { getProblemDetail } from '../api/auth-api'
@@ -14,9 +15,24 @@ interface RegisterForm extends RegisterRequest {
 export function RegisterPage() {
   const [form] = Form.useForm<RegisterForm>()
   const [pending, setPending] = useState(false)
+  const [retryPending, setRetryPending] = useState(false)
+  const [accountCreated, setAccountCreated] = useState(false)
   const [errorDetail, setErrorDetail] = useState<string | null>(null)
-  const { register } = useAuth()
+  const { register, retrySession } = useAuth()
   const navigate = useNavigate()
+
+  const handleRetryAccount = async () => {
+    setRetryPending(true)
+    setErrorDetail(null)
+    try {
+      const user = await retrySession()
+      navigate(HOME_PATH_BY_ROLE[user.role], { replace: true })
+    } catch {
+      setErrorDetail('Chưa tải được thông tin tài khoản. Hãy thử lại hoặc đăng nhập.')
+    } finally {
+      setRetryPending(false)
+    }
+  }
 
   const handleFinish = (values: RegisterForm) => {
     setPending(true)
@@ -32,6 +48,10 @@ export function RegisterPage() {
         })
         navigate(HOME_PATH_BY_ROLE[user.role], { replace: true })
       } catch (error) {
+        if (error instanceof AuthCompletionError && error.action === 'register') {
+          setAccountCreated(true)
+          return
+        }
         const problem = getProblemDetail(error)
         const fieldErrors = { ...problem.errors }
         const conflictField = problem.detail?.toLowerCase().includes('email')
@@ -58,6 +78,32 @@ export function RegisterPage() {
         setPending(false)
       }
     })()
+  }
+
+  if (accountCreated) {
+    return (
+      <>
+        <Alert
+          type="success"
+          showIcon
+          title="Tài khoản đã được tạo"
+          description="Thông tin tài khoản chưa tải được. Hãy thử lại hoặc đăng nhập; không cần đăng ký lại."
+        />
+        {errorDetail && <Alert type="warning" showIcon title={errorDetail} style={{ marginTop: 16 }} />}
+        <Button
+          type="primary"
+          block
+          loading={retryPending}
+          style={{ marginTop: 16 }}
+          onClick={() => void handleRetryAccount()}
+        >
+          Thử tải thông tin tài khoản
+        </Button>
+        <Typography.Paragraph style={{ margin: '16px 0 0', textAlign: 'center' }}>
+          <Link to="/login">Đăng nhập</Link>
+        </Typography.Paragraph>
+      </>
+    )
   }
 
   return (

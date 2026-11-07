@@ -4,6 +4,7 @@ import {
   getAccessToken,
   getSessionEpoch,
   setAccessToken,
+  suspendSession,
 } from '../auth/session-store'
 import { queueCookieOperation } from '../auth/cookie-operation-queue'
 import { requestRefresh } from './refresh-client'
@@ -41,7 +42,13 @@ export function refreshAccessToken(expectedEpoch = getSessionEpoch()): Promise<s
       }
       return response.accessToken
     } catch (error) {
-      expireSession(expectedEpoch)
+      if (getSessionEpoch() === expectedEpoch) {
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          expireSession(expectedEpoch)
+        } else {
+          suspendSession(expectedEpoch)
+        }
+      }
       throw error
     }
   })
@@ -96,13 +103,9 @@ http.interceptors.response.use(
       return http.request(config)
     }
 
-    try {
-      await refreshAccessToken(config.authEpoch)
-      if (config.authEpoch !== getSessionEpoch()) throw error
-      config.authRetry = true
-      return http.request(config)
-    } catch {
-      throw error
-    }
+    await refreshAccessToken(config.authEpoch)
+    if (config.authEpoch !== getSessionEpoch()) throw error
+    config.authRetry = true
+    return http.request(config)
   },
 )

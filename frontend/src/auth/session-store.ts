@@ -2,6 +2,7 @@
 let accessToken: string | null = null
 let sessionEpoch = 0
 const expiredListeners = new Set<() => void>()
+const recoveryListeners = new Set<() => void>()
 
 export function getAccessToken() {
   return accessToken
@@ -38,9 +39,23 @@ export function expireSession(expectedEpoch: number) {
   return true
 }
 
+/** Xóa access token sau lỗi refresh tạm thời; cookie vẫn được giữ để người dùng thử lại. */
+export function suspendSession(expectedEpoch: number) {
+  if (!clearSession(expectedEpoch)) return false
+  recoveryListeners.forEach((listener) => listener())
+  return true
+}
+
 export function subscribeToSessionExpiry(listener: () => void) {
   expiredListeners.add(listener)
   return () => {
     expiredListeners.delete(listener)
+  }
+}
+
+export function subscribeToSessionRecovery(listener: () => void) {
+  recoveryListeners.add(listener)
+  return () => {
+    recoveryListeners.delete(listener)
   }
 }

@@ -2,6 +2,7 @@ import { LockOutlined, MailOutlined } from '@ant-design/icons'
 import { Alert, Button, Form, Input, Typography } from 'antd'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { AuthCompletionError } from '../../../auth/AuthContext'
 import { useAuth } from '../../../auth/useAuth'
 import { roleAwareReturnPath } from '../../../auth/redirect'
 import { getProblemDetail } from '../api/auth-api'
@@ -15,8 +16,10 @@ interface LoginForm {
 export function LoginPage() {
   const [form] = Form.useForm<LoginForm>()
   const [pending, setPending] = useState(false)
+  const [retryPending, setRetryPending] = useState(false)
+  const [identityNeedsRetry, setIdentityNeedsRetry] = useState(false)
   const [errorDetail, setErrorDetail] = useState<string | null>(null)
-  const { login } = useAuth()
+  const { login, retrySession } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -30,6 +33,11 @@ export function LoginPage() {
           replace: true,
         })
       } catch (error) {
+        if (error instanceof AuthCompletionError && error.action === 'login') {
+          setIdentityNeedsRetry(true)
+          setErrorDetail(error.message)
+          return
+        }
         const problem = getProblemDetail(error)
         form.setFields(
           Object.entries(problem.errors)
@@ -43,6 +51,21 @@ export function LoginPage() {
     })()
   }
 
+  const handleRetryAccount = async () => {
+    setRetryPending(true)
+    setErrorDetail(null)
+    try {
+      const user = await retrySession()
+      navigate(roleAwareReturnPath(location.state, window.location.origin, user.role), {
+        replace: true,
+      })
+    } catch {
+      setErrorDetail('Chưa tải được thông tin tài khoản. Hãy thử lại.')
+    } finally {
+      setRetryPending(false)
+    }
+  }
+
   return (
     <>
       <Typography.Title level={3} style={{ marginTop: 0 }}>
@@ -50,6 +73,16 @@ export function LoginPage() {
       </Typography.Title>
       {errorDetail && (
         <Alert type="error" showIcon title={errorDetail} style={{ marginBottom: 16 }} />
+      )}
+      {identityNeedsRetry && (
+        <Button
+          block
+          loading={retryPending}
+          style={{ marginBottom: 16 }}
+          onClick={() => void handleRetryAccount()}
+        >
+          Thử tải thông tin tài khoản
+        </Button>
       )}
       <Form<LoginForm>
         form={form}
