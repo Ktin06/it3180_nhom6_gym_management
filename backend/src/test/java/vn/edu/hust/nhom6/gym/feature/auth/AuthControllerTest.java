@@ -3,6 +3,7 @@ package vn.edu.hust.nhom6.gym.feature.auth;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -18,6 +19,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,8 +31,10 @@ import vn.edu.hust.nhom6.gym.common.exception.GlobalExceptionHandler;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
 import vn.edu.hust.nhom6.gym.config.SecurityConfig;
 import vn.edu.hust.nhom6.gym.feature.auth.controller.AuthController;
+import vn.edu.hust.nhom6.gym.feature.auth.dto.AuthMeResponse;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.RegisterRequest;
+import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 import vn.edu.hust.nhom6.gym.feature.auth.service.AuthCookieHelper;
 import vn.edu.hust.nhom6.gym.feature.auth.service.AuthService;
 
@@ -117,6 +121,20 @@ class AuthControllerTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.status").value(400))
             .andExpect(jsonPath("$.errors.password").exists());
+    }
+
+    @Test
+    void dangKyMatKhauDaiHon72KyTuTra400ThayVi500() throws Exception {
+        String password80Chars = "A1" + "a".repeat(78);
+        RegisterRequest request = new RegisterRequest(
+            "Nguyễn Văn A", "member@example.com", "0912345678", password80Chars, null, null);
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.errors.password").value("Mật khẩu phải từ 8 đến 72 ký tự"));
     }
 
     @Test
@@ -213,5 +231,20 @@ class AuthControllerTest {
             .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("Max-Age=0")));
 
         verify(authService).logout("token-to-revoke");
+    }
+
+    @Test
+    void layThongTinTaiKhoanHienTaiUyQuyenChoAuthService() throws Exception {
+        when(authService.getCurrentUser(any(Jwt.class)))
+            .thenReturn(new AuthMeResponse(10L, "member@example.com", UserRole.MEMBER));
+
+        mockMvc.perform(get("/api/v1/auth/me")
+                .header(HttpHeaders.AUTHORIZATION, JwtTestSupport.bearerToken(10L, "member@example.com", UserRole.MEMBER)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.userId").value(10))
+            .andExpect(jsonPath("$.email").value("member@example.com"))
+            .andExpect(jsonPath("$.role").value("MEMBER"));
+
+        verify(authService).getCurrentUser(any(Jwt.class));
     }
 }
