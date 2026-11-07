@@ -1,13 +1,19 @@
 package vn.edu.hust.nhom6.gym.feature.auth.service;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.ForbiddenException;
+import vn.edu.hust.nhom6.gym.common.exception.NotFoundException;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
 import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
@@ -56,6 +62,10 @@ public class AuthService {
         String email = request.email().toLowerCase().trim();
         if (userRepository.existsByEmail(email)) {
             throw new ConflictException("Email đã được đăng ký trong hệ thống.");
+        }
+
+        if (request.dob() != null && !request.dob().isBefore(LocalDate.now())) {
+            throw new BusinessRuleException("Ngày sinh phải ở trong quá khứ.");
         }
 
         String normalizedPhone = PhoneUtils.normalizePhone(request.phone());
@@ -154,6 +164,43 @@ public class AuthService {
                 }
             });
         }
+    }
+
+    /**
+     * Tra cứu email theo danh sách ID tài khoản (phục vụ tích hợp liên chức năng theo ADR 0007).
+     */
+    @Transactional(readOnly = true)
+    public Map<Long, String> getEmailsByUserIds(Collection<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Map.of();
+        }
+        return userRepository.findAllById(userIds).stream()
+            .collect(Collectors.toMap(User::getId, User::getEmail));
+    }
+
+    /**
+     * Ngừng hoạt động tài khoản (DISABLED) và thu hồi toàn bộ refresh token đang hiệu lực (UC-F1.6, UC-F2.4).
+     */
+    @Transactional
+    public void disableAccount(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản liên kết."));
+        user.setStatus(UserStatus.DISABLED);
+        userRepository.saveAndFlush(user);
+        refreshTokenRepository.revokeAllByUserId(userId, OffsetDateTime.now());
+    }
+
+    /**
+     * Kích hoạt lại tài khoản đang ở trạng thái DISABLED; không mở khóa tài khoản đang LOCKED (UC-F1.6, UC-F2.4).
+     */
+    @Transactional
+    public void activateAccountIfDisabled(Long userId) {
+        userRepository.findById(userId).ifPresent(user -> {
+            if (user.getStatus() == UserStatus.DISABLED) {
+                user.setStatus(UserStatus.ACTIVE);
+                userRepository.saveAndFlush(user);
+            }
+        });
     }
 
     private String issueRefreshToken(User user) {
