@@ -1,6 +1,7 @@
 # Quy ước giao diện và wireframe công khai
 
 - **Người biên soạn:** Phạm Gia Bảo · #17 · WBS 1.4.1, 1.4.2.
+- **Cập nhật:** 07/11/2026.
 - **Cơ sở:** [phạm vi chuẩn](../../requirements/ban-chot-pham-vi.md), [quy tắc mã nguồn](../../guides/quy-tac-ma-nguon.md), [ADR 0007](../../decisions/0007-cau-truc-ma-nguon.md), [ADR 0008](../../decisions/0008-goi-api-cung-domain.md), [SRS F1](../../requirements/srs/dac-ta-use-case-f1-tai-khoan-va-phan-quyen.md).
 - Đây là quy ước và thiết kế để triển khai; wireframe chưa phải bằng chứng chức năng đã chạy với backend.
 
@@ -47,7 +48,7 @@ Wireframe chỉnh sửa được: [dang-ky.drawio.svg](dang-ky.drawio.svg).
 | Mật khẩu | Có | S1: tối thiểu 8 ký tự có chữ và số; cho phép ẩn/hiện; `autocomplete="new-password"`. |
 | Xác nhận mật khẩu | Có trên form | Khớp mật khẩu, chỉ dùng frontend, không gửi thêm trường chưa có trong DTO. |
 | Ngày sinh | Không | Nếu nhập gửi ngày `YYYY-MM-DD`; không tự đặt giới hạn tuổi chưa có trong yêu cầu. |
-| Giới tính | Không | Tập giá trị DTO chưa được định nghĩa trong SRS/ERD; chốt với owner API trước khi bật các lựa chọn, không tự đặt enum. |
+| Giới tính | Không | Theo [SRS F1 mục 6.1 đã chốt](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/5bcfaa5/docs/requirements/srs/dac-ta-use-case-f1-tai-khoan-va-phan-quyen.md), DTO nhận `MALE`, `FEMALE`, `OTHER` hoặc `null`; trường tùy chọn, có thể không gửi. Không biến trường này thành bắt buộc. |
 
 Tự đăng ký tạo cả tài khoản `MEMBER` và hồ sơ ở chi nhánh mặc định, không cho khách chọn vai trò/chi nhánh. Nếu SĐT đã có hồ sơ, báo 409 và hướng dẫn liên hệ quầy; không tự liên kết tài khoản với hồ sơ cũ. Email trùng báo lỗi backend; không xem đăng ký tài khoản là đã mua/kích hoạt gói. Khi thành công tự đăng nhập theo SRS F1; JWT access chỉ ở bộ nhớ, refresh trong cookie HttpOnly theo ADR 0008.
 
