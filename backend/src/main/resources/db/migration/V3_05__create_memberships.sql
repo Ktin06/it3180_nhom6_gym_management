@@ -27,7 +27,12 @@ CREATE TABLE memberships (
     CONSTRAINT ck_memberships_dates CHECK (end_date >= start_date),
     CONSTRAINT ck_memberships_remaining_sessions CHECK (remaining_sessions IS NULL OR remaining_sessions >= 0),
     CONSTRAINT ck_memberships_freeze_count CHECK (freeze_count >= 0),
-    CONSTRAINT ck_memberships_version CHECK (version >= 0)
+    CONSTRAINT ck_memberships_version CHECK (version >= 0),
+    CONSTRAINT ck_memberships_sessions CHECK (
+    (package_type = 'TIME' AND total_sessions IS NULL AND remaining_sessions IS NULL)
+    OR (package_type IN ('SESSION', 'PT') AND total_sessions IS NOT NULL
+        AND remaining_sessions IS NOT NULL AND remaining_sessions <= total_sessions)
+    )
 );
 
 CREATE INDEX ix_memberships_member_status ON memberships (member_id, status);

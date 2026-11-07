@@ -333,7 +333,6 @@ Table members {
   indexes {
     (`lower(full_name) varchar_pattern_ops`) [name: 'ix_members_full_name', note: 'Tối ưu cho truy vấn LIKE theo chữ thường']
   }
-  }
 }
 
 Table face_embeddings {
@@ -393,7 +392,7 @@ Table memberships {
   start_date date [not null, note: 'gói PENDING mang ngày dự kiến; tính lại lúc hóa đơn chuyển PAID: ngày sau ngày gói cũ cùng loại hết hiệu lực (gói SESSION cũ đã về 0 buổi thì là ngày mai). Gói UPCOMING nối sau gói SESSION được kéo về ngày mai khi gói SESSION bị trừ buổi cuối, trong cùng giao dịch check-in; gói UPCOMING nối sau gói PT được kéo về hôm nay và kích hoạt khi buổi PT cuối được xác nhận (chốt 03/11)']
   end_date date [not null, note: 'ngày cuối còn dùng được: start_date + packages.duration_days - 1; CHECK end_date >= start_date; cộng thêm số ngày bảo lưu. Khi bảo lưu được duyệt, gói UPCOMING cùng loại nối tiếp phía sau cũng được dời start_date và end_date thêm đúng số ngày đó, trong cùng giao dịch (chốt 01/11)']
   total_sessions int [note: 'chép từ packages.session_count lúc mua']
-  remaining_sessions int [note: 'CHECK remaining_sessions >= 0']
+  remaining_sessions int [note: 'CHECK remaining_sessions >= 0. CHECK ((package_type = \'TIME\' AND total_sessions IS NULL AND remaining_sessions IS NULL) OR (package_type IN (\'SESSION\', \'PT\') AND total_sessions IS NOT NULL AND remaining_sessions IS NOT NULL AND remaining_sessions <= total_sessions))']
   freeze_count int [not null, default: 0]
   status membership_status [not null, default: 'PENDING']
   version int [not null, default: 0, note: 'khóa lạc quan (@Version): trừ buổi, bảo lưu, kích hoạt']
@@ -409,7 +408,7 @@ Table memberships {
   }
 }
 
-Note: 'CHECK ((package_type = \'TIME\' AND total_sessions IS NULL AND remaining_sessions IS NULL) OR (package_type IN (\'SESSION\', \'PT\') AND total_sessions IS NOT NULL AND remaining_sessions IS NOT NULL AND remaining_sessions <= total_sessions))'
+
 
 Table membership_freezes {
   id bigint [pk, increment]
@@ -452,7 +451,7 @@ Table checkins {
   branch_id bigint [not null, ref: > branches.id]
   created_by bigint [not null, ref: > users.id, note: 'lễ tân thực hiện']
   method checkin_method [not null, default: 'MANUAL']
-  match_score decimal(5,4) [note: 'chỉ có khi method = FACE', CHECK method = \'FACE\' OR match_score IS NULL']
+  match_score decimal(5,4) [note: 'chỉ có khi method = FACE. CHECK method = \'FACE\' OR match_score IS NULL']
   checkin_date date [not null, note: 'ngày theo giờ Việt Nam, để xác định lần check-in đầu tiên trong ngày']
   session_deducted boolean [not null, default: false, note: 'true nếu lượt này trừ 1 buổi của gói theo buổi']
   checked_in_at timestamptz [not null]
@@ -539,7 +538,7 @@ Table class_bookings {
     (class_session_id, status, waitlisted_at) [note: 'lấy người đứng đầu danh sách chờ']
     (member_id, status)
   }
-  Note: 'NF6: khi đặt chỗ, khóa (SELECT ... FOR UPDATE) dòng class_sessions để không vượt sĩ số, và dòng members của hội viên để hai yêu cầu đặt đồng thời không lọt kiểm tra trùng giờ. Thứ tự khóa cố định: members trước, class_sessions sau, để tránh deadlock. CHECK ((status = \'CANCELLED\') = (cancelled_at IS NOT NULL AND cancel_reason IS NOT NULL)) AND (is_late_cancel = false OR status = \'CANCELLED\')''
+  Note: 'NF6: khi đặt chỗ, khóa (SELECT ... FOR UPDATE) dòng class_sessions để không vượt sĩ số, và dòng members của hội viên để hai yêu cầu đặt đồng thời không lọt kiểm tra trùng giờ. Thứ tự khóa cố định: members trước, class_sessions sau, để tránh deadlock. CHECK ((status = \'CANCELLED\') = (cancelled_at IS NOT NULL AND cancel_reason IS NOT NULL)) AND (is_late_cancel = false OR status = \'CANCELLED\')'
 }
 
 // =====================================================================
