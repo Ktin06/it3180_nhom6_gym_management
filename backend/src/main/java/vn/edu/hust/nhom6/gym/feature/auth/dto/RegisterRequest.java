@@ -25,7 +25,7 @@ public record RegisterRequest(
     String phone,
 
     @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 8, message = "Mật khẩu phải có ít nhất 8 ký tự")
+    @Size(min = 8, max = 72, message = "Mật khẩu phải từ 8 đến 72 ký tự")
     @Pattern(
         regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,}$",
         message = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm cả chữ cái và chữ số"
