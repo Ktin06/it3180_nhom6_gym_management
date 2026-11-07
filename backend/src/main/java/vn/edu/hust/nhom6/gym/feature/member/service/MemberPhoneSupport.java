@@ -16,6 +16,13 @@ public final class MemberPhoneSupport {
         }
     }
 
+    /** Tìm theo tiền tố nội địa đầu 0; số đầy đủ vẫn dùng chuẩn hóa chung của F1. */
+    public static String normalizeSearchPrefix(String keyword) {
+        String cleaned = keyword == null ? "" : keyword.replaceAll("[\\s.\\-]", "");
+        if (cleaned.matches("0[0-9]{0,8}")) { return cleaned; }
+        return normalize(keyword);
+    }
+
     public static boolean isPhoneKeyword(String keyword) {
         return keyword != null && keyword.matches("[+0-9\\s.\\-]+") && keyword.matches(".*[0-9].*");
     }

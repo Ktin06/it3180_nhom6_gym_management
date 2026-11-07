@@ -1,9 +1,16 @@
 package vn.edu.hust.nhom6.gym.feature.member;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.stream.Stream;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -13,12 +20,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.json.JsonMapper;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import vn.edu.hust.nhom6.gym.feature.member.service.MemberActor.Role;
+import vn.edu.hust.nhom6.gym.feature.member.dto.CreateMemberRequest;
+import vn.edu.hust.nhom6.gym.feature.member.dto.UpdateMemberRequest;
+import vn.edu.hust.nhom6.gym.feature.member.entity.MemberStatus;
 import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberAccountAccess;
 import vn.edu.hust.nhom6.gym.feature.member.service.MemberRegistrationService;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -36,6 +47,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 class MemberApiIntegrationTest {
     @Autowired MockMvc mvc;
     @Autowired JdbcTemplate jdbc;
+    @Autowired JsonMapper json;
     @MockitoSpyBean MemberAccountAccess accounts;
     @Autowired MemberRegistrationService registration;
     @Autowired PlatformTransactionManager transactions;
@@ -101,12 +113,116 @@ class MemberApiIntegrationTest {
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(3));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"HV000901", "hv000901", "Hv000901", " hv000901 "})
+    void memberCodeSearchIsExactAndIgnoresCase(String keyword) throws Exception {
+        profile("HV000901", "0912345601", branch, null, "Nguyễn An");
+        profile("HV000902", "0912345602", branch, null, "hv000901 tên khác");
+        mvc.perform(get("/api/v1/members").with(identity(receptionist, Role.RECEPTIONIST))
+                .param("keyword", keyword))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
+            .andExpect(jsonPath("$.content[0].memberCode").value("HV000901"));
+    }
+
+    @Test
+    void phonePrefixSearchRespectsBranchStatusSoftDeletionAndPagination() throws Exception {
+        profile("HV000901", "0912345601", branch, memberUser, "An");
+        profile("HV000902", "0912345602", branch, null, "Bình");
+        profile("HV000903", "0912345603", otherBranch, null, "Chi");
+        Long deleted = profile("HV000904", "0912345604", branch, null, "Dũng");
+        jdbc.update("UPDATE members SET deleted_at = now() WHERE id = ?", deleted);
+        Long inactive = profile("HV000905", "0912345605", branch, null, "Giang");
+        jdbc.update("UPDATE members SET status = 'INACTIVE' WHERE id = ?", inactive);
+        profile("HV000906", "0909123401", branch, null, "0912 tên không được khớp");
+        RequestPostProcessor auth = identity(receptionist, Role.RECEPTIONIST);
+
+        mvc.perform(get("/api/v1/members").with(auth)
+                .param("keyword", "0912").param("status", "ACTIVE").param("size", "1"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(2))
+            .andExpect(jsonPath("$.totalPages").value(2))
+            .andExpect(jsonPath("$.content[0].memberCode").value("HV000902"))
+            .andExpect(jsonPath("$.content[0].email").value(org.hamcrest.Matchers.nullValue()));
+        mvc.perform(get("/api/v1/members").with(auth)
+                .param("keyword", "0912").param("status", "ACTIVE").param("size", "1").param("page", "1"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(2))
+            .andExpect(jsonPath("$.content[0].memberCode").value("HV000901"))
+            .andExpect(jsonPath("$.content[0].email").value("member@example.com"));
+        mvc.perform(get("/api/v1/members").with(identity(admin, Role.SUPER_ADMIN))
+                .param("keyword", "0912").param("status", "ACTIVE"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(3));
+        mvc.perform(get("/api/v1/members").with(auth).param("keyword", "0999"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"0912345601", "+84 912 345 601", "84912345601", "0912.345-601"})
+    void completePhoneSearchStillNormalizesAndMatchesExactly(String keyword) throws Exception {
+        profile("HV000901", "0912345601", branch, null, "An");
+        profile("HV000902", "0912345602", branch, null, "Bình");
+        mvc.perform(get("/api/v1/members").with(identity(receptionist, Role.RECEPTIONIST))
+                .param("keyword", keyword))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
+            .andExpect(jsonPath("$.content[0].phone").value("0912345601"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("validBirthDates")
+    void createAndUpdateAcceptPastOrAbsentBirthDate(LocalDate dob) throws Exception {
+        RequestPostProcessor auth = identity(receptionist, Role.RECEPTIONIST);
+        var expected = dob == null ? org.hamcrest.Matchers.nullValue() : org.hamcrest.Matchers.is(dob.toString());
+        mvc.perform(post("/api/v1/members").with(auth).contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(new CreateMemberRequest("Nguyễn An", "0912345699", null, dob))))
+            .andExpect(status().isCreated()).andExpect(jsonPath("$.dob").value(expected));
+        Long id = jdbc.queryForObject("SELECT id FROM members WHERE phone = '0912345699'", Long.class);
+        // Có ngày sinh cũ để kiểm tra PUT có thể thay đổi hoặc xóa ngày sinh tùy chọn.
+        jdbc.update("UPDATE members SET dob = '1980-01-01' WHERE id = ?", id);
+        mvc.perform(put("/api/v1/members/{id}", id).with(auth).contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(new UpdateMemberRequest("Nguyễn An", "0912345699", null, dob, MemberStatus.ACTIVE))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.dob").value(expected));
+        assertThat(jdbc.queryForObject("SELECT dob::text FROM members WHERE id = ?", String.class, id))
+            .isEqualTo(dob == null ? null : dob.toString());
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidBirthDates")
+    void createAndUpdateRejectTodayOrFutureBirthDateWithoutChanges(LocalDate dob) throws Exception {
+        Long id = profile("HV000901", "0912345601", branch, memberUser, "An");
+        jdbc.update("UPDATE members SET dob = '2000-05-20' WHERE id = ?", id);
+        refreshToken(memberUser);
+        RequestPostProcessor auth = identity(receptionist, Role.RECEPTIONIST);
+        mvc.perform(post("/api/v1/members").with(auth).contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(new CreateMemberRequest("Tên mới", "0912345699", null, dob))))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.errors.dob").value("Ngày sinh phải ở trong quá khứ"));
+        mvc.perform(put("/api/v1/members/{id}", id).with(auth).contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(new UpdateMemberRequest("Tên mới", "0912345699", null, dob, MemberStatus.INACTIVE))))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.errors.dob").value("Ngày sinh phải ở trong quá khứ"));
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM members", Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT full_name FROM members WHERE id = ?", String.class, id)).isEqualTo("An");
+        assertThat(jdbc.queryForObject("SELECT phone FROM members WHERE id = ?", String.class, id)).isEqualTo("0912345601");
+        assertThat(jdbc.queryForObject("SELECT dob::text FROM members WHERE id = ?", String.class, id)).isEqualTo("2000-05-20");
+        assertThat(jdbc.queryForObject("SELECT status FROM members WHERE id = ?", String.class, id)).isEqualTo("ACTIVE");
+        assertThat(accountStatus(memberUser)).isEqualTo("ACTIVE");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM refresh_tokens WHERE revoked_at IS NULL", Integer.class)).isEqualTo(1);
+    }
+
+    static Stream<LocalDate> validBirthDates() { return Stream.of(null, LocalDate.of(2000, 5, 20)); }
+
+    static Stream<LocalDate> invalidBirthDates() { return Stream.of(LocalDate.now(), LocalDate.now().plusDays(1)); }
+
     @Test
     void validatesEndpointAndRecordPermissions() throws Exception {
         Long id = profile("HV000901", "0912345601", branch, memberUser, "An");
         mvc.perform(get("/api/v1/members")).andExpect(status().isUnauthorized());
         for (var role : List.of(Role.MEMBER, Role.TRAINER)) {
             mvc.perform(get("/api/v1/members").with(identity(memberUser, role)))
+                .andExpect(status().isForbidden());
+            mvc.perform(post("/api/v1/members").with(identity(memberUser, role))
+                    .contentType(MediaType.APPLICATION_JSON).content(createBody("0912345699")))
+                .andExpect(status().isForbidden());
+            mvc.perform(put("/api/v1/members/{id}", id).with(identity(memberUser, role))
+                    .contentType(MediaType.APPLICATION_JSON).content(updateBody("0912345601", "INACTIVE")))
                 .andExpect(status().isForbidden());
         }
         mvc.perform(get("/api/v1/members/{id}", id).with(identity(memberUser, Role.MEMBER)))
@@ -122,6 +238,84 @@ class MemberApiIntegrationTest {
         Long stranger = user("stranger@example.com", "MEMBER");
         mvc.perform(get("/api/v1/members/{id}", id).with(identity(stranger, Role.MEMBER)))
             .andExpect(status().isNotFound());
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidFullNames")
+    void invalidNamesAreRejectedByRequestValidationOnCreateAndUpdate(String name) throws Exception {
+        Long id = profile("HV000901", "0912345601", branch, null, "An");
+        RequestPostProcessor auth = identity(receptionist, Role.RECEPTIONIST);
+        mvc.perform(post("/api/v1/members").with(auth).contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(new CreateMemberRequest(name, "0912345699", null, null))))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors.fullName").exists());
+        mvc.perform(put("/api/v1/members/{id}", id).with(auth).contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(new UpdateMemberRequest(name, "0912345601", null, null, MemberStatus.ACTIVE))))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors.fullName").exists());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM members", Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT full_name FROM members WHERE id = ?", String.class, id)).isEqualTo("An");
+    }
+
+    @Test
+    void missingUpdateStatusIsRejectedByRequestValidation() throws Exception {
+        Long id = profile("HV000901", "0912345601", branch, null, "An");
+        mvc.perform(put("/api/v1/members/{id}", id).with(identity(receptionist, Role.RECEPTIONIST))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(new UpdateMemberRequest("Tên mới", "0912345601", null, null, null))))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors.status").exists());
+        assertThat(jdbc.queryForObject("SELECT full_name FROM members WHERE id = ?", String.class, id)).isEqualTo("An");
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {0, -1})
+    void nonPositiveIdsAreRejectedAtController(Long id) throws Exception {
+        RequestPostProcessor auth = identity(receptionist, Role.RECEPTIONIST);
+        mvc.perform(get("/api/v1/members/{id}", id).with(auth))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.errors.id").value("ID hội viên phải lớn hơn 0"));
+        mvc.perform(put("/api/v1/members/{id}", id).with(auth)
+                .contentType(MediaType.APPLICATION_JSON).content(updateBody("0912345601", "ACTIVE")))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.errors.id").value("ID hội viên phải lớn hơn 0"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidRegistrationInputs")
+    void directRegistrationUsesTheSameDtoConstraints(String name, String phone, LocalDate dob, String field) {
+        assertThatThrownBy(() -> registration.registerMemberProfile(memberUser, name, phone, dob, null))
+            .isInstanceOfSatisfying(ConstraintViolationException.class, failure ->
+                assertThat(failure.getConstraintViolations()).extracting(v -> v.getPropertyPath().toString())
+                    .contains(field));
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM members", Integer.class)).isZero();
+    }
+
+    @Test
+    void branchManagerCanCreateReadUpdateAndSearchWithinTheirBranch() throws Exception {
+        Long manager = user("manager@example.com", "BRANCH_MANAGER");
+        staff(manager, branch, "NV03");
+        RequestPostProcessor auth = identity(manager, Role.BRANCH_MANAGER);
+        mvc.perform(post("/api/v1/members").with(auth).contentType(MediaType.APPLICATION_JSON)
+                .content(createBody("0912345699")))
+            .andExpect(status().isCreated()).andExpect(jsonPath("$.homeBranchId").value(branch.intValue()));
+        Long id = jdbc.queryForObject("SELECT id FROM members WHERE phone = '0912345699'", Long.class);
+        mvc.perform(get("/api/v1/members/{id}", id).with(auth)).andExpect(status().isOk());
+        mvc.perform(put("/api/v1/members/{id}", id).with(auth).contentType(MediaType.APPLICATION_JSON)
+                .content(updateBody("0912345699", "INACTIVE")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("INACTIVE"));
+        mvc.perform(get("/api/v1/members").with(auth).param("keyword", "0912"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    static Stream<String> invalidFullNames() { return Stream.of(null, "", "   ", "x".repeat(256)); }
+
+    static Stream<Arguments> invalidRegistrationInputs() {
+        return Stream.of(
+            Arguments.of(null, "0912345699", null, "fullName"),
+            Arguments.of("   ", "0912345699", null, "fullName"),
+            Arguments.of("x".repeat(256), "0912345699", null, "fullName"),
+            Arguments.of("An", "123", null, "phone"),
+            Arguments.of("An", "0912345699", LocalDate.now(), "dob"),
+            Arguments.of("An", "0912345699", LocalDate.now().plusDays(1), "dob")
+        );
     }
 
     @Test
@@ -289,7 +483,7 @@ class MemberApiIntegrationTest {
         RequestPostProcessor auth = identity(receptionist, Role.RECEPTIONIST);
         // Làm nóng Spring/JPA trước khi đo ba cách tìm theo hợp đồng NF1.
         mvc.perform(get("/api/v1/members").with(auth)).andExpect(status().isOk());
-        for (String term : List.of("HV100001", "0900000001", "Hiệu năng")) {
+        for (String term : List.of("HV100001", "hv100001", "0900000001", "0900", "Hiệu năng")) {
             long start = System.nanoTime();
             mvc.perform(get("/api/v1/members").with(auth).param("keyword", term))
                 .andExpect(status().isOk());

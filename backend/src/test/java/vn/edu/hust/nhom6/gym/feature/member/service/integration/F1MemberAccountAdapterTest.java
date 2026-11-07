@@ -1,39 +1,19 @@
 package vn.edu.hust.nhom6.gym.feature.member.service.integration;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.FilteredClassLoader;
-import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import vn.edu.hust.nhom6.gym.common.exception.NotFoundException;
+import vn.edu.hust.nhom6.gym.feature.auth.service.AuthService;
 
 class F1MemberAccountAdapterTest {
-    // Hợp đồng cục bộ cho unit test; bài IT gọi AuthService thật của F1.
-    public interface AccountContract {
-        Map<Long, String> getEmailsByUserIds(Collection<Long> userIds);
-        void disableAccount(Long userId);
-        void activateAccountIfDisabled(Long userId);
-    }
-
-    public interface IncompleteContract {
-        Map<Long, String> getEmailsByUserIds(Collection<Long> userIds);
-        void disableAccount(Long userId);
-    }
-
-    public interface WrongReturnContract {
-        String getEmailsByUserIds(Collection<Long> userIds);
-        void disableAccount(Long userId);
-        void activateAccountIfDisabled(Long userId);
-    }
-
-    private final AccountContract target = mock(AccountContract.class);
-    private final F1MemberAccountAdapter adapter = new F1MemberAccountAdapter(() -> target, AccountContract.class);
+    private final AuthService target = mock(AuthService.class);
+    private final F1MemberAccountAdapter adapter = new F1MemberAccountAdapter(target);
 
     @Test
     void forwardsBatchWithoutSplittingIdsOrChangingResult() {
@@ -85,23 +65,4 @@ class F1MemberAccountAdapterTest {
         assertThatThrownBy(() -> adapter.emails(List.of(11L))).isSameAs(failure);
     }
 
-    @Test
-    void requiresAllThreeMethodsWithMatchingReturnTypes() {
-        assertThat(F1MemberAccountAdapter.supports(AccountContract.class)).isTrue();
-        assertThat(F1MemberAccountAdapter.supports(IncompleteContract.class)).isFalse();
-        assertThat(F1MemberAccountAdapter.supports(WrongReturnContract.class)).isFalse();
-        assertThatThrownBy(() -> new F1MemberAccountAdapter(() -> target, IncompleteContract.class))
-            .isInstanceOf(IllegalStateException.class).hasMessageContaining("activateAccountIfDisabled");
-    }
-
-    @Test
-    void absentF1DoesNotRegisterAdapterOrBreakStandaloneContext() {
-        new ApplicationContextRunner()
-            .withClassLoader(new FilteredClassLoader("vn.edu.hust.nhom6.gym.feature.auth"))
-            .withUserConfiguration(F1MemberAccountAdapter.class)
-            .run(context -> {
-                assertThat(context).hasNotFailed();
-                assertThat(context).doesNotHaveBean(MemberAccountAccess.class);
-            });
-    }
 }

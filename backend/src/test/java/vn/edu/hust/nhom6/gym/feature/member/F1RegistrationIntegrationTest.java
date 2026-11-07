@@ -17,27 +17,31 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.util.ClassUtils;
 import tools.jackson.databind.json.JsonMapper;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.NotFoundException;
+import vn.edu.hust.nhom6.gym.feature.auth.service.MemberService;
+import vn.edu.hust.nhom6.gym.feature.member.entity.Member;
+import vn.edu.hust.nhom6.gym.feature.member.mapper.MemberMapper;
 import vn.edu.hust.nhom6.gym.feature.member.service.MemberRegistrationService;
 import vn.edu.hust.nhom6.gym.feature.member.service.integration.F1MemberAccountAdapter;
+import vn.edu.hust.nhom6.gym.feature.member.service.integration.F1MemberRegistrationAdapter;
 import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberAccountAccess;
 import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberBranchAccess;
 import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberBranchAdapter;
 
 /**
- * Bài IT chạy riêng trên nền đã có dịch vụ tài khoản F1 (đối chiếu commit 0f4e3de).
- * Chạy bằng -Dtest=F1RegistrationIntegrationIT; không phải bài unit mặc định của nhánh chỉ có F2.
+ * Kiểm thử tích hợp dùng dịch vụ tài khoản F1 thật (đối chiếu commit 03bab42).
+ * Hậu tố *Test để Maven Surefire tự chạy trong verify mặc định và job Backend của CI.
  * Dùng AuthController/AuthService/JWT F1 thật, mọi adapter F2 và service tra cứu production.
  * Cần schema đầy đủ (đối chiếu PR #101), không tạo bảng staff bằng fixture tạm.
  * Các request qua MockMvc với PostgreSQL thật; không thay cho nghiệm thu staging qua trình duyệt.
@@ -45,7 +49,7 @@ import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberBranchAdap
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(MemberTestConfiguration.class)
-class F1RegistrationIntegrationIT {
+class F1RegistrationIntegrationTest {
     @Autowired MockMvc mvc;
     @Autowired JdbcTemplate jdbc;
     @Autowired ApplicationContext context;
@@ -54,13 +58,14 @@ class F1RegistrationIntegrationIT {
     @Autowired MemberBranchAccess branches;
     @MockitoSpyBean MemberRegistrationService registrations;
     @MockitoSpyBean MemberAccountAccess accounts;
+    @MockitoSpyBean MemberMapper mapper;
 
     @BeforeEach
     void fixtures() {
-        Class<?> contract = ClassUtils.resolveClassName(
-            "vn.edu.hust.nhom6.gym.feature.auth.service.MemberService", context.getClassLoader());
-        assertThat(context.getBean(contract)).isSameAs(context.getBean("f2MemberRegistrationAdapter"));
-        assertThat(context.getBean(contract)).isNotSameAs(context.getBean("defaultMemberService"));
+        MemberService registration = context.getBean(MemberService.class);
+        assertThat(registration).isInstanceOf(F1MemberRegistrationAdapter.class);
+        assertThat(registration).isSameAs(context.getBean("f2MemberRegistrationAdapter"));
+        assertThat(registration).isNotSameAs(context.getBean("defaultMemberService"));
         assertThat(context.getBeansOfType(MemberAccountAccess.class)).hasSize(1);
         assertThat(accounts).isInstanceOf(F1MemberAccountAdapter.class);
         assertThat(accounts).isSameAs(context.getBean("f1MemberAccountAdapter"));
@@ -204,9 +209,16 @@ class F1RegistrationIntegrationIT {
             throw new IllegalStateException("Kiểm thử lỗi sau khi F1 vô hiệu hóa tài khoản");
         }).when(accounts).disable(member.userId());
 
-        update(member.memberId(), adminToken(), "INACTIVE", 500);
+        mvc.perform(put("/api/v1/members/{id}", member.memberId())
+                .header("Authorization", "Bearer " + adminToken()).contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(Map.of("fullName", "Tên mới", "phone", "0912345699", "status", "INACTIVE"))))
+            .andExpect(status().isInternalServerError());
 
         assertThat(storedStatus("members", member.memberId())).isEqualTo("ACTIVE");
+        assertThat(jdbc.queryForObject("SELECT full_name FROM members WHERE id = ?", String.class, member.memberId()))
+            .isEqualTo("Nguyễn An");
+        assertThat(jdbc.queryForObject("SELECT phone FROM members WHERE id = ?", String.class, member.memberId()))
+            .isEqualTo("0912345601");
         assertThat(storedStatus("users", member.userId())).isEqualTo("ACTIVE");
         assertThat(activeTokens(member.userId())).isEqualTo(1);
         mvc.perform(post("/api/v1/auth/refresh").cookie(member.refreshToken()))
@@ -228,6 +240,28 @@ class F1RegistrationIntegrationIT {
         assertThat(storedStatus("members", member.memberId())).isEqualTo("INACTIVE");
         assertThat(storedStatus("users", member.userId())).isEqualTo("DISABLED");
         assertThat(activeTokens(member.userId())).isZero();
+    }
+
+    @Test
+    void failureAfterSavingMemberRollsBackProfileAccountAndTokenRevocation() throws Exception {
+        Session member = register("rollback-after-save@example.com", "0912345601");
+        String adminToken = adminToken();
+        doThrow(new IllegalStateException("Kiểm thử lỗi sau khi lưu hồ sơ"))
+            .when(mapper).detail(any(Member.class), anyString());
+
+        mvc.perform(put("/api/v1/members/{id}", member.memberId())
+                .header("Authorization", "Bearer " + adminToken).contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(Map.of("fullName", "Tên mới", "phone", "0912345699", "status", "INACTIVE"))))
+            .andExpect(status().isInternalServerError());
+
+        verify(accounts).disable(member.userId());
+        assertThat(storedStatus("members", member.memberId())).isEqualTo("ACTIVE");
+        assertThat(jdbc.queryForObject("SELECT full_name FROM members WHERE id = ?", String.class, member.memberId()))
+            .isEqualTo("Nguyễn An");
+        assertThat(jdbc.queryForObject("SELECT phone FROM members WHERE id = ?", String.class, member.memberId()))
+            .isEqualTo("0912345601");
+        assertThat(storedStatus("users", member.userId())).isEqualTo("ACTIVE");
+        assertThat(activeTokens(member.userId())).isEqualTo(1);
     }
 
     @Test

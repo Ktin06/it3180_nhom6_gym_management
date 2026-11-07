@@ -274,6 +274,95 @@
       ]
     },
     {
+      "name": "F2 – Tìm mã không phân biệt hoa thường",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/members?keyword={{memberCodeLower}}",
+        "auth": {
+          "type": "bearer",
+          "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.variables.set(\"memberCodeLower\", pm.variables.get(\"memberCode\").toLowerCase());"]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Tìm đúng mã dù nhập chữ thường\", () => { const page = pm.response.json(); pm.expect(page.totalElements).to.eql(1); pm.expect(page.content[0].memberCode).to.eql(pm.variables.get(\"memberCode\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "F2 – Tìm theo tiền tố điện thoại",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/members?keyword={{phonePrefix}}&page=0&size=20",
+        "auth": {
+          "type": "bearer",
+          "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.variables.set(\"phonePrefix\", pm.variables.get(\"memberPhone\").slice(0, 4));"]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Kết quả khớp tiền tố điện thoại\", () => { const page = pm.response.json(); pm.expect(page.totalElements).to.be.above(0); page.content.forEach(member => pm.expect(member.phone.startsWith(pm.variables.get(\"phonePrefix\"))).to.eql(true)); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "F2 – Từ chối ngày sinh tương lai",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/v1/members",
+        "auth": {
+          "type": "bearer",
+          "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"Hồ sơ sai ngày sinh\",\n  \"phone\": \"{{memberPhone}}\",\n  \"dob\": \"2999-01-01\"\n}",
+          "options": { "raw": { "language": "json" } }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Có lỗi trường ngày sinh\", () => pm.expect(pm.response.json().errors.dob).to.eql(\"Ngày sinh phải ở trong quá khứ\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "F2 – Tiền tố tên và trạng thái",
       "request": {
         "method": "GET",

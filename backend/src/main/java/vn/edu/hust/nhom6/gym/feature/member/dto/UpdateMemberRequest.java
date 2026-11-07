@@ -10,6 +10,7 @@ public record UpdateMemberRequest(
     @NotBlank(message = "Họ tên không được để trống")
     @Size(max = 255, message = "Họ tên không quá 255 ký tự") String fullName,
     @NotBlank(message = "Số điện thoại không được để trống") @ValidPhone String phone,
-    Gender gender, LocalDate dob,
+    Gender gender,
+    @Past(message = "Ngày sinh phải ở trong quá khứ") LocalDate dob,
     @NotNull(message = "Trạng thái không được để trống") MemberStatus status
 ) { }

@@ -9,7 +9,7 @@ import org.testcontainers.utility.DockerImageName;
 /**
  * Chỉ cung cấp PostgreSQL kiểm thử. Tra cứu chi nhánh luôn dùng service/adapter production.
  * Adapter tài khoản riêng cho bài F2 độc lập nằm ở StandaloneMemberAccountTestConfiguration;
- * bài IT F1 dùng F1MemberAccountAdapter production.
+ * F1RegistrationIntegrationTest dùng F1MemberAccountAdapter production.
  */
 @TestConfiguration(proxyBeanMethods = false)
 class MemberTestConfiguration {
