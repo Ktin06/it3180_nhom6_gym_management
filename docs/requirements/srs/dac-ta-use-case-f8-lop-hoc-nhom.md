@@ -3,7 +3,7 @@
 - **Mã chức năng:** F8
 - **Version:** v2 (Bắt buộc)
 - **Người biên soạn:** Phạm Gia Bảo
-- **Cập nhật:** 04/11/2026 — sửa review và bổ sung 16 quyết định nghiệp vụ của trưởng nhóm; xem mục 7.
+- **Cập nhật:** 07/11/2026 — áp dụng phần làm rõ sức chứa và sửa điểm danh của trưởng nhóm; xem mục 7.
 - **Người duyệt chéo:** Nguyễn Anh Tú
 - **Truy vết:** [#9](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/9) · WBS 1.2.9 · bản nháp chờ review và đồng bộ tài liệu chuẩn ở mục 7.6.
 - **Tài liệu chuẩn tham chiếu:**
@@ -15,9 +15,9 @@
   - [ADR 0009: Bộ sơ đồ phân tích và thiết kế](../../decisions/0009-bo-so-do-phan-tich-thiet-ke.md)
   - [Mẫu đặc tả Use Case](mau-dac-ta-use-case.md)
 
-> **Nguồn quyết định mới:** [Trưởng nhóm Hoàng Kim Tiến chốt 04/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6633040706). Mục 7 ghi nguyên các quyết định; các luồng bên dưới đã cập nhật theo đó. Những ghi chú cũ về mốc ân hạn tính từ email trong ADR/ERD cần được người phụ trách nguồn chuẩn đồng bộ, không dùng để đảo ngược quyết định mới (mục 7.6).
+> **Nguồn quyết định:** [Trưởng nhóm Hoàng Kim Tiến chốt 04/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6633040706) và [làm rõ quyết định 13, sửa điểm danh ngày 07/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6701988493). Mục 7 ghi các quyết định; các luồng bên dưới đã cập nhật theo đó. Những ghi chú cũ về mốc ân hạn tính từ email trong ADR/ERD cần được người phụ trách nguồn chuẩn đồng bộ, không dùng để đảo ngược quyết định mới (mục 7.6).
 
-> **Trạng thái:** Đặc tả này diễn giải yêu cầu đã duyệt trong bản chốt phạm vi, ERD và ADR 0003. Các API, DTO, cách phân loại lỗi cụ thể trong mục G là **đề xuất thiết kế để người triển khai backend F8 trong Sprint 2 xác nhận**, chưa phải hợp đồng API đã thống nhất. Những điểm chưa được nguồn chuẩn quyết định được ghi rõ trong mục 7.5–7.6 (thiết kế và phụ thuộc còn lại), không tự đặt thêm quy tắc.
+> **Trạng thái:** Đặc tả này diễn giải yêu cầu trong bản chốt phạm vi, ERD và ADR 0003 cùng quyết định của trưởng nhóm. Các API, DTO, cách phân loại lỗi cụ thể trong mục G là **đề xuất thiết kế để người triển khai backend F8 trong Sprint 2 xác nhận**, chưa phải hợp đồng API đã thống nhất. Thiết kế kỹ thuật và việc đồng bộ nguồn chuẩn được ghi ở mục 7.5–7.6; không tự đặt thêm quy tắc.
 
 ---
 
@@ -779,7 +779,7 @@ Các cột lịch sử phục vụ đếm vi phạm theo tháng Việt Nam và s
 
 #### B. Hậu điều kiện
 
-- **Thành công:** `class_bookings.status` chuyển thành `ATTENDED` hoặc `NO_SHOW`; khi huấn luyện viên điểm danh, `attendance_marked_by` lưu `users.id` của huấn luyện viên theo ERD. Cách ghi người sửa là quản lý chi nhánh do backend F8 chốt ở mục 7.5, chưa tự chọn ghi đè hay thêm lịch sử. `NO_SHOW` được tính vào quy tắc khóa đặt lớp theo bản chốt.
+- **Thành công:** `class_bookings.status` chuyển thành `ATTENDED` hoặc `NO_SHOW`; mỗi lần ghi/sửa kết quả, `attendance_marked_by` lưu `users.id` của người thao tác; khi sửa kết quả đã ghi, `audit_logs` ghi giá trị cũ/mới trong cùng giao dịch. Theo comment ngày 07/11, hệ thống tính lại vi phạm trong tháng; nếu dưới ngưỡng thì đặt `members.booking_locked_until = NULL` ngay, còn nếu vẫn đạt ngưỡng thì giữ nguyên khóa, không rút ngắn. Lần điểm danh hoặc sửa thành `NO_SHOW` làm đạt ngưỡng thì áp khóa ngay. Quan hệ giữa phép tính lại này với ranh giới “sau lần bị khóa gần nhất” đã chốt ngày 04/11 được ghi ở mục 7.6.
 - **Thất bại:** Không thay đổi điểm danh; trạng thái hiện tại được giữ nguyên.
 
 #### C. Luồng sự kiện chính
@@ -789,8 +789,8 @@ Các cột lịch sử phục vụ đếm vi phạm theo tháng Việt Nam và s
 3. Hệ thống trả danh sách chỗ đặt đang có chỗ cần điểm danh; không trộn các dòng chỉ đang `WAITLIST` hoặc đã `CANCELLED`.
 4. Huấn luyện viên chọn từng hội viên và ghi nhận có mặt (`ATTENDED`) hoặc vắng mặt (`NO_SHOW`).
 5. Hệ thống kiểm tra trạng thái điểm danh hợp lệ và chỗ không ở `WAITLIST`/`CANCELLED`; kết quả đã ghi được sửa trong thời hạn, sau hạn chỉ quản lý đúng chi nhánh được sửa.
-6. Hệ thống cập nhật kết quả; luồng huấn luyện viên ghi `attendance_marked_by` theo ERD. Luồng quản lý sửa sau hạn cần thiết kế ghi nhận người sửa tại mục 7.5, không tự suy ra cột lịch sử mới.
-7. Nếu kết quả là `NO_SHOW`, hệ thống đếm sự kiện vi phạm đúng một lần theo tháng dương lịch Việt Nam và sau lần bị khóa gần nhất; đủ ngưỡng thì khóa đặt lớp theo cấu hình. Cách xử lý lệnh khóa đã áp khi sửa điểm danh sai còn cần trưởng nhóm xác nhận (mục 7.6).
+6. Hệ thống cập nhật kết quả, ghi `attendance_marked_by` là `users.id` của người thao tác; nếu sửa kết quả đã ghi thì thêm một dòng `audit_logs` với giá trị cũ/mới trong cùng giao dịch.
+7. Khi điểm danh mới là `NO_SHOW`, đếm vi phạm gồm hủy muộn (`is_late_cancel`) và `NO_SHOW` trong tháng dương lịch Việt Nam, sau lần bị khóa gần nhất theo quyết định 5–6; nếu đạt `PENALTY_LIMIT_PER_MONTH`, áp khóa theo `PENALTY_LOCK_DAYS` ngay. Với mỗi lần sửa kết quả đã ghi, tính lại vi phạm trong tháng gồm `is_late_cancel` và `NO_SHOW` trong cùng giao dịch: nếu thấp hơn ngưỡng thì đặt `members.booking_locked_until = NULL` ngay; nếu vẫn đạt ngưỡng thì giữ nguyên khóa hiện có, không rút ngắn. Sửa `ATTENDED` thành `NO_SHOW` làm đạt ngưỡng thì áp khóa ngay. Comment 07/11 không nói rõ phép tính lại có tiếp tục giới hạn theo mốc khóa gần nhất như quyết định 6 hay không; xem mục 7.6.
 8. Hệ thống trả kết quả đã điểm danh.
 
 #### D. Các luồng thay thế và ngoại lệ
@@ -807,23 +807,24 @@ Các cột lịch sử phục vụ đếm vi phạm theo tháng Việt Nam và s
 
 #### E. Quy tắc nghiệp vụ liên quan
 
-- **BR-F8.6-01:** Huấn luyện viên được phân công điểm danh/sửa trong thời hạn; quản lý chi nhánh sửa sau thời hạn. `attendance_marked_by` theo ERD ghi `users.id` của huấn luyện viên; cách lưu người quản lý sửa và lịch sử sửa phải được backend F8 chốt (mục 7.5), không tự chọn ghi đè trường này.
+- **BR-F8.6-01:** Huấn luyện viên được phân công điểm danh/sửa trong thời hạn; quản lý chi nhánh sửa sau thời hạn. Mỗi lần ghi/sửa điểm danh, `attendance_marked_by` ghi `users.id` của người thao tác; khi sửa kết quả đã ghi, `audit_logs` ghi giá trị cũ/mới trong cùng giao dịch (quyết định ngày 07/11/2026). Các cột cần thiết đã có trong ERD; việc đồng bộ ghi chú ERD thuộc mục 7.6.
 - **BR-F8.6-02:** F4 ghi `arrived_at` khi check-in có lớp sắp bắt đầu; điều đó không thay cho `ATTENDED` do huấn luyện viên xác nhận (bản chốt phạm vi F4 và ERD).
-- **BR-F8.6-03:** `NO_SHOW` góp vào số vi phạm trong tháng dương lịch Việt Nam, chỉ tính sau lần bị khóa gần nhất và không phạt lại cùng lỗi. Đủ ngưỡng cấu hình thì khóa đặt lớp; không đếm trùng khi gửi lại cùng kết quả (quyết định 5–6).
+- **BR-F8.6-03:** Với điểm danh mới, vi phạm gồm hủy muộn (`is_late_cancel`) và `NO_SHOW`, tính trong tháng dương lịch Việt Nam và chỉ sau lần bị khóa gần nhất; không đếm trùng cùng lỗi (quyết định 5–6). Lần ghi mới hoặc sửa thành `NO_SHOW` làm đạt `PENALTY_LIMIT_PER_MONTH` thì áp khóa ngay. Mỗi lần sửa điểm danh tính lại vi phạm trong tháng trong cùng giao dịch: dưới ngưỡng thì đặt `members.booking_locked_until = NULL` ngay; nếu vẫn đạt ngưỡng thì giữ nguyên khóa hiện có, không rút ngắn (làm rõ ngày 07/11/2026). Phạm vi mốc khóa gần nhất cho phép tính lại còn cần xác nhận tại mục 7.6.
 - **BR-F8.6-04:** Chỗ đặt `ATTENDED` và `NO_SHOW` vẫn được tính trong sĩ số của buổi học (thiết kế dữ liệu ERD).
-- **Quyết định đã chốt:** Huấn luyện viên được điểm danh và sửa từ lúc bắt đầu buổi đến 23:59 cùng ngày Việt Nam; sau đó chỉ quản lý chi nhánh được sửa (quyết định 14). Không tự coi hết giờ là `NO_SHOW` khi chưa có thao tác điểm danh. Ảnh hưởng của việc sửa sai điểm danh lên lệnh khóa đã áp cần trưởng nhóm chốt thêm, xem mục 7.6.
+- **Quyết định đã chốt:** Huấn luyện viên được điểm danh và sửa từ lúc bắt đầu buổi đến 23:59 cùng ngày Việt Nam; sau đó chỉ quản lý chi nhánh được sửa (quyết định 14). Không tự coi hết giờ là `NO_SHOW` khi chưa có thao tác điểm danh. Sửa `NO_SHOW`/`ATTENDED` tính lại vi phạm và cập nhật khóa ngay theo BR-F8.6-03; không chờ tác vụ nền.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
 
-- **Bảng tác động:** `class_bookings`, có thể `members.booking_locked_until` khi đủ ngưỡng.
+- **Bảng tác động:** `class_bookings`, `audit_logs`, và `members.booking_locked_until` khi việc tính lại khóa cần thay đổi giá trị.
 - **Bảng đọc:** `class_sessions`, `staff`, `users`, `system_configs`.
 
 - `class_bookings`: `status`, `attendance_marked_by`, `arrived_at`, `member_id`, `class_session_id`, `is_late_cancel`, `cancelled_at`.
-- `class_sessions`: `trainer_id`, `start_at`.
+- `class_sessions`: `capacity`, `trainer_id`, `start_at`, `status`.
 - `members`: `booking_locked_until`.
+- `audit_logs`: `user_id`, `branch_id`, `action`, `entity`, `entity_id`, `old_value`, `new_value`.
 - `system_configs`: `config_key`, `config_value`.
 
-Các cột lịch sử phục vụ đếm theo tháng Việt Nam và sau lần khóa gần nhất; lưu mốc khóa lịch sử do backend F8 Sprint 2 thiết kế, không suy ra cột chưa có trong ERD (mục 7.6).
+Lịch sử cần để đếm theo tháng Việt Nam và sau lần khóa gần nhất do backend F8 Sprint 2 thiết kế; không suy ra cột chưa có trong ERD (mục 7.6). Dòng `audit_logs` khi sửa điểm danh dùng các cột cũ/mới đã có; không thêm cột.
 
 Định nghĩa cột và ràng buộc: xem [ERD v2](../../design/erd/erd-v2.dbml) (mục 2.1).
 
@@ -861,7 +862,7 @@ Các cột lịch sử phục vụ đếm theo tháng Việt Nam và sau lần k
 - **Kịch bản 1: Huấn luyện viên ghi nhận học viên có mặt**
   - **Given** Huấn luyện viên được phân công; chỗ đặt `BOOKED` có `arrived_at` hoặc học viên đã có mặt tại lớp.
   - **When** Huấn luyện viên đánh dấu `ATTENDED`.
-  - **Then** Chỗ đặt thành `ATTENDED`, ghi `attendance_marked_by`; `arrived_at` không bị dùng làm nguồn thay thế cho thao tác này.
+  - **Then** Chỗ đặt thành `ATTENDED`, `attendance_marked_by` ghi người thao tác; `arrived_at` không bị dùng làm nguồn thay thế cho thao tác này.
 - **Kịch bản 2: Huấn luyện viên ghi nhận vắng mặt đạt ngưỡng**
   - **Given** Hội viên có 2 lần vi phạm được tính trong tháng và huấn luyện viên được phân công cho buổi.
   - **When** Huấn luyện viên đánh dấu chỗ đặt `NO_SHOW`.
@@ -883,7 +884,22 @@ Các cột lịch sử phục vụ đếm theo tháng Việt Nam và sau lần k
 - **Kịch bản 6: Quản lý sửa sau hạn huấn luyện viên**
   - **Given** Buổi đã qua ngày diễn ra; tài khoản quản lý thuộc đúng chi nhánh.
   - **When** Quản lý sửa kết quả điểm danh.
-  - **Then** Cho sửa theo quyền quản lý; huấn luyện viên và quản lý chi nhánh khác không được dùng quyền này. Không tự chốt tác động lên lệnh khóa do điểm danh sai, xem mục 7.6.
+  - **Then** Cho sửa theo quyền quản lý; huấn luyện viên và quản lý chi nhánh khác không được dùng quyền này. `attendance_marked_by` ghi người quản lý và `audit_logs` ghi giá trị cũ/mới trong cùng giao dịch.
+
+- **Kịch bản 7: Sửa `NO_SHOW` thành `ATTENDED` làm số vi phạm xuống dưới ngưỡng**
+  - **Given** Điểm danh hiện là `NO_SHOW`, hội viên đang bị khóa và số vi phạm sau khi tính lại theo chỉ dẫn ngày 07/11 thấp hơn `PENALTY_LIMIT_PER_MONTH`; quản lý đúng chi nhánh được phép sửa.
+  - **When** Quản lý sửa kết quả thành `ATTENDED`.
+  - **Then** Trong cùng giao dịch, trạng thái được sửa, `attendance_marked_by` ghi người quản lý, `audit_logs` lưu giá trị cũ/mới và `members.booking_locked_until` được đặt `NULL` ngay, không chờ tác vụ ban đêm.
+
+- **Kịch bản 8: Sửa điểm danh nhưng số vi phạm vẫn đạt ngưỡng**
+  - **Given** Điểm danh đã ghi; sau khi tính lại theo chỉ dẫn ngày 07/11, số vi phạm vẫn bằng hoặc lớn hơn `PENALTY_LIMIT_PER_MONTH` và hội viên đang có khóa.
+  - **When** Người có quyền sửa điểm danh cập nhật kết quả.
+  - **Then** Ghi người sửa và giá trị cũ/mới như BR-F8.6-01; giữ nguyên `booking_locked_until`, không rút ngắn khóa.
+
+- **Kịch bản 9: Sửa `ATTENDED` thành `NO_SHOW` làm đạt ngưỡng**
+  - **Given** Điểm danh hiện là `ATTENDED`; hội viên có số vi phạm thấp hơn ngưỡng trước lần sửa nhưng đạt `PENALTY_LIMIT_PER_MONTH` khi tính lại theo chỉ dẫn ngày 07/11.
+  - **When** Người có quyền sửa kết quả thành `NO_SHOW`.
+  - **Then** Trong cùng giao dịch, ghi người sửa và giá trị cũ/mới; áp khóa theo `PENALTY_LOCK_DAYS` ngay.
 
 ---
 
@@ -920,7 +936,7 @@ Các cột lịch sử phục vụ đếm theo tháng Việt Nam và sau lần k
 
 #### D. Các luồng thay thế và ngoại lệ
 
-- **A1 – Cập nhật lịch lặp:** Chỉ áp dụng thay đổi cho buổi được sinh về sau; buổi đã sinh giữ nguyên. Muốn đổi buổi đã sinh, quản lý sửa/hủy từng buổi riêng lẻ. Quy tắc giảm sức chứa áp dụng theo quyết định 13; đối tượng là lịch lặp hay buổi riêng lẻ và trường hợp có trạng thái giữ chỗ khác cần trưởng nhóm làm rõ ở mục 7.6, không tự áp thay đổi lên buổi đã sinh.
+- **A1 – Cập nhật sức chứa:** `class_schedules.capacity` chỉ dùng cho các buổi sẽ sinh về sau; kiểm tra `0 < capacity <= rooms.capacity`, không đổi buổi đã sinh. Với `class_sessions.capacity`, chỉ cho sửa khi `start_at > now` và trạng thái là `SCHEDULED` hoặc `RESCHEDULED`; sức chứa mới vẫn phải dương, không vượt sức chứa phòng và ít nhất bằng số `BOOKED` + `PENDING_RECONFIRM` đang giữ chỗ (quyết định 13 và ràng buộc ERD). Không cho sửa sức chứa buổi đã bắt đầu hoặc không ở hai trạng thái này.
 - **A2 – Ngừng lịch:** Chuyển trạng thái sang `INACTIVE`, không xóa cứng; không đổi các buổi đã sinh. Ngày lễ xử lý bằng hủy từng buổi.
 - **A3 – Chưa có ngày kết thúc:** `valid_to = NULL` biểu thị không khai báo ngày dừng; số ngày sinh buổi trước do backend F8 Sprint 2 chốt.
 - **A4 – Hủy một buổi cụ thể:** Chuyển `class_sessions.status = 'CANCELLED'`; mọi chỗ đặt đang hoạt động, gồm `BOOKED`, `PENDING_RECONFIRM`, `WAITLIST`, được chuyển `CANCELLED` với `cancel_reason = 'SESSION_CANCELLED'`, không phạt; gửi thông báo cho tất cả người có chỗ đặt/danh sách chờ của buổi. Không áp dụng tự động đưa vào lớp cho buổi đã hủy.
@@ -928,26 +944,26 @@ Các cột lịch sử phục vụ đếm theo tháng Việt Nam và sau lần k
 - **E2 – Không có quyền (403 Forbidden):** Từ chối quản lý truy cập ngoài chi nhánh của mình và lễ tân sửa/hủy buổi riêng lẻ; không giới hạn chủ chuỗi vào một chi nhánh cho nhánh được phép.
 - **E3 – Không tìm thấy phòng/loại lớp/nhân viên (404 Not Found):** Trả lỗi tiếng Việt.
 - **E4 – Trùng hoặc xung đột dữ liệu (409 Conflict):** Ràng buộc duy nhất hoặc cập nhật cạnh tranh.
-- **E5 – Vi phạm nghiệp vụ (422 Unprocessable Content):** Sức chứa lớn hơn sức chứa phòng, giờ kết thúc không sau giờ bắt đầu, hoặc huấn luyện viên không có vai trò `TRAINER`.
+- **E5 – Vi phạm nghiệp vụ (422 Unprocessable Content):** Sức chứa không dương hoặc lớn hơn sức chứa phòng, sức chứa buổi thấp hơn tổng `BOOKED` và `PENDING_RECONFIRM`, giờ kết thúc không sau giờ bắt đầu, hoặc huấn luyện viên không có vai trò `TRAINER`.
 
 #### E. Quy tắc nghiệp vụ liên quan
 
 - **BR-F8.7-01:** `class_schedules` là lịch lặp theo tuần; `day_of_week`: 1 = thứ Hai … 7 = Chủ nhật (ISO).
-- **BR-F8.7-02:** `0 < capacity <= rooms.capacity`; `end_time > start_time`; huấn luyện viên phải có vai trò `TRAINER` (ERD).
+- **BR-F8.7-02:** Với lịch lặp, `0 < class_schedules.capacity <= rooms.capacity`; sức chứa này chỉ dùng cho buổi sinh về sau, không cập nhật buổi đã sinh. Với buổi cụ thể, chỉ cho sửa `class_sessions.capacity` khi `start_at > now` và `status` là `SCHEDULED` hoặc `RESCHEDULED`; giá trị mới vẫn phải thỏa `0 < capacity <= rooms.capacity` và `>=` tổng `BOOKED` + `PENDING_RECONFIRM` đang giữ chỗ. `end_time > start_time`; huấn luyện viên phải có vai trò `TRAINER` (ERD và quyết định 13 ngày 07/11/2026).
 - **BR-F8.7-03:** Lịch lặp chứa chi nhánh, loại lớp, huấn luyện viên, phòng, ngày/giờ, sức chứa, `valid_from`, `valid_to`, trạng thái.
 - **BR-F8.7-04:** Chuyển trạng thái `INACTIVE`, không xóa cứng dữ liệu nghiệp vụ.
 - **BR-F8.7-05:** Hủy buổi phải hủy toàn bộ chỗ đặt/danh sách chờ, không phạt và thông báo mọi người bị ảnh hưởng (bản chốt phạm vi F8). Không xóa cứng `class_sessions`/`class_bookings`.
 - **BR-F8.7-06:** Chặn hai lịch lặp trùng phòng hoặc trùng huấn luyện viên khi thứ/ngày, giờ và khoảng hiệu lực tạo ra buổi thực tế trùng nhau; báo rõ lịch bị trùng. Vẫn chặn lịch huấn luyện viên với buổi PT/lớp nhóm theo F9/NF6 (quyết định 11 mục 7.3).
-- **Quyết định đã chốt:** Sửa/ngừng lịch chỉ tác động buổi sinh về sau; ngày lễ hủy từng buổi (quyết định 12). Không giảm sức chứa dưới số `BOOKED` hiện có (quyết định 13); bất biến sức chứa theo ERD vẫn áp dụng. Đổi phòng/giờ hoặc hủy buổi riêng lẻ: quản lý đúng chi nhánh và chủ chuỗi được làm, lễ tân không được (quyết định 15). Backend F8 Sprint 2 chốt API, không tự mở rộng quyền của chủ chuỗi sang tạo lịch lặp.
+- **Quyết định đã chốt:** Sửa/ngừng lịch chỉ tác động buổi sinh về sau; ngày lễ hủy từng buổi (quyết định 12). Sức chứa lịch lặp chỉ áp dụng cho buổi sinh về sau và tuân theo BR-F8.7-02. Với buổi cụ thể, áp dụng giới hạn và điều kiện sửa trong BR-F8.7-02; không làm yếu bất biến sức chứa theo ERD. Đổi phòng/giờ hoặc hủy buổi riêng lẻ: quản lý đúng chi nhánh và chủ chuỗi được làm, lễ tân không được (quyết định 15). Backend F8 Sprint 2 chốt API, không tự mở rộng quyền của chủ chuỗi sang tạo lịch lặp.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
 
-- **Bảng tác động:** `class_types`, `class_schedules`; khi hủy buổi còn có `class_sessions`, `class_bookings`, `notifications`.
+- **Bảng tác động:** `class_types`, `class_schedules`; khi sửa sức chứa buổi hoặc hủy buổi còn có `class_sessions`; khi hủy buổi còn có `class_bookings`, `notifications`.
 - **Bảng đọc:** `branches`, `rooms`, `staff`, `users`.
 
 - `class_types`: `name`, `description`, `status`.
 - `class_schedules`: `branch_id`, `class_type_id`, `trainer_id`, `room_id`, `day_of_week`, `start_time`, `end_time`, `capacity`, `valid_from`, `valid_to`, `status`.
-- `class_sessions`: `status`.
+- `class_sessions`: `capacity`, `start_at`, `status` (khi sửa sức chứa buổi riêng lẻ hoặc hủy buổi).
 - `class_bookings`: `status`, `cancel_reason`, `is_late_cancel`.
 - `notifications`: `related_entity`, `related_id`, `user_id`, `type`, `channel`, `status`.
 - `rooms`: `capacity`, `branch_id`.
@@ -1019,14 +1035,19 @@ Các cột lịch sử phục vụ đếm theo tháng Việt Nam và sau lần k
   - **Then** Từ chối, nêu rõ lịch bị trùng, không lưu một phần dữ liệu.
 
 - **Kịch bản 9: Sửa/ngừng lịch không đổi buổi đã sinh**
-  - **Given** Lịch đã sinh các buổi cụ thể và có chỗ đặt.
-  - **When** Quản lý sửa hoặc ngừng lịch lặp.
-  - **Then** Các buổi đã sinh giữ nguyên; thay đổi chỉ áp dụng buổi sinh về sau. Muốn xử lý ngày lễ thì hủy từng buổi.
+  - **Given** Lịch đã sinh các buổi cụ thể, có buổi đã có chỗ đặt và sức chứa lịch lặp hợp lệ (`0 < capacity <= rooms.capacity`).
+  - **When** Quản lý sửa sức chứa hoặc ngừng lịch lặp.
+  - **Then** Các buổi đã sinh, sức chứa và chỗ đặt của chúng giữ nguyên; sức chứa mới chỉ dùng cho buổi sinh về sau. Muốn xử lý ngày lễ thì hủy từng buổi.
 
 - **Kịch bản 10: Giới hạn giảm sĩ số theo quyết định 13**
-  - **Given** Đối tượng áp dụng quyết định 13 đã được xác định, có 3 chỗ `BOOKED` và không có trạng thái giữ chỗ khác.
-  - **When** Quản lý giảm sức chứa xuống 2 hoặc giữ ở 3.
-  - **Then** Mức 2 bị từ chối; mức 3 không bị từ chối bởi kiểm tra số đã đặt. Luôn giữ bất biến sức chứa theo ERD.
+  - **Given** Buổi `SCHEDULED` hoặc `RESCHEDULED` có `start_at > now`, `class_sessions.capacity = 5`, với 3 chỗ `BOOKED` và 1 chỗ `PENDING_RECONFIRM` đang giữ chỗ.
+  - **When** Quản lý sửa `class_sessions.capacity` xuống 3 hoặc 4.
+  - **Then** Mức 3 bị từ chối với `422` và thông báo “đã có 4 người giữ chỗ”; mức 4 được chấp nhận. Sức chứa mới không thấp hơn `BOOKED` + `PENDING_RECONFIRM`.
+
+  **Biên từ chối thuộc kịch bản 10:**
+  - **Given** Buổi có `start_at <= now` hoặc trạng thái không phải `SCHEDULED`/`RESCHEDULED`.
+  - **When** Quản lý yêu cầu sửa `class_sessions.capacity`.
+  - **Then** Hệ thống từ chối thay đổi và giữ nguyên sức chứa.
 
 - **Kịch bản 11: Quyền sửa buổi riêng lẻ**
   - **Given** Buổi thuộc chi nhánh A; có quản lý A, quản lý B, chủ chuỗi và lễ tân.
@@ -1220,7 +1241,7 @@ Các số trong kịch bản kiểm thử dùng bộ giá trị mặc định b�
 
 | # | Câu hỏi | Quyết định |
 | --- | --- | --- |
-| 13 | Giảm sĩ số dưới số người đã đặt | **Không cho.** Sĩ số mới phải lớn hơn hoặc bằng số chỗ `BOOKED` hiện có. |
+| 13 | Giảm sức chứa buổi hoặc lịch lặp | Với `class_sessions.capacity`, chỉ cho sửa khi `start_at > now` và trạng thái `SCHEDULED` hoặc `RESCHEDULED`; sức chứa mới phải `>= BOOKED + PENDING_RECONFIRM` đang giữ chỗ. Với `class_schedules.capacity`, chỉ dùng cho buổi sinh về sau và kiểm tra `0 < capacity <= rooms.capacity`; buổi đã sinh không đổi. |
 | 14 | Khoảng thời gian điểm danh | **Từ giờ bắt đầu buổi đến 23:59 cùng ngày (giờ Việt Nam)**, sửa được trong khoảng đó. Sau đó khóa; cần sửa thì quản lý chi nhánh sửa. |
 | 15 | Ai sửa buổi lớp riêng lẻ (đổi phòng, đổi giờ, hủy) | **Quản lý chi nhánh** (chỉ chi nhánh mình) **và chủ chuỗi** (mọi chi nhánh). Lễ tân không được. |
 | 16 | `class_bookings.created_by` khi hội viên tự đặt | **Ghi `users.id` của tài khoản đã bấm đặt** (hội viên hoặc lễ tân). Chỗ được tự động đưa từ danh sách chờ vào lớp giữ nguyên người tạo ban đầu. |
@@ -1234,15 +1255,14 @@ Các số trong kịch bản kiểm thử dùng bộ giá trị mặc định b�
 - Mã `cancel_reason` cho từ chối/hết hạn xác nhận lại.
 - Nội dung lịch công khai (có số chỗ trống hay không), bộ lọc và dữ liệu trả về.
 - Lịch chạy, số ngày sinh buổi trước và cách thử lại UC-F8.8.
-- Cách lưu mốc lần khóa gần nhất, thời điểm vi phạm và mốc tạo thông báo trong web; cách ghi người quản lý sửa điểm danh (ghi đè `attendance_marked_by` hay giữ người điểm danh ban đầu và ghi lịch sử sửa). Không tự thêm tên cột/migration trong đặc tả này.
+- Cách lưu mốc lần khóa gần nhất, thời điểm vi phạm và mốc tạo thông báo trong web. Không tự thêm tên cột/migration trong đặc tả này.
 
 ### 7.6. Đồng bộ nguồn chuẩn và phụ thuộc còn lại
 
-- **Trưởng nhóm/người phụ trách ADR và ERD:** cập nhật ADR 0003, bản chốt phạm vi và ghi chú `class_bookings.grace_until` trong ERD từ mốc email sang mốc thông báo trong web theo quyết định 7 mới; bổ sung tiêu chí phụ `id` của FIFO, `created_by` cho cả hội viên/lễ tân và `attendance_marked_by` cho quản lý sửa sau hạn. Giữ nguyên luồng gửi email ban đêm. SRS chỉ ghi quyết định đã được xác nhận, không sửa hộ tài liệu chuẩn của đồng đội trong nhiệm vụ #9.
+- **Trưởng nhóm/người phụ trách ADR và ERD:** cập nhật ADR 0003, bản chốt phạm vi và ghi chú `class_bookings.grace_until` trong ERD từ mốc email sang mốc thông báo trong web theo quyết định 7 mới; bổ sung tiêu chí phụ `id` của FIFO, `created_by` cho cả hội viên/lễ tân và cập nhật ghi chú `attendance_marked_by` để phản ánh người điểm danh hoặc người sửa (kể cả quản lý). Ghi nhận `audit_logs.old_value`/`new_value` cho giá trị điểm danh cũ/mới; các cột này đã có trong ERD, không thêm cột. Giữ nguyên luồng gửi email ban đêm. SRS chỉ ghi quyết định đã được xác nhận, không sửa hộ tài liệu chuẩn của đồng đội trong nhiệm vụ #9.
 - **Backend F8 Sprint 2:** `created_by` bắt buộc có `users.id` người bấm đặt theo quyết định 16; ERD hiện để nullable, nên cần chốt ràng buộc/ý nghĩa NULL và đồng bộ ghi chú, không dùng tính nullable để bỏ qua người tạo của chỗ đặt mới.
 - **Backend F8 Sprint 2 phối hợp F10:** thiết kế dữ liệu để đếm lại vi phạm sau lần bị khóa gần nhất, không suy ra lịch sử chỉ từ `booking_locked_until` trừ số ngày cấu hình hiện tại. ERD hiện chưa có mốc lịch sử khóa được chỉ định cho quy tắc này. Hồ sơ được lễ tân đặt hộ nhưng chưa có tài khoản cần cách ghi mốc thông báo trong web phù hợp với `notifications.user_id`; không tự tạo cột hoặc bỏ ân hạn.
-- **Trưởng nhóm Hoàng Kim Tiến:** khi sửa điểm danh sai `NO_SHOW` thành `ATTENDED` sau khi đã áp khóa đặt, có gỡ/rút ngắn khóa đó không? Quyết định 14 cho phép sửa điểm danh nhưng chưa chốt tác động này; chưa tự chọn kết quả.
-- **Trưởng nhóm Hoàng Kim Tiến:** quyết định 13 dùng số `BOOKED` làm giới hạn giảm sĩ số, trong khi ERD tính cả `PENDING_RECONFIRM`, `ATTENDED`, `NO_SHOW` là chỗ chiếm. Cần xác nhận trường hợp sức chứa mới không dưới `BOOKED` nhưng dưới tổng bốn trạng thái: có phải từ chối hay có quy tắc khác? Giới hạn này áp dụng khi sửa `class_sessions.capacity`, sức chứa của lịch lặp cho buổi sinh sau, hay cả hai? Chưa đặc tả kết quả cho các nhánh này; không tự làm yếu bất biến NF6 hoặc đổi buổi đã sinh.
+- **Trưởng nhóm xác nhận ranh giới tính lại:** quyết định ngày 04/11 số 6 giới hạn vi phạm tính vào ngưỡng ở tháng hiện tại và sau lần bị khóa gần nhất; comment ngày 07/11 yêu cầu tính lại vi phạm trong tháng khi sửa điểm danh nhưng không nói sự kiện trước lần khóa gần nhất có tham gia phép tính lại hay không. SRS giữ quyết định 6 cho điểm danh mới và ghi trực tiếp yêu cầu tính lại theo tháng cho thao tác sửa, không tự thêm hoặc bỏ bộ lọc lịch sử khóa vào nhánh sửa. Cần người duyệt xác nhận ranh giới này vì nó ảnh hưởng số vi phạm dùng để gỡ/giữ khóa.
 
 ---
 
@@ -1250,7 +1270,7 @@ Các số trong kịch bản kiểm thử dùng bộ giá trị mặc định b�
 
 | Nội dung | Nguồn |
 | --- | --- |
-| 16 quyết định nghiệp vụ chốt ngày 04/11/2026, cập nhật các luồng trong SRS | [Xác nhận của trưởng nhóm](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6633040706), mục 7.1–7.4; các nguồn cũ cần đồng bộ theo mục 7.6 |
+| 16 quyết định nghiệp vụ ngày 04/11 và phần làm rõ ngày 07/11 về sức chứa, sửa điểm danh | [Xác nhận của trưởng nhóm](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6633040706), [làm rõ mới](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6701988493), mục 7.1–7.4; nguồn chuẩn cần đồng bộ theo mục 7.6 |
 | Phạm vi chức năng, tác nhân, điều kiện gói, cửa sổ đặt chỗ, hủy chỗ, đổi giờ, vi phạm, thông báo | [Bản chốt phạm vi](../ban-chot-pham-vi.md), mục F8 |
 | FIFO, tự động đưa vào lớp, mốc ngừng đưa vào lớp, ân hạn, chỗ trống ban đêm, thông báo, khóa chỗ | [ADR 0003](../../decisions/0003-danh-sach-cho-tu-dong-dua-vao-lop.md) |
 | Tập giá trị Enum khái niệm, các ràng buộc duy nhất, trạng thái giữ chỗ, khóa NF6, khóa cấu hình | [ERD v2](../../design/erd/erd-v2.dbml), [Thiết kế dữ liệu](../../design/erd/thiet-ke-du-lieu.md) |
@@ -1278,3 +1298,4 @@ Các issue dưới đây là yêu cầu, không phải bằng chứng đã tri�
 | 03/11/2026 | Soạn bản nháp F8 theo phạm vi, ERD và ADR 0003. |
 | 04/11/2026 | Việt hóa diễn đạt; ghi người quyết định; rút chỉ mục dữ liệu theo ERD; đơn giản UC-F8.1 trong phạm vi đã rõ; sửa tham chiếu và thứ tự kịch bản. Ở lần sửa trước comment chốt mới, câu 13–14 còn chờ trưởng nhóm; trạng thái đã được cập nhật theo 16 quyết định ở dòng lịch sử tiếp theo. |
 | 04/11/2026 | Bổ sung 16 quyết định nghiệp vụ từ comment của trưởng nhóm; sửa luồng/ân hạn/FIFO/đóng đặt/điểm danh và thêm kịch bản biên. Ghi phụ thuộc đồng bộ ADR/ERD và câu hỏi tác động sửa điểm danh sai lên lệnh khóa. |
+| 07/11/2026 | Cập nhật quyết định 13 về sức chứa lịch lặp/buổi cụ thể; bổ sung điều kiện sửa và tiêu chí chấp nhận. Cập nhật việc sửa điểm danh, tính lại khóa và audit log theo comment trưởng nhóm; giữ phụ thuộc lưu lịch sử khóa/thời điểm vi phạm và ghi chú khả năng cần xác nhận cửa sổ đếm. |
