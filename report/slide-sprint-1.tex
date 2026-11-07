@@ -245,7 +245,7 @@
       \end{block}
   \end{columns}
   \begin{block}{SRS đang có trên snapshot}
-    SRS tổng quan \#95 và các SRS F1--F7, F9, F10 đã có trên main. Bảng truy vết \#98 đã merge; F8 vẫn ở PR Draft \#79. Hai câu hỏi nghiệp vụ cũ đã được trưởng nhóm trả lời ngày 07/11, đang cập nhật và chờ review.
+    SRS tổng quan \#95 và các SRS F1--F7, F9, F10 đã có trên main. Bảng truy vết \#98 đã merge; F8 vẫn ở PR Draft \#79. F8 đã cập nhật quyết định ngày 07/11 tại \texttt{3f00584}, có 68 bộ Given/When/Then; chờ review và đồng bộ nguồn chuẩn.
   \end{block}
   \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/tree/main/docs/design/use-case}{Use case}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/tree/main/docs/design/activity}{Activity}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79}{PR \#79 F8}]
 \end{frame}
@@ -310,7 +310,7 @@
 \begin{columns}[T,onlytextwidth]
     \column{.49\textwidth}
       \begin{block}{Frontend}
-        Main còn công cụ giả lập role cho phát triển. PR \#80 bổ sung đăng ký, xác thực và menu theo role; đang sửa lỗi phục hồi phiên theo review.
+        Main còn công cụ giả lập role cho phát triển. PR \#80 bổ sung đăng ký, xác thực và menu theo role; đã sửa lỗi phục hồi phiên tại \texttt{73d616d}; còn chờ review và tích hợp thật.
       \end{block}
       \begin{block}{Giao diện khác}
         Wireframe F2/F3 (\#89) và cổng hội viên/PT (\#102) đã merge. UI F2/F3 \#103 đang review; không trình bày như đã tích hợp backend.
@@ -329,7 +329,7 @@
 \begin{frame}{Bằng chứng hiện có — và giới hạn của bằng chứng}
 \begin{itemize}
     \item CI \href{https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/42345472272}{\#42345472272}: success trên \texttt{main e9baa77}; job ứng dụng bỏ qua cho docs-only.
-    \item Baseline frontend \#80, commit \texttt{199a929}: CI \href{https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/42221658657}{\#42221658657} chạy lint, 9 file/45 Vitest và build qua. Đang bổ sung test cho góp ý auth mới; chưa kiểm thử backend thật.
+    \item Frontend \#80, commit \texttt{73d616d}: local và CI \href{https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/42347149363}{\#42347149363} chạy lint, 10 file/54 Vitest và build qua. Đã sửa ba nhánh lỗi/phục hồi auth; chưa kiểm thử HTTP/cookie thật.
     \item PR \#77 đã được đồng đội duyệt và merge; 31 story \#46--\#76 nằm trên Projects theo xác nhận trưởng nhóm. Issue là nguồn chuẩn, repo giữ chỉ mục.
     \item SRS tổng quan \#95, ERD/từ điển \#96 và truy vết \#98 đã merge; không còn là sản phẩm chưa cung cấp.
   \end{itemize}
@@ -344,8 +344,8 @@
     \item \textbf{Schema \#101:} review mới yêu cầu bốn CHECK còn thiếu, sửa cú pháp DBML và cấu hình placeholder dữ liệu mẫu; thuộc người phụ trách schema.
     \item \textbf{F2 \#97:} F1 đã bổ sung service trên nhánh; adapter và bản migration trong PR còn phải đồng bộ theo review. Chưa merge, không nhập để giả định production sẵn sàng.
     \item \textbf{Proxy \#99:} phải giữ \texttt{/api/:path*}; main còn đích giả, chưa có bằng chứng cookie thật.
-    \item \textbf{F8 \#79:} quyết định nghiệp vụ mới đã có; còn cập nhật đặc tả, đồng bộ ADR/ERD và thiết kế kỹ thuật Sprint 2.
-    \item \textbf{UI \#78/\#80/\#103:} đang review hoặc Draft; tách phần F4/F5 đúng chủ \#19, sửa auth và kiểm chứng tích hợp.
+    \item \textbf{F8 \#79:} đặc tả đã cập nhật; còn đồng bộ ADR/ERD, làm rõ ranh giới đếm lại vi phạm và thiết kế kỹ thuật Sprint 2.
+    \item \textbf{UI \#78/\#80/\#103:} đang review hoặc Draft; tách phần F4/F5 đúng chủ \#19, review auth đã sửa và kiểm chứng tích hợp.
     \item \textbf{Bàn giao:} theme HUST đã áp; chờ evidence tích hợp/staging/Postman và rehearsal, không chờ xuất SRS/ERD.
   \end{itemize}
   \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/31}{Staging/Postman \#31}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/32}{Bàn giao \#32}]
@@ -361,7 +361,7 @@
     ERD / dữ liệu & \#96 đã merge PDF/PNG và từ điển; nguồn DBML là chuẩn & Nguyễn Anh Tú \\
     Stories / wireframe & \#77 và \#102 đã merge; \#78 chờ tách phạm vi F4/F5 & Gia Bảo và các chủ wireframe theo kế hoạch \\
     Schema / API & Auth đã merge; schema \#101, F2 \#97 còn review & Chủ issue/WBS; F1 Đức Việt, F2/F3 Lân \\
-    UI xác thực & \#80 Draft; sửa auth/recovery, chờ tích hợp thật & Phạm Gia Bảo \\
+    UI xác thực & \#80 Draft; 54 Vitest qua, chờ tích hợp thật & Phạm Gia Bảo \\
     Staging / Postman & Đã có URL; proxy/schema/API và Postman còn chờ & Phú Trọng; Kim Tiến đã dựng Neon theo \#31 \\
     Slide / rehearsal & Cập nhật snapshot07/11, còn evidence cuối trước demo & Phạm Gia Bảo, hạn09/11 \\
     \bottomrule

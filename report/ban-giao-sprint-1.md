@@ -40,13 +40,13 @@ Theo [ADR0008](../docs/decisions/0008-goi-api-cung-domain.md), trình duyệt g�
 | Backend main | JWT/phân quyền #87 và đăng ký/login/refresh/logout #91 đã merge; `DefaultMemberService` còn in-memory |
 | Schema | Main có hai migration auth; schema39bảng #101 chưa merge |
 | F2 | #97 chưa merge. F1 đã bổ sung service vào nhánh đó tại03bab42; adapter/migration còn review. Không nhập nhánh chưa duyệt để nghiệm thu frontend |
-| Frontend F1 | #80 Draft; có form, token memory, refresh/me và menu theo role; đang xử lý review về đăng ký201/me lỗi, logout lỗi và refresh tạm thời |
+| Frontend F1 | #80 Draft; có form, token memory, refresh/me và menu theo role; đã sửa tại73d616d: đăng ký201/me lỗi, logout lỗi và refresh tạm thời có phục hồi;10file/54Vitest qua, chưa có HTTP/cookie thật |
 | Frontend F2/F3 | #103 đang review, chưa coi là đã tích hợp backend |
 
 **Bằng chứng có thể kiểm tra:**
 
 - Main e9baa77: [CI42345472272](https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/42345472272) SUCCESS; jobs ứng dụng bỏ qua vì docs-only. Không gọi đây là chạy lại unit/E2E.
-- Baseline frontend #80 tại199a929: [CI42221658657](https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/42221658657) thực sự chạy ESLint,9file/45Vitest và TypeScript/Vite build qua ngày06/11; bundle968.56kB còn cảnh báo. Test dùng API giả lập ở ranh giới frontend, không chứng minh cookie/backend thật.
+- Frontend #80 tại73d616d: [CI42347149363](https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/42347149363) thực sự chạy ESLint,10file/54Vitest và TypeScript/Vite build qua ngày07/11 trên Node22.23.4. Local Node24.18.0 cũng qua; focused6file/29tests qua; bundle972.23kB còn cảnh báo. Test dùng API giả lập ở ranh giới frontend, không chứng minh cookie/backend thật.
 - Kiểm tra trình duyệt với API mock tại360/768/1280px thuộc baseline27693ab ngày03/11; không coi là bằng chứng bản auth mới đã thử backend.
 - Slide nguồn snapshot07/11 đã biên dịch local và được rà hiển thị toàn bộ17trang; chi tiết kiểm tra ở mục6. Không có Postman/E2E hoặc báo cáo nghiệm thu NF/S mới để tuyên bố đã đạt.
 
@@ -63,7 +63,7 @@ Trưởng nhóm [công bố staging ngày05/11](https://github.com/Ktin06/it3180
 | #99 — proxy | [Review](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/99#issuecomment-6685208195): destination phải giữ `/api/:path*`, tách schema sau#101; main còn đích.invalid |
 | #80 / #31 | Sau khi phụ thuộc được duyệt: thử đăng ký ghi member bền vững, login, refresh/tải lại, logout, role, cookie qua proxy; PostmanF1–F3 trên staging. Ghi môi trường, commit, thời gian và kết quả |
 
-Hợp đồng F1 đã được Đức Việt xác nhận: `{accessToken}` và `/me` `{userId,email,role}`; gender optional MALE/FEMALE/OTHER/null. Giữ #80 Draft tới khi có kiểm chứng thật. Xem [guide tích hợp của #80 tại nguồn ghim](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/199a9291e3aae8cfa061cadeb6b3eb960b4caa14/docs/guides/tich-hop-frontend-f1.md); phần chẩn đoán19:53 ngày06/11 trong đó là lịch sử, bảng trên ghi tiến độ mới07/11.
+Hợp đồng F1 đã được Đức Việt xác nhận: `{accessToken}` và `/me` `{userId,email,role}`; gender optional MALE/FEMALE/OTHER/null. Giữ #80 Draft tới khi có kiểm chứng thật. Xem [guide tích hợp của #80 tại nguồn ghim](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/73d616d39b33eb9f89e4caef530fa101380b8c0c/docs/guides/tich-hop-frontend-f1.md); phần chẩn đoán19:53 ngày06/11 trong đó là lịch sử, bảng trên ghi tiến độ mới07/11.
 
 ## 5. Review còn lại và phân công bàn giao
 
@@ -71,8 +71,8 @@ Hợp đồng F1 đã được Đức Việt xác nhận: `{accessToken}` và `/
 | --- | --- | --- |
 | Stories | #77 đã được natus26 duyệt và đồng đội merge5bcfaa5; #16 đã đóng | Gia Bảo |
 | #78 wireframe | Gender đã sửa4f54950; phối hợp Lân tách3fileF4/F5 thuộc#19, chưa tự xóa hay nhận phần việc của Lân | Gia Bảo; Lân sở hữu#19 |
-| #79 F8 | Trưởng nhóm đã [trả lời hai câu hỏi07/11](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6701988493): sửa sức chứa buổi chưa bắt đầu tính BOOKED+PENDING_RECONFIRM; sửa điểm danh tính lại và xử lý khóa ngay trong giao dịch, lưu người sửa/audit. Đang cập nhật luồng/AC; còn đồng bộ ADR/ERD và thiết kế kỹ thuật Sprint2 | Gia Bảo đặc tả; trưởng nhóm/người phụ trách nguồn; backendF8 Sprint2 |
-| #80 UI auth | Sửa3nhánh lỗi/phục hồi theo [review](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80#issuecomment-6690299880); không thay backend của đồng đội | Gia Bảo; phối hợp Đức Việt/Lân |
+| #79 F8 | Trưởng nhóm đã [trả lời hai câu hỏi07/11](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6701988493): sửa sức chứa buổi chưa bắt đầu tính BOOKED+PENDING_RECONFIRM; sửa điểm danh tính lại và xử lý khóa ngay trong giao dịch, lưu người sửa/audit. Đã cập nhật3f00584 với68GWT và canonical64/69; còn đồng bộ ADR/ERD, làm rõ cửa sổ tính lại so với lần khóa gần nhất và thiết kế kỹ thuật Sprint2 | Gia Bảo đặc tả; trưởng nhóm/người phụ trách nguồn; backendF8 Sprint2 |
+| #80 UI auth | Đã sửa3nhánh lỗi/phục hồi tại73d616d theo [review](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80#issuecomment-6690299880); không thay backend của đồng đội | Gia Bảo; phối hợp Đức Việt/Lân |
 | #103 UI F2/F3 | Review code/AC/CI trên head hiện hành; không tự duyệt/merge khi có blocker | Anh Tú làm, Gia Bảo review |
 | Triển khai/Postman | #31 còn mở, proxy/schema/API và bằng chứng nghiệm thu còn chờ | Phú Trọng; Kim Tiến đã dựng Neon theo xác nhận |
 | Slide/rehearsal | Deck hiện đã cập nhật07/11; hoàn thiện evidence cuối và rehearsal trước demo | Gia Bảo, hạn09/11 |
@@ -97,6 +97,6 @@ xelatex -interaction=nonstopmode -halt-on-error -output-directory=/tmp/gym-slide
 xelatex -interaction=nonstopmode -halt-on-error -output-directory=/tmp/gym-slide-check report/slide-sprint-1.tex
 ```
 
-Kiểm tra07/11: Tectonic0.17/NotoSans xuất PDF17trang vào `/tmp/gym-slide-check-261107`; `pdfinfo` đọc được, đã render và rà toàn bộ17trang. Lượt đầu bắt lỗi TeX xuống dòng trước dấu `[` và fragment URL chưa escape, đã sửa rồi build lại. Rà hình phát hiện nguồn slide7 chạm vùng logo, đã giảm cỡ chữ để tách rõ; chỉ kết quả build/rà cuối được dùng để bàn giao. Cảnh báo hệ thống về font và tên package theme còn được ghi nhận; không thay theme của trưởng nhóm để che cảnh báo.
+Kiểm tra07/11: Tectonic0.17/NotoSans xuất PDF17trang vào `/tmp/gym-slide-check-261107`; `pdfinfo` đọc được, đã render và rà toàn bộ17trang. Lượt đầu bắt lỗi TeX xuống dòng trước dấu `[` và fragment URL chưa escape, đã sửa rồi build lại. Rà hình phát hiện nguồn slide7 chạm vùng logo, đã giảm cỡ chữ để tách rõ; chỉ kết quả build/rà cuối được dùng để bàn giao. Bản cuối bổ sung bằng chứng auth73d616d/54test và F8 3f00584/68GWT: đã render lại17trang,10trang trùng pixel với bản đã rà,7trang thay đổi đã xem lại. Cảnh báo hệ thống về font và tên package theme còn được ghi nhận; không thay theme của trưởng nhóm để che cảnh báo.
 
 Output PDF/PNG/tệp phụ trợ không đưa vào Git; [report/.gitignore](.gitignore) vẫn bảo vệ output. PDF cuối do trưởng nhóm đính kèm GitHub Release, không commit. Giữ #81 Draft vì còn kiểm chứng tích hợp/staging/Postman và review/rehearsal cuối; không phải vì thiếu theme/SRS/ERD.
