@@ -130,6 +130,18 @@ class AuthServiceTest {
     }
 
     @Test
+    void dangKyNgaySinhTuongLaiNemBusinessRuleException() {
+        RegisterRequest request = new RegisterRequest(
+            "Nguyễn Văn A", "member@example.com", "0912345678", "Password123", LocalDate.now().plusDays(1), null);
+
+        when(userRepository.existsByEmail("member@example.com")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.register(request))
+            .isInstanceOf(BusinessRuleException.class)
+            .hasMessageContaining("Ngày sinh phải ở trong quá khứ");
+    }
+
+    @Test
     void dangNhapThanhCongCapTokenVaCapNhatLastLoginAt() {
         LoginRequest request = new LoginRequest("member@example.com", "Password123");
         User user = User.builder()

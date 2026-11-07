@@ -1,5 +1,6 @@
 package vn.edu.hust.nhom6.gym.feature.auth.service;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Map;
@@ -9,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.ForbiddenException;
 import vn.edu.hust.nhom6.gym.common.exception.NotFoundException;
@@ -60,6 +62,10 @@ public class AuthService {
         String email = request.email().toLowerCase().trim();
         if (userRepository.existsByEmail(email)) {
             throw new ConflictException("Email đã được đăng ký trong hệ thống.");
+        }
+
+        if (request.dob() != null && !request.dob().isBefore(LocalDate.now())) {
+            throw new BusinessRuleException("Ngày sinh phải ở trong quá khứ.");
         }
 
         String normalizedPhone = PhoneUtils.normalizePhone(request.phone());
