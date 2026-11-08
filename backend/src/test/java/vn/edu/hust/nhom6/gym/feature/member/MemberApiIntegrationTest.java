@@ -155,6 +155,26 @@ class MemberApiIntegrationTest {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = {"5678", "1234", "56 78", "84912", "+84 123", "+84 912", "8491234567", "+84 912 345 67"})
+    void shortNumericKeywordsWithoutMatchingPrefixReturnAnEmptyPage(String keyword) throws Exception {
+        profile("HV000901", "0912345678", branch, null, "5678 tên không được khớp");
+        profile("HV000902", "0849123456", branch, null, "Hội viên khác");
+        mvc.perform(get("/api/v1/members").with(identity(receptionist, Role.RECEPTIONIST))
+                .param("keyword", keyword).param("status", "ACTIVE").param("page", "0").param("size", "1"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0))
+            .andExpect(jsonPath("$.totalPages").value(0))
+            .andExpect(jsonPath("$.content").isEmpty());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"1234567890", "09123456789", "+85912345678"})
+    void invalidCompletePhoneSearchStillReturns400(String keyword) throws Exception {
+        mvc.perform(get("/api/v1/members").with(identity(receptionist, Role.RECEPTIONIST))
+                .param("keyword", keyword))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400));
+    }
+
+    @ParameterizedTest
     @ValueSource(strings = {"0912345601", "+84 912 345 601", "84912345601", "0912.345-601"})
     void completePhoneSearchStillNormalizesAndMatchesExactly(String keyword) throws Exception {
         profile("HV000901", "0912345601", branch, null, "An");
@@ -336,15 +356,18 @@ class MemberApiIntegrationTest {
             .andExpect(status().isConflict()).andExpect(jsonPath("$.status").value(409));
     }
 
-    @Test
-    void invalidPhoneSearchAndUpdateStillReturn400WithSharedUtility() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"123", "5678", "84912"})
+    void incompletePhoneCannotBeSavedOnCreateOrUpdate(String phone) throws Exception {
         Long id = profile("HV000901", "0912345601", branch, null, "An");
         RequestPostProcessor auth = identity(receptionist, Role.RECEPTIONIST);
-        mvc.perform(get("/api/v1/members").with(auth).param("keyword", "+84 123"))
-            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400));
+        mvc.perform(post("/api/v1/members").with(auth)
+                .contentType(MediaType.APPLICATION_JSON).content(createBody(phone)))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors.phone").exists());
         mvc.perform(put("/api/v1/members/{id}", id).with(auth)
-                .contentType(MediaType.APPLICATION_JSON).content(updateBody("123", "ACTIVE")))
-            .andExpect(status().isBadRequest());
+                .contentType(MediaType.APPLICATION_JSON).content(updateBody(phone, "ACTIVE")))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors.phone").exists());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM members", Integer.class)).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT phone FROM members WHERE id = ?", String.class, id))
             .isEqualTo("0912345601");
     }

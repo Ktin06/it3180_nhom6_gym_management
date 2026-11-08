@@ -16,10 +16,11 @@ public final class MemberPhoneSupport {
         }
     }
 
-    /** Tìm theo tiền tố nội địa đầu 0; số đầy đủ vẫn dùng chuẩn hóa chung của F1. */
+    /** Từ khóa ngắn tìm theo tiền tố nguyên dạng; chỉ chuẩn hóa khi đủ độ dài số điện thoại. */
     public static String normalizeSearchPrefix(String keyword) {
         String cleaned = keyword == null ? "" : keyword.replaceAll("[\\s.\\-]", "");
-        if (cleaned.matches("0[0-9]{0,8}")) { return cleaned; }
+        int fullLength = cleaned.startsWith("+84") ? 12 : cleaned.startsWith("84") ? 11 : 10;
+        if (cleaned.matches("\\+?[0-9]+") && cleaned.length() < fullLength) { return cleaned; }
         return normalize(keyword);
     }
 

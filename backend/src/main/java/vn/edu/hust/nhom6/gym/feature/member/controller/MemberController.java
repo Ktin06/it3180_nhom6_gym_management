@@ -34,6 +34,7 @@ public class MemberController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_MANAGER','RECEPTIONIST')")
     @Operation(summary = "Tìm hội viên theo mã, điện thoại hoặc tiền tố họ tên trong phạm vi chi nhánh",
         description = "Mã HV + 6 chữ số không phân biệt hoa/thường; điện thoại đầy đủ hoặc tiền tố đầu 0 (ví dụ 0912). "
+            + "Dãy số ngắn như 5678, 84912 không khớp thì trả trang rỗng. "
             + "Số đầy đủ hỗ trợ chuẩn hóa +84; page từ 0; size từ 1 đến 100, mặc định 20; "
             + "sắp xếp id giảm dần. Loại hồ sơ đã xóa mềm.")
     public PageResponse<MemberSummaryResponse> search(Authentication auth,

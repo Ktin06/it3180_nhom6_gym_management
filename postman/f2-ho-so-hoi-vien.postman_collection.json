@@ -334,6 +334,48 @@
       ]
     },
     {
+      "name": "F2 – Tìm số ngắn 5678 trả trang rỗng",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/members?keyword=5678",
+        "auth": {
+          "type": "bearer",
+          "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+            "pm.test(\"Không tìm chứa chuỗi hoặc số cuối\", () => { const page = pm.response.json(); pm.expect(page.totalElements).to.eql(0); pm.expect(page.content).to.be.an(\"array\").that.is.empty; });"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "F2 – Tìm số ngắn 84912 trả trang rỗng",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/members?keyword=84912",
+        "auth": {
+          "type": "bearer",
+          "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+            "pm.test(\"Không chuẩn hóa đầu 84 khi chưa đủ số\", () => { const page = pm.response.json(); pm.expect(page.totalElements).to.eql(0); pm.expect(page.content).to.be.an(\"array\").that.is.empty; });"
+          ]
+        }
+      }]
+    },
+    {
       "name": "F2 – Từ chối ngày sinh tương lai",
       "request": {
         "method": "POST",
