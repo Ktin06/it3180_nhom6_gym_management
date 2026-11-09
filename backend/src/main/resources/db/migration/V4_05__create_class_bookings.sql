@@ -24,7 +24,11 @@ CREATE TABLE class_bookings (
     updated_at timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT fk_class_bookings_session FOREIGN KEY (class_session_id) REFERENCES class_sessions (id),
     CONSTRAINT ck_class_bookings_status CHECK (status IN ('BOOKED', 'WAITLIST', 'PENDING_RECONFIRM', 'CANCELLED', 'ATTENDED', 'NO_SHOW')),
-    CONSTRAINT ck_class_bookings_cancel_reason CHECK (cancel_reason IS NULL OR cancel_reason IN ('BY_MEMBER', 'BY_STAFF', 'NOT_RECONFIRMED', 'SESSION_CANCELLED'))
+    CONSTRAINT ck_class_bookings_cancel_reason CHECK (cancel_reason IS NULL OR cancel_reason IN ('BY_MEMBER', 'BY_STAFF', 'NOT_RECONFIRMED', 'SESSION_CANCELLED')),
+    CONSTRAINT ck_class_bookings_cancelled CHECK (
+        (status = 'CANCELLED') = (cancelled_at IS NOT NULL AND cancel_reason IS NOT NULL)
+        AND (is_late_cancel = false OR status = 'CANCELLED')
+    )
 );
 
 CREATE UNIQUE INDEX uq_active_booking ON class_bookings (class_session_id, member_id) WHERE status <> 'CANCELLED';

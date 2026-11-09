@@ -19,7 +19,8 @@ CREATE TABLE checkins (
     updated_at timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT ck_checkins_method CHECK (method IN ('MANUAL', 'FACE')),
     CONSTRAINT ck_checkins_match_score CHECK (match_score IS NULL OR (match_score >= 0 AND match_score <= 1)),
-    CONSTRAINT ck_checkins_checkout CHECK (checked_out_at IS NULL OR checked_out_at >= checked_in_at)
+    CONSTRAINT ck_checkins_checkout CHECK (checked_out_at IS NULL OR checked_out_at >= checked_in_at),
+    CONSTRAINT ck_checkins_face_score CHECK (method = 'FACE' OR match_score IS NULL)
 );
 
 CREATE INDEX ix_checkins_branch_checked_in ON checkins (branch_id, checked_in_at);

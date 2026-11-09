@@ -31,5 +31,5 @@ CREATE TABLE members (
     CONSTRAINT ck_members_status CHECK (status IN ('ACTIVE', 'INACTIVE'))
 );
 
-CREATE INDEX ix_members_full_name ON members (full_name);
+CREATE INDEX ix_members_full_name ON members (lower(full_name) varchar_pattern_ops);
 

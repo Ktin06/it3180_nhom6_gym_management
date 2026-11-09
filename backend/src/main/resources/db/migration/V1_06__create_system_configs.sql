@@ -31,5 +31,5 @@ VALUES
     (NULL, 'FREEZE_MAX_TIMES', '2', 'Số lần bảo lưu tối đa cho mỗi gói tập'),
     (NULL, 'TRANSFER_MIN_DAYS', '30', 'Số ngày hạn còn lại tối thiểu của gói để được chuyển nhượng'),
     (NULL, 'TRANSFER_FEE', '200000', 'Phí chuyển nhượng gói tập (VND)'),
-    (NULL, 'PENDING_INVOICE_TTL_DAYS', '3', 'Số ngày tối đa giữ hóa đơn chờ từ cổng hội viên trước khi tự động hủy')
-ON CONFLICT ON CONSTRAINT uq_system_configs_branch_key DO NOTHING;
+    (NULL, 'PENDING_INVOICE_TTL_DAYS', '3', 'Số ngày tối đa giữ hóa đơn chờ từ cổng hội viên trước khi tự động hủy'),
+    (NULL, 'SESSION_WARNING_THRESHOLD', '2', 'Số buổi còn lại tối đa của gói SESSION để kích hoạt cảnh báo sắp hết buổi')

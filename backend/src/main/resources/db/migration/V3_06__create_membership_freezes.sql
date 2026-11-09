@@ -16,7 +16,8 @@ CREATE TABLE membership_freezes (
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT fk_membership_freezes_membership FOREIGN KEY (membership_id) REFERENCES memberships (id),
-    CONSTRAINT ck_membership_freezes_status CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'))
+    CONSTRAINT ck_membership_freezes_status CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED')),
+    CONSTRAINT ck_membership_freezes_dates CHECK (to_date >= from_date)
 );
 
 CREATE INDEX ix_membership_freezes_membership_id ON membership_freezes (membership_id);

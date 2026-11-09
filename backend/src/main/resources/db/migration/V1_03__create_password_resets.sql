@@ -12,5 +12,3 @@ CREATE TABLE password_resets (
     CONSTRAINT uq_password_resets_token_hash UNIQUE (token_hash),
     CONSTRAINT fk_password_resets_user FOREIGN KEY (user_id) REFERENCES users (id)
 );
-
-CREATE INDEX ix_password_resets_user_id ON password_resets (user_id);

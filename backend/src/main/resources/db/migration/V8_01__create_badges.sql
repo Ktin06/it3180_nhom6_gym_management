@@ -1,4 +1,5 @@
--- Nhóm 8: Gamification. Tạo bảng badges.
+-- Nhóm 8: Gamification (F19)
+-- Bảng badges: Danh mục huy hiệu và điều kiện đạt
 
 CREATE TABLE badges (
     id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

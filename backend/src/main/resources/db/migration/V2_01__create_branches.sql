@@ -22,4 +22,4 @@ CREATE TABLE branches (
 -- Chi nhánh mặc định cần có ở mọi môi trường (v1 - v3)
 INSERT INTO branches (code, name, address, phone, open_time, close_time, capacity, status)
 VALUES ('CN01', 'Chi nhánh Bách Khoa', 'Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội', '0900000001', '05:30:00', '22:00:00', 200, 'ACTIVE')
-ON CONFLICT (code) DO NOTHING;
+
