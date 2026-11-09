@@ -141,7 +141,7 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> authService.register(request))
             .isInstanceOf(BusinessRuleException.class)
-            .hasMessageContaining("72 byte");
+            .hasMessage(AuthService.PASSWORD_MAX_BYTES_MESSAGE);
 
         verify(userRepository, never()).save(any());
     }
@@ -186,6 +186,34 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.login(request))
             .isInstanceOf(UnauthorizedException.class)
             .hasMessageContaining("Email hoặc mật khẩu không chính xác");
+    }
+
+    @Test
+    void dangNhapMatKhauVuotQua72ByteNemUnauthorizedExceptionKhongNem500() {
+        String longPassword = "ă".repeat(30) + "Pass1234567890123456";
+        LoginRequest request = new LoginRequest("member@example.com", longPassword);
+        User user = User.builder()
+            .email("member@example.com")
+            .passwordHash("hashed-pwd")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .build();
+
+        when(userRepository.findByEmail("member@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(anyString(), eq("hashed-pwd"))).thenAnswer(invocation -> {
+            String raw = invocation.getArgument(0);
+            if (raw.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > AuthService.MAX_PASSWORD_BYTES) {
+                throw new IllegalArgumentException("password cannot be more than 72 bytes");
+            }
+            return true;
+        });
+
+        assertThatThrownBy(() -> authService.login(request))
+            .isInstanceOf(UnauthorizedException.class)
+            .hasMessageContaining("Email hoặc mật khẩu không chính xác");
+
+        verify(userRepository, never()).save(any());
+        verify(refreshTokenRepository, never()).save(any());
     }
 
     @Test
@@ -283,7 +311,15 @@ class AuthServiceTest {
         String rawToken = "expired-token";
         String tokenHash = TokenHashUtil.sha256Hex(rawToken);
 
+        User user = User.builder()
+            .email("member@example.com")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .build();
+        org.springframework.test.util.ReflectionTestUtils.setField(user, "id", 77L);
+
         RefreshToken existingToken = RefreshToken.builder()
+            .user(user)
             .tokenHash(tokenHash)
             .expiresAt(OffsetDateTime.now().minusDays(1))
             .revokedAt(null)
@@ -294,6 +330,8 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.refresh(rawToken))
             .isInstanceOf(UnauthorizedException.class)
             .hasMessageContaining("Phiên đăng nhập đã hết hạn hoặc không hợp lệ");
+
+        verify(refreshTokenRepository, never()).revokeAllByUserId(any(), any());
     }
 
     @Test

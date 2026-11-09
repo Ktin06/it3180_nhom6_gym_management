@@ -134,7 +134,21 @@ class AuthControllerTest {
                 .content(jsonMapper.writeValueAsString(request)))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.status").value(400))
-            .andExpect(jsonPath("$.errors.password").value("Mật khẩu phải từ 8 đến 72 ký tự"));
+            .andExpect(jsonPath("$.errors.password").value(AuthService.PASSWORD_MAX_BYTES_MESSAGE));
+    }
+
+    @Test
+    void dangKyMatKhauCoDau50KyTuVuot72ByteTra400ThayVi422() throws Exception {
+        String multiBytePassword = "ă".repeat(30) + "Pass1234567890123456";
+        RegisterRequest request = new RegisterRequest(
+            "Nguyễn Văn A", "member@example.com", "0912345678", multiBytePassword, null, null);
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.errors.password").value(AuthService.PASSWORD_MAX_BYTES_MESSAGE));
     }
 
     @Test

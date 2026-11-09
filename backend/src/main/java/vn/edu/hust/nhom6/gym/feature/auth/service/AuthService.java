@@ -30,6 +30,7 @@ import vn.edu.hust.nhom6.gym.feature.auth.repository.UserRepository;
 public class AuthService {
 
     public static final int MAX_PASSWORD_BYTES = 72;
+    public static final String PASSWORD_MAX_BYTES_MESSAGE = "Mật khẩu không được vượt quá 72 byte";
 
     /**
      * Mã băm BCrypt giả (cost 10) dùng để cân bằng thời gian phản hồi khi đăng nhập với email không tồn tại,
@@ -100,7 +101,7 @@ public class AuthService {
      */
     public void validatePasswordLength(String password) {
         if (password == null || password.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES) {
-            throw new BusinessRuleException("Mật khẩu không được vượt quá 72 byte.");
+            throw new BusinessRuleException(PASSWORD_MAX_BYTES_MESSAGE);
         }
     }
 
