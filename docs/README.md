@@ -10,6 +10,7 @@ Mục lục thư mục `docs/`. Khi các tài liệu mâu thuẫn nhau, thứ t�
 | [boi-canh-de-tai.md](requirements/boi-canh-de-tai.md) | Tóm tắt đề tài, thành viên, các quyết định chính |
 | [srs/srs-tong-quan.md](requirements/srs/srs-tong-quan.md) | SRS tổng quan: bối cảnh và quy trình hiện tại, phạm vi, 6 vai trò, NF1–NF6, S1–S10 và nguồn tham khảo |
 | [srs/](requirements/srs/) | Đặc tả use case chi tiết theo chức năng và mẫu dùng chung |
+| [Bảng truy vết yêu cầu](requirements/srs/bang-truy-vet-yeu-cau.md) | Liên kết F1–F20, use case và 39 bảng ERD; ghi nhận nguồn nháp và các điểm cần đồng bộ |
 
 ## Thiết kế – [design/](design/)
 
