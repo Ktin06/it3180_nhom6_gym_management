@@ -47,10 +47,10 @@
 }
 
 \title[Bàn giao Sprint 1]{Bàn giao Sprint 1\\Web quản lý chuỗi phòng tập Gym}
-\subtitle{Nhóm 6 · IT3180 · snapshot main e9baa77}
+\subtitle{Nhóm 6 · IT3180 · snapshot main 872386d}
 \author{Nhóm 6}
 \institute{Đại học Bách khoa Hà Nội}
-\date{07/11/2026}
+\date{10/11/2026}
 
 \begin{document}
 
@@ -65,7 +65,7 @@
           \vspace{.3cm}
           {\large\bfseries Web quản lý chuỗi\\phòng tập Gym\par}
           \vspace{.3cm}
-          {\small Nhóm 6 · IT3180\par Đại học Bách khoa Hà Nội\par 07/11/2026\par}
+          {\small Nhóm 6 · IT3180\par Đại học Bách khoa Hà Nội\par 10/11/2026\par}
           \vspace{.3cm}
           {\scriptsize\color{draftred} DRAFT — chờ tài liệu và kiểm chứng bàn giao.\par}
       };
@@ -75,15 +75,15 @@
 
 \begin{frame}{Snapshot bàn giao}
 \begin{itemize}
-    \item Snapshot \texttt{main e9baa77}, ngày 07/11/2026: SRS tổng quan, ERD xuất bản, từ điển và chỉ mục 31 story đã merge.
+    \item Snapshot \texttt{main 872386d}, ngày 10/11/2026: SRS tổng quan, ERD xuất bản, từ điển, chỉ mục 31 story, schema \#101, API hồ sơ hội viên F2 \#97 và wireframe F4/F5 \#106 đã merge.
     \item Bảng truy vết \#98 đã merge; F8 trong bảng vẫn ghim bản nháp, cần cập nhật khi \#79 được duyệt.
-    \item Backend F1 đã có JWT/API auth; schema chung \#101, F2 \#97 và proxy \#99 chưa merge.
-    \item Frontend F1 \#80 còn Draft; chưa có bằng chứng tích hợp HTTP/cookie hoặc Postman F1--F3.
+    \item Backend có JWT/API auth, schema 39 bảng và F2 trên main; proxy \#99 đã đóng, không merge.
+    \item Frontend F1 \#80 còn Draft; đã thử cục bộ với backend và CSDL thật (15/15 đạt). Staging và Postman F1--F3 chưa xác minh.
   \end{itemize}
   \begin{block}{Mốc bàn giao}
     4 sprint · 20 chức năng · 6 vai trò. Sprint 1 kết thúc 09/11; demo 10/11/2026.
   \end{block}
-  \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/commit/e9baa7730de80889586ae5067513787122c4de32}{Snapshot main}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/42345472272}{CI snapshot: success, docs-only}]
+  \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/commit/872386d5a02037886143aa780e71e5954a591189}{Snapshot main}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/42771961483}{CI snapshot: success, Backend chạy, Frontend bỏ qua}]
 \end{frame}
 
 \begin{frame}{Phạm vi: 20 chức năng trong 5 version}
@@ -174,7 +174,7 @@
   \end{tikzpicture}
   \vspace{1em}
   \begin{alertblock}{Trạng thái hiện tại}
-    Đã có địa chỉ Vercel và Render do trưởng nhóm công bố. Main vẫn rewrite tới \texttt{.invalid}; PR \#99 cần sửa đường dẫn và tách schema. Luồng API cùng domain chưa được kiểm chứng thành công.
+    Cấu hình Vercel trên main đã trỏ tới Render (\#101); \#99 đã đóng, không merge. Luồng API cùng domain đã chạy thành công cục bộ qua proxy Vite (\#80, 15/15). Trên staging, \texttt{/api/v1/auth/me} qua Vercel và health của Render chưa phản hồi ở lần thử 10/11 nên luồng này chưa được kiểm chứng.
   \end{alertblock}
   \scriptsize Nguồn: [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/blob/main/docs/decisions/0008-goi-api-cung-domain.md}{ADR 0008}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/blob/main/frontend/vercel.json}{cấu hình Vercel}]
 \end{frame}
@@ -201,7 +201,7 @@
     \texttt{erd-v2.dbml} là bản chuẩn; DBML Enum chỉ mô tả tập giá trị logic. CSDL vật lý dùng \texttt{varchar} + \texttt{CHECK}.
   \end{block}
   \begin{alertblock}{Báo cáo}
-    PR \#96 đã merge: PDF/PNG từ dbdiagram.io, hình vector theo nhóm và từ điển 39 bảng/422 cột/89 quan hệ. Schema vật lý \#101 đang review; không coi ERD là bằng chứng migration đã chạy.
+    PR \#96 đã merge: PDF/PNG từ dbdiagram.io, hình vector theo nhóm và từ điển 39 bảng/422 cột/89 quan hệ. Schema vật lý \#101 đã merge; trên PostgreSQL 16 cục bộ, Flyway áp 45 migration (gồm dữ liệu mẫu) và tạo 39 bảng.
   \end{alertblock}
   \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/blob/main/docs/design/erd/erd-v2.dbml}{Mở DBML ERD v2}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/15}{Issue \#15}]
 \end{frame}
@@ -222,13 +222,13 @@
   \begin{itemize}
     \item Frontend: \href{https://it3180-nhom6-gym.vercel.app}{it3180-nhom6-gym.vercel.app}.
     \item Backend: \href{https://it3180-nhom6-gym-management.onrender.com}{Render — Gym Management}.
-    \item GET ngày07/11: frontend HTTP200; \texttt{/api/v1/auth/me} qua Vercel HTTP502; Render health timeout20giây, chưa xác nhận UP.
+    \item GET lúc 10:06 UTC ngày 10/11: frontend HTTP 200; \texttt{/api/v1/auth/me} qua Vercel không phản hồi trong 20 giây; Render health không phản hồi trong 60 giây, chưa xác nhận UP.
     \item Render Free có thể khởi động chậm. Không suy ra backend chết từ timeout; không chạy công cụ giữ thức định kỳ.
   \end{itemize}
   \begin{alertblock}{Chưa phải demo tích hợp hoàn chỉnh}
-    Có URL không đồng nghĩa API/cookie hoạt động. Chờ proxy \#99, schema \#101, F2 \#97 và bằng chứng Postman theo \#31.
+    Có URL không đồng nghĩa API/cookie hoạt động. Schema \#101 và F2 \#97 đã merge, \#99 đã đóng; còn chờ Render phản hồi và bằng chứng Postman theo \#31.
   \end{alertblock}
-  \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/31\#issuecomment-6653959733}{Nguồn URL: trưởng nhóm công bố05/11}]
+  \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/31\#issuecomment-6653959733}{Nguồn URL: trưởng nhóm công bố 05/11}]
 \end{frame}
 
 \begin{frame}{Sơ đồ nghiệp vụ có trong \texttt{main}}
@@ -245,7 +245,7 @@
       \end{block}
   \end{columns}
   \begin{block}{SRS đang có trên snapshot}
-    SRS tổng quan \#95 và các SRS F1--F7, F9, F10 đã có trên main. Bảng truy vết \#98 đã merge; F8 vẫn ở PR Draft \#79. F8 đã cập nhật quyết định ngày 07/11 tại \texttt{3f00584}, có 68 bộ Given/When/Then; chờ review và đồng bộ nguồn chuẩn.
+    SRS tổng quan \#95 và các SRS F1--F7, F9, F10 đã có trên main. Bảng truy vết \#98 đã merge; F8 vẫn ở PR Draft \#79. F8 đã cập nhật quyết định ngày 09/11 tại \texttt{59cd592}, có 69 bộ Given/When/Then; chờ Tú review lại, đồng bộ ADR/ERD do trưởng nhóm giao trong Sprint 2.
   \end{block}
   \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/tree/main/docs/design/use-case}{Use case}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/tree/main/docs/design/activity}{Activity}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79}{PR \#79 F8}]
 \end{frame}
@@ -279,7 +279,7 @@
       \vspace{1em}
 
       \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/78}{PR \#78: đăng ký, bảng giá, lịch lớp}]\\
-      Sơ đồ ghim \texttt{464a31a}; tài liệu UI đã sửa gender ở \texttt{4f54950}. Đang phối hợp tách wireframe F4/F5 của Lân khỏi \#78.
+      Sơ đồ ghim \texttt{464a31a}; gender đã sửa ở \texttt{4f54950}. Wireframe F4/F5 của Lân đã vào main qua \#106 và không còn trong diff \#78; chờ Tú review lại.
   \end{columns}
 \end{frame}
 
@@ -310,43 +310,45 @@
 \begin{columns}[T,onlytextwidth]
     \column{.49\textwidth}
       \begin{block}{Frontend}
-        Main còn công cụ giả lập role cho phát triển. PR \#80 bổ sung đăng ký, xác thực và menu theo role; đã sửa lỗi phục hồi phiên tại \texttt{73d616d}; còn chờ review và tích hợp thật.
+        Main còn công cụ giả lập role cho phát triển. PR \#80 bổ sung đăng ký, xác thực và menu theo role, kèm phục hồi phiên lỗi. Đã thử cục bộ với backend và CSDL thật (15/15); còn chờ review, staging và Postman.
       \end{block}
       \begin{block}{Giao diện khác}
-        Wireframe F2/F3 (\#89) và cổng hội viên/PT (\#102) đã merge. UI F2/F3 \#103 đang review; không trình bày như đã tích hợp backend.
+        Wireframe F2/F3 (\#89), cổng hội viên/PT (\#102) và F4/F5 (\#106) đã merge. UI F2/F3 \#103 còn Draft; không trình bày như đã tích hợp backend.
       \end{block}
     \column{.49\textwidth}
       \begin{block}{Backend F1}
-        JWT/phân quyền \#87 và đăng ký/login/refresh/logout \#91 đã merge. DefaultMemberService còn in-memory; đăng ký bền vững phụ thuộc F2.
+        JWT/phân quyền \#87 và đăng ký/login/refresh/logout \#91 đã merge. F2 \#97 đã merge: đăng ký ghi hồ sơ hội viên bền vững (kiểm chứng cục bộ). Bản vá JWT \#105 chưa merge.
       \end{block}
       \begin{block}{CSDL / F2}
-        Main có hai migration auth. Schema 39 bảng \#101 và API F2 \#97 chưa merge; F1 bổ sung service trên nhánh \#97 chưa thuộc main.
+        Schema 39 bảng \#101 và API hồ sơ hội viên F2 \#97 đã merge. API danh mục gói F3 \#29 chưa merge.
       \end{block}
   \end{columns}
-  \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80}{PR \#80}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/97}{PR \#97}] · Snapshot \texttt{main e9baa77}.
+  \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80}{PR \#80}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/pull/97}{PR \#97}] · Snapshot \texttt{main 872386d}.
 \end{frame}
 
 \begin{frame}{Bằng chứng hiện có — và giới hạn của bằng chứng}
+\small
 \begin{itemize}
-    \item CI \href{https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/42345472272}{\#42345472272}: success trên \texttt{main e9baa77}; job ứng dụng bỏ qua cho docs-only.
-    \item Frontend \#80, commit \texttt{73d616d}: local và CI \href{https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/42347149363}{\#42347149363} chạy lint, 10 file/54 Vitest và build qua. Đã sửa ba nhánh lỗi/phục hồi auth; chưa kiểm thử HTTP/cookie thật.
-    \item PR \#77 đã được đồng đội duyệt và merge; 31 story \#46--\#76 nằm trên Projects theo xác nhận trưởng nhóm. Issue là nguồn chuẩn, repo giữ chỉ mục.
-    \item SRS tổng quan \#95, ERD/từ điển \#96 và truy vết \#98 đã merge; không còn là sản phẩm chưa cung cấp.
+    \item CI \href{https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/42771961483}{\#42771961483}: success trên \texttt{main 872386d}; job Backend (Maven, Testcontainers) chạy thật, job Frontend bỏ qua vì không đổi frontend.
+    \item Frontend \#80, commit \texttt{b0e87a7}: CI \href{https://github.com/Ktin06/it3180_nhom6_gym_management/actions/runs/42797835483}{\#42797835483} chạy lint, kiểm thử và build qua; cục bộ 10 file/54 Vitest.
+    \item Tích hợp cục bộ \#80 (10/11): Chromium, backend \texttt{main 872386d} và PostgreSQL 16 thật, 15/15 đạt: đăng ký ghi hồ sơ bền vững, đăng nhập năm vai trò, tải lại giữ phiên, đăng xuất thu hồi phiên, phục hồi khi backend ngừng thật. Một ca lai chặn \texttt{/me} bằng công cụ kiểm thử.
+    \item PR \#77 đã merge; 31 story \#46--\#76 nằm trên Projects theo xác nhận trưởng nhóm.
+    \item SRS tổng quan \#95, ERD/từ điển \#96 và truy vết \#98 đã merge.
   \end{itemize}
   \begin{alertblock}{Giới hạn}
-    Unit tests và CI không thay thế Postman, E2E, cookie qua proxy hoặc nghiệm thu các yêu cầu bảo mật.
+    Chưa chạy Postman F1--F3, chưa kiểm tra staging và cookie \texttt{Secure}. Kiểm thử cục bộ và CI không thay thế nghiệm thu các yêu cầu bảo mật.
   \end{alertblock}
 \end{frame}
 
 \begin{frame}{Phụ thuộc và rủi ro trước khi demo}
 \small
   \begin{itemize}
-    \item \textbf{Schema \#101:} review mới yêu cầu bốn CHECK còn thiếu, sửa cú pháp DBML và cấu hình placeholder dữ liệu mẫu; thuộc người phụ trách schema.
-    \item \textbf{F2 \#97:} F1 đã bổ sung service trên nhánh; adapter và bản migration trong PR còn phải đồng bộ theo review. Chưa merge, không nhập để giả định production sẵn sàng.
-    \item \textbf{Proxy \#99:} phải giữ \texttt{/api/:path*}; main còn đích giả, chưa có bằng chứng cookie thật.
-    \item \textbf{F8 \#79:} đặc tả đã cập nhật; còn đồng bộ ADR/ERD, làm rõ ranh giới đếm lại vi phạm và thiết kế kỹ thuật Sprint 2.
-    \item \textbf{UI \#78/\#80/\#103:} đang review hoặc Draft; tách phần F4/F5 đúng chủ \#19, review auth đã sửa và kiểm chứng tích hợp.
-    \item \textbf{Bàn giao:} theme HUST đã áp; chờ evidence tích hợp/staging/Postman và rehearsal, không chờ xuất SRS/ERD.
+    \item \textbf{Staging:} Vercel trả HTTP 200 nhưng \texttt{/api/v1/auth/me} và health Render chưa phản hồi (20/60 giây) ngày 10/11. Chủ \#31 cần kiểm tra Render; không kết luận backend hỏng chỉ từ timeout.
+    \item \textbf{Postman F1--F3 (\#31):} chưa chạy; bộ trong \texttt{postman/} gồm bộ chung 6 request và bộ F2 20 request.
+    \item \textbf{API và bảo mật:} F3 \#29 chưa merge; bản vá JWT \#105 chưa merge nên chưa nằm trong backend đã thử.
+    \item \textbf{F8 \#79:} đặc tả đã cập nhật quyết định 09/11, chờ review lại; đồng bộ ADR/ERD và thiết kế kỹ thuật thuộc Sprint 2.
+    \item \textbf{UI \#78/\#80/\#103:} \#78 đã tách F4/F5, chờ review lại; \#80 Draft, đã thử thật cục bộ; \#103 Draft.
+    \item \textbf{Bàn giao:} theme HUST đã áp; còn rehearsal và bằng chứng staging/Postman, không chờ xuất SRS/ERD.
   \end{itemize}
   \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/31}{Staging/Postman \#31}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/32}{Bàn giao \#32}]
 \end{frame}
@@ -357,26 +359,26 @@
     \toprule
     Hạng mục & Trạng thái / bước tiếp theo & Người theo phân công \\
     \midrule
-    SRS / truy vết & \#95 và \#98 đã merge; F8 \#79 đang sửa review & Nguyễn Anh Tú; Phạm Gia Bảo (F8) \\
-    ERD / dữ liệu & \#96 đã merge PDF/PNG và từ điển; nguồn DBML là chuẩn & Nguyễn Anh Tú \\
-    Stories / wireframe & \#77 và \#102 đã merge; \#78 chờ tách phạm vi F4/F5 & Gia Bảo và các chủ wireframe theo kế hoạch \\
-    Schema / API & Auth đã merge; schema \#101, F2 \#97 còn review & Chủ issue/WBS; F1 Đức Việt, F2/F3 Lân \\
-    UI xác thực & \#80 Draft; 54 Vitest qua, chờ tích hợp thật & Phạm Gia Bảo \\
-    Staging / Postman & Đã có URL; proxy/schema/API và Postman còn chờ & Phú Trọng; Kim Tiến đã dựng Neon theo \#31 \\
-    Slide / rehearsal & Cập nhật snapshot07/11, còn evidence cuối trước demo & Phạm Gia Bảo, hạn09/11 \\
+    SRS / truy vết & \#95 và \#98 đã merge; F8 \#79 đã cập nhật quyết định 09/11, chờ review lại & Nguyễn Anh Tú; Phạm Gia Bảo (F8) \\
+    ERD / dữ liệu & \#96 đã merge PDF/PNG và từ điển; schema \#101 đã merge; DBML là nguồn chuẩn & Nguyễn Anh Tú \\
+    Stories / wireframe & \#77, \#102, \#106 đã merge; \#78 đã tách F4/F5, chờ review lại & Gia Bảo và các chủ wireframe theo kế hoạch \\
+    Schema / API & Auth, schema \#101 và F2 \#97 đã merge; F3 \#29 và \#105 còn mở & Chủ issue/WBS; F1 Đức Việt, F2/F3 Lân \\
+    UI xác thực & \#80 Draft; thử backend thật cục bộ 15/15, chờ staging và review & Phạm Gia Bảo \\
+    Staging / Postman & Đã có URL; Render chưa phản hồi ngày 10/11, Postman chưa chạy & Phú Trọng; Kim Tiến đã dựng Neon theo \#31 \\
+    Slide / rehearsal & Cập nhật snapshot 10/11, còn rehearsal trước buổi trình bày & Phạm Gia Bảo, hạn 09/11 \\
     \bottomrule
   \end{tabularx}
   \vfill
   \scriptsize [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/blob/main/docs/plans/sprint-1-tien-do.md}{Sprint Plan}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/31\#issuecomment-6653959733}{Xác nhận triển khai của trưởng nhóm}]. Không tự đổi phân công.
 \end{frame}
 
-\begin{frame}{Việc cần chốt trước buổi trình bày 10/11}
+\begin{frame}{Việc cần chốt trước và trong buổi trình bày 10/11}
 \begin{enumerate}
-    \item Chủ schema/F1/F2/proxy xử lý các review còn mở, merge theo policy và xác minh backend khởi động với dữ liệu mẫu.
-    \item Ghép frontend với backend đã được duyệt; thử đăng ký, login, refresh/tải lại, logout, role và cookie qua domain/proxy.
-    \item Chạy Postman F1--F3 trên staging; ghi môi trường, commit, thời gian và kết quả thật. Không gọi CI là E2E.
-    \item Cập nhật F8/truy vết sau review; dùng SRS và ERD/từ điển đã merge, không xuất bản nguồn DBML nhánh chưa duyệt.
-    \item Rehearsal với URL thật trước demo; dùng tài liệu thiết kế làm phương án dự phòng, không gọi là chức năng chạy được.
+    \item Chủ \#31 kiểm tra Render/Vercel để \texttt{/api/v1/auth/me} và health phản hồi; ghi môi trường, commit, thời gian và kết quả.
+    \item Chạy Postman F1--F3 trên staging; không gọi CI hay kiểm thử cục bộ là E2E trên staging.
+    \item Review và merge theo policy: \#78, \#79, \#80 (chuyển Ready khi người duyệt đồng ý), \#103, \#105.
+    \item Đồng bộ ADR/ERD và bảng truy vết F8 sau khi \#79 được duyệt.
+    \item Rehearsal với URL thật. Nếu staging chưa phản hồi, trình bày bằng môi trường cục bộ đã kiểm chứng và nói rõ đó là cục bộ.
   \end{enumerate}
   \vfill
   \small [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/31}{Staging/Postman}] · [\href{https://github.com/Ktin06/it3180_nhom6_gym_management/issues/32}{Bàn giao}] · Source-only: PDF cuối do trưởng nhóm đưa lên Release.
