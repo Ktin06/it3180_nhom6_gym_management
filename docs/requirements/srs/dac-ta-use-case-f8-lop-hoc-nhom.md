@@ -3,7 +3,7 @@
 - **Mã chức năng:** F8
 - **Version:** v2 (Bắt buộc)
 - **Người biên soạn:** Phạm Gia Bảo
-- **Cập nhật:** 07/11/2026 — áp dụng phần làm rõ sức chứa và sửa điểm danh của trưởng nhóm; xem mục 7.
+- **Cập nhật:** 10/11/2026 — áp dụng quyết định ngày 09/11 của trưởng nhóm về cách tính lại vi phạm khi sửa điểm danh, sau phần làm rõ sức chứa và sửa điểm danh ngày 07/11; xem mục 7.
 - **Người duyệt chéo:** Nguyễn Anh Tú
 - **Truy vết:** [#9](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/9) · WBS 1.2.9 · bản nháp chờ review và đồng bộ tài liệu chuẩn ở mục 7.6.
 - **Tài liệu chuẩn tham chiếu:**
@@ -15,7 +15,7 @@
   - [ADR 0009: Bộ sơ đồ phân tích và thiết kế](../../decisions/0009-bo-so-do-phan-tich-thiet-ke.md)
   - [Mẫu đặc tả Use Case](mau-dac-ta-use-case.md)
 
-> **Nguồn quyết định:** [Trưởng nhóm Hoàng Kim Tiến chốt 04/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6633040706) và [làm rõ quyết định 13, sửa điểm danh ngày 07/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6701988493). Mục 7 ghi các quyết định; các luồng bên dưới đã cập nhật theo đó. Những ghi chú cũ về mốc ân hạn tính từ email trong ADR/ERD cần được người phụ trách nguồn chuẩn đồng bộ, không dùng để đảo ngược quyết định mới (mục 7.6).
+> **Nguồn quyết định:** [Trưởng nhóm Hoàng Kim Tiến chốt 04/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6633040706) và [làm rõ quyết định 13, sửa điểm danh ngày 07/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6701988493) và [cách tính lại vi phạm khi sửa điểm danh ngày 09/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6734172961). Mục 7 ghi các quyết định; các luồng bên dưới đã cập nhật theo đó. Những ghi chú cũ về mốc ân hạn tính từ email trong ADR/ERD cần được người phụ trách nguồn chuẩn đồng bộ, không dùng để đảo ngược quyết định mới (mục 7.6).
 
 > **Trạng thái:** Đặc tả này diễn giải yêu cầu trong bản chốt phạm vi, ERD và ADR 0003 cùng quyết định của trưởng nhóm. Các API, DTO, cách phân loại lỗi cụ thể trong mục G là **đề xuất thiết kế để người triển khai backend F8 trong Sprint 2 xác nhận**, chưa phải hợp đồng API đã thống nhất. Thiết kế kỹ thuật và việc đồng bộ nguồn chuẩn được ghi ở mục 7.5–7.6; không tự đặt thêm quy tắc.
 
@@ -779,7 +779,7 @@ Các cột lịch sử phục vụ đếm vi phạm theo tháng Việt Nam và s
 
 #### B. Hậu điều kiện
 
-- **Thành công:** `class_bookings.status` chuyển thành `ATTENDED` hoặc `NO_SHOW`; mỗi lần ghi/sửa kết quả, `attendance_marked_by` lưu `users.id` của người thao tác; khi sửa kết quả đã ghi, `audit_logs` ghi giá trị cũ/mới trong cùng giao dịch. Theo comment ngày 07/11, hệ thống tính lại vi phạm trong tháng; nếu dưới ngưỡng thì đặt `members.booking_locked_until = NULL` ngay, còn nếu vẫn đạt ngưỡng thì giữ nguyên khóa, không rút ngắn. Lần điểm danh hoặc sửa thành `NO_SHOW` làm đạt ngưỡng thì áp khóa ngay. Quan hệ giữa phép tính lại này với ranh giới “sau lần bị khóa gần nhất” đã chốt ngày 04/11 được ghi ở mục 7.6.
+- **Thành công:** `class_bookings.status` chuyển thành `ATTENDED` hoặc `NO_SHOW`; mỗi lần ghi/sửa kết quả, `attendance_marked_by` lưu `users.id` của người thao tác; khi sửa kết quả đã ghi, `audit_logs` ghi giá trị cũ/mới trong cùng giao dịch. Khi sửa điểm danh, hệ thống tính lại vi phạm theo BR-F8.6-03: nếu hội viên đang có khóa thì xét lần khóa đang có hiệu lực, dưới ngưỡng thì đặt `members.booking_locked_until = NULL` ngay, vẫn đạt ngưỡng thì giữ nguyên khóa, không rút ngắn. Lần điểm danh hoặc sửa thành `NO_SHOW` làm đạt ngưỡng thì áp khóa ngay.
 - **Thất bại:** Không thay đổi điểm danh; trạng thái hiện tại được giữ nguyên.
 
 #### C. Luồng sự kiện chính
@@ -790,7 +790,7 @@ Các cột lịch sử phục vụ đếm vi phạm theo tháng Việt Nam và s
 4. Huấn luyện viên chọn từng hội viên và ghi nhận có mặt (`ATTENDED`) hoặc vắng mặt (`NO_SHOW`).
 5. Hệ thống kiểm tra trạng thái điểm danh hợp lệ và chỗ không ở `WAITLIST`/`CANCELLED`; kết quả đã ghi được sửa trong thời hạn, sau hạn chỉ quản lý đúng chi nhánh được sửa.
 6. Hệ thống cập nhật kết quả, ghi `attendance_marked_by` là `users.id` của người thao tác; nếu sửa kết quả đã ghi thì thêm một dòng `audit_logs` với giá trị cũ/mới trong cùng giao dịch.
-7. Khi điểm danh mới là `NO_SHOW`, đếm vi phạm gồm hủy muộn (`is_late_cancel`) và `NO_SHOW` trong tháng dương lịch Việt Nam, sau lần bị khóa gần nhất theo quyết định 5–6; nếu đạt `PENALTY_LIMIT_PER_MONTH`, áp khóa theo `PENALTY_LOCK_DAYS` ngay. Với mỗi lần sửa kết quả đã ghi, tính lại vi phạm trong tháng gồm `is_late_cancel` và `NO_SHOW` trong cùng giao dịch: nếu thấp hơn ngưỡng thì đặt `members.booking_locked_until = NULL` ngay; nếu vẫn đạt ngưỡng thì giữ nguyên khóa hiện có, không rút ngắn. Sửa `ATTENDED` thành `NO_SHOW` làm đạt ngưỡng thì áp khóa ngay. Comment 07/11 không nói rõ phép tính lại có tiếp tục giới hạn theo mốc khóa gần nhất như quyết định 6 hay không; xem mục 7.6.
+7. Khi điểm danh mới là `NO_SHOW`, đếm vi phạm gồm hủy muộn (`is_late_cancel`) và `NO_SHOW` trong tháng dương lịch Việt Nam, sau lần bị khóa gần nhất theo quyết định 5–6; nếu đạt `PENALTY_LIMIT_PER_MONTH`, áp khóa theo `PENALTY_LOCK_DAYS` ngay. Với mỗi lần sửa kết quả đã ghi, tính lại vi phạm trong cùng giao dịch theo BR-F8.6-03: nếu hội viên đang có khóa, đếm hủy muộn (`is_late_cancel`) và `NO_SHOW` trong tháng dương lịch Việt Nam, sau lần khóa liền trước lần khóa đang xét; dưới ngưỡng thì đặt `members.booking_locked_until = NULL` ngay, vẫn đạt ngưỡng thì giữ nguyên khóa, không rút ngắn. Nếu hội viên không đang bị khóa, tính như điểm danh mới; sửa `ATTENDED` thành `NO_SHOW` làm đạt ngưỡng thì áp khóa ngay.
 8. Hệ thống trả kết quả đã điểm danh.
 
 #### D. Các luồng thay thế và ngoại lệ
@@ -809,7 +809,12 @@ Các cột lịch sử phục vụ đếm vi phạm theo tháng Việt Nam và s
 
 - **BR-F8.6-01:** Huấn luyện viên được phân công điểm danh/sửa trong thời hạn; quản lý chi nhánh sửa sau thời hạn. Mỗi lần ghi/sửa điểm danh, `attendance_marked_by` ghi `users.id` của người thao tác; khi sửa kết quả đã ghi, `audit_logs` ghi giá trị cũ/mới trong cùng giao dịch (quyết định ngày 07/11/2026). Các cột cần thiết đã có trong ERD; việc đồng bộ ghi chú ERD thuộc mục 7.6.
 - **BR-F8.6-02:** F4 ghi `arrived_at` khi check-in có lớp sắp bắt đầu; điều đó không thay cho `ATTENDED` do huấn luyện viên xác nhận (bản chốt phạm vi F4 và ERD).
-- **BR-F8.6-03:** Với điểm danh mới, vi phạm gồm hủy muộn (`is_late_cancel`) và `NO_SHOW`, tính trong tháng dương lịch Việt Nam và chỉ sau lần bị khóa gần nhất; không đếm trùng cùng lỗi (quyết định 5–6). Lần ghi mới hoặc sửa thành `NO_SHOW` làm đạt `PENALTY_LIMIT_PER_MONTH` thì áp khóa ngay. Mỗi lần sửa điểm danh tính lại vi phạm trong tháng trong cùng giao dịch: dưới ngưỡng thì đặt `members.booking_locked_until = NULL` ngay; nếu vẫn đạt ngưỡng thì giữ nguyên khóa hiện có, không rút ngắn (làm rõ ngày 07/11/2026). Phạm vi mốc khóa gần nhất cho phép tính lại còn cần xác nhận tại mục 7.6.
+- **BR-F8.6-03:** Vi phạm gồm hủy muộn (`is_late_cancel`) và `NO_SHOW`. Mỗi vi phạm chỉ được tính cho đúng một lần khóa (quyết định 5–6, làm rõ ngày 09/11/2026). Lần ghi mới hoặc sửa thành `NO_SHOW` làm đạt `PENALTY_LIMIT_PER_MONTH` thì áp khóa ngay. Cách đếm phụ thuộc tình huống, đều thực hiện trong cùng giao dịch với việc ghi điểm danh:
+  - **Điểm danh mới:** đếm trong tháng dương lịch Việt Nam, chỉ sau lần bị khóa gần nhất.
+  - **Sửa điểm danh khi hội viên đang có khóa hiệu lực:** đếm trong tháng dương lịch Việt Nam, chỉ sau **lần khóa liền trước lần khóa đang xét**, tức là bỏ các vi phạm đã được dùng cho một lần khóa cũ hơn. Nếu chưa có lần khóa nào trước đó thì chỉ giới hạn trong tháng. Dưới ngưỡng thì đặt `members.booking_locked_until = NULL` ngay; vẫn đạt ngưỡng thì giữ nguyên khóa hiện có, không rút ngắn.
+  - **Sửa điểm danh khi hội viên không đang bị khóa:** tính như điểm danh mới.
+
+  Lý do không dùng “sau lần khóa gần nhất” cho phép tính lại: khi hội viên đang bị khóa thì lần khóa gần nhất chính là lần đang xét, đếm sau nó luôn bằng 0 nên sửa bất kỳ điểm danh nào cũng gỡ khóa; còn đếm cả tháng thì một vi phạm có thể góp vào hai lần khóa.
 - **BR-F8.6-04:** Chỗ đặt `ATTENDED` và `NO_SHOW` vẫn được tính trong sĩ số của buổi học (thiết kế dữ liệu ERD).
 - **Quyết định đã chốt:** Huấn luyện viên được điểm danh và sửa từ lúc bắt đầu buổi đến 23:59 cùng ngày Việt Nam; sau đó chỉ quản lý chi nhánh được sửa (quyết định 14). Không tự coi hết giờ là `NO_SHOW` khi chưa có thao tác điểm danh. Sửa `NO_SHOW`/`ATTENDED` tính lại vi phạm và cập nhật khóa ngay theo BR-F8.6-03; không chờ tác vụ nền.
 
@@ -824,7 +829,7 @@ Các cột lịch sử phục vụ đếm vi phạm theo tháng Việt Nam và s
 - `audit_logs`: `user_id`, `branch_id`, `action`, `entity`, `entity_id`, `old_value`, `new_value`.
 - `system_configs`: `config_key`, `config_value`.
 
-Lịch sử cần để đếm theo tháng Việt Nam và sau lần khóa gần nhất do backend F8 Sprint 2 thiết kế; không suy ra cột chưa có trong ERD (mục 7.6). Dòng `audit_logs` khi sửa điểm danh dùng các cột cũ/mới đã có; không thêm cột.
+Lịch sử cần để đếm theo tháng Việt Nam, sau lần khóa gần nhất (điểm danh mới) và sau lần khóa liền trước lần khóa đang xét (sửa điểm danh) do backend F8 Sprint 2 thiết kế; không suy ra cột chưa có trong ERD (mục 7.6). Dòng `audit_logs` khi sửa điểm danh dùng các cột cũ/mới đã có; không thêm cột.
 
 Định nghĩa cột và ràng buộc: xem [ERD v2](../../design/erd/erd-v2.dbml) (mục 2.1).
 
@@ -887,19 +892,24 @@ Lịch sử cần để đếm theo tháng Việt Nam và sau lần khóa gần 
   - **Then** Cho sửa theo quyền quản lý; huấn luyện viên và quản lý chi nhánh khác không được dùng quyền này. `attendance_marked_by` ghi người quản lý và `audit_logs` ghi giá trị cũ/mới trong cùng giao dịch.
 
 - **Kịch bản 7: Sửa `NO_SHOW` thành `ATTENDED` làm số vi phạm xuống dưới ngưỡng**
-  - **Given** Điểm danh hiện là `NO_SHOW`, hội viên đang bị khóa và số vi phạm sau khi tính lại theo chỉ dẫn ngày 07/11 thấp hơn `PENALTY_LIMIT_PER_MONTH`; quản lý đúng chi nhánh được phép sửa.
+  - **Given** Điểm danh hiện là `NO_SHOW`, hội viên đang bị khóa và số vi phạm đếm theo BR-F8.6-03 (tháng Việt Nam, sau lần khóa liền trước lần khóa đang xét) thấp hơn `PENALTY_LIMIT_PER_MONTH` sau khi sửa; quản lý đúng chi nhánh được phép sửa.
   - **When** Quản lý sửa kết quả thành `ATTENDED`.
   - **Then** Trong cùng giao dịch, trạng thái được sửa, `attendance_marked_by` ghi người quản lý, `audit_logs` lưu giá trị cũ/mới và `members.booking_locked_until` được đặt `NULL` ngay, không chờ tác vụ ban đêm.
 
 - **Kịch bản 8: Sửa điểm danh nhưng số vi phạm vẫn đạt ngưỡng**
-  - **Given** Điểm danh đã ghi; sau khi tính lại theo chỉ dẫn ngày 07/11, số vi phạm vẫn bằng hoặc lớn hơn `PENALTY_LIMIT_PER_MONTH` và hội viên đang có khóa.
+  - **Given** Điểm danh đã ghi; hội viên đang có khóa và sau khi tính lại theo BR-F8.6-03, số vi phạm vẫn bằng hoặc lớn hơn `PENALTY_LIMIT_PER_MONTH`.
   - **When** Người có quyền sửa điểm danh cập nhật kết quả.
   - **Then** Ghi người sửa và giá trị cũ/mới như BR-F8.6-01; giữ nguyên `booking_locked_until`, không rút ngắn khóa.
 
 - **Kịch bản 9: Sửa `ATTENDED` thành `NO_SHOW` làm đạt ngưỡng**
-  - **Given** Điểm danh hiện là `ATTENDED`; hội viên có số vi phạm thấp hơn ngưỡng trước lần sửa nhưng đạt `PENALTY_LIMIT_PER_MONTH` khi tính lại theo chỉ dẫn ngày 07/11.
+  - **Given** Điểm danh hiện là `ATTENDED`; hội viên không đang bị khóa và có số vi phạm thấp hơn ngưỡng trước lần sửa; sau khi sửa, số vi phạm tính như điểm danh mới (tháng Việt Nam, sau lần khóa gần nhất) đạt `PENALTY_LIMIT_PER_MONTH`.
   - **When** Người có quyền sửa kết quả thành `NO_SHOW`.
   - **Then** Trong cùng giao dịch, ghi người sửa và giá trị cũ/mới; áp khóa theo `PENALTY_LOCK_DAYS` ngay.
+
+- **Kịch bản 10: Sửa điểm danh khi đã có hai lần khóa, mỗi vi phạm chỉ tính cho một lần khóa**
+  - **Given** Trong tháng 11, hội viên có ba vi phạm A, B, C dẫn đến khóa lần 1. Hết khóa, hội viên có thêm ba vi phạm D, E, F, đều là `NO_SHOW`, dẫn đến khóa lần 2 và hội viên đang bị khóa lần 2. `PENALTY_LIMIT_PER_MONTH` là 3; người sửa là quản lý đúng chi nhánh.
+  - **When** Quản lý sửa điểm danh E thành `ATTENDED`.
+  - **Then** Hệ thống chỉ đếm các vi phạm sau lần khóa liền trước lần khóa 2, tức là sau lần khóa 1, gồm D và F, được 2 vi phạm, thấp hơn ngưỡng 3. Khóa lần 2 được gỡ ngay bằng cách đặt `members.booking_locked_until = NULL`. A, B, C không được tính lại vì đã dùng cho khóa lần 1. Ghi người sửa và giá trị cũ/mới như BR-F8.6-01.
 
 ---
 
@@ -1228,6 +1238,14 @@ Các số trong kịch bản kiểm thử dùng bộ giá trị mặc định b�
 | 7 | Không có email hoặc gửi email lỗi thì ân hạn tính thế nào | Ân hạn 15 phút **tính từ lúc tạo thông báo trong web** (thời điểm được đưa vào lớp). Hủy đúng mốc `grace_until` vẫn tính là trong ân hạn (so sánh `<=`). |
 | 8 | Rời danh sách chờ sát giờ có bị tính hủy muộn | **Không bao giờ.** Hủy muộn chỉ áp dụng cho chỗ đã `BOOKED`. |
 
+**Làm rõ quyết định 6 về tính lại vi phạm khi sửa điểm danh (09/11/2026).** Nguồn: [comment của trưởng nhóm](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6734172961). Mỗi vi phạm chỉ được tính cho đúng một lần khóa.
+
+- **Điểm danh mới:** đếm hủy muộn và `NO_SHOW` trong tháng dương lịch Việt Nam, sau lần khóa gần nhất.
+- **Sửa điểm danh làm phải tính lại khóa đang có hiệu lực:** đếm trong tháng Việt Nam, sau lần khóa liền trước lần khóa đang xét. Dưới ngưỡng thì gỡ khóa ngay; vẫn đạt ngưỡng thì giữ nguyên, không rút ngắn.
+- **Hội viên không đang bị khóa:** tính lại như điểm danh mới.
+- **Ví dụ của trưởng nhóm:** tháng 11 có vi phạm A, B, C thì khóa lần 1; hết khóa, có thêm D, E, F thì khóa lần 2. Sửa E thành `ATTENDED`: chỉ đếm D, F (sau khóa lần 1) được 2, thấp hơn 3 nên gỡ khóa lần 2; A, B, C không được tính lại. Ví dụ này là kịch bản 10 của UC-F8.6.
+- **Lý do:** khi hội viên đang bị khóa, lần khóa gần nhất chính là lần đang xét nên đếm sau nó luôn bằng 0 và sửa bất kỳ điểm danh nào cũng gỡ khóa; còn đếm cả tháng thì một vi phạm có thể góp vào hai lần khóa.
+
 ### 7.3. Đổi giờ và lịch lặp
 
 | # | Câu hỏi | Quyết định |
@@ -1259,10 +1277,10 @@ Các số trong kịch bản kiểm thử dùng bộ giá trị mặc định b�
 
 ### 7.6. Đồng bộ nguồn chuẩn và phụ thuộc còn lại
 
-- **Trưởng nhóm/người phụ trách ADR và ERD:** cập nhật ADR 0003, bản chốt phạm vi và ghi chú `class_bookings.grace_until` trong ERD từ mốc email sang mốc thông báo trong web theo quyết định 7 mới; bổ sung tiêu chí phụ `id` của FIFO, `created_by` cho cả hội viên/lễ tân và cập nhật ghi chú `attendance_marked_by` để phản ánh người điểm danh hoặc người sửa (kể cả quản lý). Ghi nhận `audit_logs.old_value`/`new_value` cho giá trị điểm danh cũ/mới; các cột này đã có trong ERD, không thêm cột. Giữ nguyên luồng gửi email ban đêm. SRS chỉ ghi quyết định đã được xác nhận, không sửa hộ tài liệu chuẩn của đồng đội trong nhiệm vụ #9.
+- **Người phụ trách ADR và ERD (trưởng nhóm giao trong buổi lập kế hoạch Sprint 2 theo comment ngày 09/11; chưa ghi tên người nhận):** cập nhật ADR 0003, bản chốt phạm vi và ghi chú `class_bookings.grace_until` trong ERD từ mốc email sang mốc thông báo trong web theo quyết định 7 mới; bổ sung tiêu chí phụ `id` của FIFO, `created_by` cho cả hội viên/lễ tân và cập nhật ghi chú `attendance_marked_by` để phản ánh người điểm danh hoặc người sửa (kể cả quản lý). Ghi nhận `audit_logs.old_value`/`new_value` cho giá trị điểm danh cũ/mới; các cột này đã có trong ERD, không thêm cột. Giữ nguyên luồng gửi email ban đêm. SRS chỉ ghi quyết định đã được xác nhận, không sửa hộ tài liệu chuẩn của đồng đội trong nhiệm vụ #9.
 - **Backend F8 Sprint 2:** `created_by` bắt buộc có `users.id` người bấm đặt theo quyết định 16; ERD hiện để nullable, nên cần chốt ràng buộc/ý nghĩa NULL và đồng bộ ghi chú, không dùng tính nullable để bỏ qua người tạo của chỗ đặt mới.
-- **Backend F8 Sprint 2 phối hợp F10:** thiết kế dữ liệu để đếm lại vi phạm sau lần bị khóa gần nhất, không suy ra lịch sử chỉ từ `booking_locked_until` trừ số ngày cấu hình hiện tại. ERD hiện chưa có mốc lịch sử khóa được chỉ định cho quy tắc này. Hồ sơ được lễ tân đặt hộ nhưng chưa có tài khoản cần cách ghi mốc thông báo trong web phù hợp với `notifications.user_id`; không tự tạo cột hoặc bỏ ân hạn.
-- **Trưởng nhóm xác nhận ranh giới tính lại:** quyết định ngày 04/11 số 6 giới hạn vi phạm tính vào ngưỡng ở tháng hiện tại và sau lần bị khóa gần nhất; comment ngày 07/11 yêu cầu tính lại vi phạm trong tháng khi sửa điểm danh nhưng không nói sự kiện trước lần khóa gần nhất có tham gia phép tính lại hay không. SRS giữ quyết định 6 cho điểm danh mới và ghi trực tiếp yêu cầu tính lại theo tháng cho thao tác sửa, không tự thêm hoặc bỏ bộ lọc lịch sử khóa vào nhánh sửa. Cần người duyệt xác nhận ranh giới này vì nó ảnh hưởng số vi phạm dùng để gỡ/giữ khóa.
+- **Backend F8 Sprint 2 phối hợp F10:** thiết kế dữ liệu để đếm vi phạm theo BR-F8.6-03, gồm sau lần bị khóa gần nhất khi điểm danh mới và sau lần khóa liền trước lần khóa đang xét khi sửa điểm danh; vì vậy cách lưu phải xác định được từng lần khóa theo thứ tự, không chỉ lần khóa gần nhất. Không suy ra lịch sử chỉ từ `booking_locked_until` trừ số ngày cấu hình hiện tại. ERD hiện chưa có mốc lịch sử khóa được chỉ định cho quy tắc này. Hồ sơ được lễ tân đặt hộ nhưng chưa có tài khoản cần cách ghi mốc thông báo trong web phù hợp với `notifications.user_id`; không tự tạo cột hoặc bỏ ân hạn.
+- **Ranh giới tính lại khi sửa điểm danh đã được trưởng nhóm chốt ngày 09/11/2026**, xem mục 7.2 và BR-F8.6-03; không còn là điểm chờ xác nhận.
 
 ---
 
@@ -1270,7 +1288,7 @@ Các số trong kịch bản kiểm thử dùng bộ giá trị mặc định b�
 
 | Nội dung | Nguồn |
 | --- | --- |
-| 16 quyết định nghiệp vụ ngày 04/11 và phần làm rõ ngày 07/11 về sức chứa, sửa điểm danh | [Xác nhận của trưởng nhóm](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6633040706), [làm rõ mới](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6701988493), mục 7.1–7.4; nguồn chuẩn cần đồng bộ theo mục 7.6 |
+| 16 quyết định nghiệp vụ ngày 04/11, phần làm rõ ngày 07/11 về sức chứa, sửa điểm danh và quyết định ngày 09/11 về tính lại vi phạm khi sửa điểm danh | [Xác nhận của trưởng nhóm](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6633040706), [làm rõ 07/11](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6701988493), [quyết định 09/11](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6734172961), mục 7.1–7.4; nguồn chuẩn cần đồng bộ theo mục 7.6 |
 | Phạm vi chức năng, tác nhân, điều kiện gói, cửa sổ đặt chỗ, hủy chỗ, đổi giờ, vi phạm, thông báo | [Bản chốt phạm vi](../ban-chot-pham-vi.md), mục F8 |
 | FIFO, tự động đưa vào lớp, mốc ngừng đưa vào lớp, ân hạn, chỗ trống ban đêm, thông báo, khóa chỗ | [ADR 0003](../../decisions/0003-danh-sach-cho-tu-dong-dua-vao-lop.md) |
 | Tập giá trị Enum khái niệm, các ràng buộc duy nhất, trạng thái giữ chỗ, khóa NF6, khóa cấu hình | [ERD v2](../../design/erd/erd-v2.dbml), [Thiết kế dữ liệu](../../design/erd/thiet-ke-du-lieu.md) |
@@ -1299,3 +1317,4 @@ Các issue dưới đây là yêu cầu, không phải bằng chứng đã tri�
 | 04/11/2026 | Việt hóa diễn đạt; ghi người quyết định; rút chỉ mục dữ liệu theo ERD; đơn giản UC-F8.1 trong phạm vi đã rõ; sửa tham chiếu và thứ tự kịch bản. Ở lần sửa trước comment chốt mới, câu 13–14 còn chờ trưởng nhóm; trạng thái đã được cập nhật theo 16 quyết định ở dòng lịch sử tiếp theo. |
 | 04/11/2026 | Bổ sung 16 quyết định nghiệp vụ từ comment của trưởng nhóm; sửa luồng/ân hạn/FIFO/đóng đặt/điểm danh và thêm kịch bản biên. Ghi phụ thuộc đồng bộ ADR/ERD và câu hỏi tác động sửa điểm danh sai lên lệnh khóa. |
 | 07/11/2026 | Cập nhật quyết định 13 về sức chứa lịch lặp/buổi cụ thể; bổ sung điều kiện sửa và tiêu chí chấp nhận. Cập nhật việc sửa điểm danh, tính lại khóa và audit log theo comment trưởng nhóm; giữ phụ thuộc lưu lịch sử khóa/thời điểm vi phạm và ghi chú khả năng cần xác nhận cửa sổ đếm. |
+| 10/11/2026 | Áp dụng quyết định ngày 09/11 của trưởng nhóm: mỗi vi phạm chỉ tính cho một lần khóa; khi sửa điểm danh làm tính lại khóa đang có hiệu lực thì đếm trong tháng, sau lần khóa liền trước lần đang xét; hội viên không bị khóa thì tính như điểm danh mới. Cập nhật BR-F8.6-03, mục 7.2, 7.6, UC-F8.6, kịch bản 7–9 và thêm kịch bản 10 (hai lần khóa). Ghi trách nhiệm đồng bộ ADR/ERD theo việc trưởng nhóm giao trong buổi lập kế hoạch Sprint 2. |
