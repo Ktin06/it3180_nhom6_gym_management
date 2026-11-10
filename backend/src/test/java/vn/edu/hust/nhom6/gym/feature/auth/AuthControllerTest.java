@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Duration;
+import java.time.LocalDate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -130,6 +131,19 @@ class AuthControllerTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.status").value(400))
             .andExpect(jsonPath("$.errors.phone").exists());
+    }
+
+    @Test
+    void dangKyNgaySinhTuongLaiTra400() throws Exception {
+        RegisterRequest request = new RegisterRequest(
+            "Nguyễn Văn A", "member@example.com", "0912345678", "Password123", LocalDate.now().plusYears(1), null);
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.errors.dob").exists());
     }
 
     @Test
