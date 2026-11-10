@@ -27,26 +27,29 @@ describe('form hồ sơ hội viên', () => {
     await user.click(screen.getByRole('button', { name: 'Lưu hồ sơ' }))
     expect(await screen.findByText('Số điện thoại bị từ chối từ server.')).toBeInTheDocument()
   })
-  it('kiểm tra thông tin bắt buộc và gửi đúng DTO tạo hồ sơ, không gửi các trường do server quản lý', async () => {
-    const user = userEvent.setup()
-    const api = createMockMembersApi()
-    const create = vi.spyOn(api, 'create')
-    const onSaved = vi.fn()
-    render(<MemberFormModal member={null} api={api} onClose={vi.fn()} onSaved={onSaved} />)
-    await user.click(screen.getByRole('button', { name: 'Lưu hồ sơ' }))
-    expect(await screen.findByText('Vui lòng nhập họ và tên.')).toBeInTheDocument()
-    expect(create).not.toHaveBeenCalled()
-    await user.type(screen.getByLabelText('Họ và tên'), '  Hội viên thử  ')
-    await user.type(screen.getByLabelText('Số điện thoại'), '+84 912 345 678')
-    await user.click(screen.getByRole('button', { name: 'Lưu hồ sơ' }))
-    await waitFor(() => expect(onSaved).toHaveBeenCalledOnce())
-    expect(create).toHaveBeenCalledWith({
-      fullName: 'Hội viên thử',
-      phone: '+84 912 345 678',
-      gender: null,
-      dob: null,
-    })
-  })
+  it.each(['+84 912 345 678', '84 912 345 678', '0912345678'])(
+    'kiểm tra thông tin bắt buộc và gửi đúng DTO với số %s',
+    async (phone) => {
+      const user = userEvent.setup()
+      const api = createMockMembersApi()
+      const create = vi.spyOn(api, 'create')
+      const onSaved = vi.fn()
+      render(<MemberFormModal member={null} api={api} onClose={vi.fn()} onSaved={onSaved} />)
+      await user.click(screen.getByRole('button', { name: 'Lưu hồ sơ' }))
+      expect(await screen.findByText('Vui lòng nhập họ và tên.')).toBeInTheDocument()
+      expect(create).not.toHaveBeenCalled()
+      await user.type(screen.getByLabelText('Họ và tên'), '  Hội viên thử  ')
+      await user.type(screen.getByLabelText('Số điện thoại'), phone)
+      await user.click(screen.getByRole('button', { name: 'Lưu hồ sơ' }))
+      await waitFor(() => expect(onSaved).toHaveBeenCalledOnce())
+      expect(create).toHaveBeenCalledWith({
+        fullName: 'Hội viên thử',
+        phone,
+        gender: null,
+        dob: null,
+      })
+    },
+  )
 
   it('giữ form và dữ liệu đã nhập khi server từ chối số điện thoại trùng', async () => {
     const user = userEvent.setup()

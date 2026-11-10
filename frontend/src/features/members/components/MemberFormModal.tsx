@@ -3,6 +3,7 @@ import { useState } from 'react'
 import axios from 'axios'
 import { errorMessage } from '../../shared/api-error'
 import type { Gender, MemberDetail, MembersGateway } from '../types/member'
+import { normalizePhone } from '../phone'
 
 interface Values {
   fullName: string
@@ -95,12 +96,12 @@ export function MemberFormModal({
         <Form.Item
           name="phone"
           label="Số điện thoại"
-          extra="Chấp nhận 0xxxxxxxxx hoặc +84, có thể có dấu cách, chấm hoặc gạch ngang."
+          extra="Chấp nhận 0xxxxxxxxx, +84xxxxxxxxx hoặc 84xxxxxxxxx; có thể có dấu cách, chấm hoặc gạch ngang."
           rules={[
             { required: true, message: 'Vui lòng nhập số điện thoại.' },
             {
               validator: (_, value: string | undefined) => {
-                const phone = (value ?? '').replace(/[\s.-]/g, '').replace(/^\+84/, '0')
+                const phone = normalizePhone(value ?? '')
                 return !value || /^0\d{9}$/.test(phone)
                   ? Promise.resolve()
                   : Promise.reject(new Error('Số điện thoại không hợp lệ.'))

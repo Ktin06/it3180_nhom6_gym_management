@@ -2,7 +2,7 @@ import type { PageQuery, PageResponse, Status } from '../../shared/types'
 
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER'
 
-/** DTO từ PR #97, commit 37bc98a; không gửi ảnh/email/chi nhánh trong form F2. */
+/** DTO F2 đã merge vào main tại 872386d (#97); không gửi ảnh/email/chi nhánh trong form. */
 export interface MemberSummary {
   id: number
   memberCode: string
