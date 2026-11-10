@@ -81,7 +81,7 @@ Chức năng **F1 – Tài khoản và phân quyền** cung cấp cơ chế xác
   - **E1 – Sai email hoặc mật khẩu (401 Unauthorized):**
     - Nếu email tồn tại, tăng `failed_login_count` thêm 1. Nếu `failed_login_count >= 5`, đặt `locked_until = now() + 15 phút` (S4 – hoàn thiện ở Sprint 2, cột và cấu trúc xử lý có sẵn).
     - Trả `ProblemDetail` (401) với thông báo chung: *"Email hoặc mật khẩu không đúng."* (không tiết lộ email có tồn tại hay không).
-  - **E2 – Tài khoản bị khóa tạm thời do nhập sai quá 5 lần (423 Locked / 403 Forbidden):** Khi `locked_until > now()`, từ chối đăng nhập và báo thời gian còn lại.
+  - **E2 – Tài khoản bị khóa tạm thời do nhập sai quá 5 lần (403 Forbidden):** Khi `locked_until > now()`, từ chối đăng nhập và trả `ProblemDetail` (403) thông báo tài khoản đang bị khóa tạm thời kèm thời gian mở khóa còn lại (không dùng mã `423 Locked` vì `GlobalExceptionHandler` thống nhất trả `403 Forbidden`).
   - **E3 – Tài khoản bị khóa hoặc ngừng hoạt động (403 Forbidden):** Khi `status` là `LOCKED` hoặc `DISABLED`, trả `ProblemDetail` (403): *"Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên."*
 
 ---
@@ -109,13 +109,13 @@ Chức năng **F1 – Tài khoản và phân quyền** cung cấp cơ chế xác
 - **Tiền điều kiện:** Người dùng đã xác thực bằng JWT hợp lệ.
 - **Luồng chính (`POST /api/v1/auth/change-password`):**
   1. Người dùng gửi mật khẩu hiện tại (`currentPassword`) và mật khẩu mới (`newPassword`).
-  2. Hệ thống kiểm tra `newPassword` đạt chuẩn bảo mật S1 (tối thiểu 8 ký tự, gồm cả chữ và số) và khác `currentPassword`.
-  3. Hệ thống kiểm tra `currentPassword` khớp với `users.password_hash`.
+  2. Hệ thống kiểm tra định dạng dữ liệu đầu vào bằng Bean Validation (`currentPassword` không được để trống; `newPassword` tối thiểu 8 ký tự, bao gồm cả chữ cái và chữ số theo S1).
+  3. Hệ thống kiểm tra quy tắc nghiệp vụ: `currentPassword` phải khớp với `users.password_hash` và `newPassword` phải khác `currentPassword`.
   4. Hệ thống cập nhật `password_hash` mới và **thu hồi toàn bộ các phiên đăng nhập hiện có** của người dùng (`UPDATE refresh_tokens SET revoked_at = now() WHERE user_id = ? AND revoked_at IS NULL`).
   5. Trả `204 No Content`.
 - **Luồng ngoại lệ:**
-  - **E1 – Mật khẩu hiện tại không đúng (400/422):** Trả lỗi thông báo mật khẩu hiện tại không chính xác.
-  - **E2 – Mật khẩu mới trùng mật khẩu cũ hoặc không đủ độ mạnh (400/422):** Trả lỗi chi tiết.
+  - **E1 – Dữ liệu đầu vào sai định dạng (400 Bad Request):** Để trống trường bắt buộc hoặc `newPassword` dưới 8 ký tự / thiếu chữ cái hoặc chữ số (Bean Validation) → Trả `ProblemDetail` (400) kèm danh sách lỗi theo từng trường (`errors`).
+  - **E2 – Vi phạm quy tắc nghiệp vụ (422 Unprocessable Content):** Mật khẩu hiện tại (`currentPassword`) không đúng, hoặc mật khẩu mới (`newPassword`) trùng với mật khẩu hiện tại (`BusinessRuleException`) → Trả `ProblemDetail` (422) thông báo chi tiết lý do.
 
 ---
 
@@ -176,6 +176,61 @@ Chi tiết đối chiếu với [Bản chốt phạm vi](../ban-chot-pham-vi.md)
 | `POST /api/v1/auth/logout` | Công khai / Đã đăng nhập | Thu hồi Refresh Token và xóa cookie | `204` |
 | `GET /api/v1/auth/me` | Mọi vai trò đã đăng nhập | Lấy thông tin tài khoản hiện tại từ JWT | `200`, `401` |
 | `POST /api/v1/auth/change-password` | Mọi vai trò đã đăng nhập | Đổi mật khẩu và thu hồi toàn bộ refresh token | `204`, `400`, `401`, `422` |
+
+### 6.1. Định dạng JSON Request / Response chuẩn (dùng chung Backend & Frontend)
+
+1. **Đăng ký hội viên (`POST /api/v1/auth/register`):**
+   - **Request Body:**
+     ```json
+     {
+       "fullName": "Nguyễn Văn A",
+       "email": "member@example.com",
+       "phone": "0912345678",
+       "password": "Password123",
+       "dob": "2000-05-15",
+       "gender": "MALE"
+     }
+     ```
+     *(Lưu ý: `dob` và `gender` là tùy chọn; `gender` nhận `"MALE"`, `"FEMALE"`, `"OTHER"` hoặc `null`. Trường `phone` chấp nhận cả dạng `"0912345678"` và `"+84 912 345 678"`, backend tự chuẩn hóa về 10 chữ số bắt đầu bằng `0` trước khi kiểm tra).*
+   - **Response (`201 Created`):** Trả kèm header `Set-Cookie: refresh_token=<token>; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth` và JSON body giống `POST /api/v1/auth/login` bên dưới.
+
+2. **Đăng nhập (`POST /api/v1/auth/login`) và Làm mới phiên (`POST /api/v1/auth/refresh`):**
+   - **Request Body (`POST /api/v1/auth/login`):**
+     ```json
+     {
+       "email": "reception@example.com",
+       "password": "Password123"
+     }
+     ```
+     *(`POST /api/v1/auth/refresh` không có request body, đọc trực tiếp từ cookie `refresh_token`).*
+   - **Response (`200 OK`):** Đặt/xoay vòng cookie `refresh_token` (`HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`) và trả JSON phẳng không bọc thêm envelope:
+     ```json
+     {
+       "accessToken": "<jwt_hs256_token>"
+     }
+     ```
+
+3. **Lấy thông tin tài khoản hiện tại (`GET /api/v1/auth/me`):**
+   - **Header:** `Authorization: Bearer <access_token>`
+   - **Response (`200 OK` – `AuthMeResponse`):** Trả đối tượng JSON phẳng ở cấp gốc (không bọc trong `user`), khớp với 5 giá trị `role` trong `users.role` (`SUPER_ADMIN`, `BRANCH_MANAGER`, `RECEPTIONIST`, `TRAINER`, `MEMBER`):
+     ```json
+     {
+       "userId": 15,
+       "email": "reception@example.com",
+       "role": "RECEPTIONIST"
+     }
+     ```
+
+4. **Đổi mật khẩu (`POST /api/v1/auth/change-password`):**
+   - **Header:** `Authorization: Bearer <access_token>`
+   - **Request Body:**
+     ```json
+     {
+       "currentPassword": "Password123",
+       "newPassword": "NewPassword456"
+     }
+     ```
+   - **Response:** `204 No Content`.
 
 ---
 

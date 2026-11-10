@@ -166,7 +166,7 @@ Table users {
   password_hash varchar(255) [not null, note: 'bcrypt (S1)']
   role user_role [not null, note: 'nguồn duy nhất của vai trò; chi nhánh làm việc lấy từ staff.branch_id']
   status user_status [not null, default: 'ACTIVE', note: 'LOCKED = quản trị viên khóa tay, đến khi mở lại; DISABLED = hội viên hoặc nhân viên ngừng hoạt động. Khóa tạm do sai mật khẩu (S4) không đổi cột này mà dùng locked_until']
-  failed_login_count int [not null, default: 0, note: 'S4: khóa 15 phút sau 5 lần sai']
+  failed_login_count int [not null, default: 0, note: 'S4: khóa 15 phút sau 5 lần sai, CHECK failed_login_count >= 0']
   locked_until timestamptz [note: 'khóa tạm theo S4; hết thời điểm này thì tự đăng nhập lại được']
   last_login_at timestamptz
   created_at timestamptz [not null]
@@ -239,7 +239,7 @@ Table notifications {
 Table system_configs {
   id bigint [pk, increment]
   branch_id bigint [ref: > branches.id, note: 'rỗng = áp dụng toàn chuỗi; giá trị của chi nhánh ghi đè giá trị toàn chuỗi']
-  config_key varchar(100) [not null, note: 'BOOKING_WINDOW_DAYS=7, PROMOTION_CUTOFF_MIN=30, PROMOTION_GRACE_MIN=15, RECONFIRM_TTL_MIN=60, LATE_CANCEL_HOURS=2, PENALTY_LIMIT_PER_MONTH=3, PENALTY_LOCK_DAYS=7, PT_MIN_LEAD_HOURS=12, FREEZE_MIN_DAYS=7, FREEZE_MAX_DAYS=30, FREEZE_MAX_TIMES=2, TRANSFER_MIN_DAYS=30, TRANSFER_FEE=200000, PENDING_INVOICE_TTL_DAYS=3']
+  config_key varchar(100) [not null, note: 'BOOKING_WINDOW_DAYS=7, PROMOTION_CUTOFF_MIN=30, PROMOTION_GRACE_MIN=15, RECONFIRM_TTL_MIN=60, LATE_CANCEL_HOURS=2, PENALTY_LIMIT_PER_MONTH=3, PENALTY_LOCK_DAYS=7, PT_MIN_LEAD_HOURS=12, FREEZE_MIN_DAYS=7, FREEZE_MAX_DAYS=30, FREEZE_MAX_TIMES=2, TRANSFER_MIN_DAYS=30, TRANSFER_FEE=200000, PENDING_INVOICE_TTL_DAYS=3, SESSION_WARNING_THRESHOLD=2']
   config_value varchar(255) [not null]
   description varchar(255)
   updated_by bigint [ref: > users.id]
@@ -260,8 +260,8 @@ Table branches {
   address varchar(255)
   phone varchar(20)
   open_time time [not null, note: 'giờ mở cửa; check-in và email chỉ trong khung open_time–close_time']
-  close_time time [not null]
-  capacity int
+  close_time time [not null, note: 'CHECK close_time > open_time']
+  capacity int [note: 'CHECK capacity IS NULL OR capacity > 0']
   status active_status [not null, default: 'ACTIVE']
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
@@ -305,6 +305,9 @@ Table maintenance_logs {
   cost int [note: 'VND, CHECK cost >= 0']
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
+  indexes {
+    equipment_id [note: 'xem lịch sử bảo trì của một thiết bị (F11)']
+  }
 }
 
 // =====================================================================
@@ -328,7 +331,7 @@ Table members {
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
   indexes {
-    full_name
+    (`lower(full_name) varchar_pattern_ops`) [name: 'ix_members_full_name', note: 'Tối ưu cho truy vấn LIKE theo chữ thường']
   }
 }
 
@@ -351,9 +354,9 @@ Table body_metrics {
   member_id bigint [not null, ref: > members.id]
   recorded_by bigint [ref: > users.id]
   measured_at date [not null]
-  weight decimal(5,2) [note: 'kg']
-  height decimal(5,2) [note: 'cm']
-  body_fat decimal(4,2) [note: '%']
+  weight decimal(5,2) [note: 'kg. CHECK weight > 0']
+  height decimal(5,2) [note: 'cm. CHECK height > 0']
+  body_fat decimal(4,2) [note: '%. CHECK body_fat >= 0 AND body_fat <= 100']
   muscle_mass decimal(5,2) [note: 'kg']
   note text
   created_at timestamptz [not null]
@@ -386,10 +389,10 @@ Table memberships {
   branch_id bigint [ref: > branches.id, note: 'chi nhánh được dùng; rỗng = toàn chuỗi (chép từ packages.branch_id)']
   sold_branch_id bigint [not null, ref: > branches.id, note: 'chi nhánh bán, dùng cho báo cáo doanh thu']
   invoice_item_id bigint [ref: > invoice_items.id, note: 'dòng hóa đơn tạo ra gói; rỗng với gói nhận chuyển nhượng']
-  start_date date [not null, note: 'gói PENDING mang ngày dự kiến; tính lại lúc hóa đơn chuyển PAID (nối tiếp gói cũ nếu còn hạn)']
-  end_date date [not null, note: 'CHECK end_date >= start_date; cộng thêm số ngày bảo lưu. Khi bảo lưu được duyệt, gói UPCOMING cùng loại nối tiếp phía sau cũng được dời start_date và end_date thêm đúng số ngày đó, trong cùng giao dịch (chốt 01/11)']
+  start_date date [not null, note: 'gói PENDING mang ngày dự kiến; tính lại lúc hóa đơn chuyển PAID: ngày sau ngày gói cũ cùng loại hết hiệu lực (gói SESSION cũ đã về 0 buổi thì là ngày mai). Gói UPCOMING nối sau gói SESSION được kéo về ngày mai khi gói SESSION bị trừ buổi cuối, trong cùng giao dịch check-in; gói UPCOMING nối sau gói PT được kéo về hôm nay và kích hoạt khi buổi PT cuối được xác nhận (chốt 03/11)']
+  end_date date [not null, note: 'ngày cuối còn dùng được: start_date + packages.duration_days - 1; CHECK end_date >= start_date; cộng thêm số ngày bảo lưu. Khi bảo lưu được duyệt, gói UPCOMING cùng loại nối tiếp phía sau cũng được dời start_date và end_date thêm đúng số ngày đó, trong cùng giao dịch (chốt 01/11)']
   total_sessions int [note: 'chép từ packages.session_count lúc mua']
-  remaining_sessions int [note: 'CHECK remaining_sessions >= 0']
+  remaining_sessions int [note: 'CHECK remaining_sessions >= 0. CHECK ((package_type = \'TIME\' AND total_sessions IS NULL AND remaining_sessions IS NULL) OR (package_type IN (\'SESSION\', \'PT\') AND total_sessions IS NOT NULL AND remaining_sessions IS NOT NULL AND remaining_sessions <= total_sessions))']
   freeze_count int [not null, default: 0]
   status membership_status [not null, default: 'PENDING']
   version int [not null, default: 0, note: 'khóa lạc quan (@Version): trừ buổi, bảo lưu, kích hoạt']
@@ -397,7 +400,7 @@ Table memberships {
   updated_at timestamptz [not null]
   indexes {
     (member_id, status)
-    end_date [note: 'tác vụ nền nhắc sắp hết hạn, chuyển EXPIRED']
+    end_date [note: 'tác vụ nền chạy lúc 00:00 giờ Việt Nam, và chạy bù mỗi khi máy chủ khởi động: chuyển EXPIRED gói ACTIVE có end_date < hôm nay, và gói SESSION ACTIVE có remaining_sessions = 0 mà hôm nay chưa có lượt check-in trừ buổi; chạy trước tác vụ kích hoạt UPCOMING']
     start_date [name: 'ix_memberships_upcoming', note: 'chỉ mục có điều kiện WHERE status = UPCOMING: tác vụ nền chuyển UPCOMING thành ACTIVE']
     (member_id, package_type, branch_id) [unique, name: 'uq_one_active_per_type', note: 'chỉ mục duy nhất có điều kiện, NULLS NOT DISTINCT (gói toàn chuỗi có branch_id rỗng): WHERE status IN (ACTIVE, FROZEN)']
     package_id
@@ -405,13 +408,15 @@ Table memberships {
   }
 }
 
+
+
 Table membership_freezes {
   id bigint [pk, increment]
   membership_id bigint [not null, ref: > memberships.id]
   requested_by bigint [not null, ref: > users.id]
   approved_by bigint [ref: > users.id, note: 'quản lý chi nhánh']
   from_date date [not null]
-  to_date date [not null, note: 'CHECK số ngày trong khoảng FREEZE_MIN_DAYS–FREEZE_MAX_DAYS (kiểm tra trong code)']
+  to_date date [not null, note: 'CHECK to_date >= from_date. CHECK số ngày trong khoảng FREEZE_MIN_DAYS–FREEZE_MAX_DAYS (kiểm tra trong code)']
   reason text
   status freeze_status [not null, default: 'PENDING', note: 'APPROVED thì cộng số ngày vào end_date của gói, và dời gói UPCOMING cùng loại nối tiếp phía sau']
   decided_at timestamptz
@@ -446,7 +451,7 @@ Table checkins {
   branch_id bigint [not null, ref: > branches.id]
   created_by bigint [not null, ref: > users.id, note: 'lễ tân thực hiện']
   method checkin_method [not null, default: 'MANUAL']
-  match_score decimal(5,4) [note: 'chỉ có khi method = FACE']
+  match_score decimal(5,4) [note: 'chỉ có khi method = FACE. CHECK method = \'FACE\' OR match_score IS NULL']
   checkin_date date [not null, note: 'ngày theo giờ Việt Nam, để xác định lần check-in đầu tiên trong ngày']
   session_deducted boolean [not null, default: false, note: 'true nếu lượt này trừ 1 buổi của gói theo buổi']
   checked_in_at timestamptz [not null]
@@ -484,6 +489,9 @@ Table class_schedules {
   status active_status [not null, default: 'ACTIVE']
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
+  indexes {
+    (branch_id, status) [name: 'ix_class_schedules_branch_status']
+  }
 }
 
 Table class_sessions {
@@ -530,7 +538,7 @@ Table class_bookings {
     (class_session_id, status, waitlisted_at) [note: 'lấy người đứng đầu danh sách chờ']
     (member_id, status)
   }
-  Note: 'NF6: khi đặt chỗ, khóa (SELECT ... FOR UPDATE) dòng class_sessions để không vượt sĩ số, và dòng members của hội viên để hai yêu cầu đặt đồng thời không lọt kiểm tra trùng giờ. Thứ tự khóa cố định: members trước, class_sessions sau, để tránh deadlock.'
+  Note: 'NF6: khi đặt chỗ, khóa (SELECT ... FOR UPDATE) dòng class_sessions để không vượt sĩ số, và dòng members của hội viên để hai yêu cầu đặt đồng thời không lọt kiểm tra trùng giờ. Thứ tự khóa cố định: members trước, class_sessions sau, để tránh deadlock. CHECK ((status = \'CANCELLED\') = (cancelled_at IS NOT NULL AND cancel_reason IS NOT NULL)) AND (is_late_cancel = false OR status = \'CANCELLED\')'
 }
 
 // =====================================================================
@@ -557,7 +565,7 @@ Table pt_sessions {
   membership_id bigint [not null, ref: > memberships.id, note: 'gói loại PT']
   branch_id bigint [not null, ref: > branches.id]
   start_at timestamptz [not null, note: 'đặt trước ít nhất PT_MIN_LEAD_HOURS']
-  end_at timestamptz [not null]
+  end_at timestamptz [not null, note: 'CHECK end_at > start_at']
   status pt_session_status [not null, default: 'BOOKED']
   confirmed_at timestamptz [note: 'PT xác nhận buổi đã diễn ra; chỉ lúc này mới trừ buổi']
   commission_amount int [note: 'VND, chụp lúc chuyển DONE, không đổi về sau: staff.commission_rate × (invoice_items.amount - invoice_items.discount_amount) ÷ memberships.total_sessions, làm tròn đến đồng. Gói nhận chuyển nhượng lấy dòng hóa đơn của gói gốc qua membership_transfers (chốt 01/11). CHECK có giá trị khi và chỉ khi status = DONE']
@@ -654,7 +662,7 @@ Table promotions {
   code varchar(50) [unique, not null]
   type promotion_type [not null]
   value int [not null, note: 'PERCENT: 1..100; FIXED: số tiền VND']
-  max_discount int [note: 'mức giảm tối đa khi type = PERCENT']
+  max_discount int [note: 'mức giảm tối đa khi type = PERCENT, CHECK (type = \'PERCENT\' OR max_discount IS NULL)']
   min_amount int [note: 'giá trị hóa đơn tối thiểu']
   start_at timestamptz [not null]
   end_at timestamptz [not null]
@@ -736,9 +744,9 @@ Table staff {
   staff_code varchar(20) [unique, not null]
   full_name varchar(255) [not null]
   phone varchar(20) [note: 'nơi duy nhất lưu số điện thoại nhân viên; cùng định dạng chuẩn với members.phone (CHECK); email lấy từ users.email']
-  base_salary int [not null, default: 0]
-  hourly_rate int
-  commission_rate decimal(5,4) [note: 'hoa hồng PT, ví dụ 0.1000 = 10%']
+  base_salary int [not null, default: 0, note: 'CHECK base_salary >= 0']
+  hourly_rate int [note: 'CHECK hourly_rate IS NULL OR hourly_rate >= 0']
+  commission_rate decimal(5,4) [note: 'hoa hồng PT, ví dụ 0.1000 = 10%. CHECK commission_rate IS NULL OR (commission_rate >= 0 AND commission_rate <= 1)']
   specialties varchar(255)
   hired_at date
   status active_status [not null, default: 'ACTIVE']
@@ -778,11 +786,11 @@ Table payrolls {
   id bigint [pk, increment]
   staff_id bigint [not null, ref: > staff.id]
   branch_id bigint [not null, ref: > branches.id, note: 'chép từ staff.branch_id lúc tính lương, để báo cáo lương theo chi nhánh không đổi khi nhân viên chuyển chi nhánh (v4)']
-  month varchar(7) [not null, note: 'YYYY-MM']
-  base_amount int [not null]
-  commission_amount int [not null, default: 0, note: 'tổng pt_sessions.commission_amount của các buổi DONE trong tháng']
-  deduction int [not null, default: 0]
-  total int [not null]
+  month varchar(7) [not null, note: 'YYYY-MM. CHECK month ~ \'^[0-9]{4}-(0[1-9]|1[0-2])$\'']
+  base_amount int [not null, note: 'CHECK base_amount >= 0']
+  commission_amount int [not null, default: 0, note: 'tổng pt_sessions.commission_amount của các buổi DONE trong tháng. CHECK commission_amount >= 0']
+  deduction int [not null, default: 0, note: 'CHECK deduction >= 0']
+  total int [not null, note: 'CHECK total = base_amount + commission_amount - deduction']
   status payroll_status [not null, default: 'DRAFT']
   created_at timestamptz [not null]
   updated_at timestamptz [not null]

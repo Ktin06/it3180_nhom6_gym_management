@@ -96,7 +96,7 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 #### B. Hậu điều kiện
 - **Thành công:**
   - Một bản ghi mới được tạo trong bảng `checkins` với `checked_in_at = now()`, `method = 'MANUAL'`, `checkin_date = :today` (ngày hiện tại theo giờ Việt Nam, xem BR-F4.3).
-  - Nếu sử dụng gói `SESSION` và đây là lần đầu tiên check-in trong ngày: `session_deducted = true`, đồng thời giảm `memberships.remaining_sessions` đi 1 đơn vị. Nếu số buổi còn lại về 0, gói **vẫn giữ trạng thái `ACTIVE` đến hết ngày** (để hội viên có thể quay lại tập tiếp trong ngày mà không bị trừ thêm/từ chối); tác vụ nền ban đêm (batch job 23:59:59) sẽ chuyển gói về `EXPIRED`.
+  - Nếu sử dụng gói `SESSION` và đây là lần đầu tiên check-in trong ngày: `session_deducted = true`, đồng thời giảm `memberships.remaining_sessions` đi 1 đơn vị. Nếu số buổi còn lại về 0, gói **vẫn giữ trạng thái `ACTIVE` đến hết ngày** (để hội viên có thể quay lại tập tiếp trong ngày mà không bị trừ thêm/từ chối); tác vụ nền đầu ngày hôm sau chuyển gói về `EXPIRED`. Nếu hội viên đã có gói gia hạn nối tiếp (`UPCOMING`) cùng loại, gói đó được kéo lịch về bắt đầu từ ngày mai (BR-F4.7).
   - Nếu sử dụng gói `TIME` hoặc gói `SESSION` đã trừ buổi trong ngày: `session_deducted = false`, không thay đổi số buổi.
   - Nếu hội viên có lịch lớp học nhóm trong khung giờ từ `now() - 15 phút` đến `now() + 60 phút`: cập nhật `class_bookings.arrived_at = now()`.
   - Màn hình hiển thị thông báo check-in thành công màu xanh lá, kèm âm thanh thông báo và thông tin gói tập được áp dụng.
@@ -116,7 +116,8 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
    - **Trường hợp 2 (Chỉ có gói SESSION):** Nếu hội viên không có gói `TIME`, nhưng có gói `package_type = 'SESSION'` đang `ACTIVE`:
      - Kiểm tra trong bảng `checkins`: xem hội viên với gói này đã có lượt check-in nào trong ngày (`checkin_date = :today`) mà `session_deducted = true` hay chưa.
      - Nếu **chưa có lượt trừ buổi nào trong ngày**:
-       - Nếu `remaining_sessions > 0`: Hệ thống trừ 1 buổi (`remaining_sessions = remaining_sessions - 1`), đặt `session_deducted = true`. **Lưu ý nghiệp vụ:** Kể cả khi số buổi còn lại giảm về 0, gói tập **vẫn giữ trạng thái `ACTIVE` đến hết ngày** (để hội viên có thể check-in lại trong ngày). Tác vụ nền ban đêm sẽ chuyển sang `EXPIRED`.
+       - Nếu `remaining_sessions > 0`: Hệ thống trừ 1 buổi (`remaining_sessions = remaining_sessions - 1`), đặt `session_deducted = true`. **Lưu ý nghiệp vụ:** Kể cả khi số buổi còn lại giảm về 0, gói tập **vẫn giữ trạng thái `ACTIVE` đến hết ngày** (để hội viên có thể check-in lại trong ngày). Tác vụ nền đầu ngày hôm sau chuyển gói sang `EXPIRED`.
+         - Nếu sau khi trừ, `remaining_sessions = 0`: hệ thống kéo lịch các gói `UPCOMING` nối tiếp theo BR-F4.7, trong cùng giao dịch.
        - Nếu `remaining_sessions <= 0`: Hệ thống từ chối check-in với mã lỗi 422 (xem luồng ngoại lệ E4).
      - Nếu **đã có lượt trừ buổi trong ngày**:
        - Kể cả khi `remaining_sessions = 0`, hệ thống vẫn cho phép check-in vào phòng tập bình thường theo quy tắc một ngày chỉ trừ tối đa một buổi. Giữ nguyên số buổi (0 buổi) và đặt `session_deducted = false`.
@@ -151,9 +152,8 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
   - Gói tập duy nhất của hội viên đang ở trạng thái `FROZEN`.
   - Hệ thống từ chối: *"Gói tập của hội viên đang trong thời gian bảo lưu (từ ngày... đến ngày...). Vui lòng liên hệ quản lý để hủy bảo lưu sớm nếu muốn tập tiếp."*
 - **E6 – Xung đột lượt trừ buổi đồng thời (409 Conflict):**
-- **E6 – Xung đột lượt trừ buổi đồng thời (409 Conflict):**
   - Hai yêu cầu check-in cùng lúc vi phạm khóa lạc quan `@Version` trên bảng `memberships` hoặc vi phạm chỉ mục duy nhất có điều kiện `uq_one_deduction_per_day` (`WHERE session_deducted = true`).
-  - Hệ thống hủy giao dịch bị xung đột và trả về mã lỗi **409 Conflict** (thông qua `GlobalExceptionHandler` có sẵn) với thông báo: *"Dữ liệu lượt check-in đang được xử lý đồng thời bởi một thao tác khác. Vui lòng thử lại."* Khi nhân viên bấm thử lại (retry), hệ thống sẽ nhận diện đã có lượt trừ buổi và cho phép check-in thành công với `session_deducted = false`.
+  - Hệ thống hủy giao dịch bị xung đột và trả về mã lỗi **409 Conflict**. `GlobalExceptionHandler` có sẵn chỉ trả thông báo chung cho `OptimisticLockingFailureException` và `DataIntegrityViolationException`, nên service check-in ghi bằng `saveAndFlush` cả bản ghi `checkins`, gói đang dùng và các gói `UPCOMING` được kéo lịch theo BR-F4.7 (để lỗi phát sinh ngay trong service, không đợi lúc commit), bắt hai ngoại lệ này rồi ném `ConflictException` với thông báo: *"Dữ liệu lượt check-in đang được xử lý đồng thời bởi một thao tác khác. Vui lòng thử lại."* Khi nhân viên bấm thử lại (retry), hệ thống sẽ nhận diện đã có lượt trừ buổi và cho phép check-in thành công với `session_deducted = false`.
 - **E7 – Hồ sơ hội viên ngừng hoạt động (422 Unprocessable Content):**
   - `members.status = 'INACTIVE'` (kiểm tra ở bước 3), kể cả khi hội viên vẫn còn gói tập `ACTIVE`.
   - Hệ thống từ chối: *"Hồ sơ hội viên này đã ngừng hoạt động. Vui lòng liên hệ quản lý để được hỗ trợ."*
@@ -241,6 +241,7 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 - **BR-F4.4 (Giờ mở cửa phòng tập):** Giờ mở cửa và đóng cửa đọc từ `branches.open_time`, `branches.close_time` của chi nhánh (theo ERD), không viết cứng mã nguồn. Được check-in khi `open_time <= giờ hiện tại < close_time`.
 - **BR-F4.5 (Hiệu năng):** Phản hồi tra cứu hội viên và xác nhận check-in phải đạt dưới 2 giây trên tập dữ liệu 10.000 hội viên (NF1).
 - **BR-F4.6 (Phân quyền):** Chỉ tài khoản nhân viên gắn với chi nhánh mới được thực hiện check-in cho chi nhánh đó (S3). Dữ liệu check-in được tự động gắn `branch_id` của nhân viên thao tác.
+- **BR-F4.7 (Gói SESSION hết buổi trước hạn, chốt 03/11):** Khi lượt check-in trừ buổi cuối (`remaining_sessions` về 0), hệ thống tìm các gói của cùng hội viên có `status = 'UPCOMING'`, cùng `package_type = 'SESSION'`, cùng `branch_id` (so sánh `IS NOT DISTINCT FROM` vì gói toàn chuỗi có `branch_id` rỗng). Gọi `D` = `start_date` của gói UPCOMING sớm nhất − (`:today` + 1 ngày); nếu `D > 0`, mọi gói UPCOMING đó được trừ `D` ngày ở cả `start_date` và `end_date` (giữ nguyên số ngày hiệu lực và thứ tự nối tiếp). Thao tác nằm trong cùng giao dịch check-in, dùng khóa lạc quan `@Version` của `memberships`. Tác vụ nền chạy lúc 00:00 giờ Việt Nam (chạy bù mỗi khi máy chủ khởi động) chuyển `EXPIRED` các gói `SESSION` `ACTIVE` có `remaining_sessions = 0` mà hôm nay chưa có lượt check-in trừ buổi trước, rồi mới kích hoạt gói `UPCOMING` có `start_date <= :today`, để không vi phạm `uq_one_active_per_type`.
 
 ---
 
@@ -381,3 +382,10 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
   - **Then** Một yêu cầu thành công (201 Created, trừ 1 buổi còn 4, `session_deducted = true`). Yêu cầu còn lại gặp xung đột trả về mã **409 Conflict**.
   - **And When** Lễ tân của yêu cầu bị lỗi 409 bấm thử lại (retry) ngay sau đó.
   - **Then** Hệ thống phát hiện đã có lượt trừ buổi trong ngày, xử lý thành công trả về mã **201 Created**, ghi nhận `session_deducted = false` và không trừ thêm buổi nào của hội viên Nam.
+
+- **Scenario 8: Gói SESSION hết buổi trước hạn kéo gói gia hạn về ngày mai**
+  - **Given** Hôm nay là 03/11/2026. Hội viên Hùng có gói SESSION A còn 1 buổi, hết hạn 30/11/2026; Hùng đã gia hạn gói SESSION B (60 ngày) đang `UPCOMING` với `start_date = 01/12/2026`, `end_date = 29/01/2027`.
+  - **When** Lễ tân check-in cho Hùng, gói A bị trừ buổi cuối về 0.
+  - **Then** Check-in thành công 201 Created; gói A vẫn `ACTIVE` đến hết ngày 03/11; gói B được dời thành `start_date = 04/11/2026`, `end_date = 02/01/2027` (vẫn 60 ngày).
+  - **And When** Tác vụ nền đầu ngày 04/11/2026 chạy.
+  - **Then** Gói A chuyển `EXPIRED`, sau đó gói B chuyển `ACTIVE`; Hùng check-in được ngay trong ngày 04/11.
