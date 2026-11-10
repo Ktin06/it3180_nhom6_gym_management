@@ -4,10 +4,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
+import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 
 /** Đọc Authentication đã xác thực: name là userId (JWT sub), authority ROLE_... . F2 không giải mã JWT. */
-public record MemberActor(Long userId, Role role) {
-    public enum Role { SUPER_ADMIN, BRANCH_MANAGER, RECEPTIONIST, TRAINER, MEMBER }
+public record MemberActor(Long userId, UserRole role) {
 
     public static MemberActor from(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) { throw invalid(); }
@@ -16,8 +16,8 @@ public record MemberActor(Long userId, Role role) {
             if (userId <= 0) { throw invalid(); }
             Set<String> authorities = authentication.getAuthorities().stream()
                 .map(a -> a.getAuthority()).collect(Collectors.toSet());
-            Role selected = null;
-            for (Role role : Role.values()) {
+            UserRole selected = null;
+            for (UserRole role : UserRole.values()) {
                 if (authorities.contains("ROLE_" + role.name())) {
                     if (selected != null) { throw invalid(); }
                     selected = role;

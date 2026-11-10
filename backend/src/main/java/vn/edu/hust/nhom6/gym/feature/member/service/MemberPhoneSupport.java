@@ -16,12 +16,20 @@ public final class MemberPhoneSupport {
         }
     }
 
-    /** Từ khóa ngắn tìm theo tiền tố nguyên dạng; chỉ chuẩn hóa khi đủ độ dài số điện thoại. */
+    /**
+     * Từ khóa ngắn tìm theo tiền tố nguyên dạng; đủ độ dài thì chuẩn hóa.
+     * Dãy số dài nhưng không phải số điện thoại hợp lệ cũng giữ nguyên dạng nên không khớp hồ sơ nào (trả trang rỗng).
+     */
     public static String normalizeSearchPrefix(String keyword) {
         String cleaned = keyword == null ? "" : keyword.replaceAll("[\\s.\\-]", "");
+        if (!cleaned.matches("\\+?[0-9]+")) { return normalize(keyword); }
         int fullLength = cleaned.startsWith("+84") ? 12 : cleaned.startsWith("84") ? 11 : 10;
-        if (cleaned.matches("\\+?[0-9]+") && cleaned.length() < fullLength) { return cleaned; }
-        return normalize(keyword);
+        if (cleaned.length() < fullLength) { return cleaned; }
+        try {
+            return PhoneUtils.normalizePhone(cleaned);
+        } catch (BusinessRuleException ex) {
+            return cleaned;
+        }
     }
 
     public static boolean isPhoneKeyword(String keyword) {

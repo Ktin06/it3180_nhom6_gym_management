@@ -6,6 +6,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,12 +36,14 @@ public class MemberController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_MANAGER','RECEPTIONIST')")
     @Operation(summary = "Tìm hội viên theo mã, điện thoại hoặc tiền tố họ tên trong phạm vi chi nhánh",
         description = "Mã HV + 6 chữ số không phân biệt hoa/thường; điện thoại đầy đủ hoặc tiền tố đầu 0 (ví dụ 0912). "
-            + "Dãy số ngắn như 5678, 84912 không khớp thì trả trang rỗng. "
+            + "Dãy số không khớp (ngắn như 5678, 84912 hoặc dài nhưng không phải số điện thoại hợp lệ) thì trả trang rỗng. "
             + "Số đầy đủ hỗ trợ chuẩn hóa +84; page từ 0; size từ 1 đến 100, mặc định 20; "
             + "sắp xếp id giảm dần. Loại hồ sơ đã xóa mềm.")
     public PageResponse<MemberSummaryResponse> search(Authentication auth,
             @RequestParam(required = false) String keyword, @RequestParam(required = false) MemberStatus status,
-            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "0") @Min(value = 0, message = "Trang phải từ 0") int page,
+            @RequestParam(defaultValue = "20") @Min(value = 1, message = "Kích thước trang từ 1 đến 100")
+            @Max(value = 100, message = "Kích thước trang từ 1 đến 100") int size) {
         return members.search(MemberActor.from(auth), keyword, status, page, size);
     }
 

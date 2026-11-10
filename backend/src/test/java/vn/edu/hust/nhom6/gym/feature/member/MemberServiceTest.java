@@ -10,29 +10,33 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import jakarta.validation.Validator;
 import vn.edu.hust.nhom6.gym.common.exception.*;
-import vn.edu.hust.nhom6.gym.feature.member.service.MemberActor.Role;
+import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 import vn.edu.hust.nhom6.gym.feature.member.dto.*;
 import vn.edu.hust.nhom6.gym.feature.member.entity.*;
 import vn.edu.hust.nhom6.gym.feature.member.mapper.MemberMapper;
 import vn.edu.hust.nhom6.gym.feature.member.repository.MemberRepository;
 import vn.edu.hust.nhom6.gym.feature.member.service.*;
+import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberAccountAccess;
+import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberBranchAccess;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
     @Mock MemberRepository repository;
-    @Mock MemberDependencies integrations;
+    @Mock MemberAccountAccess accounts;
+    @Mock MemberBranchAccess branches;
     @Mock Validator validator;
     MemberServiceImpl service;
-    final MemberActor receptionist = new MemberActor(10L, Role.RECEPTIONIST);
+    final MemberActor receptionist = new MemberActor(10L, UserRole.RECEPTIONIST);
 
     @BeforeEach
     void setUp() {
-        service = new MemberServiceImpl(repository, integrations, new MemberMapper(), validator);
+        service = new MemberServiceImpl(repository, accounts, branches, new MemberMapper(), validator);
     }
 
     @Test
     void createsWithStaffBranchAndNormalizedPhone() {
-        when(integrations.staffBranchId(10L)).thenReturn(7L);
+        when(branches.staffBranchId(10L)).thenReturn(7L);
         when(repository.nextMemberCode()).thenReturn(123L);
         when(repository.saveAndFlush(any())).thenAnswer(inv -> inv.getArgument(0));
         var result = service.create(receptionist, new CreateMemberRequest("  Nguyễn An  ", "+84 912 345 678", null, null));
@@ -41,12 +45,12 @@ class MemberServiceTest {
         assertThat(result.phone()).isEqualTo("0912345678");
         assertThat(result.fullName()).isEqualTo("Nguyễn An");
         assertThat(result.userId()).isNull();
-        verify(integrations, never()).defaultBranchId();
+        verify(branches, never()).defaultBranchId();
     }
 
     @Test
     void duplicatePhoneDoesNotConsumeSequence() {
-        when(integrations.staffBranchId(10L)).thenReturn(7L);
+        when(branches.staffBranchId(10L)).thenReturn(7L);
         when(repository.existsByPhone("0912345678")).thenReturn(true);
         assertThatThrownBy(() -> service.create(receptionist,
             new CreateMemberRequest("An", "0912345678", null, null))).isInstanceOf(ConflictException.class);
@@ -55,8 +59,29 @@ class MemberServiceTest {
     }
 
     @Test
+    void concurrentDuplicatePhoneStillGetsFrontDeskGuidance() {
+        when(branches.staffBranchId(10L)).thenReturn(7L);
+        when(repository.nextMemberCode()).thenReturn(1L);
+        when(repository.saveAndFlush(any())).thenThrow(new DataIntegrityViolationException("lỗi",
+            new RuntimeException("duplicate key value violates unique constraint \"uq_members_phone\"")));
+        assertThatThrownBy(() -> service.create(receptionist,
+            new CreateMemberRequest("An", "0912345678", null, null)))
+            .isInstanceOf(ConflictException.class).hasMessageContaining("liên hệ quầy lễ tân");
+    }
+
+    @Test
+    void otherConstraintViolationsAreNotReportedAsDuplicatePhone() {
+        when(branches.staffBranchId(10L)).thenReturn(7L);
+        when(repository.nextMemberCode()).thenReturn(1L);
+        var failure = new DataIntegrityViolationException("lỗi", new RuntimeException("violates uq_members_member_code"));
+        when(repository.saveAndFlush(any())).thenThrow(failure);
+        assertThatThrownBy(() -> service.create(receptionist,
+            new CreateMemberRequest("An", "0912345678", null, null))).isSameAs(failure);
+    }
+
+    @Test
     void exhaustedSequenceDoesNotTruncateCode() {
-        when(integrations.staffBranchId(10L)).thenReturn(7L);
+        when(branches.staffBranchId(10L)).thenReturn(7L);
         when(repository.nextMemberCode()).thenReturn(1000000L);
         assertThatThrownBy(() -> service.create(receptionist,
             new CreateMemberRequest("An", "0912345678", null, null))).isInstanceOf(BusinessRuleException.class);
@@ -68,11 +93,11 @@ class MemberServiceTest {
         Member member = new Member();
         member.setHomeBranchId(8L);
         when(repository.findForUpdate(1L)).thenReturn(Optional.of(member));
-        when(integrations.staffBranchId(10L)).thenReturn(7L);
+        when(branches.staffBranchId(10L)).thenReturn(7L);
         assertThatThrownBy(() -> service.update(receptionist, 1L,
             new UpdateMemberRequest("An", "0912345678", null, null, MemberStatus.INACTIVE)))
             .isInstanceOf(NotFoundException.class);
-        verify(integrations, never()).disable(any());
+        verify(accounts, never()).disable(any());
     }
 
     @Test
@@ -80,18 +105,18 @@ class MemberServiceTest {
         Member member = new Member();
         member.setUserId(99L);
         when(repository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(member));
-        assertThatThrownBy(() -> service.detail(new MemberActor(3L, Role.MEMBER), 1L))
+        assertThatThrownBy(() -> service.detail(new MemberActor(3L, UserRole.MEMBER), 1L))
             .isInstanceOf(NotFoundException.class);
-        verifyNoInteractions(integrations);
+        verifyNoInteractions(accounts, branches);
     }
 
     @Test
     void failedAccountTransitionDoesNotMutateNamePhoneOrStatus() {
         Member member = linkedMember();
         when(repository.findForUpdate(1L)).thenReturn(Optional.of(member));
-        when(integrations.staffBranchId(10L)).thenReturn(7L);
+        when(branches.staffBranchId(10L)).thenReturn(7L);
         var failure = new NotFoundException("Không tìm thấy tài khoản liên kết.");
-        doThrow(failure).when(integrations).disable(42L);
+        doThrow(failure).when(accounts).disable(42L);
 
         assertThatThrownBy(() -> service.update(receptionist, 1L,
             new UpdateMemberRequest("Tên mới", "0912345699", null, null, MemberStatus.INACTIVE)))
@@ -107,8 +132,8 @@ class MemberServiceTest {
     void editingProfileWithoutStatusTransitionDoesNotDisableOrActivateAccount() {
         Member member = linkedMember();
         when(repository.findForUpdate(1L)).thenReturn(Optional.of(member));
-        when(integrations.staffBranchId(10L)).thenReturn(7L);
-        when(integrations.emails(Set.of(42L))).thenReturn(Map.of(42L, "member@example.com"));
+        when(branches.staffBranchId(10L)).thenReturn(7L);
+        when(accounts.emails(Set.of(42L))).thenReturn(Map.of(42L, "member@example.com"));
 
         var result = service.update(receptionist, 1L,
             new UpdateMemberRequest("Tên mới", "0912345699", null, null, MemberStatus.ACTIVE));
@@ -116,8 +141,8 @@ class MemberServiceTest {
         assertThat(result.fullName()).isEqualTo("Tên mới");
         assertThat(result.phone()).isEqualTo("0912345699");
         assertThat(result.email()).isEqualTo("member@example.com");
-        verify(integrations, never()).disable(any());
-        verify(integrations, never()).activateIfDisabled(any());
+        verify(accounts, never()).disable(any());
+        verify(accounts, never()).activateIfDisabled(any());
     }
 
     private Member linkedMember() {

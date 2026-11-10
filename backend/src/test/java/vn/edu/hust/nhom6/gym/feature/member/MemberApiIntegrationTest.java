@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.json.JsonMapper;
 import static org.assertj.core.api.Assertions.*;
@@ -26,7 +25,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import vn.edu.hust.nhom6.gym.feature.member.service.MemberActor.Role;
+import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 import vn.edu.hust.nhom6.gym.feature.member.dto.CreateMemberRequest;
 import vn.edu.hust.nhom6.gym.feature.member.dto.UpdateMemberRequest;
 import vn.edu.hust.nhom6.gym.feature.member.entity.MemberStatus;
@@ -43,7 +42,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import({MemberTestConfiguration.class, StandaloneMemberAccountTestConfiguration.class})
-@Sql("/db/fixtures/f2-staff.sql")
 class MemberApiIntegrationTest {
     @Autowired MockMvc mvc;
     @Autowired JdbcTemplate jdbc;
@@ -79,7 +77,7 @@ class MemberApiIntegrationTest {
 
     @Test
     void createNormalizesAndReturnsLocationAndAudit() throws Exception {
-        mvc.perform(post("/api/v1/members").with(identity(receptionist, Role.RECEPTIONIST))
+        mvc.perform(post("/api/v1/members").with(identity(receptionist, UserRole.RECEPTIONIST))
                 .contentType(MediaType.APPLICATION_JSON).content(createBody("+84 912 345 678")))
             .andExpect(status().isCreated())
             .andExpect(header().exists("Location"))
@@ -99,17 +97,17 @@ class MemberApiIntegrationTest {
         Long deleted = profile("HV000904", "0912345604", branch, null, "Nguyễn Dũng");
         jdbc.update("UPDATE members SET deleted_at = now() WHERE id = ?", deleted);
         mvc.perform(get("/api/v1/members").param("keyword", "Nguyễn").param("size", "1")
-                .with(identity(receptionist, Role.RECEPTIONIST)))
+                .with(identity(receptionist, UserRole.RECEPTIONIST)))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(2))
             .andExpect(jsonPath("$.totalPages").value(2)).andExpect(jsonPath("$.content[0].memberCode").value("HV000902"));
         mvc.perform(get("/api/v1/members").param("keyword", "+84 912 345 601")
-                .with(identity(receptionist, Role.RECEPTIONIST)))
+                .with(identity(receptionist, UserRole.RECEPTIONIST)))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
             .andExpect(jsonPath("$.content[0].email").value("member@example.com"));
         mvc.perform(get("/api/v1/members").param("keyword", "HV000903")
-                .with(identity(receptionist, Role.RECEPTIONIST)))
+                .with(identity(receptionist, UserRole.RECEPTIONIST)))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0));
-        mvc.perform(get("/api/v1/members").with(identity(admin, Role.SUPER_ADMIN)))
+        mvc.perform(get("/api/v1/members").with(identity(admin, UserRole.SUPER_ADMIN)))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(3));
     }
 
@@ -118,7 +116,7 @@ class MemberApiIntegrationTest {
     void memberCodeSearchIsExactAndIgnoresCase(String keyword) throws Exception {
         profile("HV000901", "0912345601", branch, null, "Nguyễn An");
         profile("HV000902", "0912345602", branch, null, "hv000901 tên khác");
-        mvc.perform(get("/api/v1/members").with(identity(receptionist, Role.RECEPTIONIST))
+        mvc.perform(get("/api/v1/members").with(identity(receptionist, UserRole.RECEPTIONIST))
                 .param("keyword", keyword))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
             .andExpect(jsonPath("$.content[0].memberCode").value("HV000901"));
@@ -134,7 +132,7 @@ class MemberApiIntegrationTest {
         Long inactive = profile("HV000905", "0912345605", branch, null, "Giang");
         jdbc.update("UPDATE members SET status = 'INACTIVE' WHERE id = ?", inactive);
         profile("HV000906", "0909123401", branch, null, "0912 tên không được khớp");
-        RequestPostProcessor auth = identity(receptionist, Role.RECEPTIONIST);
+        RequestPostProcessor auth = identity(receptionist, UserRole.RECEPTIONIST);
 
         mvc.perform(get("/api/v1/members").with(auth)
                 .param("keyword", "0912").param("status", "ACTIVE").param("size", "1"))
@@ -147,7 +145,7 @@ class MemberApiIntegrationTest {
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(2))
             .andExpect(jsonPath("$.content[0].memberCode").value("HV000901"))
             .andExpect(jsonPath("$.content[0].email").value("member@example.com"));
-        mvc.perform(get("/api/v1/members").with(identity(admin, Role.SUPER_ADMIN))
+        mvc.perform(get("/api/v1/members").with(identity(admin, UserRole.SUPER_ADMIN))
                 .param("keyword", "0912").param("status", "ACTIVE"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(3));
         mvc.perform(get("/api/v1/members").with(auth).param("keyword", "0999"))
@@ -159,7 +157,7 @@ class MemberApiIntegrationTest {
     void shortNumericKeywordsWithoutMatchingPrefixReturnAnEmptyPage(String keyword) throws Exception {
         profile("HV000901", "0912345678", branch, null, "5678 tên không được khớp");
         profile("HV000902", "0849123456", branch, null, "Hội viên khác");
-        mvc.perform(get("/api/v1/members").with(identity(receptionist, Role.RECEPTIONIST))
+        mvc.perform(get("/api/v1/members").with(identity(receptionist, UserRole.RECEPTIONIST))
                 .param("keyword", keyword).param("status", "ACTIVE").param("page", "0").param("size", "1"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0))
             .andExpect(jsonPath("$.totalPages").value(0))
@@ -168,10 +166,12 @@ class MemberApiIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"1234567890", "09123456789", "+85912345678"})
-    void invalidCompletePhoneSearchStillReturns400(String keyword) throws Exception {
-        mvc.perform(get("/api/v1/members").with(identity(receptionist, Role.RECEPTIONIST))
+    void longInvalidNumericKeywordsReturnAnEmptyPage(String keyword) throws Exception {
+        profile("HV000901", "0912345678", branch, null, "An");
+        mvc.perform(get("/api/v1/members").with(identity(receptionist, UserRole.RECEPTIONIST))
                 .param("keyword", keyword))
-            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400));
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0))
+            .andExpect(jsonPath("$.content").isEmpty());
     }
 
     @ParameterizedTest
@@ -179,7 +179,7 @@ class MemberApiIntegrationTest {
     void completePhoneSearchStillNormalizesAndMatchesExactly(String keyword) throws Exception {
         profile("HV000901", "0912345601", branch, null, "An");
         profile("HV000902", "0912345602", branch, null, "Bình");
-        mvc.perform(get("/api/v1/members").with(identity(receptionist, Role.RECEPTIONIST))
+        mvc.perform(get("/api/v1/members").with(identity(receptionist, UserRole.RECEPTIONIST))
                 .param("keyword", keyword))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
             .andExpect(jsonPath("$.content[0].phone").value("0912345601"));
@@ -188,7 +188,7 @@ class MemberApiIntegrationTest {
     @ParameterizedTest
     @MethodSource("validBirthDates")
     void createAndUpdateAcceptPastOrAbsentBirthDate(LocalDate dob) throws Exception {
-        RequestPostProcessor auth = identity(receptionist, Role.RECEPTIONIST);
+        RequestPostProcessor auth = identity(receptionist, UserRole.RECEPTIONIST);
         var expected = dob == null ? org.hamcrest.Matchers.nullValue() : org.hamcrest.Matchers.is(dob.toString());
         mvc.perform(post("/api/v1/members").with(auth).contentType(MediaType.APPLICATION_JSON)
                 .content(json.writeValueAsString(new CreateMemberRequest("Nguyễn An", "0912345699", null, dob))))
@@ -209,7 +209,7 @@ class MemberApiIntegrationTest {
         Long id = profile("HV000901", "0912345601", branch, memberUser, "An");
         jdbc.update("UPDATE members SET dob = '2000-05-20' WHERE id = ?", id);
         refreshToken(memberUser);
-        RequestPostProcessor auth = identity(receptionist, Role.RECEPTIONIST);
+        RequestPostProcessor auth = identity(receptionist, UserRole.RECEPTIONIST);
         mvc.perform(post("/api/v1/members").with(auth).contentType(MediaType.APPLICATION_JSON)
                 .content(json.writeValueAsString(new CreateMemberRequest("Tên mới", "0912345699", null, dob))))
             .andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400))
@@ -235,7 +235,7 @@ class MemberApiIntegrationTest {
     void validatesEndpointAndRecordPermissions() throws Exception {
         Long id = profile("HV000901", "0912345601", branch, memberUser, "An");
         mvc.perform(get("/api/v1/members")).andExpect(status().isUnauthorized());
-        for (var role : List.of(Role.MEMBER, Role.TRAINER)) {
+        for (var role : List.of(UserRole.MEMBER, UserRole.TRAINER)) {
             mvc.perform(get("/api/v1/members").with(identity(memberUser, role)))
                 .andExpect(status().isForbidden());
             mvc.perform(post("/api/v1/members").with(identity(memberUser, role))
@@ -245,18 +245,18 @@ class MemberApiIntegrationTest {
                     .contentType(MediaType.APPLICATION_JSON).content(updateBody("0912345601", "INACTIVE")))
                 .andExpect(status().isForbidden());
         }
-        mvc.perform(get("/api/v1/members/{id}", id).with(identity(memberUser, Role.MEMBER)))
+        mvc.perform(get("/api/v1/members/{id}", id).with(identity(memberUser, UserRole.MEMBER)))
             .andExpect(status().isOk());
-        mvc.perform(get("/api/v1/members/{id}", id).with(identity(otherReceptionist, Role.RECEPTIONIST)))
+        mvc.perform(get("/api/v1/members/{id}", id).with(identity(otherReceptionist, UserRole.RECEPTIONIST)))
             .andExpect(status().isNotFound());
-        mvc.perform(get("/api/v1/members/{id}", id).with(identity(trainer, Role.TRAINER)))
+        mvc.perform(get("/api/v1/members/{id}", id).with(identity(trainer, UserRole.TRAINER)))
             .andExpect(status().isForbidden());
         mvc.perform(put("/api/v1/members/{id}", id)
-                .with(identity(otherReceptionist, Role.RECEPTIONIST))
+                .with(identity(otherReceptionist, UserRole.RECEPTIONIST))
                 .contentType(MediaType.APPLICATION_JSON).content(updateBody("0912345601", "INACTIVE")))
             .andExpect(status().isNotFound());
         Long stranger = user("stranger@example.com", "MEMBER");
-        mvc.perform(get("/api/v1/members/{id}", id).with(identity(stranger, Role.MEMBER)))
+        mvc.perform(get("/api/v1/members/{id}", id).with(identity(stranger, UserRole.MEMBER)))
             .andExpect(status().isNotFound());
     }
 
@@ -264,7 +264,7 @@ class MemberApiIntegrationTest {
     @MethodSource("invalidFullNames")
     void invalidNamesAreRejectedByRequestValidationOnCreateAndUpdate(String name) throws Exception {
         Long id = profile("HV000901", "0912345601", branch, null, "An");
-        RequestPostProcessor auth = identity(receptionist, Role.RECEPTIONIST);
+        RequestPostProcessor auth = identity(receptionist, UserRole.RECEPTIONIST);
         mvc.perform(post("/api/v1/members").with(auth).contentType(MediaType.APPLICATION_JSON)
                 .content(json.writeValueAsString(new CreateMemberRequest(name, "0912345699", null, null))))
             .andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors.fullName").exists());
@@ -278,7 +278,7 @@ class MemberApiIntegrationTest {
     @Test
     void missingUpdateStatusIsRejectedByRequestValidation() throws Exception {
         Long id = profile("HV000901", "0912345601", branch, null, "An");
-        mvc.perform(put("/api/v1/members/{id}", id).with(identity(receptionist, Role.RECEPTIONIST))
+        mvc.perform(put("/api/v1/members/{id}", id).with(identity(receptionist, UserRole.RECEPTIONIST))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json.writeValueAsString(new UpdateMemberRequest("Tên mới", "0912345601", null, null, null))))
             .andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors.status").exists());
@@ -288,7 +288,7 @@ class MemberApiIntegrationTest {
     @ParameterizedTest
     @ValueSource(longs = {0, -1})
     void nonPositiveIdsAreRejectedAtController(Long id) throws Exception {
-        RequestPostProcessor auth = identity(receptionist, Role.RECEPTIONIST);
+        RequestPostProcessor auth = identity(receptionist, UserRole.RECEPTIONIST);
         mvc.perform(get("/api/v1/members/{id}", id).with(auth))
             .andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400))
             .andExpect(jsonPath("$.errors.id").value("ID hội viên phải lớn hơn 0"));
@@ -312,7 +312,7 @@ class MemberApiIntegrationTest {
     void branchManagerCanCreateReadUpdateAndSearchWithinTheirBranch() throws Exception {
         Long manager = user("manager@example.com", "BRANCH_MANAGER");
         staff(manager, branch, "NV03");
-        RequestPostProcessor auth = identity(manager, Role.BRANCH_MANAGER);
+        RequestPostProcessor auth = identity(manager, UserRole.BRANCH_MANAGER);
         mvc.perform(post("/api/v1/members").with(auth).contentType(MediaType.APPLICATION_JSON)
                 .content(createBody("0912345699")))
             .andExpect(status().isCreated()).andExpect(jsonPath("$.homeBranchId").value(branch.intValue()));
@@ -340,7 +340,7 @@ class MemberApiIntegrationTest {
 
     @Test
     void invalidBodiesAndPaginationAre400AndDuplicateIs409() throws Exception {
-        RequestPostProcessor auth = identity(receptionist, Role.RECEPTIONIST);
+        RequestPostProcessor auth = identity(receptionist, UserRole.RECEPTIONIST);
         for (String phone : List.of("123", "09123abc78", "")) {
             mvc.perform(post("/api/v1/members").with(auth)
                     .contentType(MediaType.APPLICATION_JSON).content(createBody(phone)))
@@ -360,7 +360,7 @@ class MemberApiIntegrationTest {
     @ValueSource(strings = {"123", "5678", "84912"})
     void incompletePhoneCannotBeSavedOnCreateOrUpdate(String phone) throws Exception {
         Long id = profile("HV000901", "0912345601", branch, null, "An");
-        RequestPostProcessor auth = identity(receptionist, Role.RECEPTIONIST);
+        RequestPostProcessor auth = identity(receptionist, UserRole.RECEPTIONIST);
         mvc.perform(post("/api/v1/members").with(auth)
                 .contentType(MediaType.APPLICATION_JSON).content(createBody(phone)))
             .andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors.phone").exists());
@@ -376,12 +376,12 @@ class MemberApiIntegrationTest {
     void updateSamePhoneAndDisableRevokeAndActivate() throws Exception {
         Long id = profile("HV000901", "0912345601", branch, memberUser, "An");
         refreshToken(memberUser);
-        mvc.perform(put("/api/v1/members/{id}", id).with(identity(receptionist, Role.RECEPTIONIST))
+        mvc.perform(put("/api/v1/members/{id}", id).with(identity(receptionist, UserRole.RECEPTIONIST))
                 .contentType(MediaType.APPLICATION_JSON).content(updateBody("0912345601", "INACTIVE")))
             .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("INACTIVE"));
         assertThat(accountStatus(memberUser)).isEqualTo("DISABLED");
         assertThat(jdbc.queryForObject("SELECT count(*) FROM refresh_tokens WHERE revoked_at IS NULL", Integer.class)).isZero();
-        mvc.perform(put("/api/v1/members/{id}", id).with(identity(receptionist, Role.RECEPTIONIST))
+        mvc.perform(put("/api/v1/members/{id}", id).with(identity(receptionist, UserRole.RECEPTIONIST))
                 .contentType(MediaType.APPLICATION_JSON).content(updateBody("0912345601", "ACTIVE")))
             .andExpect(status().isOk());
         assertThat(accountStatus(memberUser)).isEqualTo("ACTIVE");
@@ -398,7 +398,7 @@ class MemberApiIntegrationTest {
             invocation.callRealMethod();
             throw new IllegalStateException("Kiểm thử rollback sau cập nhật tài khoản");
         }).when(accounts).disable(anyLong());
-        mvc.perform(put("/api/v1/members/{id}", id).with(identity(receptionist, Role.RECEPTIONIST))
+        mvc.perform(put("/api/v1/members/{id}", id).with(identity(receptionist, UserRole.RECEPTIONIST))
                 .contentType(MediaType.APPLICATION_JSON).content(updateBody("0912345601", "INACTIVE")))
             .andExpect(status().isInternalServerError());
         assertThat(jdbc.queryForObject("SELECT status FROM members WHERE id = ?", String.class, id)).isEqualTo("ACTIVE");
@@ -425,7 +425,7 @@ class MemberApiIntegrationTest {
 
     @Test
     void concurrentRequestsCannotCreateDuplicatePhone() throws Exception {
-        RequestPostProcessor auth = identity(admin, Role.SUPER_ADMIN);
+        RequestPostProcessor auth = identity(admin, UserRole.SUPER_ADMIN);
         CountDownLatch start = new CountDownLatch(1);
         try (ExecutorService executor = Executors.newFixedThreadPool(2)) {
             Callable<Integer> request = () -> {
@@ -448,7 +448,7 @@ class MemberApiIntegrationTest {
         Long id = profile("HV000901", "0912345601", branch, null, "An%_ Bình");
         profile("HV000902", "0912345602", branch, null, "An khác");
         jdbc.update("UPDATE members SET status = 'INACTIVE' WHERE id = ?", id);
-        mvc.perform(get("/api/v1/members").with(identity(admin, Role.SUPER_ADMIN))
+        mvc.perform(get("/api/v1/members").with(identity(admin, UserRole.SUPER_ADMIN))
                 .param("keyword", "An%_").param("status", "INACTIVE"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
             .andExpect(jsonPath("$.content[0].memberCode").value("HV000901"));
@@ -458,18 +458,18 @@ class MemberApiIntegrationTest {
     void duplicateUpdateIs409AndUnassignedStaffCannotAccess() throws Exception {
         Long id = profile("HV000901", "0912345601", branch, null, "An");
         profile("HV000902", "0912345602", branch, null, "Bình");
-        mvc.perform(put("/api/v1/members/{id}", id).with(identity(receptionist, Role.RECEPTIONIST))
+        mvc.perform(put("/api/v1/members/{id}", id).with(identity(receptionist, UserRole.RECEPTIONIST))
                 .contentType(MediaType.APPLICATION_JSON).content(updateBody("0912345602", "ACTIVE")))
             .andExpect(status().isConflict());
         Long unassigned = user("unassigned@example.com", "RECEPTIONIST");
-        mvc.perform(get("/api/v1/members").with(identity(unassigned, Role.RECEPTIONIST)))
+        mvc.perform(get("/api/v1/members").with(identity(unassigned, UserRole.RECEPTIONIST)))
             .andExpect(status().isForbidden());
     }
 
     @Test
     void concurrentUpdatesKeepMemberAndAccountStatusesConsistent() throws Exception {
         Long id = profile("HV000901", "0912345601", branch, memberUser, "An");
-        RequestPostProcessor auth = identity(admin, Role.SUPER_ADMIN);
+        RequestPostProcessor auth = identity(admin, UserRole.SUPER_ADMIN);
         CountDownLatch start = new CountDownLatch(1);
         try (ExecutorService executor = Executors.newFixedThreadPool(2)) {
             Callable<Integer> disable = () -> {
@@ -503,7 +503,7 @@ class MemberApiIntegrationTest {
             FROM generate_series(1,10000) n
             """, branch);
         jdbc.execute("ANALYZE members");
-        RequestPostProcessor auth = identity(receptionist, Role.RECEPTIONIST);
+        RequestPostProcessor auth = identity(receptionist, UserRole.RECEPTIONIST);
         // Làm nóng Spring/JPA trước khi đo ba cách tìm theo hợp đồng NF1.
         mvc.perform(get("/api/v1/members").with(auth)).andExpect(status().isOk());
         for (String term : List.of("HV100001", "hv100001", "0900000001", "0900", "Hiệu năng")) {
@@ -545,7 +545,7 @@ class MemberApiIntegrationTest {
         return jdbc.queryForObject("SELECT status FROM users WHERE id = ?", String.class, userId);
     }
 
-    private RequestPostProcessor identity(Long userId, Role role) {
+    private RequestPostProcessor identity(Long userId, UserRole role) {
         return authentication(new UsernamePasswordAuthenticationToken(
             userId.toString(), "test-only", List.of(new SimpleGrantedAuthority("ROLE_" + role.name()))));
     }

@@ -10,7 +10,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -22,7 +21,6 @@ import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberBranchAdap
 /** Kiểm tra adapter, hai service và truy vấn production với PostgreSQL thật. */
 @SpringBootTest
 @Import(MemberTestConfiguration.class)
-@Sql("/db/fixtures/f2-staff.sql")
 @Transactional
 class MemberBranchAccessIntegrationTest {
     @Autowired MemberBranchAccess branches;

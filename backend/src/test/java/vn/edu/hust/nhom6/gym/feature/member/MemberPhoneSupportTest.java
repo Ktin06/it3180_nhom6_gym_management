@@ -30,8 +30,14 @@ class MemberPhoneSupportTest {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = {"1234567890", "09123456789", "+85912345678"})
+    void keepsLongInvalidNumbersAsIsSoSearchFindsNothing(String keyword) {
+        assertThat(MemberPhoneSupport.normalizeSearchPrefix(keyword)).isEqualTo(keyword);
+    }
+
+    @ParameterizedTest
     @NullSource
-    @ValueSource(strings = {"", "1234567890", "09123456789", "+85912345678", "09%", "09_"})
+    @ValueSource(strings = {"", "09%", "09_"})
     void rejectsInvalidSearchPrefixes(String keyword) {
         assertThatThrownBy(() -> MemberPhoneSupport.normalizeSearchPrefix(keyword))
             .isInstanceOf(InvalidRequestException.class);

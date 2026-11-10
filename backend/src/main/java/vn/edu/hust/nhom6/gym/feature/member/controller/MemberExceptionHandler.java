@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.validation.method.ParameterErrors;
-import vn.edu.hust.nhom6.gym.common.exception.InvalidRequestException;
 
 /** Lỗi riêng của F2, giữ nguyên xử lý lỗi chung và xác thực F1. */
 @RestControllerAdvice(assignableTypes = MemberController.class)
@@ -37,13 +36,6 @@ public class MemberExceptionHandler {
             "Vui lòng kiểm tra lại các trường dữ liệu.");
         problem.setTitle("Dữ liệu không hợp lệ");
         problem.setProperty("errors", errors);
-        return problem;
-    }
-
-    @ExceptionHandler(InvalidRequestException.class)
-    public ProblemDetail invalidRequest(InvalidRequestException ex) {
-        var problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-        problem.setTitle("Dữ liệu không hợp lệ");
         return problem;
     }
 
