@@ -1,0 +1,887 @@
+{
+  "info": {
+    "name": "F3 – Danh mục gói tập (bốn API)",
+    "description": "Danh sách, thêm, sửa và ngừng bán. baseUrl gồm /api/v1. Chỉ dùng dữ liệu kiểm thử; nhập token tại máy, không lưu lên Git.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api/v1"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "deniedRoleToken",
+      "value": ""
+    },
+    {
+      "key": "managerToken",
+      "value": ""
+    },
+    {
+      "key": "createdPackageCode",
+      "value": ""
+    },
+    {
+      "key": "packageId",
+      "value": ""
+    },
+    {
+      "key": "outsidePackageId",
+      "value": ""
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Danh mục ACTIVE mặc định",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/packages",
+        "description": "JWT Quản lý/Lễ tân: chỉ chi nhánh mình và toàn chuỗi. JWT Chủ chuỗi: toàn bộ. Đối chiếu dữ liệu seed để xác minh phạm vi."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Kiểm tra phản hồi', () => { pm.response.to.have.status(200); const r = pm.response.json(); pm.expect(r.page).to.eql(0); pm.expect(r.size).to.eql(20); pm.expect(r.content).to.be.an('array'); pm.expect(r.totalElements).to.be.a('number'); pm.expect(r.totalPages).to.be.a('number'); r.content.forEach(p => { pm.expect(p.status).to.eql('ACTIVE'); ['id','code','name','type','durationDays','sessionCount','price','description','status','branchId'].forEach(k => pm.expect(p).to.have.property(k)); }); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lọc PT và phân trang",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/packages?type=PT&status=ACTIVE&page=0&size=10"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Kiểm tra phản hồi', () => { pm.response.to.have.status(200); const r = pm.response.json(); pm.expect(r.size).to.eql(10); r.content.forEach(p => { pm.expect(p.type).to.eql('PT'); pm.expect(p.status).to.eql('ACTIVE'); }); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tra cứu gói ngừng bán",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/packages?status=INACTIVE&page=0&size=20"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Kiểm tra phản hồi', () => { pm.response.to.have.status(200); pm.response.json().content.forEach(p => pm.expect(p.status).to.eql('INACTIVE')); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "400 – kích thước trang vượt giới hạn",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/packages?size=101"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Kiểm tra phản hồi', () => { pm.response.to.have.status(400); pm.expect(pm.response.json().errors).to.have.property('size'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "400 – loại gói sai",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/packages?type=INVALID"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Kiểm tra phản hồi', () => { pm.response.to.have.status(400); pm.expect(pm.response.json().errors).to.have.property('type'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "401 – không có token",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/packages",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Kiểm tra phản hồi', () => { pm.response.to.have.status(401); pm.expect(pm.response.json().status).to.eql(401); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "403 – token Hội viên hoặc Huấn luyện viên",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/packages",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{deniedRoleToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Kiểm tra phản hồi', () => { pm.response.to.have.status(403); pm.expect(pm.response.json().status).to.eql(403); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Thêm gói – bước 4 (chạy tuần tự)",
+      "description": "managerToken: JWT Quản lý có staff ACTIVE; packageId: gói ACTIVE thuộc chi nhánh; outsidePackageId: gói ngoài chi nhánh hoặc không tồn tại. Chạy tuần tự trên môi trường kiểm thử.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{managerToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "201 – Thêm TIME",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/packages",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{newPackageCode}}\",\n  \"name\": \"Gói kiểm tra Postman\",\n  \"type\": \"TIME\",\n  \"durationDays\": 30,\n  \"price\": 500000\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('newPackageCode','F3-'+Date.now()+'-'+Math.floor(Math.random()*10000));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi', () => { pm.response.to.have.status(201); const r=pm.response.json(); pm.expect(r.status).to.eql('ACTIVE'); pm.expect(r.branchId).to.be.a('number'); pm.expect(r.createdAt).to.be.a('string'); pm.expect(r.updatedAt).to.be.a('string'); pm.expect(pm.response.headers.get('Location')).to.eql('/api/v1/packages/'+r.id); pm.collectionVariables.set('createdPackageCode',r.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "201 – Thêm SESSION",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/packages",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{newPackageCode}}\",\n  \"name\": \"Gói kiểm tra Postman\",\n  \"type\": \"SESSION\",\n  \"durationDays\": 30,\n  \"price\": 500000,\n  \"sessionCount\": 10\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('newPackageCode','F3-'+Date.now()+'-'+Math.floor(Math.random()*10000));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi', () => { pm.response.to.have.status(201); const r=pm.response.json(); pm.expect(r.status).to.eql('ACTIVE'); pm.expect(r.branchId).to.be.a('number'); pm.expect(r.createdAt).to.be.a('string'); pm.expect(r.updatedAt).to.be.a('string'); pm.expect(pm.response.headers.get('Location')).to.eql('/api/v1/packages/'+r.id); pm.collectionVariables.set('createdPackageCode',r.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "201 – Thêm PT",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/packages",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{newPackageCode}}\",\n  \"name\": \"Gói kiểm tra Postman\",\n  \"type\": \"PT\",\n  \"durationDays\": 30,\n  \"price\": 500000,\n  \"sessionCount\": 10\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('newPackageCode','F3-'+Date.now()+'-'+Math.floor(Math.random()*10000));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi', () => { pm.response.to.have.status(201); const r=pm.response.json(); pm.expect(r.status).to.eql('ACTIVE'); pm.expect(r.branchId).to.be.a('number'); pm.expect(r.createdAt).to.be.a('string'); pm.expect(r.updatedAt).to.be.a('string'); pm.expect(pm.response.headers.get('Location')).to.eql('/api/v1/packages/'+r.id); pm.collectionVariables.set('createdPackageCode',r.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "409 – Mã vừa tạo đã tồn tại",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/packages",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{createdPackageCode}}\",\n  \"name\": \"Gói kiểm tra Postman\",\n  \"type\": \"TIME\",\n  \"durationDays\": 30,\n  \"price\": 500000\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>{pm.response.to.have.status(409);pm.expect(pm.response.json().detail).to.include(pm.collectionVariables.get('createdPackageCode'));});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "400 – SESSION thiếu số buổi",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/packages",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"F3-INVALID\",\n  \"name\": \"Gói kiểm tra Postman\",\n  \"type\": \"SESSION\",\n  \"durationDays\": 30,\n  \"price\": 500000\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>{pm.response.to.have.status(400);pm.expect(pm.response.json().errors).to.have.property('sessionCount');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "400 – Không nhận branchId từ client",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/packages",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"F3-FORGED\",\n  \"name\": \"Gói kiểm tra Postman\",\n  \"type\": \"TIME\",\n  \"durationDays\": 30,\n  \"price\": 500000,\n  \"branchId\": 999\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>{pm.response.to.have.status(400);pm.expect(pm.response.json().errors).to.be.an('object');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 – Hội viên hoặc Huấn luyện viên",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/packages",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"F3-DENIED\",\n  \"name\": \"Gói kiểm tra Postman\",\n  \"type\": \"TIME\",\n  \"durationDays\": 30,\n  \"price\": 500000\n}"
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{deniedRoleToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "401 – Không có token",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/packages",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"F3-NOAUTH\",\n  \"name\": \"Gói kiểm tra Postman\",\n  \"type\": \"TIME\",\n  \"durationDays\": 30,\n  \"price\": 500000\n}"
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Sửa gói – bước 5",
+      "description": "managerToken: JWT Quản lý có staff ACTIVE; packageId: gói ACTIVE thuộc chi nhánh; outsidePackageId: gói ngoài chi nhánh hoặc không tồn tại. Chạy tuần tự trên môi trường kiểm thử.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{managerToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "200 – Chỉ sửa giá",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/packages/{{packageId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 450000\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>{pm.response.to.have.status(200);pm.expect(pm.response.json().price).to.eql(450000);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "200 – Xóa mô tả bằng null",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/packages/{{packageId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": null\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>{pm.response.to.have.status(200);pm.expect(pm.response.json().description).to.eql(null);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "200 – Body rỗng giữ nguyên",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/packages/{{packageId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>{pm.response.to.have.status(200);pm.expect(pm.response.json()).to.have.property('updatedAt');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "400 – Không xóa giá bắt buộc",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/packages/{{packageId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": null\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>{pm.response.to.have.status(400);pm.expect(pm.response.json().errors).to.have.property('price');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "400 – Không đổi mã",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/packages/{{packageId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"FORGED\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>{pm.response.to.have.status(400);pm.expect(pm.response.json().errors).to.be.an('object');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "404 – Gói ngoài chi nhánh hoặc không tồn tại",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/packages/{{outsidePackageId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>{pm.response.to.have.status(404);pm.expect(pm.response.json().detail).to.eql('Gói tập không tồn tại trên hệ thống.');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 – Hội viên/HLV không được sửa",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/packages/{{packageId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{deniedRoleToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "401 – Không token",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/packages/{{packageId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ngừng bán – bước 6 (chạy tuần tự)",
+      "description": "managerToken: JWT Quản lý có staff ACTIVE; packageId: gói ACTIVE thuộc chi nhánh; outsidePackageId: gói ngoài chi nhánh hoặc không tồn tại. Chạy tuần tự trên môi trường kiểm thử.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{managerToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "200 – Ngừng bán",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/packages/{{packageId}}/deactivate"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>{pm.response.to.have.status(200);const r=pm.response.json();pm.expect(Object.keys(r).sort()).to.eql(['code','id','status','updatedAt']);pm.expect(r.status).to.eql('INACTIVE');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 – Gọi lại",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/packages/{{packageId}}/deactivate"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>{pm.response.to.have.status(422);pm.expect(pm.response.json().detail).to.eql('Gói tập này đã ở trạng thái ngừng bán.');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "404 – Ngoài phạm vi hoặc không tồn tại",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/packages/{{outsidePackageId}}/deactivate"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>{pm.response.to.have.status(404);pm.expect(pm.response.json().detail).to.eql('Gói tập không tồn tại trên hệ thống.');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "400 – ID không hợp lệ",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/packages/0/deactivate"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>{pm.response.to.have.status(400);pm.expect(pm.response.json().errors).to.have.property('id');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "400 – Không nhận body",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/packages/{{packageId}}/deactivate",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>{pm.response.to.have.status(400);pm.expect(pm.response.json().errors).to.have.property('body');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "401 – Không token",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/packages/{{packageId}}/deactivate",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 – Sai vai trò",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/packages/{{packageId}}/deactivate",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{deniedRoleToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Kiểm tra phản hồi',()=>pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
