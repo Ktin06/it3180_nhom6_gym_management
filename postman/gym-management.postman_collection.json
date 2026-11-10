@@ -39,6 +39,193 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "F1 – Tài khoản và phân quyền",
+      "item": [
+        {
+          "name": "Đăng ký tài khoản hội viên (POST /api/v1/auth/register)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Trả mã 201 Created khi đăng ký thành công', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Trả accessToken và lưu vào biến môi trường', function () {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('accessToken');",
+                  "  pm.environment.set('accessToken', json.accessToken);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Nguyễn Văn A\",\n  \"email\": \"member.test@example.com\",\n  \"phone\": \"0912345678\",\n  \"password\": \"Password123\",\n  \"dob\": \"2000-01-01\",\n  \"gender\": \"MALE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "register"]
+            },
+            "description": "Tự đăng ký tài khoản hội viên qua web (F1, UC-F1.1)."
+          },
+          "response": []
+        },
+        {
+          "name": "Đăng nhập tài khoản bằng email (POST /api/v1/auth/login)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Trả mã 200 OK khi đăng nhập thành công', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Trả accessToken và lưu vào biến môi trường', function () {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('accessToken');",
+                  "  pm.environment.set('accessToken', json.accessToken);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"member.test@example.com\",\n  \"password\": \"Password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Đăng nhập bằng email và nhận Access Token + cookie Refresh Token (F1, UC-F1.2)."
+          },
+          "response": []
+        },
+        {
+          "name": "Làm mới phiên đăng nhập (POST /api/v1/auth/refresh)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Trả mã 200 OK khi làm mới thành công', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Cập nhật accessToken mới vào biến môi trường', function () {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('accessToken');",
+                  "  pm.environment.set('accessToken', json.accessToken);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "refresh"]
+            },
+            "description": "Làm mới Access Token bằng cookie HttpOnly refresh_token và xoay vòng token (F1, UC-F1.3)."
+          },
+          "response": []
+        },
+        {
+          "name": "Đăng xuất tài khoản (POST /api/v1/auth/logout)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Trả mã 204 No Content khi đăng xuất', function () {",
+                  "  pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "logout"]
+            },
+            "description": "Đăng xuất tài khoản, thu hồi refresh token và xóa cookie (F1, UC-F1.3)."
+          },
+          "response": []
+        },
+        {
+          "name": "Lấy thông tin tài khoản hiện tại (GET /api/v1/auth/me)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Trả mã 200 khi có JWT hợp lệ', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Có đủ userId, email, role', function () {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('userId');",
+                  "  pm.expect(json).to.have.property('email');",
+                  "  pm.expect(json).to.have.property('role');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "me"]
+            },
+            "description": "Đọc thông tin người dùng hiện tại từ JWT Access Token (HS256)."
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

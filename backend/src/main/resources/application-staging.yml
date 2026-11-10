@@ -8,12 +8,16 @@ spring:
   flyway:
     # Thêm dữ liệu mẫu cho demo (db/seed/README.md); môi trường khác chỉ chạy db/migration.
     locations: classpath:db/migration,classpath:db/seed
+    placeholders:
+      seed_password_hash: ${SEED_PASSWORD_HASH}
 
 app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS}
   jwt:
     secret: ${JWT_SECRET}
+  auth:
+    cookie-secure: true
 
 springdoc:
   # Swagger vẫn mở ở staging để demo; tắt trước khi bảo vệ nếu giảng viên yêu cầu.

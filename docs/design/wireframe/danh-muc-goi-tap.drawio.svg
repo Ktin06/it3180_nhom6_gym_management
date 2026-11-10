@@ -1,0 +1,262 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1450" viewBox="0 0 1600 1450" content="&lt;mxfile host=&quot;app.diagrams.net&quot; version=&quot;24.7.17&quot;&gt;&lt;diagram id=&quot;danh-muc-goi-tap&quot; name=&quot;03 / Danh mục gói tập&quot;&gt;&lt;mxGraphModel grid=&quot;1&quot; gridSize=&quot;10&quot; page=&quot;1&quot; pageWidth=&quot;1600&quot; pageHeight=&quot;1450&quot;&gt;&lt;root&gt;&lt;mxCell id=&quot;0&quot; /&gt;&lt;mxCell id=&quot;1&quot; parent=&quot;0&quot; /&gt;&lt;mxCell id=&quot;2&quot; value=&quot;&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f4f5f7;strokeColor=#f4f5f7;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;0&quot; y=&quot;0&quot; width=&quot;1600&quot; height=&quot;1450&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;3&quot; value=&quot;03 / Danh mục gói tập&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f4f5f7;strokeColor=#f4f5f7;fontColor=#26313e;fontFamily=Arial;fontSize=27;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;24&quot; width=&quot;1536&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;4&quot; value=&quot;Issue #18 · F3 · Màn hình quản lý chi nhánh · TIME / SESSION / PT · Giá minh họa, đơn vị VND&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f4f5f7;strokeColor=#f4f5f7;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;76&quot; width=&quot;1536&quot; height=&quot;52&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;5&quot; value=&quot;&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;140&quot; width=&quot;1140&quot; height=&quot;680&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;6&quot; value=&quot;&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;140&quot; width=&quot;190&quot; height=&quot;680&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;7&quot; value=&quot;GYM NHÓM 6&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#eceef1;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;44&quot; y=&quot;150&quot; width=&quot;166&quot; height=&quot;50&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;8&quot; value=&quot;Trang chủ&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;44&quot; y=&quot;220&quot; width=&quot;166&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;9&quot; value=&quot;Hội viên&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;44&quot; y=&quot;272&quot; width=&quot;166&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;10&quot; value=&quot;Gói tập&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;44&quot; y=&quot;324&quot; width=&quot;166&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;11&quot; value=&quot;Thanh toán&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;44&quot; y=&quot;376&quot; width=&quot;166&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;12&quot; value=&quot;CN01  /  Không gian làm việc tại quầy&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f1f2f4;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;152&quot; width=&quot;918&quot; height=&quot;42&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;13&quot; value=&quot;&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1200&quot; y=&quot;140&quot; width=&quot;360&quot; height=&quot;680&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;14&quot; value=&quot;☰  Gym Nhóm 6                Tài khoản&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1200&quot; y=&quot;140&quot; width=&quot;360&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;15&quot; value=&quot;MOBILE · chiều rộng 360 px&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f4f5f7;strokeColor=#f4f5f7;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1200&quot; y=&quot;832&quot; width=&quot;360&quot; height=&quot;42&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;16&quot; value=&quot;DANH MỤC GÓI TẬP&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=21;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;212&quot; width=&quot;650&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;17&quot; value=&quot;+ Thêm gói&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#e3e6eb;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;916&quot; y=&quot;212&quot; width=&quot;240&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;18&quot; value=&quot;Tìm mã / tên gói…     |     Loại: Tất cả ▾     |     Trạng thái: Tất cả ▾&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;272&quot; width=&quot;918&quot; height=&quot;46&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;19&quot; value=&quot;Tên / mã gói&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;336&quot; width=&quot;205&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;20&quot; value=&quot;Loại&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;443&quot; y=&quot;336&quot; width=&quot;94&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;21&quot; value=&quot;Hạn ngày&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;537&quot; y=&quot;336&quot; width=&quot;90&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;22&quot; value=&quot;Số buổi&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;627&quot; y=&quot;336&quot; width=&quot;85&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;23&quot; value=&quot;Giá VND&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;712&quot; y=&quot;336&quot; width=&quot;125&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;24&quot; value=&quot;Thao tác&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;957&quot; y=&quot;336&quot; width=&quot;199&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;25&quot; value=&quot;TIME 30 / T30&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;376&quot; width=&quot;205&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;26&quot; value=&quot;TIME&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;443&quot; y=&quot;376&quot; width=&quot;94&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;27&quot; value=&quot;30&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;537&quot; y=&quot;376&quot; width=&quot;90&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;28&quot; value=&quot;—&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;627&quot; y=&quot;376&quot; width=&quot;85&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;29&quot; value=&quot;500.000&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;712&quot; y=&quot;376&quot; width=&quot;125&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;30&quot; value=&quot;Sửa · Ngừng bán&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;957&quot; y=&quot;376&quot; width=&quot;199&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;31&quot; value=&quot;10 buổi / S10&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;424&quot; width=&quot;205&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;32&quot; value=&quot;SESSION&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;443&quot; y=&quot;424&quot; width=&quot;94&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;33&quot; value=&quot;60&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;537&quot; y=&quot;424&quot; width=&quot;90&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;34&quot; value=&quot;10&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;627&quot; y=&quot;424&quot; width=&quot;85&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;35&quot; value=&quot;700.000&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;712&quot; y=&quot;424&quot; width=&quot;125&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;36&quot; value=&quot;Sửa&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;957&quot; y=&quot;424&quot; width=&quot;199&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;37&quot; value=&quot;PT 10 / PT10&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;472&quot; width=&quot;205&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;38&quot; value=&quot;PT&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;443&quot; y=&quot;472&quot; width=&quot;94&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;39&quot; value=&quot;60&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;537&quot; y=&quot;472&quot; width=&quot;90&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;40&quot; value=&quot;10&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;627&quot; y=&quot;472&quot; width=&quot;85&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;41&quot; value=&quot;3.000.000&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;712&quot; y=&quot;472&quot; width=&quot;125&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;42&quot; value=&quot;Sửa · Ngừng bán&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;957&quot; y=&quot;472&quot; width=&quot;199&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;43&quot; value=&quot;FORM THÊM / SỬA GÓI · Đề xuất mở ở trang riêng hoặc hộp thoại&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=13;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;538&quot; width=&quot;918&quot; height=&quot;36&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;44&quot; value=&quot;Mã gói *          | T30&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;586&quot; width=&quot;440&quot; height=&quot;46&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;45&quot; value=&quot;Tên gói *         | TIME 30 ngày&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;702&quot; y=&quot;586&quot; width=&quot;454&quot; height=&quot;46&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;46&quot; value=&quot;Loại * TIME ▾    | Hạn * 30 ngày&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;644&quot; width=&quot;440&quot; height=&quot;46&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;47&quot; value=&quot;Giá * 500.000 đ  | Số buổi: —&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;702&quot; y=&quot;644&quot; width=&quot;454&quot; height=&quot;46&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;48&quot; value=&quot;Mô tả (tùy chọn)…&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;702&quot; width=&quot;650&quot; height=&quot;46&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;49&quot; value=&quot;[Hủy]    [Lưu gói]&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#e3e6eb;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;916&quot; y=&quot;702&quot; width=&quot;240&quot; height=&quot;46&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;50&quot; value=&quot;Bộ lọc: Tất cả. Gói ngừng bán vẫn hiển thị trạng thái; không có nút Ngừng bán lần nữa.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=13;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;760&quot; width=&quot;918&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;51&quot; value=&quot;Danh mục gói        [+ Thêm]&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;204&quot; width=&quot;336&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;52&quot; value=&quot;Tìm mã hoặc tên gói…&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;260&quot; width=&quot;336&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;53&quot; value=&quot;Loại: Tất cả ▾ | Trạng thái: Tất cả ▾&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=13;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;316&quot; width=&quot;336&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;54&quot; value=&quot;TIME 30 ngày&amp;#10;30 ngày · không giới hạn buổi&amp;#10;500.000 đ · Đang bán&amp;#10;[Sửa]    [Ngừng bán]&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;380&quot; width=&quot;336&quot; height=&quot;160&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;55&quot; value=&quot;SESSION 10 buổi&amp;#10;60 ngày · 10 buổi&amp;#10;700.000 đ · Ngừng bán&amp;#10;[Sửa]&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;560&quot; width=&quot;336&quot; height=&quot;160&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;56&quot; value=&quot;Form trên mobile: xếp một cột&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;748&quot; width=&quot;336&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;57&quot; value=&quot;Quy tắc danh mục và các trạng thái&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#e3e6eb;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;886&quot; width=&quot;1528&quot; height=&quot;42&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;58&quot; value=&quot;Quản lý chi nhánh được thêm/sửa/ngừng bán (#29). Người chỉ có quyền xem không thấy nút quản lý. Lựa chọn gói dùng toàn chuỗi không thuộc Sprint 1.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=16;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;942&quot; width=&quot;1528&quot; height=&quot;72&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;59&quot; value=&quot;TIME: số buổi để rỗng; SESSION/PT: phải nhập số buổi. Cả ba loại cần hạn dùng &amp;gt; 0 ngày. Giá là số nguyên VND ≥ 0. Một tháng TIME = 30 ngày. Quy tắc mã nhập/sinh tự động sẽ khớp đặc tả API khi triển khai.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=16;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;1026&quot; width=&quot;1528&quot; height=&quot;72&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;60&quot; value=&quot;Ngừng bán: “Ngừng bán gói này?” [Hủy] [Ngừng bán]. Sau xác nhận, hàng chuyển sang Ngừng bán và bỏ nút Ngừng bán; vẫn xem được khi lọc Tất cả/Ngừng bán. Không xóa danh mục hoặc hủy gói hội viên đã mua.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=16;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;1110&quot; width=&quot;1528&quot; height=&quot;72&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;61&quot; value=&quot;Tải/rỗng/lỗi: hàng chờ; “Chưa có gói tập” + Thêm theo quyền; “Không có kết quả”; lỗi tải + Thử lại. Form có lỗi theo trường, trạng thái đang lưu, giữ dữ liệu khi lỗi và thông báo thành công.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=16;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;1194&quot; width=&quot;1528&quot; height=&quot;72&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;62&quot; value=&quot;Nguồn: #18, #6, #29 và ERD packages. Bộ lọc/cách mở form là đề xuất bố cục cho review; không chốt endpoint hay DTO. packages ACTIVE là đang bán, khác memberships ACTIVE là gói đã kích hoạt.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=16;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;1278&quot; width=&quot;1528&quot; height=&quot;72&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;63&quot; value=&quot;Trạng thái&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;837&quot; y=&quot;336&quot; width=&quot;120&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;64&quot; value=&quot;Đang bán&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;837&quot; y=&quot;376&quot; width=&quot;120&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;65&quot; value=&quot;Ngừng bán&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;837&quot; y=&quot;424&quot; width=&quot;120&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;66&quot; value=&quot;Đang bán&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=12;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;837&quot; y=&quot;472&quot; width=&quot;120&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;/root&gt;&lt;/mxGraphModel&gt;&lt;/diagram&gt;&lt;/mxfile&gt;">
+  <title>03 / Danh mục gói tập</title>
+  <rect x="0.0" y="0.0" width="1600.0" height="1450.0" fill="#f4f5f7" stroke="#f4f5f7" />
+  <rect x="32.0" y="24.0" width="1536.0" height="44.0" fill="#f4f5f7" stroke="#f4f5f7" />
+  <text font-family="Arial, sans-serif" font-size="27.0" font-weight="700" x="44.0" y="54.1" fill="#26313e">
+    <tspan x="44.0" dy="0">03 / Danh mục gói tập</tspan>
+  </text>
+  <rect x="32.0" y="76.0" width="1536.0" height="52.0" fill="#f4f5f7" stroke="#f4f5f7" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="400" x="44.0" y="106.5" fill="#26313e">
+    <tspan x="44.0" dy="0">Issue #18 · F3 · Màn hình quản lý chi nhánh · TIME / SESSION / PT · Giá minh họa, đơn vị VND</tspan>
+  </text>
+  <rect x="32.0" y="140.0" width="1140.0" height="680.0" fill="#ffffff" stroke="#9aa1aa" />
+  <rect x="32.0" y="140.0" width="190.0" height="680.0" fill="#eceef1" stroke="#9aa1aa" />
+  <rect x="44.0" y="150.0" width="166.0" height="50.0" fill="#eceef1" stroke="#eceef1" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="700" x="56.0" y="179.5" fill="#26313e">
+    <tspan x="56.0" dy="0">GYM NHÓM 6</tspan>
+  </text>
+  <rect x="44.0" y="220.0" width="166.0" height="40.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="400" x="56.0" y="244.5" fill="#26313e">
+    <tspan x="56.0" dy="0">Trang chủ</tspan>
+  </text>
+  <rect x="44.0" y="272.0" width="166.0" height="40.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="400" x="56.0" y="296.5" fill="#26313e">
+    <tspan x="56.0" dy="0">Hội viên</tspan>
+  </text>
+  <rect x="44.0" y="324.0" width="166.0" height="40.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="400" x="56.0" y="348.5" fill="#26313e">
+    <tspan x="56.0" dy="0">Gói tập</tspan>
+  </text>
+  <rect x="44.0" y="376.0" width="166.0" height="40.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="400" x="56.0" y="400.5" fill="#26313e">
+    <tspan x="56.0" dy="0">Thanh toán</tspan>
+  </text>
+  <rect x="238.0" y="152.0" width="918.0" height="42.0" fill="#f1f2f4" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="400" x="250.0" y="177.5" fill="#26313e">
+    <tspan x="250.0" dy="0">CN01  /  Không gian làm việc tại quầy</tspan>
+  </text>
+  <rect x="1200.0" y="140.0" width="360.0" height="680.0" fill="#ffffff" stroke="#9aa1aa" />
+  <rect x="1200.0" y="140.0" width="360.0" height="48.0" fill="#eceef1" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="1212.0" y="168.2" fill="#26313e">
+    <tspan x="1212.0" dy="0">☰  Gym Nhóm 6                Tài khoản</tspan>
+  </text>
+  <rect x="1200.0" y="832.0" width="360.0" height="42.0" fill="#f4f5f7" stroke="#f4f5f7" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="700" x="1212.0" y="857.5" fill="#26313e">
+    <tspan x="1212.0" dy="0">MOBILE · chiều rộng 360 px</tspan>
+  </text>
+  <rect x="238.0" y="212.0" width="650.0" height="44.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="21.0" font-weight="700" x="250.0" y="240.3" fill="#26313e">
+    <tspan x="250.0" dy="0">DANH MỤC GÓI TẬP</tspan>
+  </text>
+  <rect x="916.0" y="212.0" width="240.0" height="44.0" fill="#e3e6eb" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="700" x="928.0" y="238.5" fill="#26313e">
+    <tspan x="928.0" dy="0">+ Thêm gói</tspan>
+  </text>
+  <rect x="238.0" y="272.0" width="918.0" height="46.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="250.0" y="299.2" fill="#26313e">
+    <tspan x="250.0" dy="0">Tìm mã / tên gói…     |     Loại: Tất cả ▾     |     Trạng thái: Tất cả ▾</tspan>
+  </text>
+  <rect x="238.0" y="336.0" width="205.0" height="40.0" fill="#eceef1" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="700" x="250.0" y="359.6" fill="#26313e">
+    <tspan x="250.0" dy="0">Tên / mã gói</tspan>
+  </text>
+  <rect x="443.0" y="336.0" width="94.0" height="40.0" fill="#eceef1" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="700" x="455.0" y="359.6" fill="#26313e">
+    <tspan x="455.0" dy="0">Loại</tspan>
+  </text>
+  <rect x="537.0" y="336.0" width="90.0" height="40.0" fill="#eceef1" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="700" x="549.0" y="359.6" fill="#26313e">
+    <tspan x="549.0" dy="0">Hạn ngày</tspan>
+  </text>
+  <rect x="627.0" y="336.0" width="85.0" height="40.0" fill="#eceef1" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="700" x="639.0" y="359.6" fill="#26313e">
+    <tspan x="639.0" dy="0">Số buổi</tspan>
+  </text>
+  <rect x="712.0" y="336.0" width="125.0" height="40.0" fill="#eceef1" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="700" x="724.0" y="359.6" fill="#26313e">
+    <tspan x="724.0" dy="0">Giá VND</tspan>
+  </text>
+  <rect x="957.0" y="336.0" width="199.0" height="40.0" fill="#eceef1" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="700" x="969.0" y="359.6" fill="#26313e">
+    <tspan x="969.0" dy="0">Thao tác</tspan>
+  </text>
+  <rect x="238.0" y="376.0" width="205.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="250.0" y="403.6" fill="#26313e">
+    <tspan x="250.0" dy="0">TIME 30 / T30</tspan>
+  </text>
+  <rect x="443.0" y="376.0" width="94.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="455.0" y="403.6" fill="#26313e">
+    <tspan x="455.0" dy="0">TIME</tspan>
+  </text>
+  <rect x="537.0" y="376.0" width="90.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="549.0" y="403.6" fill="#26313e">
+    <tspan x="549.0" dy="0">30</tspan>
+  </text>
+  <rect x="627.0" y="376.0" width="85.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="639.0" y="403.6" fill="#26313e">
+    <tspan x="639.0" dy="0">—</tspan>
+  </text>
+  <rect x="712.0" y="376.0" width="125.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="724.0" y="403.6" fill="#26313e">
+    <tspan x="724.0" dy="0">500.000</tspan>
+  </text>
+  <rect x="957.0" y="376.0" width="199.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="969.0" y="403.6" fill="#26313e">
+    <tspan x="969.0" dy="0">Sửa · Ngừng bán</tspan>
+  </text>
+  <rect x="238.0" y="424.0" width="205.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="250.0" y="451.6" fill="#26313e">
+    <tspan x="250.0" dy="0">10 buổi / S10</tspan>
+  </text>
+  <rect x="443.0" y="424.0" width="94.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="455.0" y="451.6" fill="#26313e">
+    <tspan x="455.0" dy="0">SESSION</tspan>
+  </text>
+  <rect x="537.0" y="424.0" width="90.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="549.0" y="451.6" fill="#26313e">
+    <tspan x="549.0" dy="0">60</tspan>
+  </text>
+  <rect x="627.0" y="424.0" width="85.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="639.0" y="451.6" fill="#26313e">
+    <tspan x="639.0" dy="0">10</tspan>
+  </text>
+  <rect x="712.0" y="424.0" width="125.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="724.0" y="451.6" fill="#26313e">
+    <tspan x="724.0" dy="0">700.000</tspan>
+  </text>
+  <rect x="957.0" y="424.0" width="199.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="969.0" y="451.6" fill="#26313e">
+    <tspan x="969.0" dy="0">Sửa</tspan>
+  </text>
+  <rect x="238.0" y="472.0" width="205.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="250.0" y="499.6" fill="#26313e">
+    <tspan x="250.0" dy="0">PT 10 / PT10</tspan>
+  </text>
+  <rect x="443.0" y="472.0" width="94.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="455.0" y="499.6" fill="#26313e">
+    <tspan x="455.0" dy="0">PT</tspan>
+  </text>
+  <rect x="537.0" y="472.0" width="90.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="549.0" y="499.6" fill="#26313e">
+    <tspan x="549.0" dy="0">60</tspan>
+  </text>
+  <rect x="627.0" y="472.0" width="85.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="639.0" y="499.6" fill="#26313e">
+    <tspan x="639.0" dy="0">10</tspan>
+  </text>
+  <rect x="712.0" y="472.0" width="125.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="724.0" y="499.6" fill="#26313e">
+    <tspan x="724.0" dy="0">3.000.000</tspan>
+  </text>
+  <rect x="957.0" y="472.0" width="199.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="969.0" y="499.6" fill="#26313e">
+    <tspan x="969.0" dy="0">Sửa · Ngừng bán</tspan>
+  </text>
+  <rect x="238.0" y="538.0" width="918.0" height="36.0" fill="#eceef1" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="13.0" font-weight="700" x="250.0" y="559.9" fill="#26313e">
+    <tspan x="250.0" dy="0">FORM THÊM / SỬA GÓI · Đề xuất mở ở trang riêng hoặc hộp thoại</tspan>
+  </text>
+  <rect x="238.0" y="586.0" width="440.0" height="46.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="250.0" y="613.2" fill="#26313e">
+    <tspan x="250.0" dy="0">Mã gói *          | T30</tspan>
+  </text>
+  <rect x="702.0" y="586.0" width="454.0" height="46.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="714.0" y="613.2" fill="#26313e">
+    <tspan x="714.0" dy="0">Tên gói *         | TIME 30 ngày</tspan>
+  </text>
+  <rect x="238.0" y="644.0" width="440.0" height="46.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="250.0" y="671.2" fill="#26313e">
+    <tspan x="250.0" dy="0">Loại * TIME ▾    | Hạn * 30 ngày</tspan>
+  </text>
+  <rect x="702.0" y="644.0" width="454.0" height="46.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="714.0" y="671.2" fill="#26313e">
+    <tspan x="714.0" dy="0">Giá * 500.000 đ  | Số buổi: —</tspan>
+  </text>
+  <rect x="238.0" y="702.0" width="650.0" height="46.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="250.0" y="729.2" fill="#26313e">
+    <tspan x="250.0" dy="0">Mô tả (tùy chọn)…</tspan>
+  </text>
+  <rect x="916.0" y="702.0" width="240.0" height="46.0" fill="#e3e6eb" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="928.0" y="729.2" fill="#26313e">
+    <tspan x="928.0" dy="0">[Hủy]    [Lưu gói]</tspan>
+  </text>
+  <rect x="238.0" y="760.0" width="918.0" height="40.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="13.0" font-weight="400" x="250.0" y="783.9" fill="#26313e">
+    <tspan x="250.0" dy="0">Bộ lọc: Tất cả. Gói ngừng bán vẫn hiển thị trạng thái; không có nút Ngừng bán lần nữa.</tspan>
+  </text>
+  <rect x="1212.0" y="204.0" width="336.0" height="44.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="700" x="1224.0" y="230.2" fill="#26313e">
+    <tspan x="1224.0" dy="0">Danh mục gói        [+ Thêm]</tspan>
+  </text>
+  <rect x="1212.0" y="260.0" width="336.0" height="44.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="1224.0" y="286.2" fill="#26313e">
+    <tspan x="1224.0" dy="0">Tìm mã hoặc tên gói…</tspan>
+  </text>
+  <rect x="1212.0" y="316.0" width="336.0" height="44.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="13.0" font-weight="400" x="1224.0" y="341.9" fill="#26313e">
+    <tspan x="1224.0" dy="0">Loại: Tất cả ▾ | Trạng thái: Tất cả ▾</tspan>
+  </text>
+  <rect x="1212.0" y="380.0" width="336.0" height="160.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="1224.0" y="434.8" fill="#26313e">
+    <tspan x="1224.0" dy="0">TIME 30 ngày</tspan>
+    <tspan x="1224.0" dy="19.599999999999998">30 ngày · không giới hạn buổi</tspan>
+    <tspan x="1224.0" dy="19.599999999999998">500.000 đ · Đang bán</tspan>
+    <tspan x="1224.0" dy="19.599999999999998">[Sửa]    [Ngừng bán]</tspan>
+  </text>
+  <rect x="1212.0" y="560.0" width="336.0" height="160.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="1224.0" y="614.8" fill="#26313e">
+    <tspan x="1224.0" dy="0">SESSION 10 buổi</tspan>
+    <tspan x="1224.0" dy="19.599999999999998">60 ngày · 10 buổi</tspan>
+    <tspan x="1224.0" dy="19.599999999999998">700.000 đ · Ngừng bán</tspan>
+    <tspan x="1224.0" dy="19.599999999999998">[Sửa]</tspan>
+  </text>
+  <rect x="1212.0" y="748.0" width="336.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="14.0" font-weight="400" x="1224.0" y="776.2" fill="#26313e">
+    <tspan x="1224.0" dy="0">Form trên mobile: xếp một cột</tspan>
+  </text>
+  <rect x="32.0" y="886.0" width="1528.0" height="42.0" fill="#e3e6eb" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="15.0" font-weight="700" x="44.0" y="911.5" fill="#26313e">
+    <tspan x="44.0" dy="0">Quy tắc danh mục và các trạng thái</tspan>
+  </text>
+  <rect x="32.0" y="942.0" width="1528.0" height="72.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="16.0" font-weight="400" x="44.0" y="982.8" fill="#26313e">
+    <tspan x="44.0" dy="0">Quản lý chi nhánh được thêm/sửa/ngừng bán (#29). Người chỉ có quyền xem không thấy nút quản lý. Lựa chọn gói dùng toàn chuỗi không thuộc Sprint 1.</tspan>
+  </text>
+  <rect x="32.0" y="1026.0" width="1528.0" height="72.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="16.0" font-weight="400" x="44.0" y="1055.6" fill="#26313e">
+    <tspan x="44.0" dy="0">TIME: số buổi để rỗng; SESSION/PT: phải nhập số buổi. Cả ba loại cần hạn dùng &gt; 0 ngày. Giá là số nguyên VND ≥ 0. Một tháng TIME = 30 ngày. Quy tắc mã nhập/sinh</tspan>
+    <tspan x="44.0" dy="22.4">tự động sẽ khớp đặc tả API khi triển khai.</tspan>
+  </text>
+  <rect x="32.0" y="1110.0" width="1528.0" height="72.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="16.0" font-weight="400" x="44.0" y="1139.6" fill="#26313e">
+    <tspan x="44.0" dy="0">Ngừng bán: “Ngừng bán gói này?” [Hủy] [Ngừng bán]. Sau xác nhận, hàng chuyển sang Ngừng bán và bỏ nút Ngừng bán; vẫn xem được khi lọc Tất cả/Ngừng bán. Không xóa</tspan>
+    <tspan x="44.0" dy="22.4">danh mục hoặc hủy gói hội viên đã mua.</tspan>
+  </text>
+  <rect x="32.0" y="1194.0" width="1528.0" height="72.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="16.0" font-weight="400" x="44.0" y="1223.6" fill="#26313e">
+    <tspan x="44.0" dy="0">Tải/rỗng/lỗi: hàng chờ; “Chưa có gói tập” + Thêm theo quyền; “Không có kết quả”; lỗi tải + Thử lại. Form có lỗi theo trường, trạng thái đang lưu, giữ dữ liệu khi</tspan>
+    <tspan x="44.0" dy="22.4">lỗi và thông báo thành công.</tspan>
+  </text>
+  <rect x="32.0" y="1278.0" width="1528.0" height="72.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="16.0" font-weight="400" x="44.0" y="1307.6" fill="#26313e">
+    <tspan x="44.0" dy="0">Nguồn: #18, #6, #29 và ERD packages. Bộ lọc/cách mở form là đề xuất bố cục cho review; không chốt endpoint hay DTO. packages ACTIVE là đang bán, khác memberships</tspan>
+    <tspan x="44.0" dy="22.4">ACTIVE là gói đã kích hoạt.</tspan>
+  </text>
+  <rect x="837.0" y="336.0" width="120.0" height="40.0" fill="#eceef1" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="700" x="849.0" y="359.6" fill="#26313e">
+    <tspan x="849.0" dy="0">Trạng thái</tspan>
+  </text>
+  <rect x="837.0" y="376.0" width="120.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="849.0" y="403.6" fill="#26313e">
+    <tspan x="849.0" dy="0">Đang bán</tspan>
+  </text>
+  <rect x="837.0" y="424.0" width="120.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="849.0" y="451.6" fill="#26313e">
+    <tspan x="849.0" dy="0">Ngừng bán</tspan>
+  </text>
+  <rect x="837.0" y="472.0" width="120.0" height="48.0" fill="#ffffff" stroke="#9aa1aa" />
+  <text font-family="Arial, sans-serif" font-size="12.0" font-weight="400" x="849.0" y="499.6" fill="#26313e">
+    <tspan x="849.0" dy="0">Đang bán</tspan>
+  </text>
+</svg>
