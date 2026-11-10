@@ -13,6 +13,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import vn.edu.hust.nhom6.gym.feature.auth.service.AuthService;
@@ -43,6 +44,7 @@ public record RegisterRequest(
     )
     String password,
 
+    @Past(message = "Ngày sinh phải ở trong quá khứ")
     LocalDate dob,
 
     @Pattern(

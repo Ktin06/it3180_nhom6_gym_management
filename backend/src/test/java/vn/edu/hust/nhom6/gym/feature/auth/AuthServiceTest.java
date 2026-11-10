@@ -379,6 +379,46 @@ class AuthServiceTest {
     }
 
     @Test
+    void disableAccountCapNhatDisabledVaThuHoiRefreshToken() {
+        User user = User.builder()
+            .email("member@example.com")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .build();
+        when(userRepository.findById(10L)).thenReturn(Optional.of(user));
+
+        authService.disableAccount(10L);
+
+        assertThat(user.getStatus()).isEqualTo(UserStatus.DISABLED);
+        verify(userRepository).saveAndFlush(user);
+        verify(refreshTokenRepository).revokeAllByUserId(eq(10L), any(OffsetDateTime.class));
+    }
+
+    @Test
+    void activateAccountIfDisabledChiMoTaiKhoanDisabledKhongMoLocked() {
+        User disabledUser = User.builder()
+            .email("disabled@example.com")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.DISABLED)
+            .build();
+        when(userRepository.findById(11L)).thenReturn(Optional.of(disabledUser));
+
+        authService.activateAccountIfDisabled(11L);
+        assertThat(disabledUser.getStatus()).isEqualTo(UserStatus.ACTIVE);
+        verify(userRepository).saveAndFlush(disabledUser);
+
+        User lockedUser = User.builder()
+            .email("locked@example.com")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.LOCKED)
+            .build();
+        when(userRepository.findById(12L)).thenReturn(Optional.of(lockedUser));
+
+        authService.activateAccountIfDisabled(12L);
+        assertThat(lockedUser.getStatus()).isEqualTo(UserStatus.LOCKED);
+    }
+
+    @Test
     void chuanHoaSoDienThoaiCacDangPhoBien() {
         assertThat(PhoneUtils.normalizePhone("0912345678")).isEqualTo("0912345678");
         assertThat(PhoneUtils.normalizePhone("+84 912 345 678")).isEqualTo("0912345678");
