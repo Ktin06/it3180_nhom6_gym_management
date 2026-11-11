@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,11 +52,13 @@ class PackageDeactivateIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"TIME", "SESSION", "PT"})
-    void deactivatesWithoutDeletingOrChangingOtherFields(String type) throws Exception {
+    @CsvSource({"TIME,false", "SESSION,false", "PT,false", "TIME,true", "SESSION,true", "PT,true"})
+    void deactivatesWithNoBodyOrEmptyJsonWithoutChangingOtherFields(String type, boolean emptyJsonBody) throws Exception {
         if (!type.equals("TIME")) { jdbc.update("UPDATE packages SET type=?,session_count=10 WHERE id=?", type, item); }
         var before = row();
-        var response = mvc.perform(put(endpoint(item.toString())).with(bearer("BRANCH_MANAGER")))
+        var request = put(endpoint(item.toString())).with(bearer("BRANCH_MANAGER"));
+        if (emptyJsonBody) { request.contentType(MediaType.APPLICATION_JSON).content("{}"); }
+        var response = mvc.perform(request)
             .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(item.intValue()))
             .andExpect(jsonPath("$.code").value("STOP")).andExpect(jsonPath("$.status").value("INACTIVE"))
             .andExpect(jsonPath("$.updatedAt").isNotEmpty()).andReturn().getResponse();
@@ -76,7 +79,8 @@ class PackageDeactivateIntegrationTest {
     void repeatIs422WithoutFurtherAuditChange() throws Exception {
         mvc.perform(put(endpoint(item.toString())).with(bearer("BRANCH_MANAGER"))).andExpect(status().isOk());
         var before = row();
-        mvc.perform(put(endpoint(item.toString())).with(bearer("BRANCH_MANAGER")))
+        mvc.perform(put(endpoint(item.toString())).with(bearer("BRANCH_MANAGER"))
+                .contentType(MediaType.APPLICATION_JSON).content("{}"))
             .andExpect(status().isUnprocessableContent())
             .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
             .andExpect(jsonPath("$.detail").value("Gói tập này đã ở trạng thái ngừng bán."));
@@ -84,12 +88,15 @@ class PackageDeactivateIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"OTHER", "GLOBAL", "MISSING"})
-    void outsideScopeHas404EvenIfAlreadyInactive(String scope) throws Exception {
-        jdbc.update("UPDATE packages SET branch_id=?,status='INACTIVE' WHERE id=?", scope.equals("GLOBAL") ? null : otherBranch, item);
+    @CsvSource({"OTHER,ACTIVE", "GLOBAL,ACTIVE", "OTHER,INACTIVE", "GLOBAL,INACTIVE"})
+    void outsideBranchAndGlobalAre403EvenIfAlreadyInactive(String scope, String state) throws Exception {
+        jdbc.update("UPDATE packages SET branch_id=?,status=? WHERE id=?",
+            scope.equals("GLOBAL") ? null : otherBranch, state, item);
         var before = row();
-        mvc.perform(put(endpoint(scope.equals("MISSING") ? "999999" : item.toString())).with(bearer("BRANCH_MANAGER")))
-            .andExpect(status().isNotFound()).andExpect(jsonPath("$.detail").value("Gói tập không tồn tại trên hệ thống."));
+        mvc.perform(put(endpoint(item.toString())).with(bearer("BRANCH_MANAGER"))
+                .contentType(MediaType.APPLICATION_JSON).content("{}"))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.detail").value("Bạn không có quyền thực hiện thao tác này."));
         assertThat(row()).isEqualTo(before);
     }
 
@@ -127,13 +134,13 @@ class PackageDeactivateIntegrationTest {
         assertThat(row()).isEqualTo(before);
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"{}", "null", "{\"status\":\"ACTIVE\"}", "text"})
-    void rejectsBodyWithoutMutation(String body) throws Exception {
+    @Test
+    void missingPackageIs404WithEmptyJsonBodyWithoutMutation() throws Exception {
         var before = row();
-        mvc.perform(put(endpoint(item.toString())).with(bearer("BRANCH_MANAGER"))
-                .contentType(MediaType.APPLICATION_JSON).content(body))
-            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors.body").isNotEmpty());
+        mvc.perform(put(endpoint("999999")).with(bearer("BRANCH_MANAGER"))
+                .contentType(MediaType.APPLICATION_JSON).content("{}"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.detail").value("Gói tập không tồn tại trên hệ thống."));
         assertThat(row()).isEqualTo(before);
     }
 
@@ -162,7 +169,8 @@ class PackageDeactivateIntegrationTest {
         try (var executor = Executors.newFixedThreadPool(2)) {
             var stop = executor.submit(() -> {
                 barrier.await(15, TimeUnit.SECONDS);
-                return mvc.perform(put(endpoint(item.toString())).with(bearer("BRANCH_MANAGER")))
+                return mvc.perform(put(endpoint(item.toString())).with(bearer("BRANCH_MANAGER"))
+                    .contentType(MediaType.APPLICATION_JSON).content("{}"))
                     .andReturn().getResponse().getStatus();
             });
             var edit = executor.submit(() -> {

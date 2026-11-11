@@ -8,9 +8,6 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import jakarta.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import vn.edu.hust.nhom6.gym.common.exception.InvalidRequestException;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.PackageDeactivationDto;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,20 +41,17 @@ public class PackageController {
     @PutMapping("/{id}/deactivate")
     @PreAuthorize("hasRole('BRANCH_MANAGER')")
     @Operation(summary = "Ngừng bán gói của chi nhánh",
-        description = "Không gửi request body. ACTIVE chuyển INACTIVE, không xóa bản ghi và không đổi "
-            + "membership/hóa đơn cũ. Gọi lại trả 422. Ngoài chi nhánh/toàn chuỗi/không tồn tại trả 404.")
+        description = "Không yêu cầu request body; tương thích với client gửi {}. Nội dung body không được sử dụng. "
+            + "ACTIVE chuyển INACTIVE, không xóa bản ghi và không đổi membership/hóa đơn cũ. "
+            + "Gọi lại trả 422. Gói khác chi nhánh/toàn chuỗi trả 403; ID không tồn tại trả 404.")
     @ApiResponse(responseCode = "200", description = "id, code, status INACTIVE và updatedAt UTC")
-    @ApiResponse(responseCode = "400", description = "ID không hợp lệ hoặc gửi body")
+    @ApiResponse(responseCode = "400", description = "ID không hợp lệ")
     @ApiResponse(responseCode = "401", description = "Chưa xác thực hoặc JWT sai")
-    @ApiResponse(responseCode = "403", description = "Sai vai trò hoặc thiếu staff ACTIVE")
-    @ApiResponse(responseCode = "404", description = "Không tìm thấy gói trong phạm vi")
+    @ApiResponse(responseCode = "403", description = "Sai vai trò, thiếu staff ACTIVE hoặc gói khác chi nhánh/toàn chuỗi")
+    @ApiResponse(responseCode = "404", description = "ID gói không tồn tại")
     @ApiResponse(responseCode = "422", description = "Gói đã ngừng bán")
     public PackageDeactivationDto deactivate(Authentication auth,
-            @PathVariable @Positive(message = "ID gói phải lớn hơn 0.") Long id,
-            HttpServletRequest request) throws IOException {
-        if (request.getInputStream().read() != -1) {
-            throw new InvalidRequestException("API ngừng bán không nhận request body.");
-        }
+            @PathVariable @Positive(message = "ID gói phải lớn hơn 0.") Long id) {
         return packages.deactivate(auth, id);
     }
 
@@ -66,12 +60,12 @@ public class PackageController {
     @Operation(summary = "Sửa từng phần thông tin gói của chi nhánh",
         description = "Không gửi trường thì giữ nguyên; description:null xóa mô tả. "
             + "Không đổi code/type/branchId/status. Trường bắt buộc null trả 400. "
-            + "Gói ngoài chi nhánh/toàn chuỗi/không tồn tại đều trả 404. Không đổi lịch sử đã bán.")
+            + "Gói khác chi nhánh/toàn chuỗi trả 403; ID không tồn tại trả 404. Không đổi lịch sử đã bán.")
     @ApiResponse(responseCode = "200", description = "Chi tiết gói sau cập nhật, kể cả body rỗng không thay đổi")
     @ApiResponse(responseCode = "400", description = "Dữ liệu hoặc ID không hợp lệ")
     @ApiResponse(responseCode = "401", description = "Chưa xác thực hoặc token không hợp lệ")
-    @ApiResponse(responseCode = "403", description = "Sai vai trò hoặc thiếu staff ACTIVE")
-    @ApiResponse(responseCode = "404", description = "Không tìm thấy gói trong phạm vi được sửa")
+    @ApiResponse(responseCode = "403", description = "Sai vai trò, thiếu staff ACTIVE hoặc gói khác chi nhánh/toàn chuỗi")
+    @ApiResponse(responseCode = "404", description = "ID gói không tồn tại")
     public PackageDetailDto update(Authentication auth,
             @PathVariable @Positive(message = "ID gói phải lớn hơn 0.") Long id,
             @Valid @RequestBody UpdatePackageRequest request) {

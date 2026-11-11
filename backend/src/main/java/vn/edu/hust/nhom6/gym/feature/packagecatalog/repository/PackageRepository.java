@@ -14,14 +14,10 @@ import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.PackageStatus;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.PackageType;
 
 public interface PackageRepository extends JpaRepository<GymPackage, Long> {
-    /** Khóa dòng trong phạm vi để hai request đồng thời không cùng chuyển ACTIVE. */
+    /** Khóa dòng cho sửa/ngừng bán; service phân biệt ID không tồn tại với gói ngoài chi nhánh. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select p from GymPackage p where p.id = :id and p.branchId = :branchId")
-    Optional<GymPackage> findForDeactivation(@Param("id") Long id, @Param("branchId") Long branchId);
-
-    /** Sửa thông tin cũng khóa dòng để không ghi đè trạng thái của request ngừng bán đồng thời. */
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<GymPackage> findByIdAndBranchId(Long id, Long branchId);
+    @Query("select p from GymPackage p where p.id = :id")
+    Optional<GymPackage> findForUpdate(@Param("id") Long id);
 
     boolean existsByCode(String code);
 

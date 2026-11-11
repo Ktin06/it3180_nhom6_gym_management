@@ -47,8 +47,7 @@ public class PackageCatalogService {
             throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này.");
         }
         Long branchId = staff.activeBranchIdForUser(userId);
-        var item = packages.findForDeactivation(id, branchId)
-            .orElseThrow(() -> new NotFoundException("Gói tập không tồn tại trên hệ thống."));
+        var item = findOwnedPackageForUpdate(id, branchId);
         if (item.getStatus() == PackageStatus.INACTIVE) {
             throw new BusinessRuleException("Gói tập này đã ở trạng thái ngừng bán.");
         }
@@ -64,8 +63,7 @@ public class PackageCatalogService {
             throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này.");
         }
         Long branchId = staff.activeBranchIdForUser(userId);
-        var item = packages.findByIdAndBranchId(id, branchId)
-            .orElseThrow(() -> new NotFoundException("Gói tập không tồn tại trên hệ thống."));
+        var item = findOwnedPackageForUpdate(id, branchId);
         var merged = new CreatePackageRequest(item.getCode(),
             request.has("name") ? request.getName() : item.getName(), item.getType(),
             request.has("durationDays") ? request.getDurationDays() : item.getDurationDays(),
@@ -115,6 +113,15 @@ public class PackageCatalogService {
             }
             throw ex;
         }
+    }
+
+    private GymPackage findOwnedPackageForUpdate(Long id, Long branchId) {
+        var item = packages.findForUpdate(id)
+            .orElseThrow(() -> new NotFoundException("Gói tập không tồn tại trên hệ thống."));
+        if (!branchId.equals(item.getBranchId())) {
+            throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này.");
+        }
+        return item;
     }
 
     private ConflictException duplicateCode(String code) {

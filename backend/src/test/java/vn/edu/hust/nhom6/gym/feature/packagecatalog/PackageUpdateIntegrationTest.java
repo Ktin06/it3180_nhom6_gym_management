@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,23 +145,27 @@ class PackageUpdateIntegrationTest {
         assertThat(row()).isEqualTo(before);
     }
 
-    @Test
-    void outsideBranchGlobalAndMissingHaveSame404() throws Exception {
-        jdbc.update("UPDATE packages SET branch_id=? WHERE id=?", otherBranch, item);
+    @ParameterizedTest
+    @CsvSource({"OTHER,ACTIVE", "GLOBAL,ACTIVE", "OTHER,INACTIVE", "GLOBAL,INACTIVE"})
+    void outsideBranchAndGlobalAre403WithoutMutation(String scope, String state) throws Exception {
+        jdbc.update("UPDATE packages SET branch_id=?,status=? WHERE id=?",
+            scope.equals("GLOBAL") ? null : otherBranch, state, item);
         var before = row();
-        String first = mvc.perform(put("/api/v1/packages/{id}", item).with(bearer("BRANCH_MANAGER"))
+        mvc.perform(put("/api/v1/packages/{id}", item).with(bearer("BRANCH_MANAGER"))
                 .contentType(MediaType.APPLICATION_JSON).content("{\"price\":0}"))
-            .andExpect(status().isNotFound()).andReturn().getResponse().getContentAsString();
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.detail").value("Bạn không có quyền thực hiện thao tác này."));
         assertThat(row()).isEqualTo(before);
-        jdbc.update("UPDATE packages SET branch_id=null WHERE id=?", item);
-        String global = mvc.perform(put("/api/v1/packages/{id}", item).with(bearer("BRANCH_MANAGER"))
+    }
+
+    @Test
+    void missingPackageIs404WithoutMutation() throws Exception {
+        var before = row();
+        mvc.perform(put("/api/v1/packages/999999").with(bearer("BRANCH_MANAGER"))
                 .contentType(MediaType.APPLICATION_JSON).content("{}"))
-            .andExpect(status().isNotFound()).andReturn().getResponse().getContentAsString();
-        String missing = mvc.perform(put("/api/v1/packages/999999").with(bearer("BRANCH_MANAGER"))
-                .contentType(MediaType.APPLICATION_JSON).content("{}"))
-            .andExpect(status().isNotFound()).andReturn().getResponse().getContentAsString();
-        assertThat(json.readTree(first).get("detail")).isEqualTo(json.readTree(global).get("detail"))
-            .isEqualTo(json.readTree(missing).get("detail"));
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.detail").value("Gói tập không tồn tại trên hệ thống."));
+        assertThat(row()).isEqualTo(before);
     }
 
     @ParameterizedTest
