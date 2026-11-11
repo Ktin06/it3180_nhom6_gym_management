@@ -1,6 +1,6 @@
 # Biên bản họp tổng kết Sprint 1 và kế hoạch Sprint 2
 
-- **Ngày họp:** [dd/11/2026]
+- **Ngày họp:** [12/11/2026]
 - **Hình thức:** [trực tiếp / trực tuyến], thời lượng [số phút]
 - **Điều phối:** Nguyễn Trọng Việt
 - **Ghi biên bản:** [họ tên, nên là người khác với người điều phối]
@@ -16,9 +16,9 @@
 
 ## 1. Mục tiêu cuộc họp
 
-1. Rà kết quả Sprint 1 (27/10 – 09/11) so với kế hoạch.
+1. Rà kết quả Sprint 1 (27/10 – 16/11) so với kế hoạch.
 2. Rút kinh nghiệm (retrospective) và chọn hành động cải tiến.
-3. Chốt kế hoạch Sprint 2 (10/11 – 23/11): mỗi việc có người phụ trách và hạn.
+3. Chốt kế hoạch Sprint 2 (17/11 – 30/11): mỗi việc có người phụ trách và hạn.
 4. Chốt câu hỏi "lưu ảnh đại diện ở đâu".
 
 ## 2. Chương trình
@@ -26,7 +26,7 @@
 | Thời lượng | Nội dung | Ai nói |
 | --- | --- | --- |
 | 20 phút | Sprint review: mỗi người nêu việc đã xong, chưa xong, đang vướng (2 phút mỗi người) | Từng người |
-| 5 phút | Kết quả demo 10/11 (nếu đã diễn ra) hoặc chuẩn bị demo | Gia Bảo |
+| 5 phút | Kết quả demo Sprint 1 hoặc chuẩn bị demo | Gia Bảo |
 | 20 phút | Retrospective: làm tốt, chưa tốt, hành động cải tiến | Cả nhóm |
 | 25 phút | Kế hoạch Sprint 2: duyệt từng dòng của bản dự thảo, đổi người hoặc hạn nếu cần | Trọng Việt |
 | 10 phút | Câu hỏi mở: lưu ảnh đại diện ở đâu | Hoàng Kim Tiến chốt |
@@ -110,7 +110,7 @@
 | Điểm đã hoàn thành trên tổng 136 | [điền] |
 | Số pull request đã gộp | [điền] |
 | Việc chuyển sang Sprint 2 | [liệt kê mã WBS] |
-| Kết quả demo 10/11 | [điền] |
+| Kết quả demo Sprint 1 | [điền sau khi demo] |
 
 ## 4. Retrospective
 
@@ -120,6 +120,7 @@
 - File đặc tả đặt sai thư mục hoặc tên, còn nhiều chỗ trống chưa điền từ ERD.
 - Làm trên web GitHub thay vì nhánh trên máy theo quy ước.
 - Dùng công cụ AI: checklist-review.md có giúp bắt lỗi trước khi mở PR không.
+- Lịch Sprint 1 phải dời từ 09/11 sang 16/11 và kéo theo lịch Sprint 2.
 - Điểm làm tốt: ERD cả nhóm duyệt ngày kick-off, phân công rõ người và hạn, quy ước tài liệu thống nhất.
 -->
 
@@ -137,20 +138,24 @@
 | --- | --- | --- |
 | [điền] | [điền] | [điền] |
 
-## 5. Kế hoạch Sprint 2 (10/11 – 23/11)
+## 5. Kế hoạch Sprint 2 (17/11 – 30/11)
 
 Bản dự thảo nằm ở [sprint-2-ke-hoach.md](../plans/sprint-2-ke-hoach.md). Kết quả duyệt tại cuộc họp:
 
 | Nội dung | Kết quả |
 | --- | --- |
+| Ngày Sprint 2: 17/11 – 30/11, hoặc giữ kết thúc 23/11 và chuyển bớt v2 sang Sprint 3 | [phương án đã chọn] |
 | Phạm vi: phần còn lại của v1 và F7–F10 | [giữ nguyên / thay đổi gì] |
-| Người phụ trách và hạn từng việc | [giữ như dự thảo / các dòng đã đổi] |
+| Ba user story chưa có việc ở bản trước (#53, #57, #60), nay là S2-36, S2-37, S2-38 | [giữ như dự thảo / đổi người hoặc chuyển sprint] |
+| Phân công đề xuất mới: Phú Trọng hỗ trợ F8 (S2-17) và làm hoàn tiền F5.2 (S2-38); Đức Việt làm API F2.2 (S2-36) | [đồng ý / đổi] |
+| Người phụ trách và hạn từng việc còn lại | [giữ như dự thảo / các dòng đã đổi] |
 | Sơ đồ còn lại (phân cấp chức năng, tuần tự, lớp phân tích, kiến trúc, lớp thiết kế) | [người và hạn đã chốt] |
-| Ngày họp giữa sprint và ngày bàn giao Sprint 2 | [điền] |
+| Ngày demo Sprint 1, ngày họp giữa sprint và ngày bàn giao Sprint 2 | [điền] |
+| Tạo issue riêng cho từng việc S2-xx sau khi gộp kế hoạch | [người tạo, hạn] |
 
 ## 6. Câu hỏi mở: lưu ảnh đại diện ở đâu
 
-Bối cảnh: F4 (check-in tại quầy) hiển thị ảnh đại diện để lễ tân đối chiếu; ổ đĩa của Render bản miễn phí không giữ file sau khi khởi động lại; Sprint 1 làm F2 chưa có ảnh ([thiet-ke-du-lieu.md](../design/erd/thiet-ke-du-lieu.md)).
+Bối cảnh: F4 (check-in tại quầy) hiển thị ảnh đại diện để lễ tân đối chiếu; ổ đĩa của Render bản miễn phí không giữ file sau khi khởi động lại; Sprint 1 làm F2 chưa có ảnh ([thiet-ke-du-lieu.md](../design/erd/thiet-ke-du-lieu.md)). Hạn chốt theo kế hoạch là 12/11 (việc S2-01); nếu đã chốt trước cuộc họp thì ghi quyết định vào cuối mục này.
 
 | Phương án | Ưu điểm | Nhược điểm |
 | --- | --- | --- |
