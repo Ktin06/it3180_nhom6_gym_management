@@ -334,6 +334,7 @@ class DatabaseConstraintsTest {
         Long trainerId = insertTestStaff("trainer.yoga@example.com", "NV000002", "0920000002");
         Long roomId = insertTestRoom("Phòng Yoga 102", 25);
         Long memberId = insertTestMember("HV000002", "0910000002");
+        Long bookerId = insertTestUser("booker.yoga@example.com");
 
         Long classTypeId = jdbcTemplate.queryForObject(
             "INSERT INTO class_types (name, description) VALUES (?, ?) RETURNING id",
@@ -348,13 +349,13 @@ class DatabaseConstraintsTest {
             Long.class, scheduleId, branchId, trainerId, roomId, LocalDate.now(), 20);
 
         jdbcTemplate.update(
-            "INSERT INTO class_bookings (class_session_id, member_id, status) VALUES (?, ?, ?)",
-            sessionId, memberId, "BOOKED");
+            "INSERT INTO class_bookings (class_session_id, member_id, created_by, status) VALUES (?, ?, ?, ?)",
+            sessionId, memberId, bookerId, "BOOKED");
 
         // Đặt lại khi đã có chỗ BOOKED sẽ vi phạm uq_active_booking
         assertThatThrownBy(() -> jdbcTemplate.update(
-            "INSERT INTO class_bookings (class_session_id, member_id, status) VALUES (?, ?, ?)",
-            sessionId, memberId, "BOOKED"))
+            "INSERT INTO class_bookings (class_session_id, member_id, created_by, status) VALUES (?, ?, ?, ?)",
+            sessionId, memberId, bookerId, "BOOKED"))
             .isInstanceOf(DataIntegrityViolationException.class)
             .hasMessageContaining("uq_active_booking");
 
@@ -364,18 +365,19 @@ class DatabaseConstraintsTest {
             sessionId, memberId);
 
         assertThatCode(() -> jdbcTemplate.update(
-            "INSERT INTO class_bookings (class_session_id, member_id, status) VALUES (?, ?, ?)",
-            sessionId, memberId, "BOOKED"))
+            "INSERT INTO class_bookings (class_session_id, member_id, created_by, status) VALUES (?, ?, ?, ?)",
+            sessionId, memberId, bookerId, "BOOKED"))
             .doesNotThrowAnyException();
     }
 
     @Test
-    @DisplayName("Trạng thái hủy đặt lớp phải đồng bộ với thời điểm hủy, lý do hủy và cờ hủy muộn (ck_class_bookings_cancelled)")
+    @DisplayName("Trạng thái hủy đặt lớp phải đồng bộ với thời điểm hủy, lý do hủy và cờ hủy muộn (ck_class_bookings_cancelled); chỗ đặt phải có người tạo (created_by NOT NULL)")
     void trangThaiHuyDatLopPhaiDongBoThongTinHuy() {
         Long branchId = defaultBranchId();
         Long trainerId = insertTestStaff("trainer.pilates@example.com", "NV000003", "0920000003");
         Long roomId = insertTestRoom("Phòng Pilates 103", 20);
         Long memberId = insertTestMember("HV000104", "0910000104");
+        Long bookerId = insertTestUser("booker.pilates@example.com");
 
         Long classTypeId = jdbcTemplate.queryForObject(
             "INSERT INTO class_types (name, description) VALUES (?, ?) RETURNING id",
@@ -391,17 +393,24 @@ class DatabaseConstraintsTest {
 
         // CANCELLED nhưng thiếu cancelled_at / cancel_reason -> vi phạm ck_class_bookings_cancelled
         assertThatThrownBy(() -> jdbcTemplate.update(
-            "INSERT INTO class_bookings (class_session_id, member_id, status, cancelled_at, cancel_reason) VALUES (?, ?, 'CANCELLED', NULL, NULL)",
-            sessionId, memberId))
+            "INSERT INTO class_bookings (class_session_id, member_id, created_by, status, cancelled_at, cancel_reason) VALUES (?, ?, ?, 'CANCELLED', NULL, NULL)",
+            sessionId, memberId, bookerId))
             .isInstanceOf(DataIntegrityViolationException.class)
             .hasMessageContaining("ck_class_bookings_cancelled");
 
         // BOOKED nhưng lại có is_late_cancel = true -> vi phạm ck_class_bookings_cancelled
         assertThatThrownBy(() -> jdbcTemplate.update(
-            "INSERT INTO class_bookings (class_session_id, member_id, status, is_late_cancel) VALUES (?, ?, 'BOOKED', true)",
-            sessionId, memberId))
+            "INSERT INTO class_bookings (class_session_id, member_id, created_by, status, is_late_cancel) VALUES (?, ?, ?, 'BOOKED', true)",
+            sessionId, memberId, bookerId))
             .isInstanceOf(DataIntegrityViolationException.class)
             .hasMessageContaining("ck_class_bookings_cancelled");
+
+        // Thiếu người tạo chỗ đặt -> vi phạm NOT NULL của created_by (ADR 0010, migration V9_01)
+        assertThatThrownBy(() -> jdbcTemplate.update(
+            "INSERT INTO class_bookings (class_session_id, member_id, status) VALUES (?, ?, 'BOOKED')",
+            sessionId, memberId))
+            .isInstanceOf(DataIntegrityViolationException.class)
+            .hasMessageContaining("created_by");
     }
 
     @Test
