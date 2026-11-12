@@ -1,6 +1,6 @@
 # Tích hợp frontend F1
 
-Cập nhật 10/11/2026. Hợp đồng JSON đã được Bùi Trần Đức Việt (`VietBTD306`, phụ trách backend F1) xác nhận tại [comment PR #80](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80#issuecomment-6624574276) và bổ sung vào [SRS F1 mục 6.1 tại commit a2fa017](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/a2fa01764b377fad74dac68cbeee97dce8c569d1/docs/requirements/srs/dac-ta-use-case-f1-tai-khoan-va-phan-quyen.md). Backend auth đã merge qua [#87](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/87) và [#91](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/91); schema chung [#101](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/101) và API hồ sơ hội viên F2 [#97](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/97) cũng đã vào main. Ngày 10/11 đã kiểm tra frontend với backend và cơ sở dữ liệu thật trên máy phát triển (mục [Kết quả tích hợp](#kết-quả-tích-hợp-với-backend-thật-10112026)); môi trường staging Vercel/Render và Postman F1–F3 chưa được xác minh.
+Cập nhật 12/11/2026. Hợp đồng JSON đã được Bùi Trần Đức Việt (`VietBTD306`, phụ trách backend F1) xác nhận tại [comment PR #80](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80#issuecomment-6624574276) và bổ sung vào [SRS F1 mục 6.1 tại commit a2fa017](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/a2fa01764b377fad74dac68cbeee97dce8c569d1/docs/requirements/srs/dac-ta-use-case-f1-tai-khoan-va-phan-quyen.md). Backend auth đã merge qua [#87](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/87) và [#91](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/91); vá JWT và giới hạn BCrypt đã merge qua [#105](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/105) (merge commit `4610765`); schema chung [#101](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/101) và API hồ sơ hội viên F2 [#97](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/97) cũng đã vào main. Ngày 12/11 đã kiểm tra frontend với `origin/main` `336e13c` (có #105) bằng backend, PostgreSQL và trình duyệt thật trên máy phát triển (mục [Kết quả tích hợp](#kết-quả-tích-hợp-với-backend-thật-12112026)). Kiểm tra HTTPS staging bị chặn (mục [Staging](#kiểm-tra-https-staging-12112026-bị-chặn)); Postman F1–F3 chưa được chạy.
 
 ## Đường dẫn và dữ liệu đã thống nhất
 
@@ -41,55 +41,76 @@ Refresh cookie: `HttpOnly; SameSite=Strict; Path=/api/v1/auth`, kèm `Secure` �
 - Refresh trả `401` xác nhận phiên không hợp lệ thì kết thúc phiên. Lỗi kết nối hoặc server tạm thời đưa giao diện vào trạng thái chưa xác minh, ẩn nội dung được bảo vệ và cho thử lại; không tự coi là đã đăng xuất. Token access chỉ ở bộ nhớ, cookie vẫn do backend quản lý.
 - Logout chỉ kết thúc phiên sau khi backend xác nhận. Lỗi mạng giữ giao diện hiện tại và cảnh báo “đăng xuất chưa hoàn tất” qua message portal; nút Thử lại vẫn có thể dùng. Nếu tải lại trước khi logout thành công, bootstrap kiểm tra cookie và có thể khôi phục phiên còn hiệu lực. Frontend không tự xóa được cookie HttpOnly.
 
-Các ca này vừa được kiểm thử bằng Vitest (giả lập ở ranh giới frontend) vừa được thử lại với backend thật ngày 10/11; xem mục bên dưới để phân biệt hai loại bằng chứng.
+Các ca này được kiểm thử bằng Vitest (giả lập ở ranh giới frontend) và thử lại trên trình duyệt với backend thật ngày 10/11 và 12/11; xem mục bên dưới để phân biệt các loại bằng chứng.
 
-## Kết quả tích hợp với backend thật (10/11/2026)
+## Kết quả tích hợp với backend thật (12/11/2026)
 
 **Môi trường (để chạy lại):**
 
 | Thành phần | Chi tiết |
 | --- | --- |
-| Frontend | Nhánh `feature/f1-dang-ky-dang-nhap` tại `a41bced` (đã đồng bộ main `872386d` vào nhánh), Node v24.18.0, `npm run dev` |
-| Backend | Đúng mã main `872386d`: nhánh này không đổi `backend/`. Đóng gói bằng `backend/Dockerfile`, chạy profile `local` có dữ liệu mẫu; Flyway áp 45 migration (schema và `db/seed`) |
-| Cơ sở dữ liệu | PostgreSQL 16. Máy thử dùng ảnh `postgres:16-alpine` có sẵn thay cho `postgres:16` trong `docker-compose.yml`, cùng bản chính |
-| Trình duyệt | Chromium điều khiển bằng Playwright, khung 1280 px và 360 px |
-| Cổng | Cổng 8080 của máy thử đang do dự án khác dùng, nên backend chạy ở 8081 và Vite trỏ proxy `/api` sang 8081 bằng một file cấu hình tạm, không commit. Cấu hình mặc định của repo vẫn là `localhost:8080` (`frontend/vite.config.ts`) |
+| Frontend | Nhánh `feature/f1-dang-ky-dang-nhap` tại commit merge `d2a8288`, đã merge `origin/main` `336e13c`. Node v24.18.0 |
+| Backend | `origin/main` `336e13c`, gồm #105. Đóng gói bằng `backend/Dockerfile` (JDK 21 để build, JRE 21 để chạy), chạy profile `local` có dữ liệu mẫu |
+| Cơ sở dữ liệu | PostgreSQL 16.15 (`postgres:16-alpine`). Flyway áp toàn bộ migration schema đến `V8_03` và các script dữ liệu mẫu lặp lại; không có lỗi migration trong log |
+| Cấu hình thử | Biến môi trường truyền khi chạy container, không ghi vào repo. Đặt `DB_SSLMODE=disable` (mặc định của backend là `require`) vì container PostgreSQL cục bộ không bật TLS |
+| Cổng | Cổng 8080 và 5432 của máy thử đã có tiến trình khác đang lắng nghe. Backend container publish ở cổng 8081; PostgreSQL chỉ nằm trong mạng Docker riêng. Vite chạy bằng cấu hình tạm ngoài repo, chỉ đổi đích proxy `/api` sang 8081 |
+| Trình duyệt | Chromium 1248 điều khiển bằng Playwright 1.65, khung 1280 px và 360 px |
 
-**Lưu ý khi chạy lại:** mở `http://localhost:5173`, không dùng `127.0.0.1:5173`. `CORS_ALLOWED_ORIGINS` mặc định là `http://localhost:5173`; origin khác bị backend trả `403 Invalid CORS request` ở mọi `POST` (đăng ký, đăng nhập, refresh, đăng xuất). Đã gặp lỗi này khi thử lần đầu và xác nhận bằng `curl` với hai giá trị `Origin`.
+**Lưu ý khi chạy lại:** mở `http://localhost:5173`, không dùng `127.0.0.1:5173`. `CORS_ALLOWED_ORIGINS` mặc định là `http://localhost:5173`; origin khác bị backend trả `403 Invalid CORS request` ở mọi `POST` (đăng ký, đăng nhập, refresh, đăng xuất).
 
-**Kết quả:** 15/15 kiểm tra đạt. "Thật" nghĩa là không giả lập API; "dừng backend" nghĩa là lỗi mạng tạo thật bằng cách dừng container backend rồi bật lại.
+**Kết quả, tách theo loại bằng chứng:**
 
-| # | Kiểm tra | Phạm vi | Kết quả |
-| --- | --- | --- | --- |
-| 1 | Đăng ký hội viên mới qua giao diện | Thật | `POST /auth/register` 201, `GET /auth/me` 200, vào `/member`; `localStorage`/`sessionStorage` rỗng |
-| 2 | Hồ sơ lưu bền vững | Thật | `users` có vai trò `MEMBER`, trạng thái `ACTIVE`, mật khẩu là mã băm bcrypt; `members` có mã `HVxxxxxx`, `user_id` trỏ đúng tài khoản |
-| 3 | Cookie refresh | Thật | Một cookie `refresh_token`: `HttpOnly`, `SameSite=Strict`, `Path=/api/v1/auth`, `Secure=false` (profile `local`); `document.cookie` rỗng |
-| 4 | Tải lại trang giữ phiên | Thật | `POST /auth/refresh` 200 rồi `GET /auth/me` 200; tab mới cùng trình duyệt vẫn đăng nhập |
-| 5 | Đăng xuất rồi tải lại | Thật | `POST /auth/logout` 204; `/member` chuyển về `/login`; refresh lại bằng cookie cũ trả 401; 0 refresh token còn hiệu lực trong CSDL |
-| 6 | Đăng nhập bằng tài khoản vừa đăng ký | Thật | `POST /auth/login` 200, vào `/member` |
-| 7 | Sai mật khẩu | Thật | Hiện “Email hoặc mật khẩu không chính xác.”, không chuyển trang |
-| 8 | Đăng nhập năm vai trò dữ liệu mẫu | Thật | `SUPER_ADMIN`→`/admin`, `BRANCH_MANAGER`→`/manager`, `RECEPTIONIST`→`/reception`, `TRAINER`→`/trainer`, `MEMBER`→`/member` |
-| 9 | Đăng ký trùng SĐT hồ sơ hội viên đã có | Thật | Bị từ chối với thông báo “đã có hồ sơ hội viên”; không tạo tài khoản cho email đó |
-| 10 | Đăng ký trùng email | Thật | `POST /auth/register` 409; lỗi “Email đã được đăng ký trong hệ thống.” hiện dưới ô Email; vẫn đúng một tài khoản |
-| 11 | Đăng ký thành công nhưng `/me` lỗi | Lai: đăng ký thật, `/me` bị chặn bằng Playwright | Giao diện báo “Tài khoản đã được tạo”; sau khi bỏ chặn, “Thử tải thông tin tài khoản” chỉ gọi `/me` (không `POST /auth/register` lần hai) và vào `/member`; vẫn đúng một tài khoản và một hồ sơ |
-| 12 | Đăng xuất khi backend ngừng | Thật, dừng backend | `POST /auth/logout` 502; cảnh báo “Đăng xuất chưa hoàn tất”, phiên và trang giữ nguyên, nút “Thử đăng xuất lại”; sau khi bật backend, thử lại trả 204 và về `/login` |
-| 13 | Tải lại khi backend ngừng | Thật, dừng backend | `POST /auth/refresh` 502; hiện “Chưa thể xác minh phiên đăng nhập”, không lộ nội dung được bảo vệ; sau khi bật backend, “Thử lại” gọi refresh 200 và `/me` 200 rồi quay lại trang |
-| 14 | Bố cục 360 px | Thật | `/register` và `/login` không tràn ngang (`scrollWidth` 360/360) |
-| 15 | Lỗi JavaScript trên trang | Thật | Không có |
+*Tầng 1: HTTP đến backend thật (curl, 24 kiểm tra, đạt 24/24)*
 
-Chạy thêm trên nhánh đã đồng bộ main: ESLint, kiểm tra kiểu TypeScript và 10 file/54 Vitest đều qua. Bước đóng gói chỉ chạy ở CI của PR.
+- Đăng ký: `201` với `{accessToken}` và cookie refresh. Bảng `users` có một hàng `MEMBER`, `ACTIVE`, mật khẩu băm bcrypt (`$2a$`). Bảng `members` có đúng một hàng liên kết.
+- Trùng email: `409`. Trùng số điện thoại: `409`, không tạo tài khoản nào.
+- Mật khẩu 72 byte: `201`. Mật khẩu 74 byte: `400`. Mật khẩu không có chữ số: `400`.
+- Đăng nhập: đúng thông tin `200`; sai mật khẩu `401`; email không tồn tại `401`.
+- `GET /auth/me`: có token `200` với `{userId,email,role}`; không token `401`; token bị sửa đổi `401`.
+- Refresh: cookie hợp lệ `200` và cookie được xoay; không có cookie `401`; cookie không hợp lệ `401`; cookie cũ đã thu hồi `401`.
+- Đăng xuất: `204`. Sau đăng xuất, bảng `refresh_tokens` không còn token nào chưa thu hồi của tài khoản; refresh bằng cookie đã dùng trả `401`.
+- Cookie refresh: `HttpOnly; SameSite=Strict; Path=/api/v1/auth`; không có thuộc tính `Secure` ở profile `local`.
+- Năm tài khoản mẫu đăng nhập `200`, `/auth/me` trả đúng vai trò `SUPER_ADMIN`, `BRANCH_MANAGER`, `RECEPTIONIST`, `TRAINER`, `MEMBER`.
 
-**Chưa được kiểm chứng:**
+*Tầng 1b: phân quyền trên API (đạt)*
 
-- **Staging Vercel/Render:** GET lúc 10:06 UTC ngày 10/11 cho thấy frontend HTTP 200, nhưng `/api/v1/auth/me` qua Vercel không phản hồi trong 20 giây và `/actuator/health` của Render không phản hồi trong 60 giây. Chưa xác nhận backend staging chạy, nên cookie `Secure`, rewrite của Vercel và dữ liệu staging chưa được kiểm tra. Không kết luận backend hỏng từ timeout vì Render Free có thể khởi động chậm.
-- **Postman F1–F3:** theo dõi tại [#31](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/31); chưa chạy trong lần kiểm tra này.
-- **PR [#105](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/105)** (vá JWT, giới hạn mật khẩu BCrypt) chưa merge nên không nằm trong backend đã thử.
-- Kịch bản Playwright chỉ chạy cục bộ, không được lưu trong repo; các bước ở bảng trên đủ để chạy lại thủ công.
+- `GET /api/v1/members` và `GET /api/v1/packages`: không token `401`; `MEMBER` và `TRAINER` `403`; `RECEPTIONIST` `200`.
+- `PUT /api/v1/packages/{id}/deactivate` (chỉ `BRANCH_MANAGER`): `MEMBER`, `TRAINER`, `RECEPTIONIST` đều `403`; `BRANCH_MANAGER` vào được handler và nhận `404` với mã không tồn tại.
+
+*Tầng 2: trình duyệt với backend thật (Playwright, 32 kiểm tra, đạt 32/32)*
+
+- Hội viên mới: đăng ký vào `/member`; Web Storage không có khóa nào và không có chuỗi giống JWT; `document.cookie` không chứa `refresh_token`; cookie có `HttpOnly`, `SameSite=Strict`, `Path=/api/v1/auth`. Tải lại trang và tab mới đều giữ phiên. Đăng xuất gọi `204`, về `/login`; tải lại không khôi phục phiên; truy cập `/member` về `/login`. Đăng ký lại cùng email bị từ chối `409` và hiện lỗi; đăng nhập lại được bằng tài khoản vừa tạo.
+- Đăng nhập: sai mật khẩu hiện thông báo và ở lại trang. Năm tài khoản mẫu vào đúng trang: `/admin`, `/manager`, `/reception`, `/trainer`, `/member`. Hội viên vào `/admin` bị chuyển sang `/403`.
+- Lỗi mạng và phục hồi (lỗi được tạo bằng cách chặn request trong trình duyệt, backend vẫn chạy; khác với lần 10/11 khi dừng hẳn container backend):
+  - Logout bị chặn: hiện cảnh báo “Đăng xuất chưa hoàn tất”, vẫn ở `/member`. Tải lại khôi phục phiên, đúng hành vi đã ghi ở trên vì request logout chưa tới server. Đăng xuất lại khi mạng hoạt động thì về `/login`.
+  - Refresh `500` khi tải lại: hiện “Chưa thể xác minh phiên đăng nhập”, không hiện nội dung hội viên. Sau khi lỗi qua đi, “Thử lại” khôi phục phiên.
+  - Refresh `401`: phiên kết thúc, về `/login`.
+- Đăng ký thành công nhưng `/auth/me` bị chặn: hiện “Tài khoản đã được tạo”. “Thử tải thông tin tài khoản” chỉ gọi `/auth/me`; số lần gọi `POST /auth/register` vẫn là 1, và vào `/member`.
+- Bố cục 360 px: `/register` và `/login` có `scrollWidth` bằng `clientWidth` (360).
+- Không có lỗi JavaScript không được bắt trong các kịch bản đăng ký, đăng nhập và đăng xuất (kịch bản A và B). Các kịch bản lỗi mạng và 360 px không thu lỗi JavaScript.
+
+*Tầng 3: Vitest và build của frontend (không thay thế tầng 1–2)*
+
+- ESLint: đạt. Vitest: 10 file, 54 kiểm tra, đạt. `tsc -b` và `vite build` trong `npm run build`: đạt; bundle vẫn có cảnh báo kích thước 972 kB đã biết.
+
+Kịch bản Playwright chỉ chạy cục bộ, không lưu trong repo; các bước trên đủ để chạy lại thủ công.
+
+## Kiểm tra HTTPS staging (12/11/2026): bị chặn
+
+| Mục | Quan sát | Kết luận |
+| --- | --- | --- |
+| Frontend production `https://it3180-nhom6-gym.vercel.app` | `/login` trả `200`. Bundle có chuỗi của trang đăng nhập, nhưng không có chuỗi của #80 như “Họ và tên”, “Nhập lại mật khẩu”, “Chưa thể xác minh phiên đăng nhập”, “Tài khoản đã được tạo” | Bản đang triển khai không phải #80. Không dùng kết quả này làm bằng chứng cho PR |
+| Preview của nhánh `https://it3180-nhom6-gym-git-feature-f1-dang-ky-dang-nhap-ktin06.vercel.app` | `302` về Vercel SSO | Cần đăng nhập Vercel; không kiểm thử ẩn danh được |
+| Backend Render `https://it3180-nhom6-gym-management.onrender.com` | `/actuator/health` không phản hồi sau 30 giây và 60 giây; `/api/v1/auth/me` không phản hồi sau 30 giây | Backend staging không phản hồi tại thời điểm kiểm tra. Chưa xác định được nguyên nhân (ngừng, khởi động chậm hay lỗi cấu hình) |
+
+Chưa làm trên staging: đăng ký và đăng nhập thật qua HTTPS; kiểm tra cookie `Secure`, `Path`, `SameSite` qua HTTPS; kiểm tra rewrite Vercel → Render. Không tạo tài khoản staging khi chưa có xác nhận rằng môi trường cho phép tài khoản thử, và mật khẩu của dữ liệu seed staging không nằm trong repo.
+
+Để hoàn tất mục này cần: backend staging phản hồi `/actuator/health`; một bản frontend thật sự chứa #80 (preview không bị SSO chặn, hoặc triển khai nhánh) được trỏ tới backend đó; và một tài khoản thử được phép dùng trên staging. Sau đó chạy lại các bước HTTPS trên.
 
 ## Chạy lại thủ công
 
-Làm theo [cai-dat-moi-truong.md](cai-dat-moi-truong.md): tạo file môi trường từ `.env.example` (đặt `JWT_SECRET` ngẫu nhiên từ 32 ký tự và `SEED_PASSWORD_HASH` theo [db/seed/README.md](../../backend/src/main/resources/db/seed/README.md)), `docker compose up -d postgres`, chạy backend profile `local`, rồi `npm run dev` ở `frontend/` và mở `http://localhost:5173`. Thử lần lượt các dòng 1–13 ở bảng trên. Dòng 12–13: dừng backend rồi bật lại để tạo lỗi mạng thật.
+Làm theo [cai-dat-moi-truong.md](cai-dat-moi-truong.md): tạo file môi trường từ `.env.example` (đặt `JWT_SECRET` ngẫu nhiên từ 32 ký tự và `SEED_PASSWORD_HASH` theo [db/seed/README.md](../../backend/src/main/resources/db/seed/README.md)), `docker compose up -d postgres`, chạy backend profile `local`, rồi `npm run dev` ở `frontend/` và mở `http://localhost:5173`. Nếu PostgreSQL cục bộ không bật TLS, thêm `DB_SSLMODE=disable` vào môi trường backend. Thử lần lượt các mục ở tầng 1 và 2 ở trên. Để tạo lỗi mạng thật, dừng backend rồi bật lại (cách này đã dùng ngày 10/11).
 
 ## Điều kiện gộp PR
 
-Theo [review của trưởng nhóm](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80#pullrequestreview-5756512423), PR #80 giữ Draft tới khi backend auth đã merge và tích hợp thật được xác minh. Phần backend đã đủ (#25/#26, #101, #97 đã merge) và đã được xác minh cục bộ như trên; việc còn lại là kiểm tra staging và Postman theo #31. Việc chuyển sang Ready do người duyệt quyết định. Nhánh này bỏ công cụ giả lập vai trò (`DevRoleSwitcher`), nên chỉ gộp khi đăng nhập thật dùng được trên nhánh chính để đồng đội không bị chặn.
+Theo [review của trưởng nhóm](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80#pullrequestreview-5756512423), PR #80 giữ Draft tới khi backend auth đã merge và tích hợp thật được xác minh. Backend auth, #105, schema #101 và API F2 #97 đã vào main, nên PR không còn phụ thuộc PR nào khác. Điều kiện còn lại là HTTPS staging theo mục trên. Postman F1–F3 do [#31](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/31) theo dõi và không nằm trong điều kiện của #80. Nhánh này bỏ công cụ giả lập vai trò (`DevRoleSwitcher`). Việc chuyển sang Ready do người duyệt quyết định.
