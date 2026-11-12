@@ -138,7 +138,10 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 | Không sinh trùng buổi lớp | Cơ sở dữ liệu (chỉ mục duy nhất) | Duy nhất trên (`class_schedule_id`, `occurrence_date`); buổi đã đổi giờ không bị sinh lại ở giờ cũ |
 | Một chỗ đặt đang hoạt động cho mỗi buổi | Cơ sở dữ liệu (chỉ mục duy nhất có điều kiện) | Duy nhất trên (`class_session_id`, `member_id`) với các dòng chưa CANCELLED; hủy rồi vẫn đặt lại được |
 | Không vượt sĩ số | Mã nghiệp vụ, có khóa bản ghi (NF6) | Khóa dòng `class_sessions`; số chỗ đang giữ (mọi trạng thái trừ WAITLIST và CANCELLED, tức BOOKED, PENDING_RECONFIRM, ATTENDED, NO_SHOW) không vượt `class_sessions.capacity` |
-| Thứ tự danh sách chờ | Mã nghiệp vụ | Đưa vào lớp theo `waitlisted_at` tăng dần; vị trí hiển thị tính khi truy vấn, không lưu số cố định |
+| Thứ tự danh sách chờ | Mã nghiệp vụ | Đưa vào lớp theo `waitlisted_at` tăng dần, trùng thì `id` tăng dần; vị trí hiển thị tính khi truy vấn, không lưu số cố định ([ADR 0010](../../decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md)) |
+| Ân hạn sau khi được đưa vào lớp | Mã nghiệp vụ | `grace_until = promoted_at + PROMOTION_GRACE_MIN`, ghi trong cùng giao dịch đưa vào lớp; hủy khi `now() <= grace_until` thì `is_late_cancel = false`; tác vụ gửi email không sửa `grace_until` |
+| Chỗ đặt có người tạo | Cơ sở dữ liệu (NOT NULL) | `class_bookings.created_by` là tài khoản đã bấm đặt hoặc vào chờ; tự động đưa vào lớp giữ nguyên người tạo ban đầu |
+| Sửa điểm danh có dấu vết | Mã nghiệp vụ | Mỗi lần ghi hoặc sửa, `attendance_marked_by` là người thao tác; khi sửa kết quả đã có, ghi thêm một dòng `audit_logs` (giá trị cũ, mới) trong cùng giao dịch |
 | Hội viên không trùng giờ lớp | Mã nghiệp vụ, có khóa bản ghi (NF6) | Khóa dòng `members` trước khi kiểm tra; không có hai chỗ đặt đang hoạt động ở hai buổi trùng giờ, kể cả khi hai yêu cầu đến cùng lúc |
 | Huấn luyện viên không trùng giờ | Mã nghiệp vụ, có khóa bản ghi (NF6) | Khóa dòng `members` rồi `staff`; không có hai buổi PT trùng giờ, kể cả với giờ dạy lớp (`class_sessions.trainer_id`) |
 | Buổi PT dùng đúng gói | Mã nghiệp vụ | `pt_sessions.membership_id` là gói PT đang ACTIVE của chính hội viên đó; chỉ trừ buổi khi DONE |
@@ -182,3 +185,4 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 | 01/11/2026 | Sau review toàn dự án: schema ban đầu tạo đủ 39 bảng một lần, migration về sau dùng dải `V9_xx`; sĩ số tính cả chỗ ATTENDED, NO_SHOW |
 | 02/11/2026 | Cả nhóm duyệt ERD bản 2 tại buổi kick-off; `TRANSFER_FEE` mặc định 200.000 đ |
 | 03/11/2026 | Theo [ADR 0005](../decisions/0005-erd-v2.md) mục 25–32: tham số `SESSION_WARNING_THRESHOLD`; công thức `end_date`; gói SESSION, PT hết buổi kéo gói nối tiếp; tác vụ nền chuyển EXPIRED (00:00, chạy bù khi khởi động) trước khi kích hoạt UPCOMING; chặn bảo lưu, chuyển nhượng gói hết buổi; giới hạn số buổi PT đặt trước; để mở trường hợp tác vụ 00:00 bị lỗi |
+| 12/11/2026 | Theo quyết định F8 ([ADR 0010](../../decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md)): `class_bookings.created_by` thành NOT NULL (migration `V9_01`); `grace_until` tính từ `promoted_at`, không từ lúc gửi email; thứ tự chờ phụ theo `id`; ghi chú `attendance_marked_by` gồm cả người sửa điểm danh |
