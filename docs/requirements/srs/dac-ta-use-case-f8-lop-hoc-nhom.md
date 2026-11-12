@@ -3,7 +3,7 @@
 - **Mã chức năng:** F8
 - **Version:** v2 (Bắt buộc)
 - **Người biên soạn:** Phạm Gia Bảo
-- **Cập nhật:** 10/11/2026 — áp dụng quyết định ngày 09/11 của trưởng nhóm về cách tính lại vi phạm khi sửa điểm danh, sau phần làm rõ sức chứa và sửa điểm danh ngày 07/11; xem mục 7.
+- **Cập nhật:** 12/11/2026 — áp dụng quyết định ngày 11/11 của trưởng nhóm về đổi giờ nhiều lần (UC-F8.4) và làm rõ trạng thái chỗ đặt được điểm danh theo review ngày 10/11 (UC-F8.6), sau quyết định ngày 09/11 về tính lại vi phạm khi sửa điểm danh và phần làm rõ sức chứa, sửa điểm danh ngày 07/11; xem mục 7.
 - **Người duyệt chéo:** Nguyễn Anh Tú
 - **Truy vết:** [#9](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/9) · WBS 1.2.9 · bản nháp chờ review và đồng bộ tài liệu chuẩn ở mục 7.6.
 - **Tài liệu chuẩn tham chiếu:**
@@ -12,10 +12,11 @@
   - [Thiết kế dữ liệu](../../design/erd/thiet-ke-du-lieu.md)
   - [Quy tắc mã nguồn](../../guides/quy-tac-ma-nguon.md)
   - [ADR 0003: Danh sách chờ tự động đưa vào lớp](../../decisions/0003-danh-sach-cho-tu-dong-dua-vao-lop.md)
+  - [PR #109](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/109) (**đang mở, chưa merge vào `main`**): đề xuất ADR 0010 thay ADR 0003 và migration V9_01 (`class_bookings.created_by` bắt buộc). Đặc tả này chỉ tham chiếu, không sao chép ADR/ERD/migration của PR đó; khi PR chưa merge, ADR 0003 và ERD trên `main` vẫn là nguồn chuẩn hiện có.
   - [ADR 0009: Bộ sơ đồ phân tích và thiết kế](../../decisions/0009-bo-so-do-phan-tich-thiet-ke.md)
   - [Mẫu đặc tả Use Case](mau-dac-ta-use-case.md)
 
-> **Nguồn quyết định:** [Trưởng nhóm Hoàng Kim Tiến chốt 04/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6633040706) và [làm rõ quyết định 13, sửa điểm danh ngày 07/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6701988493) và [cách tính lại vi phạm khi sửa điểm danh ngày 09/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6734172961). Mục 7 ghi các quyết định; các luồng bên dưới đã cập nhật theo đó. Những ghi chú cũ về mốc ân hạn tính từ email trong ADR/ERD cần được người phụ trách nguồn chuẩn đồng bộ, không dùng để đảo ngược quyết định mới (mục 7.6).
+> **Nguồn quyết định:** [Trưởng nhóm Hoàng Kim Tiến chốt 04/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6633040706) và [làm rõ quyết định 13, sửa điểm danh ngày 07/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6701988493) và [cách tính lại vi phạm khi sửa điểm danh ngày 09/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6734172961). Với UC-F8.4 và UC-F8.6, áp dụng thêm [quyết định đổi giờ nhiều lần ngày 11/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6791816000) và [góp ý review ngày 10/11/2026](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6774232169). Mục 7 ghi các quyết định; các luồng bên dưới đã cập nhật theo đó. Những ghi chú cũ về mốc ân hạn tính từ email trong ADR/ERD cần được người phụ trách nguồn chuẩn đồng bộ, không dùng để đảo ngược quyết định mới (mục 7.6).
 
 > **Trạng thái:** Đặc tả này diễn giải yêu cầu trong bản chốt phạm vi, ERD và ADR 0003 cùng quyết định của trưởng nhóm. Các API, DTO, cách phân loại lỗi cụ thể trong mục G là **đề xuất thiết kế để người triển khai backend F8 trong Sprint 2 xác nhận**, chưa phải hợp đồng API đã thống nhất. Thiết kế kỹ thuật và việc đồng bộ nguồn chuẩn được ghi ở mục 7.5–7.6; không tự đặt thêm quy tắc.
 
@@ -556,50 +557,58 @@ Các cột lịch sử phục vụ đếm vi phạm theo tháng Việt Nam và s
 - **Tên Use Case:** Xác nhận lại hoặc từ chối khi đổi giờ lớp
 - **Tác nhân chính:** Hội viên (`MEMBER`); Hệ thống cho hạn xác nhận; Lễ tân có thể hỗ trợ theo quyền thao tác hộ
 - **Tác nhân phụ (nếu có):** Quản lý chi nhánh (`BRANCH_MANAGER`), Chủ chuỗi (`SUPER_ADMIN`), F10
-- **Mô tả ngắn gọn:** Khi quản lý đổi giờ một buổi, hội viên đang có chỗ xác nhận tham gia giờ mới trong thời hạn cấu hình hoặc từ chối. Hết hạn/từ chối thì mất chỗ, không bị phạt; chỗ được xét cho danh sách chờ.
+- **Mô tả ngắn gọn:** Khi quản lý đổi giờ một buổi, hội viên đang giữ chỗ xác nhận tham gia giờ mới nhất trong thời hạn cấu hình hoặc từ chối. Buổi có thể được đổi giờ nhiều lần; mỗi lần đổi là một thay đổi mới, hạn xác nhận được tính lại và xác nhận cho giờ cũ không còn giá trị. Hết hạn/từ chối thì mất chỗ, không bị phạt; chỗ được xét cho danh sách chờ.
 
 #### A. Tiền điều kiện
 
 - Buổi học tồn tại và quản lý đúng chi nhánh hoặc chủ chuỗi đã thay đổi giờ bắt đầu/kết thúc.
-- Hội viên có chỗ đặt đã xác nhận trước khi đổi giờ.
-- Chỗ đặt đang ở trạng thái `PENDING_RECONFIRM` và chưa hết `reconfirm_expires_at`.
+- **Khi đổi giờ:** chỗ đặt đang giữ chỗ ở trạng thái `BOOKED` hoặc `PENDING_RECONFIRM` (đổi giờ lần hai trở đi, hội viên có thể chưa trả lời lần đổi trước). Chỗ `PENDING_RECONFIRM` đã tới hoặc qua `reconfirm_expires_at` không còn hợp lệ: không được lần đổi mới làm sống lại, xử lý theo A1.
+- **Khi hội viên xác nhận hoặc từ chối:** chỗ đặt đang ở trạng thái `PENDING_RECONFIRM`, chưa hết `reconfirm_expires_at` hiện tại, và phản hồi thuộc lần đổi giờ mới nhất của buổi.
 
 #### B. Hậu điều kiện
 
-- **Thành công – xác nhận:** Chỗ đặt chuyển về `BOOKED`; hội viên giữ chỗ theo thời gian mới.
+- **Thành công – đổi giờ (kể cả đổi giờ lại):** Mọi chỗ đặt hợp lệ `BOOKED` hoặc `PENDING_RECONFIRM` của buổi ở trạng thái `PENDING_RECONFIRM`, vẫn chiếm chỗ; `reconfirm_expires_at` được tính lại theo lần đổi mới nhất; hội viên nhận thông báo giờ mới nhất.
+- **Thành công – xác nhận:** Chỗ đặt chuyển về `BOOKED`; hội viên giữ chỗ theo giờ mới nhất của buổi.
 - **Thành công – từ chối/hết hạn:** Chỗ đặt chuyển `CANCELLED`, không phạt; chỗ được giải phóng và UC-F8.2 được xét theo mốc ngừng đưa vào lớp.
-- **Thất bại:** Không đổi trạng thái chỗ đặt; không mở chỗ nếu thao tác không ghi nhận giao dịch.
+- **Thất bại (gồm phản hồi cho giờ cũ):** Không đổi trạng thái chỗ đặt và không đổi hạn xác nhận; không mở chỗ nếu thao tác không ghi nhận giao dịch.
 
 #### C. Luồng sự kiện chính
 
 1. Quản lý chi nhánh của buổi hoặc chủ chuỗi thay đổi giờ `class_sessions`; lễ tân không được đổi phòng/giờ hoặc hủy buổi riêng lẻ.
-2. Hệ thống lưu `original_start_at`, cập nhật `start_at`/`end_at`, đặt trạng thái buổi `RESCHEDULED`.
-3. Hệ thống xác định các chỗ đặt `BOOKED` đang chiếm chỗ và chuyển sang `PENDING_RECONFIRM`.
-4. Hệ thống đặt `reconfirm_expires_at = min(thời điểm đổi giờ + RECONFIRM_TTL_MIN, giờ bắt đầu mới)`, rồi phát thông báo đổi giờ qua F10.
-5. Hội viên mở thông báo/lịch lớp và chọn xác nhận giờ mới hoặc không tham gia; lễ tân có thể thao tác thay theo quyền đã cấp.
-6. Hệ thống kiểm tra quyền, chỗ đặt còn `PENDING_RECONFIRM` và chưa đến hạn. Khi hội viên bấm xác nhận, kiểm tra lịch trùng như đặt mới; nếu trùng thì từ chối và báo “hãy hủy buổi kia trước”, giữ trạng thái chờ xác nhận và hạn hiện tại.
+2. Hệ thống lưu `original_start_at` (giờ cũ để ghi vào thông báo, theo ERD), cập nhật `start_at`/`end_at`, đặt trạng thái buổi `RESCHEDULED`. Mỗi lần đổi giờ, kể cả khi buổi đã `RESCHEDULED`, được xử lý như một thay đổi mới.
+3. Hệ thống xác định các chỗ đặt `BOOKED` và `PENDING_RECONFIRM` còn hợp lệ của buổi (xem tiền điều kiện) và chuyển `BOOKED` sang `PENDING_RECONFIRM`, giữ nguyên `PENDING_RECONFIRM`. Chỗ vẫn chiếm chỗ trong suốt quá trình, không bị hủy hoặc nhả khi đổi giờ lại. Các dòng `WAITLIST`, `CANCELLED`, `ATTENDED`, `NO_SHOW` không bị thay đổi.
+4. Hệ thống đặt lại `reconfirm_expires_at = min(thời điểm đổi giờ mới nhất + RECONFIRM_TTL_MIN, giờ bắt đầu mới nhất)`, với `RECONFIRM_TTL_MIN` đọc từ `system_configs` tại thời điểm đổi giờ; giá trị mới thay thế hạn của lần đổi trước. Sau đó hệ thống phát thông báo giờ mới nhất qua F10; yêu cầu xác nhận của lần đổi trước không còn giá trị.
+5. Hội viên mở thông báo/lịch lớp và chọn xác nhận giờ mới nhất hoặc không tham gia; lễ tân có thể thao tác thay theo quyền đã cấp.
+6. Hệ thống kiểm tra quyền, phản hồi thuộc lần đổi giờ mới nhất, chỗ đặt còn `PENDING_RECONFIRM` và chưa đến hạn hiện tại. Khi hội viên bấm xác nhận, kiểm tra lịch trùng như đặt mới; nếu trùng thì từ chối và báo “hãy hủy buổi kia trước”, giữ trạng thái chờ xác nhận và hạn hiện tại.
 7. Nếu xác nhận, hệ thống chuyển chỗ đặt về `BOOKED`; nếu từ chối, hệ thống chuyển chỗ đặt `CANCELLED` với lý do phù hợp, không phạt.
 8. Khi chỗ được giải phóng, hệ thống thực hiện UC-F8.2 trong cùng giao dịch rồi ghi nhận giao dịch thay đổi; không đưa vào lớp sau mốc ngừng đưa vào lớp.
 
 #### D. Các luồng thay thế và ngoại lệ
 
-- **A1 – Hội viên không phản hồi trước hạn:** Tác vụ nền tìm `PENDING_RECONFIRM` đã tới hoặc qua `reconfirm_expires_at`, chuyển chỗ đặt sang `CANCELLED` và giải phóng chỗ; không tính phạt; xét danh sách chờ.
+- **A1 – Hội viên không phản hồi trước hạn:** Tác vụ nền tìm `PENDING_RECONFIRM` đã tới hoặc qua `reconfirm_expires_at` **hiện tại** (hạn của lần đổi mới nhất), chuyển chỗ đặt sang `CANCELLED` và giải phóng chỗ; không tính phạt; xét danh sách chờ. Tác vụ đọc lại trạng thái và hạn của từng chỗ đặt trong giao dịch xử lý; nếu hạn đã được lần đổi giờ mới hơn kéo dài thì không hủy.
 - **A2 – Hội viên báo không tham gia:** Hệ thống hủy chỗ đặt ngay, không phạt, rồi xét người trong danh sách chờ.
-- **A3 – Chỉ đổi phòng:** Không chuyển chỗ đặt sang `PENDING_RECONFIRM`; chỉ thông báo thay đổi phòng theo quy tắc F8.
+- **A3 – Chỉ đổi phòng:** Không chuyển chỗ đặt sang `PENDING_RECONFIRM` và không tính lại hạn; chỗ đang `PENDING_RECONFIRM` từ lần đổi giờ trước giữ nguyên trạng thái và hạn. Chỉ thông báo thay đổi phòng theo quy tắc F8.
 - **A4 – Chỉ đổi giờ:** Giữ nguyên chỗ hiện tại nhưng yêu cầu xác nhận lại trước hạn đã tính, tối đa `RECONFIRM_TTL_MIN` và không vượt giờ bắt đầu mới.
+- **A5 – Đổi giờ lại khi hội viên chưa xác nhận lần đổi trước:** Ví dụ buổi 18:00 đổi sang 19:00, rồi sang 20:00 trước khi hội viên trả lời. Hệ thống xử lý lần đổi thứ hai theo các bước 2–4: chỗ `PENDING_RECONFIRM` được giữ, `reconfirm_expires_at` tính lại từ lần đổi thứ hai, thông báo nêu giờ 20:00. Phản hồi gửi cho giờ 19:00 không xác nhận giờ 20:00 (E7).
+- **A6 – Đổi giờ lại sau khi một số hội viên đã xác nhận:** Chỗ đã `BOOKED` do xác nhận giờ trước cũng chuyển lại `PENDING_RECONFIRM`, vì giờ đã thay đổi; hội viên phải xác nhận giờ mới nhất.
 - **E1 – Yêu cầu sai định dạng (400 Bad Request):** Dữ liệu hoặc mã chỗ đặt không hợp lệ.
 - **E2 – Không có quyền (403 Forbidden):** Người gọi không phải chủ chỗ đặt, lễ tân không có quyền thao tác hộ, hoặc quản lý không thuộc chi nhánh.
 - **E3 – Không tìm thấy buổi/chỗ đặt (404 Not Found):** Tài nguyên không tồn tại trong phạm vi truy cập.
 - **E4 – Hạn đã hết hoặc chỗ đặt không chờ xác nhận (422 Unprocessable Content):** Hệ thống từ chối cập nhật và trả trạng thái mới nhất.
 - **E6 – Giờ mới trùng chỗ đã đặt (409 Conflict):** Khi bấm xác nhận phát hiện trùng giờ, báo “hãy hủy buổi kia trước”; không giữ thêm chỗ hoặc kéo dài hạn xác nhận.
 - **E5 – Xung đột đồng thời (409 Conflict):** Yêu cầu xác nhận và tác vụ hết hạn đồng thời; chỉ một chuyển trạng thái được ghi nhận giao dịch; thao tác còn lại nhận `409`.
+- **E7 – Phản hồi cho giờ cũ (409 Conflict, mã đề xuất):** Hội viên xác nhận hoặc từ chối dựa trên giờ không còn là giờ mới nhất của buổi. Hệ thống từ chối, không đổi trạng thái chỗ đặt hoặc hạn, và trả giờ mới nhất cùng hạn xác nhận hiện tại để hội viên phản hồi lại. Mã HTTP do backend F8 Sprint 2 chốt (mục 7.5).
 
 #### E. Quy tắc nghiệp vụ liên quan
 
-- **BR-F8.4-01:** Hạn xác nhận lại là mốc đến trước giữa lúc đổi giờ + `RECONFIRM_TTL_MIN` (mặc định 60 phút) và giờ bắt đầu mới. Hết hạn chưa xác nhận thì mất chỗ, không phạt (quyết định 9 mục 7.3).
+- **BR-F8.4-01:** Hạn xác nhận lại là mốc đến trước giữa thời điểm đổi giờ mới nhất + `RECONFIRM_TTL_MIN` (mặc định 60 phút) và giờ bắt đầu mới nhất. Hết hạn chưa xác nhận thì mất chỗ, không phạt (quyết định 9 mục 7.3).
 - **BR-F8.4-02:** Không xác nhận hoặc báo không tham gia thì mất chỗ, không bị phạt; chỗ chuyển cho danh sách chờ theo UC-F8.2.
 - **BR-F8.4-03:** Đổi phòng chỉ thông báo; không yêu cầu xác nhận lại.
 - **BR-F8.4-04:** `PENDING_RECONFIRM` vẫn chiếm chỗ trong sức chứa (ERD/thiet-ke-du-lieu.md).
+- **BR-F8.4-05:** Mỗi lần đổi giờ là một thay đổi mới, kể cả khi buổi đã `RESCHEDULED` và hội viên chưa trả lời lần đổi trước (quyết định ngày 11/11/2026, mục 7.3). Mọi chỗ đặt giữ chỗ còn hợp lệ, gồm `BOOKED` và `PENDING_RECONFIRM`, chuyển sang hoặc giữ `PENDING_RECONFIRM`; chỗ không bị nhả khi đổi giờ lại.
+- **BR-F8.4-06:** Mỗi lần đổi giờ tính lại `reconfirm_expires_at` từ lần đổi mới nhất theo BR-F8.4-01, với `RECONFIRM_TTL_MIN` đọc từ `system_configs`; hạn mới thay hạn cũ, kể cả khi sớm hơn hoặc muộn hơn hạn cũ. Hội viên được thông báo giờ mới nhất.
+- **BR-F8.4-07:** Xác nhận hoặc từ chối chỉ có giá trị với giờ mới nhất của buổi. Phản hồi cho giờ cũ không được xác nhận giờ mới (quyết định ngày 11/11/2026, mục 7.3).
+- **BR-F8.4-08:** Đổi giờ và xác nhận/từ chối đồng thời phải cho kết quả nhất quán: không chỗ đặt nào ở `BOOKED` cho giờ mới nhất mà chưa được hội viên xác nhận giờ đó. Cách thực hiện (khóa, số phiên bản dữ liệu hoặc cách khác) do backend F8 Sprint 2 chốt (mục 7.5).
 - **Quyết định đã chốt:** Kiểm tra trùng giờ lúc hội viên xác nhận; người đang chờ giữ vị trí, nếu trùng giờ thì bỏ qua khi xét đưa vào lớp. Quản lý đúng chi nhánh và chủ chuỗi được sửa buổi riêng lẻ, lễ tân không được (quyết định 10, 15). Mã `cancel_reason` cụ thể do backend F8 Sprint 2 chốt (mục 7.5).
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
@@ -635,6 +644,7 @@ Các cột lịch sử phục vụ đếm vi phạm theo tháng Việt Nam và s
 - **Phản hồi thành công – Hình dạng đề xuất:** `200 OK` kèm `status`, `reconfirmExpiresAt`, `startAt`, `endAt` mới.
 - **Màn hình giao diện liên quan:** Quản lý chi tiết buổi; hội viên lịch lớp/trung tâm thông báo.
 - Đường dẫn, phương thức HTTP, cách mã hóa từ chối và mã HTTP phản hồi cần người triển khai backend F8 trong Sprint 2 xác nhận.
+- Cách nhận biết một phản hồi thuộc lần đổi giờ nào (ví dụ kèm giờ đã hiển thị hoặc số phiên bản) do backend chốt, miễn bảo đảm BR-F8.4-07; DTO đề xuất ở trên chưa thêm trường nào cho việc này.
 
 #### H. Tiêu chí chấp nhận
 
@@ -668,6 +678,41 @@ Các cột lịch sử phục vụ đếm vi phạm theo tháng Việt Nam và s
   - **Given** Chỗ đang `PENDING_RECONFIRM`, chưa hết hạn, giờ mới trùng một buổi khác hội viên đã đặt.
   - **When** Hội viên bấm xác nhận.
   - **Then** Từ chối, báo “hãy hủy buổi kia trước”; giữ trạng thái/hạn hiện tại. Người `WAITLIST` vẫn giữ vị trí, người trùng giờ bị bỏ qua khi xét đưa vào lớp.
+
+- **Kịch bản 8: Đổi giờ hai lần trước khi hội viên xác nhận lần đầu**
+  - **Given** Buổi 18:00 ngày 12/11, `RECONFIRM_TTL_MIN=60`. Hội viên M `BOOKED`. Lúc 10:00 quản lý đổi sang 19:00, M thành `PENDING_RECONFIRM` với `reconfirm_expires_at` 11:00; M chưa trả lời.
+  - **When** Lúc 10:20 quản lý đổi tiếp sang 20:00.
+  - **Then** M giữ `PENDING_RECONFIRM`, vẫn chiếm một chỗ, không bị hủy hoặc nhả chỗ; `reconfirm_expires_at` tính lại từ lần đổi lúc 10:20 là 11:20; M nhận thông báo giờ 20:00.
+
+- **Kịch bản 9: Đổi giờ lại khi có cả `BOOKED` và `PENDING_RECONFIRM`**
+  - **Given** Sau lần đổi giờ đầu, hội viên M chưa trả lời (`PENDING_RECONFIRM`) và hội viên N đã xác nhận (`BOOKED`).
+  - **When** Quản lý đổi giờ lần hai.
+  - **Then** Cả M và N ở `PENDING_RECONFIRM` với cùng `reconfirm_expires_at` tính từ lần đổi thứ hai; số chỗ đang giữ không đổi, người `WAITLIST` không được xét vì chưa có chỗ trống; cả hai nhận thông báo giờ mới nhất.
+
+- **Kịch bản 10: Tính lại hạn xác nhận theo lần đổi mới nhất và giờ bắt đầu mới nhất**
+  - **Given** Hạn xác nhận của lần đổi đầu là 11:00. Lúc 10:50 quản lý đổi lần hai với giờ bắt đầu mới là 11:20; `RECONFIRM_TTL_MIN=60`.
+  - **When** Hệ thống tính lại hạn.
+  - **Then** `reconfirm_expires_at` là 11:20 (không phải 11:00 của lần trước, cũng không phải 11:50 vì vượt giờ bắt đầu mới).
+
+- **Kịch bản 11: Từ chối xác nhận cho giờ cũ**
+  - **Given** Chỗ của M đang `PENDING_RECONFIRM` sau lần đổi giờ thứ hai (giờ 20:00, hạn 11:20 chưa tới); M gửi phản hồi xác nhận dựa trên thông báo giờ 19:00.
+  - **When** Hệ thống nhận phản hồi xác nhận cho giờ cũ.
+  - **Then** Từ chối, chỗ vẫn `PENDING_RECONFIRM` với hạn 11:20, kèm giờ mới nhất; sau đó M xác nhận giờ 20:00 trước hạn thì chỗ mới thành `BOOKED`.
+
+- **Kịch bản 12: Đổi giờ lần hai cạnh tranh với xác nhận lần đầu**
+  - **Given** Chỗ của M `PENDING_RECONFIRM` sau lần đổi đầu; M gửi xác nhận giờ 19:00 đúng lúc quản lý đổi sang 20:00.
+  - **When** Hai giao dịch cạnh tranh.
+  - **Then** Nếu xác nhận được ghi trước thì M `BOOKED` rồi bị chuyển lại `PENDING_RECONFIRM` bởi lần đổi hai, hạn mới theo lần đổi hai; nếu lần đổi hai ghi trước thì xác nhận bị từ chối vì là giờ cũ. Không trường hợp nào M `BOOKED` cho giờ 20:00 mà chưa xác nhận giờ đó.
+
+- **Kịch bản 13: Tác vụ hết hạn không hủy chỗ vừa được gia hạn bởi lần đổi mới**
+  - **Given** Hạn cũ của M là 11:00; lúc 10:50 lần đổi hai đã đặt hạn mới 11:20, trong khi tác vụ nền đã chọn M từ hạn cũ.
+  - **When** Tác vụ nền xử lý lúc 11:00.
+  - **Then** Tác vụ đọc lại trạng thái và hạn trong giao dịch, thấy hạn 11:20 chưa tới nên không hủy M.
+
+- **Kịch bản 14: Đổi giờ khi xác nhận cũ đã hết hạn nhưng tác vụ hủy chưa chạy**
+  - **Given** Chỗ của M `PENDING_RECONFIRM` có `reconfirm_expires_at` 11:00; lúc 11:05 tác vụ nền chưa hủy; quản lý đổi giờ lại.
+  - **When** Hệ thống xác định các chỗ đặt hợp lệ của lần đổi mới.
+  - **Then** Chỗ của M không còn hợp lệ nên không được sống lại; M bị hủy không phạt theo A1 và chỗ được xét cho danh sách chờ nếu chưa qua mốc ngừng đưa vào lớp (xem mục 7.3, điểm cần xác nhận).
 
 ---
 
@@ -775,20 +820,20 @@ Các cột lịch sử phục vụ đếm vi phạm theo tháng Việt Nam và s
 
 - Huấn luyện viên đăng nhập vai trò `TRAINER`; hoặc quản lý đúng chi nhánh thực hiện nhánh sửa sau thời hạn.
 - Buổi học tồn tại; huấn luyện viên được phân công hoặc quản lý có quyền đúng chi nhánh. Huấn luyện viên chỉ điểm danh/sửa từ giờ bắt đầu đến 23:59 cùng ngày theo giờ Việt Nam.
-- Chỗ đặt cần điểm danh đang chiếm chỗ và chưa bị hủy.
+- **Trạng thái chỗ đặt được phép:** điểm danh lần đầu chỉ từ `BOOKED`; sửa kết quả đã ghi chỉ từ `ATTENDED` hoặc `NO_SHOW`. `PENDING_RECONFIRM`, `WAITLIST` và `CANCELLED` không đủ điều kiện điểm danh hoặc sửa điểm danh. Chỗ `PENDING_RECONFIRM` không bao giờ được điểm danh, kể cả khi `reconfirm_expires_at` đã qua nhưng tác vụ hủy của UC-F8.4 chưa chạy.
 
 #### B. Hậu điều kiện
 
 - **Thành công:** `class_bookings.status` chuyển thành `ATTENDED` hoặc `NO_SHOW`; mỗi lần ghi/sửa kết quả, `attendance_marked_by` lưu `users.id` của người thao tác; khi sửa kết quả đã ghi, `audit_logs` ghi giá trị cũ/mới trong cùng giao dịch. Khi sửa điểm danh, hệ thống tính lại vi phạm theo BR-F8.6-03: nếu hội viên đang có khóa thì xét lần khóa đang có hiệu lực, dưới ngưỡng thì đặt `members.booking_locked_until = NULL` ngay, vẫn đạt ngưỡng thì giữ nguyên khóa, không rút ngắn. Lần điểm danh hoặc sửa thành `NO_SHOW` làm đạt ngưỡng thì áp khóa ngay.
-- **Thất bại:** Không thay đổi điểm danh; trạng thái hiện tại được giữ nguyên.
+- **Thất bại (gồm chỗ đặt không ở trạng thái được phép):** Không thay đổi điểm danh; trạng thái hiện tại được giữ nguyên. Không tạo `NO_SHOW`, không tính thêm vi phạm, không đổi `attendance_marked_by`, không ghi dòng `audit_logs` sửa điểm danh và không đổi `members.booking_locked_until`.
 
 #### C. Luồng sự kiện chính
 
 1. Huấn luyện viên mở một buổi được phân công từ UC-F8.5.
 2. Hệ thống xác thực vai trò/phạm vi: huấn luyện viên phải khớp `class_sessions.trainer_id`, thời điểm từ giờ bắt đầu đến 23:59 cùng ngày Việt Nam; sau đó chỉ quản lý chi nhánh của buổi được sửa.
-3. Hệ thống trả danh sách chỗ đặt đang có chỗ cần điểm danh; không trộn các dòng chỉ đang `WAITLIST` hoặc đã `CANCELLED`.
+3. Hệ thống trả danh sách chỗ đặt có thể điểm danh: `BOOKED` (điểm danh lần đầu) và `ATTENDED`/`NO_SHOW` (sửa kết quả); không đưa vào các dòng `PENDING_RECONFIRM`, `WAITLIST` hoặc `CANCELLED`.
 4. Huấn luyện viên chọn từng hội viên và ghi nhận có mặt (`ATTENDED`) hoặc vắng mặt (`NO_SHOW`).
-5. Hệ thống kiểm tra trạng thái điểm danh hợp lệ và chỗ không ở `WAITLIST`/`CANCELLED`; kết quả đã ghi được sửa trong thời hạn, sau hạn chỉ quản lý đúng chi nhánh được sửa.
+5. Trong giao dịch lưu, hệ thống đọc lại trạng thái hiện tại của từng chỗ đặt, không dựa vào trạng thái lúc danh sách được hiển thị, và kiểm tra: điểm danh lần đầu chỉ khi chỗ đang `BOOKED`; sửa chỉ khi chỗ đang `ATTENDED` hoặc `NO_SHOW`. Chỗ ở trạng thái khác, gồm `PENDING_RECONFIRM` đã hết hạn nhưng chưa bị hủy, bị từ chối theo E5. Kết quả đã ghi được sửa trong thời hạn, sau hạn chỉ quản lý đúng chi nhánh được sửa.
 6. Hệ thống cập nhật kết quả, ghi `attendance_marked_by` là `users.id` của người thao tác; nếu sửa kết quả đã ghi thì thêm một dòng `audit_logs` với giá trị cũ/mới trong cùng giao dịch.
 7. Khi điểm danh mới là `NO_SHOW`, đếm vi phạm gồm hủy muộn (`is_late_cancel`) và `NO_SHOW` trong tháng dương lịch Việt Nam, sau lần bị khóa gần nhất theo quyết định 5–6; nếu đạt `PENALTY_LIMIT_PER_MONTH`, áp khóa theo `PENALTY_LOCK_DAYS` ngay. Với mỗi lần sửa kết quả đã ghi, tính lại vi phạm trong cùng giao dịch theo BR-F8.6-03: nếu hội viên đang có khóa, đếm hủy muộn (`is_late_cancel`) và `NO_SHOW` trong tháng dương lịch Việt Nam, sau lần khóa liền trước lần khóa đang xét; dưới ngưỡng thì đặt `members.booking_locked_until = NULL` ngay, vẫn đạt ngưỡng thì giữ nguyên khóa, không rút ngắn. Nếu hội viên không đang bị khóa, tính như điểm danh mới; sửa `ATTENDED` thành `NO_SHOW` làm đạt ngưỡng thì áp khóa ngay.
 8. Hệ thống trả kết quả đã điểm danh.
@@ -797,13 +842,15 @@ Các cột lịch sử phục vụ đếm vi phạm theo tháng Việt Nam và s
 
 - **A1 – Hội viên đã check-in ở quầy:** Nếu `arrived_at` đã có, vẫn cần huấn luyện viên xác nhận `ATTENDED`; check-in không tự chuyển trạng thái điểm danh.
 - **A2 – Điểm danh cả danh sách:** Người triển khai backend F8 trong Sprint 2 chốt API và tính nguyên tử khi nhận nhiều kết quả; mọi dòng vẫn kiểm tra quyền, thời hạn và trạng thái.
-- **A3 – Sửa điểm danh:** Huấn luyện viên được phân công có thể sửa trong khoảng từ giờ bắt đầu đến 23:59 cùng ngày Việt Nam. Sau thời hạn, huấn luyện viên bị khóa sửa; chỉ quản lý đúng chi nhánh được sửa.
+- **A3 – Sửa điểm danh:** Huấn luyện viên được phân công có thể sửa trong khoảng từ giờ bắt đầu đến 23:59 cùng ngày Việt Nam. Sau thời hạn, huấn luyện viên bị khóa sửa; chỉ quản lý đúng chi nhánh được sửa. Chỉ sửa được chỗ đang `ATTENDED` hoặc `NO_SHOW`; chỗ `BOOKED` chưa từng được ghi kết quả đi theo luồng điểm danh lần đầu, không phải luồng sửa.
+- **A4 – Chỗ đặt đang chờ xác nhận giờ mới:** Chỗ `PENDING_RECONFIRM` bị từ chối điểm danh theo E5, dù còn hạn hay đã quá `reconfirm_expires_at`. Nếu hạn đã qua mà tác vụ hủy của UC-F8.4 (A1) chưa chạy, hệ thống vẫn từ chối điểm danh và không tự đánh `NO_SHOW`; chỗ đặt được tác vụ nền hủy không phạt như UC-F8.4. Luồng điểm danh không tự hủy chỗ và không tạo vi phạm.
 - **E1 – Dữ liệu gửi sai định dạng (400 Bad Request):** Trạng thái ngoài tập cho phép hoặc trường bắt buộc thiếu.
 - **E2 – Chưa đăng nhập (401 Unauthorized):** Token không hợp lệ.
 - **E3 – Không được phân công / sai quyền (403 Forbidden):** Huấn luyện viên không phải huấn luyện viên của buổi học.
 - **E4 – Buổi học/chỗ đặt không tồn tại (404 Not Found):** Trả `ProblemDetail` tiếng Việt.
-- **E5 – chỗ đặt không thể điểm danh (422 Unprocessable Content):** Chỗ đặt đang `WAITLIST`, `CANCELLED` hoặc không thuộc thời hạn/quyền được điểm danh; không cập nhật.
+- **E5 – chỗ đặt không thể điểm danh (422 Unprocessable Content):** Chỗ đặt đang `PENDING_RECONFIRM` (kể cả đã hết hạn xác nhận nhưng chưa bị hủy), `WAITLIST`, `CANCELLED`; điểm danh lần đầu khi chỗ không ở `BOOKED`; sửa điểm danh khi chỗ không ở `ATTENDED`/`NO_SHOW`; hoặc không thuộc thời hạn/quyền được điểm danh. Không cập nhật, không tạo vi phạm.
 - **E6 – Xung đột cập nhật đồng thời (409 Conflict):** Trạng thái điểm danh đã được thay đổi trong yêu cầu khác.
+- **E7 – Chỗ đặt đổi trạng thái trước khi lưu (422 Unprocessable Content):** Chỗ đặt hiển thị `BOOKED` nhưng khi lưu đã thành `PENDING_RECONFIRM` (buổi vừa đổi giờ), `CANCELLED` hoặc trạng thái không được phép khác; từ chối theo E5 và trả trạng thái mới nhất.
 
 #### E. Quy tắc nghiệp vụ liên quan
 
@@ -816,6 +863,8 @@ Các cột lịch sử phục vụ đếm vi phạm theo tháng Việt Nam và s
 
   Lý do không dùng “sau lần khóa gần nhất” cho phép tính lại: khi hội viên đang bị khóa thì lần khóa gần nhất chính là lần đang xét, đếm sau nó luôn bằng 0 nên sửa bất kỳ điểm danh nào cũng gỡ khóa; còn đếm cả tháng thì một vi phạm có thể góp vào hai lần khóa.
 - **BR-F8.6-04:** Chỗ đặt `ATTENDED` và `NO_SHOW` vẫn được tính trong sĩ số của buổi học (thiết kế dữ liệu ERD).
+- **BR-F8.6-05:** Điểm danh lần đầu chỉ cho chỗ `BOOKED`; sửa điểm danh chỉ cho chỗ `ATTENDED` hoặc `NO_SHOW`. `PENDING_RECONFIRM` không bao giờ đủ điều kiện, kể cả khi đã quá `reconfirm_expires_at` mà tác vụ hủy chưa chạy. Trạng thái chỗ đặt được kiểm tra lại trong giao dịch lưu (review ngày 10/11/2026, mục 7.4). Quyền, thời hạn trong ngày, `attendance_marked_by`, `audit_logs` và việc tính lại vi phạm (BR-F8.6-01, BR-F8.6-03) giữ nguyên.
+- **BR-F8.6-06:** Điểm danh bị từ chối vì trạng thái không hợp lệ không tạo `NO_SHOW`, không được đếm là vi phạm và không làm đổi `members.booking_locked_until`.
 - **Quyết định đã chốt:** Huấn luyện viên được điểm danh và sửa từ lúc bắt đầu buổi đến 23:59 cùng ngày Việt Nam; sau đó chỉ quản lý chi nhánh được sửa (quyết định 14). Không tự coi hết giờ là `NO_SHOW` khi chưa có thao tác điểm danh. Sửa `NO_SHOW`/`ATTENDED` tính lại vi phạm và cập nhật khóa ngay theo BR-F8.6-03; không chờ tác vụ nền.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
@@ -910,6 +959,26 @@ Lịch sử cần để đếm theo tháng Việt Nam, sau lần khóa gần nh�
   - **Given** Trong tháng 11, hội viên có ba vi phạm A, B, C dẫn đến khóa lần 1. Hết khóa, hội viên có thêm ba vi phạm D, E, F, đều là `NO_SHOW`, dẫn đến khóa lần 2 và hội viên đang bị khóa lần 2. `PENALTY_LIMIT_PER_MONTH` là 3; người sửa là quản lý đúng chi nhánh.
   - **When** Quản lý sửa điểm danh E thành `ATTENDED`.
   - **Then** Hệ thống chỉ đếm các vi phạm sau lần khóa liền trước lần khóa 2, tức là sau lần khóa 1, gồm D và F, được 2 vi phạm, thấp hơn ngưỡng 3. Khóa lần 2 được gỡ ngay bằng cách đặt `members.booking_locked_until = NULL`. A, B, C không được tính lại vì đã dùng cho khóa lần 1. Ghi người sửa và giá trị cũ/mới như BR-F8.6-01.
+
+- **Kịch bản 11: Điểm danh chỗ đang chờ xác nhận giờ mới**
+  - **Given** Lúc 10:00 buổi được đổi sang 20:00; chỗ của hội viên M đang `PENDING_RECONFIRM` với `reconfirm_expires_at` 11:00 chưa tới; huấn luyện viên được phân công gửi yêu cầu điểm danh M (ví dụ từ danh sách cũ).
+  - **When** Huấn luyện viên đánh dấu M là `ATTENDED` hoặc `NO_SHOW`.
+  - **Then** Từ chối `422` vì chỗ không ở `BOOKED`, độc lập với kiểm tra thời hạn trong ngày; chỗ giữ `PENDING_RECONFIRM`; không tạo `NO_SHOW`, không tính vi phạm, không ghi `attendance_marked_by` hoặc `audit_logs`.
+
+- **Kịch bản 12: Xác nhận đã hết hạn nhưng tác vụ hủy chưa chạy**
+  - **Given** Chỗ của M `PENDING_RECONFIRM` có `reconfirm_expires_at` đã qua; tác vụ nền của UC-F8.4 chưa chạy; M có 2 vi phạm trong tháng.
+  - **When** Huấn luyện viên đánh dấu M là `NO_SHOW`.
+  - **Then** Từ chối `422`, không tạo `NO_SHOW` và không đạt ngưỡng khóa, `members.booking_locked_until` không đổi; khi tác vụ nền chạy, chỗ được hủy không phạt theo UC-F8.4.
+
+- **Kịch bản 13: Trạng thái chỗ đặt đổi trước khi lưu điểm danh**
+  - **Given** Danh sách điểm danh hiển thị chỗ của M là `BOOKED`; trước khi huấn luyện viên lưu, quản lý đổi giờ buổi và chỗ của M thành `PENDING_RECONFIRM`.
+  - **When** Huấn luyện viên lưu điểm danh M là `ATTENDED`.
+  - **Then** Giao dịch lưu đọc lại trạng thái hiện tại và từ chối `422`; chỗ giữ `PENDING_RECONFIRM`; không có kết quả điểm danh hoặc vi phạm nào được ghi.
+
+- **Kịch bản 14: Sửa điểm danh với chuyển trạng thái không hợp lệ**
+  - **Given** Quản lý đúng chi nhánh sửa điểm danh sau thời hạn của huấn luyện viên; chỗ của M đang `CANCELLED` (hoặc `WAITLIST`, hoặc `PENDING_RECONFIRM`), chưa có kết quả `ATTENDED`/`NO_SHOW`.
+  - **When** Quản lý yêu cầu sửa kết quả điểm danh của chỗ này; một yêu cầu khác đặt trạng thái là `BOOKED`.
+  - **Then** Yêu cầu sửa bị từ chối `422` vì chỗ không ở `ATTENDED`/`NO_SHOW`, không đổi trạng thái, không tính lại vi phạm, không đổi khóa, không ghi `audit_logs` và `attendance_marked_by`; yêu cầu đặt `BOOKED` bị từ chối `400` vì ngoài tập `ATTENDED`/`NO_SHOW`.
 
 ---
 
@@ -1160,8 +1229,8 @@ Lịch sử cần để đếm theo tháng Việt Nam, sau lần khóa gần nh�
 4. **FIFO:** `waitlisted_at ASC, id ASC`; không lưu vị trí danh sách chờ cố định và không cho người thao tác hộ vượt hàng.
 5. **Đặt mới/đưa vào lớp:** Xét danh sách chờ đủ điều kiện trước người mới khi còn chỗ. Dưới `PROMOTION_CUTOFF_MIN` phút thì không tự đưa vào lớp và đóng cả đặt mới/vào danh sách chờ; đúng mốc chưa phải dưới mốc.
 6. **Hủy chỗ:** Hủy trước ít nhất `LATE_CANCEL_HOURS` không phạt; rời `WAITLIST` luôn không phạt. Chỗ vừa được tự động đưa vào lớp có ân hạn từ thông báo trong web, bao gồm đúng `grace_until`. Đếm vi phạm theo tháng Việt Nam và sau lần bị khóa gần nhất; không phạt lại lỗi cũ.
-7. **Đổi giờ:** Đổi phòng chỉ báo; đổi giờ yêu cầu xác nhận trước mốc sớm hơn giữa thời điểm đổi + `RECONFIRM_TTL_MIN` và giờ mới. Kiểm tra trùng giờ khi xác nhận; từ chối/hết hạn mất chỗ không phạt.
-8. **Điểm danh:** F4 chỉ ghi `arrived_at`. Huấn luyện viên được phân công điểm danh/sửa từ giờ bắt đầu đến 23:59 cùng ngày Việt Nam; sau đó chỉ quản lý chi nhánh được sửa.
+7. **Đổi giờ:** Đổi phòng chỉ báo; đổi giờ yêu cầu xác nhận trước mốc sớm hơn giữa thời điểm đổi + `RECONFIRM_TTL_MIN` và giờ mới. Mỗi lần đổi giờ là thay đổi mới: chỗ `BOOKED` và `PENDING_RECONFIRM` còn hợp lệ chuyển sang hoặc giữ `PENDING_RECONFIRM`, hạn tính lại từ lần đổi mới nhất, xác nhận cho giờ cũ không còn giá trị. Kiểm tra trùng giờ khi xác nhận; từ chối/hết hạn mất chỗ không phạt.
+8. **Điểm danh:** F4 chỉ ghi `arrived_at`. Huấn luyện viên được phân công điểm danh/sửa từ giờ bắt đầu đến 23:59 cùng ngày Việt Nam; sau đó chỉ quản lý chi nhánh được sửa. Điểm danh lần đầu chỉ từ `BOOKED`, sửa chỉ từ `ATTENDED`/`NO_SHOW`; `PENDING_RECONFIRM` không bao giờ được điểm danh, và trạng thái được kiểm tra lại trong giao dịch lưu.
 9. **Lịch lặp:** Thứ trong tuần theo ISO 1–7, `end_time > start_time`, `0 < capacity <= rooms.capacity`, huấn luyện viên phải có vai trò `TRAINER`; từng buổi cụ thể được lưu ở `class_sessions`.
 10. **Thời gian:** Thời điểm trong DB là UTC (`timestamptz`); `occurrence_date` là ngày theo lịch Việt Nam. Trình bày giờ cho người dùng theo `Asia/Ho_Chi_Minh`.
 11. **Cấu hình:** Đọc `system_configs`; giá trị chi nhánh ghi đè giá trị toàn chuỗi. Không viết cứng giá trị có dấu `*`.
@@ -1255,6 +1324,14 @@ Các số trong kịch bản kiểm thử dùng bộ giá trị mặc định b�
 | 11 | Hai lịch lặp trùng phòng hoặc trùng huấn luyện viên | **Chặn, báo lỗi** rõ trùng với lịch nào. |
 | 12 | Sửa hoặc ngừng lịch lặp khi đã sinh buổi | **Chỉ áp dụng cho buổi sinh về sau.** Buổi đã sinh giữ nguyên; muốn đổi thì quản lý sửa hoặc hủy từng buổi. Ngày lễ xử lý bằng cách hủy từng buổi. |
 
+**Làm rõ đổi giờ nhiều lần (11/11/2026).** Nguồn: [comment của trưởng nhóm](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6791816000), theo [góp ý review ngày 10/11](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6774232169). Áp dụng cho UC-F8.4 (BR-F8.4-05 đến BR-F8.4-08, kịch bản 8–14).
+
+- Mỗi lần đổi giờ tính là một lần đổi mới. Mọi chỗ còn giữ, gồm `BOOKED` và `PENDING_RECONFIRM`, chuyển sang hoặc giữ `PENDING_RECONFIRM`.
+- Hạn xác nhận tính lại từ lần đổi mới nhất theo quyết định 9; thời hạn 60 phút đọc từ `system_configs` (`RECONFIRM_TTL_MIN`).
+- Xác nhận cho giờ cũ không còn giá trị; hội viên phải xác nhận giờ mới nhất và được gửi thêm thông báo giờ mới.
+- Cách bảo đảm nhất quán khi đổi giờ và xác nhận đồng thời (khóa hoặc số phiên bản dữ liệu) do backend F8 Sprint 2 chốt (mục 7.5).
+- **Chỗ suy ra từ quyết định 9, nhờ Tiến/Tú xác nhận nếu chưa đúng ý:** chỗ `PENDING_RECONFIRM` đã quá `reconfirm_expires_at` nhưng tác vụ hủy chưa chạy là chỗ đã mất theo quyết định 9, nên lần đổi giờ mới không làm sống lại chỗ đó (kịch bản 14); chỗ được hủy không phạt theo UC-F8.4 A1.
+
 ### 7.4. Sĩ số, điểm danh, phân quyền, dữ liệu
 
 | # | Câu hỏi | Quyết định |
@@ -1264,6 +1341,8 @@ Các số trong kịch bản kiểm thử dùng bộ giá trị mặc định b�
 | 15 | Ai sửa buổi lớp riêng lẻ (đổi phòng, đổi giờ, hủy) | **Quản lý chi nhánh** (chỉ chi nhánh mình) **và chủ chuỗi** (mọi chi nhánh). Lễ tân không được. |
 | 16 | `class_bookings.created_by` khi hội viên tự đặt | **Ghi `users.id` của tài khoản đã bấm đặt** (hội viên hoặc lễ tân). Chỗ được tự động đưa từ danh sách chờ vào lớp giữ nguyên người tạo ban đầu. |
 
+**Làm rõ trạng thái chỗ đặt được điểm danh (review ngày 10/11/2026).** Nguồn: [góp ý của người duyệt chéo](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6774232169); áp dụng cho UC-F8.6 (BR-F8.6-05, BR-F8.6-06, kịch bản 11–14). Điểm danh lần đầu chỉ từ `BOOKED`; sửa chỉ từ `ATTENDED`/`NO_SHOW`; `PENDING_RECONFIRM` không bao giờ được điểm danh, kể cả khi đã hết hạn xác nhận mà tác vụ hủy chưa chạy; trạng thái được kiểm tra lại trong giao dịch lưu; điểm danh bị từ chối không tạo vi phạm `NO_SHOW`. Quyền, thời hạn, `attendance_marked_by`, `audit_logs` và quy tắc tính lại vi phạm không đổi.
+
 ### 7.5. Phần kỹ thuật được giao chốt trong Sprint 2
 
 **Người quyết định:** Người triển khai backend F8 được phân công khi lập kế hoạch Sprint 2; phối hợp F10 cho thông báo. Chưa tự gán thành viên hoặc tạo API contract đã duyệt.
@@ -1271,6 +1350,8 @@ Các số trong kịch bản kiểm thử dùng bộ giá trị mặc định b�
 - API, DTO, mã HTTP chi tiết và tính nguyên tử khi điểm danh cả danh sách.
 - Kế hoạch khóa toàn giao dịch đặt mới/xét danh sách chờ/giải phóng chỗ theo NF6, xử lý lại giao dịch khi tập ứng viên thay đổi.
 - Mã `cancel_reason` cho từ chối/hết hạn xác nhận lại.
+- Cách đảm bảo nhất quán khi đổi giờ nhiều lần và khi đổi giờ chạy đồng thời với xác nhận, từ chối hoặc tác vụ hết hạn: khóa, số phiên bản dữ liệu hoặc cách khác; cách nhận biết phản hồi thuộc lần đổi giờ nào và mã HTTP khi phản hồi cho giờ cũ. Đặc tả chỉ nêu hành vi bắt buộc (BR-F8.4-07, BR-F8.4-08).
+- Việc kiểm tra lại trạng thái chỗ đặt trong giao dịch điểm danh (BR-F8.6-05), gồm thứ tự khóa so với đổi giờ.
 - Nội dung lịch công khai (có số chỗ trống hay không), bộ lọc và dữ liệu trả về.
 - Lịch chạy, số ngày sinh buổi trước và cách thử lại UC-F8.8.
 - Cách lưu mốc lần khóa gần nhất, thời điểm vi phạm và mốc tạo thông báo trong web. Không tự thêm tên cột/migration trong đặc tả này.
@@ -1278,7 +1359,8 @@ Các số trong kịch bản kiểm thử dùng bộ giá trị mặc định b�
 ### 7.6. Đồng bộ nguồn chuẩn và phụ thuộc còn lại
 
 - **Người phụ trách ADR và ERD (trưởng nhóm giao trong buổi lập kế hoạch Sprint 2 theo comment ngày 09/11; chưa ghi tên người nhận):** cập nhật ADR 0003, bản chốt phạm vi và ghi chú `class_bookings.grace_until` trong ERD từ mốc email sang mốc thông báo trong web theo quyết định 7 mới; bổ sung tiêu chí phụ `id` của FIFO, `created_by` cho cả hội viên/lễ tân và cập nhật ghi chú `attendance_marked_by` để phản ánh người điểm danh hoặc người sửa (kể cả quản lý). Ghi nhận `audit_logs.old_value`/`new_value` cho giá trị điểm danh cũ/mới; các cột này đã có trong ERD, không thêm cột. Giữ nguyên luồng gửi email ban đêm. SRS chỉ ghi quyết định đã được xác nhận, không sửa hộ tài liệu chuẩn của đồng đội trong nhiệm vụ #9.
-- **Backend F8 Sprint 2:** `created_by` bắt buộc có `users.id` người bấm đặt theo quyết định 16; ERD hiện để nullable, nên cần chốt ràng buộc/ý nghĩa NULL và đồng bộ ghi chú, không dùng tính nullable để bỏ qua người tạo của chỗ đặt mới.
+- **PR #109 (trưởng nhóm, đang mở, chưa merge vào `main`):** đề xuất [ADR 0010](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/109) thay ADR 0003, bản cập nhật ERD/thiết kế dữ liệu/F10 và migration V9_01. Đề xuất này đã nêu FIFO theo `waitlisted_at` rồi `id`, ân hạn tính từ `promoted_at` (`grace_until = promoted_at + PROMOTION_GRACE_MIN`), xét danh sách chờ trước người đặt mới, mốc đóng đặt chỗ 30 phút, `created_by` bắt buộc và metadata người sửa điểm danh. SRS này đã khớp các điểm đó theo quyết định ngày 04/11 và 07/11, nhưng **không** coi chúng là nguồn có sẵn trên `main` và không sao chép nội dung PR; đặc tả không thêm ADR, ERD hay migration. Sau khi PR merge, cập nhật liên kết tới ADR 0010 và bỏ ghi chú “chưa merge”.
+- **Backend F8 Sprint 2:** `created_by` bắt buộc có `users.id` người bấm đặt theo quyết định 16; ERD trên `main` hiện để nullable (PR #109 đề xuất `NOT NULL` qua V9_01, chưa merge), nên khi triển khai cần bám nguồn chuẩn sau khi PR được xử lý, không dùng tính nullable để bỏ qua người tạo của chỗ đặt mới.
 - **Backend F8 Sprint 2 phối hợp F10:** thiết kế dữ liệu để đếm vi phạm theo BR-F8.6-03, gồm sau lần bị khóa gần nhất khi điểm danh mới và sau lần khóa liền trước lần khóa đang xét khi sửa điểm danh; vì vậy cách lưu phải xác định được từng lần khóa theo thứ tự, không chỉ lần khóa gần nhất. Không suy ra lịch sử chỉ từ `booking_locked_until` trừ số ngày cấu hình hiện tại. ERD hiện chưa có mốc lịch sử khóa được chỉ định cho quy tắc này. Hồ sơ được lễ tân đặt hộ nhưng chưa có tài khoản cần cách ghi mốc thông báo trong web phù hợp với `notifications.user_id`; không tự tạo cột hoặc bỏ ân hạn.
 - **Ranh giới tính lại khi sửa điểm danh đã được trưởng nhóm chốt ngày 09/11/2026**, xem mục 7.2 và BR-F8.6-03; không còn là điểm chờ xác nhận.
 
@@ -1289,6 +1371,8 @@ Các số trong kịch bản kiểm thử dùng bộ giá trị mặc định b�
 | Nội dung | Nguồn |
 | --- | --- |
 | 16 quyết định nghiệp vụ ngày 04/11, phần làm rõ ngày 07/11 về sức chứa, sửa điểm danh và quyết định ngày 09/11 về tính lại vi phạm khi sửa điểm danh | [Xác nhận của trưởng nhóm](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6633040706), [làm rõ 07/11](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6701988493), [quyết định 09/11](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6734172961), mục 7.1–7.4; nguồn chuẩn cần đồng bộ theo mục 7.6 |
+| Đổi giờ nhiều lần (UC-F8.4) và trạng thái chỗ đặt được điểm danh (UC-F8.6) | [Review ngày 10/11](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6774232169), [quyết định ngày 11/11 của trưởng nhóm](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79#issuecomment-6791816000), mục 7.3–7.4 |
+| Đồng bộ ADR 0010, ERD `created_by` bắt buộc và migration V9_01 | [PR #109](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/109), đang mở, chưa merge vào `main` (mục 7.6) |
 | Phạm vi chức năng, tác nhân, điều kiện gói, cửa sổ đặt chỗ, hủy chỗ, đổi giờ, vi phạm, thông báo | [Bản chốt phạm vi](../ban-chot-pham-vi.md), mục F8 |
 | FIFO, tự động đưa vào lớp, mốc ngừng đưa vào lớp, ân hạn, chỗ trống ban đêm, thông báo, khóa chỗ | [ADR 0003](../../decisions/0003-danh-sach-cho-tu-dong-dua-vao-lop.md) |
 | Tập giá trị Enum khái niệm, các ràng buộc duy nhất, trạng thái giữ chỗ, khóa NF6, khóa cấu hình | [ERD v2](../../design/erd/erd-v2.dbml), [Thiết kế dữ liệu](../../design/erd/thiet-ke-du-lieu.md) |
@@ -1318,3 +1402,4 @@ Các issue dưới đây là yêu cầu, không phải bằng chứng đã tri�
 | 04/11/2026 | Bổ sung 16 quyết định nghiệp vụ từ comment của trưởng nhóm; sửa luồng/ân hạn/FIFO/đóng đặt/điểm danh và thêm kịch bản biên. Ghi phụ thuộc đồng bộ ADR/ERD và câu hỏi tác động sửa điểm danh sai lên lệnh khóa. |
 | 07/11/2026 | Cập nhật quyết định 13 về sức chứa lịch lặp/buổi cụ thể; bổ sung điều kiện sửa và tiêu chí chấp nhận. Cập nhật việc sửa điểm danh, tính lại khóa và audit log theo comment trưởng nhóm; giữ phụ thuộc lưu lịch sử khóa/thời điểm vi phạm và ghi chú khả năng cần xác nhận cửa sổ đếm. |
 | 10/11/2026 | Áp dụng quyết định ngày 09/11 của trưởng nhóm: mỗi vi phạm chỉ tính cho một lần khóa; khi sửa điểm danh làm tính lại khóa đang có hiệu lực thì đếm trong tháng, sau lần khóa liền trước lần đang xét; hội viên không bị khóa thì tính như điểm danh mới. Cập nhật BR-F8.6-03, mục 7.2, 7.6, UC-F8.6, kịch bản 7–9 và thêm kịch bản 10 (hai lần khóa). Ghi trách nhiệm đồng bộ ADR/ERD theo việc trưởng nhóm giao trong buổi lập kế hoạch Sprint 2. |
+| 12/11/2026 | Áp dụng quyết định ngày 11/11 của trưởng nhóm và góp ý review ngày 10/11. UC-F8.4: xử lý đổi giờ nhiều lần (xét cả `BOOKED` và `PENDING_RECONFIRM`, giữ chỗ, tính lại hạn từ lần đổi mới nhất, xác nhận cho giờ cũ không còn giá trị, nhất quán khi đồng thời), thêm A5–A6, E7, BR-F8.4-05 đến 08 và kịch bản 8–14. UC-F8.6: điểm danh lần đầu chỉ từ `BOOKED`, sửa chỉ từ `ATTENDED`/`NO_SHOW`, `PENDING_RECONFIRM` không bao giờ được điểm danh, kiểm tra lại trong giao dịch, thêm A4, E7, BR-F8.6-05, 06 và kịch bản 11–14. Ghi PR #109 là đang chờ merge, không mô tả như đã có trên `main`. |
