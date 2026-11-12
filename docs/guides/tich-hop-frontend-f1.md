@@ -1,6 +1,6 @@
 # Tích hợp frontend F1
 
-Cập nhật 12/11/2026. Hợp đồng JSON đã được Bùi Trần Đức Việt (`VietBTD306`, phụ trách backend F1) xác nhận tại [comment PR #80](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80#issuecomment-6624574276) và bổ sung vào [SRS F1 mục 6.1 tại commit a2fa017](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/a2fa01764b377fad74dac68cbeee97dce8c569d1/docs/requirements/srs/dac-ta-use-case-f1-tai-khoan-va-phan-quyen.md). Backend auth đã merge qua [#87](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/87) và [#91](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/91); vá JWT và giới hạn BCrypt đã merge qua [#105](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/105) (merge commit `4610765`); schema chung [#101](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/101) và API hồ sơ hội viên F2 [#97](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/97) cũng đã vào main. Ngày 12/11 đã kiểm tra frontend với `origin/main` `336e13c` (có #105) bằng backend, PostgreSQL và trình duyệt thật trên máy phát triển (mục [Kết quả tích hợp](#kết-quả-tích-hợp-với-backend-thật-12112026)). Kiểm tra HTTPS staging bị chặn (mục [Staging](#kiểm-tra-https-staging-12112026-bị-chặn)); Postman F1–F3 chưa được chạy.
+Cập nhật 12/11/2026. Hợp đồng JSON đã được Bùi Trần Đức Việt (`VietBTD306`, phụ trách backend F1) xác nhận tại [comment PR #80](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80#issuecomment-6624574276) và bổ sung vào [SRS F1 mục 6.1 tại commit a2fa017](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/a2fa01764b377fad74dac68cbeee97dce8c569d1/docs/requirements/srs/dac-ta-use-case-f1-tai-khoan-va-phan-quyen.md). Backend auth đã merge qua [#87](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/87) và [#91](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/91); vá JWT và giới hạn BCrypt đã merge qua [#105](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/105) (merge commit `4610765`); schema chung [#101](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/101) và API hồ sơ hội viên F2 [#97](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/97) cũng đã vào main. Ngày 12/11 đã kiểm tra frontend với `origin/main` `336e13c` (có #105) bằng backend, PostgreSQL và trình duyệt thật trên máy phát triển (mục [Kết quả tích hợp](#kết-quả-tích-hợp-với-backend-thật-12112026)). Kiểm tra HTTPS trên preview Vercel và backend Render staging đã đạt (mục [Staging](#kiểm-tra-https-staging-12112026-đạt)). Postman F1–F3 do [#31](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/31) theo dõi và không thuộc phạm vi của PR này.
 
 ## Đường dẫn và dữ liệu đã thống nhất
 
@@ -95,17 +95,30 @@ Các ca này được kiểm thử bằng Vitest (giả lập ở ranh giới fr
 
 Kịch bản Playwright chỉ chạy cục bộ, không lưu trong repo; các bước trên đủ để chạy lại thủ công.
 
-## Kiểm tra HTTPS staging (12/11/2026): bị chặn
+## Kiểm tra HTTPS staging (12/11/2026): đạt
 
-| Mục | Quan sát | Kết luận |
-| --- | --- | --- |
-| Frontend production `https://it3180-nhom6-gym.vercel.app` | `/login` trả `200`. Bundle có chuỗi của trang đăng nhập, nhưng không có chuỗi của #80 như “Họ và tên”, “Nhập lại mật khẩu”, “Chưa thể xác minh phiên đăng nhập”, “Tài khoản đã được tạo” | Bản đang triển khai không phải #80. Không dùng kết quả này làm bằng chứng cho PR |
-| Preview của nhánh `https://it3180-nhom6-gym-git-feature-f1-dang-ky-dang-nhap-ktin06.vercel.app` | `302` về Vercel SSO | Cần đăng nhập Vercel; không kiểm thử ẩn danh được |
-| Backend Render `https://it3180-nhom6-gym-management.onrender.com` | `/actuator/health` không phản hồi sau 30 giây và 60 giây; `/api/v1/auth/me` không phản hồi sau 30 giây | Backend staging không phản hồi tại thời điểm kiểm tra. Chưa xác định được nguyên nhân (ngừng, khởi động chậm hay lỗi cấu hình) |
+Sau khi trưởng nhóm tắt Vercel Authentication cho project, preview của nhánh mở được ẩn danh và đã chạy lại các bước HTTPS lúc 22:50–22:55 ngày 12/11 (giờ Việt Nam).
 
-Chưa làm trên staging: đăng ký và đăng nhập thật qua HTTPS; kiểm tra cookie `Secure`, `Path`, `SameSite` qua HTTPS; kiểm tra rewrite Vercel → Render. Không tạo tài khoản staging khi chưa có xác nhận rằng môi trường cho phép tài khoản thử, và mật khẩu của dữ liệu seed staging không nằm trong repo.
+| Thành phần | Quan sát |
+| --- | --- |
+| Frontend | Preview của nhánh `https://it3180-nhom6-gym-git-feature-f1-dang-ky-dang-nhap-ktin06.vercel.app`, bản triển khai Vercel của commit `093fa55` (hoàn tất 14:17 UTC). `/login` trả `200`; bundle chứa chuỗi của #80 (“Nhập lại mật khẩu”, “Chưa thể xác minh phiên đăng nhập”, “Tài khoản đã được tạo”). Production `it3180-nhom6-gym.vercel.app` vẫn chưa chứa mã của #80 nên không dùng làm bằng chứng |
+| Backend | Render `https://it3180-nhom6-gym-management.onrender.com`, `/actuator/health` trả `UP`. Lần gọi đầu mất khoảng 1–2 phút vì gói miễn phí ngủ khi không có request. Render không công khai commit (`/actuator/info` yêu cầu đăng nhập) nên chưa xác nhận được mã đang chạy; hành vi giới hạn mật khẩu của #105 có mặt: đăng ký với mật khẩu 73 byte trả `400` “Mật khẩu không được vượt quá 72 byte” |
+| Đường đi | Trình duyệt chỉ gọi `/api/v1/...` trên origin của preview; Vercel rewrite sang Render theo `vercel.json`, nên cookie thuộc origin của preview |
+| Trình duyệt | Chromium 157.0.8103.38 (bản snap trên máy thử) điều khiển bằng Playwright, khung 1280 px và 360 px |
 
-Để hoàn tất mục này cần: backend staging phản hồi `/actuator/health`; một bản frontend thật sự chứa #80 (preview không bị SSO chặn, hoặc triển khai nhánh) được trỏ tới backend đó; và một tài khoản thử được phép dùng trên staging. Sau đó chạy lại các bước HTTPS trên.
+Tài khoản thử là hội viên mới do kiểm thử tự đăng ký trên preview (họ tên “Kiem Thu HTTPS 12-11”, email thuộc `example.com`). Không có mật khẩu hay tài khoản seed nào được dùng hoặc ghi vào repo. Tài khoản này vẫn nằm trong cơ sở dữ liệu staging vì chưa có API xóa tài khoản; trưởng nhóm có thể dọn khi làm mới dữ liệu staging.
+
+**Kết quả (15/15 đạt):**
+
+- Đăng ký qua HTTPS: `201`, sau đó `GET /auth/me` `200` và vào `/member`.
+- Cookie `refresh_token` (quan sát qua trình duyệt và qua header `Set-Cookie`): `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`, `Max-Age=604800`, thuộc origin của preview. `document.cookie` rỗng; `localStorage` và `sessionStorage` không có khóa nào.
+- Tải lại trang: `POST /auth/refresh` `200` rồi `GET /auth/me` `200`, vẫn ở `/member`. Tab mới vào `/member` cũng khôi phục phiên.
+- Đăng xuất: `204`, về `/login`. Sau đó tải lại và vào `/member`: `POST /auth/refresh` trả `401`, bị chuyển về `/login`, không khôi phục phiên.
+- Đăng nhập sai mật khẩu: `401`, ở lại `/login`. Đăng nhập đúng: `200`, vào `/member`.
+- Rewrite Vercel → Render hoạt động: `/api/v1/auth/me` không token qua preview trả `401` “Chưa xác thực” từ backend.
+- Bố cục 360 px ở `/member`: không tràn ngang (`scrollWidth` bằng chiều rộng khung nhìn).
+
+Hai kiểm tra trong lần chạy đầu (đăng ký rồi `/auth/me` `200`, và đăng xuất `204`) báo lỗi do kịch bản đọc danh sách request trước khi trình nghe kịp ghi; nhật ký request cho thấy cả hai đều đã xảy ra (`/auth/me` `200` ngay sau đăng ký, `/auth/logout` `204`). Kết quả 15/15 dựa trên đối chiếu nhật ký đó. Kịch bản chỉ chạy cục bộ, không lưu trong repo. Chưa kiểm thử lỗi mạng và phục hồi trên staging (đã kiểm thử ở tầng 2 với backend cục bộ), và chưa kiểm thử vai trò nhân viên trên staging vì chưa có tài khoản được cấp.
 
 ## Chạy lại thủ công
 
@@ -113,4 +126,4 @@ Làm theo [cai-dat-moi-truong.md](cai-dat-moi-truong.md): tạo file môi trư�
 
 ## Điều kiện gộp PR
 
-Theo [review của trưởng nhóm](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80#pullrequestreview-5756512423), PR #80 giữ Draft tới khi backend auth đã merge và tích hợp thật được xác minh. Backend auth, #105, schema #101 và API F2 #97 đã vào main, nên PR không còn phụ thuộc PR nào khác. Điều kiện còn lại là HTTPS staging theo mục trên. Postman F1–F3 do [#31](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/31) theo dõi và không nằm trong điều kiện của #80. Nhánh này bỏ công cụ giả lập vai trò (`DevRoleSwitcher`). Việc chuyển sang Ready do người duyệt quyết định.
+Theo [review của trưởng nhóm](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80#pullrequestreview-5756512423), PR #80 giữ Draft tới khi backend auth đã merge và tích hợp thật được xác minh. Backend auth, #105, schema #101 và API F2 #97 đã vào main, nên PR không còn phụ thuộc PR nào khác. Tích hợp thật đã được xác minh cục bộ (tầng 1 và 2) và qua HTTPS trên preview Vercel với backend Render staging (mục trên). Postman F1–F3 do [#31](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/31) theo dõi và không nằm trong điều kiện của #80. Nhánh này bỏ công cụ giả lập vai trò (`DevRoleSwitcher`). Việc approve và merge do người duyệt quyết định.
