@@ -31,6 +31,7 @@ import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.ForbiddenException;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
 import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
+import vn.edu.hust.nhom6.gym.feature.auth.dto.AuthMeResponse;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.RegisterRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.RefreshToken;
@@ -130,6 +131,22 @@ class AuthServiceTest {
     }
 
     @Test
+    void dangKyMatKhauVuotQua72ByteUtf8NemBusinessRuleException() {
+        // 30 ký tự 'ă' (mỗi ký tự 2 byte) + 20 ký tự ASCII = 50 ký tự (<= 72 ký tự) nhưng dài 80 byte (> 72 byte)
+        String multiBytePassword = "ă".repeat(30) + "Pass1234567890123456";
+        RegisterRequest request = new RegisterRequest(
+            "Nguyễn Văn A", "member@example.com", "0912345678", multiBytePassword, null, null);
+
+        when(userRepository.existsByEmail("member@example.com")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.register(request))
+            .isInstanceOf(BusinessRuleException.class)
+            .hasMessage(AuthService.PASSWORD_MAX_BYTES_MESSAGE);
+
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
     void dangNhapThanhCongCapTokenVaCapNhatLastLoginAt() {
         LoginRequest request = new LoginRequest("member@example.com", "Password123");
         User user = User.builder()
@@ -169,6 +186,47 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.login(request))
             .isInstanceOf(UnauthorizedException.class)
             .hasMessageContaining("Email hoặc mật khẩu không chính xác");
+    }
+
+    @Test
+    void dangNhapMatKhauVuotQua72ByteNemUnauthorizedExceptionKhongNem500() {
+        String longPassword = "ă".repeat(30) + "Pass1234567890123456";
+        LoginRequest request = new LoginRequest("member@example.com", longPassword);
+        User user = User.builder()
+            .email("member@example.com")
+            .passwordHash("hashed-pwd")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .build();
+
+        when(userRepository.findByEmail("member@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(anyString(), eq("hashed-pwd"))).thenAnswer(invocation -> {
+            String raw = invocation.getArgument(0);
+            if (raw.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > AuthService.MAX_PASSWORD_BYTES) {
+                throw new IllegalArgumentException("password cannot be more than 72 bytes");
+            }
+            return true;
+        });
+
+        assertThatThrownBy(() -> authService.login(request))
+            .isInstanceOf(UnauthorizedException.class)
+            .hasMessageContaining("Email hoặc mật khẩu không chính xác");
+
+        verify(userRepository, never()).save(any());
+        verify(refreshTokenRepository, never()).save(any());
+    }
+
+    @Test
+    void dangNhapEmailKhongTonTaiVanChayPasswordEncoderMatchesDeChongDoanEmailQuaThoiGian() {
+        LoginRequest request = new LoginRequest("unknown@example.com", "Password123");
+
+        when(userRepository.findByEmail("unknown@example.com")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.login(request))
+            .isInstanceOf(UnauthorizedException.class)
+            .hasMessageContaining("Email hoặc mật khẩu không chính xác");
+
+        verify(passwordEncoder).matches(eq("Password123"), anyString());
     }
 
     @Test
@@ -221,11 +279,19 @@ class AuthServiceTest {
     }
 
     @Test
-    void lamMoiTokenDaBiThuHoiNemUnauthorizedException() {
+    void lamMoiTokenDaBiThuHoiThuHoiToanBoPhienVaNemUnauthorizedException() {
         String rawToken = "revoked-token";
         String tokenHash = TokenHashUtil.sha256Hex(rawToken);
 
+        User user = User.builder()
+            .email("member@example.com")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .build();
+        org.springframework.test.util.ReflectionTestUtils.setField(user, "id", 77L);
+
         RefreshToken existingToken = RefreshToken.builder()
+            .user(user)
             .tokenHash(tokenHash)
             .expiresAt(OffsetDateTime.now().plusDays(5))
             .revokedAt(OffsetDateTime.now().minusHours(1))
@@ -236,6 +302,8 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.refresh(rawToken))
             .isInstanceOf(UnauthorizedException.class)
             .hasMessageContaining("Phiên đăng nhập đã hết hạn hoặc không hợp lệ");
+
+        verify(refreshTokenRepository).revokeAllByUserId(eq(77L), any(OffsetDateTime.class));
     }
 
     @Test
@@ -243,7 +311,15 @@ class AuthServiceTest {
         String rawToken = "expired-token";
         String tokenHash = TokenHashUtil.sha256Hex(rawToken);
 
+        User user = User.builder()
+            .email("member@example.com")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .build();
+        org.springframework.test.util.ReflectionTestUtils.setField(user, "id", 77L);
+
         RefreshToken existingToken = RefreshToken.builder()
+            .user(user)
             .tokenHash(tokenHash)
             .expiresAt(OffsetDateTime.now().minusDays(1))
             .revokedAt(null)
@@ -254,6 +330,8 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.refresh(rawToken))
             .isInstanceOf(UnauthorizedException.class)
             .hasMessageContaining("Phiên đăng nhập đã hết hạn hoặc không hợp lệ");
+
+        verify(refreshTokenRepository, never()).revokeAllByUserId(any(), any());
     }
 
     @Test
@@ -273,6 +351,31 @@ class AuthServiceTest {
 
         assertThat(existingToken.getRevokedAt()).isNotNull();
         verify(refreshTokenRepository).save(existingToken);
+    }
+
+    @Test
+    void getCurrentUserDocThongTinTuJwtVaNem401KhiClaimKhongHopLe() {
+        org.springframework.security.oauth2.jwt.Jwt validJwt = org.springframework.security.oauth2.jwt.Jwt.withTokenValue("tok")
+            .header("alg", "HS256")
+            .subject("25")
+            .claim("email", "staff@example.com")
+            .claim("role", "RECEPTIONIST")
+            .build();
+
+        AuthMeResponse me = authService.getCurrentUser(validJwt);
+        assertThat(me.userId()).isEqualTo(25L);
+        assertThat(me.email()).isEqualTo("staff@example.com");
+        assertThat(me.role()).isEqualTo(UserRole.RECEPTIONIST);
+
+        org.springframework.security.oauth2.jwt.Jwt badRoleJwt = org.springframework.security.oauth2.jwt.Jwt.withTokenValue("tok")
+            .header("alg", "HS256")
+            .subject("25")
+            .claim("email", "hacker@example.com")
+            .claim("role", "HACKER")
+            .build();
+
+        assertThatThrownBy(() -> authService.getCurrentUser(badRoleJwt))
+            .isInstanceOf(UnauthorizedException.class);
     }
 
     @Test

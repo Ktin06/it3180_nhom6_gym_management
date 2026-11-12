@@ -3,24 +3,17 @@ package vn.edu.hust.nhom6.gym.feature.auth;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
+import java.time.temporal.ChronoUnit;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtValidationException;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-
-import com.nimbusds.jose.jwk.source.ImmutableSecret;
 
 import vn.edu.hust.nhom6.gym.config.SecurityConfig;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
@@ -33,13 +26,11 @@ class JwtTokenServiceTest {
 
     @Test
     void taoVaGiaiMaJwtHs256ChuaDuSubEmailRoleVaHan15Phut() {
-        SecretKey key = new SecretKeySpec(
-            JwtTestSupport.DEFAULT_TEST_SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-        JwtEncoder encoder = new NimbusJwtEncoder(new ImmutableSecret<>(key));
-        JwtDecoder decoder = NimbusJwtDecoder.withSecretKey(key).macAlgorithm(MacAlgorithm.HS256).build();
+        JwtEncoder encoder = securityConfig.jwtEncoder(JwtTestSupport.DEFAULT_TEST_SECRET);
+        JwtDecoder decoder = securityConfig.jwtDecoder(JwtTestSupport.DEFAULT_TEST_SECRET);
         JwtTokenService service = new JwtTokenService(encoder);
 
-        Instant issuedAt = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.SECONDS);
+        Instant issuedAt = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         String token = service.generateAccessToken(42L, "reception@example.com", UserRole.RECEPTIONIST, issuedAt);
 
         Jwt jwt = decoder.decode(token);
@@ -51,18 +42,8 @@ class JwtTokenServiceTest {
 
     @Test
     void chuyenClaimRoleThanhQuyenRolePrefixCho5VaiTro() {
-        SecretKey key = new SecretKeySpec(
-            JwtTestSupport.DEFAULT_TEST_SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-        JwtDecoder decoder = NimbusJwtDecoder.withSecretKey(key).macAlgorithm(MacAlgorithm.HS256).build();
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-            String role = jwt.getClaimAsString("role");
-            if (role == null || role.isBlank()) {
-                return java.util.List.of();
-            }
-            return java.util.List.of(
-                new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role.trim()));
-        });
+        JwtDecoder decoder = securityConfig.jwtDecoder(JwtTestSupport.DEFAULT_TEST_SECRET);
+        JwtAuthenticationConverter converter = securityConfig.jwtAuthenticationConverter();
 
         for (UserRole role : UserRole.values()) {
             String token = JwtTestSupport.accessToken(10L, "user@example.com", role);
@@ -79,10 +60,7 @@ class JwtTokenServiceTest {
 
     @Test
     void tokenHetHanBiJwtDecoderTuChoi() {
-        SecretKey key = new SecretKeySpec(
-            JwtTestSupport.DEFAULT_TEST_SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-        JwtDecoder decoder = NimbusJwtDecoder.withSecretKey(key).macAlgorithm(MacAlgorithm.HS256).build();
-
+        JwtDecoder decoder = securityConfig.jwtDecoder(JwtTestSupport.DEFAULT_TEST_SECRET);
         String expiredToken = JwtTestSupport.expiredAccessToken(1L, "member@example.com", UserRole.MEMBER);
 
         assertThatThrownBy(() -> decoder.decode(expiredToken))
@@ -90,16 +68,30 @@ class JwtTokenServiceTest {
     }
 
     @Test
+    void tokenThieuRoleHoacRoleLaHoacSubKhongPhaiSoBiJwtDecoderTuChoi() {
+        JwtDecoder decoder = securityConfig.jwtDecoder(JwtTestSupport.DEFAULT_TEST_SECRET);
+
+        String missingRoleToken = JwtTestSupport.accessTokenWithoutRole(1L, "member@example.com");
+        assertThatThrownBy(() -> decoder.decode(missingRoleToken))
+            .isInstanceOf(JwtValidationException.class);
+
+        String invalidRoleToken = JwtTestSupport.accessTokenWithCustomClaims("1", "hacker@example.com", "HACKER");
+        assertThatThrownBy(() -> decoder.decode(invalidRoleToken))
+            .isInstanceOf(JwtValidationException.class);
+
+        String invalidSubToken = JwtTestSupport.accessTokenWithCustomClaims("not-a-number", "member@example.com", "MEMBER");
+        assertThatThrownBy(() -> decoder.decode(invalidSubToken))
+            .isInstanceOf(JwtValidationException.class);
+    }
+
+    @Test
     void jwtSecretNganHon32ByteBiTuChoiKhiKhoiTao() {
-        assertThatThrownBy(() -> {
-            var method = SecurityConfig.class.getDeclaredMethod("hmacSha256Key", String.class);
-            method.setAccessible(true);
-            try {
-                method.invoke(securityConfig, "khoa-qua-ngan");
-            } catch (java.lang.reflect.InvocationTargetException ex) {
-                throw ex.getTargetException();
-            }
-        }).isInstanceOf(IllegalStateException.class)
+        assertThatThrownBy(() -> securityConfig.jwtDecoder("khoa-qua-ngan"))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("32 byte");
+
+        assertThatThrownBy(() -> securityConfig.jwtEncoder("khoa-qua-ngan"))
+            .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("32 byte");
     }
 }

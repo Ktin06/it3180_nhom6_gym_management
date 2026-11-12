@@ -1,5 +1,7 @@
 package vn.edu.hust.nhom6.gym.feature.auth;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -7,14 +9,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +50,11 @@ class JwtSecurityIntegrationTest {
 
     @MockitoBean
     private AuthCookieHelper cookieHelper;
+
+    @BeforeEach
+    void setUp() {
+        when(authService.getCurrentUser(any(Jwt.class))).thenCallRealMethod();
+    }
 
     @TestConfiguration(proxyBeanMethods = false)
     static class TestRoleEndpointConfig {
@@ -140,13 +148,36 @@ class JwtSecurityIntegrationTest {
     }
 
     @Test
-    void tokenThieuClaimRoleBiChanVoi403KhiGoiApiCanVaiTro() throws Exception {
+    void tokenThieuClaimRoleBiChanVoi401KhiGoiApi() throws Exception {
         String tokenWithoutRole = JwtTestSupport.accessTokenWithoutRole(99L, "norole@example.com");
+
+        mockMvc.perform(get("/api/v1/auth/me")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenWithoutRole))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.status").value(401))
+            .andExpect(jsonPath("$.title").value("Chưa xác thực"));
 
         mockMvc.perform(get("/api/v1/test-rbac/staff-only")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenWithoutRole))
-            .andExpect(status().isForbidden())
-            .andExpect(jsonPath("$.status").value(403))
-            .andExpect(jsonPath("$.title").value("Không có quyền"));
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.status").value(401))
+            .andExpect(jsonPath("$.title").value("Chưa xác thực"));
+    }
+
+    @Test
+    void tokenCoRoleLaHoacSubKhongPhaiSoTra401ThayVi500() throws Exception {
+        String unknownRoleToken = JwtTestSupport.accessTokenWithCustomClaims("15", "hacker@example.com", "HACKER");
+        mockMvc.perform(get("/api/v1/auth/me")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + unknownRoleToken))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.status").value(401))
+            .andExpect(jsonPath("$.title").value("Chưa xác thực"));
+
+        String nonNumericSubToken = JwtTestSupport.accessTokenWithCustomClaims("not-a-number", "user@example.com", "MEMBER");
+        mockMvc.perform(get("/api/v1/auth/me")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + nonNumericSubToken))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.status").value(401))
+            .andExpect(jsonPath("$.title").value("Chưa xác thực"));
     }
 }
