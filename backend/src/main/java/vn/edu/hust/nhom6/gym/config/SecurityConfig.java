@@ -2,38 +2,65 @@ package vn.edu.hust.nhom6.gym.config;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.List;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtValidators;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.nimbusds.jose.jwk.source.ImmutableSecret;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import tools.jackson.databind.json.JsonMapper;
+import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 
 /**
- * Cấu hình bảo mật TẠM THỜI cho khung dự án.
+ * Cấu hình bảo mật cho hệ thống (F1 – Tài khoản và phân quyền).
  *
- * <p>Chỉ mở /actuator/health và tài liệu Swagger; mọi đường dẫn khác yêu cầu xác thực.
- * Bộ lọc đọc JWT sẽ được thêm ở chức năng F1 (tài khoản và phân quyền).
+ * <p>Mở các đường dẫn công khai (health, Swagger, các API xác thực công khai của {@code /api/v1/auth});
+ * mọi đường dẫn khác yêu cầu xác thực bằng JWT HS256 qua {@code spring-boot-starter-oauth2-resource-server}
+ * và phân quyền theo vai trò {@code ROLE_<vai trò>} (S2, S3, ADR 0001).
  */
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    private static final int MIN_JWT_SECRET_BYTES = 32;
 
     private static final String[] PUBLIC_PATHS = {
         "/actuator/health",
@@ -42,10 +69,22 @@ public class SecurityConfig {
         "/swagger-ui/**",
         "/v3/api-docs/**",
         "/error",
+        "/api/v1/auth/register",
+        "/api/v1/auth/login",
+        "/api/v1/auth/refresh",
+        "/api/v1/auth/logout",
     };
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, JsonMapper jsonMapper) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, JsonMapper jsonMapper,
+            Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter) throws Exception {
+        AuthenticationEntryPoint entryPoint = (request, response, e) -> writeProblem(
+            jsonMapper, request, response, HttpStatus.UNAUTHORIZED,
+            "Chưa xác thực", "Bạn cần đăng nhập để truy cập tài nguyên này.");
+        AccessDeniedHandler accessDeniedHandler = (request, response, e) -> writeProblem(
+            jsonMapper, request, response, HttpStatus.FORBIDDEN,
+            "Không có quyền", "Bạn không có quyền thực hiện thao tác này.");
+
         http
             // Access token (JWT) gửi qua header Authorization nên tắt CSRF. Riêng cookie refresh token
             // là cookie cùng domain với SameSite=Strict (ADR 0008), trình duyệt không gửi kèm request từ trang khác.
@@ -57,18 +96,45 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(PUBLIC_PATHS).permitAll()
                 .anyRequest().authenticated())
+            .oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
+                .authenticationEntryPoint(entryPoint)
+                .accessDeniedHandler(accessDeniedHandler))
             .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((request, response, e) -> writeProblem(
-                    jsonMapper, request, response, HttpStatus.UNAUTHORIZED,
-                    "Chưa xác thực", "Bạn cần đăng nhập để truy cập tài nguyên này."))
-                .accessDeniedHandler((request, response, e) -> writeProblem(
-                    jsonMapper, request, response, HttpStatus.FORBIDDEN,
-                    "Không có quyền", "Bạn không có quyền thực hiện thao tác này.")));
+                .authenticationEntryPoint(entryPoint)
+                .accessDeniedHandler(accessDeniedHandler));
         return http.build();
     }
 
+    /** Kiểm tra chữ ký JWT HS256, hạn dùng và cấu trúc claim {@code sub}/{@code role} bằng khóa {@code JWT_SECRET} (ADR 0001, S2). */
     @Bean
-    CorsConfigurationSource corsConfigurationSource(
+    public JwtDecoder jwtDecoder(@Value("${app.jwt.secret}") String jwtSecret) {
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(hmacSha256Key(jwtSecret))
+            .macAlgorithm(MacAlgorithm.HS256)
+            .build();
+        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
+            JwtValidators.createDefault(),
+            SecurityConfig::validateSubjectAndRole
+        ));
+        return decoder;
+    }
+
+    /** Ký JWT HS256 bằng khóa {@code JWT_SECRET}. */
+    @Bean
+    public JwtEncoder jwtEncoder(@Value("${app.jwt.secret}") String jwtSecret) {
+        return new NimbusJwtEncoder(new ImmutableSecret<>(hmacSha256Key(jwtSecret)));
+    }
+
+    /** Chuyển claim {@code role} trong JWT thành quyền {@code ROLE_<vai trò>} của Spring Security (S3). */
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(SecurityConfig::extractRoleAuthorities);
+        return converter;
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource(
             @Value("${app.cors.allowed-origins}") List<String> allowedOrigins) {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(allowedOrigins);
@@ -85,8 +151,52 @@ public class SecurityConfig {
 
     /** Băm mật khẩu bằng bcrypt (S1). */
     @Bean
-    PasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    private static SecretKey hmacSha256Key(String jwtSecret) {
+        byte[] keyBytes = jwtSecret == null ? new byte[0] : jwtSecret.getBytes(StandardCharsets.UTF_8);
+        if (keyBytes.length < MIN_JWT_SECRET_BYTES) {
+            throw new IllegalStateException("JWT_SECRET phải dài ít nhất 32 byte cho thuật toán HS256.");
+        }
+        return new SecretKeySpec(keyBytes, "HmacSHA256");
+    }
+
+    private static OAuth2TokenValidatorResult validateSubjectAndRole(Jwt jwt) {
+        String subject = jwt.getSubject();
+        if (subject == null || subject.isBlank()) {
+            return OAuth2TokenValidatorResult.failure(
+                new OAuth2Error("invalid_token", "JWT thiếu claim 'sub'.", null));
+        }
+        try {
+            Long.parseLong(subject);
+        } catch (NumberFormatException ex) {
+            return OAuth2TokenValidatorResult.failure(
+                new OAuth2Error("invalid_token", "Claim 'sub' trong JWT phải là số nguyên.", null));
+        }
+
+        String role = jwt.getClaimAsString("role");
+        if (role == null || role.isBlank()) {
+            return OAuth2TokenValidatorResult.failure(
+                new OAuth2Error("invalid_token", "JWT thiếu claim 'role'.", null));
+        }
+        try {
+            UserRole.valueOf(role.trim());
+        } catch (IllegalArgumentException ex) {
+            return OAuth2TokenValidatorResult.failure(
+                new OAuth2Error("invalid_token", "Claim 'role' trong JWT không hợp lệ.", null));
+        }
+
+        return OAuth2TokenValidatorResult.success();
+    }
+
+    private static Collection<GrantedAuthority> extractRoleAuthorities(Jwt jwt) {
+        String role = jwt.getClaimAsString("role");
+        if (role == null || role.isBlank()) {
+            return List.of();
+        }
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.trim()));
     }
 
     private static void writeProblem(JsonMapper jsonMapper, HttpServletRequest request,

@@ -22,11 +22,41 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void unauthorizedTra401KemProblemDetail() {
+        ProblemDetail problem = handler.handleUnauthorized(
+            new UnauthorizedException("Email hoặc mật khẩu không chính xác."));
+
+        assertThat(problem.getStatus()).isEqualTo(401);
+        assertThat(problem.getTitle()).isEqualTo("Chưa xác thực");
+        assertThat(problem.getDetail()).isEqualTo("Email hoặc mật khẩu không chính xác.");
+    }
+
+    @Test
+    void forbiddenTra403KemProblemDetail() {
+        ProblemDetail problem = handler.handleForbidden(
+            new ForbiddenException("Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên."));
+
+        assertThat(problem.getStatus()).isEqualTo(403);
+        assertThat(problem.getTitle()).isEqualTo("Không có quyền");
+        assertThat(problem.getDetail()).isEqualTo(
+            "Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên.");
+    }
+
+    @Test
     void conflictTra409() {
         ProblemDetail problem = handler.handleConflict(new ConflictException("Số điện thoại đã tồn tại"));
 
         assertThat(problem.getStatus()).isEqualTo(409);
         assertThat(problem.getDetail()).isEqualTo("Số điện thoại đã tồn tại");
+    }
+
+    @Test
+    void duLieuSaiDinhDangTra400DungChoMoiChucNang() {
+        ProblemDetail problem = handler.handleInvalidRequest(new InvalidRequestException("Giới tính không hợp lệ."));
+
+        assertThat(problem.getStatus()).isEqualTo(400);
+        assertThat(problem.getTitle()).isEqualTo("Dữ liệu không hợp lệ");
+        assertThat(problem.getDetail()).isEqualTo("Giới tính không hợp lệ.");
     }
 
     @Test
