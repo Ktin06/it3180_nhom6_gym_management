@@ -140,7 +140,7 @@ Các khối `Enum` trong DBML mô tả tập giá trị logic để đặc tả 
     ]
   }
   ```
-- **Màn hình giao diện liên quan:** Trang khách / lịch lớp công khai; wireframe thuộc issue #17, hiện chưa có file wireframe trang này trong repo.
+- **Màn hình giao diện liên quan:** Trang khách / lịch lớp công khai; wireframe tại [`lich-lop-cong-khai.drawio.svg`](../../design/wireframe/lich-lop-cong-khai.drawio.svg) (issue #17, PR #78 đã merge).
 - Các trường công khai cụ thể và việc hiển thị sức chứa/chỗ trống do người triển khai backend F8 trong Sprint 2 chốt theo chỉ đạo tại mục 7.5 trước khi coi là hợp đồng API.
 
 #### H. Tiêu chí chấp nhận
@@ -1330,7 +1330,7 @@ Các số trong kịch bản kiểm thử dùng bộ giá trị mặc định b�
 - Hạn xác nhận tính lại từ lần đổi mới nhất theo quyết định 9; thời hạn 60 phút đọc từ `system_configs` (`RECONFIRM_TTL_MIN`).
 - Xác nhận cho giờ cũ không còn giá trị; hội viên phải xác nhận giờ mới nhất và được gửi thêm thông báo giờ mới.
 - Cách bảo đảm nhất quán khi đổi giờ và xác nhận đồng thời (khóa hoặc số phiên bản dữ liệu) do backend F8 Sprint 2 chốt (mục 7.5).
-- **Chỗ suy ra từ quyết định 9, nhờ Tiến/Tú xác nhận nếu chưa đúng ý:** chỗ `PENDING_RECONFIRM` đã quá `reconfirm_expires_at` nhưng tác vụ hủy chưa chạy là chỗ đã mất theo quyết định 9, nên lần đổi giờ mới không làm sống lại chỗ đó (kịch bản 14); chỗ được hủy không phạt theo UC-F8.4 A1.
+- **Chốt 12/11/2026 (trưởng nhóm xác nhận):** chỗ `PENDING_RECONFIRM` đã quá `reconfirm_expires_at` nhưng tác vụ hủy chưa chạy là chỗ đã mất theo quyết định 9, nên lần đổi giờ mới không làm sống lại chỗ đó (kịch bản 14); chỗ được hủy không phạt theo UC-F8.4 A1.
 
 ### 7.4. Sĩ số, điểm danh, phân quyền, dữ liệu
 
@@ -1403,3 +1403,4 @@ Các issue dưới đây là yêu cầu, không phải bằng chứng đã tri�
 | 07/11/2026 | Cập nhật quyết định 13 về sức chứa lịch lặp/buổi cụ thể; bổ sung điều kiện sửa và tiêu chí chấp nhận. Cập nhật việc sửa điểm danh, tính lại khóa và audit log theo comment trưởng nhóm; giữ phụ thuộc lưu lịch sử khóa/thời điểm vi phạm và ghi chú khả năng cần xác nhận cửa sổ đếm. |
 | 10/11/2026 | Áp dụng quyết định ngày 09/11 của trưởng nhóm: mỗi vi phạm chỉ tính cho một lần khóa; khi sửa điểm danh làm tính lại khóa đang có hiệu lực thì đếm trong tháng, sau lần khóa liền trước lần đang xét; hội viên không bị khóa thì tính như điểm danh mới. Cập nhật BR-F8.6-03, mục 7.2, 7.6, UC-F8.6, kịch bản 7–9 và thêm kịch bản 10 (hai lần khóa). Ghi trách nhiệm đồng bộ ADR/ERD theo việc trưởng nhóm giao trong buổi lập kế hoạch Sprint 2. |
 | 12/11/2026 | Áp dụng quyết định ngày 11/11 của trưởng nhóm và góp ý review ngày 10/11. UC-F8.4: xử lý đổi giờ nhiều lần (xét cả `BOOKED` và `PENDING_RECONFIRM`, giữ chỗ, tính lại hạn từ lần đổi mới nhất, xác nhận cho giờ cũ không còn giá trị, nhất quán khi đồng thời), thêm A5–A6, E7, BR-F8.4-05 đến 08 và kịch bản 8–14. UC-F8.6: điểm danh lần đầu chỉ từ `BOOKED`, sửa chỉ từ `ATTENDED`/`NO_SHOW`, `PENDING_RECONFIRM` không bao giờ được điểm danh, kiểm tra lại trong giao dịch, thêm A4, E7, BR-F8.6-05, 06 và kịch bản 11–14. Ghi PR #109 là đang chờ merge, không mô tả như đã có trên `main`. |
+| 12/11/2026 | Trưởng nhóm xác nhận kịch bản 14 (chỗ quá hạn xác nhận thì mất chỗ, không phạt, không được làm sống lại). Bỏ ghi chú chờ chốt ở mục 7.3; cập nhật liên kết wireframe lịch lớp công khai (#78) ở UC-F8.0 mục G. |
