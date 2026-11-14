@@ -16,6 +16,7 @@ import {
   register as registerRequest,
 } from '../features/auth/api/auth-api'
 import { refreshAccessToken } from '../services/http'
+import { isUnauthorized } from '../services/http-errors'
 import type {
   AccessTokenResponse,
   LoginRequest,
@@ -27,18 +28,6 @@ const RECOVERABLE_SESSION_MESSAGE =
   'Chưa thể xác minh phiên đăng nhập. Hãy kiểm tra kết nối rồi thử lại.'
 
 let bootstrapFlight: { epoch: number; promise: Promise<BootstrapResult> } | null = null
-
-function isUnauthorized(error: unknown) {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'response' in error &&
-    typeof error.response === 'object' &&
-    error.response !== null &&
-    'status' in error.response &&
-    error.response.status === 401
-  )
-}
 
 function bootstrapSession(epoch: number): Promise<BootstrapResult> {
   if (bootstrapFlight?.epoch === epoch) return bootstrapFlight.promise

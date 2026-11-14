@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -71,7 +71,9 @@ describe('RegisterPage', () => {
 
     expect(await screen.findByText('Nhập số di động 10 số, ví dụ 0912345678')).toBeInTheDocument()
     expect(
-      await screen.findByText('Mật khẩu cần ít nhất 8 ký tự, gồm chữ và số'),
+      await screen.findByText(
+        'Mật khẩu cần ít nhất 8 ký tự, có chữ A–Z/a–z và số, tối đa 72 byte UTF-8',
+      ),
     ).toBeInTheDocument()
     expect(register).not.toHaveBeenCalled()
   })
@@ -98,5 +100,45 @@ describe('RegisterPage', () => {
     expect(await screen.findByText('Trang hội viên')).toBeInTheDocument()
     expect(retrySession).toHaveBeenCalledOnce()
     expect(register).toHaveBeenCalledTimes(1)
+  })
+
+  it('dùng tên trường lỗi thay vì suy từ câu báo lỗi xung đột', async () => {
+    register.mockRejectedValue({
+      response: {
+        status: 409,
+        data: {
+          detail: 'Email liên hệ cần xác minh sau khi đổi số điện thoại.',
+          errors: { phone: 'Thông tin đã tồn tại.' },
+        },
+      },
+    })
+    const user = userEvent.setup()
+    renderRegister()
+    await user.type(screen.getByLabelText('Họ và tên'), 'Nguyễn An')
+    await user.type(screen.getByLabelText('Email'), 'an@example.com')
+    await user.type(screen.getByLabelText('Số điện thoại'), '84912345678')
+    await user.type(screen.getByLabelText('Mật khẩu'), 'Secret123')
+    await user.type(screen.getByLabelText('Nhập lại mật khẩu'), 'Secret123')
+    await user.click(screen.getByRole('button', { name: 'Đăng ký' }))
+
+    await waitFor(() =>
+      expect(screen.getByLabelText('Số điện thoại')).toHaveAttribute('aria-invalid', 'true'),
+    )
+    expect(screen.getByLabelText('Email')).not.toHaveAttribute('aria-invalid', 'true')
+    expect(register).toHaveBeenCalledWith(expect.objectContaining({ phone: '0912345678' }))
+  })
+
+  it('lỗi 409 không có errors hiện chung, không suy tên trường từ detail', async () => {
+    register.mockRejectedValue({ response: { status: 409, data: { detail: 'Email đã tồn tại.' } } })
+    const user = userEvent.setup()
+    renderRegister()
+    await user.type(screen.getByLabelText('Họ và tên'), 'Nguyễn An')
+    await user.type(screen.getByLabelText('Email'), 'an@example.com')
+    await user.type(screen.getByLabelText('Số điện thoại'), '0912345678')
+    await user.type(screen.getByLabelText('Mật khẩu'), 'Secret123')
+    await user.type(screen.getByLabelText('Nhập lại mật khẩu'), 'Secret123')
+    await user.click(screen.getByRole('button', { name: 'Đăng ký' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Email đã tồn tại.')
+    expect(screen.getByLabelText('Email')).not.toHaveAttribute('aria-invalid', 'true')
   })
 })

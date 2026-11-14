@@ -8,9 +8,10 @@ import {
 } from '../auth/session-store'
 import { queueCookieOperation } from '../auth/cookie-operation-queue'
 import { requestRefresh } from './refresh-client'
+import { HTTP_BASE_URL, HTTP_TIMEOUT } from './http-config'
+import { isUnauthorized } from './http-errors'
 
-const baseURL = import.meta.env.VITE_API_URL ?? '/api/v1'
-const timeout = 15000
+export { HTTP_BASE_URL, HTTP_TIMEOUT } from './http-config'
 let refreshFlight: { epoch: number; promise: Promise<string> } | null = null
 
 /**
@@ -19,8 +20,8 @@ let refreshFlight: { epoch: number; promise: Promise<string> } | null = null
  * nhờ đó cookie refresh token là cookie cùng domain.
  */
 export const http = axios.create({
-  baseURL,
-  timeout,
+  baseURL: HTTP_BASE_URL,
+  timeout: HTTP_TIMEOUT,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 })
@@ -43,7 +44,7 @@ export function refreshAccessToken(expectedEpoch = getSessionEpoch()): Promise<s
       return response.accessToken
     } catch (error) {
       if (getSessionEpoch() === expectedEpoch) {
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (isUnauthorized(error)) {
           expireSession(expectedEpoch)
         } else {
           suspendSession(expectedEpoch)
@@ -87,7 +88,7 @@ http.interceptors.response.use(
     return response
   },
   async (error) => {
-    if (!axios.isAxiosError(error) || error.response?.status !== 401) throw error
+    if (!axios.isAxiosError(error) || !isUnauthorized(error)) throw error
 
     const config = error.config
     if (!config || config.skipAuthRefresh || !config.authSentToken) throw error

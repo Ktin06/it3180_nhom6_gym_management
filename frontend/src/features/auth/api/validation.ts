@@ -4,7 +4,9 @@ export function normalizeEmail(value: string) {
 
 export function normalizePhone(value: string) {
   const compact = value.trim().replace(/[\s().-]/g, '')
-  return compact.startsWith('+84') ? `0${compact.slice(3)}` : compact
+  if (compact.startsWith('+84')) return `0${compact.slice(3)}`
+  if (compact.startsWith('84') && compact.length === 11) return `0${compact.slice(2)}`
+  return compact
 }
 
 export function isValidPhone(value: string) {
@@ -12,5 +14,9 @@ export function isValidPhone(value: string) {
 }
 
 export function isValidPassword(value: string) {
-  return value.length >= 8 && /\p{L}/u.test(value) && /[0-9]/.test(value)
+  return (
+    /^(?=.*[A-Za-z])(?=.*[0-9]).{8,}$/u.test(value) &&
+    !/[\r\n\u0085\u2028\u2029]/u.test(value) &&
+    new TextEncoder().encode(value).byteLength <= 72
+  )
 }
