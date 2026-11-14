@@ -33,13 +33,14 @@ Sơ đồ UML và wireframe vẽ bằng draw.io (trong VS Code dùng tiện ích
 | [0000](decisions/0000-mau-adr.md) | Mẫu ADR |
 | [0001](decisions/0001-cong-nghe.md) | Công nghệ: React + Spring Boot + PostgreSQL + Flyway, kèm phiên bản |
 | [0002](decisions/0002-phat-trien-tang-dan-5-version.md) | Phát triển tăng dần theo 5 version |
-| [0003](decisions/0003-danh-sach-cho-tu-dong-dua-vao-lop.md) | Danh sách chờ tự động đưa vào lớp |
+| [0003](decisions/0003-danh-sach-cho-tu-dong-dua-vao-lop.md) | Danh sách chờ tự động đưa vào lớp (đã thay thế bởi 0010) |
 | [0004](decisions/0004-thanh-toan-chi-tai-quay.md) | Thanh toán chỉ tại quầy |
 | [0005](decisions/0005-erd-v2.md) | Thiết kế dữ liệu ERD bản 2 |
 | [0006](decisions/0006-git-workflow.md) | Quy trình Git: main + nhánh tính năng, squash merge |
 | [0007](decisions/0007-cau-truc-ma-nguon.md) | Cấu trúc mã nguồn: đóng gói theo chức năng |
 | [0008](decisions/0008-goi-api-cung-domain.md) | Gọi API cùng domain qua proxy của Vercel (cookie refresh token) |
 | [0009](decisions/0009-bo-so-do-phan-tich-thiet-ke.md) | Bộ 8 loại sơ đồ UML cho phân tích và thiết kế, không dùng DFD |
+| [0010](decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md) | Danh sách chờ tự động đưa vào lớp, bản 2: ân hạn tính từ lúc đưa vào lớp, thứ tự phụ theo `id`, mốc 30 phút đóng cả đặt mới |
 
 ## Khác
 

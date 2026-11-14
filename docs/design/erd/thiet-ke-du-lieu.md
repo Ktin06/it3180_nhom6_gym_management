@@ -50,7 +50,7 @@ Mọi bảng tuân theo cùng một quy ước, để mã do 8 người (và AI)
 | Bảng | Mục đích | Cột và khóa ngoại chính | Chức năng |
 | --- | --- | --- | --- |
 | `members` | Hồ sơ hội viên | `user_id` (rỗng nếu chưa có tài khoản), `home_branch_id`, `member_code`, `phone` (duy nhất), `face_consent_at`, `booking_locked_until`, `status`, `deleted_at` | F2 |
-| `member_avatars` | Ảnh đại diện hội viên, đã thu nhỏ và nén ([ADR 0011](../decisions/0011-anh-dai-dien-luu-trong-postgresql.md)) | `member_id` (duy nhất), `content` (`bytea`, JPEG ≤ 100 KB), `content_type`, `size_bytes`, `uploaded_by` | F2, F4 |
+| `member_avatars` | Ảnh đại diện hội viên, đã thu nhỏ và nén ([ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md)) | `member_id` (duy nhất), `content` (`bytea`, JPEG ≤ 100 KB), `content_type`, `size_bytes`, `uploaded_by` | F2, F4 |
 | `face_embeddings` | Vector khuôn mặt 128 chiều, không lưu ảnh | `member_id`, `embedding` (`real[]`), `model_version` | F20 |
 | `body_metrics` | Chỉ số cơ thể theo từng lần đo | `member_id`, `recorded_by`, `measured_at`, cân nặng, chiều cao, % mỡ, khối cơ | F2, F9 |
 | `packages` | Danh mục gói đang bán (bảng giá) | `branch_id` (rỗng = toàn chuỗi), `code`, `type` (TIME, SESSION, PT), `duration_days` (gói "1 tháng" = 30 ngày), `session_count`, `price`, `status` | F3 |
@@ -139,7 +139,10 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 | Không sinh trùng buổi lớp | Cơ sở dữ liệu (chỉ mục duy nhất) | Duy nhất trên (`class_schedule_id`, `occurrence_date`); buổi đã đổi giờ không bị sinh lại ở giờ cũ |
 | Một chỗ đặt đang hoạt động cho mỗi buổi | Cơ sở dữ liệu (chỉ mục duy nhất có điều kiện) | Duy nhất trên (`class_session_id`, `member_id`) với các dòng chưa CANCELLED; hủy rồi vẫn đặt lại được |
 | Không vượt sĩ số | Mã nghiệp vụ, có khóa bản ghi (NF6) | Khóa dòng `class_sessions`; số chỗ đang giữ (mọi trạng thái trừ WAITLIST và CANCELLED, tức BOOKED, PENDING_RECONFIRM, ATTENDED, NO_SHOW) không vượt `class_sessions.capacity` |
-| Thứ tự danh sách chờ | Mã nghiệp vụ | Đưa vào lớp theo `waitlisted_at` tăng dần; vị trí hiển thị tính khi truy vấn, không lưu số cố định |
+| Thứ tự danh sách chờ | Mã nghiệp vụ | Đưa vào lớp theo `waitlisted_at` tăng dần, trùng thì `id` tăng dần; vị trí hiển thị tính khi truy vấn, không lưu số cố định ([ADR 0010](../../decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md)) |
+| Ân hạn sau khi được đưa vào lớp | Mã nghiệp vụ | `grace_until = promoted_at + PROMOTION_GRACE_MIN`, ghi trong cùng giao dịch đưa vào lớp; hủy khi `now() <= grace_until` thì `is_late_cancel = false`; tác vụ gửi email không sửa `grace_until` |
+| Chỗ đặt có người tạo | Cơ sở dữ liệu (NOT NULL) | `class_bookings.created_by` là tài khoản đã bấm đặt hoặc vào chờ; tự động đưa vào lớp giữ nguyên người tạo ban đầu |
+| Sửa điểm danh có dấu vết | Mã nghiệp vụ | Mỗi lần ghi hoặc sửa, `attendance_marked_by` là người thao tác; khi sửa kết quả đã có, ghi thêm một dòng `audit_logs` (giá trị cũ, mới) trong cùng giao dịch |
 | Hội viên không trùng giờ lớp | Mã nghiệp vụ, có khóa bản ghi (NF6) | Khóa dòng `members` trước khi kiểm tra; không có hai chỗ đặt đang hoạt động ở hai buổi trùng giờ, kể cả khi hai yêu cầu đến cùng lúc |
 | Huấn luyện viên không trùng giờ | Mã nghiệp vụ, có khóa bản ghi (NF6) | Khóa dòng `members` rồi `staff`; không có hai buổi PT trùng giờ, kể cả với giờ dạy lớp (`class_sessions.trainer_id`) |
 | Buổi PT dùng đúng gói | Mã nghiệp vụ | `pt_sessions.membership_id` là gói PT đang ACTIVE của chính hội viên đó; chỉ trừ buổi khi DONE |
@@ -169,7 +172,7 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 - [x] Gói TIME tính theo số ngày (`duration_days`); "1 tháng" = 30 ngày (01/11).
 - [x] Mã hội viên dạng `HV` + 6 chữ số (`HV000123`), sinh từ sequence `member_code_seq` dùng chung cả chuỗi (01/11).
 - [ ] Tác vụ chuyển EXPIRED lúc 00:00 bị lỗi trong khi máy chủ vẫn chạy (không có lần chạy bù): gói SESSION 0 buổi còn ACTIVE, gói nối tiếp chưa kích hoạt, hội viên bị từ chối check-in cả ngày. Trường hợp ngoại vi, để xử lý sau (hướng đã bàn: cho tác vụ chạy lại mỗi giờ, chạy lặp không gây sai) (03/11).
-- [x] Ảnh đại diện hội viên lưu trong PostgreSQL, bảng `member_avatars`, server thu nhỏ và nén; bỏ `members.avatar_url` (14/11, [ADR 0011](../decisions/0011-anh-dai-dien-luu-trong-postgresql.md)).
+- [x] Ảnh đại diện hội viên lưu trong PostgreSQL, bảng `member_avatars`, server thu nhỏ và nén; bỏ `members.avatar_url` (14/11, [ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md)).
 
 ## Lịch sử thay đổi
 
@@ -183,4 +186,5 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 | 01/11/2026 | Sau review toàn dự án: schema ban đầu tạo đủ 39 bảng một lần, migration về sau dùng dải `V9_xx`; sĩ số tính cả chỗ ATTENDED, NO_SHOW |
 | 02/11/2026 | Cả nhóm duyệt ERD bản 2 tại buổi kick-off; `TRANSFER_FEE` mặc định 200.000 đ |
 | 03/11/2026 | Theo [ADR 0005](../decisions/0005-erd-v2.md) mục 25–32: tham số `SESSION_WARNING_THRESHOLD`; công thức `end_date`; gói SESSION, PT hết buổi kéo gói nối tiếp; tác vụ nền chuyển EXPIRED (00:00, chạy bù khi khởi động) trước khi kích hoạt UPCOMING; chặn bảo lưu, chuyển nhượng gói hết buổi; giới hạn số buổi PT đặt trước; để mở trường hợp tác vụ 00:00 bị lỗi |
-| 14/11/2026 | Theo [ADR 0011](../decisions/0011-anh-dai-dien-luu-trong-postgresql.md): thêm bảng `member_avatars` (ảnh đại diện lưu trong PostgreSQL), bỏ `members.avatar_url`; 40 bảng. Migration `V9_02` làm ở việc S2-06 |
+| 12/11/2026 | Theo quyết định F8 ([ADR 0010](../../decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md)): `class_bookings.created_by` thành NOT NULL (migration `V9_01`); `grace_until` tính từ `promoted_at`, không từ lúc gửi email; thứ tự chờ phụ theo `id`; ghi chú `attendance_marked_by` gồm cả người sửa điểm danh |
+| 14/11/2026 | Theo [ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md): thêm bảng `member_avatars` (ảnh đại diện lưu trong PostgreSQL), bỏ `members.avatar_url`; 40 bảng. Migration `V9_02` làm ở việc S2-06 |
