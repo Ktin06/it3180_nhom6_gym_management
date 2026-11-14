@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -32,6 +32,7 @@ function AuthProbe() {
       <p>{auth.status}</p>
       <p>{auth.user?.role ?? 'Chưa có người dùng'}</p>
       <p>{lastError}</p>
+      <p>{auth.sessionError}</p>
       <button
         onClick={() =>
           void auth.login({ email: 'hv@example.com', password: 'Secret123' }).catch(() => {})
@@ -111,6 +112,28 @@ describe('AuthProvider', () => {
 
     expect(await screen.findByText('anonymous')).toBeInTheDocument()
     expect(authApi.getCurrentUser).not.toHaveBeenCalled()
+  })
+
+  it('xóa identity và chuyển anonymous với thông báo khi token đổi chủ thể', async () => {
+    const jwt = (sub: string) => `e30.${btoa(JSON.stringify({ sub }))}.signature`
+    refresh.mockImplementation(async (epoch: number) => {
+      setAccessToken(jwt('15'), epoch)
+      return jwt('15')
+    })
+    authApi.getCurrentUser.mockResolvedValue({ email: 'a@example.com', role: 'MEMBER' })
+    renderProvider()
+    await screen.findByText('authenticated')
+
+    act(() => {
+      expect(setAccessToken(jwt('26'), getSessionEpoch())).toBe(false)
+    })
+
+    expect(screen.getByText('anonymous')).toBeInTheDocument()
+    expect(screen.queryByText('MEMBER')).not.toBeInTheDocument()
+    expect(
+      screen.getByText('Tài khoản đã đổi ở tab khác. Vui lòng đăng nhập lại.'),
+    ).toBeInTheDocument()
+    expect(authApi.logout).not.toHaveBeenCalled()
   })
 
   it('bootstrap lỗi tạm thời giữ trang được bảo vệ đóng và cho thử lại', async () => {

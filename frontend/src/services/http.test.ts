@@ -10,6 +10,7 @@ import {
   getAccessToken,
   getSessionEpoch,
   setAccessToken,
+  subscribeToSessionExpiry,
   subscribeToSessionRecovery,
 } from '../auth/session-store'
 import { http, refreshAccessToken } from './http'
@@ -91,6 +92,27 @@ describe('http auth interceptors', () => {
     expect(requestRefresh).toHaveBeenCalledTimes(1)
     expect(attempts).toBe(2)
     expect(getAccessToken()).toBeNull()
+  })
+
+  it('không retry request bằng tài khoản khác khi cookie đổi ở tab khác', async () => {
+    const jwt = (sub: string) => `e30.${btoa(JSON.stringify({ sub }))}.signature`
+    setAccessToken(jwt('15'), getSessionEpoch())
+    requestRefresh.mockResolvedValue({ accessToken: jwt('26') })
+    const onExpiry = vi.fn()
+    const unsubscribe = subscribeToSessionExpiry(onExpiry)
+    const adapter = vi.fn(async (config: Parameters<AxiosAdapter>[0]) => {
+      throw unauthorized(config)
+    })
+    http.defaults.adapter = adapter
+
+    try {
+      await expect(http.get('/private')).rejects.toThrow('Phiên đăng nhập đã thay đổi.')
+      expect(adapter).toHaveBeenCalledTimes(1)
+      expect(getAccessToken()).toBeNull()
+      expect(onExpiry).toHaveBeenCalledWith('Tài khoản đã đổi ở tab khác. Vui lòng đăng nhập lại.')
+    } finally {
+      unsubscribe()
+    }
   })
 
   it('401 đến trễ của request cũ không refresh hay xóa phiên đăng nhập mới', async () => {

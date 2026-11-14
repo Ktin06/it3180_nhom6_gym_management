@@ -8,13 +8,13 @@ import { LoginPage } from './LoginPage'
 const login = vi.fn()
 const retrySession = vi.fn()
 
-function renderLogin() {
+function renderLogin(sessionError: string | null = null) {
   return render(
     <AuthContext.Provider
       value={{
         status: 'anonymous',
         user: null,
-        sessionError: null,
+        sessionError,
         login,
         register: vi.fn(),
         logout: vi.fn(),
@@ -36,6 +36,11 @@ describe('LoginPage', () => {
   beforeEach(() => {
     login.mockReset()
     retrySession.mockReset()
+  })
+
+  it('hiện thông báo tài khoản đổi ở tab khác tại trang đăng nhập', () => {
+    renderLogin('Tài khoản đã đổi ở tab khác. Vui lòng đăng nhập lại.')
+    expect(screen.getByRole('alert')).toHaveTextContent('Tài khoản đã đổi ở tab khác')
   })
 
   it('đăng nhập bằng email đã chuẩn hóa rồi mở trang theo role', async () => {

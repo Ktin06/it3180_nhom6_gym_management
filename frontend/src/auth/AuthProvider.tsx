@@ -71,10 +71,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [sessionError, setSessionError] = useState<string | null>(null)
 
   useEffect(() => {
-    const unsubscribeExpiry = subscribeToSessionExpiry(() => {
+    const unsubscribeExpiry = subscribeToSessionExpiry((message) => {
       setUser(null)
       setStatus('anonymous')
-      setSessionError(null)
+      setSessionError(message ?? null)
     })
     const unsubscribeRecovery = subscribeToSessionRecovery(() => {
       setUser(null)
@@ -136,10 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const establishSession = useCallback(
-    async (
-      request: () => Promise<AccessTokenResponse>,
-      action: 'login' | 'register',
-    ) => {
+    async (request: () => Promise<AccessTokenResponse>, action: 'login' | 'register') => {
       const epoch = beginSession()
       setUser(null)
       setStatus('initializing')

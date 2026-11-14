@@ -19,7 +19,7 @@ export function LoginPage() {
   const [retryPending, setRetryPending] = useState(false)
   const [identityNeedsRetry, setIdentityNeedsRetry] = useState(false)
   const [errorDetail, setErrorDetail] = useState<string | null>(null)
-  const { login, retrySession } = useAuth()
+  const { login, retrySession, sessionError } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -71,6 +71,9 @@ export function LoginPage() {
       <Typography.Title level={3} style={{ marginTop: 0 }}>
         Đăng nhập
       </Typography.Title>
+      {sessionError && (
+        <Alert type="warning" showIcon title={sessionError} style={{ marginBottom: 16 }} />
+      )}
       {errorDetail && (
         <Alert type="error" showIcon title={errorDetail} style={{ marginBottom: 16 }} />
       )}
