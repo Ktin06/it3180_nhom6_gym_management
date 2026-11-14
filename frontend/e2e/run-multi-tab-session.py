@@ -246,7 +246,11 @@ await server.listen();"""
                     except (OSError, subprocess.SubprocessError) as error:
                         print(f"Không lấy được log {name}: {type(error).__name__}", flush=True)
                     command("docker", "stop", "--time", "10", name)
-                command("docker", kind, "rm", name)
+                # PostgreSQL creates an anonymous data volume even without an explicit mount.
+                if kind == "container":
+                    command("docker", "container", "rm", "--volumes", name)
+                else:
+                    command("docker", "network", "rm", name)
             except (OSError, subprocess.SubprocessError) as error:
                 cleanup_errors.append(f"{name}: {error}")
         for path in (db_env, api_env):
