@@ -47,6 +47,10 @@ Các ca này được kiểm thử bằng Vitest (giả lập ở ranh giới fr
 
 Mỗi phiên ghim claim `sub` của JWT trong bộ nhớ tab. Nếu token làm mới có chủ thể khác (ví dụ tab khác đăng nhập tài khoản B trong khi tab này đang hiển thị A), frontend bỏ token mới trước khi retry request, xóa phiên của tab hiện tại và về `/login` với thông báo “Tài khoản đã đổi ở tab khác”. Không gọi logout bằng cookie chung vì có thể làm mất phiên B ở tab khác. Lỗi mạng khi refresh giữ chủ thể đã ghim cho lần khôi phục; đăng nhập mới đặt lại chủ thể. Backend vẫn xác minh JWT và phân quyền.
 
+Refresh, đăng nhập, đăng ký và đăng xuất cùng dùng Web Locks tên `gym-auth-cookie`. Khóa giữ đến khi response xử lý xong; tab sau gửi request với cookie mới nhất, không gửi lại cookie đã bị thu hồi. Mỗi tab vẫn tự giữ access token; không truyền hoặc lưu token qua Web Storage. Khóa được trình duyệt nhả khi tab đóng. Yêu cầu HTTPS hoặc `localhost` và Web Locks (Chrome, Edge, Firefox bản mới theo NF4). Nếu API không có, frontend từ chối thao tác cookie thay vì âm thầm chạy không khóa. Không thêm grace window hoặc thay quy tắc chống dùng lại token của backend; phần backend tiếp tục theo #104/#112.
+
+Kiểm thử hai tab với API/CSDL thật nằm ở `frontend/e2e/multi-tab-session.mjs`. Chạy Vite tại `http://localhost:5173` với backend thử riêng; **sao lưu CSDL trước** vì login/refresh thay dữ liệu phiên. Cấp `GYM_E2E_EMAIL`, `GYM_E2E_PASSWORD` qua môi trường từ nguồn bí mật đang dùng, và `GYM_E2E_DB_BACKUP` trỏ tới file backup; không ghi giá trị vào repo. Sau `npm ci` và `npx playwright install chromium`, chạy `npm run test:auth:tabs` trong `frontend/`. Có thể đổi `GYM_E2E_BASE_URL` hoặc `GYM_BROWSER_EXECUTABLE`; cần Vite để import các module nguồn trong trình duyệt. Test dùng hai trang cùng context, chặn tạm request đầu để xác nhận tab sau chờ khóa, rồi chuyển nguyên request tới backend; không giả lập response. Sau đó tải lại đồng thời, kiểm `/me`, HttpOnly và Web Storage. Vitest chỉ kiểm tra ranh giới frontend với LockManager test double của jsdom; không thay thế lần chạy trình duyệt này.
+
 ## Kết quả tích hợp với backend thật (12/11/2026)
 
 **Môi trường (để chạy lại):**
