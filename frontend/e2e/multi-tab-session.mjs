@@ -51,12 +51,12 @@ test(
         return store.getAccessToken() !== null
       })
     await Promise.all([ready(first), ready(second)])
+    const previousCookie = (await context.cookies()).find((entry) => entry.name === 'refresh_token')
+    assert(previousCookie?.httpOnly, 'Hai tab phải dùng cookie refresh HttpOnly thật.')
 
-    const firstStarted = deferred()
     const releaseFirst = deferred()
     let secondRequests = 0
     await first.route('**/api/v1/auth/refresh', async (route) => {
-      firstStarted.resolve()
       await releaseFirst.promise
       await route.continue()
     })
@@ -74,10 +74,15 @@ test(
           () => null,
           (error) => error,
         )
+    const firstStarted = first.waitForRequest(
+      (request) => new URL(request.url()).pathname === '/api/v1/auth/refresh',
+      { timeout: 10000 },
+    )
     const firstResult = refresh(first)
-    await firstStarted.promise
-    const secondResult = refresh(second)
+    let secondResult
     try {
+      await firstStarted
+      secondResult = refresh(second)
       await second.waitForFunction(
         async () => {
           const locks = await navigator.locks.query()
@@ -100,11 +105,14 @@ test(
     await first.unroute('**/api/v1/auth/refresh')
     await second.unroute('**/api/v1/auth/refresh')
 
-    const identity = (page) =>
-      page.evaluate(async () => {
+    const identity = async (page) => {
+      const userId = await page.evaluate(async () => {
         const { http } = await import('/src/services/http.ts')
         return (await http.get('/auth/me')).data.userId
       })
+      assert(Number.isSafeInteger(userId) && userId > 0, '/me phải trả userId số nguyên dương.')
+      return userId
+    }
     assert.equal(await identity(first), await identity(second))
     await Promise.all([first.reload(), second.reload()])
     await Promise.all([ready(first), ready(second)])
@@ -116,5 +124,10 @@ test(
     }
     const cookie = (await context.cookies()).find((entry) => entry.name === 'refresh_token')
     assert(cookie?.httpOnly, 'Refresh cookie phải là HttpOnly.')
+    assert(cookie.value !== previousCookie.value, 'Refresh phải xoay cookie thật.')
+    const replay = await context.request.post(`${baseURL}/api/v1/auth/refresh`, {
+      headers: { Cookie: `refresh_token=${previousCookie.value}` },
+    })
+    assert.equal(replay.status(), 401, 'Token cũ đã dùng vẫn phải bị backend từ chối.')
   },
 )
