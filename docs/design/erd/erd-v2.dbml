@@ -519,18 +519,18 @@ Table class_bookings {
   id bigint [pk, increment]
   class_session_id bigint [not null, ref: > class_sessions.id]
   member_id bigint [not null, ref: > members.id]
-  created_by bigint [ref: > users.id, note: 'lễ tân nếu thao tác hộ']
+  created_by bigint [not null, ref: > users.id, note: 'tài khoản đã bấm đặt hoặc vào chờ (hội viên, hoặc lễ tân nếu thao tác hộ); được tự động đưa vào lớp thì giữ nguyên người tạo ban đầu (ADR 0010)']
   status booking_status [not null, note: 'chỉ được đặt chỗ hoặc vào chờ khi có gói TIME đang ACTIVE dùng được tại chi nhánh; gói SESSION và PT không dùng cho lớp nhóm (chốt 31/10)']
-  waitlisted_at timestamptz [note: 'căn cứ thứ tự chờ: đến trước, xếp trước']
+  waitlisted_at timestamptz [note: 'căn cứ thứ tự chờ: đến trước, xếp trước; trùng thời điểm thì id nhỏ hơn đứng trước (ADR 0010)']
   booked_at timestamptz
   promoted_at timestamptz [note: 'thời điểm được tự động đưa từ danh sách chờ vào lớp']
-  grace_until timestamptz [note: 'hết ân hạn hủy không phạt = thời điểm gửi email báo + 15 phút']
+  grace_until timestamptz [note: 'hết ân hạn hủy không phạt = promoted_at + PROMOTION_GRACE_MIN (15 phút), ghi cùng giao dịch đưa vào lớp; hủy đúng mốc này vẫn không phạt (<=); thời điểm gửi email không ảnh hưởng (ADR 0010)']
   reconfirm_expires_at timestamptz [note: 'hạn xác nhận lại khi đổi giờ']
   arrived_at timestamptz [note: 'đánh dấu "đã đến" khi check-in tại quầy']
   cancelled_at timestamptz
   cancel_reason cancel_reason
   is_late_cancel boolean [not null, default: false]
-  attendance_marked_by bigint [ref: > users.id, note: 'huấn luyện viên điểm danh']
+  attendance_marked_by bigint [ref: > users.id, note: 'người điểm danh hoặc sửa điểm danh gần nhất (huấn luyện viên được phân công, hoặc quản lý chi nhánh sau thời hạn); mỗi lần sửa ghi thêm audit_logs giá trị cũ, mới']
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
   indexes {
