@@ -6,7 +6,7 @@ Tài liệu này giải thích thiết kế cơ sở dữ liệu. **Mã nguồn 
 
 ## Nguyên tắc thiết kế
 
-Mọi bảng tuân theo cùng một quy ước, để mã do 8 người (và AI) sinh ra khớp nhau. Hệ thống có 39 bảng chia 8 nhóm, thiết kế cho cả 20 chức năng ngay từ đầu, kể cả các chức năng làm ở v3, v4, v5.
+Mọi bảng tuân theo cùng một quy ước, để mã do 8 người (và AI) sinh ra khớp nhau. Hệ thống có 40 bảng chia 8 nhóm, thiết kế cho cả 20 chức năng ngay từ đầu, kể cả các chức năng làm ở v3, v4, v5.
 
 - **Tên:** bảng và cột viết snake_case, tên bảng số nhiều (`members`, `class_bookings`).
 - **Khóa chính:** cột `id` kiểu `bigint` tự tăng (khớp kiểu `Long` trong entity Java); khóa ngoại đặt tên `<bảng số ít>_id` (`member_id`).
@@ -45,11 +45,12 @@ Mọi bảng tuân theo cùng một quy ước, để mã do 8 người (và AI)
 | `equipment` | Thiết bị, máy tập | `branch_id`, `room_id`, `code`, `status` | F11 |
 | `maintenance_logs` | Báo hỏng và bảo trì | `equipment_id`, `reported_by`, `status`, `scheduled_date`, `completed_date`, `cost` | F11 |
 
-### 3. Hội viên và gói tập (7 bảng)
+### 3. Hội viên và gói tập (8 bảng)
 
 | Bảng | Mục đích | Cột và khóa ngoại chính | Chức năng |
 | --- | --- | --- | --- |
-| `members` | Hồ sơ hội viên | `user_id` (rỗng nếu chưa có tài khoản), `home_branch_id`, `member_code`, `phone` (duy nhất), `avatar_url`, `face_consent_at`, `booking_locked_until`, `status`, `deleted_at` | F2 |
+| `members` | Hồ sơ hội viên | `user_id` (rỗng nếu chưa có tài khoản), `home_branch_id`, `member_code`, `phone` (duy nhất), `face_consent_at`, `booking_locked_until`, `status`, `deleted_at` | F2 |
+| `member_avatars` | Ảnh đại diện hội viên, đã thu nhỏ và nén ([ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md)) | `member_id` (duy nhất), `content` (`bytea`, JPEG ≤ 100 KB), `content_type`, `size_bytes`, `uploaded_by` | F2, F4 |
 | `face_embeddings` | Vector khuôn mặt 128 chiều, không lưu ảnh | `member_id`, `embedding` (`real[]`), `model_version` | F20 |
 | `body_metrics` | Chỉ số cơ thể theo từng lần đo | `member_id`, `recorded_by`, `measured_at`, cân nặng, chiều cao, % mỡ, khối cơ | F2, F9 |
 | `packages` | Danh mục gói đang bán (bảng giá) | `branch_id` (rỗng = toàn chuỗi), `code`, `type` (TIME, SESSION, PT), `duration_days` (gói "1 tháng" = 30 ngày), `session_count`, `price`, `status` | F3 |
@@ -171,7 +172,7 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 - [x] Gói TIME tính theo số ngày (`duration_days`); "1 tháng" = 30 ngày (01/11).
 - [x] Mã hội viên dạng `HV` + 6 chữ số (`HV000123`), sinh từ sequence `member_code_seq` dùng chung cả chuỗi (01/11).
 - [ ] Tác vụ chuyển EXPIRED lúc 00:00 bị lỗi trong khi máy chủ vẫn chạy (không có lần chạy bù): gói SESSION 0 buổi còn ACTIVE, gói nối tiếp chưa kích hoạt, hội viên bị từ chối check-in cả ngày. Trường hợp ngoại vi, để xử lý sau (hướng đã bàn: cho tác vụ chạy lại mỗi giờ, chạy lặp không gây sai) (03/11).
-- [ ] Ảnh đại diện hội viên lưu ở đâu: ổ đĩa Render bản miễn phí bị xóa khi triển khai lại nên không lưu file trên Render. Sprint 1 làm F2 chưa có ảnh (`avatar_url` để rỗng); chốt trước khi làm F4 ở Sprint 2.
+- [x] Ảnh đại diện hội viên lưu trong PostgreSQL, bảng `member_avatars`, server thu nhỏ và nén; bỏ `members.avatar_url` (14/11, [ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md)).
 
 ## Lịch sử thay đổi
 
@@ -184,5 +185,6 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 | 01/11/2026 | Sau review ERD: `NULLS NOT DISTINCT` cho `uq_one_active_per_type` và `system_configs`; thêm `class_sessions.occurrence_date`, `invoices.source`, `invoice_items.discount_amount`, `pt_sessions.commission_amount`, `membership_transfers.status`, `payrolls.branch_id`, cột `version` cho 4 bảng; ADJUST kho mang dấu; CHECK chuẩn hóa email, số điện thoại, vector 128 chiều; thêm chỉ mục khóa ngoại; ghi rõ cách khóa bản ghi (NF6), ngoại lệ xóa cứng `face_embeddings`, phân biệt `users.status = LOCKED` với `locked_until` |
 | 01/11/2026 | Sau review toàn dự án: schema ban đầu tạo đủ 39 bảng một lần, migration về sau dùng dải `V9_xx`; sĩ số tính cả chỗ ATTENDED, NO_SHOW |
 | 02/11/2026 | Cả nhóm duyệt ERD bản 2 tại buổi kick-off; `TRANSFER_FEE` mặc định 200.000 đ |
-| 03/11/2026 | Theo [ADR 0005](../decisions/0005-erd-v2.md) mục 25–32: tham số `SESSION_WARNING_THRESHOLD`; công thức `end_date`; gói SESSION, PT hết buổi kéo gói nối tiếp; tác vụ nền chuyển EXPIRED (00:00, chạy bù khi khởi động) trước khi kích hoạt UPCOMING; chặn bảo lưu, chuyển nhượng gói hết buổi; giới hạn số buổi PT đặt trước; để mở trường hợp tác vụ 00:00 bị lỗi |
+| 03/11/2026 | Theo [ADR 0005](../../decisions/0005-erd-v2.md) mục 25–32: tham số `SESSION_WARNING_THRESHOLD`; công thức `end_date`; gói SESSION, PT hết buổi kéo gói nối tiếp; tác vụ nền chuyển EXPIRED (00:00, chạy bù khi khởi động) trước khi kích hoạt UPCOMING; chặn bảo lưu, chuyển nhượng gói hết buổi; giới hạn số buổi PT đặt trước; để mở trường hợp tác vụ 00:00 bị lỗi |
 | 12/11/2026 | Theo quyết định F8 ([ADR 0010](../../decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md)): `class_bookings.created_by` thành NOT NULL (migration `V9_01`); `grace_until` tính từ `promoted_at`, không từ lúc gửi email; thứ tự chờ phụ theo `id`; ghi chú `attendance_marked_by` gồm cả người sửa điểm danh |
+| 14/11/2026 | Theo [ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md): thêm bảng `member_avatars` (ảnh đại diện lưu trong PostgreSQL), bỏ `members.avatar_url`; 40 bảng. Migration `V9_02` làm ở việc S2-06 |
