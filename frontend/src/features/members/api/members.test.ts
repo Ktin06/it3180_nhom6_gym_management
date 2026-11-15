@@ -25,6 +25,21 @@ describe('kết nối API F2', () => {
 })
 
 describe('dữ liệu minh họa hội viên', () => {
+  it.each([
+    ['0900', 30],
+    ['+84 900 000 001', 1],
+    ['84 900 000 001', 1],
+    ['84900', 0],
+    ['+84900', 0],
+    ['5678', 0],
+    ['090000000199', 0],
+  ])('tìm số hoặc tiền tố %s như API F2 đã merge', async (keyword, count) => {
+    const api = createMockMembersApi()
+    const page = await api.list({ page: 0, size: 100, keyword })
+    expect(page.totalElements).toBe(count)
+    expect(page.content).toHaveLength(count)
+  })
+
   it('tìm cùng một số điện thoại ở dạng +84 và từ chối tạo trùng mà không thêm dòng', async () => {
     const api = createMockMembersApi()
     const before = await api.list({ page: 0, size: 100 })

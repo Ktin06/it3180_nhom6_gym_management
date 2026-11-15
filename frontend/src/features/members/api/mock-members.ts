@@ -1,10 +1,5 @@
 import type { MemberDetail, MemberInput, MembersGateway } from '../types/member'
-
-export function normalizePhone(raw: string) {
-  let phone = raw.replace(/[\s.-]/g, '')
-  if (phone.startsWith('+84')) phone = `0${phone.slice(3)}`
-  return phone
-}
+import { normalizePhone, normalizePhoneSearch } from '../phone'
 
 /** Dữ liệu hư cấu, trong bộ nhớ; không dùng làm xác thực hoặc thay backend. */
 export function createMockMembersApi(): MembersGateway {
@@ -44,14 +39,15 @@ export function createMockMembersApi(): MembersGateway {
   return {
     async list(query) {
       const keyword = query.keyword?.trim() ?? ''
-      const phoneKeyword = normalizePhone(keyword)
+      const isPhone = /^[+0-9\s.-]+$/.test(keyword) && /[0-9]/.test(keyword)
+      const phoneKeyword = normalizePhoneSearch(keyword)
       const filtered = members
         .filter((item) => !query.status || item.status === query.status)
         .filter(
           (item) =>
             !keyword ||
             item.memberCode.toLowerCase() === keyword.toLowerCase() ||
-            item.phone === phoneKeyword ||
+            (isPhone && item.phone.startsWith(phoneKeyword)) ||
             item.fullName.toLocaleLowerCase('vi').startsWith(keyword.toLocaleLowerCase('vi')),
         )
         .sort((a, b) => b.id - a.id)
