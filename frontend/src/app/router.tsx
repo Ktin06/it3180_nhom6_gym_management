@@ -1,5 +1,5 @@
 import { createBrowserRouter, type RouteObject } from 'react-router-dom'
-import { HOME_PATH_BY_ROLE, STAFF_ROLES } from '../auth/roles'
+import { HOME_PATH_BY_ROLE, MEMBER_MANAGEMENT_ROLES, STAFF_ROLES } from '../auth/roles'
 import { AuthLayout } from '../layouts/AuthLayout'
 import { MemberLayout } from '../layouts/MemberLayout'
 import { PublicLayout } from '../layouts/PublicLayout'
@@ -13,8 +13,6 @@ import { NotFoundPage } from '../pages/NotFoundPage'
 import { ProtectedRoute } from '../routes/ProtectedRoute'
 import { MembersPage } from '../features/members/pages/MembersPage'
 import { PackagesPage } from '../features/packages/pages/PackagesPage'
-
-const memberManagementRoles = ['SUPER_ADMIN', 'BRANCH_MANAGER', 'RECEPTIONIST'] as const
 
 export const routes: RouteObject[] = [
   {
@@ -50,7 +48,7 @@ export const routes: RouteObject[] = [
       {
         path: '/members',
         element: (
-          <ProtectedRoute allowedRoles={[...memberManagementRoles]}>
+          <ProtectedRoute allowedRoles={MEMBER_MANAGEMENT_ROLES}>
             <MembersPage />
           </ProtectedRoute>
         ),
@@ -58,7 +56,7 @@ export const routes: RouteObject[] = [
       {
         path: '/packages',
         element: (
-          <ProtectedRoute allowedRoles={[...memberManagementRoles]}>
+          <ProtectedRoute allowedRoles={MEMBER_MANAGEMENT_ROLES}>
             <PackagesPage />
           </ProtectedRoute>
         ),

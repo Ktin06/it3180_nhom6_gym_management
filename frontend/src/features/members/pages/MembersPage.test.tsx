@@ -29,8 +29,10 @@ describe('danh sách hội viên', () => {
     await user.click(screen.getByRole('button', { name: 'Sửa HV000030' }))
     expect(detail).toHaveBeenCalledWith(30)
     await user.click(screen.getByRole('button', { name: /Thêm hội viên/ }))
-    await user.type(screen.getByLabelText('Họ và tên'), 'Hồ sơ mới')
-    await user.type(screen.getByLabelText('Số điện thoại'), '0912009999')
+    await user.click(screen.getByLabelText('Họ và tên'))
+    await user.paste('Hồ sơ mới')
+    await user.click(screen.getByLabelText('Số điện thoại'))
+    await user.paste('0912009999')
 
     await act(async () => completeDetail(oldMember))
 

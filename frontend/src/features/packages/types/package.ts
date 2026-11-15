@@ -2,7 +2,7 @@ import type { PageQuery, PageResponse, Status } from '../../shared/types'
 
 export type PackageType = 'TIME' | 'SESSION' | 'PT'
 
-/** Hợp đồng dự kiến từ đặc tả F3; cần đối chiếu lại với backend #29 khi bàn giao. */
+/** Khớp PackageSummaryDto của API F3 đã merge qua #107. */
 export interface GymPackage {
   id: number
   code: string

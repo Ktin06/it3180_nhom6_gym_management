@@ -1,4 +1,4 @@
-import { HOME_PATH_BY_ROLE, type Role } from './roles'
+import { HOME_PATH_BY_ROLE, MEMBER_MANAGEMENT_ROLES, type Role } from './roles'
 
 /** Chỉ dùng đường dẫn cùng origin được ProtectedRoute lưu vào history state. */
 export function safeReturnPath(state: unknown, origin: string) {
@@ -25,5 +25,11 @@ export function roleAwareReturnPath(state: unknown, origin: string, role: Role) 
 
   const roleHome = HOME_PATH_BY_ROLE[role]
   const pathname = new URL(returnPath, origin).pathname
+  if (
+    MEMBER_MANAGEMENT_ROLES.includes(role) &&
+    (pathname === '/members' || pathname === '/packages')
+  ) {
+    return returnPath
+  }
   return pathname === roleHome || pathname.startsWith(`${roleHome}/`) ? returnPath : roleHome
 }
