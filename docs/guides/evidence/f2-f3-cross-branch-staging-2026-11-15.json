@@ -1,0 +1,81 @@
+{
+  "baseURL": "https://it3180-nhom6-gym-git-feature-f2-f3-giao-dien-ktin06.vercel.app",
+  "timestamp": "2026-11-15T16:19:39.768Z",
+  "frontendCommit": "83c1d35",
+  "browser": "157.0.4341.46",
+  "passed": 43,
+  "checks": [
+    "RECEPTIONIST CN02: real login and server role",
+    "CN02: fixture HV888888 really exists in another branch",
+    "RECEPTIONIST CN02: HTTPS login returns to members",
+    "RECEPTIONIST CN02: create member via UI and real API",
+    "RECEPTIONIST CN02: reload restores session and persisted record",
+    "RECEPTIONIST CN02: pending keyword is applied when changing status",
+    "RECEPTIONIST CN02: edit name/status and persist after reload",
+    "RECEPTIONIST CN02: search by code/name and filter INACTIVE",
+    "RECEPTIONIST CN02: duplicate phone is rejected without losing form",
+    "RECEPTIONIST CN02: scoped member list stays in account branch",
+    "RECEPTIONIST CN02: catalog loads with branch/global scope and type/status filters",
+    "RECEPTIONIST CN02: Secure cookie and logout",
+    "BRANCH_MANAGER CN01: real login and server role",
+    "BRANCH_MANAGER CN01: HTTPS login returns to members",
+    "BRANCH_MANAGER CN01: create member via UI and real API",
+    "BRANCH_MANAGER CN01: reload restores session and persisted record",
+    "BRANCH_MANAGER CN01: pending keyword is applied when changing status",
+    "BRANCH_MANAGER CN01: edit name/status and persist after reload",
+    "BRANCH_MANAGER CN01: search by code/name and filter INACTIVE",
+    "BRANCH_MANAGER CN01: duplicate phone is rejected without losing form",
+    "BRANCH_MANAGER CN01: scoped member list stays in account branch",
+    "BRANCH_MANAGER CN01: catalog loads with branch/global scope and type/status filters",
+    "BRANCH_MANAGER CN01: known foreign member cannot be read or updated",
+    "BRANCH_MANAGER CN01: cannot search CN02 fixture or new member, even overriding branchId",
+    "BRANCH_MANAGER CN01: browser search hides new CN02 record",
+    "BRANCH_MANAGER CN01: Secure cookie and logout",
+    "RECEPTIONIST CN01: real login and server role",
+    "RECEPTIONIST CN01: HTTPS login returns to members",
+    "RECEPTIONIST CN01: create member via UI and real API",
+    "RECEPTIONIST CN01: reload restores session and persisted record",
+    "RECEPTIONIST CN01: pending keyword is applied when changing status",
+    "RECEPTIONIST CN01: edit name/status and persist after reload",
+    "RECEPTIONIST CN01: search by code/name and filter INACTIVE",
+    "RECEPTIONIST CN01: duplicate phone is rejected without losing form",
+    "RECEPTIONIST CN01: scoped member list stays in account branch",
+    "RECEPTIONIST CN01: catalog loads with branch/global scope and type/status filters",
+    "RECEPTIONIST CN01: known foreign member cannot be read or updated",
+    "RECEPTIONIST CN01: cannot search CN02 fixture or new member, even overriding branchId",
+    "RECEPTIONIST CN01: browser search hides new CN02 record",
+    "RECEPTIONIST CN01: Secure cookie and logout",
+    "CN02: denied CN01 attempts did not modify the owned member",
+    "CN02: reciprocal access to an existing CN01 member is denied",
+    "No uncaught browser errors"
+  ],
+  "members": [
+    {
+      "role": "RECEPTIONIST",
+      "branchAccount": "cn02",
+      "id": 13,
+      "memberCode": "HV000009",
+      "homeBranchId": 2
+    },
+    {
+      "role": "BRANCH_MANAGER",
+      "branchAccount": "manager",
+      "id": 14,
+      "memberCode": "HV000010",
+      "homeBranchId": 1
+    },
+    {
+      "role": "RECEPTIONIST",
+      "branchAccount": "receptionist",
+      "id": 15,
+      "memberCode": "HV000011",
+      "homeBranchId": 1
+    }
+  ],
+  "foreignFixture": {
+    "id": 8,
+    "memberCode": "HV888888",
+    "homeBranchId": 2
+  },
+  "limitations": ["Backend deployment revision is not independently exposed"]
+}

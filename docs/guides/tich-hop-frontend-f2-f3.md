@@ -124,7 +124,7 @@ Với **từng vai trò**, đã kiểm tra:
 
 Tạo riêng bốn hồ sơ thử mang tiền tố `PR103 Staff`: hai lượt đầu dừng ở selector kiểm thử khớp cả dropdown ẩn và hiện, sau đó đã sửa selector và chạy lại trọn bộ đạt 23/23. Hai hồ sơ của lượt đạt có ID 11/12, mã HV000007/HV000008, trạng thái INACTIVE. Hai hồ sơ từ lượt đầu có ID 9/10, mã HV000005/HV000006; không sửa hồ sơ có sẵn của người khác. Các hồ sơ thử còn trong staging vì không có API xóa; trưởng nhóm có thể dọn theo các mã này.
 
-**Chưa đủ để xác nhận toàn bộ cách ly chi nhánh:** người dùng chưa được cấp ID/mã hồ sơ thử thuộc CN02. Kiểm tra danh sách cùng CN01 và tham số không mở rộng phạm vi không thay thế kiểm tra đọc/sửa một hồ sơ khác chi nhánh đang thực sự tồn tại. Cần Tiến cấp fixture/ID đã xác nhận thuộc CN02 để chạy phần từ chối `404`. Revision backend đang chạy và việc vô hiệu hóa tài khoản thử cũ cũng chưa được xác nhận độc lập. Giữ Draft trong khi hoàn tất các mục này và chờ người duyệt kết luận.
+**Giới hạn của phiên 23 ca:** lúc đó chưa có ID/mã hồ sơ thử CN02, nên chưa kiểm tra đọc/sửa ngoài chi nhánh trên hồ sơ thực sự tồn tại. Giới hạn này đã được giải quyết trong phiên 43 ca bên dưới. Revision backend vẫn chưa được đọc độc lập; lần kiểm tra thông tin đăng nhập cũ được ghi riêng bên dưới.
 
 Để chạy lại, dùng Playwright riêng như mục trên, tạo file JSON **ngoài repo** với hai key `manager`, `receptionist`, mỗi key có `email` và `password` nhận riêng. Không đưa file đó vào báo cáo hoặc commit. Sau đó:
 
@@ -138,3 +138,25 @@ node frontend/scripts/check-f2-f3-staff-staging.mjs
 ```
 
 Không dùng ID không tồn tại để thay cho hồ sơ chi nhánh khác. Báo cáo không xuất email tài khoản hoặc mật khẩu; lỗi được lọc các thông tin đăng nhập trước khi ghi log.
+
+## HTTPS cách ly CN01/CN02 — 23:19 ngày 15/11/2026
+
+**43/43 ca đạt** trên preview #103 của frontend **`83c1d35`**, deployment Vercel [6woRoQ1MAYyNkKbJZyhoXxadizYT](https://vercel.com/ktin06/it3180-nhom6-gym/6woRoQ1MAYyNkKbJZyhoXxadizYT). [Báo cáo JSON](evidence/f2-f3-cross-branch-staging-2026-11-15.json). Edge 157.0.4341.46, Vercel → Render thật, không mock response/cookie.
+
+Tiến cấp thêm một Lễ tân CN02 và xác nhận fixture HV888888/SĐT 0988000001 thuộc CN02. Kịch bản đăng nhập CN02 rồi kiểm tra fixture thực sự tồn tại: **ID 8, homeBranchId 2**. Sau đó tạo riêng hồ sơ **HV000009, ID 13, CN02** bằng giao diện, sửa tên/trạng thái và reload để xác nhận dữ liệu lưu bền.
+
+Với **cả Quản lý CN01 và Lễ tân CN01**, đã xác nhận:
+
+- Tìm HV888888, mã/SĐT hồ sơ mới CN02 đều trả trang rỗng, kể cả khi gửi thêm `branchId=2`.
+- GET trực tiếp fixture ID 8 và hồ sơ mới ID 13 đều trả `404`.
+- PUT trực tiếp ID 13 trả `404`; đọc lại bằng CN02 xác nhận tên, SĐT, trạng thái và chi nhánh không bị đổi bởi các lần thử bị chặn.
+- Tìm trên giao diện preview cũng không thấy hồ sơ CN02, hiển thị đúng thông báo rỗng sau response.
+- Chiều ngược lại: CN02 không tìm hoặc đọc được hồ sơ CN01 có thật được tạo trong cùng lượt thử.
+
+Lượt chạy này cũng thử lại các luồng thêm/sửa/tìm/lọc, lưu bền, SĐT trùng, danh mục, cookie và logout cho **ba tài khoản**. Các hồ sơ mới có ID 13/14/15, mã HV000009/HV000010/HV000011; cuối lượt đều INACTIVE. Các hồ sơ thử có thể được trưởng nhóm dọn sau nghiệm thu. Không sửa dữ liệu fixture HV888888.
+
+Kiểm tra bổ sung đúng một lần bằng thông tin đăng nhập lịch sử của tài khoản hội viên thử có mật khẩu suy ra được: **login bị từ chối `403`**. [Bằng chứng không chứa thông tin đăng nhập](evidence/f2-f3-old-credential-check-2026-11-15.json). Điều này xác nhận thông tin đăng nhập cũ không còn dùng được ở thời điểm thử; không suy ra trạng thái DB chính xác là DISABLED hay LOCKED.
+
+Để chạy lại phiên ba tài khoản, bổ sung key `cn02` (có `email`, `password` nhận riêng) vào file JSON ngoài repo. Bỏ `GYM_STAFF_ROLE` để chạy tất cả. Kịch bản tự xác minh fixture HV888888, tạo hồ sơ mới CN02 rồi dùng cả hai tài khoản CN01 thử truy cập chéo; không cần tự đặt `GYM_FOREIGN_MEMBER_ID`. Báo cáo và lỗi không xuất email/mật khẩu đăng nhập, bearer hay refresh token.
+
+Phần nghiệm thu luồng nhân viên và cách ly chi nhánh được yêu cầu trong review đã có bằng chứng HTTPS. Không phát hiện lỗi chức năng trong 43 ca này. Revision backend chưa được Render công khai nên vẫn ghi là chưa xác minh độc lập; không nhận mã revision từ phiên thử cũ làm revision hiện tại. Người duyệt cần đọc lại bằng chứng và gỡ Request changes trước khi merge.
