@@ -92,7 +92,9 @@ describe('danh sách hội viên', () => {
     )
     expect(await screen.findByText('HV000030')).toBeInTheDocument()
     await user.click(screen.getByTitle('2'))
-    await waitFor(() => expect(list).toHaveBeenLastCalledWith({ page: 1, size: 20 }))
+    await waitFor(() =>
+      expect(list).toHaveBeenLastCalledWith({ page: 1, size: 20, keyword: undefined }),
+    )
     await user.type(screen.getByLabelText('Tìm hội viên'), 'HV000001')
     await user.click(screen.getByRole('button', { name: /Tìm$/ }))
     await waitFor(() =>
@@ -106,6 +108,67 @@ describe('danh sách hội viên', () => {
       expect(list).toHaveBeenLastCalledWith({ page: 0, size: 20, keyword: undefined }),
     )
     expect(await screen.findByText('HV000030')).toBeInTheDocument()
+  })
+
+  it('áp dụng từ khóa đang nhập khi đổi trạng thái hoặc tải lại', async () => {
+    const user = userEvent.setup()
+    const api = createMockMembersApi()
+    const list = vi.spyOn(api, 'list')
+    render(
+      <App>
+        <MembersPage api={api} />
+      </App>,
+    )
+    await screen.findByText('HV000030')
+    await user.click(screen.getByTitle('2'))
+    await screen.findByText('HV000010')
+    await user.click(screen.getByLabelText('Tìm hội viên'))
+    await user.paste('0900')
+    await user.click(screen.getByLabelText('Trạng thái'))
+    await user.click(await screen.findByTitle('Đang hoạt động'))
+    await waitFor(() =>
+      expect(list).toHaveBeenLastCalledWith({
+        page: 0,
+        size: 20,
+        keyword: '0900',
+        status: 'ACTIVE',
+      }),
+    )
+    await user.click(screen.getByLabelText('Tìm hội viên'))
+    await user.clear(screen.getByLabelText('Tìm hội viên'))
+    await user.paste('Nguyễn')
+    await user.click(screen.getByRole('button', { name: /Tải lại/ }))
+    await waitFor(() =>
+      expect(list).toHaveBeenLastCalledWith({
+        page: 0,
+        size: 20,
+        keyword: 'Nguyễn',
+        status: 'ACTIVE',
+      }),
+    )
+  })
+
+  it('không báo rỗng khi request đang tải, chỉ báo rỗng sau response rỗng', async () => {
+    const api = createMockMembersApi()
+    let finish!: (data: Awaited<ReturnType<typeof api.list>>) => void
+    vi.spyOn(api, 'list').mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve
+        }),
+    )
+    render(
+      <App>
+        <MembersPage api={api} />
+      </App>,
+    )
+    expect(screen.getByText('Đang tải hội viên…')).toBeInTheDocument()
+    expect(screen.queryByText('Không có hội viên phù hợp.')).not.toBeInTheDocument()
+    await act(async () =>
+      finish({ content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 }),
+    )
+    expect(await screen.findByText('Không có hội viên phù hợp.')).toBeInTheDocument()
+    expect(screen.queryByText('Đang tải hội viên…')).not.toBeInTheDocument()
   })
 
   it('hiển thị lỗi tải dữ liệu và cho thử lại', async () => {

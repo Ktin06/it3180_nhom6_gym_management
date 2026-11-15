@@ -18,7 +18,9 @@
     "HTTPS 360px auth pages fit viewport",
     "HTTPS browser has no uncaught JavaScript errors"
   ],
-  "testEmail": "pr103-https-1794724821446@example.com",
+  "redactions": [
+    "Test account email removed after credential predictability review; historical run was before the password generator fix"
+  ],
   "limitations": [
     "No authorized staff staging account: positive F2/F3 CRUD and branch scope remain locally verified only",
     "Backend deployment commit is not exposed publicly"

@@ -21,6 +21,16 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
   const [editError, setEditError] = useState<{ id: number; message: string }>()
   const editRequest = useRef(0)
 
+  function applyQuery(update: Partial<MemberQuery>, search = keyword) {
+    const normalized = search.trim() || undefined
+    list.changeQuery({
+      ...list.query,
+      ...update,
+      keyword: normalized,
+      page: normalized !== list.query.keyword ? 0 : (update.page ?? list.query.page),
+    })
+  }
+
   useEffect(
     () => () => {
       editRequest.current += 1
@@ -77,9 +87,7 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
               allowClear
               value={keyword}
               onChange={(event) => setKeyword(event.target.value)}
-              onSearch={(value) =>
-                list.changeQuery({ ...list.query, keyword: value.trim() || undefined, page: 0 })
-              }
+              onSearch={(value) => applyQuery({ page: 0 }, value)}
               enterButton="Tìm"
             />
           </div>
@@ -94,15 +102,14 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
                 { value: 'INACTIVE', label: 'Ngừng hoạt động' },
               ]}
               onChange={(value) =>
-                list.changeQuery({
-                  ...list.query,
+                applyQuery({
                   status: value === 'ALL' ? undefined : value,
                   page: 0,
                 })
               }
             />
           </div>
-          <Button icon={<ReloadOutlined />} onClick={list.reload}>
+          <Button icon={<ReloadOutlined />} onClick={() => applyQuery({})}>
             Tải lại
           </Button>
         </div>
@@ -138,7 +145,11 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
             loading={list.loading}
             dataSource={list.data?.content ?? []}
             locale={{
-              emptyText: list.error ? 'Chưa tải được dữ liệu.' : 'Không có hội viên phù hợp.',
+              emptyText: list.loading
+                ? 'Đang tải hội viên…'
+                : list.error
+                  ? 'Chưa tải được dữ liệu.'
+                  : 'Không có hội viên phù hợp.',
             }}
             scroll={{ x: 850 }}
             columns={[
@@ -190,8 +201,7 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
               pageSizeOptions: [10, 20, 50, 100],
               showTotal: (total) => `${total} hội viên`,
               onChange: (page, size) =>
-                list.changeQuery({
-                  ...list.query,
+                applyQuery({
                   page: size !== list.query.size ? 0 : page - 1,
                   size,
                 }),

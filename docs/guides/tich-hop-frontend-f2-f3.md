@@ -69,7 +69,7 @@ Lint, build và bộ Vitest sau sửa đạt 103/103 ở timeout mặc định; 
 - Frontend: preview `https://it3180-nhom6-gym-git-feature-f2-f3-giao-dien-ktin06.vercel.app`, commit **`c6da982`**, deployment Vercel [HV8tkUZUp2tJByyjKYmpthGv51wJ](https://vercel.com/ktin06/it3180-nhom6-gym/HV8tkUZUp2tJByyjKYmpthGv51wJ). Trạng thái deployment trên GitHub của đúng commit là success; CI Frontend/Backend cũng success. Bundle có mã auth mới cùng F2/F3.
 - Backend: `https://it3180-nhom6-gym-management.onrender.com`; health trả `200 UP`. Chưa xác minh độc lập commit backend đang triển khai vì không có endpoint công khai trả revision. Không dùng xác nhận backend của phiên 12/11 để suy ra revision hôm nay.
 - Trình duyệt: Edge 157.0.4341.46 headless. Các request ứng dụng đi trên origin HTTPS của preview, Vercel rewrite `/api` sang Render.
-- Tài khoản: tự đăng ký một hội viên thử mới, email `example.com` được ghi trong báo cáo, họ tên “Kiem thu HTTPS PR103”. Mật khẩu ngẫu nhiên chỉ ở bộ nhớ của kịch bản. Tài khoản/hồ sơ thử còn trong staging do chưa có API xóa; người quản lý có thể dọn khi làm mới dữ liệu.
+- Tài khoản: tự đăng ký một hội viên thử mới thuộc miền `example.com`, họ tên “Kiem thu HTTPS PR103”. Phiên chạy lịch sử này dùng mật khẩu suy ra được từ định danh thử, không phải mật khẩu ngẫu nhiên an toàn như mô tả ban đầu. Email đã được bỏ khỏi bằng chứng hiện tại. Tiến đã nhận vô hiệu hóa tài khoản cũ; chưa có xác nhận hoàn tất. Việc xóa email ở bản mới không xóa dữ liệu trong lịch sử Git.
 
 Đã xác nhận:
 
@@ -96,3 +96,11 @@ node frontend/scripts/check-f2-f3-staging.mjs
 ```
 
 Kịch bản HTTPS không dùng mật khẩu seed và không áp fixture SQL lên staging; mỗi lượt tạo một hội viên thử mới rồi đăng xuất khi hoàn tất.
+
+## Sửa theo review ngày 15/11
+
+Kịch bản mới sinh phần bí mật của mật khẩu bằng `crypto.randomBytes(24)`, độc lập với email và thời gian. Báo cáo mới không xuất email, mật khẩu hoặc token. Bằng chứng 12/12 bên trên vẫn thuộc phiên bản lịch sử đã ghi, không phải kết quả chạy lại kịch bản sau sửa bảo mật; chưa chạy thêm staging trong lúc chờ tài khoản nhân viên được cấp.
+
+Giao diện hội viên áp dụng từ khóa đang nhập khi đổi trạng thái, đổi trang hoặc tải lại; từ khóa thay đổi đưa về trang đầu. Trạng thái đang tải hiển thị “Đang tải hội viên…”; chỉ hiển thị thông báo không có hội viên sau khi API trả kết quả rỗng.
+
+Sau các sửa review này: 105/105 Vitest ở timeout mặc định, ESLint, TypeScript/build và định dạng các file thay đổi đều đạt. Hai test bổ sung kiểm tra từ khóa chưa bấm Tìm khi đổi bộ lọc/tải lại và phân biệt đang tải với kết quả rỗng. Chưa chạy lại 28 ca cục bộ hoặc 12 ca HTTPS cho phiên bản sửa này; các số liệu tích hợp phía trên vẫn thuộc đúng phiên bản lịch sử đã ghi.

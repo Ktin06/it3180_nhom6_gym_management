@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { randomBytes } from 'node:crypto'
 import { mkdir, writeFile } from 'node:fs/promises'
 
 const { chromium, request } = await import(process.env.PLAYWRIGHT_MODULE ?? 'playwright')
@@ -40,7 +41,7 @@ try {
   const suffix = String(Date.now())
   const email = `pr103-https-${suffix}@example.com`
   const phone = `094${suffix.slice(-7)}`
-  const password = `Staging9!${suffix}`
+  const password = `Staging9!${randomBytes(24).toString('base64url')}`
   let bearer
   await check('HTTPS browser registration creates member and loads real identity', async () => {
     await page.goto('/register')
@@ -144,7 +145,6 @@ try {
     passed: checks.length,
     frontendCommit: process.env.GYM_TEST_COMMIT ?? 'check GitHub deployment status',
     checks,
-    testEmail: email,
     limitations: [
       'No authorized staff staging account: positive F2/F3 CRUD and branch scope remain locally verified only',
       'Backend deployment commit is not exposed publicly',
