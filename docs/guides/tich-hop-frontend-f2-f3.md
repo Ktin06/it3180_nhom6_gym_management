@@ -104,3 +104,37 @@ Kịch bản mới sinh phần bí mật của mật khẩu bằng `crypto.rando
 Giao diện hội viên áp dụng từ khóa đang nhập khi đổi trạng thái, đổi trang hoặc tải lại; từ khóa thay đổi đưa về trang đầu. Trạng thái đang tải hiển thị “Đang tải hội viên…”; chỉ hiển thị thông báo không có hội viên sau khi API trả kết quả rỗng.
 
 Sau các sửa review này: 105/105 Vitest ở timeout mặc định, ESLint, TypeScript/build và định dạng các file thay đổi đều đạt. Hai test bổ sung kiểm tra từ khóa chưa bấm Tìm khi đổi bộ lọc/tải lại và phân biệt đang tải với kết quả rỗng. Chưa chạy lại 28 ca cục bộ hoặc 12 ca HTTPS cho phiên bản sửa này; các số liệu tích hợp phía trên vẫn thuộc đúng phiên bản lịch sử đã ghi.
+
+## HTTPS nhân viên — 23:00 ngày 15/11/2026
+
+**23/23 ca đạt** trên frontend **`6d985be`**, preview nhánh #103 → Render. [Báo cáo JSON](evidence/f2-f3-staff-staging-2026-11-15.json), [kịch bản chạy lại](../../frontend/scripts/check-f2-f3-staff-staging.mjs). GitHub xác nhận deployment Vercel [GmWh37kbvkUBxRZz8LgZkL7g3rP8](https://vercel.com/ktin06/it3180-nhom6-gym/GmWh37kbvkUBxRZz8LgZkL7g3rP8) thành công cho đúng commit. Render health `200 UP`, Edge 157.0.4341.46; không giả lập response hay cookie.
+
+Người dùng đã nhận hai tài khoản thử do Tiến cấp riêng, cùng CN01. Server `/auth/me` xác nhận vai trò thực tế là **BRANCH_MANAGER** và **RECEPTIONIST**; nhãn “MANAGER” trong bàn giao là tài khoản BRANCH_MANAGER của API. Thông tin đăng nhập chỉ nằm trong file tạm ngoài repo và bộ nhớ, không có trong kịch bản hoặc báo cáo công khai.
+
+Với **từng vai trò**, đã kiểm tra:
+
+1. Đăng nhập API và giao diện thành công, trở lại `/members`.
+2. Thêm hồ sơ bằng giao diện qua API thật `201`; reload refresh `200`, hồ sơ và SĐT vẫn lưu bền.
+3. Gõ SĐT chưa bấm Tìm rồi đổi trạng thái: request dùng đúng từ khóa, lọc ACTIVE và trả đúng một hồ sơ.
+4. Sửa tên và trạng thái INACTIVE qua PUT `200`; reload và GET chi tiết vẫn trả đúng dữ liệu đã sửa.
+5. Tìm theo mã/đầu họ tên, lọc INACTIVE; SĐT trùng `409`, giữ dữ liệu đã nhập trong form.
+6. Đọc mọi trang danh sách: tất cả hồ sơ trả về có `homeBranchId=1` (CN01 theo tài khoản được cấp). Thêm bộ lọc `branchId=999999` không mở rộng/đổi phạm vi danh sách.
+7. Danh mục tải `200`, chỉ quan sát được gói toàn chuỗi hoặc `branchId=1`; lọc SESSION và ACTIVE/INACTIVE gửi đúng bộ lọc, nội dung trả về khớp.
+8. Cookie Secure/HttpOnly/SameSite/Path đúng; logout `204`, truy cập lại route bảo vệ về login. Không có lỗi JavaScript không được bắt trong hai trang thử.
+
+Tạo riêng bốn hồ sơ thử mang tiền tố `PR103 Staff`: hai lượt đầu dừng ở selector kiểm thử khớp cả dropdown ẩn và hiện, sau đó đã sửa selector và chạy lại trọn bộ đạt 23/23. Hai hồ sơ của lượt đạt có ID 11/12, mã HV000007/HV000008, trạng thái INACTIVE. Hai hồ sơ từ lượt đầu có ID 9/10, mã HV000005/HV000006; không sửa hồ sơ có sẵn của người khác. Các hồ sơ thử còn trong staging vì không có API xóa; trưởng nhóm có thể dọn theo các mã này.
+
+**Chưa đủ để xác nhận toàn bộ cách ly chi nhánh:** người dùng chưa được cấp ID/mã hồ sơ thử thuộc CN02. Kiểm tra danh sách cùng CN01 và tham số không mở rộng phạm vi không thay thế kiểm tra đọc/sửa một hồ sơ khác chi nhánh đang thực sự tồn tại. Cần Tiến cấp fixture/ID đã xác nhận thuộc CN02 để chạy phần từ chối `404`. Revision backend đang chạy và việc vô hiệu hóa tài khoản thử cũ cũng chưa được xác nhận độc lập. Giữ Draft trong khi hoàn tất các mục này và chờ người duyệt kết luận.
+
+Để chạy lại, dùng Playwright riêng như mục trên, tạo file JSON **ngoài repo** với hai key `manager`, `receptionist`, mỗi key có `email` và `password` nhận riêng. Không đưa file đó vào báo cáo hoặc commit. Sau đó:
+
+```powershell
+$env:GYM_STAFF_CREDENTIALS = 'C:/duong-dan-rieng/credentials.json'
+$env:GYM_TEST_URL = 'https://it3180-nhom6-gym-git-feature-f2-f3-giao-dien-ktin06.vercel.app'
+$env:GYM_TEST_COMMIT = '6d985be' # thay theo deployment thực tế được xác nhận
+$env:GYM_TEST_OUTPUT = Join-Path $env:TEMP 'gym-staff-results'
+# Chỉ đặt GYM_FOREIGN_MEMBER_ID nếu Tiến xác nhận ID thuộc chi nhánh khác.
+node frontend/scripts/check-f2-f3-staff-staging.mjs
+```
+
+Không dùng ID không tồn tại để thay cho hồ sơ chi nhánh khác. Báo cáo không xuất email tài khoản hoặc mật khẩu; lỗi được lọc các thông tin đăng nhập trước khi ghi log.
