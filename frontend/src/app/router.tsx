@@ -1,5 +1,5 @@
 import { createBrowserRouter, type RouteObject } from 'react-router-dom'
-import { HOME_PATH_BY_ROLE, STAFF_ROLES } from '../auth/roles'
+import { HOME_PATH_BY_ROLE, MEMBER_MANAGEMENT_ROLES, STAFF_ROLES } from '../auth/roles'
 import { AuthLayout } from '../layouts/AuthLayout'
 import { MemberLayout } from '../layouts/MemberLayout'
 import { PublicLayout } from '../layouts/PublicLayout'
@@ -11,6 +11,8 @@ import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { ProtectedRoute } from '../routes/ProtectedRoute'
+import { MembersPage } from '../features/members/pages/MembersPage'
+import { PackagesPage } from '../features/packages/pages/PackagesPage'
 
 export const routes: RouteObject[] = [
   {
@@ -34,14 +36,32 @@ export const routes: RouteObject[] = [
         <StaffLayout />
       </ProtectedRoute>
     ),
-    children: STAFF_ROLES.map((role) => ({
-      path: HOME_PATH_BY_ROLE[role],
-      element: (
-        <ProtectedRoute allowedRoles={[role]}>
-          <RoleHomePage role={role} />
-        </ProtectedRoute>
-      ),
-    })),
+    children: [
+      ...STAFF_ROLES.map((role) => ({
+        path: HOME_PATH_BY_ROLE[role],
+        element: (
+          <ProtectedRoute allowedRoles={[role]}>
+            <RoleHomePage role={role} />
+          </ProtectedRoute>
+        ),
+      })),
+      {
+        path: '/members',
+        element: (
+          <ProtectedRoute allowedRoles={MEMBER_MANAGEMENT_ROLES}>
+            <MembersPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/packages',
+        element: (
+          <ProtectedRoute allowedRoles={MEMBER_MANAGEMENT_ROLES}>
+            <PackagesPage />
+          </ProtectedRoute>
+        ),
+      },
+    ],
   },
   {
     element: (

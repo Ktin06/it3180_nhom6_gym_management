@@ -14,6 +14,9 @@ export const ROLE_LABELS: Record<Role, string> = {
 /** Các vai trò nhân viên dùng giao diện StaffLayout. */
 export const STAFF_ROLES: Role[] = ['SUPER_ADMIN', 'BRANCH_MANAGER', 'RECEPTIONIST', 'TRAINER']
 
+/** Vai trò được tra cứu và quản lý hồ sơ hội viên, danh mục gói. */
+export const MEMBER_MANAGEMENT_ROLES: Role[] = ['SUPER_ADMIN', 'BRANCH_MANAGER', 'RECEPTIONIST']
+
 /** Trang chủ của từng vai trò sau khi đăng nhập. */
 export const HOME_PATH_BY_ROLE: Record<Role, string> = {
   SUPER_ADMIN: '/admin',
