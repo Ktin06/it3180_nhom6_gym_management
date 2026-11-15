@@ -1,0 +1,26 @@
+{
+  "baseURL": "https://it3180-nhom6-gym-git-feature-f2-f3-giao-dien-ktin06.vercel.app",
+  "timestamp": "2026-11-15T06:40:38.785Z",
+  "browser": "157.0.4341.46",
+  "passed": 12,
+  "frontendCommit": "c6da982",
+  "checks": [
+    "HTTPS preview includes current auth and F2/F3 code",
+    "HTTPS proxy forwards anonymous auth/F2/F3 requests to backend",
+    "HTTPS browser registration creates member and loads real identity",
+    "HTTPS cookie has Secure/HttpOnly/SameSite/Path and is hidden from JS",
+    "HTTPS reload refreshes cookie and retains member session",
+    "HTTPS new tab restores session",
+    "HTTPS F2/F3 APIs reject authenticated MEMBER",
+    "HTTPS frontend F2/F3 routes reject MEMBER",
+    "HTTPS logout invalidates session and protected route stays anonymous",
+    "HTTPS wrong password is rejected and correct login works",
+    "HTTPS 360px auth pages fit viewport",
+    "HTTPS browser has no uncaught JavaScript errors"
+  ],
+  "testEmail": "pr103-https-1794724821446@example.com",
+  "limitations": [
+    "No authorized staff staging account: positive F2/F3 CRUD and branch scope remain locally verified only",
+    "Backend deployment commit is not exposed publicly"
+  ]
+}

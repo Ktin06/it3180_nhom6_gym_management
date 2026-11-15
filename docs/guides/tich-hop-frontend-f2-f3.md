@@ -58,6 +58,41 @@ Dependency Playwright không được thêm vào package.json/package-lock của
 
 ## Giới hạn
 
-Đây là tích hợp thật **cục bộ qua HTTP**, không phải kết quả HTTPS Vercel → Render. Cookie Secure và bản triển khai staging của #103 chưa được xác minh trong phiên này. Profile local không bật Secure. Không xem kết quả này là bằng chứng sửa hai tab refresh đồng thời (#112).
+Các kết quả 28 ca phía trên là tích hợp thật **cục bộ qua HTTP**; profile local không bật Secure. Kết quả HTTPS bổ sung nằm ở mục dưới. Không xem kết quả này là bằng chứng sửa hai tab refresh đồng thời (#112).
 
 Lint, build và bộ Vitest sau sửa đạt 103/103 ở timeout mặc định; không tăng timeout toàn cục. Test race được đổi sang dán cả giá trị để giảm chi phí gõ từng ký tự, vẫn trì hoãn response chi tiết và kiểm tra form mới không bị ghi đè.
+
+## HTTPS Vercel → Render ngày 15/11/2026
+
+**12/12 ca đạt**, hoàn tất lúc 13:40 giờ Việt Nam. [Báo cáo JSON](evidence/f2-f3-staging-2026-11-15.json), [kịch bản chạy lại](../../frontend/scripts/check-f2-f3-staging.mjs).
+
+- Frontend: preview `https://it3180-nhom6-gym-git-feature-f2-f3-giao-dien-ktin06.vercel.app`, commit **`c6da982`**, deployment Vercel [HV8tkUZUp2tJByyjKYmpthGv51wJ](https://vercel.com/ktin06/it3180-nhom6-gym/HV8tkUZUp2tJByyjKYmpthGv51wJ). Trạng thái deployment trên GitHub của đúng commit là success; CI Frontend/Backend cũng success. Bundle có mã auth mới cùng F2/F3.
+- Backend: `https://it3180-nhom6-gym-management.onrender.com`; health trả `200 UP`. Chưa xác minh độc lập commit backend đang triển khai vì không có endpoint công khai trả revision. Không dùng xác nhận backend của phiên 12/11 để suy ra revision hôm nay.
+- Trình duyệt: Edge 157.0.4341.46 headless. Các request ứng dụng đi trên origin HTTPS của preview, Vercel rewrite `/api` sang Render.
+- Tài khoản: tự đăng ký một hội viên thử mới, email `example.com` được ghi trong báo cáo, họ tên “Kiem thu HTTPS PR103”. Mật khẩu ngẫu nhiên chỉ ở bộ nhớ của kịch bản. Tài khoản/hồ sơ thử còn trong staging do chưa có API xóa; người quản lý có thể dọn khi làm mới dữ liệu.
+
+Đã xác nhận:
+
+1. Frontend preview và API proxy hoạt động; `/auth/me`, `/members`, `/packages` không token trả `401`.
+2. Đăng ký trên trình duyệt trả `201`, lấy identity `200`, role MEMBER, vào `/member`.
+3. Cookie refresh thuộc domain preview, `Secure; HttpOnly; SameSite=Strict; Path=/api/v1/auth`; không đọc được từ JavaScript. Web Storage trống.
+4. Reload và tab mới gọi refresh `200`, giữ phiên.
+5. Với JWT MEMBER thật, API F2/F3 trả `403`; giao diện `/members` và `/packages` chuyển `/403`.
+6. Logout `204`; truy cập lại trang bảo vệ làm refresh `401`, về `/login`, không tự khôi phục phiên.
+7. Sai mật khẩu `401`; đúng mật khẩu `200`. Login/register không tràn ngang ở 360px. Không có lỗi JavaScript không được bắt trong trang kiểm thử.
+
+Lượt đầu preview tải được nhưng API qua proxy bị timeout/`ECONNRESET`; health Render cũng chưa phản hồi. Gọi trực tiếp health sau đó trả UP sau 33,5 giây. Chạy lại sau khi health UP đạt 12/12; lượt lỗi ban đầu không được tính là đạt.
+
+**Giới hạn còn lại:** người dùng xác nhận chưa có tài khoản nhân viên staging được cấp. Vì vậy chưa kiểm tra thao tác thêm/sửa/tìm/lọc bằng Lễ tân/Quản lý hoặc quyền chi nhánh trên HTTPS. Các luồng đó đã đạt trong phiên 28/28 với backend/PostgreSQL cục bộ, không được ghi thành kết quả staging. Phiên HTTPS cũng không kiểm tra hai tab đổi tài khoản nhân viên.
+
+Để chạy lại, cài Playwright riêng và đặt `PLAYWRIGHT_MODULE` như hướng dẫn trên, sau đó tại gốc repo:
+
+```powershell
+$env:GYM_TEST_URL = 'https://it3180-nhom6-gym-git-feature-f2-f3-giao-dien-ktin06.vercel.app'
+# Đặt GYM_TEST_COMMIT theo commit được xác nhận từ deployment đang chạy.
+$env:GYM_TEST_COMMIT = 'c6da982'
+$env:GYM_TEST_OUTPUT = Join-Path $env:TEMP 'gym-staging-results'
+node frontend/scripts/check-f2-f3-staging.mjs
+```
+
+Kịch bản HTTPS không dùng mật khẩu seed và không áp fixture SQL lên staging; mỗi lượt tạo một hội viên thử mới rồi đăng xuất khi hoàn tất.
