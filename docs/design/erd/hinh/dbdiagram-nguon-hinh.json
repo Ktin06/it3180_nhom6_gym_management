@@ -1,0 +1,48 @@
+{
+  "source": "../erd-v2.dbml",
+  "sha256LF": "ba6237cd2f2f49fca0272958876514761611ad78071f899a7d92eadba0062b8d",
+  "exportedOn": "2026-11-06",
+  "timezone": "Asia/Ho_Chi_Minh",
+  "exportedBy": "Nguyễn Anh Tú (natus26)",
+  "renderer": "dbdiagram.io — chức năng Export PDF/PNG trên website",
+  "originalFileNames": [
+    "Untitled.pdf",
+    "Untitled.png"
+  ],
+  "files": [
+    {
+      "file": "dbdiagram-erd-v2.pdf",
+      "sha256": "610876d6ddfc651779d0b8cf06d75d06a1e56dadf79dc402cb42ca2f13c67dec",
+      "bytes": 3564874,
+      "pages": 5,
+      "pageSizePt": [
+        1920,
+        1080
+      ],
+      "contents": {
+        "1": "ERD tổng quan",
+        "2": "ERD với một số đường liên kết được tô nổi",
+        "3-5": "25 tập giá trị Enum"
+      }
+    },
+    {
+      "file": "dbdiagram-erd-v2.png",
+      "sha256": "346ddca8fa5f6247639e26c289974067396a0103e82a7ca019d16df53552b6b7",
+      "bytes": 1586829,
+      "dimensionsPx": [
+        4956,
+        4945
+      ]
+    }
+  ],
+  "validation": {
+    "tables": 39,
+    "columns": 422,
+    "columnNamesAndTypes": "Khớp từng bảng với erd-v2.dbml trong trang sơ đồ PDF",
+    "relationships": 89,
+    "relationshipValidation": "178 nhãn đầu quan hệ: 87 dấu nhiều và 91 dấu một; phù hợp 87 quan hệ nhiều-một và 2 quan hệ một-một trong DBML; không kiểm tra tự động từng tuyến nối trong PNG",
+    "enumSets": 25,
+    "enumValues": "Khớp các tập giá trị trong trang 3–5 PDF với DBML",
+    "visualReview": "Đã xem toàn bộ PNG và bản render năm trang PDF; bảng không bị cắt. Sơ đồ lớn, dùng hình nhóm khi trình bày ở khổ giấy nhỏ."
+  }
+}

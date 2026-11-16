@@ -1,0 +1,329 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1200px" height="850px" viewBox="-0.5 -0.5 1200 850" content="&lt;mxfile host=&quot;app.diagrams.net&quot; version=&quot;24.0.0&quot;&gt;&lt;diagram id=&quot;diag_f5_vietqr_modern&quot; name=&quot;f5_thanh_toan_vietqr_modern&quot;&gt;&lt;mxGraphModel dx=&quot;1200&quot; dy=&quot;850&quot; grid=&quot;1&quot; gridSize=&quot;10&quot; guides=&quot;1&quot; tooltips=&quot;1&quot; connect=&quot;1&quot; arrows=&quot;1&quot; fold=&quot;1&quot; page=&quot;1&quot; pageScale=&quot;1&quot; pageWidth=&quot;1200&quot; pageHeight=&quot;850&quot;&gt;&lt;root&gt;&lt;mxCell id=&quot;0&quot;/&gt;&lt;mxCell id=&quot;1&quot; parent=&quot;0&quot;/&gt;&lt;mxCell id=&quot;bg&quot; value=&quot;&quot; style=&quot;rounded=0;fillColor=#0F172A;strokeColor=none;opacity=75;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;0&quot; y=&quot;0&quot; width=&quot;1200&quot; height=&quot;850&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;modal&quot; value=&quot;&quot; style=&quot;rounded=1;arcSize=4;fillColor=#FFFFFF;strokeColor=#CBD5E1;strokeWidth=1.5;shadow=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;150&quot; y=&quot;60&quot; width=&quot;900&quot; height=&quot;725&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;hdr&quot; value=&quot;HÓA ĐƠN QUẦY: #HD000089 • Cơ sở 1 - Bách Khoa&quot; style=&quot;text;html=1;fontStyle=1;fontSize=16;fontColor=#0F172A;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;180&quot; y=&quot;80&quot; width=&quot;450&quot; height=&quot;30&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;status&quot; value=&quot;CHỜ THANH TOÁN (PENDING)&quot; style=&quot;rounded=1;arcSize=50;fillColor=#FFFBEB;strokeColor=#FDE68A;fontColor=#B45309;fontStyle=1;fontSize=11;align=center;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;660&quot; y=&quot;80&quot; width=&quot;220&quot; height=&quot;28&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;cust_box&quot; value=&quot;Khách hàng: Hoàng Thùy Trang (HV000092) • 0904.555.666&quot; style=&quot;rounded=1;arcSize=10;fillColor=#F8FAFC;strokeColor=#E2E8F0;fontStyle=1;fontSize=12;fontColor=#0F172A;align=left;spacingLeft=15;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;180&quot; y=&quot;145&quot; width=&quot;390&quot; height=&quot;65&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;rec_box&quot; value=&quot;&quot; style=&quot;rounded=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#E2E8F0;strokeWidth=1.2;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;180&quot; y=&quot;225&quot; width=&quot;390&quot; height=&quot;215&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;rec_title&quot; value=&quot;CHI TIẾT DỊCH VỤ ĐĂNG KÝ&quot; style=&quot;text;html=1;fontStyle=1;fontSize=11;fontColor=#94A3B8;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;195&quot; y=&quot;235&quot; width=&quot;300&quot; height=&quot;20&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;item1&quot; value=&quot;1. Gói 30 Buổi Gym (SESSION) - 60 ngày&quot; style=&quot;text;html=1;fontSize=12;fontStyle=1;fontColor=#0F172A;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;195&quot; y=&quot;265&quot; width=&quot;280&quot; height=&quot;20&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;item1_p&quot; value=&quot;1.800.000 đ&quot; style=&quot;text;html=1;fontSize=12;fontStyle=1;fontColor=#0F172A;align=right;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;470&quot; y=&quot;265&quot; width=&quot;85&quot; height=&quot;20&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;item2&quot; value=&quot;2. Khóa từ thông minh Smart-Lock (Tặng kèm)&quot; style=&quot;text;html=1;fontSize=12;fontColor=#10B981;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;195&quot; y=&quot;300&quot; width=&quot;280&quot; height=&quot;20&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;item2_p&quot; value=&quot;0 đ&quot; style=&quot;text;html=1;fontSize=12;fontStyle=1;fontColor=#10B981;align=right;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;470&quot; y=&quot;300&quot; width=&quot;85&quot; height=&quot;20&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;tot_box&quot; value=&quot;TỔNG THANH TOÁN: 1.800.000 đ&quot; style=&quot;rounded=1;arcSize=12;fillColor=#F0F7FF;strokeColor=#BFDBFE;fontStyle=1;fontSize=15;fontColor=#1D4ED8;align=center;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;195&quot; y=&quot;375&quot; width=&quot;360&quot; height=&quot;45&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;tab_cash&quot; value=&quot;💵 Tiền mặt (CASH)&quot; style=&quot;rounded=1;arcSize=10;fillColor=#FFFFFF;strokeColor=#CBD5E1;fontStyle=1;fontSize=12;align=center;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;180&quot; y=&quot;460&quot; width=&quot;185&quot; height=&quot;60&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;tab_vqr&quot; value=&quot;📱 VietQR Napas 247 [ĐANG CHỌN]&quot; style=&quot;rounded=1;arcSize=10;fillColor=#EFF6FF;strokeColor=#2563EB;strokeWidth=2;fontStyle=1;fontSize=12;fontColor=#1D4ED8;align=center;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;380&quot; y=&quot;460&quot; width=&quot;190&quot; height=&quot;60&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;auto_act&quot; value=&quot;⚡ KÍCH HOẠT TỨC THÌ (BR-F5-03): Tự động chuyển gói sang ACTIVE ngay sau khi xác nhận nhận tiền.&quot; style=&quot;rounded=1;arcSize=10;fillColor=#ECFDF5;strokeColor=#A7F3D0;fontSize=10;fontColor=#065F46;align=left;spacingLeft=10;whiteSpace=wrap;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;180&quot; y=&quot;535&quot; width=&quot;390&quot; height=&quot;45&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;vqr_box&quot; value=&quot;&quot; style=&quot;rounded=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#2563EB;strokeWidth=2;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;600&quot; y=&quot;145&quot; width=&quot;425&quot; height=&quot;485&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;vqr_hdr&quot; value=&quot;VIETQR  |  napas 247  •  Chờ quét mã...&quot; style=&quot;rounded=0;fillColor=#005BAA;fontColor=#FFFFFF;fontStyle=1;fontSize=13;align=center;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;600&quot; y=&quot;145&quot; width=&quot;425&quot; height=&quot;45&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;vqr_img&quot; value=&quot;[MÃ VIETQR ĐỘNG NAPAS 247 SỐ TIỀN 1.800.000 đ]&quot; style=&quot;rounded=1;arcSize=10;fillColor=#FFFFFF;strokeColor=#CBD5E1;strokeWidth=1.5;align=center;fontStyle=1;fontSize=11;fontColor=#1E293B;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;710&quot; y=&quot;205&quot; width=&quot;205&quot; height=&quot;195&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;vqr_timer&quot; value=&quot;⏱️ Tự động làm mới sau 14:58&quot; style=&quot;rounded=1;arcSize=50;fillColor=#F1F5F9;fontColor=#64748B;fontSize=10;align=center;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;735&quot; y=&quot;410&quot; width=&quot;160&quot; height=&quot;22&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;vqr_bank&quot; value=&quot;Ngân hàng: MBBank (Quân Đội) • STK: 0987654321 [Sao chép]&quot; style=&quot;rounded=1;arcSize=8;fillColor=#F8FAFC;strokeColor=#E2E8F0;fontSize=11;fontColor=#0F172A;align=left;spacingLeft=10;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;615&quot; y=&quot;440&quot; width=&quot;395&quot; height=&quot;38&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;vqr_holder&quot; value=&quot;Chủ TK: CONG TY GYM NHOM 6 CN01 • Số tiền: 1.800.000 đ&quot; style=&quot;rounded=1;arcSize=8;fillColor=#F8FAFC;strokeColor=#E2E8F0;fontSize=11;fontColor=#0F172A;align=left;spacingLeft=10;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;615&quot; y=&quot;485&quot; width=&quot;395&quot; height=&quot;38&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;vqr_syntax&quot; value=&quot;CÚ PHÁP CHUYỂN KHOẢN (ĐỐI SOÁT):  CN01 HD000089  [Sao chép cú pháp]&quot; style=&quot;rounded=1;arcSize=8;fillColor=#FFFBEB;strokeColor=#F59E0B;strokeWidth=1.5;fontStyle=1;fontSize=11;fontColor=#78350F;align=center;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;615&quot; y=&quot;530&quot; width=&quot;395&quot; height=&quot;48&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;s7_alert&quot; value=&quot;LƯU Ý LỄ TÂN (S7): Bắt buộc đối chiếu đúng cú pháp &amp;#x27;CN01 HD000089&amp;#x27; và kiểm tra tin nhắn/app báo có tiền trước khi bấm xác nhận.&quot; style=&quot;rounded=1;arcSize=8;fillColor=#FFFBEB;strokeColor=#FDE68A;fontColor=#92400E;fontSize=11;fontStyle=1;align=left;spacingLeft=12;whiteSpace=wrap;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;180&quot; y=&quot;645&quot; width=&quot;845&quot; height=&quot;40&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;btn_cancel&quot; value=&quot;🗑 Hủy hóa đơn (E4)&quot; style=&quot;rounded=1;arcSize=8;fillColor=#FEF2F2;strokeColor=#FEE2E2;fontColor=#EF4444;fontStyle=1;fontSize=12;align=center;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;180&quot; y=&quot;700&quot; width=&quot;140&quot; height=&quot;44&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;btn_print&quot; value=&quot;🖨 In tạm tính&quot; style=&quot;rounded=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#CBD5E1;fontColor=#475569;fontSize=12;align=center;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;540&quot; y=&quot;700&quot; width=&quot;110&quot; height=&quot;44&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;btn_close&quot; value=&quot;Để sau&quot; style=&quot;rounded=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#CBD5E1;fontColor=#64748B;fontSize=12;align=center;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;660&quot; y=&quot;700&quot; width=&quot;80&quot; height=&quot;44&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;btn_confirm&quot; value=&quot;✔ XÁC NHẬN ĐÃ NHẬN TIỀN (F9)&quot; style=&quot;rounded=1;arcSize=8;fillColor=#10B981;strokeColor=#059669;fontColor=#FFFFFF;fontStyle=1;fontSize=13;align=center;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;750&quot; y=&quot;700&quot; width=&quot;275&quot; height=&quot;44&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;/root&gt;&lt;/mxGraphModel&gt;&lt;/diagram&gt;&lt;/mxfile&gt;">
+  <defs>
+    <style type="text/css">
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap');
+      text { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+      .mono { font-family: 'JetBrains Mono', monospace; }
+      .modal-glow { filter: drop-shadow(0 25px 35px rgba(15, 23, 42, 0.45)); }
+      .qr-glow { filter: drop-shadow(0 10px 20px rgba(37, 99, 235, 0.12)); }
+    </style>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#1E293B" />
+    </linearGradient>
+    <linearGradient id="vietqrGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#005BAA" />
+      <stop offset="60%" stop-color="#0A3B7E" />
+      <stop offset="100%" stop-color="#E11931" />
+    </linearGradient>
+    <linearGradient id="btnConfirmGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="badgePulseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FEF3C7" />
+      <stop offset="100%" stop-color="#FDE68A" />
+    </linearGradient>
+  </defs>
+
+  <!-- BACKGROUND: RECEPTION WORKSPACE (BLURRED / DIMMED) -->
+  <rect width="1200" height="850" fill="#0B132B"/>
+
+  <!-- Browser Chrome Bar -->
+  <rect x="15" y="15" width="1170" height="820" rx="10" fill="#0F172A" stroke="#1E293B" stroke-width="1.5"/>
+  <circle cx="38" cy="34" r="5.5" fill="#EF4444"/>
+  <circle cx="56" cy="34" r="5.5" fill="#F59E0B"/>
+  <circle cx="74" cy="34" r="5.5" fill="#10B981"/>
+  
+  <rect x="105" y="24" width="560" height="22" rx="6" fill="#1E293B"/>
+  <text x="120" y="39" font-size="11" fill="#94A3B8">gym.hust.edu.vn/staff/invoices/89/checkout</text>
+
+  <!-- Ambient Blurred Backdrop Elements -->
+  <rect x="25" y="55" width="205" height="770" fill="#001529" opacity="0.4"/>
+  <rect x="240" y="55" width="935" height="770" fill="#1E293B" opacity="0.3"/>
+  <rect x="15" y="50" width="1170" height="785" fill="#0F172A" opacity="0.75"/>
+
+  <!-- ==================== MODERN FINTECH CHECKOUT MODAL ==================== -->
+  <g transform="translate(150, 60)" class="modal-glow">
+    <!-- Main Modal Base Card -->
+    <rect x="0" y="0" width="900" height="725" rx="20" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+
+    <!-- ================= MODAL HEADER (MODERN SLATE BAR) ================= -->
+    <g transform="translate(0, 0)">
+      <path d="M 0 0 L 900 0 A 20 20 0 0 1 900 0 L 900 68 L 0 68 Z" fill="#FAFAFC"/>
+      <line x1="0" y1="68" x2="900" y2="68" stroke="#F1F5F9" stroke-width="1.2"/>
+
+      <!-- Invoice Tag & Code -->
+      <rect x="28" y="23" width="95" height="24" rx="6" fill="#EEF2F6"/>
+      <text x="75" y="39" font-size="11" font-weight="700" fill="#475569" text-anchor="middle">HÓA ĐƠN QUẦY</text>
+
+      <text x="135" y="41" font-size="18" font-weight="800" fill="#0F172A">#HD000089</text>
+      
+      <circle cx="270" cy="35" r="3" fill="#CBD5E1"/>
+      <text x="285" y="40" font-size="12" font-weight="500" fill="#64748B">📍 Chi nhánh Bách Khoa (Cơ sở 1)</text>
+
+      <!-- Pulse Status Pill: PENDING -->
+      <rect x="585" y="22" width="220" height="26" rx="13" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1"/>
+      <circle cx="602" cy="35" r="4.5" fill="#F59E0B"/>
+      <text x="618" y="40" font-size="11" font-weight="700" fill="#B45309">CHỜ THANH TOÁN (PENDING)</text>
+
+      <!-- Minimalist Close Icon -->
+      <circle cx="858" cy="35" r="15" fill="#F1F5F9"/>
+      <text x="858" y="40" font-size="13" font-weight="700" fill="#64748B" text-anchor="middle">✕</text>
+    </g>
+
+
+    <!-- ================= MODAL BODY: 2 COLUMNS ================= -->
+
+    <!-- ================= LEFT COLUMN: DIGITAL RECEIPT (Width 390px) ================= -->
+    <g transform="translate(28, 85)">
+      
+      <!-- 1. Customer Mini Profile (Modern Chip) -->
+      <rect x="0" y="0" width="390" height="66" rx="12" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+      
+      <!-- Customer Avatar with Initials Gradient -->
+      <circle cx="33" cy="33" r="20" fill="#3B82F6"/>
+      <text x="33" y="38" font-size="12" font-weight="800" fill="#FFFFFF" text-anchor="middle">TT</text>
+      
+      <text x="63" y="28" font-size="13.5" font-weight="700" fill="#0F172A">Hoàng Thùy Trang</text>
+      
+      <rect x="63" y="36" width="70" height="18" rx="4" fill="#EFF6FF"/>
+      <text x="98" y="49" font-size="10" font-weight="700" fill="#1D4ED8" text-anchor="middle">HV000092</text>
+      
+      <text x="142" y="49" font-size="11" fill="#64748B">0904.555.666</text>
+      <text x="370" y="38" font-size="11" font-weight="600" fill="#10B981" text-anchor="end">Hội viên mới</text>
+
+      <!-- 2. Itemized Digital Receipt Card -->
+      <g transform="translate(0, 78)">
+        <rect x="0" y="0" width="390" height="215" rx="14" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.2"/>
+        
+        <text x="16" y="24" font-size="10.5" font-weight="700" fill="#94A3B8" letter-spacing="0.5">DỊCH VỤ ĐĂNG KÝ MUA</text>
+        <line x1="16" y1="34" x2="374" y2="34" stroke="#F1F5F9" stroke-width="1"/>
+
+        <!-- Item 1: Package -->
+        <circle cx="28" cy="56" r="12" fill="#EFF6FF"/>
+        <text x="28" y="60" font-size="11" text-anchor="middle">🏋️</text>
+        <text x="48" y="52" font-size="12.5" font-weight="700" fill="#0F172A">Gói 30 Buổi Gym (SESSION)</text>
+        <text x="48" y="67" font-size="10.5" fill="#64748B">Hạn 60 ngày • Tập mọi khung giờ</text>
+        <text x="374" y="58" font-size="13" font-weight="700" fill="#0F172A" text-anchor="end">1.800.000 ₫</text>
+
+        <!-- Item 2: Free Gift Locker -->
+        <circle cx="28" cy="98" r="12" fill="#ECFDF5"/>
+        <text x="28" y="102" font-size="11" text-anchor="middle">🎁</text>
+        <text x="48" y="94" font-size="12.5" font-weight="600" fill="#0F172A">Khóa từ thông minh Smart-Lock</text>
+        <text x="48" y="108" font-size="10.5" fill="#10B981">Quà tặng kích hoạt gói</text>
+        <rect x="330" y="88" width="44" height="18" rx="4" fill="#DCFCE7"/>
+        <text x="352" y="101" font-size="10" font-weight="700" fill="#15803D" text-anchor="middle">0 ₫</text>
+
+        <line x1="16" y1="124" x2="374" y2="124" stroke="#F1F5F9" stroke-width="1" stroke-dasharray="3 3"/>
+
+        <!-- Subtotals -->
+        <text x="16" y="142" font-size="11.5" fill="#64748B">Tạm tính:</text>
+        <text x="374" y="142" font-size="11.5" font-weight="600" fill="#0F172A" text-anchor="end">1.800.000 ₫</text>
+        
+        <text x="16" y="160" font-size="11.5" fill="#64748B">Ưu đãi / Giảm giá:</text>
+        <text x="374" y="160" font-size="11.5" font-weight="600" fill="#10B981" text-anchor="end">- 0 ₫</text>
+
+        <!-- Big Total Container -->
+        <rect x="12" y="170" width="366" height="36" rx="8" fill="#F0F7FF"/>
+        <text x="24" y="193" font-size="11.5" font-weight="800" fill="#1E40AF">TỔNG THANH TOÁN:</text>
+        <text x="362" y="194" font-size="17" font-weight="900" fill="#1D4ED8" text-anchor="end">1.800.000 ₫</text>
+      </g>
+
+      <!-- 3. Payment Method Segmented Controls (Modern Tabs) -->
+      <g transform="translate(0, 308)">
+        <text x="0" y="16" font-size="11" font-weight="700" fill="#475569" letter-spacing="0.5">PHƯƠNG THỨC THANH TOÁN TẠI QUẦY (ADR 0004)</text>
+
+        <!-- Cash Option (Inactive Tab) -->
+        <g transform="translate(0, 26)">
+          <rect x="0" y="0" width="188" height="66" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.2"/>
+          <text x="16" y="28" font-size="16">💵</text>
+          <text x="44" y="27" font-size="12" font-weight="700" fill="#475569">Tiền mặt (CASH)</text>
+          <text x="44" y="44" font-size="10" fill="#94A3B8">Khách trả tiền tại quầy</text>
+        </g>
+
+        <!-- VietQR Option (ACTIVE SELECTED TAB) -->
+        <g transform="translate(200, 26)">
+          <rect x="0" y="0" width="190" height="66" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+          <!-- Active Indicator Badge -->
+          <rect x="125" y="6" width="58" height="16" rx="4" fill="#2563EB"/>
+          <text x="154" y="17" font-size="9" font-weight="700" fill="#FFFFFF" text-anchor="middle">ĐANG CHỌN</text>
+          
+          <text x="16" y="28" font-size="16">📱</text>
+          <text x="44" y="27" font-size="12" font-weight="800" fill="#1D4ED8">VietQR Napas</text>
+          <text x="44" y="44" font-size="10" fill="#2563EB">Chuyển khoản tức thì</text>
+        </g>
+      </g>
+
+      <!-- Instant Activation Guarantee Banner -->
+      <g transform="translate(0, 420)">
+        <rect x="0" y="0" width="390" height="48" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1"/>
+        <text x="14" y="20" font-size="11" font-weight="700" fill="#065F46">⚡ TỰ ĐỘNG KÍCH HOẠT GÓI (BR-F5-03)</text>
+        <text x="14" y="36" font-size="10" fill="#047857">Ngay khi xác nhận đã nhận tiền, gói tập tự chuyển sang ACTIVE để hội viên vào tập ngay.</text>
+      </g>
+
+    </g>
+
+
+    <!-- ================= RIGHT COLUMN: VIETQR SMART DISPLAY (Width 440px) ================= -->
+    <g transform="translate(445, 85)">
+      
+      <!-- Modern Smart Terminal Card -->
+      <rect x="0" y="0" width="425" height="485" rx="18" fill="#FFFFFF" stroke="#2563EB" stroke-width="1.8" class="qr-glow"/>
+
+      <!-- Top VietQR Gradient Banner -->
+      <path d="M 0 0 L 425 0 A 18 18 0 0 1 425 0 L 425 48 L 0 48 Z" fill="url(#vietqrGrad)"/>
+      <text x="24" y="30" font-size="15" font-weight="900" fill="#FFFFFF" letter-spacing="1">VIETQR</text>
+      <text x="96" y="29" font-size="12" fill="#FFFFFF" opacity="0.6">|</text>
+      <text x="110" y="30" font-size="14" font-weight="800" fill="#FFFFFF">napas 247</text>
+      
+      <!-- Live Scan Status Indicator -->
+      <rect x="290" y="14" width="120" height="20" rx="10" fill="#000000" opacity="0.3"/>
+      <circle cx="304" cy="24" r="3.5" fill="#4ADE80"/>
+      <text x="314" y="28" font-size="9.5" font-weight="600" fill="#FFFFFF">Chờ quét mã...</text>
+
+      <!-- Center Dynamic QR Visual -->
+      <g transform="translate(112, 60)">
+        <!-- Rounded White QR Container with Scanner Brackets -->
+        <rect x="0" y="0" width="200" height="200" rx="12" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+        
+        <!-- Modern Corner Scanner Brackets -->
+        <path d="M 10 24 L 10 12 A 2 2 0 0 1 12 10 L 24 10" stroke="#2563EB" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M 190 24 L 190 12 A 2 2 0 0 0 188 10 L 176 10" stroke="#2563EB" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M 10 176 L 10 188 A 2 2 0 0 0 12 190 L 24 190" stroke="#2563EB" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M 190 176 L 190 188 A 2 2 0 0 1 188 190 L 176 190" stroke="#2563EB" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+        <!-- QR Finder Patterns -->
+        <!-- Top-Left -->
+        <rect x="20" y="20" width="40" height="40" rx="6" fill="#0F172A"/>
+        <rect x="26" y="26" width="28" height="28" rx="3" fill="#FFFFFF"/>
+        <rect x="31" y="31" width="18" height="18" rx="2" fill="#2563EB"/>
+
+        <!-- Top-Right -->
+        <rect x="140" y="20" width="40" height="40" rx="6" fill="#0F172A"/>
+        <rect x="146" y="26" width="28" height="28" rx="3" fill="#FFFFFF"/>
+        <rect x="151" y="31" width="18" height="18" rx="2" fill="#2563EB"/>
+
+        <!-- Bottom-Left -->
+        <rect x="20" y="140" width="40" height="40" rx="6" fill="#0F172A"/>
+        <rect x="26" y="146" width="28" height="28" rx="3" fill="#FFFFFF"/>
+        <rect x="31" y="151" width="18" height="18" rx="2" fill="#2563EB"/>
+
+        <!-- Realistic QR Data Modules -->
+        <rect x="70" y="24" width="10" height="10" fill="#0F172A"/>
+        <rect x="85" y="24" width="8" height="16" fill="#0F172A"/>
+        <rect x="100" y="24" width="16" height="8" fill="#0F172A"/>
+        <rect x="120" y="24" width="10" height="10" fill="#0F172A"/>
+
+        <rect x="24" y="70" width="12" height="8" fill="#0F172A"/>
+        <rect x="24" y="88" width="8" height="16" fill="#0F172A"/>
+        <rect x="24" y="114" width="12" height="8" fill="#0F172A"/>
+
+        <rect x="72" y="75" width="12" height="12" fill="#0F172A"/>
+        <rect x="90" y="65" width="8" height="8" fill="#0F172A"/>
+        <rect x="115" y="72" width="14" height="14" fill="#0F172A"/>
+        <rect x="145" y="78" width="10" height="18" fill="#0F172A"/>
+        <rect x="165" y="70" width="14" height="10" fill="#0F172A"/>
+
+        <rect x="68" y="112" width="16" height="8" fill="#0F172A"/>
+        <rect x="124" y="105" width="18" height="18" fill="#0F172A"/>
+        <rect x="152" y="116" width="16" height="10" fill="#0F172A"/>
+
+        <rect x="72" y="142" width="14" height="14" fill="#0F172A"/>
+        <rect x="94" y="148" width="18" height="8" fill="#0F172A"/>
+        <rect x="120" y="138" width="10" height="18" fill="#0F172A"/>
+        <rect x="140" y="152" width="20" height="20" fill="#0F172A"/>
+        <rect x="168" y="142" width="14" height="14" fill="#0F172A"/>
+
+        <!-- Center VietQR Emblem Badge -->
+        <circle cx="100" cy="100" r="18" fill="#FFFFFF" stroke="#005BAA" stroke-width="2"/>
+        <circle cx="100" cy="100" r="14" fill="#005BAA"/>
+        <text x="100" y="104" font-size="10" font-weight="900" fill="#FFFFFF" text-anchor="middle">QR</text>
+      </g>
+
+      <!-- Auto-refresh Timer Pill -->
+      <g transform="translate(132, 268)">
+        <rect x="0" y="0" width="160" height="22" rx="11" fill="#F1F5F9"/>
+        <text x="80" y="15" font-size="10.5" font-weight="600" fill="#64748B" text-anchor="middle">⏱️ Tự làm mới sau 14:58</text>
+      </g>
+
+      <!-- ================= BENEFICIARY DATA CHIPS ================= -->
+      <g transform="translate(20, 300)">
+        
+        <!-- Account Info Row -->
+        <rect x="0" y="0" width="385" height="42" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+        <text x="12" y="17" font-size="9.5" font-weight="600" fill="#94A3B8">NGÂN HÀNG THỤ HƯỞNG</text>
+        <text x="12" y="32" font-size="11.5" font-weight="800" fill="#0F172A">MBBank • 0987654321</text>
+        
+        <!-- Copy STK Button -->
+        <rect x="305" y="9" width="70" height="24" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text x="340" y="25" font-size="10" font-weight="600" fill="#1D4ED8" text-anchor="middle">Sao chép</text>
+
+        <!-- Account Holder & Exact Amount Row -->
+        <rect x="0" y="48" width="385" height="42" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+        <text x="12" y="65" font-size="9.5" font-weight="600" fill="#94A3B8">CHỦ TÀI KHOẢN &amp; SỐ TIỀN</text>
+        <text x="12" y="80" font-size="11" font-weight="700" fill="#0F172A">CONG TY GYM NHOM 6 CN01 — <tspan fill="#1D4ED8" font-weight="900">1.800.000 ₫</tspan></text>
+        
+        <rect x="305" y="57" width="70" height="24" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text x="340" y="73" font-size="10" font-weight="600" fill="#1D4ED8" text-anchor="middle">Sao chép</text>
+
+        <!-- CRUCIAL S7 HIGHLIGHT: TRANSFER SYNTAX CARD -->
+        <g transform="translate(0, 96)">
+          <rect x="0" y="0" width="385" height="52" rx="8" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1.5"/>
+          <text x="14" y="18" font-size="9.5" font-weight="800" fill="#B45309" letter-spacing="0.5">CÚ PHÁP CHUYỂN KHOẢN (ĐỐI SOÁT CHUẨN):</text>
+          
+          <text x="14" y="39" font-size="16" font-weight="900" fill="#78350F" class="mono" letter-spacing="1.5">CN01 HD000089</text>
+          
+          <!-- Large Copy Syntax Button -->
+          <rect x="275" y="12" width="100" height="28" rx="6" fill="#F59E0B"/>
+          <text x="325" y="30" font-size="10.5" font-weight="800" fill="#FFFFFF" text-anchor="middle">Sao chép cú pháp</text>
+        </g>
+
+        <!-- Microcopy Instruction -->
+        <text x="192" y="166" font-size="10" fill="#64748B" text-anchor="middle">Quét mã bằng bất kỳ ứng dụng ngân hàng hoặc ví điện tử</text>
+
+      </g>
+    </g>
+
+
+    <!-- ================= MODAL FOOTER: ACTION & VERIFICATION BAR ================= -->
+    <g transform="translate(28, 595)">
+      
+      <!-- S7 MANDATORY BUSINESS WARNING (MODERN COMPACT PILL) -->
+      <rect x="0" y="0" width="842" height="42" rx="8" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1"/>
+      <circle cx="20" cy="21" r="8" fill="#F59E0B"/>
+      <text x="20" y="25" font-size="11" font-weight="900" fill="#FFFFFF" text-anchor="middle">!</text>
+      
+      <text x="36" y="25" font-size="11" font-weight="600" fill="#92400E">LƯU Ý LỄ TÂN (S7): <tspan font-weight="400" fill="#78350F">Bắt buộc đối chiếu đúng cú pháp </tspan><tspan font-weight="800" fill="#78350F" class="mono">"CN01 HD000089"</tspan><tspan font-weight="400" fill="#78350F"> và kiểm tra tin nhắn/app báo có tiền trước khi bấm xác nhận thu tiền.</tspan></text>
+
+      <!-- Action Buttons Row -->
+      <g transform="translate(0, 56)">
+        
+        <!-- Cancel Invoice Button (Left) -->
+        <rect x="0" y="0" width="130" height="44" rx="8" fill="#FEF2F2" stroke="#FEE2E2"/>
+        <text x="65" y="27" font-size="12" font-weight="700" fill="#EF4444" text-anchor="middle">🗑 Hủy hóa đơn (E4)</text>
+
+        <!-- Print Draft Bill -->
+        <rect x="375" y="0" width="125" height="44" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.2"/>
+        <text x="437" y="27" font-size="12" font-weight="600" fill="#475569" text-anchor="middle">🖨 In tạm tính</text>
+
+        <!-- Close / Dismiss -->
+        <rect x="510" y="0" width="80" height="44" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.2"/>
+        <text x="550" y="27" font-size="12" font-weight="600" fill="#64748B" text-anchor="middle">Để sau</text>
+
+        <!-- PRIMARY CONFIRM PAYMENT BUTTON (MODERN EMERALD GREEN GRADIENT) -->
+        <g transform="translate(600, 0)">
+          <rect x="0" y="0" width="242" height="44" rx="8" fill="url(#btnConfirmGrad)"/>
+          <text x="121" y="27" font-size="13" font-weight="800" fill="#FFFFFF" text-anchor="middle">✔ ĐÃ NHẬN TIỀN</text>
+          
+          <!-- Shortcut Pill Tag -->
+          <rect x="185" y="11" width="45" height="22" rx="4" fill="#047857"/>
+          <text x="207" y="26" font-size="10.5" font-weight="800" fill="#FFFFFF" text-anchor="middle">[F9]</text>
+        </g>
+      </g>
+
+    </g>
+
+  </g>
+
+</svg>

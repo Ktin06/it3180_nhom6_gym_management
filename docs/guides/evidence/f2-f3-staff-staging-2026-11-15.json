@@ -1,0 +1,50 @@
+{
+  "baseURL": "https://it3180-nhom6-gym-git-feature-f2-f3-giao-dien-ktin06.vercel.app",
+  "timestamp": "2026-11-15T16:00:36.677Z",
+  "frontendCommit": "6d985be",
+  "browser": "157.0.4341.46",
+  "passed": 23,
+  "checks": [
+    "BRANCH_MANAGER: real login and server role",
+    "BRANCH_MANAGER: HTTPS login returns to members",
+    "BRANCH_MANAGER: create member via UI and real API",
+    "BRANCH_MANAGER: reload restores session and persisted record",
+    "BRANCH_MANAGER: pending keyword is applied when changing status",
+    "BRANCH_MANAGER: edit name/status and persist after reload",
+    "BRANCH_MANAGER: search by code/name and filter INACTIVE",
+    "BRANCH_MANAGER: duplicate phone is rejected without losing form",
+    "BRANCH_MANAGER: scoped member list stays in account branch",
+    "BRANCH_MANAGER: catalog loads with branch/global scope and type/status filters",
+    "BRANCH_MANAGER: Secure cookie and logout",
+    "RECEPTIONIST: real login and server role",
+    "RECEPTIONIST: HTTPS login returns to members",
+    "RECEPTIONIST: create member via UI and real API",
+    "RECEPTIONIST: reload restores session and persisted record",
+    "RECEPTIONIST: pending keyword is applied when changing status",
+    "RECEPTIONIST: edit name/status and persist after reload",
+    "RECEPTIONIST: search by code/name and filter INACTIVE",
+    "RECEPTIONIST: duplicate phone is rejected without losing form",
+    "RECEPTIONIST: scoped member list stays in account branch",
+    "RECEPTIONIST: catalog loads with branch/global scope and type/status filters",
+    "RECEPTIONIST: Secure cookie and logout",
+    "No uncaught browser errors"
+  ],
+  "members": [
+    {
+      "role": "BRANCH_MANAGER",
+      "id": 11,
+      "memberCode": "HV000007",
+      "homeBranchId": 1
+    },
+    {
+      "role": "RECEPTIONIST",
+      "id": 12,
+      "memberCode": "HV000008",
+      "homeBranchId": 1
+    }
+  ],
+  "limitations": [
+    "No independently identified foreign-branch member was provided: direct cross-branch read/update denial is not yet demonstrated",
+    "Backend deployment revision is not independently exposed"
+  ]
+}

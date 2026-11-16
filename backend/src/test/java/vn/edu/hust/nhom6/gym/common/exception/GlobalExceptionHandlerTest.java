@@ -51,6 +51,15 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void duLieuSaiDinhDangTra400DungChoMoiChucNang() {
+        ProblemDetail problem = handler.handleInvalidRequest(new InvalidRequestException("Giới tính không hợp lệ."));
+
+        assertThat(problem.getStatus()).isEqualTo(400);
+        assertThat(problem.getTitle()).isEqualTo("Dữ liệu không hợp lệ");
+        assertThat(problem.getDetail()).isEqualTo("Giới tính không hợp lệ.");
+    }
+
+    @Test
     void viPhamQuyTacNghiepVuTra422() {
         ProblemDetail problem = handler.handleBusinessRule(new BusinessRuleException("Gói PT không dùng để check-in"));
 

@@ -1,0 +1,293 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1200px" height="850px" viewBox="-0.5 -0.5 1200 850" content="&lt;mxfile host=&quot;app.diagrams.net&quot; version=&quot;24.0.0&quot;&gt;&lt;diagram id=&quot;diag_f4_checkin&quot; name=&quot;f4_check_in_tai_quay&quot;&gt;&lt;mxGraphModel dx=&quot;1200&quot; dy=&quot;850&quot; grid=&quot;1&quot; gridSize=&quot;10&quot; guides=&quot;1&quot; tooltips=&quot;1&quot; connect=&quot;1&quot; arrows=&quot;1&quot; fold=&quot;1&quot; page=&quot;1&quot; pageScale=&quot;1&quot; pageWidth=&quot;1200&quot; pageHeight=&quot;850&quot;&gt;&lt;root&gt;&lt;mxCell id=&quot;0&quot;/&gt;&lt;mxCell id=&quot;1&quot; parent=&quot;0&quot;/&gt;&lt;mxCell id=&quot;win&quot; value=&quot;&quot; style=&quot;rounded=1;arcSize=6;fillColor=#F8FAFC;strokeColor=#CBD5E1;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;15&quot; y=&quot;15&quot; width=&quot;1170&quot; height=&quot;820&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;sidebar&quot; value=&quot;GYM MASTER
+
+📊 Dashboard
+🏷️ Check-in tại quầy [ACTIVE]
+👥 Quản lý hội viên
+📦 Gói tập &amp;amp; Gia hạn
+💳 Hóa đơn &amp;amp; Bán hàng
+📅 Lớp học nhóm
+🏋️ Huấn luyện viên
+📈 Báo cáo thống kê&quot; style=&quot;rounded=0;fillColor=#001529;strokeColor=none;fontColor=#FFFFFF;fontSize=13;align=left;spacingLeft=25;whiteSpace=wrap;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;15&quot; y=&quot;50&quot; width=&quot;215&quot; height=&quot;785&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;topbar&quot; value=&quot;📍 Chi nhánh Bách Khoa (Cơ sở 1) • 06:00 - 22:00              Thái Hùng Lân (Lễ tân)&quot; style=&quot;rounded=0;fillColor=#FFFFFF;strokeColor=#E2E8F0;fontStyle=1;fontSize=13;fontColor=#1E293B;align=left;spacingLeft=25;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;230&quot; y=&quot;50&quot; width=&quot;955&quot; height=&quot;52&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;search_bar&quot; value=&quot;🔍  0912345678  |  nhập mã HV hoặc SĐT...   [Tra cứu ↵]&quot; style=&quot;rounded=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#3B82F6;strokeWidth=1.8;fontStyle=1;fontSize=13;align=left;spacingLeft=20;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;245&quot; y=&quot;115&quot; width=&quot;600&quot; height=&quot;55&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;shortcuts&quot; value=&quot;[F2] Tra cứu  •  [Space] Check-in  •  [F4] Check-out
+Phản hồi &amp;lt; 2s (NF1) • Kiểm tra chi nhánh (S3)&quot; style=&quot;rounded=1;arcSize=8;fillColor=#F1F5F9;fontColor=#475569;fontSize=10.5;fontStyle=1;align=center;whiteSpace=wrap;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;860&quot; y=&quot;115&quot; width=&quot;310&quot; height=&quot;55&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;left_panel&quot; value=&quot;&quot; style=&quot;rounded=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#E2E8F0;strokeWidth=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;245&quot; y=&quot;185&quot; width=&quot;555&quot; height=&quot;635&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;left_hdr&quot; value=&quot;ĐỐI CHIẾU THÔNG TIN &amp;amp; HỒ SƠ HỘI VIÊN  •  ● HOẠT ĐỘNG&quot; style=&quot;rounded=0;fillColor=#F8FAFC;strokeColor=#E2E8F0;fontStyle=1;fontSize=12;fontColor=#334155;align=left;spacingLeft=15;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;245&quot; y=&quot;185&quot; width=&quot;555&quot; height=&quot;35&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;avatar&quot; value=&quot;[ẢNH ĐỐI CHIẾU CHỐNG MƯỢN THẺ]&quot; style=&quot;rounded=1;arcSize=8;fillColor=#F1F5F9;strokeColor=#10B981;strokeWidth=2;align=center;fontStyle=1;fontSize=10;fontColor=#15803D;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;265&quot; y=&quot;235&quot; width=&quot;110&quot; height=&quot;130&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;member_info&quot; value=&quot;NGUYỄN VĂN AN (HV000088)
+SĐT: 0912.345.678 • Nam • 31t
+Chi nhánh gốc: Cơ sở 1 - Bách Khoa&quot; style=&quot;text;html=1;fontStyle=1;fontSize=13;fontColor=#0F172A;align=left;whiteSpace=wrap;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;390&quot; y=&quot;240&quot; width=&quot;380&quot; height=&quot;100&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;pkg_time&quot; value=&quot;✓ Standard 1 Tháng (TIME) [ÁP DỤNG CHECK-IN]
+Hiệu lực: 01/11 - 30/11/2026 (Còn 25 ngày) • Ưu tiên gói TIME, không giới hạn vào, không trừ buổi.&quot; style=&quot;rounded=1;arcSize=8;fillColor=#F0FDF4;strokeColor=#16A34A;strokeWidth=1.8;fontStyle=1;fontSize=11.5;fontColor=#15803D;align=left;spacingLeft=15;whiteSpace=wrap;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;265&quot; y=&quot;415&quot; width=&quot;515&quot; height=&quot;70&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;pkg_sess&quot; value=&quot;Gói 30 Buổi Gym (SESSION) - Còn 14/30 buổi
+ℹ Đã có gói TIME đang dùng, hệ thống giữ nguyên số buổi của gói này.&quot; style=&quot;rounded=1;arcSize=8;fillColor=#F8FAFC;strokeColor=#CBD5E1;fontSize=11;fontColor=#475569;align=left;spacingLeft=15;whiteSpace=wrap;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;265&quot; y=&quot;495&quot; width=&quot;515&quot; height=&quot;52&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;pkg_pt&quot; value=&quot;HLV Cá nhân PT 1-1 - Còn 6 buổi
+⚠️ Quy tắc: Gói PT không có giá trị check-in vào phòng tập tự do.&quot; style=&quot;rounded=1;arcSize=8;fillColor=#FFFBE6;strokeColor=#FDE68A;fontSize=10.5;fontColor=#92400E;align=left;spacingLeft=15;whiteSpace=wrap;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;265&quot; y=&quot;555&quot; width=&quot;515&quot; height=&quot;40&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;class_alert&quot; value=&quot;📅 Lịch lớp hôm nay: Hatha Yoga (18:00 - 19:00, Phòng 02) - Chỗ #12
+Hệ thống sẽ tự động cập nhật mốc ĐÃ ĐẾN (arrived_at) khi check-in.&quot; style=&quot;rounded=1;arcSize=8;fillColor=#EFF6FF;strokeColor=#93C5FD;fontStyle=1;fontSize=11;fontColor=#1D4ED8;align=left;spacingLeft=15;whiteSpace=wrap;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;265&quot; y=&quot;605&quot; width=&quot;515&quot; height=&quot;50&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;btn_chk&quot; value=&quot;✔ XÁC NHẬN CHECK-IN (Space / Enter)&quot; style=&quot;rounded=1;arcSize=8;fillColor=#10B981;strokeColor=#059669;fontColor=#FFFFFF;fontStyle=1;fontSize=15;align=center;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;265&quot; y=&quot;670&quot; width=&quot;370&quot; height=&quot;46&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;btn_view&quot; value=&quot;Xem hồ sơ&quot; style=&quot;rounded=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#CBD5E1;fontColor=#475569;fontStyle=1;fontSize=12;align=center;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;650&quot; y=&quot;670&quot; width=&quot;130&quot; height=&quot;46&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;toast_success&quot; value=&quot;✓ 17:48:20 – Check-in thành công cho HV000088 (Standard 1M). Chúc buổi tập vui vẻ!&quot; style=&quot;rounded=1;arcSize=8;fillColor=#DCFCE7;strokeColor=#86EFAC;fontStyle=1;fontSize=11.5;fontColor=#166534;align=center;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;265&quot; y=&quot;730&quot; width=&quot;515&quot; height=&quot;40&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;right_panel&quot; value=&quot;&quot; style=&quot;rounded=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#E2E8F0;strokeWidth=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;825&quot; y=&quot;185&quot; width=&quot;345&quot; height=&quot;635&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;right_hdr&quot; value=&quot;HỘI VIÊN ĐANG TẬP (42 người)&quot; style=&quot;rounded=0;fillColor=#F8FAFC;strokeColor=#E2E8F0;fontStyle=1;fontSize=12;fontColor=#334155;align=left;spacingLeft=15;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;825&quot; y=&quot;185&quot; width=&quot;345&quot; height=&quot;35&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;chk_search&quot; value=&quot;🔍 Tìm tên / mã để check-out nhanh...&quot; style=&quot;rounded=1;arcSize=6;fillColor=#F8FAFC;strokeColor=#CBD5E1;fontSize=11;fontColor=#64748B;align=left;spacingLeft=10;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;840&quot; y=&quot;235&quot; width=&quot;315&quot; height=&quot;32&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;feed1&quot; value=&quot;Trần Thị Bích (HV000045) • Vào: 17:30 (18p) [Check-out]&quot; style=&quot;rounded=1;arcSize=6;fillColor=#FFFFFF;strokeColor=#E2E8F0;fontSize=11;fontStyle=1;align=left;spacingLeft=10;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;840&quot; y=&quot;280&quot; width=&quot;315&quot; height=&quot;60&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;feed2&quot; value=&quot;Lê Hoàng Nam (HV000108) • Vào: 16:15 (93p) [Check-out]&quot; style=&quot;rounded=1;arcSize=6;fillColor=#FFFFFF;strokeColor=#E2E8F0;fontSize=11;fontStyle=1;align=left;spacingLeft=10;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;840&quot; y=&quot;350&quot; width=&quot;315&quot; height=&quot;60&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;feed3&quot; value=&quot;Phạm Thùy Linh (HV000012) • Vào: 17:10 (38p) [Check-out]&quot; style=&quot;rounded=1;arcSize=6;fillColor=#FFFFFF;strokeColor=#E2E8F0;fontSize=11;fontStyle=1;align=left;spacingLeft=10;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;840&quot; y=&quot;420&quot; width=&quot;315&quot; height=&quot;60&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;feed4&quot; value=&quot;Đặng Quốc Tuấn (HV000076) • Vào: 17:22 (26p) [Check-out]&quot; style=&quot;rounded=1;arcSize=6;fillColor=#FFFFFF;strokeColor=#E2E8F0;fontSize=11;fontStyle=1;align=left;spacingLeft=10;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;840&quot; y=&quot;490&quot; width=&quot;315&quot; height=&quot;60&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;feed5&quot; value=&quot;Vũ Đức Minh (HV000099) • Ra về lúc 17:25 (Tập 65p) [Đã về]&quot; style=&quot;rounded=1;arcSize=6;fillColor=#F8FAFC;strokeColor=#E2E8F0;fontSize=11;fontColor=#64748B;align=left;spacingLeft=10;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;840&quot; y=&quot;560&quot; width=&quot;315&quot; height=&quot;55&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;feed_link&quot; value=&quot;Xem nhật ký toàn bộ 158 lượt hôm nay →&quot; style=&quot;text;html=1;fontSize=12;fontStyle=1;fontColor=#1890FF;align=center;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;825&quot; y=&quot;770&quot; width=&quot;345&quot; height=&quot;30&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;/root&gt;&lt;/mxGraphModel&gt;&lt;/diagram&gt;&lt;/mxfile&gt;">
+  <defs>
+    <style type="text/css">
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap');
+      text { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+      .title { font-size: 18px; font-weight: 700; fill: #0F172A; }
+      .subtitle { font-size: 12px; font-weight: 400; fill: #64748B; }
+      .badge-txt { font-size: 11px; font-weight: 700; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1200" height="850" fill="#F1F5F9"/>
+
+  <!-- Browser Window Frame -->
+  <rect x="15" y="15" width="1170" height="820" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5"/>
+  <path d="M 15 50 L 1185 50" stroke="#E2E8F0" stroke-width="1.5"/>
+  <circle cx="38" cy="32" r="5.5" fill="#EF4444"/>
+  <circle cx="56" cy="32" r="5.5" fill="#F59E0B"/>
+  <circle cx="74" cy="32" r="5.5" fill="#10B981"/>
+  
+  <!-- Address Bar -->
+  <rect x="105" y="23" width="580" height="20" rx="4" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="120" y="37" font-size="11" fill="#64748B">https://gym.hust.edu.vn/staff/checkins</text>
+
+  <!-- LEFT SIDEBAR (Dark Theme #001529) -->
+  <rect x="15" y="50" width="215" height="785" fill="#001529"/>
+  
+  <!-- Logo -->
+  <rect x="35" y="68" width="30" height="30" rx="6" fill="#1890FF"/>
+  <text x="50" y="89" font-size="17" font-weight="900" fill="#FFFFFF" text-anchor="middle">G</text>
+  <text x="75" y="89" font-size="15" font-weight="700" fill="#FFFFFF">GYM MASTER</text>
+
+  <!-- Sidebar Menu Items -->
+  <g transform="translate(25, 120)">
+    <!-- Dashboard -->
+    <text x="40" y="24" font-size="13" font-weight="500" fill="#94A3B8">📊 Dashboard</text>
+    
+    <!-- Check-in (ACTIVE) -->
+    <rect x="0" y="42" width="195" height="36" rx="6" fill="#1890FF"/>
+    <text x="40" y="65" font-size="13" font-weight="600" fill="#FFFFFF">🏷️ Check-in tại quầy</text>
+    
+    <!-- Hội viên -->
+    <text x="40" y="106" font-size="13" font-weight="500" fill="#94A3B8">👥 Quản lý hội viên</text>
+    
+    <!-- Gói tập -->
+    <text x="40" y="146" font-size="13" font-weight="500" fill="#94A3B8">📦 Gói tập &amp; Gia hạn</text>
+    
+    <!-- Hóa đơn -->
+    <text x="40" y="186" font-size="13" font-weight="500" fill="#94A3B8">💳 Hóa đơn &amp; Bán hàng</text>
+    
+    <!-- Lớp học -->
+    <text x="40" y="226" font-size="13" font-weight="500" fill="#94A3B8">📅 Lớp học nhóm</text>
+    
+    <!-- HLV -->
+    <text x="40" y="266" font-size="13" font-weight="500" fill="#94A3B8">🏋️ Huấn luyện viên</text>
+    
+    <!-- Báo cáo -->
+    <text x="40" y="306" font-size="13" font-weight="500" fill="#94A3B8">📈 Báo cáo thống kê</text>
+  </g>
+
+  <!-- TOP HEADER BAR -->
+  <rect x="230" y="50" width="955" height="52" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="255" y="81" font-size="13" font-weight="600" fill="#1E293B">📍 Chi nhánh Bách Khoa (Cơ sở 1)</text>
+  <rect x="475" y="68" width="92" height="20" rx="10" fill="#DCFCE7"/>
+  <circle cx="487" cy="78" r="3.5" fill="#16A34A"/>
+  <text x="526" y="82" font-size="10.5" font-weight="600" fill="#15803D" text-anchor="middle">06:00 - 22:00</text>
+
+  <!-- User badge -->
+  <circle cx="1025" cy="76" r="15" fill="#E0F2FE"/>
+  <text x="1025" y="81" font-size="11" font-weight="700" fill="#0284C7" text-anchor="middle">TL</text>
+  <text x="1048" y="81" font-size="12" font-weight="600" fill="#1E293B">Thái Hùng Lân (Lễ tân)</text>
+
+  <!-- MAIN CONTENT AREA -->
+  <!-- Search & Quick Action Toolbar -->
+  <rect x="245" y="115" width="925" height="60" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  
+  <!-- Search Input Box -->
+  <rect x="260" y="126" width="460" height="38" rx="6" fill="#F8FAFC" stroke="#3B82F6" stroke-width="1.8"/>
+  <text x="275" y="150" font-size="14" fill="#64748B">🔍</text>
+  <text x="300" y="150" font-size="14" font-weight="600" fill="#0F172A">0912345678</text>
+  <text x="405" y="150" font-size="12" fill="#94A3B8">| hoặc nhập mã HV (ví dụ: HV000088)</text>
+  
+  <rect x="730" y="126" width="115" height="38" rx="6" fill="#1890FF"/>
+  <text x="787" y="150" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">Tra cứu ↵</text>
+
+  <!-- Quick Shortcut Badges -->
+  <rect x="860" y="126" width="300" height="38" rx="6" fill="#F1F5F9"/>
+  <text x="872" y="142" font-size="10.5" font-weight="600" fill="#475569"><tspan fill="#0284C7">[F2]</tspan> Tra cứu</text>
+  <text x="945" y="142" font-size="10.5" font-weight="600" fill="#475569"><tspan fill="#16A34A">[Space]</tspan> Check-in</text>
+  <text x="1035" y="142" font-size="10.5" font-weight="600" fill="#475569"><tspan fill="#EA580C">[F4]</tspan> Check-out</text>
+  <text x="872" y="157" font-size="9.5" fill="#64748B">Phản hồi hệ thống &lt; 2s (NF1) • Kiểm tra chi nhánh (S3)</text>
+
+  <!-- SPLIT VIEW CONTAINER (2 COLUMNS) -->
+  <!-- LEFT COLUMN: MEMBER PROFILE & PACKAGES (Width 555px) -->
+  <rect x="245" y="185" width="555" height="635" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  
+  <!-- Left Card Header -->
+  <path d="M 245 185 L 800 185 A 8 8 0 0 1 800 185 L 800 220 L 245 220 Z" fill="#F8FAFC"/>
+  <text x="265" y="208" font-size="12" font-weight="700" fill="#334155" letter-spacing="0.5">ĐỐI CHIẾU THÔNG TIN &amp; HỒ SƠ HỘI VIÊN</text>
+  <rect x="700" y="193" width="85" height="20" rx="10" fill="#DCFCE7"/>
+  <text x="742" y="207" font-size="10" font-weight="700" fill="#15803D" text-anchor="middle">● HOẠT ĐỘNG</text>
+  <line x1="245" y1="220" x2="800" y2="220" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- Member Avatar & Basic Info -->
+  <!-- Large Face Avatar Box for Visual Face Matching (Anti-card sharing) -->
+  <rect x="265" y="235" width="110" height="130" rx="8" fill="#F1F5F9" stroke="#10B981" stroke-width="2.5"/>
+  <!-- Stylized Face Illustration inside Avatar Box -->
+  <circle cx="320" cy="280" r="28" fill="#FED7AA"/>
+  <path d="M 300 270 Q 320 250 340 270" stroke="#9A3412" stroke-width="4" fill="none"/>
+  <circle cx="310" cy="278" r="3" fill="#1E293B"/>
+  <circle cx="330" cy="278" r="3" fill="#1E293B"/>
+  <path d="M 314 292 Q 320 298 326 292" stroke="#9A3412" stroke-width="2" fill="none"/>
+  <path d="M 285 340 C 285 315 355 315 355 340" fill="#3B82F6"/>
+  <!-- Visual Verification Stamp -->
+  <rect x="265" y="340" width="110" height="25" rx="0" fill="#10B981"/>
+  <text x="320" y="356" font-size="10" font-weight="700" fill="#FFFFFF" text-anchor="middle">✓ ĐÃ ĐỐI CHIẾU ẢNH</text>
+
+  <!-- Member Details Fields -->
+  <text x="390" y="255" font-size="18" font-weight="800" fill="#0F172A">NGUYỄN VĂN AN</text>
+  
+  <rect x="390" y="265" width="85" height="20" rx="4" fill="#EFF6FF" stroke="#BFDBFE"/>
+  <text x="432" y="279" font-size="11" font-weight="700" fill="#1D4ED8" text-anchor="middle">HV000088</text>
+
+  <rect x="482" y="265" width="70" height="20" rx="4" fill="#F1F5F9"/>
+  <text x="517" y="279" font-size="10.5" font-weight="600" fill="#475569" text-anchor="middle">Nam • 31t</text>
+
+  <text x="390" y="306" font-size="12" fill="#64748B">Số điện thoại:</text>
+  <text x="475" y="306" font-size="12" font-weight="600" fill="#0F172A">0912.345.678</text>
+
+  <text x="390" y="326" font-size="12" fill="#64748B">Chi nhánh gốc:</text>
+  <text x="475" y="326" font-size="12" font-weight="600" fill="#0F172A">Cơ sở 1 - Bách Khoa</text>
+
+  <text x="390" y="346" font-size="12" fill="#64748B">Ngày tham gia:</text>
+  <text x="475" y="346" font-size="12" fill="#0F172A">12/03/2025 (Hơn 1 năm)</text>
+
+  <!-- DIVIDER -->
+  <line x1="265" y1="380" x2="780" y2="380" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- PACKAGES EVALUATION SECTION (Business Rules Check) -->
+  <text x="265" y="402" font-size="12" font-weight="700" fill="#1E293B">CÁC GÓI TẬP HIỆN CÓ (TỰ ĐỘNG CHỌN GÓI HỢP LỆ)</text>
+  <text x="615" y="402" font-size="10.5" fill="#64748B">Ưu tiên TIME &gt; SESSION</text>
+
+  <!-- Package 1: TIME (Selected / Valid for Check-in) -->
+  <rect x="265" y="415" width="515" height="70" rx="6" fill="#F0FDF4" stroke="#16A34A" stroke-width="1.8"/>
+  <circle cx="288" cy="450" r="11" fill="#16A34A"/>
+  <text x="288" y="454" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">✓</text>
+  
+  <text x="310" y="438" font-size="13" font-weight="700" fill="#15803D">Standard 1 Tháng (Toàn chuỗi)</text>
+  <rect x="525" y="426" width="50" height="17" rx="3" fill="#DCFCE7"/>
+  <text x="550" y="438" font-size="9.5" font-weight="700" fill="#15803D" text-anchor="middle">TIME</text>
+  <rect x="580" y="426" width="75" height="17" rx="3" fill="#16A34A"/>
+  <text x="617" y="438" font-size="9.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">ÁP DỤNG</text>
+  
+  <text x="310" y="457" font-size="11.5" fill="#334155">Hiệu lực: 01/11/2026 – 30/11/2026 (<tspan font-weight="700" fill="#15803D">Còn 25 ngày</tspan>)</text>
+  <text x="310" y="473" font-size="10" fill="#16A34A">● Gói theo thời gian hợp lệ: Check-in không giới hạn số lần, không trừ buổi.</text>
+
+  <!-- Package 2: SESSION (Secondary / Ignored since TIME is active) -->
+  <rect x="265" y="495" width="515" height="52" rx="6" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="280" y="516" font-size="12" font-weight="600" fill="#475569">Gói 30 Buổi Gym</text>
+  <rect x="400" y="505" width="60" height="16" rx="3" fill="#F1F5F9"/>
+  <text x="430" y="516" font-size="9.5" font-weight="600" fill="#475569" text-anchor="middle">SESSION</text>
+  <text x="480" y="516" font-size="11.5" font-weight="600" fill="#0284C7">Còn 14 / 30 buổi</text>
+  
+  <text x="280" y="535" font-size="10" fill="#64748B">ℹ Quy tắc: Đã có gói TIME đang hoạt động, hệ thống giữ nguyên số buổi gói này.</text>
+
+  <!-- Package 3: PT 1-1 (Cannot check-in rule) -->
+  <rect x="265" y="555" width="515" height="38" rx="6" fill="#FFFBE6" stroke="#FDE68A" stroke-width="1"/>
+  <text x="280" y="573" font-size="11.5" font-weight="600" fill="#92400E">HLV Cá nhân PT 1-1 (10 buổi) – Còn 6 buổi</text>
+  <text x="280" y="586" font-size="9.5" fill="#B45309">⚠️ Quy tắc: Gói PT không có giá trị check-in vào phòng tập tự do.</text>
+
+  <!-- UPCOMING CLASS SESSION ALERT (F8 integration) -->
+  <rect x="265" y="605" width="515" height="50" rx="6" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.2"/>
+  <text x="280" y="626" font-size="12" font-weight="700" fill="#1D4ED8">📅 Lịch lớp học hôm nay: Hatha Yoga (18:00 - 19:00, Phòng 02)</text>
+  <text x="280" y="643" font-size="10.5" fill="#2563EB">Chỗ đặt: #12 • Hệ thống sẽ tự động cập nhật mốc ĐÃ ĐẾN (arrived_at) khi check-in.</text>
+
+  <!-- ACTION BUTTONS -->
+  <g transform="translate(265, 670)">
+    <!-- Primary Big Action Button -->
+    <rect x="0" y="0" width="370" height="46" rx="6" fill="#10B981" stroke="#059669" stroke-width="1"/>
+    <text x="185" y="28" font-size="15" font-weight="700" fill="#FFFFFF" text-anchor="middle">✔ XÁC NHẬN CHECK-IN (Space / Enter)</text>
+    
+    <!-- Secondary Reject Button -->
+    <rect x="385" y="0" width="130" height="46" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2"/>
+    <text x="450" y="28" font-size="12.5" font-weight="600" fill="#475569" text-anchor="middle">Xem hồ sơ</text>
+  </g>
+
+  <!-- SUCCESS NOTIFICATION BAR -->
+  <rect x="265" y="730" width="515" height="40" rx="6" fill="#DCFCE7" stroke="#86EFAC" stroke-width="1"/>
+  <text x="285" y="754" font-size="11.5" font-weight="600" fill="#166534">✓ 17:48:20 – Check-in thành công cho HV000088 (Standard 1M). Chúc buổi tập vui vẻ!</text>
+
+
+  <!-- RIGHT COLUMN: LIVE RECEPTION FEED & CHECK-OUT (Width 345px) -->
+  <rect x="825" y="185" width="345" height="635" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  
+  <!-- Right Card Header -->
+  <path d="M 825 185 L 1170 185 A 8 8 0 0 1 1170 185 L 1170 220 L 825 220 Z" fill="#F8FAFC"/>
+  <text x="845" y="208" font-size="12" font-weight="700" fill="#334155" letter-spacing="0.5">HỘI VIÊN ĐANG TẬP</text>
+  <rect x="1090" y="193" width="65" height="20" rx="10" fill="#EFF6FF"/>
+  <text x="1122" y="207" font-size="10.5" font-weight="700" fill="#1D4ED8" text-anchor="middle">42 người</text>
+  <line x1="825" y1="220" x2="1170" y2="220" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- Quick Filter / Search for Check-out -->
+  <rect x="840" y="235" width="315" height="32" rx="4" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <text x="852" y="255" font-size="11.5" fill="#64748B">🔍 Tìm tên / mã để check-out nhanh...</text>
+
+  <!-- Feed Item 1: In gym -->
+  <g transform="translate(840, 280)">
+    <rect x="0" y="0" width="315" height="65" rx="6" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <circle cx="22" cy="25" r="14" fill="#FED7AA"/>
+    <text x="22" y="29" font-size="10" font-weight="700" fill="#9A3412" text-anchor="middle">TB</text>
+    <text x="44" y="22" font-size="12" font-weight="700" fill="#0F172A">Trần Thị Bích</text>
+    <text x="44" y="37" font-size="10" fill="#64748B">HV000045 • Gói 30 Buổi</text>
+    <text x="44" y="52" font-size="10" font-weight="600" fill="#16A34A">Vào: 17:30 (Đang tập 18p)</text>
+    
+    <!-- Quick Checkout Button -->
+    <rect x="235" y="18" width="70" height="28" rx="4" fill="#F1F5F9" stroke="#CBD5E1"/>
+    <text x="270" y="36" font-size="11" font-weight="600" fill="#334155" text-anchor="middle">Check-out</text>
+  </g>
+
+  <!-- Feed Item 2: In gym -->
+  <g transform="translate(840, 355)">
+    <rect x="0" y="0" width="315" height="65" rx="6" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <circle cx="22" cy="25" r="14" fill="#E0F2FE"/>
+    <text x="22" y="29" font-size="10" font-weight="700" fill="#0369A1" text-anchor="middle">HN</text>
+    <text x="44" y="22" font-size="12" font-weight="700" fill="#0F172A">Lê Hoàng Nam</text>
+    <text x="44" y="37" font-size="10" fill="#64748B">HV000108 • VIP 12M</text>
+    <text x="44" y="52" font-size="10" font-weight="600" fill="#EA580C">Vào: 16:15 (Đang tập 93p)</text>
+    
+    <rect x="235" y="18" width="70" height="28" rx="4" fill="#F1F5F9" stroke="#CBD5E1"/>
+    <text x="270" y="36" font-size="11" font-weight="600" fill="#334155" text-anchor="middle">Check-out</text>
+  </g>
+
+  <!-- Feed Item 3: In gym -->
+  <g transform="translate(840, 430)">
+    <rect x="0" y="0" width="315" height="65" rx="6" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <circle cx="22" cy="25" r="14" fill="#FCE7F3"/>
+    <text x="22" y="29" font-size="10" font-weight="700" fill="#9D174D" text-anchor="middle">TL</text>
+    <text x="44" y="22" font-size="12" font-weight="700" fill="#0F172A">Phạm Thùy Linh</text>
+    <text x="44" y="37" font-size="10" fill="#64748B">HV000012 • Standard 3M</text>
+    <text x="44" y="52" font-size="10" font-weight="600" fill="#16A34A">Vào: 17:10 (Đang tập 38p)</text>
+    
+    <rect x="235" y="18" width="70" height="28" rx="4" fill="#F1F5F9" stroke="#CBD5E1"/>
+    <text x="270" y="36" font-size="11" font-weight="600" fill="#334155" text-anchor="middle">Check-out</text>
+  </g>
+
+  <!-- Feed Item 4: In gym -->
+  <g transform="translate(840, 505)">
+    <rect x="0" y="0" width="315" height="65" rx="6" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <circle cx="22" cy="25" r="14" fill="#FEF3C7"/>
+    <text x="22" y="29" font-size="10" font-weight="700" fill="#B45309" text-anchor="middle">QT</text>
+    <text x="44" y="22" font-size="12" font-weight="700" fill="#0F172A">Đặng Quốc Tuấn</text>
+    <text x="44" y="37" font-size="10" fill="#64748B">HV000076 • Standard 1M</text>
+    <text x="44" y="52" font-size="10" font-weight="600" fill="#16A34A">Vào: 17:22 (Đang tập 26p)</text>
+    
+    <rect x="235" y="18" width="70" height="28" rx="4" fill="#F1F5F9" stroke="#CBD5E1"/>
+    <text x="270" y="36" font-size="11" font-weight="600" fill="#334155" text-anchor="middle">Check-out</text>
+  </g>
+
+  <!-- Feed Item 5: Already Checked Out -->
+  <g transform="translate(840, 580)">
+    <rect x="0" y="0" width="315" height="58" rx="6" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <circle cx="22" cy="25" r="14" fill="#E2E8F0"/>
+    <text x="22" y="29" font-size="10" font-weight="700" fill="#64748B" text-anchor="middle">DM</text>
+    <text x="44" y="22" font-size="12" font-weight="600" fill="#64748B">Vũ Đức Minh (HV000099)</text>
+    <text x="44" y="38" font-size="10" fill="#94A3B8">Vào 16:20 → Ra 17:25 (Tập 65p)</text>
+    
+    <rect x="230" y="17" width="75" height="22" rx="3" fill="#E2E8F0"/>
+    <text x="267" y="32" font-size="10" font-weight="600" fill="#475569" text-anchor="middle">Đã về</text>
+  </g>
+
+  <!-- Right Footer Link -->
+  <line x1="825" y1="760" x2="1170" y2="760" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="997" y="788" font-size="12" font-weight="600" fill="#1890FF" text-anchor="middle">Xem nhật ký toàn bộ 158 lượt hôm nay →</text>
+
+</svg>
+

@@ -1,4 +1,4 @@
-import { Button, Layout, Typography } from 'antd'
+import { Button, Layout, Space, Typography } from 'antd'
 import { Link, Outlet } from 'react-router-dom'
 
 const { Header, Content, Footer } = Layout
@@ -19,9 +19,14 @@ export function PublicLayout() {
         <Link to="/">
           <Typography.Text strong>Gym Nhóm 6</Typography.Text>
         </Link>
-        <Link to="/login">
-          <Button type="primary">Đăng nhập</Button>
-        </Link>
+        <Space size="small">
+          <Link to="/register">
+            <Button>Đăng ký</Button>
+          </Link>
+          <Link to="/login">
+            <Button type="primary">Đăng nhập</Button>
+          </Link>
+        </Space>
       </Header>
       <Content style={{ padding: 16, width: '100%', maxWidth: 1080, margin: '0 auto' }}>
         <Outlet />

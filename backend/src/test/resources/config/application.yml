@@ -1,0 +1,4 @@
+# Cấu hình ghi đè chỉ dùng trong môi trường kiểm thử tự động (JUnit).
+app:
+  jwt:
+    secret: khoa-bi-mat-kiem-thu-jwt-rieng-biet-toi-thieu-32-byte

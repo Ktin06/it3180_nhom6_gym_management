@@ -1,0 +1,180 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1450" viewBox="0 0 1600 1450" content="&lt;mxfile host=&quot;app.diagrams.net&quot; version=&quot;24.7.17&quot;&gt;&lt;diagram id=&quot;form-ho-so-hoi-vien&quot; name=&quot;02 / Form hồ sơ hội viên&quot;&gt;&lt;mxGraphModel grid=&quot;1&quot; gridSize=&quot;10&quot; page=&quot;1&quot; pageWidth=&quot;1600&quot; pageHeight=&quot;1450&quot;&gt;&lt;root&gt;&lt;mxCell id=&quot;0&quot; /&gt;&lt;mxCell id=&quot;1&quot; parent=&quot;0&quot; /&gt;&lt;mxCell id=&quot;2&quot; value=&quot;&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f4f5f7;strokeColor=#f4f5f7;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;0&quot; y=&quot;0&quot; width=&quot;1600&quot; height=&quot;1450&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;3&quot; value=&quot;02 / Form hồ sơ hội viên&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f4f5f7;strokeColor=#f4f5f7;fontColor=#26313e;fontFamily=Arial;fontSize=27;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;24&quot; width=&quot;1536&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;4&quot; value=&quot;Issue #18 · F2 · Hai chế độ Thêm / Sửa · Sprint 1 chưa có ảnh · Bản phác thảo&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f4f5f7;strokeColor=#f4f5f7;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;76&quot; width=&quot;1536&quot; height=&quot;52&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;5&quot; value=&quot;&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;140&quot; width=&quot;1140&quot; height=&quot;680&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;6&quot; value=&quot;&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;140&quot; width=&quot;190&quot; height=&quot;680&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;7&quot; value=&quot;GYM NHÓM 6&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#eceef1;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;44&quot; y=&quot;150&quot; width=&quot;166&quot; height=&quot;50&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;8&quot; value=&quot;Trang chủ&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;44&quot; y=&quot;220&quot; width=&quot;166&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;9&quot; value=&quot;Hội viên&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;44&quot; y=&quot;272&quot; width=&quot;166&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;10&quot; value=&quot;Gói tập&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;44&quot; y=&quot;324&quot; width=&quot;166&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;11&quot; value=&quot;Thanh toán&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;44&quot; y=&quot;376&quot; width=&quot;166&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;12&quot; value=&quot;CN01  /  Không gian làm việc tại quầy&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f1f2f4;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;152&quot; width=&quot;918&quot; height=&quot;42&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;13&quot; value=&quot;&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1200&quot; y=&quot;140&quot; width=&quot;360&quot; height=&quot;680&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;14&quot; value=&quot;☰  Gym Nhóm 6                Tài khoản&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#eceef1;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1200&quot; y=&quot;140&quot; width=&quot;360&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;15&quot; value=&quot;MOBILE · chiều rộng 360 px&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f4f5f7;strokeColor=#f4f5f7;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1200&quot; y=&quot;832&quot; width=&quot;360&quot; height=&quot;42&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;16&quot; value=&quot;HỒ SƠ HỘI VIÊN  /  THÊM MỚI HOẶC SỬA&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=20;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;212&quot; width=&quot;918&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;17&quot; value=&quot;Mã hội viên: hệ thống tự cấp khi thêm; chỉ đọc khi sửa (VD: HV000001).&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f1f2f4;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;272&quot; width=&quot;918&quot; height=&quot;52&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;18&quot; value=&quot;Họ và tên *&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#ffffff;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;342&quot; width=&quot;440&quot; height=&quot;32&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;19&quot; value=&quot;Nguyễn Minh An&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;380&quot; width=&quot;440&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;20&quot; value=&quot;Số điện thoại *&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#ffffff;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;702&quot; y=&quot;342&quot; width=&quot;454&quot; height=&quot;32&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;21&quot; value=&quot;0900000001&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;702&quot; y=&quot;380&quot; width=&quot;454&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;22&quot; value=&quot;Giới tính (tùy chọn)&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#ffffff;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;466&quot; width=&quot;440&quot; height=&quot;32&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;23&quot; value=&quot;Chưa chọn  ▾&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;504&quot; width=&quot;440&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;24&quot; value=&quot;Ngày sinh (tùy chọn)&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#ffffff;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;702&quot; y=&quot;466&quot; width=&quot;454&quot; height=&quot;32&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;25&quot; value=&quot;Chọn ngày  ▾&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;702&quot; y=&quot;504&quot; width=&quot;454&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;26&quot; value=&quot;Trạng thái khi sửa: Hoạt động ▾   ·   Chuyển ngừng hoạt động cần xác nhận.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#f1f2f4;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;582&quot; width=&quot;918&quot; height=&quot;56&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;27&quot; value=&quot;Hồ sơ có thể chưa có tài khoản. Không yêu cầu email hoặc mật khẩu tại form này.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;238&quot; y=&quot;658&quot; width=&quot;918&quot; height=&quot;50&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;28&quot; value=&quot;Hủy&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;796&quot; y=&quot;736&quot; width=&quot;160&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;29&quot; value=&quot;Lưu hồ sơ&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#e3e6eb;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;972&quot; y=&quot;736&quot; width=&quot;184&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;30&quot; value=&quot;← Danh sách / Thêm / Sửa hội viên&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;204&quot; width=&quot;336&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;31&quot; value=&quot;Họ và tên *&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#ffffff;fontColor=#26313e;fontFamily=Arial;fontSize=13;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;264&quot; width=&quot;336&quot; height=&quot;30&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;32&quot; value=&quot;Nguyễn Minh An&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;298&quot; width=&quot;336&quot; height=&quot;46&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;33&quot; value=&quot;Số điện thoại *&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#ffffff;fontColor=#26313e;fontFamily=Arial;fontSize=13;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;364&quot; width=&quot;336&quot; height=&quot;30&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;34&quot; value=&quot;0900000001&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;398&quot; width=&quot;336&quot; height=&quot;46&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;35&quot; value=&quot;Giới tính&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#ffffff;fontColor=#26313e;fontFamily=Arial;fontSize=13;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;464&quot; width=&quot;336&quot; height=&quot;30&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;36&quot; value=&quot;Chưa chọn ▾&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;498&quot; width=&quot;336&quot; height=&quot;46&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;37&quot; value=&quot;Ngày sinh&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#ffffff;fontColor=#26313e;fontFamily=Arial;fontSize=13;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;564&quot; width=&quot;336&quot; height=&quot;30&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;38&quot; value=&quot;Chọn ngày ▾&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=14;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;598&quot; width=&quot;336&quot; height=&quot;46&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;39&quot; value=&quot;Khi sửa: trạng thái Hoạt động ▾&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=13;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;682&quot; width=&quot;336&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;40&quot; value=&quot;Hủy&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1212&quot; y=&quot;752&quot; width=&quot;150&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;41&quot; value=&quot;Lưu hồ sơ&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#e3e6eb;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;1374&quot; y=&quot;752&quot; width=&quot;174&quot; height=&quot;44&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;42&quot; value=&quot;Thêm, sửa và phản hồi của form&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#e3e6eb;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=15;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;886&quot; width=&quot;1528&quot; height=&quot;42&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;43&quot; value=&quot;Thêm: mã tự sinh sau khi lưu; trạng thái ban đầu ACTIVE. Sửa: nạp dữ liệu có sẵn, mã chỉ đọc. Không có trường ảnh/avatarUrl hoặc nút tải ảnh.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=16;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;942&quot; width=&quot;1528&quot; height=&quot;72&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;44&quot; value=&quot;Dữ liệu không hợp lệ: lỗi ngay dưới trường, đưa focus về lỗi đầu. Trùng SĐT: “Số điện thoại này đã thuộc hồ sơ khác”; giữ dữ liệu nhập. Backend chuẩn hóa SĐT (có thể nhập +84 theo đặc tả).&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=16;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;1026&quot; width=&quot;1528&quot; height=&quot;72&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;45&quot; value=&quot;Đang lưu: nút “Đang lưu…” và ngăn gửi lặp. Thành công: báo “Đã lưu hồ sơ”, quay về danh sách và tải lại. Lỗi mạng: giữ form, cho lưu lại. 404/403 khi sửa: báo rõ và cho quay về danh sách.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=16;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;1110&quot; width=&quot;1528&quot; height=&quot;72&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;46&quot; value=&quot;Đổi sang ngừng hoạt động: hộp xác nhận “Ngừng hoạt động hội viên? Tài khoản liên kết cũng sẽ bị khóa.” [Hủy] [Xác nhận]. Backend đồng bộ trạng thái tài khoản; không xóa hồ sơ.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=16;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;1194&quot; width=&quot;1528&quot; height=&quot;72&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;mxCell id=&quot;47&quot; value=&quot;Mobile: form một cột, các nút nằm trong luồng cuộn, không che trường cuối. Hủy khi đã nhập thay đổi: hỏi “Bỏ thay đổi chưa lưu?” [Tiếp tục sửa] [Bỏ thay đổi]. Nguồn: UC-F2.1/UC-F2.4.&quot; style=&quot;rounded=0;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa1aa;fontColor=#26313e;fontFamily=Arial;fontSize=16;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontStyle=0;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;32&quot; y=&quot;1278&quot; width=&quot;1528&quot; height=&quot;72&quot; as=&quot;geometry&quot; /&gt;&lt;/mxCell&gt;&lt;/root&gt;&lt;/mxGraphModel&gt;&lt;/diagram&gt;&lt;/mxfile&gt;">
+  <title>02 / Form hồ sơ hội viên</title>
+  <rect x="0" y="0" width="1600" height="1450" fill="#f4f5f7" stroke="#f4f5f7" />
+  <rect x="32" y="24" width="1536" height="44" fill="#f4f5f7" stroke="#f4f5f7" />
+  <text x="44" y="54.1" fill="#26313e" font-family="Arial, sans-serif" font-size="27" font-weight="700">
+    <tspan x="44" dy="0">02 / Form hồ sơ hội viên</tspan>
+  </text>
+  <rect x="32" y="76" width="1536" height="52" fill="#f4f5f7" stroke="#f4f5f7" />
+  <text x="44" y="106.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="400">
+    <tspan x="44" dy="0">Issue #18 · F2 · Hai chế độ Thêm / Sửa · Sprint 1 chưa có ảnh · Bản phác thảo</tspan>
+  </text>
+  <rect x="32" y="140" width="1140" height="680" fill="#ffffff" stroke="#9aa1aa" />
+  <rect x="32" y="140" width="190" height="680" fill="#eceef1" stroke="#9aa1aa" />
+  <rect x="44" y="150" width="166" height="50" fill="#eceef1" stroke="#eceef1" />
+  <text x="56" y="179.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="700">
+    <tspan x="56" dy="0">GYM NHÓM 6</tspan>
+  </text>
+  <rect x="44" y="220" width="166" height="40" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="56" y="244.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="400">
+    <tspan x="56" dy="0">Trang chủ</tspan>
+  </text>
+  <rect x="44" y="272" width="166" height="40" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="56" y="296.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="400">
+    <tspan x="56" dy="0">Hội viên</tspan>
+  </text>
+  <rect x="44" y="324" width="166" height="40" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="56" y="348.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="400">
+    <tspan x="56" dy="0">Gói tập</tspan>
+  </text>
+  <rect x="44" y="376" width="166" height="40" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="56" y="400.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="400">
+    <tspan x="56" dy="0">Thanh toán</tspan>
+  </text>
+  <rect x="238" y="152" width="918" height="42" fill="#f1f2f4" stroke="#9aa1aa" />
+  <text x="250" y="177.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="400">
+    <tspan x="250" dy="0">CN01  /  Không gian làm việc tại quầy</tspan>
+  </text>
+  <rect x="1200" y="140" width="360" height="680" fill="#ffffff" stroke="#9aa1aa" />
+  <rect x="1200" y="140" width="360" height="48" fill="#eceef1" stroke="#9aa1aa" />
+  <text x="1212" y="168.2" fill="#26313e" font-family="Arial, sans-serif" font-size="14" font-weight="400">
+    <tspan x="1212" dy="0">☰  Gym Nhóm 6                Tài khoản</tspan>
+  </text>
+  <rect x="1200" y="832" width="360" height="42" fill="#f4f5f7" stroke="#f4f5f7" />
+  <text x="1212" y="857.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="700">
+    <tspan x="1212" dy="0">MOBILE · chiều rộng 360 px</tspan>
+  </text>
+  <rect x="238" y="212" width="918" height="44" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="250" y="240.0" fill="#26313e" font-family="Arial, sans-serif" font-size="20" font-weight="700">
+    <tspan x="250" dy="0">HỒ SƠ HỘI VIÊN  /  THÊM MỚI HOẶC SỬA</tspan>
+  </text>
+  <rect x="238" y="272" width="918" height="52" fill="#f1f2f4" stroke="#9aa1aa" />
+  <text x="250" y="302.2" fill="#26313e" font-family="Arial, sans-serif" font-size="14" font-weight="400">
+    <tspan x="250" dy="0">Mã hội viên: hệ thống tự cấp khi thêm; chỉ đọc khi sửa (VD: HV000001).</tspan>
+  </text>
+  <rect x="238" y="342" width="440" height="32" fill="#ffffff" stroke="#ffffff" />
+  <text x="250" y="362.2" fill="#26313e" font-family="Arial, sans-serif" font-size="14" font-weight="700">
+    <tspan x="250" dy="0">Họ và tên *</tspan>
+  </text>
+  <rect x="238" y="380" width="440" height="48" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="250" y="408.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="400">
+    <tspan x="250" dy="0">Nguyễn Minh An</tspan>
+  </text>
+  <rect x="702" y="342" width="454" height="32" fill="#ffffff" stroke="#ffffff" />
+  <text x="714" y="362.2" fill="#26313e" font-family="Arial, sans-serif" font-size="14" font-weight="700">
+    <tspan x="714" dy="0">Số điện thoại *</tspan>
+  </text>
+  <rect x="702" y="380" width="454" height="48" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="714" y="408.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="400">
+    <tspan x="714" dy="0">0900000001</tspan>
+  </text>
+  <rect x="238" y="466" width="440" height="32" fill="#ffffff" stroke="#ffffff" />
+  <text x="250" y="486.2" fill="#26313e" font-family="Arial, sans-serif" font-size="14" font-weight="700">
+    <tspan x="250" dy="0">Giới tính (tùy chọn)</tspan>
+  </text>
+  <rect x="238" y="504" width="440" height="48" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="250" y="532.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="400">
+    <tspan x="250" dy="0">Chưa chọn  ▾</tspan>
+  </text>
+  <rect x="702" y="466" width="454" height="32" fill="#ffffff" stroke="#ffffff" />
+  <text x="714" y="486.2" fill="#26313e" font-family="Arial, sans-serif" font-size="14" font-weight="700">
+    <tspan x="714" dy="0">Ngày sinh (tùy chọn)</tspan>
+  </text>
+  <rect x="702" y="504" width="454" height="48" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="714" y="532.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="400">
+    <tspan x="714" dy="0">Chọn ngày  ▾</tspan>
+  </text>
+  <rect x="238" y="582" width="918" height="56" fill="#f1f2f4" stroke="#9aa1aa" />
+  <text x="250" y="614.2" fill="#26313e" font-family="Arial, sans-serif" font-size="14" font-weight="400">
+    <tspan x="250" dy="0">Trạng thái khi sửa: Hoạt động ▾   ·   Chuyển ngừng hoạt động cần xác nhận.</tspan>
+  </text>
+  <rect x="238" y="658" width="918" height="50" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="250" y="687.2" fill="#26313e" font-family="Arial, sans-serif" font-size="14" font-weight="400">
+    <tspan x="250" dy="0">Hồ sơ có thể chưa có tài khoản. Không yêu cầu email hoặc mật khẩu tại form này.</tspan>
+  </text>
+  <rect x="796" y="736" width="160" height="44" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="808" y="762.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="400">
+    <tspan x="808" dy="0">Hủy</tspan>
+  </text>
+  <rect x="972" y="736" width="184" height="44" fill="#e3e6eb" stroke="#9aa1aa" />
+  <text x="984" y="762.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="700">
+    <tspan x="984" dy="0">Lưu hồ sơ</tspan>
+  </text>
+  <rect x="1212" y="204" width="336" height="44" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="1224" y="230.2" fill="#26313e" font-family="Arial, sans-serif" font-size="14" font-weight="700">
+    <tspan x="1224" dy="0">← Danh sách / Thêm / Sửa hội viên</tspan>
+  </text>
+  <rect x="1212" y="264" width="336" height="30" fill="#ffffff" stroke="#ffffff" />
+  <text x="1224" y="282.9" fill="#26313e" font-family="Arial, sans-serif" font-size="13" font-weight="400">
+    <tspan x="1224" dy="0">Họ và tên *</tspan>
+  </text>
+  <rect x="1212" y="298" width="336" height="46" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="1224" y="325.2" fill="#26313e" font-family="Arial, sans-serif" font-size="14" font-weight="400">
+    <tspan x="1224" dy="0">Nguyễn Minh An</tspan>
+  </text>
+  <rect x="1212" y="364" width="336" height="30" fill="#ffffff" stroke="#ffffff" />
+  <text x="1224" y="382.9" fill="#26313e" font-family="Arial, sans-serif" font-size="13" font-weight="400">
+    <tspan x="1224" dy="0">Số điện thoại *</tspan>
+  </text>
+  <rect x="1212" y="398" width="336" height="46" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="1224" y="425.2" fill="#26313e" font-family="Arial, sans-serif" font-size="14" font-weight="400">
+    <tspan x="1224" dy="0">0900000001</tspan>
+  </text>
+  <rect x="1212" y="464" width="336" height="30" fill="#ffffff" stroke="#ffffff" />
+  <text x="1224" y="482.9" fill="#26313e" font-family="Arial, sans-serif" font-size="13" font-weight="400">
+    <tspan x="1224" dy="0">Giới tính</tspan>
+  </text>
+  <rect x="1212" y="498" width="336" height="46" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="1224" y="525.2" fill="#26313e" font-family="Arial, sans-serif" font-size="14" font-weight="400">
+    <tspan x="1224" dy="0">Chưa chọn ▾</tspan>
+  </text>
+  <rect x="1212" y="564" width="336" height="30" fill="#ffffff" stroke="#ffffff" />
+  <text x="1224" y="582.9" fill="#26313e" font-family="Arial, sans-serif" font-size="13" font-weight="400">
+    <tspan x="1224" dy="0">Ngày sinh</tspan>
+  </text>
+  <rect x="1212" y="598" width="336" height="46" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="1224" y="625.2" fill="#26313e" font-family="Arial, sans-serif" font-size="14" font-weight="400">
+    <tspan x="1224" dy="0">Chọn ngày ▾</tspan>
+  </text>
+  <rect x="1212" y="682" width="336" height="44" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="1224" y="707.9" fill="#26313e" font-family="Arial, sans-serif" font-size="13" font-weight="400">
+    <tspan x="1224" dy="0">Khi sửa: trạng thái Hoạt động ▾</tspan>
+  </text>
+  <rect x="1212" y="752" width="150" height="44" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="1224" y="778.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="400">
+    <tspan x="1224" dy="0">Hủy</tspan>
+  </text>
+  <rect x="1374" y="752" width="174" height="44" fill="#e3e6eb" stroke="#9aa1aa" />
+  <text x="1386" y="778.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="700">
+    <tspan x="1386" dy="0">Lưu hồ sơ</tspan>
+  </text>
+  <rect x="32" y="886" width="1528" height="42" fill="#e3e6eb" stroke="#9aa1aa" />
+  <text x="44" y="911.5" fill="#26313e" font-family="Arial, sans-serif" font-size="15" font-weight="700">
+    <tspan x="44" dy="0">Thêm, sửa và phản hồi của form</tspan>
+  </text>
+  <rect x="32" y="942" width="1528" height="72" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="44" y="982.8" fill="#26313e" font-family="Arial, sans-serif" font-size="16" font-weight="400">
+    <tspan x="44" dy="0">Thêm: mã tự sinh sau khi lưu; trạng thái ban đầu ACTIVE. Sửa: nạp dữ liệu có sẵn, mã chỉ đọc. Không có trường ảnh/avatarUrl hoặc nút tải ảnh.</tspan>
+  </text>
+  <rect x="32" y="1026" width="1528" height="72" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="44" y="1055.6" fill="#26313e" font-family="Arial, sans-serif" font-size="16" font-weight="400">
+    <tspan x="44" dy="0">Dữ liệu không hợp lệ: lỗi ngay dưới trường, đưa focus về lỗi đầu. Trùng SĐT: “Số điện thoại này đã thuộc hồ sơ khác”; giữ dữ liệu nhập. Backend chuẩn hóa SĐT (có</tspan>
+    <tspan x="44" dy="22.4">thể nhập +84 theo đặc tả).</tspan>
+  </text>
+  <rect x="32" y="1110" width="1528" height="72" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="44" y="1139.6" fill="#26313e" font-family="Arial, sans-serif" font-size="16" font-weight="400">
+    <tspan x="44" dy="0">Đang lưu: nút “Đang lưu…” và ngăn gửi lặp. Thành công: báo “Đã lưu hồ sơ”, quay về danh sách và tải lại. Lỗi mạng: giữ form, cho lưu lại. 404/403 khi sửa: báo rõ</tspan>
+    <tspan x="44" dy="22.4">và cho quay về danh sách.</tspan>
+  </text>
+  <rect x="32" y="1194" width="1528" height="72" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="44" y="1223.6" fill="#26313e" font-family="Arial, sans-serif" font-size="16" font-weight="400">
+    <tspan x="44" dy="0">Đổi sang ngừng hoạt động: hộp xác nhận “Ngừng hoạt động hội viên? Tài khoản liên kết cũng sẽ bị khóa.” [Hủy] [Xác nhận]. Backend đồng bộ trạng thái tài khoản;</tspan>
+    <tspan x="44" dy="22.4">không xóa hồ sơ.</tspan>
+  </text>
+  <rect x="32" y="1278" width="1528" height="72" fill="#ffffff" stroke="#9aa1aa" />
+  <text x="44" y="1307.6" fill="#26313e" font-family="Arial, sans-serif" font-size="16" font-weight="400">
+    <tspan x="44" dy="0">Mobile: form một cột, các nút nằm trong luồng cuộn, không che trường cuối. Hủy khi đã nhập thay đổi: hỏi “Bỏ thay đổi chưa lưu?” [Tiếp tục sửa] [Bỏ thay đổi].</tspan>
+    <tspan x="44" dy="22.4">Nguồn: UC-F2.1/UC-F2.4.</tspan>
+  </text>
+</svg>
