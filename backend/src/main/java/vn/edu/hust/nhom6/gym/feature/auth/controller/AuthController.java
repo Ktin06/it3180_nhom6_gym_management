@@ -78,21 +78,47 @@ public class AuthController {
         }
     }
 
-    @Operation(summary = "Đăng xuất tài khoản")
+    @Operation(
+        summary = "Đăng xuất tài khoản",
+        description = "Nếu gửi kèm Authorization Bearer JWT hợp lệ, chỉ thu hồi và xóa cookie refresh_token "
+            + "khi token trong cookie thuộc cùng người dùng với JWT để tránh làm mất phiên của tab khác."
+    )
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> logout(
-            @CookieValue(name = AuthCookieHelper.REFRESH_COOKIE_NAME, required = false) String refreshToken) {
-        authService.logout(refreshToken);
-        ResponseCookie cleanCookie = cookieHelper.createCleanRefreshCookie();
-        return ResponseEntity.noContent()
-            .header(HttpHeaders.SET_COOKIE, cleanCookie.toString())
-            .build();
+            @CookieValue(name = AuthCookieHelper.REFRESH_COOKIE_NAME, required = false) String refreshToken,
+            @AuthenticationPrincipal Jwt jwt) {
+        Long authenticatedUserId = extractUserId(jwt);
+        boolean shouldClearCookie;
+        if (authenticatedUserId != null) {
+            shouldClearCookie = authService.logoutForUser(refreshToken, authenticatedUserId);
+        } else {
+            authService.logout(refreshToken);
+            shouldClearCookie = true;
+        }
+
+        if (shouldClearCookie) {
+            return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, cookieHelper.createCleanRefreshCookie().toString())
+                .build();
+        }
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Lấy thông tin tài khoản hiện tại từ JWT")
     @GetMapping("/me")
     public AuthMeResponse getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
         return authService.getCurrentUser(jwt);
+    }
+
+    private static Long extractUserId(Jwt jwt) {
+        if (jwt == null || jwt.getSubject() == null || jwt.getSubject().isBlank()) {
+            return null;
+        }
+        try {
+            return Long.valueOf(jwt.getSubject());
+        } catch (NumberFormatException ex) {
+            return null;
+        }
     }
 }

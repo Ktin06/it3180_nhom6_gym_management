@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -157,7 +158,7 @@ public class AuthService {
         }
 
         String tokenHash = TokenHashUtil.sha256Hex(rawRefreshToken);
-        RefreshToken refreshToken = refreshTokenRepository.findByTokenHash(tokenHash)
+        RefreshToken refreshToken = refreshTokenRepository.findByTokenHashForUpdate(tokenHash)
             .orElseThrow(() -> new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ."));
 
         if (refreshToken.getRevokedAt() != null) {
@@ -212,15 +213,39 @@ public class AuthService {
      */
     @Transactional
     public void logout(String rawRefreshToken) {
-        if (rawRefreshToken != null && !rawRefreshToken.isBlank()) {
-            String tokenHash = TokenHashUtil.sha256Hex(rawRefreshToken);
-            refreshTokenRepository.findByTokenHash(tokenHash).ifPresent(token -> {
-                if (token.getRevokedAt() == null) {
-                    token.setRevokedAt(OffsetDateTime.now());
-                    refreshTokenRepository.save(token);
-                }
-            });
+        logoutForUser(rawRefreshToken, null);
+    }
+
+    /**
+     * Đăng xuất có đối chiếu chủ sở hữu khi có JWT đi kèm (#112).
+     *
+     * <p>Nếu người dùng đang đăng nhập ở tab hiện tại khác chủ sở hữu của refresh token trong cookie dùng chung
+     * (tab khác đã đăng nhập tài khoản khác), backend giữ nguyên phiên của tài khoản trong cookie và trả
+     * {@code false} để controller không xóa cookie chung.
+     *
+     * @return {@code true} nếu được phép xóa cookie {@code refresh_token} ở trình duyệt
+     */
+    @Transactional
+    public boolean logoutForUser(String rawRefreshToken, Long authenticatedUserId) {
+        if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
+            return true;
         }
+        String tokenHash = TokenHashUtil.sha256Hex(rawRefreshToken);
+        Optional<RefreshToken> found = refreshTokenRepository.findByTokenHashForUpdate(tokenHash);
+        if (found.isEmpty()) {
+            return true;
+        }
+        RefreshToken token = found.get();
+        if (authenticatedUserId != null
+                && token.getUser() != null
+                && !authenticatedUserId.equals(token.getUser().getId())) {
+            return false;
+        }
+        if (token.getRevokedAt() == null) {
+            token.setRevokedAt(OffsetDateTime.now());
+            refreshTokenRepository.save(token);
+        }
+        return true;
     }
 
     /**
