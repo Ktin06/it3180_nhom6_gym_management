@@ -1,5 +1,5 @@
 // ERD – Web quản lý chuỗi phòng tập Gym – bản 2 (01/11/2026, cập nhật sau review), thay thế bản 27/10. Trạng thái: cả nhóm đã duyệt ngày 02/11/2026.
-// 39 bảng, 8 nhóm. Dán vào https://dbdiagram.io để vẽ. Giải thích từng bảng: docs/design/erd/thiet-ke-du-lieu.md
+// 40 bảng, 8 nhóm. Dán vào https://dbdiagram.io để vẽ. Giải thích từng bảng: docs/design/erd/thiet-ke-du-lieu.md
 // Quy ước:
 //   - Khóa chính id kiểu bigint tự tăng (khớp kiểu Long trong entity Java).
 //   - Thời gian lưu kiểu timestamptz (có múi giờ), giá trị theo UTC; hiển thị theo giờ Việt Nam.
@@ -311,7 +311,7 @@ Table maintenance_logs {
 }
 
 // =====================================================================
-// 3. Hội viên và gói tập (7 bảng)
+// 3. Hội viên và gói tập (8 bảng)
 // =====================================================================
 Table members {
   id bigint [pk, increment]
@@ -322,7 +322,6 @@ Table members {
   gender varchar(10)
   dob date
   phone varchar(20) [unique, not null, note: 'nơi duy nhất lưu số điện thoại hội viên; duy nhất vì F4 tìm theo số điện thoại. Lưu dạng chuẩn 10 chữ số bắt đầu bằng 0, CHECK phone ~ \'^0[0-9]{9}$\'. Email lấy từ users.email qua user_id. Tự đăng ký bằng số đã có hồ sơ thì bị từ chối, lễ tân tạo tài khoản cho hồ sơ có sẵn (chốt 01/11)']
-  avatar_url varchar(500)
   face_consent_at timestamptz [note: 'thời điểm đồng ý dùng khuôn mặt (S8); rỗng = chưa đồng ý']
   booking_locked_until timestamptz [note: 'khóa đặt lớp do hủy muộn hoặc vắng mặt']
   status active_status [not null, default: 'ACTIVE', note: 'chuyển INACTIVE thì đồng thời chuyển users.status = DISABLED trong cùng giao dịch']
@@ -333,6 +332,18 @@ Table members {
   indexes {
     (`lower(full_name) varchar_pattern_ops`) [name: 'ix_members_full_name', note: 'Tối ưu cho truy vấn LIKE theo chữ thường']
   }
+}
+
+Table member_avatars {
+  id bigint [pk, increment]
+  member_id bigint [unique, not null, ref: - members.id, note: 'mỗi hội viên tối đa một ảnh; đổi ảnh thì ghi đè dòng này']
+  content bytea [not null, note: 'ảnh JPEG do server thu nhỏ (cạnh dài nhất 256 px) và nén; không lưu ảnh gốc']
+  content_type varchar(50) [not null, note: 'CHECK content_type = \'image/jpeg\'']
+  size_bytes int [not null, note: 'CHECK size_bytes > 0 AND size_bytes <= 102400']
+  uploaded_by bigint [not null, ref: > users.id, note: 'người tải lên lần cuối']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  Note: 'Ảnh đại diện hội viên (F2, F4), theo ADR 0011. Bảng con của members, lấy chi nhánh qua members. Xem và đổi ảnh qua API /api/v1/members/{id}/avatar với cùng quyền như hồ sơ hội viên.'
 }
 
 Table face_embeddings {
