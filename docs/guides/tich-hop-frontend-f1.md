@@ -35,6 +35,10 @@ Login/register/refresh trả JSON phẳng, không bọc thêm đối tượng:
 
 Refresh cookie: `HttpOnly; SameSite=Strict; Path=/api/v1/auth`, kèm `Secure` ở staging (`app.auth.cookie-secure: true`); profile `local` không đặt `Secure` để chạy được trên `http://localhost`. JWT sống 15 phút và chỉ lưu trong bộ nhớ tab; frontend không đọc cookie hoặc ghi token vào Web Storage. Mật khẩu xác nhận chỉ dùng phía giao diện, không nằm trong request.
 
+Form đăng ký đối chiếu với [RegisterRequest](../../backend/src/main/java/vn/edu/hust/nhom6/gym/feature/auth/dto/RegisterRequest.java): ít nhất 8 ký tự, có chữ ASCII và chữ số, không chứa ký tự xuống dòng, tối đa 72 byte UTF-8. Unicode vẫn được dùng cùng chữ ASCII và số; giới hạn byte có thể đạt trước giới hạn ký tự. Số điện thoại đầu `84` không có dấu `+` được chuẩn hóa như `+84`.
+
+Lỗi theo ô dựa vào tên trường trong `ProblemDetail.errors`. Phản hồi `409` hiện tại của backend chỉ có `detail`; khi thiếu tên trường, giao diện hiện thông báo chung và không đoán ô từ câu chữ. Hai client HTTP và refresh dùng chung cấu hình tại `services/http-config.ts` để tránh vòng import giữa chúng.
+
 ## Lỗi và phục hồi phiên sau review 07/11
 
 - Khi đăng ký đã thành công nhưng `/auth/me` lỗi, giao diện báo tài khoản đã được tạo. Nút tải lại thông tin chỉ hoàn tất phiên, không gửi lại đăng ký; người dùng cũng có thể chuyển sang đăng nhập. Nội dung cần quyền vẫn đóng tới khi nhận được identity hợp lệ.

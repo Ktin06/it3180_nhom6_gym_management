@@ -1,10 +1,11 @@
 import axios from 'axios'
 import type { AccessTokenResponse } from '../features/auth/types/auth'
+import { HTTP_BASE_URL, HTTP_TIMEOUT } from './http-config'
 
 /** Client riêng, không có bearer/interceptor; cookie HttpOnly cùng domain đi tự động. */
 const refreshClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? '/api/v1',
-  timeout: 15000,
+  baseURL: HTTP_BASE_URL,
+  timeout: HTTP_TIMEOUT,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 })

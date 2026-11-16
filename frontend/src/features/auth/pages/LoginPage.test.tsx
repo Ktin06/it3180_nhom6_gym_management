@@ -107,6 +107,26 @@ describe('LoginPage', () => {
     expect(await screen.findByText('Trang lễ tân')).toBeInTheDocument()
   })
 
+  it('ẩn retry identity cũ khi bắt đầu lần đăng nhập mới bị sai mật khẩu', async () => {
+    login
+      .mockRejectedValueOnce(new AuthCompletionError('login', 'Unable to load account.'))
+      .mockRejectedValueOnce({ response: { status: 401, data: { detail: 'Sai mật khẩu.' } } })
+    const user = userEvent.setup()
+    renderLogin()
+    await user.type(screen.getByLabelText('Email'), 'hv@example.com')
+    await user.type(screen.getByLabelText('Mật khẩu'), 'Secret123')
+    await user.click(screen.getByRole('button', { name: 'Đăng nhập' }))
+    expect(
+      await screen.findByRole('button', { name: 'Thử tải thông tin tài khoản' }),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Đăng nhập' }))
+    expect(await screen.findByText('Sai mật khẩu.')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Thử tải thông tin tài khoản' }),
+    ).not.toBeInTheDocument()
+  })
+
   it('mở home role mới nếu return path trước đó thuộc hội viên', async () => {
     login.mockResolvedValue({ email: 'lt@example.com', role: 'RECEPTIONIST' })
     const user = userEvent.setup()
