@@ -4,7 +4,7 @@
 - **Version:** v1 (Bắt buộc)
 - **Người biên soạn:** Bùi Trần Đức Việt
 - **Người duyệt chéo:** Thái Hùng Lân (phụ trách phát triển API F2) & Nguyễn Anh Tú (phụ trách giao diện F2)
-- **Tài liệu chuẩn tham chiếu:** [Bản chốt phạm vi](../ban-chot-pham-vi.md), [ERD v2 (`erd-v2.dbml`)](../../design/erd/erd-v2.dbml), [Thiết kế dữ liệu](../../design/erd/thiet-ke-du-lieu.md)
+- **Tài liệu chuẩn tham chiếu:** [Bản chốt phạm vi](../ban-chot-pham-vi.md), [ERD v2 (`erd-v2.dbml`)](../../design/erd/erd-v2.dbml), [Thiết kế dữ liệu](../../design/erd/thiet-ke-du-lieu.md), [ADR 0011 – Lưu ảnh đại diện trong PostgreSQL](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md)
 
 ---
 
@@ -15,7 +15,7 @@ Chức năng **F2 – Hồ sơ hội viên** giúp lễ tân, quản lý chi nh�
 - Lễ tân kích hoạt/tạo tài khoản đăng nhập cho hồ sơ hội viên đã có sẵn (trường hợp hội viên đăng ký trực tiếp tại quầy trước đó rồi mới muốn dùng cổng hội viên).
 - Tìm kiếm nhanh hội viên theo **mã hội viên (`HV` + 6 chữ số)**, **số điện thoại** hoặc **tiền tố họ tên** với thời gian phản hồi dưới 2 giây trên 10.000 hội viên (NF1).
 - Cập nhật thông tin hồ sơ, ngừng hoạt động hội viên (đồng thời khóa tài khoản đăng nhập trong cùng giao dịch), và quản lý lịch sử chỉ số cơ thể (`body_metrics`).
-- *Lưu ý phạm vi Sprint 1:* Cột `avatar_url` đã có trong bảng `members` (để `NULL` ở Sprint 1); form tạo và sửa hội viên ở Sprint 1 bỏ trường `avatarUrl` vì nơi lưu trữ ảnh đại diện sẽ được chốt ở đầu Sprint 2 trước khi làm F4 (Check-in tại quầy).
+- *Ảnh đại diện (theo [ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md)):* Ảnh đại diện hội viên lưu trong PostgreSQL tại bảng riêng `member_avatars` (bỏ cột `members.avatar_url`), đọc/ghi qua API `GET /api/v1/members/{id}/avatar` và `PUT /api/v1/members/{id}/avatar` (triển khai ở Sprint 2 trước khi làm F4 – Check-in tại quầy; Sprint 1 chưa có tải/hiển thị ảnh).
 
 ---
 
@@ -45,7 +45,7 @@ Chức năng **F2 – Hồ sơ hội viên** giúp lễ tân, quản lý chi nh�
     - `created_by` lưu `users.id` của lễ tân/quản lý thao tác.
     - `user_id` để `NULL` nếu hội viên chưa tạo tài khoản đăng nhập.
 - **Luồng chính:**
-  1. Lễ tân mở form "Thêm hội viên mới" và nhập: Họ và tên (`fullName`), Số điện thoại (`phone`), Giới tính (`gender` – tùy chọn), Ngày sinh (`dob` – tùy chọn). *(Lưu ý: Bỏ `avatarUrl` khỏi form tạo ở Sprint 1; cột `avatar_url` để `NULL` cho đến khi chốt nơi lưu ảnh ở Sprint 2).*
+  1. Lễ tân mở form "Thêm hội viên mới" và nhập: Họ và tên (`fullName`), Số điện thoại (`phone`), Giới tính (`gender` – tùy chọn), Ngày sinh (`dob` – tùy chọn). *(Lưu ý: Sprint 1 chưa có ảnh đại diện; từ Sprint 2 theo ADR 0011, ảnh được tải riêng qua `PUT /api/v1/members/{id}/avatar` và lưu ở bảng `member_avatars`, không dùng cột `members.avatar_url`).*
   2. Hệ thống chuẩn hóa số điện thoại về 10 chữ số bắt đầu bằng `0` (ví dụ `+84 987 654 321` → `0987654321`) và kiểm tra định dạng bằng Bean Validation.
   3. Hệ thống kiểm tra `phone` chưa tồn tại trong bảng `members`.
   4. Hệ thống lấy số tiếp theo từ `member_code_seq` để định dạng mã `HVxxxxxx`.
@@ -101,8 +101,8 @@ Chức năng **F2 – Hồ sơ hội viên** giúp lễ tân, quản lý chi nh�
      - `MEMBER`: **chỉ xem được hồ sơ của chính mình** (`members.user_id = currentUserId`).
   3. Hệ thống trả về thông tin chi tiết của hội viên đó (`200 OK`).
 - **Luồng ngoại lệ:**
-  - **E1 – Không đủ quyền hoặc ngoài phạm vi được phép (403 Forbidden):** `TRAINER` hoặc `MEMBER` gọi `GET /api/v1/members`; hoặc nhân viên xem hội viên thuộc chi nhánh khác (`members.home_branch_id != staff.branch_id`); hoặc `TRAINER` xem hội viên không phải học viên mình dạy; hoặc `MEMBER` xem hồ sơ của hội viên khác → Trả `ProblemDetail` (403).
-  - **E2 – Không tìm thấy hội viên (404 Not Found):** Không tồn tại hội viên với `id` yêu cầu hoặc `deleted_at IS NOT NULL` → Trả `ProblemDetail` (404).
+  - **E1 – Không đủ quyền theo vai trò (403 Forbidden):** `TRAINER` hoặc `MEMBER` gọi `GET /api/v1/members`; hoặc `TRAINER` gọi `GET /api/v1/members/{id}` khi chưa được phép / xem hội viên không phải học viên mình dạy → Trả `ProblemDetail` (403).
+  - **E2 – Không tìm thấy hoặc ngoài phạm vi chi nhánh/hồ sơ (404 Not Found):** Không tồn tại hội viên với `id` yêu cầu, `deleted_at IS NOT NULL`, nhân viên (`BRANCH_MANAGER`, `RECEPTIONIST`) xem hội viên thuộc chi nhánh khác (`members.home_branch_id != staff.branch_id`), hoặc `MEMBER` xem hồ sơ của hội viên khác → Trả `ProblemDetail` (404) *(cố ý trả 404 theo `MemberServiceImpl.requireBranch` để người ngoài phạm vi không biết hồ sơ có tồn tại)*.
 
 ---
 
@@ -111,7 +111,7 @@ Chức năng **F2 – Hồ sơ hội viên** giúp lễ tân, quản lý chi nh�
 - **Tác nhân:** Lễ tân (`RECEPTIONIST`), Quản lý chi nhánh (`BRANCH_MANAGER`), Chủ chuỗi (`SUPER_ADMIN`).
 - **Tiền điều kiện:** Hồ sơ hội viên tồn tại (`deleted_at IS NULL`).
 - **Luồng chính – Cập nhật thông tin (`PUT /api/v1/members/{id}`):**
-  1. Lễ tân sửa các thông tin: `fullName`, `phone`, `gender`, `dob`, `status`. *(Lưu ý: Bỏ `avatarUrl` khỏi form sửa ở Sprint 1; nơi lưu ảnh sẽ chốt ở Sprint 2).*
+  1. Lễ tân sửa các thông tin: `fullName`, `phone`, `gender`, `dob`, `status`. *(Lưu ý: Sprint 1 chưa có sửa ảnh đại diện; từ Sprint 2 theo ADR 0011, đổi ảnh dùng API riêng `PUT /api/v1/members/{id}/avatar` ghi đè vào bảng `member_avatars`; hội viên không tự đổi ảnh).*
   2. Nếu đổi `phone`, hệ thống chuẩn hóa về 10 chữ số bắt đầu bằng `0` và kiểm tra không trùng với hội viên khác.
   3. **Quy tắc ngừng hoạt động hội viên:** Nếu chuyển `members.status` sang `INACTIVE` và hội viên đó đã có tài khoản (`user_id IS NOT NULL`), hệ thống **bắt buộc chuyển đồng thời `users.status = 'DISABLED'` và thu hồi mọi `refresh_tokens` đang hiệu lực của tài khoản đó trong cùng giao dịch CSDL**.
   4. Nếu kích hoạt lại hội viên (`members.status = 'ACTIVE'`) và tài khoản đang là `DISABLED`, chuyển `users.status = 'ACTIVE'`.
@@ -152,7 +152,8 @@ Chức năng **F2 – Hồ sơ hội viên** giúp lễ tân, quản lý chi nh�
 
 | Bảng / Đối tượng | Nhóm | Vai trò trong F2 |
 | --- | --- | --- |
-| `members` | Nhóm 3 | Lưu hồ sơ hội viên (`user_id`, `home_branch_id`, `member_code`, `full_name`, `gender`, `dob`, `phone`, `avatar_url`, `status`, `deleted_at`, `created_by`) |
+| `members` | Nhóm 3 | Lưu hồ sơ hội viên (`user_id`, `home_branch_id`, `member_code`, `full_name`, `gender`, `dob`, `phone`, `status`, `deleted_at`, `created_by`; bỏ `avatar_url` theo ADR 0011) |
+| `member_avatars` | Nhóm 3 | Lưu ảnh đại diện hội viên dạng `bytea` JPEG đã thu nhỏ (`member_id`, `content`, `content_type`, `size_bytes`, `uploaded_by`) theo [ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md) |
 | `member_code_seq` | Nhóm 3 | Sequence sinh mã hội viên tuần tự toàn chuỗi |
 | `body_metrics` | Nhóm 3 | Lưu lịch sử đo chỉ số cơ thể (`member_id`, `recorded_by`, `measured_at`, `weight`, `height`, `body_fat`, `muscle_mass`, `note`) |
 | `users` | Nhóm 1 | Liên kết 1–0..1 với `members` để lấy `email` và đồng bộ trạng thái `DISABLED` khi ngừng hoạt động hội viên |
@@ -165,9 +166,11 @@ Chức năng **F2 – Hồ sơ hội viên** giúp lễ tân, quản lý chi nh�
 | Phương thức & Đường dẫn | Quyền truy cập | Mô tả | Mã phản hồi |
 | --- | --- | --- | --- |
 | `GET /api/v1/members` | `SUPER_ADMIN`, `BRANCH_MANAGER`, `RECEPTIONIST` | Tìm kiếm & phân trang hội viên trong chi nhánh của nhân viên (`SUPER_ADMIN` xem toàn chuỗi; `TRAINER` không có quyền) | `200`, `401`, `403` |
-| `GET /api/v1/members/{id}` | `SUPER_ADMIN` (toàn chuỗi); `BRANCH_MANAGER`, `RECEPTIONIST` (chỉ hội viên trong chi nhánh của mình); `TRAINER` (chỉ học viên mình dạy); `MEMBER` (chỉ chính mình) | Xem chi tiết hồ sơ hội viên | `200`, `401`, `403`, `404` |
-| `POST /api/v1/members` | `SUPER_ADMIN`, `BRANCH_MANAGER`, `RECEPTIONIST` | Tạo hồ sơ hội viên mới tại quầy (Sprint 1 chưa có `avatarUrl`) | `201`, `400`, `409` |
-| `PUT /api/v1/members/{id}` | `SUPER_ADMIN`, `BRANCH_MANAGER`, `RECEPTIONIST` | Cập nhật thông tin hoặc trạng thái hội viên (Sprint 1 chưa có `avatarUrl`) | `200`, `400`, `404`, `409` |
+| `GET /api/v1/members/{id}` | `SUPER_ADMIN` (toàn chuỗi); `BRANCH_MANAGER`, `RECEPTIONIST` (chỉ hội viên trong chi nhánh của mình); `TRAINER` (chỉ học viên mình dạy); `MEMBER` (chỉ chính mình) | Xem chi tiết hồ sơ hội viên (ngoài phạm vi chi nhánh/cá nhân trả `404` thay vì `403`) | `200`, `401`, `403`, `404` |
+| `POST /api/v1/members` | `SUPER_ADMIN`, `BRANCH_MANAGER`, `RECEPTIONIST` | Tạo hồ sơ hội viên mới tại quầy (không gồm ảnh đại diện; tải ảnh riêng qua `PUT /api/v1/members/{id}/avatar` từ Sprint 2) | `201`, `400`, `409` |
+| `PUT /api/v1/members/{id}` | `SUPER_ADMIN`, `BRANCH_MANAGER`, `RECEPTIONIST` | Cập nhật thông tin hoặc trạng thái hội viên (không gồm ảnh đại diện; đổi ảnh riêng qua `PUT /api/v1/members/{id}/avatar` từ Sprint 2) | `200`, `400`, `404`, `409` |
+| `GET /api/v1/members/{id}/avatar` | Cùng phạm vi quyền như `GET /api/v1/members/{id}` | Lấy ảnh đại diện hội viên (`image/jpeg` từ `member_avatars`; chưa có ảnh hoặc ngoài phạm vi trả `404`) | `200`, `401`, `403`, `404` |
+| `PUT /api/v1/members/{id}/avatar` | `SUPER_ADMIN`, `BRANCH_MANAGER`, `RECEPTIONIST` (trong chi nhánh; `MEMBER` không tự đổi ảnh) | Tải lên/ghi đè ảnh đại diện (multipart JPEG/PNG ≤ 5 MB, server nén JPEG ≤ 100 KB vào `member_avatars`) | `200`, `400`, `401`, `403`, `404` |
 | `POST /api/v1/members/{id}/account` | `SUPER_ADMIN`, `BRANCH_MANAGER`, `RECEPTIONIST` | Tạo tài khoản đăng nhập cho hồ sơ hội viên có sẵn | `200`, `400`, `404`, `409` |
 | `GET /api/v1/members/{id}/body-metrics` | Cùng phạm vi quyền như `GET /api/v1/members/{id}` | Danh sách lịch sử đo chỉ số cơ thể | `200`, `401`, `403`, `404` |
 | `POST /api/v1/members/{id}/body-metrics` | `SUPER_ADMIN`, `BRANCH_MANAGER`, `RECEPTIONIST`, `TRAINER` (học viên mình dạy) | Ghi nhận lần đo chỉ số cơ thể mới | `201`, `400`, `403`, `404` |
@@ -190,5 +193,5 @@ Chức năng **F2 – Hồ sơ hội viên** giúp lễ tân, quản lý chi nh�
    - **Then** trong cùng giao dịch, `members.status` chuyển thành `INACTIVE`, `users.status` chuyển thành `DISABLED`, và tài khoản đó không thể đăng nhập được nữa.
 4. **AC4 – Phân quyền bảo vệ dữ liệu hội viên theo vai trò và chi nhánh (S3):**
    - **Given** người dùng đang đăng nhập,
-   - **When** `TRAINER` hoặc `MEMBER` gọi `GET /api/v1/members`, hoặc nhân viên (`RECEPTIONIST` / `BRANCH_MANAGER`) gọi `GET /api/v1/members/{id}` của hội viên thuộc chi nhánh khác (khác `staff.branch_id`), hoặc `MEMBER` xem hồ sơ của hội viên khác,
-   - **Then** hệ thống từ chối với `403 Forbidden` (chỉ `SUPER_ADMIN` xem được hội viên thuộc mọi chi nhánh).
+   - **When** `TRAINER` hoặc `MEMBER` gọi `GET /api/v1/members`, **Then** hệ thống từ chối với `403 Forbidden`.
+   - **When** nhân viên (`RECEPTIONIST` / `BRANCH_MANAGER`) gọi `GET /api/v1/members/{id}` của hội viên thuộc chi nhánh khác (khác `staff.branch_id`), hoặc `MEMBER` xem hồ sơ của hội viên khác, **Then** hệ thống trả `404 Not Found` (cố ý ẩn sự tồn tại của hồ sơ ngoài phạm vi; chỉ `SUPER_ADMIN` xem được hội viên thuộc mọi chi nhánh).
