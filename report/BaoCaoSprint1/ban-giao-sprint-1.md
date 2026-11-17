@@ -4,7 +4,7 @@
 
 ## 1. Phạm vi và yêu cầu đã duyệt
 
-Nguồn chuẩn: [bản chốt phạm vi](../docs/requirements/ban-chot-pham-vi.md), [kick-off](../docs/meetings/2026-11-02-kick-off.md), [SRS tổng quan](../docs/requirements/srs/srs-tong-quan.md). Không có khảo sát thực địa; SRS phân biệt mô hình As-Is với dữ liệu khảo sát.
+Nguồn chuẩn: [bản chốt phạm vi](../../docs/requirements/ban-chot-pham-vi.md), [kick-off](../../docs/meetings/2026-11-02-kick-off.md), [SRS tổng quan](../../docs/requirements/srs/srs-tong-quan.md). Không có khảo sát thực địa; SRS phân biệt mô hình As-Is với dữ liệu khảo sát.
 
 | Version | Phạm vi | Cam kết |
 | --- | --- | --- |
@@ -18,19 +18,19 @@ Sáu vai trò sử dụng: chủ chuỗi, quản lý chi nhánh, lễ tân, hu�
 
 ## 2. Kiến trúc, ERD và tài liệu đã có trên main
 
-Theo [ADR0008](../docs/decisions/0008-goi-api-cung-domain.md), trình duyệt gọi `/api/v1` cùng domain, qua Vite proxy ở local hoặc Vercel rewrite tới Render; Spring Boot dùng PostgreSQL/JPA/Flyway. Thời điểm lưu UTC, nghiệp vụ ngày theo `Asia/Ho_Chi_Minh`. WebSocket F10 vẫn thuộc kiến trúc đích, không nhận là đã triển khai.
+Theo [ADR0008](../../docs/decisions/0008-goi-api-cung-domain.md), trình duyệt gọi `/api/v1` cùng domain, qua Vite proxy ở local hoặc Vercel rewrite tới Render; Spring Boot dùng PostgreSQL/JPA/Flyway. Thời điểm lưu UTC, nghiệp vụ ngày theo `Asia/Ho_Chi_Minh`. WebSocket F10 vẫn thuộc kiến trúc đích, không nhận là đã triển khai.
 
 | Sản phẩm | Bằng chứng đã merge |
 | --- | --- |
-| User story | [#77](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/77), chỉ mục [31 story](../docs/requirements/user-stories-f1-f10.md); Issues #46–#76 là nguồn nội dung/AC. Trưởng nhóm đã xác nhận đủ31story trên Projects tại comment16#6633043096 |
+| User story | [#77](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/77), chỉ mục [31 story](../../docs/requirements/user-stories-f1-f10.md); Issues #46–#76 là nguồn nội dung/AC. Trưởng nhóm đã xác nhận đủ31story trên Projects tại comment16#6633043096 |
 | SRS tổng quan | [#95](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/95), bài toán/As-Is có nguồn,20F/5version/6vai trò/NF/S |
-| SRS chi tiết | F1–F10 trong [thư mục SRS](../docs/requirements/srs/); [F8 #79](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79) đã merge ngày 13/11 tại `3ff0ae1` |
-| Bảng truy vết | [#98](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/98), [56UC và39bảng](../docs/requirements/srs/bang-truy-vet-yeu-cau.md). Chín UC F8 vẫn ghim bản nháp5233c53; cần chủ bảng truy vết cập nhật sang F8 đã merge tại `3ff0ae1` |
-| ERD và từ điển | [#96](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/96), [hướng dẫn/nguồn xuất](../docs/design/erd/xuat-ban-erd.md), [từ điển](../docs/design/erd/tu-dien-du-lieu.md):39bảng/422cột/89quan hệ |
-| Use case / activity | [Use case](../docs/design/use-case/) và [activity](../docs/design/activity/), #38/#41 đã merge |
-| Wireframe | Dashboard #42, F2/F3 #89, cổng hội viên/PT #102, check-in/hóa đơn/VietQR F4/F5 #106 và trang công khai/đăng ký #78 đã merge; [thư mục](../docs/design/wireframe/) |
+| SRS chi tiết | F1–F10 trong [thư mục SRS](../../docs/requirements/srs/); [F8 #79](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79) đã merge ngày 13/11 tại `3ff0ae1` |
+| Bảng truy vết | [#98](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/98), [56UC và39bảng](../../docs/requirements/srs/bang-truy-vet-yeu-cau.md). Chín UC F8 vẫn ghim bản nháp5233c53; cần chủ bảng truy vết cập nhật sang F8 đã merge tại `3ff0ae1` |
+| ERD và từ điển | [#96](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/96), [hướng dẫn/nguồn xuất](../../docs/design/erd/xuat-ban-erd.md), [từ điển](../../docs/design/erd/tu-dien-du-lieu.md):39bảng/422cột/89quan hệ |
+| Use case / activity | [Use case](../../docs/design/use-case/) và [activity](../../docs/design/activity/), #38/#41 đã merge |
+| Wireframe | Dashboard #42, F2/F3 #89, cổng hội viên/PT #102, check-in/hóa đơn/VietQR F4/F5 #106 và trang công khai/đăng ký #78 đã merge; [thư mục](../../docs/design/wireframe/) |
 
-[DBML](../docs/design/erd/erd-v2.dbml) là nguồn chuẩn dữ liệu. Bản xuất dbdiagram PDF/PNG và các hình vector theo nhóm đã sẵn sàng; không còn coi #13/#15 là thiếu sản phẩm. Slide dùng PDF nhóm3 từ bộ #96 đã duyệt, không tự vẽ lại schema hoặc thêm bản xuất khác. Thu nhỏ trên slide chỉ phục vụ cấu trúc chung; mở vector/từ điển để đọc chi tiết. Schema vật lý #101 đã merge ngày 09/11; DBML trên main vẫn là nguồn chuẩn, không suy ra migration từ ảnh ERD.
+[DBML](../../docs/design/erd/erd-v2.dbml) là nguồn chuẩn dữ liệu. Bản xuất dbdiagram PDF/PNG và các hình vector theo nhóm đã sẵn sàng; không còn coi #13/#15 là thiếu sản phẩm. Slide dùng PDF nhóm3 từ bộ #96 đã duyệt, không tự vẽ lại schema hoặc thêm bản xuất khác. Thu nhỏ trên slide chỉ phục vụ cấu trúc chung; mở vector/từ điển để đọc chi tiết. Schema vật lý #101 đã merge ngày 09/11; DBML trên main vẫn là nguồn chuẩn, không suy ra migration từ ảnh ERD.
 
 ## 3. Trạng thái triển khai và kiểm chứng
 
@@ -86,22 +86,22 @@ Schema theo Sprint Plan: nhóm1/2 Đức Việt; nhóm3 Lân; nhóm4 Minh Quân;
 
 ## 6. Nguồn slide, cách build và kiểm tra
 
-Nguồn: [slide-sprint-1.tex](slide-sprint-1.tex). Theme HUST theo [chỉ đạo tại#32](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/32#issuecomment-6633041875), đã merge qua#88. `.sty` giữ logic/attribution; chỉ chuẩn hóa whitespace dòng168 và EOF để giải quyết add/add trước đây. Hai nền xanh16:9 đang dùng giữ nguyên byte từ nguồn dca1fc4; bộ mẫu đầy đủ trên main được bảo toàn.
+Nguồn: [SlideBaoCaoSprint1.tex](SlideBaoCaoSprint1.tex), ảnh chụp màn hình trong [anh-slide/](anh-slide/). Theme HUST theo [chỉ đạo tại#32](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/32#issuecomment-6633041875), đã merge qua#88. `.sty` giữ logic/attribution; chỉ chuẩn hóa whitespace dòng168 và EOF để giải quyết add/add trước đây. Hai nền xanh16:9 đang dùng giữ nguyên byte từ nguồn dca1fc4; bộ mẫu đầy đủ trên main được bảo toàn.
 
-- [Theme](mau-slide-hust/beamerthemeHUST.sty), [nền bìa](mau-slide-hust/images/hust-blue-169-title.png), [nền nội dung](mau-slide-hust/images/hust-blue-169-content-full.png) là tài nguyên nguồn, không phải output slide.
+- [Theme](../mau-slide-hust/beamerthemeHUST.sty), [nền bìa](../mau-slide-hust/images/hust-blue-169-title.png), [nền nội dung](../mau-slide-hust/images/hust-blue-169-content-full.png) là tài nguyên nguồn, không phải output slide.
 - Hai minh họa đăng ký/lịch dùng TikZ inline, tham chiếu wireframe Draw.io ở#78/464a31a; không phải ảnh UI chạy thật.
-- Hình ERD dùng [PDF nhóm3 đã duyệt](../docs/design/erd/hinh/nhom-3.pdf) của#96, kèm link nguồn/từ điển; không sao chép hoặc sinh thêm file nhị phân vào PR slide.
+- Hình ERD dùng [PDF nhóm3 đã duyệt](../../docs/design/erd/hinh/nhom-3.pdf) của#96, kèm link nguồn/từ điển; không sao chép hoặc sinh thêm file nhị phân vào PR slide.
 - Cần XeLaTeX hoặc Tectonic, Beamer/fontspec/TikZ/booktabs/tabularx/array và font Noto Sans. Có thể build từ gốc repo hoặc thư mụcreport; đường dẫn nguồn có nhánh tương ứng.
 
 ```bash
-# Từ gốc repository, xuất vào thư mục tạm để không lẫn với nguồn.
+# Từ gốc repository: vào thư mục slide, xuất vào thư mục tạm để không lẫn với nguồn.
 mkdir -p /tmp/gym-slide-check
-tectonic --outdir /tmp/gym-slide-check report/slide-sprint-1.tex
-# Hoặc XeLaTeX, chạy hai lượt để cập nhật số trang/liên kết.
-xelatex -interaction=nonstopmode -halt-on-error -output-directory=/tmp/gym-slide-check report/slide-sprint-1.tex
-xelatex -interaction=nonstopmode -halt-on-error -output-directory=/tmp/gym-slide-check report/slide-sprint-1.tex
+cd report/BaoCaoSprint1
+# XeLaTeX, chạy hai lượt để cập nhật số trang/liên kết.
+xelatex -interaction=nonstopmode -halt-on-error -output-directory=/tmp/gym-slide-check SlideBaoCaoSprint1.tex
+xelatex -interaction=nonstopmode -halt-on-error -output-directory=/tmp/gym-slide-check SlideBaoCaoSprint1.tex
 ```
 
 Kiểm tra 14/11: Tectonic 0.17/Noto Sans dựng từ nguồn và tài nguyên đã cache ra PDF 17 trang trong thư mục tạm; `pdfinfo` đọc được. Đã render và xem đủ 17 trang; chỉnh cỡ chữ trang 2 và 13 để nội dung tách khỏi chân trang, dựng lại và xem lại hai trang. Log cuối không có overfull/underfull, thiếu glyph hoặc lỗi TeX; vẫn có cảnh báo đường dẫn font hệ thống. Liên kết Markdown nội bộ và `git diff --check` đạt. Đây là kiểm tra tài liệu, không chạy lại kiểm thử ứng dụng hoặc staging.
 
-Output PDF/PNG/tệp phụ trợ không đưa vào Git; [report/.gitignore](.gitignore) vẫn bảo vệ output. PDF cuối do trưởng nhóm đính kèm GitHub Release, không commit. Giữ #81 Draft để Tú review và rehearsal cuối; commit backend Render của phiên HTTPS còn chờ Tiến/Đức Việt xác nhận. Bằng chứng HTTPS và Postman đã có nguồn, không còn là việc chưa chạy.
+Output PDF/PNG/tệp phụ trợ không đưa vào Git; [report/.gitignore](../.gitignore) vẫn bảo vệ output. PDF cuối do trưởng nhóm đính kèm GitHub Release, không commit. Giữ #81 Draft để Tú review và rehearsal cuối; commit backend Render của phiên HTTPS còn chờ Tiến/Đức Việt xác nhận. Bằng chứng HTTPS và Postman đã có nguồn, không còn là việc chưa chạy.
