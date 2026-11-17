@@ -187,7 +187,7 @@ npm ci
 npm run dev
 ```
 
-Mở <http://localhost:5173>. Ở chế độ phát triển có ô **"Giả lập vai trò"** để thử menu theo từng vai trò (sẽ thay bằng đăng nhập thật ở F1).
+Mở <http://localhost:5173>, dùng đúng tên `localhost` (không dùng `127.0.0.1`): backend chỉ cho phép origin trong `CORS_ALLOWED_ORIGINS`, mặc định `http://localhost:5173`, và trả `403 Invalid CORS request` cho origin khác. Đăng nhập bằng tài khoản dữ liệu mẫu trong `backend/src/main/resources/db/seed` (ví dụ `receptionist@example.com`, `member1@example.com`; mật khẩu là chuỗi dùng để tạo `SEED_PASSWORD_HASH`) hoặc đăng ký hội viên mới tại `/register`. Cần backend đang chạy; cách thử đầy đủ ở [tich-hop-frontend-f1.md](tich-hop-frontend-f1.md).
 
 Các lệnh khác: `npm run lint`, `npm test`, `npm run build`, `npm run format`.
 

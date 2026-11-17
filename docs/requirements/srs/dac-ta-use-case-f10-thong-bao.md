@@ -181,11 +181,11 @@ Mỗi sự kiện tạo **hai dòng** trong bảng `notifications`: một dòng 
 2. Hệ thống chọn lượt WAITLIST đứng đầu và đủ điều kiện theo `waitlisted_at`, có khóa bản ghi để chống xung đột (NF6).
 3. Hệ thống cập nhật lượt đặt chỗ sang BOOKED, ghi `promoted_at` (việc đưa vào lớp thuộc F8; F10 chỉ gửi thông báo).
 4. Hệ thống tạo hai dòng `notifications` (kênh `IN_APP` và `EMAIL`) trong cùng giao dịch, rồi đẩy thông báo `IN_APP` tới trình duyệt hội viên đang mở qua WebSocket (STOMP).
-5. Email được gửi như UC-F10.1 bước 5 (chỉ trong giờ mở cửa chi nhánh); hạn hủy không phạt `grace_until` bằng thời điểm gửi email cộng `PROMOTION_GRACE_MIN` (mặc định 15 phút), theo ERD.
+5. Email được gửi như UC-F10.1 bước 5 (chỉ trong giờ mở cửa chi nhánh). Hạn hủy không phạt `grace_until` do F8 ghi ở bước 3, bằng `promoted_at` cộng `PROMOTION_GRACE_MIN` (mặc định 15 phút); việc gửi email không sửa `grace_until` ([ADR 0010](../../decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md)).
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
-- **A1 – Hội viên chưa có tài khoản:** hệ thống không tạo thông báo (hội viên vẫn được đưa vào lớp).
-- **A2 – Chỗ trống phát sinh ngoài giờ mở cửa:** vẫn đưa vào lớp ngay (trước mốc `PROMOTION_CUTOFF_MIN`); thông báo trong web hiển thị ngay, email gửi khi tới giờ mở cửa, ân hạn tính từ lúc gửi email.
+- **A1 – Hội viên chưa có tài khoản:** hệ thống không tạo thông báo (hội viên vẫn được đưa vào lớp, `grace_until` vẫn tính từ `promoted_at`).
+- **A2 – Chỗ trống phát sinh ngoài giờ mở cửa:** vẫn đưa vào lớp ngay (trước mốc `PROMOTION_CUTOFF_MIN`); thông báo trong web hiển thị ngay, email gửi khi tới giờ mở cửa; ân hạn vẫn tính từ lúc được đưa vào lớp (`promoted_at`), không chờ email.
 - **E1 – Gửi email thất bại:** hội viên vẫn ở trong lớp; dòng email chuyển `FAILED`; thông báo trong web vẫn có *(cơ chế thử lại là đề xuất)*.
 - **E4 – Xung đột đồng thời (409):** hai chỗ trống xuất hiện cùng lúc; hệ thống khóa `members` rồi `class_sessions` (NF6) để không đưa cùng một người vào hai lần hoặc vượt sĩ số.
 

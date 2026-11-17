@@ -24,10 +24,14 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
@@ -43,6 +47,7 @@ import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import tools.jackson.databind.json.JsonMapper;
+import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 
 /**
  * Cấu hình bảo mật cho hệ thống (F1 – Tài khoản và phân quyền).
@@ -101,30 +106,35 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /** Kiểm tra chữ ký JWT HS256 và hạn dùng bằng khóa {@code JWT_SECRET} (ADR 0001, S2). */
+    /** Kiểm tra chữ ký JWT HS256, hạn dùng và cấu trúc claim {@code sub}/{@code role} bằng khóa {@code JWT_SECRET} (ADR 0001, S2). */
     @Bean
-    JwtDecoder jwtDecoder(@Value("${app.jwt.secret}") String jwtSecret) {
-        return NimbusJwtDecoder.withSecretKey(hmacSha256Key(jwtSecret))
+    public JwtDecoder jwtDecoder(@Value("${app.jwt.secret}") String jwtSecret) {
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(hmacSha256Key(jwtSecret))
             .macAlgorithm(MacAlgorithm.HS256)
             .build();
+        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
+            JwtValidators.createDefault(),
+            SecurityConfig::validateSubjectAndRole
+        ));
+        return decoder;
     }
 
     /** Ký JWT HS256 bằng khóa {@code JWT_SECRET}. */
     @Bean
-    JwtEncoder jwtEncoder(@Value("${app.jwt.secret}") String jwtSecret) {
+    public JwtEncoder jwtEncoder(@Value("${app.jwt.secret}") String jwtSecret) {
         return new NimbusJwtEncoder(new ImmutableSecret<>(hmacSha256Key(jwtSecret)));
     }
 
     /** Chuyển claim {@code role} trong JWT thành quyền {@code ROLE_<vai trò>} của Spring Security (S3). */
     @Bean
-    JwtAuthenticationConverter jwtAuthenticationConverter() {
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(SecurityConfig::extractRoleAuthorities);
         return converter;
     }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource(
+    public CorsConfigurationSource corsConfigurationSource(
             @Value("${app.cors.allowed-origins}") List<String> allowedOrigins) {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(allowedOrigins);
@@ -141,7 +151,7 @@ public class SecurityConfig {
 
     /** Băm mật khẩu bằng bcrypt (S1). */
     @Bean
-    PasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -151,6 +161,34 @@ public class SecurityConfig {
             throw new IllegalStateException("JWT_SECRET phải dài ít nhất 32 byte cho thuật toán HS256.");
         }
         return new SecretKeySpec(keyBytes, "HmacSHA256");
+    }
+
+    private static OAuth2TokenValidatorResult validateSubjectAndRole(Jwt jwt) {
+        String subject = jwt.getSubject();
+        if (subject == null || subject.isBlank()) {
+            return OAuth2TokenValidatorResult.failure(
+                new OAuth2Error("invalid_token", "JWT thiếu claim 'sub'.", null));
+        }
+        try {
+            Long.parseLong(subject);
+        } catch (NumberFormatException ex) {
+            return OAuth2TokenValidatorResult.failure(
+                new OAuth2Error("invalid_token", "Claim 'sub' trong JWT phải là số nguyên.", null));
+        }
+
+        String role = jwt.getClaimAsString("role");
+        if (role == null || role.isBlank()) {
+            return OAuth2TokenValidatorResult.failure(
+                new OAuth2Error("invalid_token", "JWT thiếu claim 'role'.", null));
+        }
+        try {
+            UserRole.valueOf(role.trim());
+        } catch (IllegalArgumentException ex) {
+            return OAuth2TokenValidatorResult.failure(
+                new OAuth2Error("invalid_token", "Claim 'role' trong JWT không hợp lệ.", null));
+        }
+
+        return OAuth2TokenValidatorResult.success();
     }
 
     private static Collection<GrantedAuthority> extractRoleAuthorities(Jwt jwt) {

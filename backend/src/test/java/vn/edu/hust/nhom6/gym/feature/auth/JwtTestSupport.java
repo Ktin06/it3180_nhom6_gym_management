@@ -28,8 +28,8 @@ import vn.edu.hust.nhom6.gym.feature.auth.service.JwtTokenService;
  */
 public final class JwtTestSupport {
 
-    /** Khóa bí mật mặc định trong {@code application.yml} khi chạy kiểm thử. */
-    public static final String DEFAULT_TEST_SECRET = "khung-kiem-thu-jwt-secret-toi-thieu-32-ky-tu";
+    /** Khóa bí mật dành riêng cho kiểm thử trong {@code src/test/resources/config/application.yml}. */
+    public static final String DEFAULT_TEST_SECRET = "khoa-bi-mat-kiem-thu-jwt-rieng-biet-toi-thieu-32-byte";
 
     private static final JwtTokenService DEFAULT_TOKEN_SERVICE = createTokenService(DEFAULT_TEST_SECRET);
 
@@ -64,17 +64,28 @@ public final class JwtTestSupport {
 
     /** Tạo JWT thiếu claim {@code role} để kiểm thử trường hợp token không có quyền. */
     public static String accessTokenWithoutRole(Long userId, String email) {
+        return accessTokenWithCustomClaims(String.valueOf(userId), email, null);
+    }
+
+    /** Tạo JWT với {@code sub} và {@code role} tùy ý (dùng để kiểm thử vé lạ/sai định dạng claim). */
+    public static String accessTokenWithCustomClaims(String subject, String email, String role) {
         SecretKey key = new SecretKeySpec(DEFAULT_TEST_SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
         NimbusJwtEncoder encoder = new NimbusJwtEncoder(new ImmutableSecret<>(key));
         Instant now = Instant.now();
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
-        JwtClaimsSet claims = JwtClaimsSet.builder()
-            .subject(String.valueOf(userId))
+        JwtClaimsSet.Builder builder = JwtClaimsSet.builder()
             .issuedAt(now)
-            .expiresAt(now.plus(JwtTokenService.ACCESS_TOKEN_TTL))
-            .claim("email", email)
-            .build();
-        return encoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
+            .expiresAt(now.plus(JwtTokenService.ACCESS_TOKEN_TTL));
+        if (subject != null) {
+            builder.subject(subject);
+        }
+        if (email != null) {
+            builder.claim("email", email);
+        }
+        if (role != null) {
+            builder.claim("role", role);
+        }
+        return encoder.encode(JwtEncoderParameters.from(header, builder.build())).getTokenValue();
     }
 
     public static String authorizationHeaderName() {

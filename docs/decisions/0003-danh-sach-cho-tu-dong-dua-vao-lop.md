@@ -2,7 +2,7 @@
 
 - **Ngày:** 27/10/2026
 - **Người quyết định:** cả nhóm 6
-- **Trạng thái:** Đã chấp nhận
+- **Trạng thái:** Đã thay thế bởi [ADR 0010](0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md) (12/11/2026)
 
 ## Bối cảnh
 

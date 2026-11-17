@@ -83,7 +83,10 @@ export function StaffLayout() {
 
 const headerStyle = {
   background: '#fff',
-  padding: '0 16px',
+  padding: '12px 16px',
+  height: 'auto',
+  minHeight: 64,
+  lineHeight: 'normal',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',

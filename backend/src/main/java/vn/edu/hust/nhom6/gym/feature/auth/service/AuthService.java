@@ -1,19 +1,23 @@
 package vn.edu.hust.nhom6.gym.feature.auth.service;
 
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.ForbiddenException;
 import vn.edu.hust.nhom6.gym.common.exception.NotFoundException;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
 import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
+import vn.edu.hust.nhom6.gym.feature.auth.dto.AuthMeResponse;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.RegisterRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.RefreshToken;
@@ -28,6 +32,16 @@ import vn.edu.hust.nhom6.gym.feature.auth.repository.UserRepository;
  */
 @Service
 public class AuthService {
+
+    public static final int MAX_PASSWORD_BYTES = 72;
+    public static final String PASSWORD_MAX_BYTES_MESSAGE = "Mật khẩu không được vượt quá 72 byte";
+
+    /**
+     * Mã băm BCrypt giả (cost 10) dùng để cân bằng thời gian phản hồi khi đăng nhập với email không tồn tại,
+     * tránh lộ thông tin tài khoản qua timing attack.
+     */
+    private static final String DUMMY_PASSWORD_HASH =
+        "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -62,6 +76,8 @@ public class AuthService {
             throw new ConflictException("Email đã được đăng ký trong hệ thống.");
         }
 
+        validatePasswordLength(request.password());
+
         String normalizedPhone = PhoneUtils.normalizePhone(request.phone());
 
         User user = User.builder()
@@ -84,15 +100,34 @@ public class AuthService {
     }
 
     /**
+     * Kiểm tra độ dài mật khẩu không vượt quá giới hạn 72 byte của BCrypt
+     * (dùng chung cho đăng ký, đổi mật khẩu và đặt lại mật khẩu).
+     */
+    public void validatePasswordLength(String password) {
+        if (password == null || password.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES) {
+            throw new BusinessRuleException(PASSWORD_MAX_BYTES_MESSAGE);
+        }
+    }
+
+    /**
      * Đăng nhập bằng email và mật khẩu (UC-F1.2).
      */
     @Transactional
     public AuthResult login(LoginRequest request) {
         String email = request.email().toLowerCase().trim();
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UnauthorizedException("Email hoặc mật khẩu không chính xác."));
+        String rawPassword = request.password();
+        boolean passwordTooLong = rawPassword == null
+            || rawPassword.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES;
+        String passwordToMatch = passwordTooLong ? "dummy-password-under-72-bytes" : rawPassword;
 
-        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            passwordEncoder.matches(passwordToMatch, DUMMY_PASSWORD_HASH);
+            throw new UnauthorizedException("Email hoặc mật khẩu không chính xác.");
+        }
+
+        boolean passwordMatched = passwordEncoder.matches(passwordToMatch, user.getPasswordHash());
+        if (passwordTooLong || !passwordMatched) {
             throw new UnauthorizedException("Email hoặc mật khẩu không chính xác.");
         }
 
@@ -115,7 +150,7 @@ public class AuthService {
     /**
      * Làm mới Access Token và xoay vòng Refresh Token (UC-F1.3).
      */
-    @Transactional
+    @Transactional(noRollbackFor = UnauthorizedException.class)
     public AuthResult refresh(String rawRefreshToken) {
         if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
             throw new UnauthorizedException("Không tìm thấy phiên làm mới.");
@@ -125,7 +160,14 @@ public class AuthService {
         RefreshToken refreshToken = refreshTokenRepository.findByTokenHash(tokenHash)
             .orElseThrow(() -> new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ."));
 
-        if (refreshToken.getRevokedAt() != null || refreshToken.getExpiresAt().isBefore(OffsetDateTime.now())) {
+        if (refreshToken.getRevokedAt() != null) {
+            if (refreshToken.getUser() != null) {
+                refreshTokenRepository.revokeAllByUserId(refreshToken.getUser().getId(), OffsetDateTime.now());
+            }
+            throw new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ.");
+        }
+
+        if (refreshToken.getExpiresAt().isBefore(OffsetDateTime.now())) {
             throw new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ.");
         }
 
@@ -142,6 +184,27 @@ public class AuthService {
         String newRawRefreshToken = issueRefreshToken(user);
 
         return new AuthResult(newAccessToken, newRawRefreshToken);
+    }
+
+    /**
+     * Đọc thông tin tài khoản hiện tại từ JWT đã xác thực.
+     */
+    public AuthMeResponse getCurrentUser(Jwt jwt) {
+        if (jwt == null || jwt.getSubject() == null) {
+            throw new UnauthorizedException("Token không hợp lệ.");
+        }
+        try {
+            Long userId = Long.valueOf(jwt.getSubject());
+            String email = jwt.getClaimAsString("email");
+            String roleClaim = jwt.getClaimAsString("role");
+            if (roleClaim == null || roleClaim.isBlank()) {
+                throw new UnauthorizedException("Token không hợp lệ.");
+            }
+            UserRole role = UserRole.valueOf(roleClaim.trim());
+            return new AuthMeResponse(userId, email, role);
+        } catch (IllegalArgumentException ex) {
+            throw new UnauthorizedException("Token không hợp lệ.");
+        }
     }
 
     /**

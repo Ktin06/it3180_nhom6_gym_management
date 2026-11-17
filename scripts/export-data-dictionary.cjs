@@ -117,7 +117,7 @@ const labels = {
 const lines = [
   '# Từ điển dữ liệu – ERD v2', '',
   '- **Người biên soạn:** Nguyễn Anh Tú (`natus26`) · [#15](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/15) · WBS 1.3.11.',
-  '- **Cập nhật:** 05/11/2026.',
+  '- **Cập nhật:** 12/11/2026.',
   '- **Nguồn chuẩn:** [erd-v2.dbml](erd-v2.dbml); mục đích bảng theo [thiết kế dữ liệu](thiet-ke-du-lieu.md).',
   `- **Phạm vi:** ${tables.length} bảng, ${tables.reduce((n,t)=>n+t.fields.length,0)} cột, ${schema.refs.length} quan hệ, ${tables.reduce((n,t)=>n+t.indexes.length,0)} khai báo chỉ mục và ${enums.size} tập giá trị Enum.`,
   `- **SHA-256 DBML (chuẩn hóa xuống dòng LF):** ${code(checksum)}.`, '',
@@ -182,7 +182,8 @@ for (const en of enums.values()) {
   lines.push('');
 }
 lines.push('## 5. Lịch sử thay đổi', '', '| Ngày | Nội dung |', '| --- | --- |',
-  '| 05/11/2026 | Xuất từ điển đầy đủ từ ERD v2 cho #15; giữ cột, kiểu, mặc định, khóa, chỉ mục, Enum và ghi chú của nguồn |', '');
+  '| 05/11/2026 | Xuất từ điển đầy đủ từ ERD v2 cho #15; giữ cột, kiểu, mặc định, khóa, chỉ mục, Enum và ghi chú của nguồn |',
+  '| 12/11/2026 | Xuất lại theo nguồn mới: các CHECK và chỉ mục đã thêm vào DBML sau 05/11; `class_bookings` theo ADR 0010 (`created_by` bắt buộc, ghi chú `waitlisted_at`, `grace_until`, `attendance_marked_by`) |', '');
 const output = lines.join('\n');
 if (args.includes('--check')) {
   const existing = fs.existsSync(outputPath) ? fs.readFileSync(outputPath, 'utf8').replace(/\r\n/g,'\n') : '';
