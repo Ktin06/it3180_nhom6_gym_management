@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { roleAwareReturnPath, safeReturnPath } from './redirect'
+import { HOME_PATH_BY_ROLE, MEMBER_MANAGEMENT_ROLES, type Role } from './roles'
 
 describe('safeReturnPath', () => {
   it('giữ lại đường dẫn nội bộ do route bảo vệ ghi vào state', () => {
@@ -22,6 +23,35 @@ describe('safeReturnPath', () => {
 })
 
 describe('roleAwareReturnPath', () => {
+  it.each(MEMBER_MANAGEMENT_ROLES)('giữ route F2/F3 với vai trò %s', (role) => {
+    for (const pathname of ['/members', '/packages']) {
+      expect(
+        roleAwareReturnPath(
+          { from: { pathname, search: '?page=2', hash: '#list' } },
+          'https://gym.example',
+          role,
+        ),
+      ).toBe(`${pathname}?page=2#list`)
+    }
+  })
+
+  it.each<Role>(['MEMBER', 'TRAINER'])('không quay lại F2/F3 với vai trò %s', (role) => {
+    for (const pathname of ['/members', '/packages']) {
+      expect(roleAwareReturnPath({ from: { pathname } }, 'https://gym.example', role)).toBe(
+        HOME_PATH_BY_ROLE[role],
+      )
+    }
+  })
+
+  it.each(['/members-other', '/packages/private', '/unknown'])(
+    'không mở rộng quyền điều hướng sang %s',
+    (pathname) => {
+      expect(
+        roleAwareReturnPath({ from: { pathname } }, 'https://gym.example', 'RECEPTIONIST'),
+      ).toBe('/reception')
+    },
+  )
+
   it('dùng trang chủ của role mới nếu return path thuộc role khác', () => {
     expect(
       roleAwareReturnPath({ from: { pathname: '/member' } }, 'https://gym.example', 'RECEPTIONIST'),

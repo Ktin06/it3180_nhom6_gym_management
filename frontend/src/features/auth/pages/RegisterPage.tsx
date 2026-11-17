@@ -6,7 +6,7 @@ import { HOME_PATH_BY_ROLE } from '../../../auth/roles'
 import { useAuth } from '../../../auth/useAuth'
 import { getProblemDetail } from '../api/auth-api'
 import type { RegisterRequest } from '../types/auth'
-import { isValidPassword, isValidPhone, normalizeEmail, normalizePhone } from '../validation'
+import { isValidPassword, isValidPhone, normalizeEmail, normalizePhone } from '../api/validation'
 
 interface RegisterForm extends RegisterRequest {
   confirmPassword: string
@@ -54,14 +54,6 @@ export function RegisterPage() {
         }
         const problem = getProblemDetail(error)
         const fieldErrors = { ...problem.errors }
-        const conflictField = problem.detail?.toLowerCase().includes('email')
-          ? 'email'
-          : problem.detail?.toLowerCase().includes('số điện thoại')
-            ? 'phone'
-            : null
-        if (problem.status === 409 && problem.detail && conflictField) {
-          fieldErrors[conflictField] = problem.detail
-        }
         form.setFields(
           Object.entries(fieldErrors)
             .filter(([name]) =>
@@ -69,11 +61,7 @@ export function RegisterPage() {
             )
             .map(([name, errors]) => ({ name: name as keyof RegisterForm, errors: [errors] })),
         )
-        setErrorDetail(
-          problem.status === 409 && conflictField
-            ? null
-            : (problem.detail ?? 'Đăng ký chưa thành công. Vui lòng thử lại.'),
-        )
+        setErrorDetail(problem.detail ?? 'Đăng ký chưa thành công. Vui lòng thử lại.')
       } finally {
         setPending(false)
       }
@@ -89,7 +77,9 @@ export function RegisterPage() {
           title="Tài khoản đã được tạo"
           description="Thông tin tài khoản chưa tải được. Hãy thử lại hoặc đăng nhập; không cần đăng ký lại."
         />
-        {errorDetail && <Alert type="warning" showIcon title={errorDetail} style={{ marginTop: 16 }} />}
+        {errorDetail && (
+          <Alert type="warning" showIcon title={errorDetail} style={{ marginTop: 16 }} />
+        )}
         <Button
           type="primary"
           block
@@ -165,7 +155,11 @@ export function RegisterPage() {
               validator: (_, value: string | undefined) =>
                 !value || isValidPassword(value)
                   ? Promise.resolve()
-                  : Promise.reject(new Error('Mật khẩu cần ít nhất 8 ký tự, gồm chữ và số')),
+                  : Promise.reject(
+                      new Error(
+                        'Mật khẩu cần ít nhất 8 ký tự, có chữ A–Z/a–z và số, tối đa 72 byte UTF-8',
+                      ),
+                    ),
             },
           ]}
         >

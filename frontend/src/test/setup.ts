@@ -7,6 +7,10 @@ beforeEach(() => {
   Object.defineProperty(navigator, 'locks', { configurable: true, value: createTestLockManager() })
 })
 
+// jsdom chưa hỗ trợ style của pseudo-element; kiểm thử DOM không đo kích thước scrollbar.
+const getComputedStyle = window.getComputedStyle.bind(window)
+window.getComputedStyle = (element) => getComputedStyle(element)
+
 afterEach(() => {
   cleanup()
 })
@@ -23,4 +27,13 @@ if (!window.matchMedia) {
     removeEventListener: () => {},
     dispatchEvent: () => false,
   })
+}
+
+// jsdom không tính bố cục; Table/Select cần API này để đăng ký theo dõi kích thước.
+if (!globalThis.ResizeObserver) {
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
 }

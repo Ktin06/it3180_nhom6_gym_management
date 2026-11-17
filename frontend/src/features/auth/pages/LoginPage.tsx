@@ -6,7 +6,7 @@ import { AuthCompletionError } from '../../../auth/AuthContext'
 import { useAuth } from '../../../auth/useAuth'
 import { roleAwareReturnPath } from '../../../auth/redirect'
 import { getProblemDetail } from '../api/auth-api'
-import { normalizeEmail } from '../validation'
+import { normalizeEmail } from '../api/validation'
 
 interface LoginForm {
   email: string
@@ -25,6 +25,7 @@ export function LoginPage() {
 
   const handleFinish = (values: LoginForm) => {
     setPending(true)
+    setIdentityNeedsRetry(false)
     setErrorDetail(null)
     void (async () => {
       try {
