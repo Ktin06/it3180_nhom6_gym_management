@@ -5,3 +5,6 @@
 # Ảnh nguồn của theme HUST từ PR #88; không phải output sinh ra.
 !/mau-slide-hust/images/hust-blue-169-title.png
 !/mau-slide-hust/images/hust-blue-169-content-full.png
+
+# Ảnh chụp màn hình dùng trong SlideBaoCaoSprint1.tex.
+!/anh-slide/*.png
