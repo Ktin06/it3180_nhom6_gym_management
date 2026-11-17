@@ -1,0 +1,10 @@
+/build/
+*.pdf
+*.png
+
+# Ảnh nguồn của theme HUST từ PR #88; không phải output sinh ra.
+!/mau-slide-hust/images/hust-blue-169-title.png
+!/mau-slide-hust/images/hust-blue-169-content-full.png
+
+# Ảnh chụp màn hình dùng trong BaoCaoSprint1/SlideBaoCaoSprint1.tex.
+!/BaoCaoSprint1/anh-slide/*.png

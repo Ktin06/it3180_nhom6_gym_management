@@ -1,0 +1,727 @@
+% Slide báo cáo Sprint 1 – Nhóm 6 – IT3180
+% Biên dịch (trong thư mục report/BaoCaoSprint1/): xelatex SlideBaoCaoSprint1.tex (chạy 2 lần)
+\documentclass[t, aspectratio=169]{beamer}
+
+\usepackage{amssymb}
+\usepackage{fontspec}
+\setsansfont{Segoe UI}[BoldFont={Segoe UI Bold}, ItalicFont={Segoe UI Italic}]
+\setmainfont{Segoe UI}[BoldFont={Segoe UI Bold}, ItalicFont={Segoe UI Italic}]
+\setmonofont{Consolas}[Scale=0.95]
+
+% --- Lề (đặt trước khi nạp theme) ---
+\def\slideContentLeftMargin{0.6cm}
+\def\slideContentRightMargin{0.6cm}
+\def\hustHeaderHeight{0.55cm}
+\def\slideContentTopPadding{0cm}
+
+\usepackage[blue, 169]{../mau-slide-hust/beamerthemeHUST}
+\graphicspath{{../mau-slide-hust/images/}{anh-slide/}{../../docs/design/erd/hinh/}}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.misc, calc}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{array}
+
+% --- Màu ---
+\definecolor{hustred}{HTML}{C8102E}
+\definecolor{okgreen}{HTML}{1A7F37}
+\definecolor{muted}{HTML}{57606A}
+\definecolor{soft}{HTML}{EEF4F9}
+\definecolor{softred}{HTML}{FBEDEF}
+\definecolor{rule}{HTML}{C9D1D9}
+
+\setbeamerfont{frametitle}{size=\Large, series=\bfseries}
+\setbeamercolor{block title}{bg=hustprimary, fg=white}
+\setbeamercolor{block body}{bg=soft, fg=black}
+\setbeamercolor{block title alerted}{bg=hustred, fg=white}
+\setbeamercolor{block body alerted}{bg=softred, fg=black}
+\setbeamercolor{itemize item}{fg=hustprimary}
+\setbeamercolor{itemize subitem}{fg=hustprimary}
+\setbeamertemplate{itemize item}{\small\raisebox{0.15ex}{$\blacktriangleright$}}
+\setbeamertemplate{itemize subitem}{\scriptsize\raisebox{0.2ex}{$\bullet$}}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setlength{\leftmargini}{1.1em}
+\setlength{\leftmarginii}{1em}
+
+% --- Ảnh chụp: giữ đúng tỉ lệ, không vượt khung rộng #2 x cao #3, viền mảnh ---
+\setlength{\fboxsep}{0pt}
+\newcommand{\shot}[3]{%
+  {\setlength{\fboxrule}{0.4pt}\fcolorbox{rule}{white}{%
+    \includegraphics[width=\dimexpr#2-1pt\relax, height=#3, keepaspectratio]{#1}}}}
+\newcommand{\capt}[1]{\par\vspace{2pt}{\scriptsize\color{muted}#1\par}}
+% --- Bảng ERD vẽ tay: tên bảng + cột, nhãn PK/FK/UQ ---
+\newlength{\erdw}\setlength{\erdw}{2.85cm}
+\newcommand{\erdtable}[2]{%
+  \begin{minipage}{\erdw}\scriptsize\setlength{\fboxsep}{0pt}%
+  \colorbox{hustprimary}{\parbox[c][0.42cm]{\erdw}{\hspace{3pt}\textcolor{white}{\bfseries #1}}}\par\nointerlineskip
+  \renewcommand{\arraystretch}{1.0}%
+  \begin{tabular*}{\erdw}{@{\hspace{3pt}}l@{\extracolsep{\fill}}r@{\hspace{3pt}}}
+  \rule{0pt}{9pt}#2
+  \end{tabular*}\vspace{1pt}
+  \end{minipage}}
+\newcommand{\col}[1]{#1 & }
+\newcommand{\pk}[1]{\textbf{#1} & {\color{hustred}\bfseries PK}}
+\newcommand{\fk}[1]{#1 & {\color{hustprimary}\bfseries FK}}
+\newcommand{\uq}[1]{#1 & {\color{okgreen}\bfseries UQ}}
+\newcommand{\num}[1]{{\color{hustprimary}\bfseries #1}}
+\newcommand{\gh}[1]{{\color{hustprimary}\bfseries\##1}}
+
+% --- Trang chuyển phần: chữ nằm gọn trong vòng tròn trống giữa ảnh nền ---
+\newcommand{\secpage}[2]{{%
+  \setbeamertemplate{background}{\includegraphics[width=\paperwidth,height=\paperheight]{hust-blue-169-section.png}}
+  \begin{frame}[plain]
+  \begin{tikzpicture}[remember picture, overlay]
+    \node[text width=5.6cm, align=center, text=white] at ($(current page.north west)+(8cm,-3.55cm)$) {%
+      {\large\bfseries\color{white!75} #1\par}\vspace{6pt}
+      {\Large\bfseries #2\par}};
+  \end{tikzpicture}
+  \end{frame}}}
+
+\title{Báo cáo Sprint 1}
+\author{Nhóm 6}
+
+\begin{document}
+
+% =================================================================
+% TRANG BÌA
+% =================================================================
+{
+\setbeamertemplate{background}{\includegraphics[width=\paperwidth,height=\paperheight]{hust-blue-169-title.png}}
+\begin{frame}[plain]
+\begin{tikzpicture}[remember picture, overlay]
+  \node[anchor=north west, text width=10.4cm, align=left]
+    at ($(current page.north west)+(0.7cm,-2.05cm)$) {%
+    {\color{hustred}\small\bfseries IT3180 – NHẬP MÔN CÔNG NGHỆ PHẦN MỀM\par}
+    \vspace{3pt}
+    {\color{hustprimary}\fontsize{22}{25}\selectfont\bfseries BÁO CÁO SPRINT 1\par}
+    \vspace{2pt}
+    {\color{black!80}\large\bfseries Web quản lý chuỗi phòng tập gym\par}
+    \vspace{5pt}
+    {\small\color{black!80}\textbf{Giảng viên hướng dẫn:} TS. Bùi Thị Mai Anh\par}
+    {\small\color{black!80}\textbf{Nhóm 6} \;·\; Sprint 1: 27/10 – 16/11/2026 \;·\; Demo 17/11/2026\par}
+    \vspace{6pt}
+    {\scriptsize
+    \begin{tabular}{@{}l@{\hspace{4pt}}l@{\hspace{18pt}}l@{\hspace{4pt}}l@{}}
+      Hoàng Kim Tiến (trưởng nhóm) & 202416367 & Nguyễn Trọng Việt & 202416399\\
+      Bùi Trần Đức Việt & 202416402 & Nguyễn Phú Trọng & 202400075\\
+      Thái Hùng Lân & 202416261 & Nguyễn Anh Tú & 202400078\\
+      Lê Phước Minh Quân & 202416324 & Phạm Gia Bảo & 202416425\\
+    \end{tabular}\par}
+  };
+\end{tikzpicture}
+\end{frame}
+}
+
+\resetPageCount
+\showPageNumber
+\useStyleFull
+\useThinBar
+
+% =================================================================
+\begin{frame}{Nội dung trình bày}
+\vspace{6pt}
+\begin{columns}[T,onlytextwidth]
+\column{0.5\textwidth}
+\begin{enumerate}\setlength{\itemsep}{9pt}
+  \item[\num{1}] \textbf{Thành viên, đề tài và mục tiêu Sprint 1}
+  \item[\num{2}] \textbf{Cách nhóm tổ chức công việc}\\
+    {\small\color{muted}Agile, chia việc, GitHub Projects, quy trình Git, xử lý vấn đề, chất lượng}
+  \item[\num{3}] \textbf{Kết quả Sprint 1}\\
+    {\small\color{muted}Phân tích, thiết kế, sản phẩm chạy được, demo}
+  \item[\num{4}] \textbf{Rút kinh nghiệm và kế hoạch Sprint 2}
+\end{enumerate}
+\column{0.46\textwidth}
+\begin{block}{Sprint 1 trong một câu}
+\small Từ con số 0 đến một hệ thống \textbf{chạy được trên mạng}: đủ tài liệu phân tích – thiết kế, database 39 bảng, đăng nhập (F1), hồ sơ hội viên (F2), danh mục gói tập (F3).
+\end{block}
+\vspace{6pt}
+\begin{block}{Mọi số liệu trong slide}
+\small Lấy trực tiếp từ GitHub ngày 16/11/2026 (issue, pull request, CI). Thầy cô kiểm chứng được trên repo.
+\end{block}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\section{Thành viên và mục tiêu}
+\secpage{PHẦN 1}{Thành viên, đề tài và mục tiêu}
+\begin{frame}{Thành viên và phân công Sprint 1}
+\vspace{2pt}
+{\scriptsize
+\renewcommand{\arraystretch}{1.28}
+\begin{tabularx}{\textwidth}{@{}l c >{\raggedright\arraybackslash}X r@{}}
+\toprule
+\textbf{Thành viên} & \textbf{MSSV} & \textbf{Phụ trách trong Sprint 1} & \textbf{Điểm}\\
+\midrule
+\rowcolor{soft} Hoàng Kim Tiến (trưởng nhóm) & 202416367 & Khung dự án, ERD, quy trình làm việc; điều phối, duyệt PR & 27\\
+Bùi Trần Đức Việt & 202416402 & F1 backend: đăng nhập, phân quyền; migration nhóm 1–2; kiểm thử CSDL & 16\\
+\rowcolor{soft} Thái Hùng Lân & 202416261 & API F2 (hội viên), F3 (danh mục gói); đặc tả F3, F5; wireframe hóa đơn & 15\\
+Lê Phước Minh Quân & 202416324 & Đặc tả F4, F6; sơ đồ use case, sơ đồ hoạt động; migration nhóm 4 & 15\\
+\rowcolor{soft} Nguyễn Trọng Việt & 202416399 & Đặc tả F7, F9, F10; migration nhóm 5, 7; wireframe; kế hoạch Sprint 2 & 16\\
+Nguyễn Phú Trọng & 202400075 & Gộp schema 39 bảng, dữ liệu mẫu, triển khai staging, chạy Postman & 16\\
+\rowcolor{soft} Nguyễn Anh Tú & 202400078 & SRS, bảng truy vết, từ điển dữ liệu; giao diện F2, F3 & 15\\
+Phạm Gia Bảo & 202416425 & User story F1–F10; đặc tả F8; giao diện F1; slide bàn giao & 16\\
+\bottomrule
+\end{tabularx}}
+\capt{Điểm = story point (đơn vị ước lượng độ khó). Tổng 136 điểm. Trưởng nhóm cao hơn vì đã dựng khung dự án trước khi chia việc.}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Đề tài và mục tiêu Sprint 1}
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\begin{block}{Đề tài}
+\small
+\begin{itemize}
+  \item Web quản lý \textbf{chuỗi} phòng tập gym: nhiều chi nhánh.
+  \item \num{20} chức năng (F1–F20), chia \num{5} version, \num{6} vai trò: chủ chuỗi, quản lý chi nhánh, lễ tân, huấn luyện viên, hội viên, khách.
+  \item Công nghệ: React + Ant Design, Spring Boot (Java 21), PostgreSQL.
+  \item Triển khai: Vercel – Render – Neon.
+\end{itemize}
+\end{block}
+\column{0.48\textwidth}
+\begin{block}{Mục tiêu Sprint 1 (27/10 – 16/11)}
+\small
+\begin{itemize}
+  \item Phân tích yêu cầu: SRS, user story, đặc tả use case F1–F10.
+  \item Thiết kế: ERD 39 bảng, sơ đồ UML, wireframe.
+  \item Dựng khung dự án, quy trình làm việc, CI.
+  \item Làm sớm phần lõi v1: \textbf{F1} tài khoản, \textbf{F2} hồ sơ hội viên, \textbf{F3} danh mục gói.
+  \item Chạy được trên môi trường thật (staging).
+\end{itemize}
+\end{block}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\section{Cách tổ chức công việc}
+\secpage{PHẦN 2}{Cách nhóm tổ chức công việc}
+
+\begin{frame}{Quy trình Agile: chia sprint, mỗi việc bắt đầu từ một issue}
+\begin{center}
+\begin{tikzpicture}[
+  every node/.style={font=\scriptsize},
+  st/.style={rounded corners=3pt, draw=hustprimary, fill=soft, minimum height=0.9cm, text width=2.35cm, align=center, line width=0.6pt},
+  ar/.style={-{Stealth[length=5pt]}, line width=0.9pt, color=hustprimary}]
+  \node[st] (a) {\textbf{Kick-off}\\chốt phạm vi, giao việc};
+  \node[st, right=0.42cm of a] (b) {\textbf{Lập kế hoạch}\\WBS, story point, hạn};
+  \node[st, right=0.42cm of b] (c) {\textbf{Làm việc}\\issue → PR → review};
+  \node[st, right=0.42cm of c] (d) {\textbf{Demo}\\cho giảng viên};
+  \node[st, right=0.42cm of d] (e) {\textbf{Tổng kết}\\rút kinh nghiệm};
+  \draw[ar] (a) -- (b); \draw[ar] (b) -- (c); \draw[ar] (c) -- (d); \draw[ar] (d) -- (e);
+  \draw[ar, dashed] (e.south) -- ++(0,-0.35) -| node[pos=0.25, below, font=\scriptsize\color{muted}]{sprint tiếp theo} (a.south);
+\end{tikzpicture}
+\end{center}
+\vspace{2pt}
+\begin{columns}[T,onlytextwidth]
+\column{0.32\textwidth}
+\begin{block}{4 sprint, 2 tuần mỗi sprint}
+\footnotesize Mỗi sprint là một \textbf{milestone} trên GitHub, có hạn chót và \% tiến độ tự tính.
+\end{block}
+\column{0.32\textwidth}
+\begin{block}{User story}
+\footnotesize "Là lễ tân, tôi muốn…" kèm \textbf{tiêu chí chấp nhận} Given/When/Then: điều kiện để coi là xong.
+\end{block}
+\column{0.32\textwidth}
+\begin{block}{Ghi lại mọi thứ}
+\footnotesize Biên bản họp, kế hoạch, \num{11} ADR (file ghi quyết định kiến trúc kèm lý do) đều nằm trong repo.
+\end{block}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Chia việc có cơ sở, không chia cảm tính}
+\begin{columns}[T,onlytextwidth]
+\column{0.56\textwidth}
+\begin{itemize}\small\setlength{\itemsep}{4pt}
+  \item Kế hoạch gồm \num{49} đầu việc \textbf{WBS} (bảng chia nhỏ công việc), mỗi việc có \textbf{story point}, người làm, hạn, thứ tự phụ thuộc. Tổng \num{136} điểm.
+  \item Khối lượng chia đều: 7 thành viên mỗi người \num{15–16} điểm.
+  \item \textbf{Ai đặc tả, viết migration chức năng nào thì làm luôn API, giao diện chức năng đó.} Ai vẽ wireframe màn hình nào thì code màn hình đó.
+  \begin{itemize}
+    \item Không ai phải đọc lại tài liệu của người khác.
+    \item Sang Sprint 2, mỗi người làm tiếp đúng cụm chức năng của mình.
+  \end{itemize}
+  \item Mỗi người có một \textbf{cặp duyệt PR chéo}.
+\end{itemize}
+\column{0.4\textwidth}
+\centering
+\shot{7.png}{\linewidth}{5.3cm}
+\capt{GitHub Insights: cả 8 thành viên đều có đóng góp. Mỗi PR được gộp thành 1 commit (squash), nên số commit nhỏ.}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Bảng công việc trên GitHub Projects}
+\begin{columns}[T,onlytextwidth]
+\column{0.57\textwidth}
+\centering
+\shot{1a.png}{\linewidth}{6.25cm}
+\column{0.39\textwidth}
+\begin{itemize}\small\setlength{\itemsep}{5pt}
+  \item Bảng Kanban 3 cột: \textbf{Todo – In Progress – Done}.
+  \item \num{114} thẻ: \num{79} Done, \num{1} đang làm, \num{34} chờ làm (phần lớn của Sprint 2).
+  \item Thẻ \textbf{tự chuyển cột}: mở PR là In Progress, gộp PR là Done (tự động hóa của GitHub).
+  \item Cả nhóm và giảng viên xem được tiến độ mọi lúc, không cần hỏi từng người.
+\end{itemize}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Mỗi đầu việc là một issue có đủ thông tin}
+\begin{columns}[T,onlytextwidth]
+\column{0.6\textwidth}
+\centering
+\shot{1c.png}{\linewidth}{6.2cm}
+\column{0.36\textwidth}
+\small Một issue ghi rõ:
+\begin{itemize}\small\setlength{\itemsep}{3pt}
+  \item mã chức năng, mã WBS, \textbf{người làm}, \textbf{hạn};
+  \item danh sách việc cần làm và kết quả mong đợi;
+  \item nhãn, milestone (thuộc sprint nào);
+  \item PR liên kết: gộp PR thì issue tự đóng.
+\end{itemize}
+\vspace{4pt}
+\small Có sẵn \textbf{3 mẫu issue}: user story, task, báo lỗi. Ai tạo issue cũng điền đủ các mục.
+\end{columns}
+\end{frame}
+
+% =================================================================
+\begin{frame}{User story có tiêu chí chấp nhận}
+\begin{columns}[T,onlytextwidth]
+\column{0.6\textwidth}
+\centering
+\shot{6b.png}{\linewidth}{6.25cm}
+\column{0.36\textwidth}
+\begin{itemize}\small\setlength{\itemsep}{5pt}
+  \item User story F1–F10 đã tạo thành issue trên GitHub.
+  \item Mỗi story có \textbf{kịch bản Given/When/Then}: có điều kiện gì, làm gì, kết quả phải ra sao.
+  \item Có quy tắc nghiệp vụ liên quan và \textbf{nguồn}: bản chốt phạm vi, ERD.
+  \item Tiêu chí chấp nhận là căn cứ để viết kiểm thử và để nghiệm thu.
+\end{itemize}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Milestone: mỗi sprint là một mốc có hạn chót}
+\vspace{4pt}
+\centering
+\shot{2a.png}{\textwidth}{5.3cm}
+\capt{4 milestone ứng với 4 sprint, mỗi mốc ghi phạm vi và hạn chót; GitHub tự tính \% hoàn thành. Sprint 1: \textbf{35/37 issue đã đóng (94\%)}.}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Milestone Sprint 1 và hệ thống nhãn}
+\begin{columns}[T,onlytextwidth]
+\column{0.555\textwidth}
+\centering
+\shot{2b.png}{\linewidth}{5.2cm}
+\capt{Các issue đã đóng của Sprint 1, mỗi issue có nhãn chức năng và loại việc.}
+\column{0.425\textwidth}
+\centering
+\shot{6a.png}{\linewidth}{4.1cm}
+\capt{Nhãn F1–F20, v1–v5, loại việc, mức ưu tiên, \textit{blocked}.}
+\vspace{2pt}
+\begin{itemize}\scriptsize\setlength{\itemsep}{1pt}
+  \item Lọc nhanh, ví dụ: "việc ưu tiên cao của F4 trong Sprint 2".
+  \item \textit{blocked}: việc đang phải chờ việc khác.
+\end{itemize}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Quy trình mã nguồn: không ai được đẩy thẳng lên main}
+\vspace{4pt}
+\begin{center}
+\begin{tikzpicture}[
+  every node/.style={font=\scriptsize},
+  st/.style={rounded corners=3pt, draw=hustprimary, fill=soft, minimum height=1.0cm, text width=1.62cm, align=center, line width=0.6pt},
+  ok/.style={st, draw=okgreen, fill=okgreen!8},
+  ar/.style={-{Stealth[length=5pt]}, line width=0.9pt, color=hustprimary}]
+  \node[st] (i) {\textbf{Issue}\\nhận việc};
+  \node[st, right=0.22cm of i] (b) {\textbf{Nhánh}\\\texttt{feature/F2-…}};
+  \node[st, right=0.22cm of b] (c) {\textbf{Commit}\\\texttt{feat(F2): …}};
+  \node[st, right=0.22cm of c] (p) {\textbf{Pull request}\\theo mẫu};
+  \node[ok, right=0.22cm of p] (ci) {\textbf{CI tự chạy}\\build + kiểm thử};
+  \node[ok, right=0.22cm of ci] (r) {\textbf{Review}\\Approve};
+  \node[ok, right=0.22cm of r] (m) {\textbf{Squash merge}\\vào \texttt{main}};
+  \foreach \x/\y in {i/b,b/c,c/p,p/ci,ci/r,r/m} \draw[ar] (\x) -- (\y);
+  \draw[ar, dashed, color=muted] (r.south) -- ++(0,-0.4) -| node[pos=0.25, below, font=\scriptsize\color{muted}]{chưa đạt: sửa và đẩy lại} (c.south);
+\end{tikzpicture}
+\end{center}
+\vspace{2pt}
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\begin{block}{Bảo vệ nhánh main (ruleset protect-main)}
+\footnotesize
+\begin{itemize}
+  \item Chỉ gộp qua pull request, chỉ cho \textbf{squash merge} (gom cả PR thành 1 commit).
+  \item Bắt buộc \textbf{CI xanh} (job Backend và Frontend).
+  \item Hook trên máy chặn \texttt{git push} thẳng lên \texttt{main}.
+\end{itemize}
+\end{block}
+\column{0.48\textwidth}
+\begin{block}{Quy ước chung}
+\footnotesize
+\begin{itemize}
+  \item Tên nhánh, commit theo mã chức năng (Conventional Commits).
+  \item Checklist tự review trước khi mở PR.
+  \item \textbf{Kết quả: 43 PR đã gộp, 68 lượt review, 48 lượt Approve.}
+\end{itemize}
+\end{block}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Ví dụ một pull request: PR \#97 – API hồ sơ hội viên (F2)}
+\begin{columns}[T,onlytextwidth]
+\column{0.63\textwidth}
+\centering
+\shot{3a.png}{\linewidth}{5.5cm}
+\capt{Mô tả theo mẫu: liên kết issue \#28, mã WBS, danh sách API, quy tắc nghiệp vụ.}
+\column{0.35\textwidth}
+\centering
+\shot{3b.png}{\linewidth}{5.5cm}
+\capt{2 người duyệt Approve, CI qua 5/5 kiểm tra, thẻ tự chuyển sang Done.}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\begin{frame}{CI: mọi pull request đều được build và kiểm thử tự động}
+\begin{columns}[T,onlytextwidth]
+\column{0.5\textwidth}
+\centering
+\shot{5a.png}{\linewidth}{5.75cm}
+\capt{189 lần chạy CI. Mỗi PR, mỗi lần đẩy thêm commit đều chạy lại.}
+\column{0.46\textwidth}
+\centering
+\shot{5b.png}{\linewidth}{3.4cm}
+\capt{Bước đầu phát hiện thư mục thay đổi, chỉ chạy job cần thiết. Frontend: 105/105 ca kiểm thử đạt.}
+\vspace{4pt}
+\begin{itemize}\footnotesize\setlength{\itemsep}{2pt}
+  \item \textbf{Backend}: Maven build, JUnit, Testcontainers (PostgreSQL thật).
+  \item \textbf{Frontend}: lint, kiểm thử Vitest, build.
+  \item CI đỏ thì \textbf{không gộp được} PR.
+\end{itemize}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Cách nhóm xử lý vấn đề}
+\begin{columns}[T,onlytextwidth]
+\column{0.4\textwidth}
+\centering
+\shot{3d.png}{\linewidth}{6.25cm}
+\column{0.56\textwidth}
+\footnotesize
+\textbf{Nguyên tắc:} vướng ở đâu hỏi ngay trong PR hoặc issue; trưởng nhóm chốt; quyết định quan trọng ghi thành \textbf{ADR}.
+\vspace{3pt}
+\begin{block}{Ví dụ: danh sách chờ lớp nhóm (F8)}
+\scriptsize
+\begin{itemize}
+  \item Khi viết đặc tả, Gia Bảo phát hiện 14 câu hỏi nghiệp vụ chưa rõ.
+  \item Trưởng nhóm chốt từng câu thành bảng quyết định ngay trong PR \#79 (ảnh bên trái).
+  \item Ghi thành ADR 0010, đồng bộ tài liệu và migration ở PR \#109.
+\end{itemize}
+\end{block}
+\vspace{2pt}
+\begin{block}{Các tình huống khác}
+\scriptsize
+\begin{itemize}
+  \item \textbf{Lưu ảnh đại diện ở đâu?} So sánh 2 phương án, chọn PostgreSQL (ADR 0011).
+  \item \textbf{Lỗi bảo mật JWT} phát hiện khi review, vá ở PR \#105.
+  \item \textbf{Migration trễ hạn:} gắn nhãn \textit{blocked}, cả nhóm dời hạn Sprint 1 từ 09/11 sang 16/11.
+\end{itemize}
+\end{block}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Đảm bảo chất lượng}
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\begin{block}{Kiểm thử tự động}
+\small
+\begin{itemize}
+  \item Backend: \num{163} ca kiểm thử JUnit trong 24 lớp.
+  \item Testcontainers chạy PostgreSQL thật để kiểm tra \textbf{ràng buộc database}.
+  \item Frontend: \num{105} ca kiểm thử trong 19 file.
+\end{itemize}
+\end{block}
+\vspace{4pt}
+\begin{block}{Một nguồn sự thật}
+\small Khi tài liệu mâu thuẫn: \textbf{bản chốt phạm vi} quyết định nghiệp vụ, \textbf{erd-v2.dbml} quyết định dữ liệu. Có \textbf{bảng truy vết}: yêu cầu → use case → bảng dữ liệu.
+\end{block}
+\column{0.48\textwidth}
+\begin{block}{Kiểm thử API trên staging bằng Postman (12/11)}
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Chức năng} & \textbf{Request} & \textbf{Đạt}\\
+\midrule
+F1 – tài khoản & 6 & 9/11\\
+F2 – hồ sơ hội viên & 20 & 25/26\\
+F3 – danh mục gói & 34 & 31/34\\
+\bottomrule
+\end{tabular}
+\par\vspace{3pt}
+\scriptsize\color{muted} Các bước không đạt đều do dữ liệu thử trên staging (ví dụ tài khoản đã tồn tại, thiếu chi nhánh thứ hai), không phải lỗi API.
+\end{block}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\section{Kết quả Sprint 1}
+\secpage{PHẦN 3}{Sprint 1 đã làm được gì}
+
+\begin{frame}{Phân tích và thiết kế}
+\begin{columns}[T,onlytextwidth]
+\column{0.335\textwidth}
+\begin{block}{Phân tích yêu cầu}
+\scriptsize
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item SRS: tổng quan, 6 vai trò, yêu cầu phi chức năng.
+  \item User story, tiêu chí chấp nhận F1–F10.
+  \item \num{10} đặc tả use case F1–F10 theo một mẫu chung.
+  \item Bảng truy vết yêu cầu.
+\end{itemize}
+\end{block}
+\vspace{2pt}
+\begin{block}{Thiết kế}
+\scriptsize
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item \textbf{ERD v2: 39 bảng, 8 nhóm}, cả nhóm duyệt 02/11; có từ điển dữ liệu.
+  \item \num{7} sơ đồ use case, \num{3} sơ đồ hoạt động.
+  \item \num{13} wireframe, quy ước giao diện.
+  \item \num{11} ADR.
+\end{itemize}
+\end{block}
+\column{0.645\textwidth}
+\centering
+\begin{tikzpicture}[
+  tbl/.style={draw=hustprimary, line width=0.6pt, inner sep=0pt, fill=white, anchor=north west},
+  rel/.style={draw=muted, line width=0.7pt},
+  card/.style={font=\scriptsize\bfseries, text=hustred, inner sep=1pt}]
+  \node[tbl] (users) at (0,0) {\erdtable{users}{%
+      \pk{id} \\ \uq{email} \\ \col{password\_hash} \\ \col{role} \\ \col{status}}};
+  \node[tbl] (members) at (3.35,0) {\erdtable{members}{%
+      \pk{id} \\ \fk{user\_id} \\ \fk{home\_branch\_id} \\ \uq{member\_code} \\ \uq{phone} \\ \col{status}}};
+  \node[tbl] (branches) at (6.7,0) {\erdtable{branches}{%
+      \pk{id} \\ \uq{code} \\ \col{name} \\ \col{open\_time} \\ \col{close\_time}}};
+  \node[tbl] (memberships) at (3.35,-3.2) {\erdtable{memberships}{%
+      \pk{id} \\ \fk{member\_id} \\ \fk{package\_id} \\ \col{start\_date} \\ \col{end\_date} \\ \col{status}}};
+  \node[tbl] (packages) at (6.7,-3.2) {\erdtable{packages}{%
+      \pk{id} \\ \fk{branch\_id} \\ \uq{code} \\ \col{type} \\ \col{duration\_days} \\ \col{price}}};
+  % users 1 – 1 members (nối ở dòng user_id)
+  \draw[rel] (users.east |- 0,-0.92) -- node[card, above, pos=0.2]{1} node[card, above, pos=0.8]{1} (members.west |- 0,-0.92);
+  % members N – 1 branches (nối ở dòng home_branch_id)
+  \draw[rel] (members.east |- 0,-1.26) -- node[card, above, pos=0.2]{N} node[card, above, pos=0.8]{1} (branches.west |- 0,-1.26);
+  % memberships N – 1 members
+  \draw[rel] (memberships.north) -- node[card, right, pos=0.15]{N} node[card, right, pos=0.85]{1} (members.south);
+  % memberships N – 1 packages (nối ở dòng package_id)
+  \draw[rel] (memberships.east |- 0,-4.46) -- node[card, above, pos=0.2]{N} node[card, above, pos=0.8]{1} (packages.west |- 0,-4.46);
+  % packages N – 1 branches
+  \draw[rel] (packages.north) -- node[card, right, pos=0.15]{N} node[card, right, pos=0.85]{1} (branches.south);
+  % chú giải
+  \node[anchor=north west, font=\scriptsize, align=left, text width=2.85cm] at (0,-3.0) {%
+    \textbf{Chú giải}\\[1pt]
+    {\color{hustred}\textbf{PK}} khóa chính\\
+    {\color{hustprimary}\textbf{FK}} khóa ngoại\\
+    {\color{okgreen}\textbf{UQ}} giá trị duy nhất\\
+    {\color{hustred}\textbf{1 – N}} một – nhiều\\[3pt]
+    {\color{muted}Một hội viên mua nhiều gói; mỗi lần mua là một dòng \texttt{memberships}.}};
+\end{tikzpicture}
+\capt{Một phần các bảng trong ERD (5/39 bảng, phục vụ F1–F3). Bản đầy đủ: \texttt{erd-v2.dbml}.}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Sản phẩm chạy được}
+\begin{columns}[T,onlytextwidth]
+\column{0.5\textwidth}
+\begin{itemize}\small\setlength{\itemsep}{4pt}
+  \item \textbf{Khung dự án}: backend chia theo chức năng, frontend có bố cục riêng từng vai trò.
+  \item \textbf{Database}: \num{42} migration dựng đủ 39 bảng, có dữ liệu mẫu.
+  \item \textbf{F1}: đăng ký, đăng nhập, làm mới token, đăng xuất; phân quyền theo vai trò.
+  \item \textbf{F2}: thêm, sửa, xem, tìm kiếm, phân trang hồ sơ hội viên.
+  \item \textbf{F3}: thêm, sửa, ngừng bán gói tập.
+  \item F1–F3 có cả \textbf{API và giao diện}.
+\end{itemize}
+\column{0.46\textwidth}
+\textbf{\small Kiến trúc triển khai (staging)}
+\vspace{4pt}
+
+\begin{tikzpicture}[
+  every node/.style={font=\scriptsize},
+  bx/.style={rounded corners=3pt, draw=hustprimary, fill=soft, minimum height=0.8cm, text width=4.6cm, align=center, line width=0.6pt},
+  ar/.style={-{Stealth[length=5pt]}, line width=0.9pt, color=hustprimary}]
+  \node[bx, fill=white] (u) {Trình duyệt của người dùng};
+  \node[bx, below=0.42cm of u] (v) {\textbf{Vercel} – frontend React};
+  \node[bx, below=0.42cm of v] (r) {\textbf{Render} – backend Spring Boot};
+  \node[bx, below=0.42cm of r] (n) {\textbf{Neon} – PostgreSQL};
+  \draw[ar] (u) -- (v);
+  \draw[ar] (v) -- node[right, font=\scriptsize\color{muted}]{chuyển tiếp \texttt{/api/v1}} (r);
+  \draw[ar] (r) -- node[right, font=\scriptsize\color{muted}]{Flyway migration} (n);
+\end{tikzpicture}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Tiến trình Sprint 1}
+\vspace{2pt}
+\begin{center}
+\begin{tikzpicture}[every node/.style={font=\scriptsize}, xscale=0.93]
+  \draw[line width=2pt, color=hustprimary!35] (0,0) -- (14.6,0);
+  \foreach \x/\d/\t [count=\i] in {
+    0.6/{27/10}/Bắt đầu Sprint 1,
+    2.1/{01/11}/Khung dự án{,} kế hoạch,
+    3.6/{02/11}/Kick-off{,} duyệt ERD,
+    5.1/{04/11}/Đặc tả use case,
+    6.6/{06/11}/API F1,
+    8.1/{09/11}/Gộp schema 39 bảng,
+    9.6/{11/11}/API F2{,} F3,
+    11.1/{12/11}/Staging{,} Postman,
+    12.6/{16/11}/Giao diện F1–F3} {
+    \fill[hustprimary] (\x,0) circle (3.2pt);
+    \ifodd\i
+      \node[above=5pt, align=center, text width=1.55cm] at (\x,0) {\textbf{\d}\\\t};
+    \else
+      \node[below=5pt, align=center, text width=1.55cm] at (\x,0) {\textbf{\d}\\\t};
+    \fi
+  }
+  \fill[hustred] (14.1,0) circle (4pt);
+  \node[below=6pt, align=center, font=\scriptsize\bfseries\color{hustred}] at (14.1,0) {17/11\\Demo};
+\end{tikzpicture}
+\end{center}
+\vspace{2pt}
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\begin{block}{Kịch bản demo (2–3 phút)}
+\footnotesize
+\begin{enumerate}\setlength{\itemsep}{0pt}
+  \item Đăng nhập bằng tài khoản lễ tân.
+  \item Tìm, thêm hồ sơ hội viên.
+  \item Xem, thêm gói trong danh mục gói tập.
+  \item Đăng nhập hội viên: bị chặn khỏi trang quản lý.
+\end{enumerate}
+\end{block}
+\column{0.48\textwidth}
+\begin{block}{Ghi chú}
+\footnotesize Mốc ngày lấy theo thời điểm gộp PR vào \texttt{main}. Hạn gốc của Sprint 1 là 09/11; nhóm dời sang 16/11 vì migration trễ (xem phần rút kinh nghiệm).
+\end{block}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Đối chiếu với kế hoạch}
+\begin{columns}[T,onlytextwidth]
+\column{0.5\textwidth}
+\centering
+\shot{1b.png}{\linewidth}{6.2cm}
+\capt{Bảng Projects lọc theo milestone Sprint 1.}
+\column{0.46\textwidth}
+\begin{block}{Kết quả}
+\small
+\begin{itemize}
+  \item \textbf{35/37} issue Sprint 1 đã xong (\textbf{94\%}).
+  \item Toàn bộ mục tiêu chính đã đạt: tài liệu, thiết kế, khung, F1–F3, staging.
+\end{itemize}
+\end{block}
+\vspace{4pt}
+\begin{alertblock}{Còn mở, chuyển sang Sprint 2}
+\small
+\begin{itemize}
+  \item \#32: slide và gói bàn giao Sprint 1 (hoàn tất sau buổi demo).
+  \item \#55: nghiệm thu user story quản lý danh mục gói (F3).
+  \item \#104: lỗi refresh token khi gửi đồng thời, đang sửa ở PR \#116.
+\end{itemize}
+\end{alertblock}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\section{Rút kinh nghiệm và Sprint 2}
+\secpage{PHẦN 4}{Rút kinh nghiệm và kế hoạch Sprint 2}
+\begin{frame}{Rút kinh nghiệm (retrospective)}
+\begin{columns}[T,onlytextwidth]
+\column{0.31\textwidth}
+\begin{block}{Làm tốt}
+\footnotesize
+\begin{itemize}
+  \item ERD được cả nhóm duyệt ngay buổi kick-off.
+  \item Phân công rõ người, hạn, điểm.
+  \item Mọi quyết định đều được ghi lại (ADR, biên bản).
+  \item CI và ruleset giữ \texttt{main} luôn chạy được.
+\end{itemize}
+\end{block}
+\column{0.31\textwidth}
+\begin{alertblock}{Chưa tốt}
+\footnotesize
+\begin{itemize}
+  \item Migration trễ hạn 04/11, API và giao diện phải chờ.
+  \item Phải dời Sprint 1 thêm một tuần.
+  \item Lúc đầu người duyệt chỉ bình luận, chưa Approve.
+  \item Có bạn sửa trực tiếp trên web thay vì làm trên nhánh.
+\end{itemize}
+\end{alertblock}
+\column{0.31\textwidth}
+\begin{block}{Cải tiến cho Sprint 2}
+\footnotesize
+\begin{itemize}
+  \item Mỗi người làm \textbf{trọn một cụm chức năng}: API → giao diện → kiểm thử.
+  \item Họp giữa sprint để phát hiện trễ sớm.
+  \item Bắt buộc Approve trước khi gộp.
+  \item Chạy lại Postman sau mỗi đợt gộp.
+\end{itemize}
+\end{block}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Kế hoạch Sprint 2 (17/11 – 30/11)}
+\begin{columns}[T,onlytextwidth]
+\column{0.64\textwidth}
+{\scriptsize
+\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+\textbf{Thành viên} & \textbf{Cụm chức năng}\\
+\midrule
+\rowcolor{soft} Bùi Trần Đức Việt & F1 còn lại, API F2.2, API F10 thông báo\\
+Thái Hùng Lân & Bán, gia hạn gói F3.2; thanh toán F5.1; API ảnh đại diện\\
+\rowcolor{soft} Lê Phước Minh Quân & Check-in F4, dashboard F6; hỗ trợ F8\\
+Nguyễn Trọng Việt & Cổng hội viên F7, huấn luyện viên F9\\
+\rowcolor{soft} Phạm Gia Bảo & Lớp học nhóm F8\\
+Nguyễn Anh Tú & Giao diện quầy (F2, F3, F10); SRS, sơ đồ lớp\\
+\rowcolor{soft} Nguyễn Phú Trọng & Hoàn tiền F5.2; staging, Postman; sơ đồ kiến trúc\\
+Hoàng Kim Tiến & Điều phối, bảng giá công khai F3.3, duyệt và gộp PR\\
+\bottomrule
+\end{tabularx}}
+\column{0.32\textwidth}
+\begin{block}{Phạm vi}
+\footnotesize
+\begin{itemize}
+  \item Hoàn thiện \textbf{v1} (F1–F6).
+  \item Làm \textbf{v2} (F7–F10).
+  \item \num{32} issue đã có sẵn trong milestone Sprint 2.
+  \item Demo Sprint 2: \textbf{01/12}.
+\end{itemize}
+\end{block}
+\vspace{3pt}
+\begin{block}{Đã chốt sẵn}
+\footnotesize Quyết định cho F4 (ảnh đại diện) và F8 (danh sách chờ) đã có ADR, nên bắt tay làm được ngay.
+\end{block}
+\end{columns}
+\end{frame}
+
+% =================================================================
+\hustcontactpage{XIN CẢM ƠN CÔ ĐÃ LẮNG NGHE!}{
+  \textbf{Nhóm 6} – Web quản lý chuỗi phòng tập gym\\
+  \textbf{Giảng viên hướng dẫn:} TS. Bùi Thị Mai Anh\\[0.4cm]
+  \textbf{Repo:} \url{github.com/Ktin06/it3180_nhom6_gym_management}\\
+  \textbf{Bảng công việc:} \url{github.com/users/Ktin06/projects/1}\\[0.5cm]
+  \textit{Nhóm sẵn sàng trả lời câu hỏi.}
+}
+
+\end{document}
