@@ -5,20 +5,11 @@ import { errorMessage } from '../../shared/api-error'
 import { DemoNotice } from '../../shared/DemoNotice'
 import { useRemoteQuery } from '../../shared/use-remote-query'
 import { packagesApi } from '../api/packages'
+import { packageTypeLabels as typeLabels, vndFormat as money } from '../package-format'
 import type { PackageQuery, PackagesGateway, PackageType } from '../types/package'
 import '../../shared/feature-pages.css'
 
 const initialQuery: PackageQuery = { page: 0, size: 20, status: 'ACTIVE' }
-const typeLabels: Record<PackageType, string> = {
-  TIME: 'Theo thời gian',
-  SESSION: 'Theo buổi',
-  PT: 'Huấn luyện cá nhân',
-}
-const money = new Intl.NumberFormat('vi-VN', {
-  style: 'currency',
-  currency: 'VND',
-  maximumFractionDigits: 0,
-})
 
 export function PackagesPage({ api = packagesApi }: { api?: PackagesGateway }) {
   const list = useRemoteQuery(api.list, initialQuery)

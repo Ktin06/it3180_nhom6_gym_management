@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -80,6 +81,10 @@ public class SecurityConfig {
         LOGOUT_PATH,
     };
 
+    /** Tiền tố API công khai chỉ để đọc, cho khách chưa đăng nhập (bảng giá F3, lịch lớp F8). Chỉ mở GET. */
+    private static final String PUBLIC_READ_PREFIX = "/api/v1/public/";
+    private static final String PUBLIC_READ_PATHS = PUBLIC_READ_PREFIX + "**";
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, JsonMapper jsonMapper,
             Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter,
@@ -101,6 +106,7 @@ public class SecurityConfig {
             .httpBasic(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(PUBLIC_PATHS).permitAll()
+                .requestMatchers(HttpMethod.GET, PUBLIC_READ_PATHS).permitAll()
                 .anyRequest().authenticated())
             .oauth2ResourceServer(oauth2 -> oauth2
                 .bearerTokenResolver(bearerTokenResolver)
@@ -127,17 +133,20 @@ public class SecurityConfig {
     }
 
     /**
-     * Đọc access token từ header {@code Authorization}, trừ ở {@link #LOGOUT_PATH}.
+     * Đọc access token từ header {@code Authorization}, trừ ở {@link #LOGOUT_PATH} và các API GET công khai.
      *
-     * <p>Nếu để Spring Security đọc JWT ở {@code /logout}, token hết hạn sẽ bị trả 401 trước khi vào controller,
-     * dù đường dẫn này công khai. Khi đó người dùng để tab lâu rồi bấm Đăng xuất sẽ không xóa được cookie (#112).
+     * <p>Nếu để Spring Security đọc JWT ở những đường dẫn này, token hết hạn sẽ bị trả 401 trước khi xét
+     * {@code permitAll}. Ví dụ: người dùng để tab lâu rồi bấm Đăng xuất không xóa được cookie (#112), hay khách
+     * còn giữ token cũ mở bảng giá công khai bị báo "cần đăng nhập" (US-F3.1.2).
      */
     @Bean
     public BearerTokenResolver bearerTokenResolver() {
         DefaultBearerTokenResolver delegate = new DefaultBearerTokenResolver();
-        return request -> LOGOUT_PATH.equals(request.getRequestURI().substring(request.getContextPath().length()))
-            ? null
-            : delegate.resolve(request);
+        return request -> {
+            String path = request.getRequestURI().substring(request.getContextPath().length());
+            boolean publicRead = "GET".equals(request.getMethod()) && path.startsWith(PUBLIC_READ_PREFIX);
+            return LOGOUT_PATH.equals(path) || publicRead ? null : delegate.resolve(request);
+        };
     }
 
     /** Giải mã JWT gửi kèm khi đăng xuất: kiểm chữ ký và claim, bỏ qua hạn dùng (#112). */
