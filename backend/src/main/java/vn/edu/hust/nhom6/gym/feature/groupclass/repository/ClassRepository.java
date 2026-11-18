@@ -22,7 +22,8 @@ public class ClassRepository {
     public record MemberRow(Long id, Long userId, Long homeBranchId, String status,
         OffsetDateTime deletedAt, OffsetDateTime bookingLockedUntil) {}
 
-    public record Resources(Long branchId, Long trainerId, Long roomId, Integer roomCapacity) {}
+    public record Resources(Long roomBranchId, Long trainerBranchId, Integer roomCapacity,
+        boolean active, boolean trainerRole) {}
 
     public <T> List<T> rows(String sql, Map<String, ?> params, Class<T> type) {
         return jdbc.query(sql, params, new DataClassRowMapper<>(type));
@@ -64,13 +65,12 @@ public class ClassRepository {
 
     public Resources resources(long branchId, ScheduleRequest request) {
         return rows("""
-            SELECT b.id branch_id, s.id trainer_id, r.id room_id, r.capacity room_capacity
-            FROM branches b JOIN rooms r ON r.branch_id=b.id
-            JOIN staff s ON s.branch_id=b.id JOIN users u ON u.id=s.user_id
-            JOIN class_types t ON t.id=:type
-            WHERE b.id=:branch AND r.id=:room AND s.id=:trainer AND b.status='ACTIVE'
-              AND r.status='ACTIVE' AND s.status='ACTIVE' AND u.status='ACTIVE'
-              AND u.role='TRAINER' AND t.status='ACTIVE'
+            SELECT r.branch_id room_branch_id, s.branch_id trainer_branch_id, r.capacity room_capacity,
+              (b.status='ACTIVE' AND r.status='ACTIVE' AND s.status='ACTIVE' AND u.status='ACTIVE'
+                AND t.status='ACTIVE') active, (u.role='TRAINER') trainer_role
+            FROM branches b CROSS JOIN rooms r CROSS JOIN staff s
+            JOIN users u ON u.id=s.user_id CROSS JOIN class_types t
+            WHERE b.id=:branch AND r.id=:room AND s.id=:trainer AND t.id=:type
             """, Map.of("branch", branchId, "room", request.roomId(), "trainer", request.trainerId(),
                 "type", request.classTypeId()), Resources.class).stream().findFirst()
             .orElseThrow(() -> new NotFoundException("Phòng, loại lớp hoặc huấn luyện viên không hợp lệ tại chi nhánh."));
@@ -137,22 +137,23 @@ public class ClassRepository {
             """, p, Boolean.class));
     }
 
-    public boolean recurringResourceConflict(Long excluded, ScheduleRequest r) {
+    public boolean recurringResourceConflict(Long scheduleId, ScheduleRequest r) {
         return Boolean.TRUE.equals(jdbc.queryForObject("""
             WITH busy AS (
               SELECT start_at,end_at FROM class_sessions WHERE status<>'CANCELLED'
                 AND (trainer_id=:trainer OR room_id=:room)
-                AND (:excluded::bigint IS NULL OR class_schedule_id<>:excluded)
               UNION ALL SELECT start_at,end_at FROM pt_sessions WHERE status<>'CANCELLED' AND trainer_id=:trainer
             ) SELECT EXISTS(SELECT 1 FROM busy,
                 LATERAL generate_series((start_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::date,
                     (end_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::date, interval '1 day') d
               WHERE d::date>=:from AND (:to::date IS NULL OR d::date<=:to)
                 AND extract(isodow FROM d)=:day
+                AND NOT EXISTS (SELECT 1 FROM class_sessions existing
+                  WHERE existing.class_schedule_id=:schedule AND existing.occurrence_date=d::date)
                 AND ((d::date + :start::time) AT TIME ZONE 'Asia/Ho_Chi_Minh')<end_at
                 AND ((d::date + :end::time) AT TIME ZONE 'Asia/Ho_Chi_Minh')>start_at)
             """, new MapSqlParameterSource().addValue("trainer", r.trainerId()).addValue("room", r.roomId())
-                .addValue("excluded", excluded).addValue("from", r.validFrom()).addValue("to", r.validTo())
+                .addValue("schedule", scheduleId).addValue("from", r.validFrom()).addValue("to", r.validTo())
                 .addValue("day", r.dayOfWeek()).addValue("start", r.startTime()).addValue("end", r.endTime()), Boolean.class));
     }
 

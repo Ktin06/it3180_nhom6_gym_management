@@ -82,6 +82,12 @@ public class ClassScheduleService {
             throw new BusinessRuleException("Giờ kết thúc phải sau giờ bắt đầu và ngày kết thúc không trước ngày hiệu lực.");
         }
         var resources = classes.resources(branch, r);
+        if (resources.roomBranchId() != branch || resources.trainerBranchId() != branch) {
+            throw new ForbiddenException("Phòng hoặc huấn luyện viên nằm ngoài chi nhánh quản lý.");
+        }
+        if (!resources.active() || !resources.trainerRole()) {
+            throw new BusinessRuleException("Phòng, loại lớp hoặc huấn luyện viên không hợp lệ tại chi nhánh.");
+        }
         if (r.capacity() > resources.roomCapacity()) { throw new BusinessRuleException("Sĩ số vượt sức chứa phòng."); }
     }
 

@@ -445,6 +445,37 @@ class ClassApiIntegrationTest {
             .isEqualTo(NOW.plusHours(5).toInstant());
     }
 
+    @Test
+    void recurringUpdateRejectsConflictWithItsOwnRescheduledSession() {
+        LocalDate wednesday = NOW.toLocalDate();
+        LocalDate tuesday = wednesday.minusDays(1);
+        var saved = schedules.save(manager(), null, request(2, tuesday, null));
+        assertThat(schedules.generate(saved.id(), tuesday, tuesday)).isEqualTo(1);
+        jdbc.update("UPDATE class_sessions SET start_at=?,end_at=?,status='RESCHEDULED' WHERE class_schedule_id=?",
+            NOW.plusHours(3), NOW.plusHours(4), saved.id());
+        assertThatThrownBy(() -> schedules.save(manager(), saved.id(), request(3, wednesday, null)))
+            .isInstanceOf(vn.edu.hust.nhom6.gym.common.exception.ConflictException.class);
+        assertThat(schedules.detail(manager(), saved.id()).dayOfWeek()).isEqualTo(2);
+    }
+
+    @Test
+    void scheduleApiDistinguishesMissingOutOfScopeAndIneligibleResources() throws Exception {
+        long otherRoom = jdbc.queryForObject("INSERT INTO rooms(branch_id,name,capacity) VALUES (?,'Khác',20) RETURNING id",
+            Long.class, otherBranch);
+        String body = json.writeValueAsString(request(3, NOW.toLocalDate(), null));
+        String auth = bearer(manager, "BRANCH_MANAGER");
+        mvc.perform(post("/api/v1/class-schedules").header("Authorization", auth)
+            .contentType(APPLICATION_JSON).content(body.replace("\"roomId\":" + room, "\"roomId\":" + otherRoom)))
+            .andExpect(status().isForbidden());
+        mvc.perform(post("/api/v1/class-schedules").header("Authorization", auth)
+            .contentType(APPLICATION_JSON).content(body.replace("\"roomId\":" + room, "\"roomId\":999999")))
+            .andExpect(status().isNotFound());
+        jdbc.update("UPDATE users SET role='RECEPTIONIST' WHERE id=(SELECT user_id FROM staff WHERE id=?)", trainer);
+        mvc.perform(post("/api/v1/class-schedules").header("Authorization", auth)
+            .contentType(APPLICATION_JSON).content(body))
+            .andExpect(status().isUnprocessableContent());
+    }
+
     @ParameterizedTest @ValueSource(strings = {"ROOM", "TRAINER", "PT"})
     void scheduleRejectsConcreteRoomTrainerAndPtConflicts(String conflict) {
         long otherTrainer = staff(user("other-trainer", "TRAINER"), "PT2");
