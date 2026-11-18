@@ -371,7 +371,7 @@ class DatabaseConstraintsTest {
     }
 
     @Test
-    @DisplayName("Trạng thái hủy đặt lớp phải đồng bộ với thời điểm hủy, lý do hủy và cờ hủy muộn (ck_class_bookings_cancelled); chỗ đặt phải có người tạo (created_by NOT NULL)")
+    @DisplayName("Trạng thái hủy đặt lớp phải đồng bộ với thời điểm hủy, lý do hủy và cờ hủy muộn (ck_class_bookings_cancelled); chỗ đặt phải có người tạo (created_by NOT NULL); không còn trạng thái danh sách chờ, xác nhận lại (ck_class_bookings_status, ck_class_bookings_cancel_reason)")
     void trangThaiHuyDatLopPhaiDongBoThongTinHuy() {
         Long branchId = defaultBranchId();
         Long trainerId = insertTestStaff("trainer.pilates@example.com", "NV000003", "0920000003");
@@ -411,6 +411,20 @@ class DatabaseConstraintsTest {
             sessionId, memberId))
             .isInstanceOf(DataIntegrityViolationException.class)
             .hasMessageContaining("created_by");
+
+        // Không còn danh sách chờ và xác nhận lại khi đổi giờ (ADR 0014, migration V9_03)
+        for (String removedStatus : new String[] {"WAITLIST", "PENDING_RECONFIRM"}) {
+            assertThatThrownBy(() -> jdbcTemplate.update(
+                "INSERT INTO class_bookings (class_session_id, member_id, created_by, status) VALUES (?, ?, ?, ?)",
+                sessionId, memberId, bookerId, removedStatus))
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .hasMessageContaining("ck_class_bookings_status");
+        }
+        assertThatThrownBy(() -> jdbcTemplate.update(
+            "INSERT INTO class_bookings (class_session_id, member_id, created_by, status, cancelled_at, cancel_reason) VALUES (?, ?, ?, 'CANCELLED', now(), 'NOT_RECONFIRMED')",
+            sessionId, memberId, bookerId))
+            .isInstanceOf(DataIntegrityViolationException.class)
+            .hasMessageContaining("ck_class_bookings_cancel_reason");
     }
 
     @Test
