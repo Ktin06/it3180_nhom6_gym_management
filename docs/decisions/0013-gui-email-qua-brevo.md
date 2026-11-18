@@ -27,7 +27,7 @@ Ràng buộc:
    - Gọi `POST https://api.brevo.com/v3/smtp/email`, khóa API đặt trong header `api-key`.
    - Gói miễn phí: 300 email mỗi ngày, không hết hạn.
    - Không dùng thư viện `spring-boot-starter-mail` (thư viện này gửi bằng SMTP, sẽ bị chặn trên Render). Dùng `RestClient` có sẵn của Spring.
-2. **Người gửi là một địa chỉ email của nhóm, đã xác minh trong Brevo.** Brevo gửi mã xác nhận tới địa chỉ đó; không cần tên miền riêng.
+2. **Người gửi là Gmail cá nhân của trưởng nhóm, đã xác minh trong Brevo.** Brevo gửi mã xác nhận tới địa chỉ đó; không cần tên miền riêng. Hệ quả: email gửi cho hội viên hiện địa chỉ này. Chấp nhận được trong phạm vi bài tập lớn; muốn đổi sang Gmail chung thì xác minh địa chỉ mới trong Brevo và sửa `MAIL_FROM_ADDRESS` trên Render, không cần tạo lại khóa API.
 3. **Ba biến môi trường**, khai báo trong [`.env.example`](../../.env.example):
 
    | Biến | Ý nghĩa |
@@ -60,5 +60,5 @@ Ràng buộc:
   - Thêm một dịch vụ ngoài [ADR 0001](0001-cong-nghe.md) (Vercel, Render, Neon). Khóa API do trưởng nhóm giữ.
 - **Cần cập nhật theo:**
   1. `.env.example`: thêm ba biến ở trên (cùng PR với ADR này).
-  2. Trưởng nhóm tạo tài khoản Brevo, xác minh người gửi, tạo khóa API rồi nhập ba biến lên Render.
+  2. ~~Trưởng nhóm tạo tài khoản Brevo, xác minh người gửi, tạo khóa API rồi nhập ba biến lên Render.~~ Đã xong 18/11/2026: khóa API chỉ có quyền Transactional email; tắt chặn IP lạ (Render đổi IP liên tục); gửi thử qua API trả `201` và người nhận đã nhận được.
   3. S2-05 (Bùi Trần Đức Việt): viết `EmailSender`, lớp gửi qua Brevo và lớp chỉ ghi log; khai báo biến trong `application-staging.yml` và `application-local.yml`.
