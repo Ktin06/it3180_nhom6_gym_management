@@ -87,7 +87,7 @@ Tóm tắt; chi tiết và ngoại lệ xem [bản chốt phạm vi](../requirem
 - **Chỉ đăng nhập bằng email** (F1).
 - **Gói PT không dùng để check-in** vào phòng tập; chỉ gói TIME hoặc SESSION đang ACTIVE (F4).
 - Hội viên có **cả gói TIME và SESSION thì dùng gói TIME**, không trừ buổi (F4).
-- **Chỉ gói TIME được đặt lớp nhóm** hoặc vào danh sách chờ; gói SESSION và PT thì không (F8).
+- **Chỉ gói TIME được đặt lớp nhóm**; gói SESSION và PT thì không. Lớp đầy là hết chỗ, không có danh sách chờ (F8, ADR 0014).
 - **Gói chỉ ACTIVE khi hóa đơn PAID** (F3, F5).
 - **Hóa đơn chờ do F7 tạo tự hủy sau `PENDING_INVOICE_TTL_DAYS`** (mặc định 3 ngày), kèm gói PENDING đi cùng.
 - **Tự đăng ký bằng số điện thoại đã có hồ sơ thì từ chối** và hướng dẫn liên hệ quầy; không tự gắn tài khoản mới vào hồ sơ cũ (F1, F2).

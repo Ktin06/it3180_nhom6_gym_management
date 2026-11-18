@@ -41,7 +41,7 @@ Theo [Conventional Commits](https://www.conventionalcommits.org/), phạm vi là
 feat(F2): thêm API tạo hồ sơ hội viên
 fix(F4): chặn check-in khi chỉ có gói PT
 docs(srs): bổ sung use case F1–F6
-test(F8): kiểm thử thứ tự danh sách chờ
+test(F8): kiểm thử không vượt sĩ số khi đặt chỗ đồng thời
 chore(db): thêm migration V3_01 tạo bảng members
 ci: cache Maven trong GitHub Actions
 ```

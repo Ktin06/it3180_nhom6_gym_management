@@ -26,7 +26,7 @@
 | --- | --- | --- |
 | Bùi Trần Đức Việt | Tài khoản và thông báo: F1 còn lại, F2.2 (API), F10 (API) | Đặc tả F1, F2; migration nhóm 1 (gồm `notifications`, `system_configs`); API F1; adapter tài khoản F1–F2 |
 | Thái Hùng Lân | Bán gói và thu tiền: F3.2, F5.1; F2.3 ảnh đại diện (API) | Đặc tả F3, F5; migration nhóm 3; API F2, F3; wireframe hóa đơn, VietQR |
-| Lê Phước Minh Quân | Check-in và dashboard: F4, F6; hỗ trợ F8 phần lớp học, danh sách chờ | Đặc tả F4, F6; migration nhóm 4 (`checkins`, bảng lớp học); sơ đồ hoạt động check-in, danh sách chờ |
+| Lê Phước Minh Quân | Check-in và dashboard: F4, F6; hỗ trợ F8 phần lớp học | Đặc tả F4, F6; migration nhóm 4 (`checkins`, bảng lớp học); sơ đồ hoạt động check-in, danh sách chờ |
 | Nguyễn Trọng Việt | Cổng hội viên và huấn luyện viên: F7, F9; chỉ số cơ thể | Đặc tả F7, F9; migration nhóm 5, 7; wireframe cổng hội viên, huấn luyện viên |
 | Phạm Gia Bảo | Lớp học nhóm: F8 trọn gói | Đặc tả F8; wireframe lịch lớp công khai |
 | Nguyễn Anh Tú | Giao diện quầy (F2.2, F2.3, F3.2, F10) và tài liệu (SRS, truy vết, sơ đồ lớp phân tích) | Wireframe và giao diện hội viên, gói; SRS, truy vết |
@@ -78,8 +78,8 @@
 | --- | --- | --- | --- | --- | --- |
 | S2-11 | F4: API và giao diện check-in tại quầy (tìm theo mã hoặc số điện thoại, hiện ảnh, kiểm tra gói, trừ buổi gói SESSION) | 18/11 | 24/11 | Dữ liệu mẫu (S2-29); ảnh hiện được sau S2-06 | US-F4.1 (#58) |
 | S2-12 | F6: API và giao diện dashboard cơ bản | 25/11 | 28/11 | S2-11, S2-09 | US-F6.1 (#61) |
-| S2-17b | F8: hỗ trợ Gia Bảo phần bảng lớp học và luồng danh sách chờ; duyệt các PR F8 | 23/11 | 28/11 | Theo sơ đồ hoạt động danh sách chờ đã vẽ | US-F8.4 (#67) |
-| S2-27 | Sơ đồ tuần tự: mỗi người vẽ một luồng của chức năng mình làm (đăng nhập, bán gói, check-in, đặt buổi PT, đặt lớp và danh sách chờ); Minh Quân tổng hợp | 24/11 | 28/11 | Sau khi các luồng có mã chạy được | — |
+| S2-17b | F8: hỗ trợ Gia Bảo phần bảng lớp học và khóa bản ghi khi đặt chỗ; duyệt các PR F8 | 23/11 | 28/11 | Bỏ phần danh sách chờ theo ADR 0014 | US-F8.1.1 (#156) |
+| S2-27 | Sơ đồ tuần tự: mỗi người vẽ một luồng của chức năng mình làm (đăng nhập, bán gói, check-in, đặt buổi PT, đặt chỗ lớp); Minh Quân tổng hợp | 24/11 | 28/11 | Sau khi các luồng có mã chạy được | — |
 
 ### 2.5 Nguyễn Trọng Việt – cổng hội viên và huấn luyện viên
 
@@ -96,8 +96,8 @@
 | Mã | Việc | Bắt đầu | Hạn | Phụ thuộc, ghi chú | Issue |
 | --- | --- | --- | --- | --- | --- |
 | S2-16 | F8: API lịch lớp lặp, sinh buổi, đặt chỗ, hủy chỗ, quy tắc vi phạm | 17/11 | 24/11 | Dữ liệu mẫu (gói TIME); ADR 0010 | US-F8.1–F8.3 (#64–#66) |
-| S2-17 | F8: danh sách chờ tự động đưa vào lớp, đổi giờ, đổi phòng, hủy buổi, điểm danh | 23/11 | 28/11 | S2-16; Minh Quân hỗ trợ bảng lớp học, Phú Trọng hỗ trợ khóa bản ghi | US-F8.4–F8.6 (#67–#69) |
-| S2-18 | F8: giao diện lịch lớp, đặt chỗ, danh sách chờ; lịch lớp công khai; lịch dạy và điểm danh của huấn luyện viên | 25/11 | 29/11 | S2-16 | US-F8.2, US-F8.6, US-F8.7 (#65, #69, #70) |
+| S2-17 | F8: đổi giờ (giữ chỗ), đổi phòng, hủy buổi, điểm danh, gỡ khóa đặt lớp | 23/11 | 28/11 | S2-16; Minh Quân hỗ trợ bảng lớp học, Phú Trọng hỗ trợ khóa bản ghi | US-F8.5, US-F8.6 (#68, #69) |
+| S2-18 | F8: giao diện lịch lớp, đặt chỗ; lịch lớp công khai; lịch dạy và điểm danh của huấn luyện viên | 25/11 | 29/11 | S2-16 | US-F8.2, US-F8.6, US-F8.7 (#65, #69, #70) |
 
 ### 2.7 Nguyễn Anh Tú – giao diện quầy và tài liệu
 
@@ -220,7 +220,7 @@ Cặp duyệt giữ như Sprint 1: Đức Việt và Lân duyệt lẫn nhau; An
 
 | Mức | Việc | Nếu trễ |
 | --- | --- | --- |
-| Phải có | v1 còn lại (F1, F2.2, F2.3, F3, F4, F5.1, F6), F7, F8 đặt chỗ, hủy chỗ, danh sách chờ | Không lùi |
+| Phải có | v1 còn lại (F1, F2.2, F2.3, F3, F4, F5.1, F6), F7, F8 đặt chỗ, hủy chỗ, điểm danh | Không lùi |
 | Nên có | F8 đổi giờ, điểm danh; F9 lịch rảnh, đặt và xác nhận buổi PT; F10 email | Chuyển tuần đầu Sprint 3 |
 | Có thì tốt | F5.2 hoàn tiền; F9 giáo án, tiến độ; F10 thông báo thời gian thực | Chuyển Sprint 3 |
 
@@ -242,3 +242,4 @@ v2 là bắt buộc trong bản chốt phạm vi, nên đây là lùi sang Sprin
 2. **Ngày Sprint 2:** 17/11 – 30/11.
 3. **Demo Sprint 1:** thứ Ba 17/11, buổi học CNPM. **Bàn giao Sprint 2:** dự kiến thứ Ba 01/12.
 4. **Phân công:** theo mục 2. Mỗi người giữ cụm chức năng đã tiếp xúc ở Sprint 1; trưởng nhóm nhận việc nhỏ, việc quản trị, bảng giá công khai, sơ đồ phân cấp chức năng và slide.
+5. **Bỏ danh sách chờ lớp học nhóm (19/11/2026):** lớp nhóm còn chỗ thì đặt, đầy là hết chỗ; đổi giờ thì giữ chỗ. Ghi ở [ADR 0014](../decisions/0014-bo-danh-sach-cho-lop-hoc-nhom.md). Việc S2-17, S2-17b, S2-18, S2-22 sửa theo; US-F8.2.1 (#157), US-F8.4.1 (#159), US-F10.3.1 (#172) bỏ.

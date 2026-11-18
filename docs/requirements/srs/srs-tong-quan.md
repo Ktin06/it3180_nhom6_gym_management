@@ -63,7 +63,7 @@ Theo [ADR 0002](../../decisions/0002-phat-trien-tang-dan-5-version.md), hệ th�
 | Version | Phạm vi chức năng | Mức cam kết |
 | --- | --- | --- |
 | v1 | F1–F6: tài khoản và phân quyền, hồ sơ hội viên, gói tập/gia hạn, check-in, thanh toán tại quầy, dashboard cơ bản | Bắt buộc |
-| v2 | F7–F10: cổng hội viên, lớp học nhóm và danh sách chờ, huấn luyện viên, thông báo | Bắt buộc |
+| v2 | F7–F10: cổng hội viên, lớp học nhóm, huấn luyện viên, thông báo | Bắt buộc |
 | v3 | F11–F17: thiết bị, POS/kho, nhân sự/lương, khuyến mãi, bảo lưu/chuyển nhượng, báo cáo nâng cao, nhật ký hoạt động | Mục tiêu |
 | v4 | F18–F19: đa chi nhánh và gamification theo quy tắc | Mục tiêu; cắt sau v5 nếu trễ |
 | v5 | F20: check-in bằng nhận diện khuôn mặt | Cắt đầu tiên nếu trễ |

@@ -41,7 +41,11 @@ Sơ đồ UML và wireframe vẽ bằng draw.io (trong VS Code dùng tiện ích
 | [0007](decisions/0007-cau-truc-ma-nguon.md) | Cấu trúc mã nguồn: đóng gói theo chức năng |
 | [0008](decisions/0008-goi-api-cung-domain.md) | Gọi API cùng domain qua proxy của Vercel (cookie refresh token) |
 | [0009](decisions/0009-bo-so-do-phan-tich-thiet-ke.md) | Bộ 8 loại sơ đồ UML cho phân tích và thiết kế, không dùng DFD |
-| [0010](decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md) | Danh sách chờ tự động đưa vào lớp, bản 2: ân hạn tính từ lúc đưa vào lớp, thứ tự phụ theo `id`, mốc 30 phút đóng cả đặt mới |
+| [0010](decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md) | Danh sách chờ tự động đưa vào lớp, bản 2 (đã thay thế bởi 0014) |
+| [0011](decisions/0011-anh-dai-dien-luu-trong-postgresql.md) | Ảnh đại diện hội viên lưu trong PostgreSQL |
+| [0012](decisions/0012-quy-uoc-ma-truy-vet.md) | Quy ước mã truy vết Chức năng → UC → US → AC → TC |
+| [0013](decisions/0013-gui-email-qua-brevo.md) | Gửi email qua API HTTPS của Brevo |
+| [0014](decisions/0014-bo-danh-sach-cho-lop-hoc-nhom.md) | Bỏ danh sách chờ lớp học nhóm: còn chỗ thì đặt, đầy là hết chỗ |
 
 ## Khác
 
