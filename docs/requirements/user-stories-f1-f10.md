@@ -1,5 +1,7 @@
 # Chỉ mục user story F1–F10
 
+> **Đã thay thế từ 18/11/2026 bởi [ADR 0012](../decisions/0012-quy-uoc-ma-truy-vet.md).** Mã US cũ hai cấp (`US-F2.1`) bị bỏ; user story mới có mã ba cấp (`US-F2.1.1`), nằm trong file SRS của từng chức năng, mỗi user story một issue mới. Câu "issue là bản chuẩn" bên dưới không còn hiệu lực: **file SRS là bản chuẩn**. File này sẽ được đổi thành bảng ánh xạ US cũ → US mới khi tạo xong các issue mới. Trong lúc đó, chỉ dùng bảng dưới để tra cứu lịch sử.
+
 - **Người biên soạn:** Phạm Gia Bảo (GamBug).
 - **Nhiệm vụ:** #16 · WBS 1.2.4 · cập nhật 06/11/2026.
 - **Nguồn chuẩn:** [Bản chốt phạm vi](ban-chot-pham-vi.md), [ERD v2](../design/erd/erd-v2.dbml), [quy tắc mã nguồn](../guides/quy-tac-ma-nguon.md), [kick-off](../meetings/2026-11-02-kick-off.md), [phân công Sprint 1](../plans/sprint-1-tien-do.md).

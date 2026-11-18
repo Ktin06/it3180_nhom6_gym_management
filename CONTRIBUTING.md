@@ -50,7 +50,7 @@ Loại: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `ci`. Mô tả viế
 
 ## 4. Pull request
 
-- **Một việc một pull request.** Liên kết issue bằng `Closes #<số>` trong phần mô tả.
+- **Một việc một pull request.** Liên kết issue task bằng `Closes #<số>`, và issue user story bằng `Refs #<số>`, trong phần mô tả. Không ghi `Closes` cho user story: một user story thường cần nhiều PR, nên nếu ghi `Closes` thì GitHub sẽ tự đóng nó ngay khi PR đầu tiên được gộp.
 - Điền đủ mẫu pull request: mã chức năng, mô tả, cách kiểm thử, checklist.
 - **Ít nhất 1 người duyệt**, **CI phải xanh** và mọi bình luận review đã được xử lý (bấm *Resolve conversation*).
 - Gộp bằng **squash merge**; xóa nhánh sau khi gộp.
@@ -62,12 +62,23 @@ Loại: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `ci`. Mô tả viế
 
 Một việc chỉ tính là xong khi:
 
-1. Issue có tiêu chí chấp nhận (Given/When/Then) và đáp ứng đủ.
-2. Có kiểm thử JUnit cho mỗi quy tắc nghiệp vụ.
+1. Đáp ứng đủ các tiêu chí chấp nhận (AC, dạng Given/When/Then) mà việc đó làm. AC có mã và nằm trong file SRS của chức năng ([ADR 0012](docs/decisions/0012-quy-uoc-ma-truy-vet.md)).
+2. Có kiểm thử JUnit cho mỗi quy tắc nghiệp vụ. Kiểm thử chứng minh AC mang mã TC ([docs/testing/README.md](docs/testing/README.md)).
 3. Có request Postman cho mỗi API mới.
 4. CI xanh.
 5. Tài liệu đã cập nhật (SRS, ADR, README, mô tả Swagger).
 6. Chạy được trên staging.
+
+**Đóng issue user story.** Issue task tự đóng khi PR có `Closes` được gộp. Issue user story thì **đóng bằng tay**, khi đủ ba điều kiện:
+
+1. Mọi task thuộc user story đã đóng.
+2. Mọi AC của user story có ít nhất một kiểm thử mang mã TC tương ứng và đang chạy qua.
+3. Một người khác người làm đã thử từng AC trên staging (gọi là *nghiệm thu*) và để lại bình luận trong issue, ví dụ:
+
+   > Nghiệm thu 25/11 trên staging, tài khoản `manager@example.com`.
+   > AC-F3.3.1-01 ✅, AC-F3.3.1-02 ✅. PR: #107 (API), #<số> (giao diện).
+
+Hạn chót là buổi review cuối sprint. User story chưa đạt thì chuyển sang sprint sau, không đóng.
 
 ## 6. Cơ sở dữ liệu
 
@@ -93,7 +104,7 @@ Một việc chỉ tính là xong khi:
 
 ## 8. Dùng công cụ AI hỗ trợ lập trình
 
-- **Có user story rồi mới sinh mã**: issue phải có user story và tiêu chí chấp nhận trước khi yêu cầu sinh mã.
+- **Có user story rồi mới sinh mã**: user story và các AC có mã phải có trong file SRS trước khi yêu cầu sinh mã. Yêu cầu AI nêu các mã US, AC, BR sẽ làm trước khi viết mã, và đặt mã TC cho kiểm thử.
 - Cấu hình công cụ đọc [docs/guides/quy-tac-ma-nguon.md](docs/guides/quy-tac-ma-nguon.md) làm hướng dẫn dự án; file cấu hình riêng của công cụ không đưa lên Git.
 - Đọc lại **toàn bộ** thay đổi trước khi commit; bạn chịu trách nhiệm về mã mình commit như mã tự viết.
 - Không thêm tính năng ngoài [bản chốt phạm vi](docs/requirements/ban-chot-pham-vi.md), kể cả khi AI gợi ý.
