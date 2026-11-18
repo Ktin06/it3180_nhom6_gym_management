@@ -6,6 +6,7 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -53,6 +54,7 @@ class PackageDeactivateIntegrationTest {
 
     @ParameterizedTest
     @CsvSource({"TIME,false", "SESSION,false", "PT,false", "TIME,true", "SESSION,true", "PT,true"})
+    @DisplayName("TC-F3.4.1-01a: Ngừng bán không body hoặc body {} đều được, chỉ đổi trạng thái")
     void deactivatesWithNoBodyOrEmptyJsonWithoutChangingOtherFields(String type, boolean emptyJsonBody) throws Exception {
         if (!type.equals("TIME")) { jdbc.update("UPDATE packages SET type=?,session_count=10 WHERE id=?", type, item); }
         var before = row();
@@ -76,6 +78,7 @@ class PackageDeactivateIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.4.1-04a: Ngừng bán gói đã INACTIVE bị 422, updated_at không đổi thêm")
     void repeatIs422WithoutFurtherAuditChange() throws Exception {
         mvc.perform(put(endpoint(item.toString())).with(bearer("BRANCH_MANAGER"))).andExpect(status().isOk());
         var before = row();
@@ -89,6 +92,7 @@ class PackageDeactivateIntegrationTest {
 
     @ParameterizedTest
     @CsvSource({"OTHER,ACTIVE", "GLOBAL,ACTIVE", "OTHER,INACTIVE", "GLOBAL,INACTIVE"})
+    @DisplayName("TC-F3.4.1-06a: Gói chi nhánh khác hoặc toàn chuỗi bị 403, kể cả đã INACTIVE")
     void outsideBranchAndGlobalAre403EvenIfAlreadyInactive(String scope, String state) throws Exception {
         jdbc.update("UPDATE packages SET branch_id=?,status=? WHERE id=?",
             scope.equals("GLOBAL") ? null : otherBranch, state, item);
@@ -102,6 +106,7 @@ class PackageDeactivateIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"SUPER_ADMIN", "RECEPTIONIST", "MEMBER", "TRAINER"})
+    @DisplayName("TC-F3.4.1-06b: Vai trò khác Quản lý chi nhánh ngừng bán bị 403")
     void deniedRolesCannotDeactivate(String role) throws Exception {
         var before = row();
         mvc.perform(put(endpoint(item.toString())).with(bearer(role))).andExpect(status().isForbidden());
@@ -110,12 +115,14 @@ class PackageDeactivateIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"0", "-1", "abc", "9223372036854775808"})
+    @DisplayName("TC-F3.4.1-06c: ID gói không hợp lệ bị 400")
     void invalidIdIs400(String id) throws Exception {
         mvc.perform(put(endpoint(id)).with(bearer("BRANCH_MANAGER"))).andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.errors.id").isNotEmpty());
     }
 
     @Test
+    @DisplayName("TC-F3.4.1-06d: Không token hoặc token sai bị 401")
     void missingAndBadTokenAre401() throws Exception {
         var before = row();
         mvc.perform(put(endpoint(item.toString()))).andExpect(status().isUnauthorized());
@@ -125,6 +132,7 @@ class PackageDeactivateIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.4.1-06e: Quản lý ngừng hoạt động hoặc chưa gán chi nhánh bị 403")
     void inactiveAndMissingStaffAre403() throws Exception {
         var before = row();
         jdbc.update("UPDATE staff SET status='INACTIVE' WHERE user_id=?", manager);
@@ -135,6 +143,7 @@ class PackageDeactivateIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.4.1-06f: Gói không tồn tại trả 404, không đổi dữ liệu")
     void missingPackageIs404WithEmptyJsonBodyWithoutMutation() throws Exception {
         var before = row();
         mvc.perform(put(endpoint("999999")).with(bearer("BRANCH_MANAGER"))
@@ -146,6 +155,7 @@ class PackageDeactivateIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"PENDING", "ACTIVE"})
+    @DisplayName("TC-F3.4.1-02a: Ngừng bán không đổi gói hội viên, hóa đơn, dòng hóa đơn đã có")
     void preservesAllHistoricalRows(String state) throws Exception {
         jdbc.update("UPDATE packages SET type='SESSION',session_count=10 WHERE id=?", item);
         Long member = jdbc.queryForObject("INSERT INTO members(home_branch_id,member_code,full_name,phone) VALUES (?,'HV000001','Test','0912345678') RETURNING id", Long.class, branch);
@@ -164,6 +174,7 @@ class PackageDeactivateIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.4.1-05a: Sửa gói cùng lúc với ngừng bán không làm gói bán lại")
     void concurrentEditCannotReactivatePackage() throws Exception {
         var barrier = new CyclicBarrier(2);
         try (var executor = Executors.newFixedThreadPool(2)) {
@@ -187,6 +198,7 @@ class PackageDeactivateIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.4.1-04b: Hai yêu cầu ngừng bán đồng thời: một 200, một 422")
     void simultaneousDeactivationHasOneSuccessAndOne422() throws Exception {
         var barrier = new CyclicBarrier(2);
         try (var executor = Executors.newFixedThreadPool(2)) {

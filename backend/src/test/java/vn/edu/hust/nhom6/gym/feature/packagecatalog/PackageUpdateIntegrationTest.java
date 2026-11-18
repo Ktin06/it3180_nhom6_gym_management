@@ -3,6 +3,7 @@ package vn.edu.hust.nhom6.gym.feature.packagecatalog;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -51,6 +52,7 @@ class PackageUpdateIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.3.1-01a: Chỉ sửa giá thì các trường khác giữ nguyên")
     void priceOnlyKeepsOmittedFieldsAndAudit() throws Exception {
         Map<String, Object> before = row();
         mvc.perform(put("/api/v1/packages/{id}", item).with(bearer("BRANCH_MANAGER"))
@@ -65,6 +67,7 @@ class PackageUpdateIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.3.1-03a: Gửi description null thì xóa mô tả; body rỗng không đổi gì kể cả updated_at")
     void explicitNullClearsDescriptionAndEmptyBodyDoesNotChangeAudit() throws Exception {
         Map<String, Object> before = row();
         mvc.perform(put("/api/v1/packages/{id}", item).with(bearer("BRANCH_MANAGER"))
@@ -89,6 +92,7 @@ class PackageUpdateIntegrationTest {
 
     @ParameterizedTest
     @MethodSource("invalidFields")
+    @DisplayName("TC-F3.3.1-05a: Một trường sai thì không trường nào bị đổi")
     void invalidUpdateIsAtomicAndReturnsFieldError(String field, String raw) throws Exception {
         var before = row();
         var body = json.createObjectNode();
@@ -101,6 +105,7 @@ class PackageUpdateIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"code", "type", "branchId", "status", "id", "updatedAt", "provided", "unknown"})
+    @DisplayName("TC-F3.3.1-04a: Gửi code, type hoặc trường lạ bị 400")
     void refusesImmutableAndUnknownFields(String field) throws Exception {
         var before = row();
         var body = json.createObjectNode(); body.put(field, "forged"); body.put("price", 0);
@@ -112,6 +117,7 @@ class PackageUpdateIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"SESSION", "PT"})
+    @DisplayName("TC-F3.3.1-04b: Số buổi kiểm theo loại gói đang có và không xóa được")
     void sessionsMergeWithExistingTypeAndCannotBeCleared(String type) throws Exception {
         jdbc.update("UPDATE packages SET type=?, session_count=10 WHERE id=?", type, item);
         mvc.perform(put("/api/v1/packages/{id}", item).with(bearer("BRANCH_MANAGER"))
@@ -131,6 +137,7 @@ class PackageUpdateIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.3.1-06a: Sửa gói đã ngừng bán được, gói vẫn INACTIVE; giá trị biên hợp lệ")
     void acceptsBoundariesAndCanEditInactiveWithoutReactivation() throws Exception {
         jdbc.update("UPDATE packages SET status='INACTIVE' WHERE id=?", item);
         var body = json.createObjectNode(); body.put("name", "N".repeat(255));
@@ -147,6 +154,7 @@ class PackageUpdateIntegrationTest {
 
     @ParameterizedTest
     @CsvSource({"OTHER,ACTIVE", "GLOBAL,ACTIVE", "OTHER,INACTIVE", "GLOBAL,INACTIVE"})
+    @DisplayName("TC-F3.3.1-02a: Sửa gói của chi nhánh khác hoặc gói toàn chuỗi bị từ chối 403, dữ liệu giữ nguyên")
     void outsideBranchAndGlobalAre403WithoutMutation(String scope, String state) throws Exception {
         jdbc.update("UPDATE packages SET branch_id=?,status=? WHERE id=?",
             scope.equals("GLOBAL") ? null : otherBranch, state, item);
@@ -159,6 +167,7 @@ class PackageUpdateIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.3.1-07a: Gói không tồn tại trả 404")
     void missingPackageIs404WithoutMutation() throws Exception {
         var before = row();
         mvc.perform(put("/api/v1/packages/999999").with(bearer("BRANCH_MANAGER"))
@@ -170,6 +179,7 @@ class PackageUpdateIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"SUPER_ADMIN", "RECEPTIONIST", "TRAINER", "MEMBER"})
+    @DisplayName("TC-F3.3.1-08a: Vai trò khác Quản lý chi nhánh sửa gói bị 403")
     void deniedRolesCannotUpdate(String role) throws Exception {
         var before = row();
         mvc.perform(put("/api/v1/packages/{id}", item).with(bearer(role))
@@ -179,6 +189,7 @@ class PackageUpdateIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.3.1-08b: Không token bị 401; quản lý ngừng hoạt động hoặc chưa gán chi nhánh bị 403")
     void noTokenOrInactiveMissingStaffCannotUpdate() throws Exception {
         var before = row();
         mvc.perform(put("/api/v1/packages/{id}", item).contentType(MediaType.APPLICATION_JSON).content("{}"))
@@ -196,6 +207,7 @@ class PackageUpdateIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"0", "-1", "abc", "9223372036854775808"})
+    @DisplayName("TC-F3.3.1-05b: ID gói không hợp lệ bị 400")
     void invalidIdIsBadRequest(String id) throws Exception {
         mvc.perform(put("/api/v1/packages/" + id).with(bearer("BRANCH_MANAGER"))
                 .contentType(MediaType.APPLICATION_JSON).content("{}"))
@@ -203,6 +215,7 @@ class PackageUpdateIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.3.1-05c: Body JSON sai cú pháp bị 400")
     void malformedBodyIsRejected() throws Exception {
         for (String body : List.of("{", "null", "", "[]")) {
             mvc.perform(put("/api/v1/packages/{id}", item).with(bearer("BRANCH_MANAGER"))
@@ -212,6 +225,7 @@ class PackageUpdateIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"PENDING", "ACTIVE"})
+    @DisplayName("TC-F3.3.1-01b: Sửa gói không đổi giá, số buổi, thời hạn của gói đã bán, kể cả gói PENDING")
     void historyIncludingPendingPurchaseRemainsIdentical(String membershipStatus) throws Exception {
         jdbc.update("UPDATE packages SET type='SESSION',session_count=10 WHERE id=?", item);
         Long member = jdbc.queryForObject("INSERT INTO members(home_branch_id,member_code,full_name,phone) VALUES (?,'HV000001','Test','0912345678') RETURNING id", Long.class, branch);

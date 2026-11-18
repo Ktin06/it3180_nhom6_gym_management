@@ -2,6 +2,7 @@ package vn.edu.hust.nhom6.gym.feature.packagecatalog;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.GymPackage;
@@ -11,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PackageMapperTest {
     @Test
+    @DisplayName("Thời gian tạo, cập nhật luôn trả theo UTC dù máy chạy giờ Việt Nam")
     void detailUsesUtcEvenWhenAuditWasCreatedInVietnamTimezone() {
         var item = GymPackage.create(1L, "UTC", "Gói UTC", PackageType.TIME, 30, null, 0, null);
         var audit = OffsetDateTime.parse("2026-11-09T09:00:00+07:00");

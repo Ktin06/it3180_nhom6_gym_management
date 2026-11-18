@@ -1,6 +1,7 @@
 package vn.edu.hust.nhom6.gym.feature.packagecatalog;
 
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -39,6 +40,7 @@ class PackageControllerTest {
     }
 
     @Test
+    @DisplayName("TC-F3.1.1-02d: Không gửi tham số thì dùng mặc định ACTIVE, trang 0, 20 gói")
     void defaultContract() throws Exception {
         mvc.perform(get("/api/v1/packages").with(jwt().authorities(new SimpleGrantedAuthority("ROLE_RECEPTIONIST"))))
             .andExpect(status().isOk()).andExpect(jsonPath("$.content").isArray())
@@ -49,6 +51,7 @@ class PackageControllerTest {
 
     @ParameterizedTest
     @CsvSource({"page,-1", "size,0", "size,101", "page,text", "size,2147483648", "type,INVALID", "status,INVALID"})
+    @DisplayName("TC-F3.1.1-06a: Tham số lọc sai trả 400 kèm lỗi từng tham số")
     void rejectsInvalidQueryWithFieldErrors(String field, String value) throws Exception {
         mvc.perform(get("/api/v1/packages").param(field, value)
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_BRANCH_MANAGER"))))
@@ -60,6 +63,7 @@ class PackageControllerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"MEMBER", "TRAINER"})
+    @DisplayName("TC-F3.1.1-05b: Huấn luyện viên, hội viên xem danh mục bị 403")
     void rejectsDeniedRole(String role) throws Exception {
         mvc.perform(get("/api/v1/packages").with(jwt().authorities(new SimpleGrantedAuthority("ROLE_" + role))))
             .andExpect(status().isForbidden());
@@ -67,6 +71,7 @@ class PackageControllerTest {
     }
 
     @Test
+    @DisplayName("TC-F3.1.1-05c: Không gửi token hoặc token sai bị 401")
     void missingAndInvalidBearerAreUnauthorized() throws Exception {
         mvc.perform(get("/api/v1/packages")).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/v1/packages").header("Authorization", "Bearer invalid"))
