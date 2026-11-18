@@ -30,6 +30,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import jakarta.servlet.http.Cookie;
 import tools.jackson.databind.json.JsonMapper;
 import vn.edu.hust.nhom6.gym.TestcontainersConfiguration;
+import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 
 /**
  * Kiểm thử tích hợp với PostgreSQL thật (Testcontainers) cho luồng làm mới phiên và đăng xuất nhiều tab (#104, #112).
@@ -130,6 +131,26 @@ class AuthSessionConcurrencyIntegrationTest {
         mockMvc.perform(post("/api/v1/auth/refresh")
                 .cookie(new Cookie("refresh_token", rotatedCookieB.getValue())))
             .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void dangXuatBangJwtHetHanCuaTaiKhoanAVanGiuPhienCuaTaiKhoanB() throws Exception {
+        registerMember("Thành viên A", "user.a@example.com", "0911111111");
+        SessionTokens sessionB = registerMember("Thành viên B", "user.b@example.com", "0922222222");
+        Long userIdA = jdbcTemplate.queryForObject(
+            "SELECT id FROM users WHERE email = ?", Long.class, "user.a@example.com");
+
+        // Tab 1 (A) để lâu nên access token đã hết hạn; cookie chung trên trình duyệt đang là của B.
+        mockMvc.perform(post("/api/v1/auth/logout")
+                .header(HttpHeaders.AUTHORIZATION,
+                    "Bearer " + JwtTestSupport.expiredAccessToken(userIdA, "user.a@example.com", UserRole.MEMBER))
+                .cookie(new Cookie("refresh_token", sessionB.refreshToken())))
+            .andExpect(status().isNoContent())
+            .andExpect(header().doesNotExist(HttpHeaders.SET_COOKIE));
+
+        mockMvc.perform(post("/api/v1/auth/refresh")
+                .cookie(new Cookie("refresh_token", sessionB.refreshToken())))
+            .andExpect(status().isOk());
     }
 
     private SessionTokens registerMember(String fullName, String email, String phone) throws Exception {

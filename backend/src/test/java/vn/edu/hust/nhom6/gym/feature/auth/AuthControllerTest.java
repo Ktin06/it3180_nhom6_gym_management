@@ -288,6 +288,34 @@ class AuthControllerTest {
     }
 
     @Test
+    void dangXuatCoJwtHetHanVanDoiChieuChuSoHuuCookie() throws Exception {
+        when(authService.logoutForUser("token-user-b", 10L)).thenReturn(false);
+
+        mockMvc.perform(post("/api/v1/auth/logout")
+                .header(HttpHeaders.AUTHORIZATION,
+                    "Bearer " + JwtTestSupport.expiredAccessToken(10L, "a@example.com", UserRole.MEMBER))
+                .cookie(new Cookie("refresh_token", "token-user-b")))
+            .andExpect(status().isNoContent())
+            .andExpect(header().doesNotExist(HttpHeaders.SET_COOKIE));
+
+        verify(authService).logoutForUser("token-user-b", 10L);
+    }
+
+    @Test
+    void dangXuatCoJwtSaiChuKyCoiNhuKhongGuiJwt() throws Exception {
+        String forged = JwtTestSupport.accessTokenWithSecret(10L, "a@example.com", UserRole.MEMBER,
+            "mot-khoa-bi-mat-khac-hoan-toan-dai-hon-32-byte");
+
+        mockMvc.perform(post("/api/v1/auth/logout")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + forged)
+                .cookie(new Cookie("refresh_token", "token-to-revoke")))
+            .andExpect(status().isNoContent())
+            .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("Max-Age=0")));
+
+        verify(authService).logout("token-to-revoke");
+    }
+
+    @Test
     void layThongTinTaiKhoanHienTaiUyQuyenChoAuthService() throws Exception {
         when(authService.getCurrentUser(any(Jwt.class)))
             .thenReturn(new AuthMeResponse(10L, "member@example.com", UserRole.MEMBER));

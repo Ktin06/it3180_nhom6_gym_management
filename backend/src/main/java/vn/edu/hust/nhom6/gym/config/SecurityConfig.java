@@ -35,6 +35,8 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -62,6 +64,9 @@ public class SecurityConfig {
 
     private static final int MIN_JWT_SECRET_BYTES = 32;
 
+    /** Đường dẫn đăng xuất: tự đọc JWT trong controller, xem {@link LogoutTokenDecoder}. */
+    static final String LOGOUT_PATH = "/api/v1/auth/logout";
+
     private static final String[] PUBLIC_PATHS = {
         "/actuator/health",
         "/actuator/health/**",
@@ -72,12 +77,13 @@ public class SecurityConfig {
         "/api/v1/auth/register",
         "/api/v1/auth/login",
         "/api/v1/auth/refresh",
-        "/api/v1/auth/logout",
+        LOGOUT_PATH,
     };
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, JsonMapper jsonMapper,
-            Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter) throws Exception {
+            Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter,
+            BearerTokenResolver bearerTokenResolver) throws Exception {
         AuthenticationEntryPoint entryPoint = (request, response, e) -> writeProblem(
             jsonMapper, request, response, HttpStatus.UNAUTHORIZED,
             "Chưa xác thực", "Bạn cần đăng nhập để truy cập tài nguyên này.");
@@ -97,6 +103,7 @@ public class SecurityConfig {
                 .requestMatchers(PUBLIC_PATHS).permitAll()
                 .anyRequest().authenticated())
             .oauth2ResourceServer(oauth2 -> oauth2
+                .bearerTokenResolver(bearerTokenResolver)
                 .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
                 .authenticationEntryPoint(entryPoint)
                 .accessDeniedHandler(accessDeniedHandler))
@@ -117,6 +124,30 @@ public class SecurityConfig {
             SecurityConfig::validateSubjectAndRole
         ));
         return decoder;
+    }
+
+    /**
+     * Đọc access token từ header {@code Authorization}, trừ ở {@link #LOGOUT_PATH}.
+     *
+     * <p>Nếu để Spring Security đọc JWT ở {@code /logout}, token hết hạn sẽ bị trả 401 trước khi vào controller,
+     * dù đường dẫn này công khai. Khi đó người dùng để tab lâu rồi bấm Đăng xuất sẽ không xóa được cookie (#112).
+     */
+    @Bean
+    public BearerTokenResolver bearerTokenResolver() {
+        DefaultBearerTokenResolver delegate = new DefaultBearerTokenResolver();
+        return request -> LOGOUT_PATH.equals(request.getRequestURI().substring(request.getContextPath().length()))
+            ? null
+            : delegate.resolve(request);
+    }
+
+    /** Giải mã JWT gửi kèm khi đăng xuất: kiểm chữ ký và claim, bỏ qua hạn dùng (#112). */
+    @Bean
+    public LogoutTokenDecoder logoutTokenDecoder(@Value("${app.jwt.secret}") String jwtSecret) {
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(hmacSha256Key(jwtSecret))
+            .macAlgorithm(MacAlgorithm.HS256)
+            .build();
+        decoder.setJwtValidator(SecurityConfig::validateSubjectAndRole);
+        return new LogoutTokenDecoder(decoder);
     }
 
     /** Ký JWT HS256 bằng khóa {@code JWT_SECRET}. */
