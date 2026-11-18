@@ -36,9 +36,9 @@
 | US-F7.1 | Xem dữ liệu tập luyện và hóa đơn cá nhân | v2 | Sprint 2 | [#62](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/62) |
 | US-F7.2 | Gửi yêu cầu mua hoặc gia hạn từ web | v2 | Sprint 2 | [#63](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/63) |
 | US-F8.1 | Quản lý lịch lớp lặp và sinh buổi | v2 | Sprint 2 | [#64](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/64) |
-| US-F8.2 | Đặt chỗ lớp hoặc vào danh sách chờ | v2 | Sprint 2 | [#65](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/65) |
+| US-F8.2 | Đặt chỗ lớp (bỏ danh sách chờ theo ADR 0014) | v2 | Sprint 2 | [#65](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/65) |
 | US-F8.3 | Hủy chỗ và áp dụng quy tắc vi phạm | v2 | Sprint 2 | [#66](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/66) |
-| US-F8.4 | Tự động vào lớp từ danh sách chờ | v2 | Sprint 2 | [#67](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/67) |
+| US-F8.4 | ~~Tự động vào lớp từ danh sách chờ~~ Đã bỏ theo ADR 0014 | v2 | Sprint 2 | [#67](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/67) |
 | US-F8.5 | Đổi phòng, đổi giờ và hủy buổi lớp | v2 | Sprint 2 | [#68](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/68) |
 | US-F8.6 | Xem lịch dạy và điểm danh lớp | v2 | Sprint 2 | [#69](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/69) |
 | US-F8.7 | Xem lịch lớp công khai | v2 | Sprint 2 | [#70](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/70) |
