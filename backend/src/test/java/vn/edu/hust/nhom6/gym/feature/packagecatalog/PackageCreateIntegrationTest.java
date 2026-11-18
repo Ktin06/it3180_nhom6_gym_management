@@ -5,6 +5,7 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -56,6 +57,7 @@ class PackageCreateIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"TIME", "SESSION", "PT"})
+    @DisplayName("TC-F3.2.1-01a: Thêm được gói TIME, SESSION, PT; gán chi nhánh của quản lý; lễ tân thấy ngay")
     void createsAllTypesWithServerBranchAuditAndReadVisibility(String type) throws Exception {
         var body = json.readTree(VALID).deepCopy();
         // ObjectNode từ JSON mẫu giúp mỗi request có cùng dữ liệu, chỉ thay loại/số buổi.
@@ -89,6 +91,7 @@ class PackageCreateIntegrationTest {
 
     @ParameterizedTest
     @MethodSource("invalidFields")
+    @DisplayName("TC-F3.2.1-03a: Dữ liệu sai trả 400 kèm lỗi từng trường, không ghi gì")
     void invalidInputsReturnFieldErrorsWithoutWrites(String field, String raw) throws Exception {
         var body = (tools.jackson.databind.node.ObjectNode) json.readTree(VALID);
         body.set(field, json.readTree(raw));
@@ -100,6 +103,7 @@ class PackageCreateIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"SESSION", "PT"})
+    @DisplayName("TC-F3.2.1-02a: SESSION, PT bắt buộc số buổi lớn hơn 0; TIME không có số buổi")
     void sessionsAreRequiredAndPositive(String type) throws Exception {
         var body = (tools.jackson.databind.node.ObjectNode) json.readTree(VALID);
         body.put("type", type);
@@ -118,6 +122,7 @@ class PackageCreateIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"id", "branchId", "status", "createdAt", "unknownField"})
+    @DisplayName("TC-F3.2.1-04a: Gửi branchId, status, id hoặc trường lạ bị 400, không tạo gói")
     void rejectsServerManagedAndUnknownFields(String field) throws Exception {
         var body = (tools.jackson.databind.node.ObjectNode) json.readTree(VALID);
         body.put(field, "forged");
@@ -128,6 +133,7 @@ class PackageCreateIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.2.1-03b: Thiếu trường, JSON sai cú pháp, chuỗi quá dài bị 400")
     void missingFieldsMalformedJsonAndLengthLimitsAreRejected() throws Exception {
         for (String body : List.of("{}", "{", "null", "")) {
             mvc.perform(post("/api/v1/packages").with(bearer("BRANCH_MANAGER"))
@@ -144,6 +150,7 @@ class PackageCreateIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.2.1-03c: Giá 0 và chuỗi đúng độ dài tối đa vẫn tạo được")
     void acceptsZeroPriceAndMaximumLengthsAndIntegers() throws Exception {
         var body = (tools.jackson.databind.node.ObjectNode) json.readTree(VALID);
         body.put("code", "A".repeat(30)); body.put("name", "B".repeat(255));
@@ -159,6 +166,7 @@ class PackageCreateIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"SUPER_ADMIN", "RECEPTIONIST", "MEMBER", "TRAINER"})
+    @DisplayName("TC-F3.2.1-06a: Chỉ Quản lý chi nhánh thêm được gói, vai trò khác bị 403")
     void onlyManagerCanCreate(String role) throws Exception {
         mvc.perform(post("/api/v1/packages").with(bearer(role)).contentType(MediaType.APPLICATION_JSON).content(VALID))
             .andExpect(status().isForbidden());
@@ -166,6 +174,7 @@ class PackageCreateIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.2.1-06b: Không token bị 401; quản lý ngừng hoạt động hoặc chưa gán chi nhánh bị 403")
     void missingTokenOrInactiveStaffCannotCreate() throws Exception {
         mvc.perform(post("/api/v1/packages").contentType(MediaType.APPLICATION_JSON).content(VALID))
             .andExpect(status().isUnauthorized());
@@ -179,6 +188,7 @@ class PackageCreateIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.2.1-05a: Mã trùng gói đã ngừng bán hoặc gói toàn chuỗi vẫn bị 409")
     void duplicateInactiveGlobalCodeIsConflict() throws Exception {
         jdbc.update("INSERT INTO packages(code,name,type,duration_days,price,status) VALUES ('NEW','Old','TIME',30,1,'INACTIVE')");
         mvc.perform(post("/api/v1/packages").with(bearer("BRANCH_MANAGER")).contentType(MediaType.APPLICATION_JSON).content(VALID))
@@ -187,6 +197,7 @@ class PackageCreateIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.2.1-05b: Hai yêu cầu cùng mã gửi đồng thời chỉ tạo một gói, yêu cầu kia 409")
     void concurrentDuplicateCodeCreatesOneAndRollsBackOther() throws Exception {
         var barrier = new CyclicBarrier(2);
         doAnswer(invocation -> {

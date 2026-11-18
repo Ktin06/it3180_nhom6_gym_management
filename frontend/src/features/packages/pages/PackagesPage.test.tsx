@@ -5,7 +5,7 @@ import { mockPackagesApi } from '../api/mock-packages'
 import { PackagesPage } from './PackagesPage'
 
 describe('danh mục gói', () => {
-  it('mặc định lấy gói đang bán; chọn loại PT giữ nguyên lọc trạng thái', async () => {
+  it('TC-F3.1.1-02e: mặc định lấy gói đang bán; chọn loại PT giữ nguyên lọc trạng thái', async () => {
     const user = userEvent.setup()
     const api = { list: vi.fn(mockPackagesApi.list) }
     render(<PackagesPage api={api} />)
