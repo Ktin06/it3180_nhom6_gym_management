@@ -34,7 +34,7 @@ Ràng buộc:
    | --- | --- |
    | `BREVO_API_KEY` | Khóa API. **Chỉ nhập trên Render** (yêu cầu S6), không ghi vào Git, không gửi qua chat |
    | `MAIL_FROM_ADDRESS` | Địa chỉ người gửi đã xác minh trong Brevo |
-   | `MAIL_FROM_NAME` | Tên hiển thị người gửi, ví dụ `Gym Nhóm 6` |
+   | `MAIL_FROM_NAME` | Tên hiển thị người gửi, ví dụ `Gym Nhóm 6` trên Render. Trong file `.env` ở máy cá nhân viết không dấu (`Gym Nhom 6`), vì backend đọc `.env` theo bảng mã ISO-8859-1 |
 
 4. **Máy cá nhân và kiểm thử không gửi email thật.** Khi `BREVO_API_KEY` để trống, backend chỉ ghi nội dung email vào log (người nhận, tiêu đề, liên kết). Nhờ vậy mọi thành viên chạy được luồng quên mật khẩu mà không cần khóa, và kiểm thử JUnit không tốn hạn mức 300 email.
 5. Gửi email nằm sau một interface chung, ví dụ `EmailSender`. F1, F2 và F10 chỉ gọi interface này. Đổi nhà cung cấp về sau thì chỉ thêm một lớp cài đặt mới.
