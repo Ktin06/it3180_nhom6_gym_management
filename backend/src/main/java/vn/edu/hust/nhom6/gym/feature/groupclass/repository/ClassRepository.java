@@ -1,0 +1,299 @@
+package vn.edu.hust.nhom6.gym.feature.groupclass.repository;
+
+import java.time.*;
+import java.util.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.DataClassRowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
+import vn.edu.hust.nhom6.gym.common.exception.NotFoundException;
+import vn.edu.hust.nhom6.gym.feature.groupclass.dto.ClassDtos.*;
+
+/** SQL có tham số cho các bảng F8 và các phép tra cứu điều kiện liên chức năng. */
+@Repository
+@RequiredArgsConstructor
+public class ClassRepository {
+    private static final Set<String> ZERO_ALLOWED_CONFIGS = Set.of(
+        "BOOKING_WINDOW_DAYS", "PROMOTION_CUTOFF_MIN", "LATE_CANCEL_HOURS");
+
+    private final NamedParameterJdbcTemplate jdbc;
+
+    public record MemberRow(Long id, Long userId, Long homeBranchId, String status,
+        OffsetDateTime deletedAt, OffsetDateTime bookingLockedUntil) {}
+
+    public record Resources(Long branchId, Long trainerId, Long roomId, Integer roomCapacity) {}
+
+    public <T> List<T> rows(String sql, Map<String, ?> params, Class<T> type) {
+        return jdbc.query(sql, params, new DataClassRowMapper<>(type));
+    }
+
+    private long scalar(String sql, Map<String, ?> params) {
+        return Objects.requireNonNull(jdbc.queryForObject(sql, params, Long.class));
+    }
+
+    public Schedule schedule(long id) {
+        return rows("SELECT * FROM class_schedules WHERE id=:id", Map.of("id", id), Schedule.class)
+            .stream().findFirst().orElseThrow(() -> new NotFoundException("Không tìm thấy lịch lớp."));
+    }
+
+    public Session session(long id, boolean lock) {
+        return rows("SELECT * FROM class_sessions WHERE id=:id" + (lock ? " FOR UPDATE" : ""),
+            Map.of("id", id), Session.class).stream().findFirst()
+            .orElseThrow(() -> new NotFoundException("Không tìm thấy buổi học."));
+    }
+
+    public MemberRow member(long id) {
+        return rows("SELECT * FROM members WHERE id=:id AND deleted_at IS NULL", Map.of("id", id), MemberRow.class)
+            .stream().findFirst().orElseThrow(() -> new NotFoundException("Không tìm thấy hội viên."));
+    }
+
+    public List<Long> waitlistMembers(long sessionId) {
+        return jdbc.queryForList("SELECT member_id FROM class_bookings WHERE class_session_id=:id AND status='WAITLIST'",
+            Map.of("id", sessionId), Long.class);
+    }
+
+    public void lockMembers(Set<Long> ids) {
+        jdbc.queryForList("SELECT id FROM members WHERE id IN (:ids) ORDER BY id FOR UPDATE",
+            Map.of("ids", ids), Long.class);
+    }
+
+    public void lockBranch(long branchId) {
+        jdbc.queryForList("SELECT id FROM branches WHERE id=:id FOR UPDATE", Map.of("id", branchId), Long.class);
+    }
+
+    public Resources resources(long branchId, ScheduleRequest request) {
+        return rows("""
+            SELECT b.id branch_id, s.id trainer_id, r.id room_id, r.capacity room_capacity
+            FROM branches b JOIN rooms r ON r.branch_id=b.id
+            JOIN staff s ON s.branch_id=b.id JOIN users u ON u.id=s.user_id
+            JOIN class_types t ON t.id=:type
+            WHERE b.id=:branch AND r.id=:room AND s.id=:trainer AND b.status='ACTIVE'
+              AND r.status='ACTIVE' AND s.status='ACTIVE' AND u.status='ACTIVE'
+              AND u.role='TRAINER' AND t.status='ACTIVE'
+            """, Map.of("branch", branchId, "room", request.roomId(), "trainer", request.trainerId(),
+                "type", request.classTypeId()), Resources.class).stream().findFirst()
+            .orElseThrow(() -> new NotFoundException("Phòng, loại lớp hoặc huấn luyện viên không hợp lệ tại chi nhánh."));
+    }
+
+    public List<Schedule> activeSchedules(long branchId) {
+        return rows("SELECT * FROM class_schedules WHERE branch_id=:branch AND status='ACTIVE' ORDER BY id",
+            Map.of("branch", branchId), Schedule.class);
+    }
+
+    public List<Long> activeScheduleIds() {
+        return jdbc.queryForList("SELECT id FROM class_schedules WHERE status='ACTIVE' ORDER BY id", Map.of(), Long.class);
+    }
+
+    public List<Schedule> schedules(long branchId, int page, int size) {
+        return rows("SELECT * FROM class_schedules WHERE branch_id=:branch ORDER BY id DESC LIMIT :size OFFSET :offset",
+            Map.of("branch", branchId, "size", size, "offset", (long) page * size), Schedule.class);
+    }
+
+    public long scheduleCount(long branchId) {
+        return scalar("SELECT count(*) FROM class_schedules WHERE branch_id=:branch", Map.of("branch", branchId));
+    }
+
+    public Schedule saveSchedule(Long id, long branch, ScheduleRequest r) {
+        var p = new MapSqlParameterSource().addValue("branch", branch).addValue("type", r.classTypeId())
+            .addValue("trainer", r.trainerId()).addValue("room", r.roomId()).addValue("day", r.dayOfWeek())
+            .addValue("start", r.startTime()).addValue("end", r.endTime()).addValue("capacity", r.capacity())
+            .addValue("from", r.validFrom()).addValue("to", r.validTo()).addValue("id", id);
+        if (id == null) {
+            Long savedId = jdbc.queryForObject("""
+                INSERT INTO class_schedules(branch_id,class_type_id,trainer_id,room_id,day_of_week,
+                    start_time,end_time,capacity,valid_from,valid_to)
+                VALUES (:branch,:type,:trainer,:room,:day,:start,:end,:capacity,:from,:to) RETURNING id
+                """, p, Long.class);
+            return schedule(savedId);
+        }
+
+        jdbc.update("""
+            UPDATE class_schedules SET class_type_id=:type, trainer_id=:trainer, room_id=:room,
+                day_of_week=:day, start_time=:start, end_time=:end, capacity=:capacity,
+                valid_from=:from, valid_to=:to, updated_at=clock_timestamp() WHERE id=:id
+            """, p);
+        return schedule(id);
+    }
+
+    public void deactivate(long id) {
+        jdbc.update("UPDATE class_schedules SET status='INACTIVE',updated_at=clock_timestamp() WHERE id=:id", Map.of("id", id));
+    }
+
+    public boolean occurrenceExists(long scheduleId, LocalDate date) {
+        return scalar("SELECT count(*) FROM class_sessions WHERE class_schedule_id=:id AND occurrence_date=:date",
+            Map.of("id", scheduleId, "date", date)) > 0;
+    }
+
+    public boolean resourceConflict(long trainer, long room, OffsetDateTime start, OffsetDateTime end) {
+        var p = new MapSqlParameterSource().addValue("trainer", trainer).addValue("room", room)
+            .addValue("start", start).addValue("end", end);
+        // Khoảng nửa mở: giờ kết thúc bằng giờ bắt đầu tiếp theo không trùng.
+        return Boolean.TRUE.equals(jdbc.queryForObject("""
+            SELECT EXISTS(SELECT 1 FROM class_sessions WHERE status<>'CANCELLED'
+                AND (trainer_id=:trainer OR room_id=:room) AND start_at<:end AND end_at>:start)
+              OR EXISTS(SELECT 1 FROM pt_sessions WHERE status<>'CANCELLED' AND trainer_id=:trainer
+                AND start_at<:end AND end_at>:start)
+            """, p, Boolean.class));
+    }
+
+    public boolean recurringResourceConflict(Long excluded, ScheduleRequest r) {
+        return Boolean.TRUE.equals(jdbc.queryForObject("""
+            WITH busy AS (
+              SELECT start_at,end_at FROM class_sessions WHERE status<>'CANCELLED'
+                AND (trainer_id=:trainer OR room_id=:room)
+                AND (:excluded::bigint IS NULL OR class_schedule_id<>:excluded)
+              UNION ALL SELECT start_at,end_at FROM pt_sessions WHERE status<>'CANCELLED' AND trainer_id=:trainer
+            ) SELECT EXISTS(SELECT 1 FROM busy,
+                LATERAL generate_series((start_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::date,
+                    (end_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::date, interval '1 day') d
+              WHERE d::date>=:from AND (:to::date IS NULL OR d::date<=:to)
+                AND extract(isodow FROM d)=:day
+                AND ((d::date + :start::time) AT TIME ZONE 'Asia/Ho_Chi_Minh')<end_at
+                AND ((d::date + :end::time) AT TIME ZONE 'Asia/Ho_Chi_Minh')>start_at)
+            """, new MapSqlParameterSource().addValue("trainer", r.trainerId()).addValue("room", r.roomId())
+                .addValue("excluded", excluded).addValue("from", r.validFrom()).addValue("to", r.validTo())
+                .addValue("day", r.dayOfWeek()).addValue("start", r.startTime()).addValue("end", r.endTime()), Boolean.class));
+    }
+
+    public int insertSession(Schedule s, LocalDate date, OffsetDateTime start, OffsetDateTime end) {
+        return jdbc.update("""
+            INSERT INTO class_sessions(class_schedule_id,branch_id,trainer_id,room_id,occurrence_date,start_at,end_at,capacity)
+            VALUES (:id,:branch,:trainer,:room,:date,:start,:end,:capacity)
+            ON CONFLICT (class_schedule_id,occurrence_date) DO NOTHING
+            """, Map.of("id", s.id(), "branch", s.branchId(), "trainer", s.trainerId(), "room", s.roomId(),
+                "date", date, "start", start, "end", end, "capacity", s.capacity()));
+    }
+
+    public int config(long branch, String key) {
+        var values = jdbc.queryForList("""
+            SELECT config_value FROM system_configs WHERE config_key=:key AND (branch_id=:branch OR branch_id IS NULL)
+            ORDER BY branch_id NULLS LAST LIMIT 1
+            """, Map.of("key", key, "branch", branch), String.class);
+        if (values.isEmpty()) { throw new IllegalStateException("Thiếu cấu hình " + key); }
+        int value = Integer.parseInt(values.getFirst());
+        if (value < 0 || value > 3660 || (value == 0 && !ZERO_ALLOWED_CONFIGS.contains(key))) {
+            throw new IllegalStateException("Cấu hình không hợp lệ: " + key);
+        }
+        return value;
+    }
+
+    public boolean eligible(long memberId, long branch, LocalDate date, OffsetDateTime now) {
+        return Boolean.TRUE.equals(jdbc.queryForObject("""
+            SELECT EXISTS(SELECT 1 FROM members m JOIN memberships p ON p.member_id=m.id
+                WHERE m.id=:id AND m.status='ACTIVE' AND m.deleted_at IS NULL
+                AND (m.booking_locked_until IS NULL OR m.booking_locked_until<=:now)
+                AND p.package_type='TIME' AND p.status='ACTIVE' AND (p.branch_id=:branch OR p.branch_id IS NULL)
+                AND p.start_date<=:date AND p.end_date>=:date)
+            """, Map.of("id", memberId, "branch", branch, "date", date, "now", now), Boolean.class));
+    }
+
+    public boolean overlap(long memberId, Session session) {
+        return Boolean.TRUE.equals(jdbc.queryForObject("""
+            SELECT EXISTS(SELECT 1 FROM class_bookings b JOIN class_sessions s ON s.id=b.class_session_id
+                WHERE b.member_id=:member AND b.status IN ('BOOKED','PENDING_RECONFIRM','ATTENDED','NO_SHOW')
+                AND s.status<>'CANCELLED' AND s.id<>:id AND s.start_at<:end AND s.end_at>:start)
+              OR EXISTS(SELECT 1 FROM pt_sessions WHERE member_id=:member AND status<>'CANCELLED'
+                AND start_at<:end AND end_at>:start)
+            """, Map.of("member", memberId, "id", session.id(), "start", session.startAt(), "end", session.endAt()), Boolean.class));
+    }
+
+    public boolean duplicate(long member, long session) {
+        return scalar("SELECT count(*) FROM class_bookings WHERE member_id=:m AND class_session_id=:s AND status<>'CANCELLED'",
+            Map.of("m", member, "s", session)) > 0;
+    }
+
+    public long occupied(long session) {
+        return scalar("SELECT count(*) FROM class_bookings WHERE class_session_id=:id AND status IN ('BOOKED','PENDING_RECONFIRM','ATTENDED','NO_SHOW')",
+            Map.of("id", session));
+    }
+
+    private static final String BOOKING_SELECT = """
+        SELECT b.*, m.booking_locked_until,
+          CASE WHEN b.status='WAITLIST' THEN (SELECT count(*) FROM class_bookings w
+              WHERE w.class_session_id=b.class_session_id AND w.status='WAITLIST'
+              AND (w.waitlisted_at,w.id)<=(b.waitlisted_at,b.id)) ELSE NULL END waitlist_position
+        FROM class_bookings b JOIN members m ON m.id=b.member_id
+        """;
+
+    public Booking booking(long id) {
+        return rows(BOOKING_SELECT + " WHERE b.id=:id", Map.of("id", id), Booking.class).stream().findFirst()
+            .orElseThrow(() -> new NotFoundException("Không tìm thấy chỗ đặt."));
+    }
+
+    public List<Booking> waitlist(long sessionId) {
+        return rows(BOOKING_SELECT + " WHERE b.class_session_id=:id AND b.status='WAITLIST' ORDER BY b.waitlisted_at,b.id",
+            Map.of("id", sessionId), Booking.class);
+    }
+
+    public long insertBooking(long session, long member, long actor, boolean wait, OffsetDateTime now) {
+        return scalar("""
+            INSERT INTO class_bookings(class_session_id,member_id,created_by,status,waitlisted_at,booked_at)
+            VALUES (:session,:member,:actor,:status,:wait,:booked) RETURNING id
+            """, new MapSqlParameterSource().addValue("session", session).addValue("member", member)
+                .addValue("actor", actor).addValue("status", wait ? "WAITLIST" : "BOOKED")
+                .addValue("wait", wait ? now : null).addValue("booked", wait ? null : now).getValues());
+    }
+
+    public void cancel(long id, boolean late, boolean staff, OffsetDateTime now) {
+        jdbc.update("""
+            UPDATE class_bookings SET status='CANCELLED', cancelled_at=:now, cancel_reason=:reason,
+                is_late_cancel=:late,updated_at=:now WHERE id=:id
+            """, Map.of("id", id, "now", now, "reason", staff ? "BY_STAFF" : "BY_MEMBER", "late", late));
+    }
+
+    public void promote(Booking booking, OffsetDateTime now, int grace) {
+        jdbc.update("""
+            UPDATE class_bookings SET status='BOOKED',booked_at=:now,promoted_at=:now,grace_until=:grace,
+                updated_at=:now WHERE id=:id
+            """, Map.of("id", booking.id(), "now", now, "grace", now.plusMinutes(grace)));
+    }
+
+    public void promotionNotice(Booking b, Session s, OffsetDateTime now) {
+        // Hồ sơ chưa có tài khoản vẫn có promoted_at/grace_until; không tạo user giả.
+        jdbc.update("""
+            INSERT INTO notifications(user_id,type,title,content,channel,related_entity,related_id,status,sent_at,created_at,updated_at)
+            SELECT user_id,'CLASS_PROMOTED','Bạn đã được đưa vào lớp',:content,'IN_APP','class_bookings',:id,'SENT',:now,:now,:now
+            FROM members WHERE id=:member AND user_id IS NOT NULL
+            """, Map.of("member", b.memberId(), "id", b.id(), "now", now,
+                "content", "Buổi học bắt đầu lúc " + s.startAt().atZoneSameInstant(ZoneId.of("Asia/Ho_Chi_Minh"))));
+        // F10 gửi email từ hàng đợi; trước giờ mở cửa thì hẹn tới giờ mở cửa.
+        jdbc.update("""
+            INSERT INTO notifications(user_id,type,title,content,channel,related_entity,related_id,status,scheduled_at,created_at,updated_at)
+            SELECT m.user_id,'CLASS_PROMOTED','Bạn đã được đưa vào lớp',:content,'EMAIL','class_bookings',:id,'PENDING',
+              CASE WHEN (:now::timestamptz AT TIME ZONE 'Asia/Ho_Chi_Minh')::time < br.open_time
+                THEN (((:now::timestamptz AT TIME ZONE 'Asia/Ho_Chi_Minh')::date + br.open_time) AT TIME ZONE 'Asia/Ho_Chi_Minh')
+                WHEN (:now::timestamptz AT TIME ZONE 'Asia/Ho_Chi_Minh')::time >= br.close_time
+                THEN (((:now::timestamptz AT TIME ZONE 'Asia/Ho_Chi_Minh')::date + 1 + br.open_time) AT TIME ZONE 'Asia/Ho_Chi_Minh')
+                ELSE :now::timestamptz END,:now,:now
+            FROM members m JOIN branches br ON br.id=:branch WHERE m.id=:member AND m.user_id IS NOT NULL
+            """, Map.of("member", b.memberId(), "id", b.id(), "branch", s.branchId(), "now", now,
+                "content", "Buổi học bắt đầu lúc " + s.startAt().atZoneSameInstant(ZoneId.of("Asia/Ho_Chi_Minh"))));
+    }
+
+    public OffsetDateTime latestLock(long member) {
+        var times = jdbc.queryForList("""
+            SELECT created_at FROM audit_logs WHERE entity='members' AND entity_id=:id
+              AND action='CLASS_BOOKING_LOCK' ORDER BY created_at DESC,id DESC LIMIT 1
+            """, Map.of("id", member), OffsetDateTime.class);
+        return times.isEmpty() ? OffsetDateTime.MIN : times.getFirst();
+    }
+
+    public long violations(long member, OffsetDateTime month, OffsetDateTime nextMonth, OffsetDateTime lastLock) {
+        return scalar("""
+            SELECT count(*) FROM class_bookings b JOIN class_sessions s ON s.id=b.class_session_id
+            WHERE b.member_id=:member AND ((b.is_late_cancel AND b.cancelled_at>=:month AND b.cancelled_at<:next
+                AND b.cancelled_at>:last) OR (b.status='NO_SHOW' AND s.start_at>=:month AND s.start_at<:next AND s.start_at>:last))
+            """, Map.of("member", member, "month", month, "next", nextMonth, "last", lastLock));
+    }
+
+    public void lockBooking(long member, long branch, long actor, OffsetDateTime now, OffsetDateTime until) {
+        jdbc.update("UPDATE members SET booking_locked_until=:until,updated_at=:now WHERE id=:id",
+            Map.of("until", until, "now", now, "id", member));
+        jdbc.update("""
+            INSERT INTO audit_logs(user_id,branch_id,action,entity,entity_id,new_value,created_at,updated_at)
+            VALUES (:actor,:branch,'CLASS_BOOKING_LOCK','members',:member,
+                jsonb_build_object('lockedUntil',:until::text),:now,:now)
+            """, Map.of("actor", actor, "branch", branch, "member", member, "until", until, "now", now));
+    }
+}
