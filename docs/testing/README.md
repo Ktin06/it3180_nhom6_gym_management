@@ -67,15 +67,57 @@ describe('TC-F1.2.1-01a: đăng nhập thành công', () => {
 
 ## 3. Ma trận truy vết
 
-File `ma-tran-truy-vet.md` trong thư mục này sẽ do script `scripts/export-truy-vet.cjs` sinh tự động. **Không sửa tay file đó.**
+### Ma trận truy vết là gì
 
-Script đọc mã US, AC, BR trong SRS và mã TC trong các file kiểm thử, rồi sinh ra:
+Là một file tổng hợp **nối AC trong SRS với kiểm thử trong mã**: [`ma-tran-truy-vet.md`](ma-tran-truy-vet.md). AC nằm trong file SRS, TC nằm trong tên kiểm thử. Hai nơi này rời nhau, không ai nhìn bằng mắt mà biết AC nào đã được kiểm thử. Script đọc cả hai rồi ghép lại.
 
-- cây xuôi F → UC → US → AC → TC;
-- bảng ngược TC → AC → US → UC → BR;
-- danh sách **AC chưa có TC**;
-- danh sách **TC trỏ tới AC không tồn tại**.
+File gồm:
 
-Danh sách "AC chưa có TC" của một US phải trống thì US đó mới đủ điều kiện nghiệm thu và đóng ([CONTRIBUTING.md, mục 5](../../CONTRIBUTING.md#5-định-nghĩa-hoàn-thành)).
+| Mục | Trả lời câu hỏi |
+| --- | --- |
+| 1. Tổng quan theo chức năng | Mỗi chức năng có bao nhiêu UC, US, AC; bao nhiêu AC đã có kiểm thử |
+| 2. Lỗi cần sửa | Có TC nào ghi mã AC không tồn tại (gõ sai, hoặc AC đã bị đổi số)? Có mã AC nào trùng? |
+| 3. AC chưa có TC | Còn AC nào chưa có kiểm thử chứng minh? |
+| 4. Cây xuôi | Một US gồm những AC nào, mỗi AC được kiểm thử bởi hàm nào? |
+| 5. Bảng ngược | Một kiểm thử báo lỗi thì nó vi phạm AC, US, quy tắc nghiệp vụ nào? |
+| 6. Kiểm thử chưa mang mã | Còn bao nhiêu kiểm thử chưa gắn mã, nằm ở file nào? |
 
-Script đang được viết. Khi xong, cách chạy sẽ được ghi vào đây.
+**File này do script sinh, không sửa tay.** Sửa tay sẽ bị ghi đè ở lần chạy sau.
+
+### Cách chạy
+
+Ở gốc repo (cần Node, không cần cài gói nào):
+
+```bash
+node scripts/export-truy-vet.cjs           # sinh lại docs/testing/ma-tran-truy-vet.md
+node scripts/export-truy-vet.cjs --check   # chỉ kiểm tra, không ghi file
+```
+
+Dòng cuối in ra tóm tắt, ví dụ `56 UC, 6 US, 43 AC (31 có TC, 12 chưa có), 63 TC, …; lỗi: 0 TC trỏ sai, 0 AC trùng, 0 US lạc`. Có lỗi ở mục 2 thì lệnh thoát với mã 1, để sau này CI dùng được.
+
+### Dùng khi nào
+
+| Lúc | Ai | Làm gì |
+| --- | --- | --- |
+| Trước khi mở PR chức năng | Người làm | Chạy script, xem mục 3: mọi AC mà PR ghi "đã làm" không còn trong danh sách "AC chưa có TC". Xem mục 2 trống. Commit luôn file ma trận đã sinh lại |
+| Khi review PR | Người duyệt | Mở diff của `ma-tran-truy-vet.md`: thấy ngay PR thêm TC cho AC nào |
+| Khi viết lại SRS, đổi số AC | Người viết SRS | Chạy script: mục 2.1 báo các kiểm thử đang trỏ tới mã AC cũ |
+| Trước khi đóng issue user story | Người nghiệm thu | Mục 4: US có dấu ✅ "mọi AC có TC" mới đủ điều kiện 2 trong 3 điều kiện đóng ([CONTRIBUTING.md, mục 5](../../CONTRIBUTING.md#5-định-nghĩa-hoàn-thành)) |
+| Một kiểm thử báo đỏ trên CI | Bất kỳ ai | Tìm mã TC trong mục 5 để biết quy tắc nghiệp vụ nào đang bị vi phạm |
+| Họp cuối sprint, viết báo cáo | Trưởng nhóm | Mục 1 cho số liệu độ phủ AC theo chức năng; mục 4 chèn được vào báo cáo làm bằng chứng truy vết |
+
+### Ví dụ
+
+Kiểm thử `PackageUpdateIntegrationTest#outsideBranchAndGlobalAre403WithoutMutation` báo lỗi. Tìm `TC-F3.3.1-02a` ở mục 5:
+
+```
+| TC-F3.3.1-02a | AC-F3.3.1-02 | US-F3.3.1 | UC-F3.3 | BR-F3-07, BR-F3-05, BR-F3-06 | PackageUpdateIntegrationTest#… |
+```
+
+Vậy mã vừa sửa đã làm hỏng quy tắc "quản lý không được sửa gói chi nhánh khác hoặc gói toàn chuỗi" (BR-F3-07), thuộc US sửa gói (#132).
+
+### Script đọc gì
+
+- **SRS:** tiêu đề `### 3.x. UC-Fx.y: …`, tiêu đề `##### US-Fx.y.z: …`, dòng `- **BR liên quan:**`, `- **Issue:**` và dòng AC `- **AC-Fx.y.z-nn: tên** (BR-…)`. Viết đúng mẫu đặc tả thì script đọc được. AC ghi "(bỏ ngày …)" không tính.
+- **Backend:** mọi `@Test`, `@ParameterizedTest`, `@RepeatedTest` trong `backend/src/test/java`; mã TC lấy từ `@DisplayName`.
+- **Frontend:** `it(…)`, `test(…)`, `describe(…)` trong file `*.test.ts(x)` của `frontend/src`; mã TC ở đầu tên.
