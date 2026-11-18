@@ -20,6 +20,7 @@ Mục lục thư mục `docs/`. Khi các tài liệu mâu thuẫn nhau, thứ t�
 | [erd/thiet-ke-du-lieu.md](design/erd/thiet-ke-du-lieu.md) | Giải thích thiết kế dữ liệu, quy ước, ràng buộc cần kiểm thử |
 | [erd/tu-dien-du-lieu.md](design/erd/tu-dien-du-lieu.md) | Từ điển đủ 39 bảng, 422 cột, khóa, chỉ mục và ghi chú từ DBML |
 | [erd/xuat-ban-erd.md](design/erd/xuat-ban-erd.md) | Bản xuất dbdiagram.io PDF/PNG và hình theo nhóm; cách tái tạo và đưa vào báo cáo LaTeX |
+| [function/](design/function/) | Sơ đồ phân cấp chức năng ([ADR 0009](decisions/0009-bo-so-do-phan-tich-thiet-ke.md)): bản tổng quát (hệ thống → 5 version → F1–F20) và bốn bản chi tiết v1, v2, v3, v4–v5 tới từng use case |
 | [use-case/](design/use-case/) | Sơ đồ use case (sẽ bổ sung) |
 | [activity/](design/activity/) | Sơ đồ hoạt động (sẽ bổ sung) |
 | [wireframe/](design/wireframe/) | Wireframe màn hình (sẽ bổ sung) |
