@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "F3 – Danh mục gói tập (bốn API)",
+    "name": "F3 – Danh mục gói tập (bốn API nội bộ và bảng giá công khai)",
     "description": "Danh sách, thêm, sửa và ngừng bán. baseUrl gồm /api/v1. Chỉ dùng dữ liệu kiểm thử; nhập token tại máy, không lưu lên Git. Chạy lần lượt danh sách, thêm, sửa, ngừng bán. outsidePackageId phải là gói tồn tại ở chi nhánh khác; globalPackageId là gói toàn chuỗi. POST TIME tự lưu packageId, POST PT tự lưu emptyBodyPackageId để kiểm tra hai cách gọi ngừng bán độc lập.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -53,6 +53,53 @@
     ]
   },
   "item": [
+    {
+      "name": "Bảng giá công khai – US-F3.1.2 (không cần token)",
+      "auth": {
+        "type": "noauth"
+      },
+      "item": [
+        {
+          "name": "TC-F3.1.2-01a 200 – Khách xem bảng giá",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/public/packages",
+            "description": "Không gửi Authorization. Trả gói ACTIVE của chi nhánh mặc định CN01 và gói toàn chuỗi, sắp TIME → SESSION → PT rồi theo giá. Không phân trang."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 và chỉ có trường hiển thị (AC-F3.1.2-01, AC-F3.1.2-03)', () => { pm.response.to.have.status(200); const r = pm.response.json(); pm.expect(r).to.be.an('array'); const allowed = ['id','name','type','durationDays','sessionCount','price','description']; r.forEach(p => { Object.keys(p).forEach(k => pm.expect(allowed).to.include(k)); pm.expect(p.price).to.be.a('number'); }); });",
+                  "pm.test('Sắp TIME → SESSION → PT', () => { const order = { TIME: 0, SESSION: 1, PT: 2 }; const r = pm.response.json(); for (let i = 1; i < r.length; i++) pm.expect(order[r[i - 1].type]).to.be.at.most(order[r[i].type]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "401 – POST vào đường dẫn công khai",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/public/packages",
+            "description": "Đường dẫn /api/v1/public/** chỉ mở GET; phương thức khác vẫn cần đăng nhập (S3)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401 khi không phải GET', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
     {
       "name": "Danh mục ACTIVE mặc định",
       "request": {

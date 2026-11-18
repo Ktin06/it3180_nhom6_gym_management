@@ -5,6 +5,7 @@ import java.time.ZoneOffset;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.PackageSummaryDto;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.PackageDetailDto;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.PackageDeactivationDto;
+import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.PublicPackageDto;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.GymPackage;
 
 public final class PackageMapper {
@@ -26,5 +27,10 @@ public final class PackageMapper {
         return new PackageSummaryDto(item.getId(), item.getCode(), item.getName(), item.getType(),
             item.getDurationDays(), item.getSessionCount(), item.getPrice(), item.getDescription(),
             item.getStatus(), item.getBranchId());
+    }
+
+    public static PublicPackageDto publicView(GymPackage item) {
+        return new PublicPackageDto(item.getId(), item.getName(), item.getType(), item.getDurationDays(),
+            item.getSessionCount(), item.getPrice(), item.getDescription());
     }
 }

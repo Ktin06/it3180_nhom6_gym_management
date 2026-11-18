@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -80,6 +81,9 @@ public class SecurityConfig {
         LOGOUT_PATH,
     };
 
+    /** API công khai chỉ để đọc, cho khách chưa đăng nhập (bảng giá F3, lịch lớp F8). Chỉ mở GET. */
+    private static final String PUBLIC_READ_PATHS = "/api/v1/public/**";
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, JsonMapper jsonMapper,
             Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter,
@@ -101,6 +105,7 @@ public class SecurityConfig {
             .httpBasic(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(PUBLIC_PATHS).permitAll()
+                .requestMatchers(HttpMethod.GET, PUBLIC_READ_PATHS).permitAll()
                 .anyRequest().authenticated())
             .oauth2ResourceServer(oauth2 -> oauth2
                 .bearerTokenResolver(bearerTokenResolver)

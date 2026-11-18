@@ -21,7 +21,7 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 
 | # | Năng lực | Người thực hiện |
 |---|---|---|
-| 1 | Xem danh mục gói tập đang bán | Lễ tân, Quản lý, Chủ chuỗi (qua API nội bộ); Khách xem bảng giá qua trang công khai (phạm vi F7/trang khách – không thuộc API này) |
+| 1 | Xem danh mục gói tập đang bán | Lễ tân, Quản lý, Chủ chuỗi (API nội bộ); Khách xem bảng giá công khai (API công khai riêng, US-F3.1.2) |
 | 2 | Thêm gói tập mới vào danh mục | Quản lý chi nhánh |
 | 3 | Sửa thông tin gói tập | Quản lý chi nhánh |
 | 4 | Ngừng bán gói tập | Quản lý chi nhánh |
@@ -30,7 +30,7 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 
 **Phạm vi Sprint 1:** Thực hiện UC-F3.1 đến UC-F3.5 (quản lý danh mục và bán gói tại quầy). Chức năng hội viên tự mua/gia hạn từ cổng hội viên (tạo hóa đơn PENDING) thực hiện ở F7 – Sprint 2.
 
-> **Lưu ý phạm vi:** Trang bảng giá công khai cho Khách (không cần đăng nhập) hiển thị danh sách gói ACTIVE – đây là màn hình tĩnh/riêng thuộc phạm vi trang khách (F7 và frontend chung). API `GET /api/v1/packages` trong F3 yêu cầu đăng nhập và phục vụ các vai trò nội bộ. Hai luồng này dùng cùng dữ liệu nhưng khác endpoint và bảo mật.
+> **Lưu ý phạm vi:** Bảng giá công khai cho Khách (không cần đăng nhập) thuộc UC-F3.1, user story US-F3.1.2. Khách dùng API riêng `GET /api/v1/public/packages`, chỉ trả gói đang bán và các trường cần hiển thị. API `GET /api/v1/packages` vẫn yêu cầu đăng nhập và chỉ phục vụ các vai trò nội bộ. Hai API dùng cùng bảng `packages` nhưng khác đường dẫn và bảo mật.
 
 **Ngoài phạm vi:** Thanh toán online; hội viên xác nhận đã nhận tiền (chỉ lễ tân/quản lý được làm – S7); bảo lưu và chuyển nhượng gói (F15 – v3).
 
@@ -40,7 +40,7 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 
 | Mã UC | Tên Use Case | Tác nhân chính | Mức ưu tiên | Sprint thực hiện |
 | --- | --- | --- | --- | --- |
-| **UC-F3.1** | Xem danh mục gói tập | Lễ tân, Quản lý chi nhánh, Chủ chuỗi | Cao | Sprint 1 |
+| **UC-F3.1** | Xem danh mục gói tập | Lễ tân, Quản lý chi nhánh, Chủ chuỗi; Khách (bảng giá công khai) | Cao | Sprint 1; bảng giá công khai Sprint 2 |
 | **UC-F3.2** | Thêm gói tập mới | Quản lý chi nhánh | Cao | Sprint 1 |
 | **UC-F3.3** | Sửa thông tin gói tập | Quản lý chi nhánh | Trung bình | Sprint 1 |
 | **UC-F3.4** | Ngừng bán gói tập | Quản lý chi nhánh | Trung bình | Sprint 1 |
@@ -56,9 +56,9 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 
 - **Mã UC:** UC-F3.1
 - **Tên Use Case:** Xem danh mục gói tập
-- **Tác nhân chính:** Lễ tân, Quản lý chi nhánh, Chủ chuỗi
+- **Tác nhân chính:** Lễ tân, Quản lý chi nhánh, Chủ chuỗi; Khách (chỉ bảng giá công khai, US-F3.1.2)
 - **Tác nhân phụ:** Không có
-- **Mô tả ngắn gọn:** Người dùng xem danh sách gói tập đang bán (ACTIVE) hoặc ngừng bán (INACTIVE), có thể lọc và phân trang.
+- **Mô tả ngắn gọn:** Nhân viên xem danh sách gói tập đang bán (ACTIVE) hoặc ngừng bán (INACTIVE), có thể lọc và phân trang. Khách xem bảng giá các gói đang bán mà không cần đăng nhập.
 
 #### A. Tiền điều kiện (Preconditions)
 - Người dùng đã đăng nhập với vai trò Lễ tân, Quản lý chi nhánh hoặc Chủ chuỗi (JWT hợp lệ – S2).
@@ -139,6 +139,26 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
   ```
 - **Màn hình giao diện liên quan:** Màn hình "Danh mục gói tập" – `docs/design/wireframe/f3-danh-muc-goi-tap.drawio.svg`.
 
+**Bảng giá công khai (US-F3.1.2):**
+
+- **API Endpoint:** `GET /api/v1/public/packages`. Không cần đăng nhập, không nhận tham số. Frontend gọi API này **không gửi** header `Authorization`.
+- **Phạm vi dữ liệu:** gói `ACTIVE` của chi nhánh mặc định `CN01` và gói toàn chuỗi (`branch_id` rỗng). Từ v1 đến v3 hệ thống chạy một chi nhánh mặc định ([bản chốt phạm vi](../ban-chot-pham-vi.md)). Trả cả danh sách, không phân trang, sắp theo `type` (TIME, SESSION, PT), rồi `price`, rồi `name`.
+- **Response Success (200 OK):** chỉ có các trường cần hiển thị, không có `code`, `status`, `branchId`, thời gian tạo hay người tạo.
+  ```json
+  [
+    {
+      "id": 1,
+      "name": "Gói 1 tháng",
+      "type": "TIME",
+      "durationDays": 30,
+      "sessionCount": null,
+      "price": 500000,
+      "description": "Tập luyện không giới hạn trong 30 ngày"
+    }
+  ]
+  ```
+- **Màn hình giao diện liên quan:** trang `/bang-gia` – [`bang-gia-cong-khai.drawio.svg`](../../design/wireframe/bang-gia-cong-khai.drawio.svg).
+
 #### H. Tiêu chí chấp nhận (Acceptance Criteria)
 - **Kịch bản 1: Lễ tân xem danh mục gói thành công**
   - **Given** Người dùng đã đăng nhập với vai trò Lễ tân của chi nhánh CN01
@@ -148,6 +168,33 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
   - **Given** Người dùng đã đăng nhập với vai trò Hội viên
   - **When** Gọi `GET /api/v1/packages`
   - **Then** Hệ thống trả `403 Forbidden` với `ProblemDetail`: *"Bạn không có quyền thực hiện thao tác này."*
+
+##### US-F3.1.2: Bảng giá công khai
+- **User story:** Là **Khách**, tôi muốn **xem bảng giá các gói đang bán mà không cần đăng nhập**, để **chọn gói trước khi đến phòng tập**.
+- **BR liên quan:** BR-F3-01; mọi thanh toán tại quầy, không có thanh toán online ([ADR 0004](../../decisions/0004-thanh-toan-chi-tai-quay.md)).
+- **Version / Sprint:** v1 / Sprint 2
+- **Issue:** #130
+- **Tiêu chí chấp nhận:**
+  - **AC-F3.1.2-01: Khách xem bảng giá không cần đăng nhập** (BR-F3-01)
+    - **Given** Chi nhánh `CN01` có gói ACTIVE, và có gói toàn chuỗi ACTIVE
+    - **When** Khách chưa đăng nhập mở trang `/bang-gia` (gọi `GET /api/v1/public/packages` không kèm `Authorization`)
+    - **Then** Hệ thống trả `200 OK`; trang hiện từng gói với loại, thời hạn (ngày) hoặc số buổi, giá VND đúng giá trong CSDL, quyền lợi theo loại gói, và dòng "Thanh toán tại quầy". Không có giỏ hàng hay nút thanh toán online.
+  - **AC-F3.1.2-02: Không hiện gói ngừng bán và gói chi nhánh khác** (BR-F3-01)
+    - **Given** Có gói INACTIVE của `CN01`, và gói ACTIVE của một chi nhánh khác (không phải `CN01`)
+    - **When** Khách gọi `GET /api/v1/public/packages`
+    - **Then** Kết quả không chứa hai gói đó
+  - **AC-F3.1.2-03: Không lộ trường nội bộ** (S3)
+    - **Given** Có gói ACTIVE
+    - **When** Khách gọi `GET /api/v1/public/packages`
+    - **Then** Mỗi phần tử chỉ có `id`, `name`, `type`, `durationDays`, `sessionCount`, `price`, `description`; không có `code`, `status`, `branchId`, thời gian tạo, người tạo
+  - **AC-F3.1.2-04: Chưa có gói đang bán**
+    - **Given** API trả danh sách rỗng
+    - **When** Khách mở `/bang-gia`
+    - **Then** Trang hiện "Chưa có gói đang bán" và nút đăng ký tài khoản; không hiện giá nào
+  - **AC-F3.1.2-05: Lỗi tải bảng giá**
+    - **Given** API lỗi mạng hoặc lỗi server
+    - **When** Khách mở `/bang-gia`
+    - **Then** Trang hiện thông báo lỗi và nút "Thử lại"; không hiện giá bịa hoặc giá cũ chưa xác minh. Bấm "Thử lại" thì gọi lại API
 
 ---
 
