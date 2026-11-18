@@ -8,7 +8,7 @@ import org.testcontainers.utility.DockerImageName;
 
 /** PostgreSQL thật chạy trong Docker cho kiểm thử; cùng phiên bản với docker-compose.yml. */
 @TestConfiguration(proxyBeanMethods = false)
-class TestcontainersConfiguration {
+public class TestcontainersConfiguration {
 
     @Bean
     @ServiceConnection

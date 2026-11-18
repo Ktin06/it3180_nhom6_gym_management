@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
+import vn.edu.hust.nhom6.gym.config.LogoutTokenDecoder;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.AccessTokenResponse;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.AuthMeResponse;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
@@ -34,10 +36,13 @@ public class AuthController {
 
     private final AuthService authService;
     private final AuthCookieHelper cookieHelper;
+    private final LogoutTokenDecoder logoutTokenDecoder;
 
-    public AuthController(AuthService authService, AuthCookieHelper cookieHelper) {
+    public AuthController(AuthService authService, AuthCookieHelper cookieHelper,
+            LogoutTokenDecoder logoutTokenDecoder) {
         this.authService = authService;
         this.cookieHelper = cookieHelper;
+        this.logoutTokenDecoder = logoutTokenDecoder;
     }
 
     @Operation(summary = "Đăng ký tài khoản hội viên")
@@ -78,16 +83,32 @@ public class AuthController {
         }
     }
 
-    @Operation(summary = "Đăng xuất tài khoản")
+    @Operation(
+        summary = "Đăng xuất tài khoản",
+        description = "Nếu gửi kèm Authorization Bearer JWT có chữ ký hợp lệ (kể cả đã hết hạn), chỉ thu hồi và "
+            + "xóa cookie refresh_token khi token trong cookie thuộc cùng người dùng với JWT, để tránh làm mất "
+            + "phiên của tab khác. JWT sai chữ ký thì coi như không gửi kèm."
+    )
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> logout(
-            @CookieValue(name = AuthCookieHelper.REFRESH_COOKIE_NAME, required = false) String refreshToken) {
-        authService.logout(refreshToken);
-        ResponseCookie cleanCookie = cookieHelper.createCleanRefreshCookie();
-        return ResponseEntity.noContent()
-            .header(HttpHeaders.SET_COOKIE, cleanCookie.toString())
-            .build();
+            @CookieValue(name = AuthCookieHelper.REFRESH_COOKIE_NAME, required = false) String refreshToken,
+            @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization) {
+        Long authenticatedUserId = logoutTokenDecoder.userIdOf(authorization).orElse(null);
+        boolean shouldClearCookie;
+        if (authenticatedUserId != null) {
+            shouldClearCookie = authService.logoutForUser(refreshToken, authenticatedUserId);
+        } else {
+            authService.logout(refreshToken);
+            shouldClearCookie = true;
+        }
+
+        if (shouldClearCookie) {
+            return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, cookieHelper.createCleanRefreshCookie().toString())
+                .build();
+        }
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Lấy thông tin tài khoản hiện tại từ JWT")

@@ -265,7 +265,7 @@ class AuthServiceTest {
             .revokedAt(null)
             .build();
 
-        when(refreshTokenRepository.findByTokenHash(tokenHash)).thenReturn(Optional.of(existingToken));
+        when(refreshTokenRepository.findByTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(existingToken));
         when(jwtTokenService.generateAccessToken(any(), eq("member@example.com"), eq(UserRole.MEMBER)))
             .thenReturn("new-access-token");
 
@@ -297,7 +297,7 @@ class AuthServiceTest {
             .revokedAt(OffsetDateTime.now().minusHours(1))
             .build();
 
-        when(refreshTokenRepository.findByTokenHash(tokenHash)).thenReturn(Optional.of(existingToken));
+        when(refreshTokenRepository.findByTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(existingToken));
 
         assertThatThrownBy(() -> authService.refresh(rawToken))
             .isInstanceOf(UnauthorizedException.class)
@@ -325,7 +325,7 @@ class AuthServiceTest {
             .revokedAt(null)
             .build();
 
-        when(refreshTokenRepository.findByTokenHash(tokenHash)).thenReturn(Optional.of(existingToken));
+        when(refreshTokenRepository.findByTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(existingToken));
 
         assertThatThrownBy(() -> authService.refresh(rawToken))
             .isInstanceOf(UnauthorizedException.class)
@@ -345,12 +345,68 @@ class AuthServiceTest {
             .revokedAt(null)
             .build();
 
-        when(refreshTokenRepository.findByTokenHash(tokenHash)).thenReturn(Optional.of(existingToken));
+        when(refreshTokenRepository.findByTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(existingToken));
 
         authService.logout(rawToken);
 
         assertThat(existingToken.getRevokedAt()).isNotNull();
         verify(refreshTokenRepository).save(existingToken);
+    }
+
+    @Test
+    void dangXuatVoiJwtKhongThuHoiCookieCuaTaiKhoanKhac() {
+        String rawToken = "user-b-refresh-token";
+        String tokenHash = TokenHashUtil.sha256Hex(rawToken);
+
+        User userB = User.builder()
+            .email("userb@example.com")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .build();
+        org.springframework.test.util.ReflectionTestUtils.setField(userB, "id", 200L);
+
+        RefreshToken tokenB = RefreshToken.builder()
+            .user(userB)
+            .tokenHash(tokenHash)
+            .expiresAt(OffsetDateTime.now().plusDays(5))
+            .revokedAt(null)
+            .build();
+
+        when(refreshTokenRepository.findByTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(tokenB));
+
+        boolean shouldClearCookie = authService.logoutForUser(rawToken, 100L);
+
+        assertThat(shouldClearCookie).isFalse();
+        assertThat(tokenB.getRevokedAt()).isNull();
+        verify(refreshTokenRepository, never()).save(any());
+    }
+
+    @Test
+    void dangXuatVoiJwtThuHoiCookieKhiCungChuSoHuu() {
+        String rawToken = "user-a-refresh-token";
+        String tokenHash = TokenHashUtil.sha256Hex(rawToken);
+
+        User userA = User.builder()
+            .email("usera@example.com")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .build();
+        org.springframework.test.util.ReflectionTestUtils.setField(userA, "id", 100L);
+
+        RefreshToken tokenA = RefreshToken.builder()
+            .user(userA)
+            .tokenHash(tokenHash)
+            .expiresAt(OffsetDateTime.now().plusDays(5))
+            .revokedAt(null)
+            .build();
+
+        when(refreshTokenRepository.findByTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(tokenA));
+
+        boolean shouldClearCookie = authService.logoutForUser(rawToken, 100L);
+
+        assertThat(shouldClearCookie).isTrue();
+        assertThat(tokenA.getRevokedAt()).isNotNull();
+        verify(refreshTokenRepository).save(tokenA);
     }
 
     @Test
