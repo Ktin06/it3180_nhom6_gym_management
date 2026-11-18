@@ -22,7 +22,12 @@
    - `404 Not Found`: Không tìm thấy bản ghi theo id/mã.
    - `409 Conflict`: Vi phạm ràng buộc duy nhất (trùng email, trùng SĐT, trùng mã, trùng lịch) hoặc xung đột phiên bản `@Version` (Optimistic Locking).
    - `422 Unprocessable Content`: Vi phạm quy tắc nghiệp vụ chuyên sâu (`BusinessRuleException`), ví dụ: gói không hợp lệ, không đủ số dư buổi, ngoài khung giờ mở cửa.
-6. **Tiêu chí chấp nhận (Acceptance Criteria):** Viết theo cấu trúc `Given ... When ... Then ...` để làm căn cứ trực tiếp khi viết kiểm thử tự động (JUnit) và tạo Issue trên GitHub Projects.
+6. **Cây truy vết và mã ([ADR 0012](../../decisions/0012-quy-uoc-ma-truy-vet.md)):** File đặc tả này là **bản chuẩn** của user story (US), tiêu chí chấp nhận (AC) và quy tắc nghiệp vụ (BR). Issue trên GitHub chỉ ghi mã và đường dẫn về đây, không chép lại nội dung.
+   - Mỗi UC có một hoặc vài US, đặt trong mục H của UC đó. Mã US: `US-F<x>.<y>.<z>`, ví dụ `US-F3.3.1` là US thứ 1 của `UC-F3.3`.
+   - Mỗi US có các AC viết theo cấu trúc `Given ... When ... Then ...`, gồm cả trường hợp bị từ chối và giá trị biên. Mã AC: `AC-F<x>.<y>.<z>-<nn>`, ví dụ `AC-F3.3.1-02`.
+   - Mã BR mới: `BR-F<x>-<nn>`, số tiếp theo trong chức năng. Mã BR đã có thì giữ nguyên.
+   - Mã đã dùng thì không dùng lại. Bỏ một AC thì giữ dòng đó và ghi "(bỏ ngày dd/mm/yyyy, lý do)".
+   - Kiểm thử chứng minh một AC mang mã TC tương ứng, xem [docs/testing/README.md](../../testing/README.md).
 
 ---
 
@@ -108,7 +113,7 @@
   - Hệ thống từ chối và trả `ProblemDetail` (422): *"[Thông báo lý do nghiệp vụ bằng tiếng Việt]."*
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
-- **[Mã quy tắc, ví dụ: BR-01]:** [Mô tả chi tiết quy tắc nghiệp vụ áp dụng, trỏ cụ thể về mục tương ứng trong `docs/requirements/ban-chot-pham-vi.md`].
+- **[Mã quy tắc dạng BR-F[X]-01]:** [Mô tả chi tiết quy tắc nghiệp vụ áp dụng, trỏ cụ thể về mục tương ứng trong `docs/requirements/ban-chot-pham-vi.md`].
 - **[Tham số cấu hình, ví dụ: CONFIG-01]:** Đọc từ bảng `system_configs` với key `[KEY_NAME]` (giá trị mặc định: `[Giá trị]`), không viết cứng mã nguồn (Quy tắc số 15).
 - **[Yêu cầu phi chức năng]:**
   - Hiệu năng (NF1): Thời gian phản hồi API dưới [X] giây.
@@ -143,15 +148,24 @@
   ```
 - **Màn hình giao diện liên quan:** [Tên màn hình, trỏ tới file wireframe tương ứng trong `docs/design/wireframe/`].
 
-#### H. Tiêu chí chấp nhận (Acceptance Criteria)
-- **Kịch bản 1: [Tên kịch bản thành công]**
-  - **Given** [Trạng thái ban đầu của hệ thống và người dùng]
-  - **When** [Người dùng thực hiện hành động]
-  - **Then** [Kết quả mong đợi, dữ liệu thay đổi và mã trả về]
-- **Kịch bản 2: [Tên kịch bản ngoại lệ / thất bại]**
-  - **Given** [...]
-  - **When** [...]
-  - **Then** [...]
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F[X].1.1: [Tên ngắn của user story]
+- **User story:** Là **[vai trò]**, tôi muốn **[hành động]**, để **[lợi ích]**.
+- **BR liên quan:** [BR-F[X]-01, BR-F[X]-02]
+- **Version / Sprint:** [v1 / Sprint 2]
+- **Issue:** [#số issue user story, điền sau khi tạo issue]
+- **Tiêu chí chấp nhận:**
+  - **AC-F[X].1.1-01: [Tên kịch bản thành công]** ([BR-F[X]-01])
+    - **Given** [Trạng thái ban đầu của hệ thống và người dùng]
+    - **When** [Người dùng thực hiện hành động]
+    - **Then** [Kết quả mong đợi, dữ liệu thay đổi và mã trả về]
+  - **AC-F[X].1.1-02: [Tên kịch bản bị từ chối]** ([BR-F[X]-02])
+    - **Given** [...]
+    - **When** [...]
+    - **Then** [...]
+
+*(UC có nhiều nhu cầu khác nhau, ví dụ nhiều vai trò cùng dùng, thì thêm US-F[X].1.2, US-F[X].1.3… Mỗi US một tiểu mục như trên.)*
 
 ---
 

@@ -1,8 +1,11 @@
 ## Liên kết
 
+<!-- Closes cho issue task (tự đóng khi gộp). Refs cho issue user story (không tự đóng; đóng bằng tay sau nghiệm thu). Mỗi issue một dòng. -->
 Closes #
+Refs #
 
 **Mã chức năng:** F
+**AC đã làm:** <!-- ví dụ: AC-F3.3.1-01, AC-F3.3.1-02; PR không thuộc user story thì ghi "không có" -->
 
 ## Mô tả
 
@@ -17,8 +20,9 @@ Closes #
 
 ## Checklist (định nghĩa hoàn thành)
 
-- [ ] Issue có tiêu chí chấp nhận và thay đổi này đáp ứng đủ
+- [ ] Các AC ghi ở mục "AC đã làm" có trong file SRS và thay đổi này đáp ứng đủ
 - [ ] Có kiểm thử JUnit cho mỗi quy tắc nghiệp vụ mới hoặc thay đổi
+- [ ] Kiểm thử mới mang mã TC của AC tương ứng ([docs/testing/README.md](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/main/docs/testing/README.md)); hành vi chưa có AC thì đã thêm AC vào SRS
 - [ ] Có request Postman cho mỗi API mới (trong `postman/`)
 - [ ] CI xanh
 - [ ] Tài liệu đã cập nhật (SRS, ADR, README, Swagger mô tả API) nếu cần
