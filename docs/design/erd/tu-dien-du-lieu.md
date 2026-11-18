@@ -3,8 +3,8 @@
 - **Người biên soạn:** Nguyễn Anh Tú (`natus26`) · [#15](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/15) · WBS 1.3.11.
 - **Cập nhật:** 12/11/2026.
 - **Nguồn chuẩn:** [erd-v2.dbml](erd-v2.dbml); mục đích bảng theo [thiết kế dữ liệu](thiet-ke-du-lieu.md).
-- **Phạm vi:** 39 bảng, 422 cột, 89 quan hệ, 46 khai báo chỉ mục và 25 tập giá trị Enum.
-- **SHA-256 DBML (chuẩn hóa xuống dòng LF):** `a2fb52664b2f7ec4e71a98fcf330a904d2d36313b7dcc0d2b2fd546d6f7a7c6d`.
+- **Phạm vi:** 40 bảng, 425 cột, 91 quan hệ, 45 khai báo chỉ mục và 25 tập giá trị Enum.
+- **SHA-256 DBML (chuẩn hóa xuống dòng LF):** `31b2baacab184e0cda857d8c8f6c1e9e5c911f6b877102a9bdbf0f6b8ca4d78e`.
 
 ## 1. Cách đọc và cập nhật
 
@@ -30,7 +30,8 @@
 | 2. Chi nhánh và cơ sở vật chất | [`rooms`](#bang-rooms) | 8 | Phòng trong chi nhánh |
 | 2. Chi nhánh và cơ sở vật chất | [`equipment`](#bang-equipment) | 10 | Thiết bị, máy tập |
 | 2. Chi nhánh và cơ sở vật chất | [`maintenance_logs`](#bang-maintenance_logs) | 10 | Báo hỏng và bảo trì |
-| 3. Hội viên và gói tập | [`members`](#bang-members) | 16 | Hồ sơ hội viên |
+| 3. Hội viên và gói tập | [`members`](#bang-members) | 15 | Hồ sơ hội viên |
+| 3. Hội viên và gói tập | [`member_avatars`](#bang-member_avatars) | 8 | Ảnh đại diện hội viên, đã thu nhỏ và nén ([ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md)) |
 | 3. Hội viên và gói tập | [`face_embeddings`](#bang-face_embeddings) | 7 | Vector khuôn mặt 128 chiều, không lưu ảnh |
 | 3. Hội viên và gói tập | [`body_metrics`](#bang-body_metrics) | 11 | Chỉ số cơ thể theo từng lần đo |
 | 3. Hội viên và gói tập | [`packages`](#bang-packages) | 12 | Danh mục gói đang bán (bảng giá) |
@@ -41,7 +42,7 @@
 | 4. Check-in và lớp học | [`class_types`](#bang-class_types) | 6 | Loại lớp: Yoga, Zumba, Boxing… |
 | 4. Check-in và lớp học | [`class_schedules`](#bang-class_schedules) | 14 | Lịch lặp hằng tuần |
 | 4. Check-in và lớp học | [`class_sessions`](#bang-class_sessions) | 13 | Từng buổi cụ thể sinh ra từ lịch lặp; hội viên đặt chỗ vào buổi |
-| 4. Check-in và lớp học | [`class_bookings`](#bang-class_bookings) | 17 | Đặt chỗ và danh sách chờ, gộp một bảng |
+| 4. Check-in và lớp học | [`class_bookings`](#bang-class_bookings) | 13 | Đặt chỗ lớp nhóm (không có danh sách chờ, ADR 0014) |
 | 5. Huấn luyện viên | [`trainer_availabilities`](#bang-trainer_availabilities) | 8 | Khung giờ rảnh theo thứ trong tuần |
 | 5. Huấn luyện viên | [`pt_sessions`](#bang-pt_sessions) | 15 | Buổi tập 1-1 đã đặt |
 | 5. Huấn luyện viên | [`workout_plans`](#bang-workout_plans) | 9 | Giáo án huấn luyện viên soạn cho hội viên |
@@ -68,7 +69,7 @@
 
 #### `users`
 
-Tài khoản đăng nhập của mọi vai trò trừ khách. [Khai báo nguồn](erd-v2.dbml#L163).
+Tài khoản đăng nhập của mọi vai trò trừ khách. [Khai báo nguồn](erd-v2.dbml#L160).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -87,7 +88,7 @@ Tài khoản đăng nhập của mọi vai trò trừ khách. [Khai báo nguồn
 
 #### `refresh_tokens`
 
-Phiên đăng nhập dài hạn, để làm mới token và đăng xuất. [Khai báo nguồn](erd-v2.dbml#L176).
+Phiên đăng nhập dài hạn, để làm mới token và đăng xuất. [Khai báo nguồn](erd-v2.dbml#L173).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -109,7 +110,7 @@ Phiên đăng nhập dài hạn, để làm mới token và đăng xuất. [Khai
 
 #### `password_resets`
 
-Mã đặt lại mật khẩu, dùng một lần. [Khai báo nguồn](erd-v2.dbml#L189).
+Mã đặt lại mật khẩu, dùng một lần. [Khai báo nguồn](erd-v2.dbml#L186).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -125,7 +126,7 @@ Mã đặt lại mật khẩu, dùng một lần. [Khai báo nguồn](erd-v2.dbm
 
 #### `audit_logs`
 
-Ai làm gì, trên bảng nào, giá trị cũ và mới. [Khai báo nguồn](erd-v2.dbml#L199).
+Ai làm gì, trên bảng nào, giá trị cũ và mới. [Khai báo nguồn](erd-v2.dbml#L196).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -153,7 +154,7 @@ Ai làm gì, trên bảng nào, giá trị cũ và mới. [Khai báo nguồn](er
 
 #### `notifications`
 
-Thông báo trong web và email. [Khai báo nguồn](erd-v2.dbml#L218).
+Thông báo trong web và email. [Khai báo nguồn](erd-v2.dbml#L215).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -183,13 +184,13 @@ Thông báo trong web và email. [Khai báo nguồn](erd-v2.dbml#L218).
 
 #### `system_configs`
 
-Tham số cấu hình (các giá trị có dấu \* trong bản chốt phạm vi). [Khai báo nguồn](erd-v2.dbml#L239).
+Tham số cấu hình (các giá trị có dấu \* trong bản chốt phạm vi). [Khai báo nguồn](erd-v2.dbml#L236).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
 | `id` | `bigint` | Không | PK; IDENTITY | Khóa chính của bản ghi |
 | `branch_id` | `bigint` | Có | FK → `branches.id` | Tham chiếu branches.id<br>DBML: rỗng = áp dụng toàn chuỗi; giá trị của chi nhánh ghi đè giá trị toàn chuỗi |
-| `config_key` | `varchar(100)` | Không | — | Khóa cấu hình<br>DBML: BOOKING_WINDOW_DAYS=7, PROMOTION_CUTOFF_MIN=30, PROMOTION_GRACE_MIN=15, RECONFIRM_TTL_MIN=60, LATE_CANCEL_HOURS=2, PENALTY_LIMIT_PER_MONTH=3, PENALTY_LOCK_DAYS=7, PT_MIN_LEAD_HOURS=12, FREEZE_MIN_DAYS=7, FREEZE_MAX_DAYS=30, FREEZE_MAX_TIMES=2, TRANSFER_MIN_DAYS=30, TRANSFER_FEE=200000, PENDING_INVOICE_TTL_DAYS=3, SESSION_WARNING_THRESHOLD=2 |
+| `config_key` | `varchar(100)` | Không | — | Khóa cấu hình<br>DBML: BOOKING_WINDOW_DAYS=7, BOOKING_CUTOFF_MIN=30, LATE_CANCEL_HOURS=2, PENALTY_LIMIT_PER_MONTH=3, PENALTY_LOCK_DAYS=7, PT_MIN_LEAD_HOURS=12, FREEZE_MIN_DAYS=7, FREEZE_MAX_DAYS=30, FREEZE_MAX_TIMES=2, TRANSFER_MIN_DAYS=30, TRANSFER_FEE=200000, PENDING_INVOICE_TTL_DAYS=3, SESSION_WARNING_THRESHOLD=2 |
 | `config_value` | `varchar(255)` | Không | — | Giá trị cấu hình |
 | `description` | `varchar(255)` | Có | — | Mô tả |
 | `updated_by` | `bigint` | Có | FK → `users.id` | Tham chiếu users.id |
@@ -208,7 +209,7 @@ Tham số cấu hình (các giá trị có dấu \* trong bản chốt phạm vi
 
 #### `branches`
 
-Chi nhánh; từ v1 đến v3 chỉ có một dòng (chi nhánh mặc định). [Khai báo nguồn](erd-v2.dbml#L256).
+Chi nhánh; từ v1 đến v3 chỉ có một dòng (chi nhánh mặc định). [Khai báo nguồn](erd-v2.dbml#L253).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -228,7 +229,7 @@ Chi nhánh; từ v1 đến v3 chỉ có một dòng (chi nhánh mặc định). 
 
 #### `rooms`
 
-Phòng trong chi nhánh. [Khai báo nguồn](erd-v2.dbml#L270).
+Phòng trong chi nhánh. [Khai báo nguồn](erd-v2.dbml#L267).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -251,7 +252,7 @@ Phòng trong chi nhánh. [Khai báo nguồn](erd-v2.dbml#L270).
 
 #### `equipment`
 
-Thiết bị, máy tập. [Khai báo nguồn](erd-v2.dbml#L284).
+Thiết bị, máy tập. [Khai báo nguồn](erd-v2.dbml#L281).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -270,7 +271,7 @@ Thiết bị, máy tập. [Khai báo nguồn](erd-v2.dbml#L284).
 
 #### `maintenance_logs`
 
-Báo hỏng và bảo trì. [Khai báo nguồn](erd-v2.dbml#L297).
+Báo hỏng và bảo trì. [Khai báo nguồn](erd-v2.dbml#L294).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -297,7 +298,7 @@ Báo hỏng và bảo trì. [Khai báo nguồn](erd-v2.dbml#L297).
 
 #### `members`
 
-Hồ sơ hội viên. [Khai báo nguồn](erd-v2.dbml#L316).
+Hồ sơ hội viên. [Khai báo nguồn](erd-v2.dbml#L313).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -309,9 +310,8 @@ Hồ sơ hội viên. [Khai báo nguồn](erd-v2.dbml#L316).
 | `gender` | `varchar(10)` | Có | — | Giới tính |
 | `dob` | `date` | Có | — | Ngày sinh |
 | `phone` | `varchar(20)` | Không | UNIQUE | Số điện thoại<br>DBML: nơi duy nhất lưu số điện thoại hội viên; duy nhất vì F4 tìm theo số điện thoại. Lưu dạng chuẩn 10 chữ số bắt đầu bằng 0, CHECK phone ~ '^0[0-9]{9}$'. Email lấy từ users.email qua user_id. Tự đăng ký bằng số đã có hồ sơ thì bị từ chối, lễ tân tạo tài khoản cho hồ sơ có sẵn (chốt 01/11) |
-| `avatar_url` | `varchar(500)` | Có | — | Đường dẫn ảnh đại diện |
 | `face_consent_at` | `timestamptz` | Có | — | Thời điểm đồng ý sử dụng khuôn mặt<br>DBML: thời điểm đồng ý dùng khuôn mặt (S8); rỗng = chưa đồng ý |
-| `booking_locked_until` | `timestamptz` | Có | — | Thời điểm kết thúc khóa đặt lớp<br>DBML: khóa đặt lớp do hủy muộn hoặc vắng mặt |
+| `booking_locked_until` | `timestamptz` | Có | — | Thời điểm kết thúc khóa đặt lớp<br>DBML: khóa đặt lớp do hủy muộn hoặc vắng mặt; sửa điểm danh không tự tính lại, quản lý chi nhánh gỡ khóa bằng tay và ghi audit_logs (ADR 0014) |
 | `status` | `active_status` | Không | DEFAULT `'ACTIVE'`; [Tập giá trị](#enum-active_status) | Trạng thái bản ghi<br>DBML: chuyển INACTIVE thì đồng thời chuyển users.status = DISABLED trong cùng giao dịch |
 | `deleted_at` | `timestamptz` | Có | — | Thời điểm xóa mềm |
 | `created_by` | `bigint` | Có | FK → `users.id` | Tham chiếu users.id |
@@ -324,11 +324,30 @@ Hồ sơ hội viên. [Khai báo nguồn](erd-v2.dbml#L316).
 | --- | --- | --- | --- |
 | `ix_members_full_name` | `lower(full_name) varchar_pattern_ops` | Không | Tối ưu cho truy vấn LIKE theo chữ thường |
 
+<a id="bang-member_avatars"></a>
+
+#### `member_avatars`
+
+Ảnh đại diện hội viên, đã thu nhỏ và nén ([ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md)). [Khai báo nguồn](erd-v2.dbml#L334).
+
+| Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
+| --- | --- | --- | --- | --- |
+| `id` | `bigint` | Không | PK; IDENTITY | Khóa chính của bản ghi |
+| `member_id` | `bigint` | Không | UNIQUE; FK → `members.id` (1–1) | Tham chiếu members.id<br>DBML: mỗi hội viên tối đa một ảnh; đổi ảnh thì ghi đè dòng này |
+| `content` | `bytea` | Không | — | Nội dung<br>DBML: ảnh JPEG do server thu nhỏ (cạnh dài nhất 256 px) và nén; không lưu ảnh gốc |
+| `content_type` | `varchar(50)` | Không | — | Kiểu nội dung (MIME) của tệp<br>DBML: CHECK content_type = 'image/jpeg' |
+| `size_bytes` | `int` | Không | — | Kích thước tệp (byte)<br>DBML: CHECK size_bytes &gt; 0 AND size_bytes &lt;= 102400 |
+| `uploaded_by` | `bigint` | Không | FK → `users.id` | Tài khoản tải tệp lên<br>DBML: người tải lên lần cuối |
+| `created_at` | `timestamptz` | Không | — | Thời điểm tạo bản ghi (UTC) |
+| `updated_at` | `timestamptz` | Không | — | Thời điểm cập nhật bản ghi (UTC) |
+
+**Ghi chú cấp bảng từ DBML:** Ảnh đại diện hội viên (F2, F4), theo ADR 0011. Bảng con của members, lấy chi nhánh qua members. Xem và đổi ảnh qua API /api/v1/members/{id}/avatar với cùng quyền như hồ sơ hội viên.
+
 <a id="bang-face_embeddings"></a>
 
 #### `face_embeddings`
 
-Vector khuôn mặt 128 chiều, không lưu ảnh. [Khai báo nguồn](erd-v2.dbml#L338).
+Vector khuôn mặt 128 chiều, không lưu ảnh. [Khai báo nguồn](erd-v2.dbml#L346).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -352,7 +371,7 @@ Vector khuôn mặt 128 chiều, không lưu ảnh. [Khai báo nguồn](erd-v2.d
 
 #### `body_metrics`
 
-Chỉ số cơ thể theo từng lần đo. [Khai báo nguồn](erd-v2.dbml#L352).
+Chỉ số cơ thể theo từng lần đo. [Khai báo nguồn](erd-v2.dbml#L360).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -378,7 +397,7 @@ Chỉ số cơ thể theo từng lần đo. [Khai báo nguồn](erd-v2.dbml#L352
 
 #### `packages`
 
-Danh mục gói đang bán (bảng giá). [Khai báo nguồn](erd-v2.dbml#L369).
+Danh mục gói đang bán (bảng giá). [Khai báo nguồn](erd-v2.dbml#L377).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -399,7 +418,7 @@ Danh mục gói đang bán (bảng giá). [Khai báo nguồn](erd-v2.dbml#L369).
 
 #### `memberships`
 
-Gói một hội viên đã mua; bảng trung tâm. [Khai báo nguồn](erd-v2.dbml#L384).
+Gói một hội viên đã mua; bảng trung tâm. [Khai báo nguồn](erd-v2.dbml#L392).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -435,7 +454,7 @@ Gói một hội viên đã mua; bảng trung tâm. [Khai báo nguồn](erd-v2.d
 
 #### `membership_freezes`
 
-Yêu cầu bảo lưu và kết quả duyệt. [Khai báo nguồn](erd-v2.dbml#L413).
+Yêu cầu bảo lưu và kết quả duyệt. [Khai báo nguồn](erd-v2.dbml#L421).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -461,7 +480,7 @@ Yêu cầu bảo lưu và kết quả duyệt. [Khai báo nguồn](erd-v2.dbml#L
 
 #### `membership_transfers`
 
-Lần chuyển nhượng gói. [Khai báo nguồn](erd-v2.dbml#L430).
+Lần chuyển nhượng gói. [Khai báo nguồn](erd-v2.dbml#L438).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -483,7 +502,7 @@ Lần chuyển nhượng gói. [Khai báo nguồn](erd-v2.dbml#L430).
 
 #### `checkins`
 
-Mỗi lượt vào phòng tập. [Khai báo nguồn](erd-v2.dbml#L447).
+Mỗi lượt vào phòng tập. [Khai báo nguồn](erd-v2.dbml#L455).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -513,7 +532,7 @@ Mỗi lượt vào phòng tập. [Khai báo nguồn](erd-v2.dbml#L447).
 
 #### `class_types`
 
-Loại lớp: Yoga, Zumba, Boxing…. [Khai báo nguồn](erd-v2.dbml#L468).
+Loại lớp: Yoga, Zumba, Boxing…. [Khai báo nguồn](erd-v2.dbml#L476).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -528,7 +547,7 @@ Loại lớp: Yoga, Zumba, Boxing…. [Khai báo nguồn](erd-v2.dbml#L468).
 
 #### `class_schedules`
 
-Lịch lặp hằng tuần. [Khai báo nguồn](erd-v2.dbml#L477).
+Lịch lặp hằng tuần. [Khai báo nguồn](erd-v2.dbml#L485).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -557,7 +576,7 @@ Lịch lặp hằng tuần. [Khai báo nguồn](erd-v2.dbml#L477).
 
 #### `class_sessions`
 
-Từng buổi cụ thể sinh ra từ lịch lặp; hội viên đặt chỗ vào buổi. [Khai báo nguồn](erd-v2.dbml#L497).
+Từng buổi cụ thể sinh ra từ lịch lặp; hội viên đặt chỗ vào buổi. [Khai báo nguồn](erd-v2.dbml#L505).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -587,20 +606,16 @@ Từng buổi cụ thể sinh ra từ lịch lặp; hội viên đặt chỗ và
 
 #### `class_bookings`
 
-Đặt chỗ và danh sách chờ, gộp một bảng. [Khai báo nguồn](erd-v2.dbml#L518).
+Đặt chỗ lớp nhóm (không có danh sách chờ, ADR 0014). [Khai báo nguồn](erd-v2.dbml#L526).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
 | `id` | `bigint` | Không | PK; IDENTITY | Khóa chính của bản ghi |
 | `class_session_id` | `bigint` | Không | FK → `class_sessions.id` | Tham chiếu class_sessions.id |
 | `member_id` | `bigint` | Không | FK → `members.id` | Tham chiếu members.id |
-| `created_by` | `bigint` | Không | FK → `users.id` | Tham chiếu users.id<br>DBML: tài khoản đã bấm đặt hoặc vào chờ (hội viên, hoặc lễ tân nếu thao tác hộ); được tự động đưa vào lớp thì giữ nguyên người tạo ban đầu (ADR 0010) |
-| `status` | `booking_status` | Không | [Tập giá trị](#enum-booking_status) | Trạng thái bản ghi<br>DBML: chỉ được đặt chỗ hoặc vào chờ khi có gói TIME đang ACTIVE dùng được tại chi nhánh; gói SESSION và PT không dùng cho lớp nhóm (chốt 31/10) |
-| `waitlisted_at` | `timestamptz` | Có | — | Thời điểm vào danh sách chờ<br>DBML: căn cứ thứ tự chờ: đến trước, xếp trước; trùng thời điểm thì id nhỏ hơn đứng trước (ADR 0010) |
+| `created_by` | `bigint` | Không | FK → `users.id` | Tham chiếu users.id<br>DBML: tài khoản đã bấm đặt chỗ (hội viên, hoặc lễ tân nếu thao tác hộ) |
+| `status` | `booking_status` | Không | [Tập giá trị](#enum-booking_status) | Trạng thái bản ghi<br>DBML: chỉ được đặt chỗ khi có gói TIME đang ACTIVE dùng được tại chi nhánh; gói SESSION và PT không dùng cho lớp nhóm (chốt 31/10). Không có danh sách chờ: lớp đủ chỗ thì từ chối (ADR 0014) |
 | `booked_at` | `timestamptz` | Có | — | Thời điểm có chỗ đặt |
-| `promoted_at` | `timestamptz` | Có | — | Thời điểm được đưa từ danh sách chờ vào lớp<br>DBML: thời điểm được tự động đưa từ danh sách chờ vào lớp |
-| `grace_until` | `timestamptz` | Có | — | Thời điểm kết thúc ân hạn hủy<br>DBML: hết ân hạn hủy không phạt = promoted_at + PROMOTION_GRACE_MIN (15 phút), ghi cùng giao dịch đưa vào lớp; hủy đúng mốc này vẫn không phạt (&lt;=); thời điểm gửi email không ảnh hưởng (ADR 0010) |
-| `reconfirm_expires_at` | `timestamptz` | Có | — | Hạn xác nhận lại sau đổi giờ<br>DBML: hạn xác nhận lại khi đổi giờ |
 | `arrived_at` | `timestamptz` | Có | — | Thời điểm ghi nhận đã đến tại quầy<br>DBML: đánh dấu "đã đến" khi check-in tại quầy |
 | `cancelled_at` | `timestamptz` | Có | — | Thời điểm hủy |
 | `cancel_reason` | `cancel_reason` | Có | [Tập giá trị](#enum-cancel_reason) | Lý do hủy |
@@ -614,7 +629,6 @@ Từng buổi cụ thể sinh ra từ lịch lặp; hội viên đặt chỗ và
 | Tên trong DBML | Cột | Duy nhất | Ghi chú / điều kiện |
 | --- | --- | --- | --- |
 | `uq_active_booking` | `class_session_id`, `member_id` | Có | chỉ mục duy nhất có điều kiện: WHERE status &lt;&gt; CANCELLED (hủy rồi vẫn đặt lại được) |
-| Không đặt tên | `class_session_id`, `status`, `waitlisted_at` | Không | lấy người đứng đầu danh sách chờ |
 | Không đặt tên | `member_id`, `status` | Không | — |
 
 **Ghi chú cấp bảng từ DBML:** NF6: khi đặt chỗ, khóa (SELECT ... FOR UPDATE) dòng class_sessions để không vượt sĩ số, và dòng members của hội viên để hai yêu cầu đặt đồng thời không lọt kiểm tra trùng giờ. Thứ tự khóa cố định: members trước, class_sessions sau, để tránh deadlock. CHECK ((status = 'CANCELLED') = (cancelled_at IS NOT NULL AND cancel_reason IS NOT NULL)) AND (is_late_cancel = false OR status = 'CANCELLED')
@@ -625,7 +639,7 @@ Từng buổi cụ thể sinh ra từ lịch lặp; hội viên đặt chỗ và
 
 #### `trainer_availabilities`
 
-Khung giờ rảnh theo thứ trong tuần. [Khai báo nguồn](erd-v2.dbml#L547).
+Khung giờ rảnh theo thứ trong tuần. [Khai báo nguồn](erd-v2.dbml#L550).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -648,7 +662,7 @@ Khung giờ rảnh theo thứ trong tuần. [Khai báo nguồn](erd-v2.dbml#L547
 
 #### `pt_sessions`
 
-Buổi tập 1-1 đã đặt. [Khai báo nguồn](erd-v2.dbml#L561).
+Buổi tập 1-1 đã đặt. [Khai báo nguồn](erd-v2.dbml#L564).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -682,7 +696,7 @@ Buổi tập 1-1 đã đặt. [Khai báo nguồn](erd-v2.dbml#L561).
 
 #### `workout_plans`
 
-Giáo án huấn luyện viên soạn cho hội viên. [Khai báo nguồn](erd-v2.dbml#L585).
+Giáo án huấn luyện viên soạn cho hội viên. [Khai báo nguồn](erd-v2.dbml#L588).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -700,7 +714,7 @@ Giáo án huấn luyện viên soạn cho hội viên. [Khai báo nguồn](erd-v
 
 #### `workout_logs`
 
-Nhật ký tập. [Khai báo nguồn](erd-v2.dbml#L597).
+Nhật ký tập. [Khai báo nguồn](erd-v2.dbml#L600).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -727,7 +741,7 @@ Nhật ký tập. [Khai báo nguồn](erd-v2.dbml#L597).
 
 #### `products`
 
-Hàng bán tại quầy (danh mục chung toàn chuỗi). [Khai báo nguồn](erd-v2.dbml#L616).
+Hàng bán tại quầy (danh mục chung toàn chuỗi). [Khai báo nguồn](erd-v2.dbml#L619).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -744,7 +758,7 @@ Hàng bán tại quầy (danh mục chung toàn chuỗi). [Khai báo nguồn](er
 
 #### `inventories`
 
-Tồn kho theo chi nhánh. [Khai báo nguồn](erd-v2.dbml#L627).
+Tồn kho theo chi nhánh. [Khai báo nguồn](erd-v2.dbml#L630).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -767,7 +781,7 @@ Tồn kho theo chi nhánh. [Khai báo nguồn](erd-v2.dbml#L627).
 
 #### `stock_movements`
 
-Nhập, xuất, điều chỉnh kho. [Khai báo nguồn](erd-v2.dbml#L641).
+Nhập, xuất, điều chỉnh kho. [Khai báo nguồn](erd-v2.dbml#L644).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -794,7 +808,7 @@ Nhập, xuất, điều chỉnh kho. [Khai báo nguồn](erd-v2.dbml#L641).
 
 #### `promotions`
 
-Mã giảm giá. [Khai báo nguồn](erd-v2.dbml#L659).
+Mã giảm giá. [Khai báo nguồn](erd-v2.dbml#L662).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -818,7 +832,7 @@ Mã giảm giá. [Khai báo nguồn](erd-v2.dbml#L659).
 
 #### `invoices`
 
-Hóa đơn. [Khai báo nguồn](erd-v2.dbml#L677).
+Hóa đơn. [Khai báo nguồn](erd-v2.dbml#L680).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -853,7 +867,7 @@ Hóa đơn. [Khai báo nguồn](erd-v2.dbml#L677).
 
 #### `invoice_items`
 
-Dòng hóa đơn. [Khai báo nguồn](erd-v2.dbml#L703).
+Dòng hóa đơn. [Khai báo nguồn](erd-v2.dbml#L706).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -880,7 +894,7 @@ Dòng hóa đơn. [Khai báo nguồn](erd-v2.dbml#L703).
 
 #### `payments`
 
-Mỗi lần thu tiền. [Khai báo nguồn](erd-v2.dbml#L721).
+Mỗi lần thu tiền. [Khai báo nguồn](erd-v2.dbml#L724).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -907,7 +921,7 @@ Mỗi lần thu tiền. [Khai báo nguồn](erd-v2.dbml#L721).
 
 #### `staff`
 
-Hồ sơ nhân viên; chức vụ lấy từ `users.role`; chủ chuỗi không có dòng ở bảng này. [Khai báo nguồn](erd-v2.dbml#L740).
+Hồ sơ nhân viên; chức vụ lấy từ `users.role`; chủ chuỗi không có dòng ở bảng này. [Khai báo nguồn](erd-v2.dbml#L743).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -930,7 +944,7 @@ Hồ sơ nhân viên; chức vụ lấy từ `users.role`; chủ chuỗi không 
 
 #### `shifts`
 
-Ca làm đã xếp. [Khai báo nguồn](erd-v2.dbml#L757).
+Ca làm đã xếp. [Khai báo nguồn](erd-v2.dbml#L760).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -953,7 +967,7 @@ Ca làm đã xếp. [Khai báo nguồn](erd-v2.dbml#L757).
 
 #### `attendances`
 
-Chấm công thực tế theo ca. [Khai báo nguồn](erd-v2.dbml#L771).
+Chấm công thực tế theo ca. [Khai báo nguồn](erd-v2.dbml#L774).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -976,7 +990,7 @@ Chấm công thực tế theo ca. [Khai báo nguồn](erd-v2.dbml#L771).
 
 #### `payrolls`
 
-Bảng lương tháng. [Khai báo nguồn](erd-v2.dbml#L785).
+Bảng lương tháng. [Khai báo nguồn](erd-v2.dbml#L788).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -1004,7 +1018,7 @@ Bảng lương tháng. [Khai báo nguồn](erd-v2.dbml#L785).
 
 #### `badges`
 
-Danh mục huy hiệu và điều kiện đạt. [Khai báo nguồn](erd-v2.dbml#L805).
+Danh mục huy hiệu và điều kiện đạt. [Khai báo nguồn](erd-v2.dbml#L808).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -1021,7 +1035,7 @@ Danh mục huy hiệu và điều kiện đạt. [Khai báo nguồn](erd-v2.dbml
 
 #### `member_badges`
 
-Huy hiệu hội viên đã đạt. [Khai báo nguồn](erd-v2.dbml#L816).
+Huy hiệu hội viên đã đạt. [Khai báo nguồn](erd-v2.dbml#L819).
 
 | Cột | Kiểu DBML | Rỗng | Ràng buộc khai báo | Ý nghĩa / ghi chú |
 | --- | --- | --- | --- | --- |
@@ -1126,8 +1140,6 @@ Các tập giá trị sau được giữ theo nguồn; việc chuyển sang `var
 | Giá trị | Ghi chú trong nguồn |
 | --- | --- |
 | `BOOKED` | — |
-| `WAITLIST` | — |
-| `PENDING_RECONFIRM` | — |
 | `CANCELLED` | — |
 | `ATTENDED` | — |
 | `NO_SHOW` | — |
@@ -1140,7 +1152,6 @@ Các tập giá trị sau được giữ theo nguồn; việc chuyển sang `var
 | --- | --- |
 | `BY_MEMBER` | — |
 | `BY_STAFF` | — |
-| `NOT_RECONFIRMED` | — |
 | `SESSION_CANCELLED` | — |
 
 <a id="enum-pt_session_status"></a>
@@ -1308,3 +1319,5 @@ Các tập giá trị sau được giữ theo nguồn; việc chuyển sang `var
 | --- | --- |
 | 05/11/2026 | Xuất từ điển đầy đủ từ ERD v2 cho #15; giữ cột, kiểu, mặc định, khóa, chỉ mục, Enum và ghi chú của nguồn |
 | 12/11/2026 | Xuất lại theo nguồn mới: các CHECK và chỉ mục đã thêm vào DBML sau 05/11; `class_bookings` theo ADR 0010 (`created_by` bắt buộc, ghi chú `waitlisted_at`, `grace_until`, `attendance_marked_by`) |
+
+| 19/11/2026 | Xuất lại theo ADR 0014 (migration `V9_03`): `class_bookings` bỏ trạng thái `WAITLIST`, `PENDING_RECONFIRM`, lý do hủy `NOT_RECONFIRMED`, các cột `waitlisted_at`, `promoted_at`, `grace_until`, `reconfirm_expires_at` và chỉ mục danh sách chờ; `system_configs` đổi `PROMOTION_CUTOFF_MIN` thành `BOOKING_CUTOFF_MIN`, bỏ `PROMOTION_GRACE_MIN`, `RECONFIRM_TTL_MIN` |

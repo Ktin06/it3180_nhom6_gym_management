@@ -68,7 +68,7 @@ Trạng thái gói (`memberships.status`): PENDING (đã có hóa đơn, chưa t
 | `class_types` | Loại lớp: Yoga, Zumba, Boxing… | `name`, `status` | F8 |
 | `class_schedules` | Lịch lặp hằng tuần | `branch_id`, `class_type_id`, `trainer_id`, `room_id`, `day_of_week` (1 = thứ Hai … 7 = Chủ nhật), `start_time`, `end_time`, `capacity`, `valid_from`, `valid_to` | F8 |
 | `class_sessions` | Từng buổi cụ thể sinh ra từ lịch lặp; hội viên đặt chỗ vào buổi | `class_schedule_id`, `branch_id`, `trainer_id`, `room_id`, `occurrence_date` (ngày theo lịch lặp, không đổi khi đổi giờ), `start_at`, `end_at`, `original_start_at`, `capacity`, `status` | F8 |
-| `class_bookings` | Đặt chỗ và danh sách chờ, gộp một bảng | `class_session_id`, `member_id`, `created_by`, `status`, `waitlisted_at`, `promoted_at`, `grace_until`, `reconfirm_expires_at`, `arrived_at`, `cancel_reason`, `is_late_cancel`, `attendance_marked_by` | F8, F10 |
+| `class_bookings` | Đặt chỗ lớp nhóm (không có danh sách chờ, ADR 0014) | `class_session_id`, `member_id`, `created_by`, `status`, `booked_at`, `arrived_at`, `cancel_reason`, `is_late_cancel`, `attendance_marked_by` | F8, F10 |
 
 ### 5. Huấn luyện viên (4 bảng)
 
@@ -135,13 +135,12 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 | Hóa đơn có gói hoặc phí chuyển nhượng phải có hội viên | Mã nghiệp vụ | `member_id` chỉ được rỗng với hóa đơn chỉ có sản phẩm (khách lẻ); báo cáo doanh thu dùng `LEFT JOIN` |
 | Check-in dùng đúng gói | Mã nghiệp vụ | Chỉ gói TIME hoặc SESSION đang ACTIVE; có cả hai thì dùng TIME; `checkins.member_id` trùng chủ của gói |
 | Trừ tối đa 1 buổi mỗi ngày | Cơ sở dữ liệu (chỉ mục duy nhất có điều kiện) | Duy nhất trên (`membership_id`, `checkin_date`) với các dòng có `session_deducted = true` |
-| Đặt lớp cần gói TIME | Mã nghiệp vụ | Không có gói TIME đang ACTIVE tại chi nhánh thì không được đặt chỗ hay vào chờ |
+| Đặt lớp cần gói TIME | Mã nghiệp vụ | Không có gói TIME đang ACTIVE tại chi nhánh thì không được đặt chỗ |
 | Không sinh trùng buổi lớp | Cơ sở dữ liệu (chỉ mục duy nhất) | Duy nhất trên (`class_schedule_id`, `occurrence_date`); buổi đã đổi giờ không bị sinh lại ở giờ cũ |
 | Một chỗ đặt đang hoạt động cho mỗi buổi | Cơ sở dữ liệu (chỉ mục duy nhất có điều kiện) | Duy nhất trên (`class_session_id`, `member_id`) với các dòng chưa CANCELLED; hủy rồi vẫn đặt lại được |
-| Không vượt sĩ số | Mã nghiệp vụ, có khóa bản ghi (NF6) | Khóa dòng `class_sessions`; số chỗ đang giữ (mọi trạng thái trừ WAITLIST và CANCELLED, tức BOOKED, PENDING_RECONFIRM, ATTENDED, NO_SHOW) không vượt `class_sessions.capacity` |
-| Thứ tự danh sách chờ | Mã nghiệp vụ | Đưa vào lớp theo `waitlisted_at` tăng dần, trùng thì `id` tăng dần; vị trí hiển thị tính khi truy vấn, không lưu số cố định ([ADR 0010](../../decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md)) |
-| Ân hạn sau khi được đưa vào lớp | Mã nghiệp vụ | `grace_until = promoted_at + PROMOTION_GRACE_MIN`, ghi trong cùng giao dịch đưa vào lớp; hủy khi `now() <= grace_until` thì `is_late_cancel = false`; tác vụ gửi email không sửa `grace_until` |
-| Chỗ đặt có người tạo | Cơ sở dữ liệu (NOT NULL) | `class_bookings.created_by` là tài khoản đã bấm đặt hoặc vào chờ; tự động đưa vào lớp giữ nguyên người tạo ban đầu |
+| Không vượt sĩ số | Mã nghiệp vụ, có khóa bản ghi (NF6) | Khóa dòng `class_sessions`; số chỗ đang giữ (mọi trạng thái trừ CANCELLED, tức BOOKED, ATTENDED, NO_SHOW) không vượt `class_sessions.capacity`; lớp đủ chỗ thì từ chối ([ADR 0014](../../decisions/0014-bo-danh-sach-cho-lop-hoc-nhom.md)) |
+| Hủy buổi đã đổi giờ không bị phạt | Mã nghiệp vụ | Buổi có `class_sessions.original_start_at` khác rỗng (đã đổi giờ) thì hủy chỗ lúc nào cũng `is_late_cancel = false` ([ADR 0014](../../decisions/0014-bo-danh-sach-cho-lop-hoc-nhom.md)) |
+| Chỗ đặt có người tạo | Cơ sở dữ liệu (NOT NULL) | `class_bookings.created_by` là tài khoản đã bấm đặt chỗ (hội viên, hoặc lễ tân thao tác hộ) |
 | Sửa điểm danh có dấu vết | Mã nghiệp vụ | Mỗi lần ghi hoặc sửa, `attendance_marked_by` là người thao tác; khi sửa kết quả đã có, ghi thêm một dòng `audit_logs` (giá trị cũ, mới) trong cùng giao dịch |
 | Hội viên không trùng giờ lớp | Mã nghiệp vụ, có khóa bản ghi (NF6) | Khóa dòng `members` trước khi kiểm tra; không có hai chỗ đặt đang hoạt động ở hai buổi trùng giờ, kể cả khi hai yêu cầu đến cùng lúc |
 | Huấn luyện viên không trùng giờ | Mã nghiệp vụ, có khóa bản ghi (NF6) | Khóa dòng `members` rồi `staff`; không có hai buổi PT trùng giờ, kể cả với giờ dạy lớp (`class_sessions.trainer_id`) |
@@ -188,3 +187,4 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 | 03/11/2026 | Theo [ADR 0005](../../decisions/0005-erd-v2.md) mục 25–32: tham số `SESSION_WARNING_THRESHOLD`; công thức `end_date`; gói SESSION, PT hết buổi kéo gói nối tiếp; tác vụ nền chuyển EXPIRED (00:00, chạy bù khi khởi động) trước khi kích hoạt UPCOMING; chặn bảo lưu, chuyển nhượng gói hết buổi; giới hạn số buổi PT đặt trước; để mở trường hợp tác vụ 00:00 bị lỗi |
 | 12/11/2026 | Theo quyết định F8 ([ADR 0010](../../decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md)): `class_bookings.created_by` thành NOT NULL (migration `V9_01`); `grace_until` tính từ `promoted_at`, không từ lúc gửi email; thứ tự chờ phụ theo `id`; ghi chú `attendance_marked_by` gồm cả người sửa điểm danh |
 | 14/11/2026 | Theo [ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md): thêm bảng `member_avatars` (ảnh đại diện lưu trong PostgreSQL), bỏ `members.avatar_url`; 40 bảng. Migration `V9_02` làm ở việc S2-06 |
+| 19/11/2026 | Theo [ADR 0014](../../decisions/0014-bo-danh-sach-cho-lop-hoc-nhom.md) (thay ADR 0010), migration `V9_03`: `class_bookings` bỏ trạng thái `WAITLIST`, `PENDING_RECONFIRM`, lý do hủy `NOT_RECONFIRMED`, các cột `waitlisted_at`, `promoted_at`, `grace_until`, `reconfirm_expires_at` và chỉ mục danh sách chờ; `system_configs` bỏ `PROMOTION_GRACE_MIN`, `RECONFIRM_TTL_MIN`, đổi `PROMOTION_CUTOFF_MIN` thành `BOOKING_CUTOFF_MIN`; buổi đã đổi giờ hủy không phạt |
