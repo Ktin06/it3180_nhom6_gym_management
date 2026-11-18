@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
 import vn.edu.hust.nhom6.gym.TestcontainersConfiguration;
+import vn.edu.hust.nhom6.gym.feature.auth.JwtTestSupport;
+import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 
 /** Bảng giá công khai với PostgreSQL thật, gọi không kèm access token (US-F3.1.2). */
 @SpringBootTest
@@ -42,11 +45,17 @@ class PublicPackageIntegrationTest {
         otherBranch = jdbc.queryForObject("SELECT id FROM branches WHERE code='F3PUB'", Long.class);
     }
 
+    /** Cơ sở dữ liệu kiểm thử dùng chung giữa các lớp: luôn trả CN01 về hoạt động sau mỗi ca. */
+    @AfterEach
+    void restoreDefaultBranch() {
+        jdbc.update("UPDATE branches SET status = 'ACTIVE' WHERE code = 'CN01'");
+    }
+
     @Test
     @DisplayName("TC-F3.1.2-01a: Khách không đăng nhập xem gói ACTIVE của CN01 và toàn chuỗi, đúng giá, sắp TIME→SESSION→PT rồi theo giá")
     void guestSeesActiveBranchAndGlobalPackagesInDisplayOrder() throws Exception {
-        item("PT10", "PT 10 buổi", "PT", null, "ACTIVE", 3_000_000);
-        item("S12", "12 buổi", "SESSION", branch, "ACTIVE", 600_000);
+        item("PT10", "PT 10 buổi", "PT", null, "ACTIVE", 3_000_000, 10);
+        item("S12", "12 buổi", "SESSION", branch, "ACTIVE", 600_000, 12);
         item("T3", "Gói 3 tháng", "TIME", null, "ACTIVE", 1_350_000);
         item("T1", "Gói 1 tháng", "TIME", branch, "ACTIVE", 500_000);
 
@@ -57,7 +66,38 @@ class PublicPackageIntegrationTest {
             .andExpect(jsonPath("$[0].price").value(500_000))
             .andExpect(jsonPath("$[0].durationDays").value(30))
             .andExpect(jsonPath("$[0].sessionCount").value(nullValue()))
-            .andExpect(jsonPath("$[2].sessionCount").value(10));
+            .andExpect(jsonPath("$[2].sessionCount").value(12))
+            .andExpect(jsonPath("$[3].sessionCount").value(10));
+    }
+
+    @Test
+    @DisplayName("TC-F3.1.2-01d: Gửi kèm access token hết hạn hoặc sai chữ ký vẫn xem được bảng giá, không bị 401")
+    void staleOrForgedTokenIsIgnoredOnPublicRead() throws Exception {
+        item("T1", "Gói 1 tháng", "TIME", branch, "ACTIVE", 500_000);
+        String expired = JwtTestSupport.expiredAccessToken(1L, "khach@example.com", UserRole.MEMBER);
+        String forged = JwtTestSupport.accessTokenWithSecret(1L, "khach@example.com", UserRole.MEMBER,
+            "mot-khoa-bi-mat-khac-hoan-toan-dai-hon-32-byte");
+
+        mvc.perform(get(URL).header("Authorization", "Bearer " + expired))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].name").value("Gói 1 tháng"));
+        mvc.perform(get(URL).header("Authorization", "Bearer " + forged))
+            .andExpect(status().isOk());
+        mvc.perform(get(URL).header("Authorization", "Bearer khong-phai-jwt"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("TC-F3.1.2-06a: Chi nhánh mặc định CN01 ngừng hoạt động thì trả danh sách rỗng, không báo lỗi")
+    void inactiveDefaultBranchReturnsEmptyList() throws Exception {
+        item("T1", "Gói 1 tháng", "TIME", branch, "ACTIVE", 500_000);
+        item("GLOBAL", "Gói toàn chuỗi", "TIME", null, "ACTIVE", 450_000);
+        jdbc.update("UPDATE branches SET status = 'INACTIVE' WHERE code = 'CN01'");
+
+        mvc.perform(get(URL))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$").isEmpty());
     }
 
     @Test
@@ -107,13 +147,22 @@ class PublicPackageIntegrationTest {
     @DisplayName("S3: Đường dẫn công khai chỉ mở GET; ghi dữ liệu vẫn cần đăng nhập")
     void onlyGetIsPublic() throws Exception {
         mvc.perform(post(URL)).andExpect(status().isUnauthorized());
+        // Bỏ qua token chỉ áp dụng cho GET công khai; ghi dữ liệu kèm token hết hạn vẫn bị chặn.
+        mvc.perform(post(URL).header("Authorization", "Bearer "
+                + JwtTestSupport.expiredAccessToken(1L, "khach@example.com", UserRole.MEMBER)))
+            .andExpect(status().isUnauthorized());
         mvc.perform(get("/api/v1/packages")).andExpect(status().isUnauthorized());
         mvc.perform(get(URL)).andExpect(status().isOk());
     }
 
     private void item(String code, String name, String type, Long branchId, String status, int price) {
+        item(code, name, type, branchId, status, price, "TIME".equals(type) ? null : 10);
+    }
+
+    private void item(String code, String name, String type, Long branchId, String status, int price,
+            Integer sessions) {
         jdbc.update("INSERT INTO packages(code,name,type,branch_id,status,duration_days,session_count,price) "
                 + "VALUES (?,?,?,?,?,30,?,?)",
-            code, name, type, branchId, status, "TIME".equals(type) ? null : 10, price);
+            code, name, type, branchId, status, sessions, price);
     }
 }

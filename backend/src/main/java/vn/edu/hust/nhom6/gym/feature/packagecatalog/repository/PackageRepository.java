@@ -1,6 +1,5 @@
 package vn.edu.hust.nhom6.gym.feature.packagecatalog.repository;
 
-import java.util.List;
 import java.util.Optional;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.Lock;
@@ -31,12 +30,4 @@ public interface PackageRepository extends JpaRepository<GymPackage, Long> {
     Page<GymPackage> search(@Param("allBranches") boolean allBranches,
         @Param("branchId") Long branchId, @Param("type") PackageType type,
         @Param("status") PackageStatus status, Pageable pageable);
-
-    /** Bảng giá công khai: gói theo trạng thái của một chi nhánh, cộng gói toàn chuỗi (BR-F3-01). */
-    @Query("""
-        select p from GymPackage p
-        where p.status = :status and (p.branchId = :branchId or p.branchId is null)
-        """)
-    List<GymPackage> findByStatusInBranchOrGlobal(@Param("status") PackageStatus status,
-        @Param("branchId") Long branchId);
 }

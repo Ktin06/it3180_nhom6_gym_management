@@ -81,8 +81,9 @@ public class SecurityConfig {
         LOGOUT_PATH,
     };
 
-    /** API công khai chỉ để đọc, cho khách chưa đăng nhập (bảng giá F3, lịch lớp F8). Chỉ mở GET. */
-    private static final String PUBLIC_READ_PATHS = "/api/v1/public/**";
+    /** Tiền tố API công khai chỉ để đọc, cho khách chưa đăng nhập (bảng giá F3, lịch lớp F8). Chỉ mở GET. */
+    private static final String PUBLIC_READ_PREFIX = "/api/v1/public/";
+    private static final String PUBLIC_READ_PATHS = PUBLIC_READ_PREFIX + "**";
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, JsonMapper jsonMapper,
@@ -132,17 +133,20 @@ public class SecurityConfig {
     }
 
     /**
-     * Đọc access token từ header {@code Authorization}, trừ ở {@link #LOGOUT_PATH}.
+     * Đọc access token từ header {@code Authorization}, trừ ở {@link #LOGOUT_PATH} và các API GET công khai.
      *
-     * <p>Nếu để Spring Security đọc JWT ở {@code /logout}, token hết hạn sẽ bị trả 401 trước khi vào controller,
-     * dù đường dẫn này công khai. Khi đó người dùng để tab lâu rồi bấm Đăng xuất sẽ không xóa được cookie (#112).
+     * <p>Nếu để Spring Security đọc JWT ở những đường dẫn này, token hết hạn sẽ bị trả 401 trước khi xét
+     * {@code permitAll}. Ví dụ: người dùng để tab lâu rồi bấm Đăng xuất không xóa được cookie (#112), hay khách
+     * còn giữ token cũ mở bảng giá công khai bị báo "cần đăng nhập" (US-F3.1.2).
      */
     @Bean
     public BearerTokenResolver bearerTokenResolver() {
         DefaultBearerTokenResolver delegate = new DefaultBearerTokenResolver();
-        return request -> LOGOUT_PATH.equals(request.getRequestURI().substring(request.getContextPath().length()))
-            ? null
-            : delegate.resolve(request);
+        return request -> {
+            String path = request.getRequestURI().substring(request.getContextPath().length());
+            boolean publicRead = "GET".equals(request.getMethod()) && path.startsWith(PUBLIC_READ_PREFIX);
+            return LOGOUT_PATH.equals(path) || publicRead ? null : delegate.resolve(request);
+        };
     }
 
     /** Giải mã JWT gửi kèm khi đăng xuất: kiểm chữ ký và claim, bỏ qua hạn dùng (#112). */

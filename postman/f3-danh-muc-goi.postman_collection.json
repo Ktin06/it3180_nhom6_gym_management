@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "F3 – Danh mục gói tập (bốn API nội bộ và bảng giá công khai)",
-    "description": "Danh sách, thêm, sửa và ngừng bán. baseUrl gồm /api/v1. Chỉ dùng dữ liệu kiểm thử; nhập token tại máy, không lưu lên Git. Chạy lần lượt danh sách, thêm, sửa, ngừng bán. outsidePackageId phải là gói tồn tại ở chi nhánh khác; globalPackageId là gói toàn chuỗi. POST TIME tự lưu packageId, POST PT tự lưu emptyBodyPackageId để kiểm tra hai cách gọi ngừng bán độc lập.",
+    "description": "Thư mục đầu \"Bảng giá công khai – US-F3.1.2\" không cần token (noauth): gọi GET /public/packages, chạy được ngay không cần đăng nhập. Các thư mục còn lại là bốn API nội bộ: Danh sách, thêm, sửa và ngừng bán. baseUrl gồm /api/v1. Chỉ dùng dữ liệu kiểm thử; nhập token tại máy, không lưu lên Git. Chạy lần lượt danh sách, thêm, sửa, ngừng bán. outsidePackageId phải là gói tồn tại ở chi nhánh khác; globalPackageId là gói toàn chuỗi. POST TIME tự lưu packageId, POST PT tự lưu emptyBodyPackageId để kiểm tra hai cách gọi ngừng bán độc lập.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [

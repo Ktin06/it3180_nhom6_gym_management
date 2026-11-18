@@ -61,7 +61,8 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 - **Mô tả ngắn gọn:** Nhân viên xem danh sách gói tập đang bán (ACTIVE) hoặc ngừng bán (INACTIVE), có thể lọc và phân trang. Khách xem bảng giá các gói đang bán mà không cần đăng nhập.
 
 #### A. Tiền điều kiện (Preconditions)
-- Người dùng đã đăng nhập với vai trò Lễ tân, Quản lý chi nhánh hoặc Chủ chuỗi (JWT hợp lệ – S2).
+- **Danh mục nội bộ (`GET /api/v1/packages`):** người dùng đã đăng nhập với vai trò Lễ tân, Quản lý chi nhánh hoặc Chủ chuỗi (JWT hợp lệ – S2).
+- **Bảng giá công khai (`GET /api/v1/public/packages`, US-F3.1.2):** không cần đăng nhập. Nếu request có gửi kèm header `Authorization` (kể cả token hết hạn), backend bỏ qua header đó.
 
 #### B. Hậu điều kiện (Postconditions)
 - **Thành công:** Danh sách gói tập được trả về; không có thay đổi dữ liệu nào trong CSDL.
@@ -141,8 +142,8 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 
 **Bảng giá công khai (US-F3.1.2):**
 
-- **API Endpoint:** `GET /api/v1/public/packages`. Không cần đăng nhập, không nhận tham số. Frontend gọi API này **không gửi** header `Authorization`.
-- **Phạm vi dữ liệu:** gói `ACTIVE` của chi nhánh mặc định `CN01` và gói toàn chuỗi (`branch_id` rỗng). Từ v1 đến v3 hệ thống chạy một chi nhánh mặc định ([bản chốt phạm vi](../ban-chot-pham-vi.md)). Trả cả danh sách, không phân trang, sắp theo `type` (TIME, SESSION, PT), rồi `price`, rồi `name`.
+- **API Endpoint:** `GET /api/v1/public/packages`. Không cần đăng nhập, không nhận tham số. Backend bỏ qua header `Authorization` ở mọi request GET tới `/api/v1/public/**`, nên token hết hạn gửi kèm cũng không làm request bị 401. Frontend gọi API này không gửi header đó.
+- **Phạm vi dữ liệu:** gói `ACTIVE` của chi nhánh mặc định `CN01` và gói toàn chuỗi (`branch_id` rỗng). Nếu `CN01` đang ngừng hoạt động thì trả danh sách rỗng `[]`. Từ v1 đến v3 hệ thống chạy một chi nhánh mặc định ([bản chốt phạm vi](../ban-chot-pham-vi.md)). Trả cả danh sách, không phân trang, sắp theo `type` (TIME, SESSION, PT), rồi `price`, rồi `name`.
 - **Response Success (200 OK):** chỉ có các trường cần hiển thị, không có `code`, `status`, `branchId`, thời gian tạo hay người tạo.
   ```json
   [
@@ -195,6 +196,10 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
     - **Given** API lỗi mạng hoặc lỗi server
     - **When** Khách mở `/bang-gia`
     - **Then** Trang hiện thông báo lỗi và nút "Thử lại"; không hiện giá bịa hoặc giá cũ chưa xác minh. Bấm "Thử lại" thì gọi lại API
+  - **AC-F3.1.2-06: Chi nhánh mặc định ngừng hoạt động**
+    - **Given** Chi nhánh `CN01` có trạng thái INACTIVE, dù vẫn còn gói ACTIVE của `CN01` hoặc gói toàn chuỗi
+    - **When** Khách gọi `GET /api/v1/public/packages`
+    - **Then** Hệ thống trả `200 OK` với danh sách rỗng `[]`, không trả lỗi và không lộ thông báo nội bộ; trang hiện "Chưa có gói đang bán" như AC-F3.1.2-04
 
 ---
 

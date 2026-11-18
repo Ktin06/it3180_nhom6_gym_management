@@ -2,31 +2,23 @@ import { Alert, Button, Card, Col, Empty, Row, Skeleton, Tag, Typography } from 
 import { Link } from 'react-router-dom'
 import { useRemoteQuery } from '../../shared/use-remote-query'
 import { publicPackagesApi } from '../api/public-packages'
+import { packageTypeLabels, vndFormat } from '../package-format'
 import type { PackageType, PublicPackage, PublicPackagesGateway } from '../types/package'
 
-const typeInfo: Record<PackageType, { label: string; color: string; benefits: string[] }> = {
+const typeInfo: Record<PackageType, { color: string; benefits: string[] }> = {
   TIME: {
-    label: 'Theo thời gian',
     color: 'blue',
     benefits: ['Vào phòng tập không giới hạn trong thời hạn', 'Được đặt lớp nhóm'],
   },
   SESSION: {
-    label: 'Theo buổi',
     color: 'cyan',
     benefits: ['Mỗi lần vào phòng tập trừ một buổi', 'Không đặt được lớp nhóm'],
   },
   PT: {
-    label: 'Tập 1–1 với huấn luyện viên',
     color: 'purple',
-    benefits: ['Học cùng huấn luyện viên', 'Không dùng để vào phòng tập hay đặt lớp nhóm'],
+    benefits: ['Tập 1–1 cùng huấn luyện viên', 'Không dùng để vào phòng tập hay đặt lớp nhóm'],
   },
 }
-
-const money = new Intl.NumberFormat('vi-VN', {
-  style: 'currency',
-  currency: 'VND',
-  maximumFractionDigits: 0,
-})
 
 function usage(item: PublicPackage): string {
   if (item.type === 'TIME') return `Thời hạn ${item.durationDays} ngày`
@@ -38,11 +30,11 @@ function PackageCard({ item }: { item: PublicPackage }) {
   return (
     <Card
       title={item.name}
-      extra={<Tag color={info.color}>{info.label}</Tag>}
+      extra={<Tag color={info.color}>{packageTypeLabels[item.type]}</Tag>}
       style={{ height: '100%' }}
     >
       <Typography.Title level={3} style={{ marginTop: 0 }}>
-        {money.format(item.price)}
+        {vndFormat.format(item.price)}
       </Typography.Title>
       <Typography.Paragraph strong>{usage(item)}</Typography.Paragraph>
       <ul style={{ paddingLeft: 20 }}>
