@@ -36,6 +36,7 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 | **UC-F9.4** | Soạn giáo án | PT | Trung bình | Sprint 2 |
 | **UC-F9.5** | Ghi nhật ký tập và chỉ số cơ thể | PT | Trung bình | Sprint 2 |
 | **UC-F9.6** | Xem tiến độ học viên | PT, Hội viên | Trung bình | Sprint 2 |
+| **UC-F9.7** | Hủy buổi PT | Hội viên, Quản lý chi nhánh | Cao | Sprint 2 |
 
 ---
 
@@ -72,11 +73,15 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
   - Tại bước 3, người thao tác không phải PT, hoặc PT cố sửa lịch của PT khác.
   - Hệ thống từ chối, không sửa lịch của người khác; trả `ProblemDetail` (403).
 - **E3 – Không tìm thấy (404):** khung giờ cần sửa không tồn tại.
+- **E4 – Khung giờ chồng nhau (422):** khung mới hoặc khung sau khi sửa chồng lên một khung khác của chính PT đó cùng thứ (BR-F9.14). Thông báo: *"Khung giờ bị trùng với khung rảnh đã khai báo."*
+- **E5 – Khung giờ đã có hội viên đặt (422):** PT xóa khung, hoặc sửa khung làm một buổi đã đặt rơi ra ngoài khung (BR-F9.15). Thông báo: *"Khung giờ đã có hội viên đặt, không thể xóa hoặc thu hẹp."*
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
-- **BR-F9.1:** PT chỉ khai báo, sửa và xem lịch rảnh của chính mình (S3).
+- **BR-F9.1:** PT chỉ khai báo, sửa, xóa và xem lịch rảnh của chính mình (S3).
 - **BR-F9.2:** Hội viên chỉ đặt được buổi PT trong khung giờ PT đã khai báo rảnh (xem UC-F9.2).
-- **[Cần chốt với nhóm]:** PT có được sửa hoặc xóa khung rảnh đã có hội viên đặt hay không; hai khung rảnh của cùng một PT có được chồng nhau hay không.
+- **BR-F9.14:** Hai khung rảnh của **cùng một PT** cùng thứ không được chồng nhau. Hai PT khác nhau có khung trùng giờ là bình thường (chốt 19/11/2026).
+- **BR-F9.15:** PT chỉ được xóa khung rảnh, hoặc sửa làm khung hẹp lại, khi **không còn buổi PT `BOOKED` chưa diễn ra** của PT đó rơi vào đúng thứ và nằm trong khoảng giờ cũ của khung mà không còn nằm trong khung mới (tính theo giờ Việt Nam). Buổi đã qua, `DONE`, `CANCELLED`, `NO_SHOW` không chặn. Lý do: đã hứa với khách thì phải giữ, tránh mất uy tín. PT muốn nghỉ buổi đã có khách thì nhờ quản lý chi nhánh hủy hộ (UC-F9.7). Xóa là xóa hẳn dòng `trainer_availabilities` (ngoại lệ quy tắc mã số 8: đây là cấu hình lịch, không bảng nào trỏ tới), có ghi `audit_logs` (chốt 19/11/2026).
+  - Ví dụ: khung "Thứ Ba 18:00–21:00", hội viên đã đặt buổi 19:00 thứ Ba 25/11. Trước buổi đó: xóa khung, hoặc sửa thành "Thứ Ba 18:00–19:00", đều bị từ chối. Sửa thành "Thứ Ba 17:00–21:00" thì được.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
 - **Bảng tác động:** `trainer_availabilities`, `staff`; đọc `pt_sessions`, `class_sessions`
@@ -97,7 +102,7 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 - **Lưu ý:** Đây là lịch rảnh lặp lại theo thứ trong tuần, không phải một khung giờ gắn với ngày cụ thể.
 
 #### G. Thiết kế giao diện và API liên quan
-- **API Endpoint:** `POST /api/v1/pt/availabilities`, `GET /api/v1/pt/schedule` *(đề xuất, thống nhất với người làm API)*
+- **API Endpoint:** `POST /api/v1/pt/availabilities`, `PUT /api/v1/pt/availabilities/{id}`, `DELETE /api/v1/pt/availabilities/{id}`, `GET /api/v1/pt/schedule` *(đề xuất, thống nhất với người làm API)*
 - **Header:** `Authorization: Bearer <access_token>`
 - **Request Body (DTO):**
   ```json
@@ -258,10 +263,11 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 - **E5 – Vi phạm quy tắc nghiệp vụ (422):** buổi đã được xác nhận (không trừ lần hai) hoặc buổi chỉ mới được đặt, chưa đủ điều kiện xác nhận. *(Mã lỗi cụ thể cần đối chiếu với nhóm.)*
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
-- **BR-F9.6:** Chỉ trừ gói PT **khi PT xác nhận buổi đã diễn ra**; chỉ đặt buổi thì không trừ; mỗi buổi chỉ trừ một lần.
+- **BR-F9.6:** Chỉ trừ gói PT **khi PT xác nhận buổi đã diễn ra** (`DONE`) **hoặc ghi hội viên vắng mặt** (`NO_SHOW`, BR-F9.18); chỉ đặt buổi thì không trừ; mỗi buổi chỉ trừ một lần.
 - **BR-F9.7:** Xác nhận buổi cuối thì gói PT chuyển EXPIRED ngay (ghi và flush trước), rồi gói PT UPCOMING nối tiếp được dời về hôm nay và ACTIVE, giữ nguyên số ngày hiệu lực, trong cùng giao dịch.
 - **BR-F9.8:** `commission_amount` có giá trị khi và chỉ khi buổi ở trạng thái DONE; bằng tỷ lệ hoa hồng × (giá gói sau giảm / số buổi), làm tròn VND và chốt lúc xác nhận, không đổi về sau.
 - **BR-F9.9:** Chỉ PT được phân công cho buổi đó mới được xác nhận (S3).
+- **BR-F9.18:** Hội viên vắng mặt không báo: sau giờ bắt đầu, PT được phân công ghi buổi là `NO_SHOW`. Buổi `NO_SHOW` **vẫn trừ một buổi** của gói, giống buổi `DONE` (hội viên không hủy đúng hạn theo BR-F9.16 thì mất buổi). Nếu là buổi cuối thì áp dụng BR-F9.7. Buổi `NO_SHOW` không có `commission_amount` (theo BR-F9.8, chỉ buổi `DONE` mới có). Chốt 19/11/2026.
 - **Ngoài phạm vi Sprint 2:** tính lương và giao diện hoa hồng (F13) thuộc v3.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
@@ -568,3 +574,52 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 - **API Endpoint:** `GET /api/v1/members/{memberId}/progress?from=...&to=...` *(đề xuất)*
 - **Header:** `Authorization: Bearer <access_token>`
 - **Request Body:** Không có.
+
+---
+
+### 3.7. UC-F9.7: Hủy buổi PT
+
+- **Mã UC:** UC-F9.7
+- **Tên Use Case:** Hủy buổi PT
+- **Tác nhân chính:** Hội viên (hủy buổi của mình), Quản lý chi nhánh (hủy hộ, ví dụ khi PT ốm)
+- **Tác nhân phụ (nếu có):** Lễ tân (hủy hộ hội viên theo đúng quy tắc của hội viên)
+- **Mô tả ngắn gọn:** Hủy một buổi PT đã đặt (`BOOKED`). Hủy không trừ buổi của gói; giờ đó trống lại cho người khác đặt. Chốt 19/11/2026.
+
+#### A. Tiền điều kiện (Preconditions)
+- Buổi PT đang `BOOKED`.
+- Hội viên hoặc lễ tân hủy: thời điểm bắt đầu buổi còn cách hiện tại ít nhất `PT_MIN_LEAD_HOURS` giờ (mặc định 12, cùng mốc với lúc đặt).
+- Quản lý chi nhánh hủy: buổi thuộc chi nhánh mình và chưa tới giờ bắt đầu.
+
+#### B. Hậu điều kiện (Postconditions)
+- **Thành công:** `pt_sessions.status = CANCELLED`, `cancelled_at = now()`; số buổi còn lại của gói giữ nguyên; giờ đó trống lại. Quản lý hủy hộ thì hội viên nhận thông báo (F10) và có bản ghi `audit_logs`.
+- **Thất bại:** buổi giữ nguyên `BOOKED`.
+
+#### C. Luồng sự kiện chính (Basic Flow / Happy Path)
+1. Người dùng mở buổi PT, bấm "Hủy buổi". Quản lý chi nhánh nhập lý do (bắt buộc).
+2. Hệ thống kiểm tra quyền (S3): hội viên chỉ hủy buổi của mình; lễ tân và quản lý chỉ hủy buổi thuộc chi nhánh mình. PT **không** được tự hủy (BR-F9.17).
+3. Hệ thống kiểm tra buổi đang `BOOKED` và mốc thời gian theo BR-F9.16.
+4. Trong một giao dịch, khóa dòng `pt_sessions` (NF6), cập nhật `status = CANCELLED`, `cancelled_at = now()`.
+5. Quản lý hủy hộ: ghi `audit_logs` (người hủy, lý do) và gửi thông báo cho hội viên (F10).
+6. Hệ thống trả `200 OK`.
+
+#### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
+- **E1 – Không có quyền (403):** hội viên hủy buổi của người khác; PT gọi API hủy; nhân viên hủy buổi chi nhánh khác.
+- **E2 – Không tìm thấy (404):** buổi không tồn tại.
+- **E3 – Buổi không còn ở trạng thái đặt (422):** buổi đã `DONE`, `CANCELLED` hoặc `NO_SHOW`. Thông báo: *"Buổi tập không còn ở trạng thái đã đặt."*
+- **E4 – Hủy quá sát giờ (422):** hội viên hoặc lễ tân hủy khi còn ít hơn `PT_MIN_LEAD_HOURS` giờ. Thông báo: *"Chỉ được hủy buổi PT trước giờ bắt đầu ít nhất 12 giờ. Vui lòng liên hệ quầy."* Buổi vẫn diễn ra; hội viên vắng thì PT ghi `NO_SHOW`.
+- **E5 – Buổi đã bắt đầu (422):** quản lý hủy khi đã tới giờ bắt đầu.
+- **E6 – Thiếu lý do (400):** quản lý hủy hộ mà không nhập lý do.
+
+#### E. Quy tắc nghiệp vụ liên quan (Business Rules)
+- **BR-F9.16:** Hội viên (hoặc lễ tân hủy hộ) chỉ hủy được buổi PT khi còn ít nhất `PT_MIN_LEAD_HOURS` giờ trước giờ bắt đầu. Hủy không trừ buổi, không có phạt hay khóa. Muộn hơn thì không cho hủy. Lý do: PT cần biết trước để sắp xếp, cùng mốc với lúc đặt.
+- **BR-F9.17:** PT không tự hủy buổi đã có hội viên đặt (giữ uy tín với khách). PT bận đột xuất thì báo quản lý chi nhánh; quản lý hủy hộ bất kỳ lúc nào trước giờ bắt đầu, bắt buộc nhập lý do, ghi `audit_logs`, và hội viên được thông báo.
+- **CONFIG-F9.1:** dùng lại `PT_MIN_LEAD_HOURS` trong `system_configs`, không viết cứng.
+
+#### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
+- **Bảng tác động:** `pt_sessions` (`status`, `cancelled_at`), `audit_logs`, `notifications`; đọc `system_configs`. Không cần thêm cột.
+- **Lưu ý:** lý do hủy của quản lý lưu trong `audit_logs.new_value`, vì `pt_sessions` không có cột lý do hủy.
+
+#### G. Thiết kế giao diện và API liên quan
+- **API Endpoint:** `POST /api/v1/pt-sessions/{id}/cancel` *(đề xuất)*
+- **Header:** `Authorization: Bearer <access_token>`
+- **Request Body (DTO):** `{ "reason": "PT ốm đột xuất" }` (bắt buộc khi quản lý hủy; hội viên không cần)
