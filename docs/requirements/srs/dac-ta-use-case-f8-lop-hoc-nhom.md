@@ -131,7 +131,7 @@ Ghi `class_bookings`. Đọc `members`, `memberships`, `packages`, `class_sessio
 
 #### G. Thiết kế giao diện và API liên quan
 
-Lịch lớp của hội viên và thao tác đặt hộ tại quầy. API đề xuất `POST /api/v1/class-sessions/{sessionId}/bookings`. Backend lấy danh tính hội viên từ phiên khi tự đặt và nhận mã hội viên ở luồng lễ tân đặt hộ. Hợp đồng do #198 xác nhận.
+Lịch lớp của hội viên và thao tác đặt hộ tại quầy. [PR API #217](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/217) dùng `POST /api/v1/class-sessions/{sessionId}/bookings` với `memberId`. Backend đối chiếu hội viên tự đặt với danh tính trong JWT, kiểm tra chi nhánh khi lễ tân đặt hộ và ghi người tạo từ JWT.
 
 #### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
 
@@ -235,7 +235,7 @@ Chỗ chuyển `CANCELLED` và được trả lại ngay. Hủy muộn được 
 
 #### G. Thiết kế giao diện và API liên quan
 
-Thao tác Hủy chỗ trong lịch đã đặt của hội viên hoặc tại quầy. API đề xuất `POST /api/v1/class-bookings/{bookingId}/cancel`. Hợp đồng do #198 xác nhận.
+Thao tác Hủy chỗ trong lịch đã đặt của hội viên hoặc tại quầy. [PR API #217](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/217) dùng `PUT /api/v1/class-bookings/{bookingId}/cancel`.
 
 #### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
 
