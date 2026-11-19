@@ -64,7 +64,7 @@
       <line x1="-16" y1="2" x2="16" y2="2" class="actor-body"/>
       <line x1="0" y1="18" x2="-12" y2="42" class="actor-body"/>
       <line x1="0" y1="18" x2="12" y2="42" class="actor-body"/>
-      <text x="0" y="58" class="actor-label">Hội viên\n(Đã đăng nhập)</text>
+      <text x="0" y="58" class="actor-label"><tspan x="0" y="58">Hội viên</tspan><tspan x="0" y="74">(Đã đăng nhập)</tspan></text>
     </g>
 
     <rect x="210" y="100" width="800" height="720" class="sys-rect"/>
@@ -73,70 +73,66 @@
     
     <g>
       <ellipse cx="380" cy="175" rx="95" ry="30" class="uc-el"/>
-      <text class="uc-text"><tspan x="380" y="165" font-size="9" fill="#64748B">«UC-F1.2»</tspan><tspan x="380" y="175">Đăng nhập bằng email\n(JWT 15 phút)</tspan></text>
+      <text class="uc-text"><tspan x="380" y="161" font-size="9" fill="#64748B">«UC-F1.2»</tspan><tspan x="380" y="176">Đăng nhập bằng email</tspan><tspan x="380" y="190">(JWT 15 phút)</tspan></text>
     </g>
     
     <g>
       <ellipse cx="380" cy="245" rx="95" ry="30" class="uc-el"/>
-      <text class="uc-text"><tspan x="380" y="235" font-size="9" fill="#64748B">«UC-F2.3/2.5»</tspan><tspan x="380" y="245">Xem hồ sơ &amp; lịch sử\nchỉ số cơ thể</tspan></text>
+      <text class="uc-text"><tspan x="380" y="231" font-size="9" fill="#64748B">«UC-F2.3/2.5»</tspan><tspan x="380" y="246">Xem hồ sơ &amp; lịch sử</tspan><tspan x="380" y="260">chỉ số cơ thể</tspan></text>
     </g>
     
     <g>
       <ellipse cx="380" cy="315" rx="95" ry="30" class="uc-el"/>
-      <text class="uc-text"><tspan x="380" y="305" font-size="9" fill="#64748B">«UC-F7.1»</tspan><tspan x="380" y="315">Xem gói tập hiện có &amp;\nlịch sử tập luyện</tspan></text>
+      <text class="uc-text"><tspan x="380" y="301" font-size="9" fill="#64748B">«UC-F7.1»</tspan><tspan x="380" y="316">Xem gói tập hiện có &amp;</tspan><tspan x="380" y="330">lịch sử tập luyện</tspan></text>
     </g>
     
     <g>
       <ellipse cx="380" cy="395" rx="100" ry="32" class="uc-el-core"/>
-      <text class="uc-text-core"><tspan x="380" y="385" font-size="9" fill="#64748B">«UC-F7.2»</tspan><tspan x="380" y="395">Yêu cầu mua / gia hạn\ngói (Thanh toán tại quầy)</tspan></text>
+      <text class="uc-text-core"><tspan x="380" y="381" font-size="9" fill="#64748B">«UC-F7.2»</tspan><tspan x="380" y="396">Yêu cầu mua / gia hạn</tspan><tspan x="380" y="410">gói (Thanh toán tại quầy)</tspan></text>
     </g>
     
     <g>
       <ellipse cx="700" cy="395" rx="95" ry="30" class="uc-el"/>
-      <text class="uc-text"><tspan x="700" y="385" font-size="9" fill="#64748B">«UC-F5.4»</tspan><tspan x="700" y="395">Tạo hóa đơn PENDING\n(Tự hủy sau 3 ngày)</tspan></text>
+      <text class="uc-text"><tspan x="700" y="381" font-size="9" fill="#64748B">«UC-F5.4»</tspan><tspan x="700" y="396">Tạo hóa đơn PENDING</tspan><tspan x="700" y="410">(Tự hủy sau 3 ngày)</tspan></text>
     </g>
 
     
     <g>
       <ellipse cx="380" cy="480" rx="95" ry="30" class="uc-el-core"/>
-      <text class="uc-text-core"><tspan x="380" y="470" font-size="9" fill="#64748B">«UC-F8.1»</tspan><tspan x="380" y="480">Đặt chỗ lớp nhóm\n(Chỉ gói TIME)</tspan></text>
+      <text class="uc-text-core"><tspan x="380" y="466" font-size="9" fill="#64748B">«UC-F8.1»</tspan><tspan x="380" y="481">Đặt chỗ lớp nhóm</tspan><tspan x="380" y="495">(Chỉ gói TIME)</tspan></text>
     </g>
     
-    <g>
-      <ellipse cx="700" cy="460" rx="95" ry="30" class="uc-el"/>
-      <text class="uc-text"><tspan x="700" y="450" font-size="9" fill="#64748B">«UC-F8.2»</tspan><tspan x="700" y="460">Tự động vào danh sách\nchờ khi lớp đầy</tspan></text>
-    </g>
     
     <g>
-      <ellipse cx="700" cy="520" rx="95" ry="30" class="uc-el"/>
-      <text class="uc-text"><tspan x="700" y="510" font-size="9" fill="#64748B">«UC-F8.3»</tspan><tspan x="700" y="520">Hủy chỗ đặt lớp\n(Ân hạn 15 phút)</tspan></text>
+      <ellipse cx="700" cy="480" rx="95" ry="30" class="uc-el"/>
+      <text class="uc-text"><tspan x="700" y="466" font-size="9" fill="#64748B">«UC-F8.3»</tspan><tspan x="700" y="481">Hủy chỗ đặt lớp</tspan><tspan x="700" y="495">(trước 2 giờ không bị phạt)</tspan></text>
     </g>
 
     
     <g>
       <ellipse cx="380" cy="580" rx="95" ry="30" class="uc-el-core"/>
-      <text class="uc-text-core"><tspan x="380" y="570" font-size="9" fill="#64748B">«UC-F9.1»</tspan><tspan x="380" y="580">Đặt lịch tập 1-1 với PT\n(Chỉ gói PT)</tspan></text>
+      <text class="uc-text-core"><tspan x="380" y="566" font-size="9" fill="#64748B">«UC-F9.1»</tspan><tspan x="380" y="581">Đặt lịch tập 1-1 với PT</tspan><tspan x="380" y="595">(Chỉ gói PT)</tspan></text>
     </g>
     
     <g>
       <ellipse cx="700" cy="580" rx="95" ry="30" class="uc-el"/>
-      <text class="uc-text"><tspan x="700" y="570" font-size="9" fill="#64748B">«NF6»</tspan><tspan x="700" y="580">Kiểm tra trùng lịch &amp;\nkhóa bi quan (NF6)</tspan></text>
+      <text class="uc-text"><tspan x="700" y="566" font-size="9" fill="#64748B">«NF6»</tspan><tspan x="700" y="581">Kiểm tra trùng lịch &amp;</tspan><tspan x="700" y="595">khóa bi quan (NF6)</tspan></text>
     </g>
 
     
     <g>
       <ellipse cx="380" cy="660" rx="95" ry="30" class="uc-el"/>
-      <text class="uc-text"><tspan x="380" y="650" font-size="9" fill="#64748B">«UC-F9.3»</tspan><tspan x="380" y="660">Xem giáo án &amp;\nnhật ký tập luyện</tspan></text>
+      <text class="uc-text"><tspan x="380" y="646" font-size="9" fill="#64748B">«UC-F9.3»</tspan><tspan x="380" y="661">Xem giáo án &amp;</tspan><tspan x="380" y="675">nhật ký tập luyện</tspan></text>
     </g>
     
     <g>
       <ellipse cx="380" cy="730" rx="95" ry="30" class="uc-el"/>
-      <text class="uc-text"><tspan x="380" y="720" font-size="9" fill="#64748B">«UC-F15.1»</tspan><tspan x="380" y="730">Yêu cầu bảo lưu gói\n(Chờ quản lý duyệt)</tspan></text>
+      <text class="uc-text"><tspan x="380" y="716" font-size="9" fill="#64748B">«UC-F15.1»</tspan><tspan x="380" y="731">Yêu cầu bảo lưu gói</tspan><tspan x="380" y="745">(Chờ quản lý duyệt)</tspan></text>
     </g>
     
     <g>
       <ellipse cx="700" cy="730" rx="95" ry="30" class="uc-el"/>
-      <text class="uc-text"><tspan x="700" y="720" font-size="9" fill="#64748B">«UC-F19.1»</tspan><tspan x="700" y="730">Theo dõi chuỗi ngày tập\n&amp; huy hiệu đạt được</tspan></text>
+      <text class="uc-text"><tspan x="700" y="716" font-size="9" fill="#64748B">«UC-F19.1»</tspan><tspan x="700" y="731">Theo dõi chuỗi ngày tập</tspan><tspan x="700" y="745">&amp; huy hiệu đạt được</tspan></text>
     </g>
 
     <!-- Actor lines -->
@@ -145,6 +141,7 @@
     <line x1="140" y1="410" x2="285" y2="315" class="line" marker-end="url(#arr)"/>
     <line x1="140" y1="420" x2="280" y2="395" class="line" marker-end="url(#arr)"/>
     <line x1="140" y1="430" x2="285" y2="480" class="line" marker-end="url(#arr)"/>
+    <polyline points="140,435 490,438 605,476" class="line" marker-end="url(#arr)"/>
     <line x1="140" y1="440" x2="285" y2="580" class="line" marker-end="url(#arr)"/>
     <line x1="140" y1="450" x2="285" y2="660" class="line" marker-end="url(#arr)"/>
     <line x1="140" y1="460" x2="285" y2="730" class="line" marker-end="url(#arr)"/>
@@ -153,8 +150,6 @@
     <line x1="480" y1="395" x2="605" y2="395" class="dash-inc" marker-end="url(#arr-inc)"/>
     <text x="540" y="388" class="lbl-inc">«include»</text>
 
-    <line x1="605" y1="465" x2="475" y2="475" class="dash-ext" marker-end="url(#arr-ext)"/>
-    <text x="540" y="463" class="lbl-ext">«extend»</text>
 
     <line x1="475" y1="580" x2="605" y2="580" class="dash-inc" marker-end="url(#arr-inc)"/>
     <text x="540" y="573" class="lbl-inc">«include»</text>

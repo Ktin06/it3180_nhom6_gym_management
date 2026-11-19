@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -35,6 +36,8 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -62,6 +65,9 @@ public class SecurityConfig {
 
     private static final int MIN_JWT_SECRET_BYTES = 32;
 
+    /** Đường dẫn đăng xuất: tự đọc JWT trong controller, xem {@link LogoutTokenDecoder}. */
+    static final String LOGOUT_PATH = "/api/v1/auth/logout";
+
     private static final String[] PUBLIC_PATHS = {
         "/actuator/health",
         "/actuator/health/**",
@@ -72,12 +78,17 @@ public class SecurityConfig {
         "/api/v1/auth/register",
         "/api/v1/auth/login",
         "/api/v1/auth/refresh",
-        "/api/v1/auth/logout",
+        LOGOUT_PATH,
     };
+
+    /** Tiền tố API công khai chỉ để đọc, cho khách chưa đăng nhập (bảng giá F3, lịch lớp F8). Chỉ mở GET. */
+    private static final String PUBLIC_READ_PREFIX = "/api/v1/public/";
+    private static final String PUBLIC_READ_PATHS = PUBLIC_READ_PREFIX + "**";
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, JsonMapper jsonMapper,
-            Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter) throws Exception {
+            Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter,
+            BearerTokenResolver bearerTokenResolver) throws Exception {
         AuthenticationEntryPoint entryPoint = (request, response, e) -> writeProblem(
             jsonMapper, request, response, HttpStatus.UNAUTHORIZED,
             "Chưa xác thực", "Bạn cần đăng nhập để truy cập tài nguyên này.");
@@ -95,8 +106,10 @@ public class SecurityConfig {
             .httpBasic(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(PUBLIC_PATHS).permitAll()
+                .requestMatchers(HttpMethod.GET, PUBLIC_READ_PATHS).permitAll()
                 .anyRequest().authenticated())
             .oauth2ResourceServer(oauth2 -> oauth2
+                .bearerTokenResolver(bearerTokenResolver)
                 .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
                 .authenticationEntryPoint(entryPoint)
                 .accessDeniedHandler(accessDeniedHandler))
@@ -117,6 +130,33 @@ public class SecurityConfig {
             SecurityConfig::validateSubjectAndRole
         ));
         return decoder;
+    }
+
+    /**
+     * Đọc access token từ header {@code Authorization}, trừ ở {@link #LOGOUT_PATH} và các API GET công khai.
+     *
+     * <p>Nếu để Spring Security đọc JWT ở những đường dẫn này, token hết hạn sẽ bị trả 401 trước khi xét
+     * {@code permitAll}. Ví dụ: người dùng để tab lâu rồi bấm Đăng xuất không xóa được cookie (#112), hay khách
+     * còn giữ token cũ mở bảng giá công khai bị báo "cần đăng nhập" (US-F3.1.2).
+     */
+    @Bean
+    public BearerTokenResolver bearerTokenResolver() {
+        DefaultBearerTokenResolver delegate = new DefaultBearerTokenResolver();
+        return request -> {
+            String path = request.getRequestURI().substring(request.getContextPath().length());
+            boolean publicRead = "GET".equals(request.getMethod()) && path.startsWith(PUBLIC_READ_PREFIX);
+            return LOGOUT_PATH.equals(path) || publicRead ? null : delegate.resolve(request);
+        };
+    }
+
+    /** Giải mã JWT gửi kèm khi đăng xuất: kiểm chữ ký và claim, bỏ qua hạn dùng (#112). */
+    @Bean
+    public LogoutTokenDecoder logoutTokenDecoder(@Value("${app.jwt.secret}") String jwtSecret) {
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(hmacSha256Key(jwtSecret))
+            .macAlgorithm(MacAlgorithm.HS256)
+            .build();
+        decoder.setJwtValidator(SecurityConfig::validateSubjectAndRole);
+        return new LogoutTokenDecoder(decoder);
     }
 
     /** Ký JWT HS256 bằng khóa {@code JWT_SECRET}. */

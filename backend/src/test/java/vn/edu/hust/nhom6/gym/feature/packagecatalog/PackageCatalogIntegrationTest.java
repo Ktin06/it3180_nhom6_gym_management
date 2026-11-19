@@ -1,5 +1,6 @@
 package vn.edu.hust.nhom6.gym.feature.packagecatalog;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -57,6 +58,7 @@ class PackageCatalogIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"BRANCH_MANAGER", "RECEPTIONIST"})
+    @DisplayName("TC-F3.1.1-01a: Lễ tân, quản lý chỉ thấy gói của chi nhánh mình và gói toàn chuỗi; bỏ qua branchId client gửi")
     void scopesRowsAndCountAndIgnoresClientBranch(String role) throws Exception {
         mvc.perform(get("/api/v1/packages").with(bearer(role)).param("type", "TIME")
                 .param("branchId", otherBranch.toString()).param("size", "1"))
@@ -73,6 +75,7 @@ class PackageCatalogIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.1.1-02a: Mặc định chỉ trả gói ACTIVE, 20 gói mỗi trang, sắp theo loại rồi tên")
     void defaultActiveAndOrderingMatchContract() throws Exception {
         mvc.perform(get("/api/v1/packages").with(bearer("BRANCH_MANAGER")))
             .andExpect(status().isOk()).andExpect(jsonPath("$.size").value(20))
@@ -81,6 +84,7 @@ class PackageCatalogIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.1.1-04a: Chủ chuỗi thấy gói mọi chi nhánh mà không cần gán chi nhánh")
     void ownerSeesOtherBranchesWithoutStaff() throws Exception {
         jdbc.update("DELETE FROM staff WHERE user_id=?", employee);
         mvc.perform(get("/api/v1/packages").with(bearer("SUPER_ADMIN")))
@@ -89,6 +93,7 @@ class PackageCatalogIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.1.1-02b, TC-F3.4.1-03a: Lọc INACTIVE thấy gói đã ngừng bán; bộ lọc không khớp trả danh sách rỗng")
     void inactiveFilterAndEmptyResults() throws Exception {
         mvc.perform(get("/api/v1/packages").with(bearer("BRANCH_MANAGER")).param("status", "INACTIVE"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
@@ -99,6 +104,7 @@ class PackageCatalogIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.1.1-02c: Kích thước trang 100 hợp lệ; trang vượt quá số trang trả danh sách rỗng")
     void maximumSizeAndPagePastEndAreValid() throws Exception {
         mvc.perform(get("/api/v1/packages").with(bearer("BRANCH_MANAGER")).param("size", "100"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.size").value(100))
@@ -109,6 +115,7 @@ class PackageCatalogIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F3.1.1-05a: Nhân viên ngừng hoạt động hoặc chưa gán chi nhánh bị 403")
     void inactiveOrMissingStaffIsForbidden() throws Exception {
         jdbc.update("UPDATE staff SET status='INACTIVE' WHERE user_id=?", employee);
         mvc.perform(get("/api/v1/packages").with(bearer("BRANCH_MANAGER"))).andExpect(status().isForbidden());

@@ -1,12 +1,12 @@
 {
   "source": "../erd-v2.dbml",
-  "sha256LF": "ba6237cd2f2f49fca0272958876514761611ad78071f899a7d92eadba0062b8d",
+  "sha256LF": "31b2baacab184e0cda857d8c8f6c1e9e5c911f6b877102a9bdbf0f6b8ca4d78e",
   "generator": "scripts/export-erd.cjs",
   "renderer": "Graphviz qua @viz-js/viz (cục bộ)",
   "graphvizVersion": "16.1.0",
-  "tables": 39,
-  "columns": 422,
-  "relationships": 89,
+  "tables": 40,
+  "columns": 425,
+  "relationships": 91,
   "figures": [
     {
       "file": "erd-v2.svg",
@@ -22,6 +22,7 @@
         "equipment",
         "maintenance_logs",
         "members",
+        "member_avatars",
         "face_embeddings",
         "body_metrics",
         "packages",
@@ -52,9 +53,9 @@
         "member_badges"
       ],
       "externalTables": [],
-      "relationships": 89,
-      "widthPt": 5845,
-      "heightPt": 3179,
+      "relationships": 91,
+      "widthPt": 5801,
+      "heightPt": 3133,
       "pdf": "erd-v2.pdf"
     },
     {
@@ -95,6 +96,7 @@
       "file": "nhom-3.svg",
       "tables": [
         "members",
+        "member_avatars",
         "face_embeddings",
         "body_metrics",
         "packages",
@@ -108,9 +110,9 @@
         "invoice_items",
         "invoices"
       ],
-      "relationships": 22,
-      "widthPt": 1048,
-      "heightPt": 1411,
+      "relationships": 24,
+      "widthPt": 1045,
+      "heightPt": 1627,
       "pdf": "nhom-3.pdf"
     },
     {
@@ -132,7 +134,7 @@
       ],
       "relationships": 16,
       "widthPt": 1067,
-      "heightPt": 1307,
+      "heightPt": 1214,
       "pdf": "nhom-4.pdf"
     },
     {

@@ -2,7 +2,7 @@
 
 - **Ngày:** 12/11/2026
 - **Người quyết định:** Hoàng Kim Tiến (trưởng nhóm), chốt khi review đặc tả F8 ngày 04/11/2026, làm rõ ngày 07/11/2026
-- **Trạng thái:** Đã chấp nhận. Thay thế [ADR 0003](0003-danh-sach-cho-tu-dong-dua-vao-lop.md)
+- **Trạng thái:** Đã thay thế bởi [ADR 0014](0014-bo-danh-sach-cho-lop-hoc-nhom.md) (19/11/2026). Trước đó thay thế [ADR 0003](0003-danh-sach-cho-tu-dong-dua-vao-lop.md)
 
 ## Bối cảnh
 

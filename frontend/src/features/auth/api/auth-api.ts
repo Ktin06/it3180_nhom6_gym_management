@@ -2,6 +2,7 @@ import { queueCookieOperation } from '../../../auth/cookie-operation-queue'
 import { ROLES, type Role } from '../../../auth/roles'
 import type { AuthUser } from '../../../auth/AuthContext'
 import { http } from '../../../services/http'
+import { publicRequest } from '../../../services/request-options'
 import type {
   AccessTokenResponse,
   AuthMeResponse,
@@ -9,7 +10,7 @@ import type {
   RegisterRequest,
 } from '../types/auth'
 
-const publicAuthRequest = { skipBearer: true, skipAuthRefresh: true }
+const publicAuthRequest = publicRequest
 
 export function login(request: LoginRequest) {
   return queueCookieOperation(async () => {

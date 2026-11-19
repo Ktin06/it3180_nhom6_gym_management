@@ -47,9 +47,9 @@ Hệ thống có 6 vai trò: 5 vai trò có tài khoản đăng nhập, riêng k
 | F5 | Thanh toán tại quầy | Ghi nhận tiền mặt hoặc chuyển khoản (hiện mã VietQR có sẵn số tiền, lễ tân xác nhận đã nhận), tạo và in hóa đơn PDF; xử lý hóa đơn chờ do hội viên gửi từ web | v1 | Trung bình |
 | F6 | Dashboard cơ bản | Doanh thu, số hội viên, lượt check-in theo ngày và theo giờ | v1 | Dễ |
 | F7 | Cổng hội viên | Hội viên xem gói, lịch sử check-in, hóa đơn; chọn gói để mua hoặc gia hạn (tạo hóa đơn chờ, thanh toán tại quầy) | v2 | Dễ |
-| F8 | Lớp học nhóm | Lịch lớp lặp hằng tuần, đặt chỗ, hủy chỗ, danh sách chờ tự động đưa vào lớp, điểm danh | v2 | Khó |
+| F8 | Lớp học nhóm | Lịch lớp lặp hằng tuần, đặt chỗ (còn chỗ thì đặt, đầy là hết chỗ), hủy chỗ, điểm danh | v2 | Trung bình |
 | F9 | Huấn luyện viên (PT) | Lịch rảnh, đặt lịch PT có kiểm tra trùng, giáo án, nhật ký tập, biểu đồ tiến độ | v2 | Khó |
-| F10 | Thông báo | Email và thông báo trong web theo thời gian thực: nhắc hết hạn gói, nhắc lịch lớp, được đưa vào lớp từ danh sách chờ, đổi giờ lớp | v2 | Trung bình |
+| F10 | Thông báo | Email và thông báo trong web theo thời gian thực: nhắc hết hạn gói, nhắc lịch lớp, đổi giờ, đổi phòng, hủy buổi lớp | v2 | Trung bình |
 | F11 | Thiết bị | Danh sách thiết bị, báo hỏng, lịch và lịch sử bảo trì | v3 | Dễ |
 | F12 | Bán hàng tại quầy (POS) và kho | Bán nước, đồ ăn, phụ kiện; nhập hàng; tồn kho; cảnh báo sắp hết | v3 | Trung bình |
 | F13 | Nhân sự và lương | Ca làm, chấm công, tính lương cứng và hoa hồng PT | v3 | Trung bình |
@@ -103,13 +103,12 @@ Các giá trị có dấu \* là tham số cấu hình (bảng `system_configs`)
 
 **Lớp học nhóm (F8)**
 
-- Chỉ hội viên có gói TIME đang ACTIVE dùng được tại chi nhánh mới được đặt chỗ hoặc vào danh sách chờ.
-- Mở đặt chỗ trước 7 ngày\*; mỗi lớp có sĩ số tối đa không vượt sức chứa phòng; một hội viên không được đăng ký hai buổi trùng giờ; không giới hạn số danh sách chờ một người tham gia. Đã hủy một buổi thì vẫn đặt lại được buổi đó.
-- Lớp đầy thì vào danh sách chờ theo nguyên tắc đến trước, xếp trước (cùng thời điểm thì ai vào chờ trước theo thứ tự ghi nhận đứng trước). Khi có chỗ trống, hệ thống **tự động đưa vào lớp** người đủ điều kiện đứng đầu và báo cho họ; không cần xác nhận. Người được đưa vào có 15 phút\* ân hạn để hủy mà không bị tính hủy muộn, tính từ lúc được đưa vào lớp. Người không còn đủ điều kiện (gói hết hạn, đang bị khóa, đã có lịch trùng giờ) bị bỏ qua. Buổi còn chỗ mà có người chờ thì xét danh sách chờ trước, rồi mới nhận người đặt mới. Rời danh sách chờ không bị tính hủy muộn.
-- Khi còn dưới 30 phút\* trước giờ học: ngừng tự động đưa vào lớp, đồng thời đóng đặt chỗ mới và vào danh sách chờ; chỗ trống sau mốc này được để trống. Chỗ trống ban đêm vẫn được lấp ngay; thông báo trong web hiện ngay, email gửi khi tới giờ mở cửa chi nhánh. Thời điểm gửi email không ảnh hưởng ân hạn ([ADR 0010](../decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md)).
-- Hủy trước giờ học ít nhất 2 giờ\* thì không bị phạt; hủy muộn hoặc vắng mặt (theo điểm danh của huấn luyện viên) 3 lần trong tháng\* thì bị khóa đặt lớp 7 ngày\*. Người không đủ điều kiện không được đặt chỗ hay vào chờ, và được báo ngay lý do.
-- Đổi phòng: chỉ thông báo. Đổi giờ: hội viên đã có chỗ xác nhận lại trong 60 phút\*; không xác nhận hoặc báo không tham gia thì mất chỗ, không bị phạt, chỗ được chuyển cho danh sách chờ. Hủy buổi: hủy mọi chỗ đặt và danh sách chờ, không phạt, thông báo cho tất cả.
-- Lễ tân được thao tác hộ hội viên nhưng không có ưu tiên; không ai được xếp hội viên vào lớp ngoài thứ tự danh sách chờ.
+- Chỉ hội viên có gói TIME đang ACTIVE dùng được tại chi nhánh mới được đặt chỗ.
+- Mở đặt chỗ trước 7 ngày\*, đóng đặt chỗ mới khi còn dưới 30 phút\* trước giờ học; mỗi lớp có sĩ số tối đa không vượt sức chứa phòng; lớp đã đủ chỗ thì từ chối; một hội viên không được đăng ký hai buổi trùng giờ. Đã hủy một buổi thì vẫn đặt lại được buổi đó nếu còn chỗ.
+- Không có danh sách chờ ([ADR 0014](../decisions/0014-bo-danh-sach-cho-lop-hoc-nhom.md)). Hủy chỗ thì chỗ được trả lại ngay, ai đặt trước thì được trước; hệ thống không tự xếp ai vào lớp.
+- Hủy trước giờ học ít nhất 2 giờ\* thì không bị phạt; hủy muộn hoặc vắng mặt (theo điểm danh của huấn luyện viên) 3 lần trong tháng\* thì bị khóa đặt lớp 7 ngày\*. Sửa điểm danh không tự tính lại khóa; quản lý chi nhánh gỡ khóa đặt lớp bằng tay, mỗi lần gỡ ghi nhật ký. Người không đủ điều kiện không được đặt chỗ, và được báo ngay lý do.
+- Đổi phòng: chỉ thông báo. Đổi giờ: chỗ đặt giữ nguyên, hội viên được báo giờ cũ và giờ mới; buổi đã đổi giờ thì hủy lúc nào cũng không bị phạt. Hủy buổi: hủy mọi chỗ đặt, không phạt, thông báo cho tất cả.
+- Lễ tân được đặt và hủy hộ hội viên nhưng không có ưu tiên.
 
 **Huấn luyện viên (F9)**
 
@@ -177,7 +176,7 @@ Nhóm đã chốt ReactJS + Java Spring Boot + PostgreSQL. Spring Boot được 
 | Cơ sở dữ liệu | PostgreSQL, Flyway | Flyway quản lý thay đổi schema bằng các file migration có đánh số, 8 người không sửa đè nhau |
 | Nhận diện khuôn mặt (v5) | face-api.js chạy trên trình duyệt | Dùng mô hình có sẵn, không cần máy chủ AI riêng |
 | Thời gian thực | WebSocket của Spring (STOMP) | Thông báo tức thời, số người đang tập |
-| Email | Spring Mail qua SMTP | Nhắc hết hạn, báo được đưa vào lớp |
+| Email | Spring Mail qua SMTP | Nhắc hết hạn, nhắc lịch lớp, báo đổi giờ lớp |
 | Thanh toán | VietQR (mã chuyển khoản có sẵn số tiền) | Miễn phí; lễ tân xác nhận thủ công |
 | Tài liệu API | Swagger (springdoc-openapi), sinh tự động | Không phải viết tay |
 | Kiểm thử | JUnit 5, Mockito, Testcontainers, Postman | Kiểm thử đơn vị, kiểm thử với PostgreSQL thật, kiểm thử API |
@@ -206,3 +205,4 @@ Nhóm đã chốt ReactJS + Java Spring Boot + PostgreSQL. Spring Boot được 
 | 02/11/2026 | Kick-off: giữ đủ 20 chức năng (F12, F13 cuối v3); giữ các con số mặc định, phí chuyển nhượng 200.000 đ; bộ sơ đồ UML theo ADR 0009; không khảo sát phòng gym thật ([biên bản](../meetings/2026-11-02-kick-off.md)) |
 | 03/11/2026 | Sau review đặc tả F4, F6 (trưởng nhóm chốt, xem [ADR 0005](../decisions/0005-erd-v2.md) mục 25–32): buổi của gói SESSION tính theo ngày, mỗi ngày trừ tối đa 1 buổi, gói về 0 buổi vẫn check-in lại được đến hết ngày; gói SESSION, PT giữ hạn dùng, ngày hết hạn = ngày bắt đầu + số ngày − 1, hết hạn mà còn buổi thì mất buổi, không hoàn tiền; hết buổi trước hạn thì gói nối tiếp được kéo lịch (SESSION về ngày mai, PT về hôm nay); không bảo lưu, chuyển nhượng gói hết buổi; số buổi PT đặt trước không vượt số buổi còn lại; F6 cảnh báo gói SESSION còn không quá 2 buổi\* |
 | 04/11 – 12/11/2026 | Sau review đặc tả F8 (trưởng nhóm chốt ở [PR #79](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/79); chi tiết trong đặc tả F8 mục 7): danh sách chờ theo [ADR 0010](../decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md), thay ADR 0003 (ân hạn tính từ lúc được đưa vào lớp, không từ lúc gửi email; trùng thời điểm vào chờ thì xếp theo thứ tự ghi nhận; xét danh sách chờ trước người đặt mới; dưới 30 phút\* đóng cả đặt mới và vào chờ; rời danh sách chờ không bị phạt). Cửa sổ đặt chỗ 7 ngày\* tính theo ngày lịch giờ Việt Nam. "Tháng" khi đếm vi phạm là tháng dương lịch giờ Việt Nam, chỉ đếm vi phạm sau lần khóa gần nhất; mỗi vi phạm chỉ tính cho một lần khóa, sửa điểm danh thì tính lại ngay (dưới ngưỡng thì gỡ khóa). Hạn xác nhận đổi giờ là mốc đến trước giữa 60 phút\* và giờ học mới; đổi giờ nhiều lần thì tính lại hạn từ lần đổi mới nhất. Sĩ số mới không nhỏ hơn số chỗ đang giữ. Điểm danh từ giờ học đến 23:59 cùng ngày, sau đó quản lý chi nhánh sửa. Chỉ quản lý chi nhánh và chủ chuỗi được đổi phòng, đổi giờ, hủy buổi. Chỗ đặt ghi người bấm đặt (hội viên hoặc lễ tân) |
+| 19/11/2026 | Bỏ danh sách chờ lớp học nhóm theo [ADR 0014](../decisions/0014-bo-danh-sach-cho-lop-hoc-nhom.md), thay ADR 0010: còn chỗ thì đặt, đầy là hết chỗ; bỏ tự động đưa vào lớp, ân hạn, xác nhận lại khi đổi giờ; đổi giờ thì giữ chỗ, buổi đã đổi giờ hủy không phạt; sửa điểm danh không tự tính lại khóa, quản lý gỡ khóa bằng tay. F8 đổi độ khó từ Khó thành Trung bình |

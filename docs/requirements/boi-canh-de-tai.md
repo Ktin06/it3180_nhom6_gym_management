@@ -38,7 +38,7 @@ Từ v1 đến v3 hệ thống chạy với một chi nhánh mặc định; nhi�
 | Version | Chủ đề | Chức năng | Mức cam kết |
 |---|---|---|---|
 | v1 | Vận hành cơ bản tại quầy | F1 Tài khoản và phân quyền · F2 Hồ sơ hội viên · F3 Gói tập và gia hạn · F4 Check-in tại quầy (mã hội viên/số điện thoại) · F5 Thanh toán tại quầy · F6 Dashboard cơ bản | Bắt buộc |
-| v2 | Hội viên, lớp học, huấn luyện viên | F7 Cổng hội viên · F8 Lớp học nhóm + danh sách chờ · F9 Huấn luyện viên (PT) · F10 Thông báo | Bắt buộc |
+| v2 | Hội viên, lớp học, huấn luyện viên | F7 Cổng hội viên · F8 Lớp học nhóm · F9 Huấn luyện viên (PT) · F10 Thông báo | Bắt buộc |
 | v3 | Vận hành nâng cao | F11 Thiết bị · F12 Bán hàng tại quầy và kho · F13 Nhân sự và lương · F14 Khuyến mãi · F15 Bảo lưu và chuyển nhượng · F16 Báo cáo nâng cao · F17 Nhật ký hoạt động | Mục tiêu |
 | v4 | Chuỗi phòng tập | F18 Đa chi nhánh · F19 Gamification (theo quy tắc, không AI) | Mục tiêu; cắt thứ hai nếu trễ |
 | v5 | Nhận diện khuôn mặt | F20 Check-in bằng khuôn mặt (face-api.js) | Cắt đầu tiên nếu trễ |
@@ -50,7 +50,7 @@ Từ v1 đến v3 hệ thống chạy với một chi nhánh mặc định; nhi�
 - Gói tập: theo thời gian (TIME), theo số buổi (SESSION), gói PT. Hội viên được giữ đồng thời nhiều gói khác loại (ví dụ TIME và PT). Lớp nhóm đã gồm trong gói TIME; gói PT chỉ dùng cho tập 1-1. Gia hạn nối tiếp ngày hết hạn cũ (gói chờ ở trạng thái UPCOMING). Bảo lưu 7–30 ngày, tối đa 2 lần, cần quản lý duyệt.
 - Cổng hội viên (F7): hội viên chọn gói trên web, hệ thống tạo hóa đơn chờ; thanh toán tại quầy thì gói kích hoạt; hóa đơn chờ quá 3 ngày tự hủy.
 - Check-in: thành công khi xác định được hội viên, có gói TIME hoặc SESSION đang ACTIVE còn hạn/còn buổi tại chi nhánh, trong giờ mở cửa. Gói PT không dùng để check-in. Có cả TIME và SESSION thì dùng TIME. Gói SESSION trừ 1 buổi ở lần check-in đầu trong ngày. Màn hình hiện ảnh đại diện để lễ tân đối chiếu. v5 thay bước tìm thủ công bằng nhận diện khuôn mặt; không nhận diện được thì quay về cách thủ công.
-- Lớp học nhóm: chỉ hội viên có gói TIME được đặt chỗ. Danh sách chờ theo thứ tự đến trước; có chỗ trống thì tự động đưa người đủ điều kiện đứng đầu vào lớp và báo cho họ, có 15 phút ân hạn hủy; ngừng tự động đưa vào lớp khi còn dưới 30 phút trước giờ học; hủy muộn/vắng 3 lần trong tháng bị khóa đặt lớp 7 ngày. Các con số là tham số cấu hình.
+- Lớp học nhóm: chỉ hội viên có gói TIME được đặt chỗ. Còn chỗ thì đặt, lớp đầy là hết chỗ, không có danh sách chờ (ADR 0014); hủy chỗ thì chỗ được trả lại ngay. Đóng đặt chỗ khi còn dưới 30 phút trước giờ học; hủy muộn/vắng 3 lần trong tháng bị khóa đặt lớp 7 ngày. Đổi giờ lớp thì giữ chỗ và báo cho hội viên. Các con số là tham số cấu hình.
 - Huấn luyện viên (PT): hội viên có gói PT đặt vào khung giờ PT đã khai báo rảnh, trước ít nhất 12 giờ; chặn trùng lịch; gói PT chỉ trừ buổi khi PT xác nhận buổi đã diễn ra.
 - Thanh toán: chỉ tại quầy (tiền mặt hoặc chuyển khoản VietQR, lễ tân xác nhận); giá luôn tính ở server; gói chỉ kích hoạt khi hóa đơn đã thanh toán. Khách lẻ mua hàng không cần hồ sơ hội viên.
 

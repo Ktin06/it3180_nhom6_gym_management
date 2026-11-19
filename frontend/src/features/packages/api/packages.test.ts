@@ -8,7 +8,7 @@ afterEach(() => {
 })
 
 describe('kết nối danh mục gói F3', () => {
-  it('gửi bộ lọc và phân trang đúng endpoint đã đặc tả', async () => {
+  it('TC-F3.1.1-02f: gửi bộ lọc và phân trang đúng endpoint đã đặc tả', async () => {
     const get = vi.spyOn(http, 'get').mockResolvedValue({ data: { content: [] } })
     await livePackagesApi.list({ page: 0, size: 20, type: 'SESSION', status: 'INACTIVE' })
     expect(get).toHaveBeenCalledWith('/packages', {
