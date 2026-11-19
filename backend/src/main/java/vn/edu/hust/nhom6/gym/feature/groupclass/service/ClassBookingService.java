@@ -1,7 +1,7 @@
 package vn.edu.hust.nhom6.gym.feature.groupclass.service;
 
 import java.time.*;
-import java.util.*;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,47 +21,52 @@ public class ClassBookingService {
     private final Clock classClock;
     private static final Set<String> OPEN = Set.of("SCHEDULED", "RESCHEDULED");
 
-    private void authorize(MemberActor actor, long memberId, Session s) {
+    private ClassRepository.MemberRow authorize(MemberActor actor, long memberId, Session session) {
         var member = classes.member(memberId);
-        if (actor.role() == UserRole.MEMBER && actor.userId().equals(member.userId())) { return; }
-        if (actor.role() == UserRole.RECEPTIONIST && staff.activeBranchIdForUser(actor.userId()).equals(s.branchId())
-                && member.homeBranchId().equals(s.branchId())) { return; }
+        if (actor.role() == UserRole.MEMBER && actor.userId().equals(member.userId())) { return member; }
+        if (actor.role() == UserRole.RECEPTIONIST && staff.activeBranchIdForUser(actor.userId()).equals(session.branchId())
+                && member.homeBranchId().equals(session.branchId())) { return member; }
         throw new ForbiddenException("Bạn không có quyền thao tác chỗ đặt của hội viên này tại chi nhánh.");
     }
 
-    /** Snapshot ứng viên, khóa member theo ID rồi khóa buổi; thay đổi tập ứng viên trả 409 để thử lại. */
+    /** NF6: khóa hội viên trước buổi học, rồi kiểm tra lại lịch và sĩ số trong giao dịch. */
     private Session lock(long memberId, long sessionId) {
-        Set<Long> locked = new TreeSet<>(classes.waitlistMembers(sessionId));
-        locked.add(memberId);
-        classes.lockMembers(locked);
-        var session = classes.session(sessionId, true);
-        if (!locked.containsAll(classes.waitlistMembers(sessionId))) {
-            throw new ConflictException("Danh sách chờ vừa thay đổi. Vui lòng thử lại.");
-        }
-        return session;
+        classes.lockMember(memberId);
+        return classes.session(sessionId, true);
     }
 
     public Booking book(MemberActor actor, long sessionId, long memberId) {
         authorize(actor, memberId, classes.session(sessionId, false));
         var session = lock(memberId, sessionId);
-        authorize(actor, memberId, session);
+        var member = authorize(actor, memberId, session);
         var now = OffsetDateTime.now(classClock);
         var today = now.atZoneSameInstant(ClassScheduleService.VIETNAM).toLocalDate();
         var day = session.startAt().atZoneSameInstant(ClassScheduleService.VIETNAM).toLocalDate();
+        long branch = session.branchId();
         if (!OPEN.contains(session.status()) || day.isBefore(today)
-                || day.isAfter(today.plusDays(classes.config(session.branchId(), "BOOKING_WINDOW_DAYS")))
-                || !beforeCutoff(session, now)) {
+                || day.isAfter(today.plusDays(classes.config(branch, "BOOKING_WINDOW_DAYS")))
+                || now.isAfter(session.startAt().minusMinutes(classes.config(branch, "BOOKING_CUTOFF_MIN")))) {
             throw new BusinessRuleException("Buổi học đã đóng đặt chỗ hoặc ngoài cửa sổ đặt chỗ.");
         }
-        if (classes.duplicate(memberId, sessionId)) { throw new ConflictException("Hội viên đã có chỗ đặt hoặc đang trong danh sách chờ của buổi này."); }
-        if (!classes.eligible(memberId, session.branchId(), day, now)) {
-            throw new BusinessRuleException("Hội viên cần gói TIME đang ACTIVE tại chi nhánh, còn hiệu lực ngày học và không bị khóa đặt lớp.");
+        if (classes.duplicate(memberId, sessionId)) {
+            throw new ConflictException("Hội viên đã có chỗ đặt của buổi này.");
         }
-        if (classes.overlap(memberId, session)) { throw new ConflictException("Hội viên đã có lịch trùng giờ. Hãy hủy buổi kia trước."); }
-        promoteWaiting(session, now);
-        long id = classes.insertBooking(sessionId, memberId, actor.userId(),
-            classes.occupied(sessionId) >= session.capacity(), now);
-        return classes.booking(id);
+        if (!"ACTIVE".equals(member.status())) {
+            throw new BusinessRuleException("Hội viên không ở trạng thái hoạt động.");
+        }
+        if (member.bookingLockedUntil() != null && member.bookingLockedUntil().isAfter(now)) {
+            throw new BusinessRuleException("Hội viên đang bị khóa đặt lớp.");
+        }
+        if (!classes.hasActiveTimePackage(memberId, branch, day)) {
+            throw new BusinessRuleException("Hội viên cần gói TIME đang ACTIVE, dùng được tại chi nhánh và còn hiệu lực ngày học.");
+        }
+        if (classes.overlap(memberId, session)) {
+            throw new ConflictException("Hội viên đã có lịch trùng giờ. Hãy hủy buổi kia trước.");
+        }
+        if (classes.occupied(sessionId) >= session.capacity()) {
+            throw new ConflictException("Lớp đã đủ chỗ");
+        }
+        return classes.booking(classes.insertBooking(sessionId, memberId, actor.userId(), now));
     }
 
     @Transactional(readOnly = true)
@@ -78,36 +83,14 @@ public class ClassBookingService {
         var b = classes.booking(id);
         authorize(actor, b.memberId(), session);
         var now = OffsetDateTime.now(classClock);
-        if (!Set.of("BOOKED", "WAITLIST").contains(b.status()) || !OPEN.contains(session.status())
-                || !session.startAt().isAfter(now)) {
+        if (!"BOOKED".equals(b.status()) || !OPEN.contains(session.status()) || !session.startAt().isAfter(now)) {
             throw new BusinessRuleException("Chỗ đặt đã kết thúc hoặc không thể hủy.");
         }
-        boolean late = b.status().equals("BOOKED")
-            && now.isAfter(session.startAt().minusHours(classes.config(session.branchId(), "LATE_CANCEL_HOURS")))
-            && (b.promotedAt() == null || b.graceUntil() == null || now.isAfter(b.graceUntil()));
+        boolean late = session.originalStartAt() == null
+            && now.isAfter(session.startAt().minusHours(classes.config(session.branchId(), "LATE_CANCEL_HOURS")));
         classes.cancel(id, late, actor.role() == UserRole.RECEPTIONIST, now);
         if (late) { applyPenalty(b.memberId(), session.branchId(), actor.userId(), now); }
-        if (b.status().equals("BOOKED")) { promoteWaiting(session, now); }
         return classes.booking(id);
-    }
-
-    private boolean beforeCutoff(Session s, OffsetDateTime now) {
-        return !now.isAfter(s.startAt().minusMinutes(classes.config(s.branchId(), "PROMOTION_CUTOFF_MIN")));
-    }
-
-    /** Dùng chung cho đặt mới và hủy; caller đã khóa toàn bộ ứng viên trước khóa buổi. */
-    private void promoteWaiting(Session s, OffsetDateTime now) {
-        if (!OPEN.contains(s.status()) || !beforeCutoff(s, now)) { return; }
-        long free = s.capacity() - classes.occupied(s.id());
-        if (free <= 0) { return; }
-        var day = s.startAt().atZoneSameInstant(ClassScheduleService.VIETNAM).toLocalDate();
-        for (var b : classes.waitlist(s.id())) {
-            if (free <= 0) { break; }
-            if (!classes.eligible(b.memberId(), s.branchId(), day, now) || classes.overlap(b.memberId(), s)) { continue; }
-            classes.promote(b, now, classes.config(s.branchId(), "PROMOTION_GRACE_MIN"));
-            classes.promotionNotice(b, s, now);
-            free--;
-        }
     }
 
     private void applyPenalty(long memberId, long branch, long actor, OffsetDateTime now) {

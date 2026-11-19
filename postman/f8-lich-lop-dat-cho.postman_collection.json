@@ -2,7 +2,7 @@
   "info": {
     "name": "F8 — Lịch lặp và đặt chỗ lớp nhóm",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Dùng dữ liệu local/staging được phép. Điền ID thật, ngày hiệu lực và access token đúng vai trò; không lưu token vào Git. Sinh buổi là job nội bộ lúc khởi động/mỗi giờ; chọn sessionId đã sinh trước khi đặt. Lịch trùng phòng/HLV bị trả 409. Chỉ dùng gói TIME ACTIVE; không chạy collection lặp trên dữ liệu thật vì các request có ghi dữ liệu."
+    "description": "Dùng dữ liệu local/staging được phép. Điền ID thật, ngày hiệu lực và access token đúng vai trò; không lưu token vào Git. Sinh buổi là job nội bộ lúc khởi động/mỗi giờ; chọn sessionId đã sinh trước khi đặt. Lịch trùng phòng/HLV bị trả 409. Chỉ dùng gói TIME ACTIVE; không chạy collection lặp trên dữ liệu thật vì các request có ghi dữ liệu. Đặt thành công trả BOOKED; lớp đầy trả 409 và thông báo “Lớp đã đủ chỗ”."
   },
   "variable": [
     {
@@ -201,7 +201,7 @@
       ]
     },
     {
-      "name": "Đặt lớp hoặc vào chờ",
+      "name": "Đặt chỗ lớp còn suất",
       "request": {
         "method": "POST",
         "header": [
@@ -238,6 +238,7 @@
             "type": "text/javascript",
             "exec": [
               "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Chỗ được ghi BOOKED\", () => pm.expect(pm.response.json().status).to.eql(\"BOOKED\"));",
               "if (pm.response.code === 201) pm.collectionVariables.set(\"bookingId\", pm.response.json().id);"
             ]
           }
@@ -245,7 +246,7 @@
       ]
     },
     {
-      "name": "Xem chỗ đặt và vị trí chờ",
+      "name": "Xem chỗ đặt và hạn khóa",
       "request": {
         "method": "GET",
         "header": [],
@@ -296,7 +297,8 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Chỗ đã hủy\", () => pm.expect(pm.response.json().status).to.eql(\"CANCELLED\"));"
             ]
           }
         }

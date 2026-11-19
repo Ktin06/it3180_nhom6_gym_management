@@ -74,7 +74,7 @@ docker run --rm -p 8080:8080 -e DB_HOST=... -e DB_NAME=... -e DB_USERNAME=... -e
 ## F8 – Lịch lặp và đặt chỗ lớp nhóm
 
 Nguồn nghiệp vụ: [SRS F8](../docs/requirements/srs/dac-ta-use-case-f8-lop-hoc-nhom.md),
-UC-F8.1, F8.3, F8.7, F8.8 và [ADR 0010](../docs/decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md).
+UC-F8.1, F8.3, F8.7, F8.8 và [ADR 0014](../docs/decisions/0014-bo-danh-sach-cho-lop-hoc-nhom.md).
 Các API dưới đây yêu cầu JWT. Vai trò ngoài bảng bị từ chối, kể cả chủ chuỗi tạo lịch lặp.
 
 | Phương thức và đường dẫn (sau `/api/v1`) | Vai trò | Kết quả |
@@ -84,15 +84,13 @@ Các API dưới đây yêu cầu JWT. Vai trò ngoài bảng bị từ chối, 
 | `POST /class-schedules` | Quản lý chi nhánh | 201, `Location`, lịch ACTIVE; chi nhánh lấy từ hồ sơ nhân viên |
 | `PUT /class-schedules/{id}` | Quản lý chi nhánh | Sửa lịch ACTIVE; không sửa các buổi đã sinh |
 | `PUT /class-schedules/{id}/deactivate` | Quản lý chi nhánh | Ngừng lịch; giữ nguyên các buổi và chỗ đặt đã sinh |
-| `POST /class-sessions/{id}/bookings` | Hội viên, lễ tân | 201 cho cả BOOKED/WAITLIST, kèm `Location` |
-| `GET /class-bookings/{id}` | Hội viên, lễ tân | Trạng thái, vị trí chờ hiện tại, hạn khóa đặt lớp |
+| `POST /class-sessions/{id}/bookings` | Hội viên, lễ tân | 201 với `BOOKED` và `Location`, 409 khi lớp đủ chỗ |
+| `GET /class-bookings/{id}` | Hội viên, lễ tân | Trạng thái và hạn khóa đặt lớp |
 | `PUT /class-bookings/{id}/cancel` | Hội viên, lễ tân | Chỗ CANCELLED, `isLateCancel`, `bookingLockedUntil` |
 
 Quản lý chỉ thao tác lịch thuộc chi nhánh làm việc ACTIVE. Hội viên chỉ đặt/xem/hủy của mình.
 Lễ tân chỉ thao tác buổi và hội viên thuộc chi nhánh làm việc. Ngoài phạm vi trả 403;
-không có tài nguyên trả 404. Dữ liệu request sai trả 400 với `errors`; trùng lịch/chỗ đặt hoặc
-cạnh tranh trả 409; điều kiện nghiệp vụ không đạt trả 422. Có thể thử lại request sau 409 do
-danh sách chờ vừa thay đổi; cần đọc trạng thái trước khi thử lại lỗi trùng chỗ đặt.
+không có tài nguyên trả 404. Dữ liệu request sai trả 400 với `errors`; trùng lịch, trùng chỗ hoặc hết chỗ trả 409; gói không hợp lệ, khóa đặt lớp hoặc ngoài cửa sổ trả 422.
 
 Ví dụ nội dung tạo/sửa lịch (thay ID và ngày bằng dữ liệu hợp lệ):
 
@@ -130,25 +128,17 @@ không ghi đè buổi đã có, kể cả đã đổi giờ hoặc hủy. Ngày
 
 ### Khóa giao dịch và tích hợp
 
-- Đặt/hủy lấy snapshot người chờ, khóa tất cả dòng `members` liên quan theo ID tăng dần,
-  rồi khóa `class_sessions`; sau khóa kiểm tra lại điều kiện và tập ứng viên. Có ứng viên mới
-  chưa khóa thì rollback/trả 409 để gọi lại bằng giao dịch mới, không khóa thêm member sau session.
-- Đặt mới và hủy giải phóng chỗ dùng cùng hàm xét FIFO (`waitlisted_at`, rồi `id`). Người
-  không còn TIME hợp lệ, bị khóa hoặc trùng giờ được bỏ qua và giữ thứ tự. Không vượt sĩ số;
-  BOOKED, PENDING_RECONFIRM, ATTENDED, NO_SHOW đều chiếm chỗ.
-- Chỉ TIME ACTIVE áp dụng tại chi nhánh, còn hiệu lực ngày học. Cửa sổ theo ngày Việt Nam;
-  đúng cutoff vẫn nhận đặt/đưa vào lớp, dưới cutoff thì đóng. Cấu hình chi nhánh ghi đè toàn chuỗi.
-- Hủy trước giờ học: BOOKED mới có thể bị hủy muộn; đúng mốc hủy sớm hoặc ân hạn không phạt;
-  rời WAITLIST không phạt. Hủy không cho phép sau khi buổi bắt đầu. PENDING_RECONFIRM được
-  xử lý bằng luồng từ chối/xác nhận đổi giờ của chức năng đổi buổi.
-- Mỗi lần khóa tạo `audit_logs.action='CLASS_BOOKING_LOCK'`, `entity='members'`, `entity_id`
-  là hội viên, `created_at` là mốc khóa, `new_value.lockedUntil` là hạn khóa. Đếm hủy muộn theo
-  `cancelled_at`, NO_SHOW theo giờ bắt đầu buổi; chỉ trong tháng Việt Nam và sau lần khóa gần nhất.
-  Không suy ngược mốc từ thời hạn khóa hoặc cấu hình số ngày. Phần sửa điểm danh phải dùng lịch sử
-  các lần khóa này để xét đúng lần khóa liền trước theo SRS F8.6.
-- Đưa vào lớp ghi `promoted_at`, `grace_until` và thông báo IN_APP trong cùng giao dịch; tạo
-  EMAIL PENDING với `scheduled_at` trong giờ mở cửa chi nhánh. F10 gửi/thử lại email; email
-  không đổi ân hạn. Hồ sơ chưa có tài khoản vẫn được ghi mốc và ân hạn, không tạo user giả.
+- Đặt và hủy khóa dòng `members` trước, `class_sessions` sau. Sau khi lấy khóa, đặt mới kiểm tra
+  lại trùng giờ và sĩ số. Các trạng thái chiếm chỗ là `BOOKED`, `ATTENDED`, `NO_SHOW`.
+  Hủy trả suất ngay. Người khác cần gửi yêu cầu đặt mới khi buổi còn nhận đặt.
+- Chỉ gói TIME ACTIVE dùng được tại chi nhánh và còn hiệu lực ngày học được đặt. Cửa sổ theo
+  ngày Việt Nam. Còn đúng `BOOKING_CUTOFF_MIN` phút vẫn nhận đặt. Cấu hình chi nhánh ghi đè toàn chuỗi.
+- Chỗ `BOOKED` có thể hủy trước giờ học. Hủy trước ít nhất `LATE_CANCEL_HOURS` hoặc hủy chỗ
+  của buổi đã đổi giờ (`original_start_at` có giá trị) thì miễn phạt.
+- Mỗi lần khóa tạo `audit_logs.action='CLASS_BOOKING_LOCK'`, `entity='members'` và `entity_id`
+  là hội viên. `created_at` là mốc khóa, `new_value.lockedUntil` là hạn khóa. Đếm hủy muộn theo
+  `cancelled_at`, NO_SHOW theo giờ bắt đầu buổi, trong tháng Việt Nam và sau lần khóa gần nhất.
+  Sửa điểm danh và gỡ khóa thủ công thuộc #199 và tuân theo ADR 0014.
 - Tạo/sửa/ngừng lịch và sinh buổi khóa dòng `branches` trước khi kiểm tra trùng. Khi triển khai
   các luồng F9/đổi buổi khác có thay đổi lịch phòng/huấn luyện viên, cần dùng cùng khóa chi nhánh
   và kiểm tra lại lịch trong giao dịch; chỉ truy vấn trước khi ghi không đủ để chống cạnh tranh.
@@ -164,14 +154,12 @@ Nếu chuẩn bị dữ liệu trên database có dữ liệu cần giữ, sao l
 ```
 
 `ClassApiIntegrationTest` dùng database PostgreSQL 16 Testcontainers mới với toàn bộ migration;
-chỉ mock đồng hồ để kiểm tra biên. Có ca cạnh tranh chỗ cuối, cùng người đặt trùng giờ,
-hủy đồng thời, sinh buổi đồng thời và rollback cả hủy/đưa vào lớp/thông báo khi ghi lỗi.
-Truy vết hiện dựa trên BR và kịch bản SRS: F8.1-01…06, F8.3-01…04, F8.7-01…04/06,
-F8.8-01…03. Mã AC/TC chính thức cần đồng bộ khi SRS được chuẩn hóa trong task #201;
-không coi tên test hiện tại là mã AC đã nghiệm thu.
+chỉ mock đồng hồ để kiểm tra biên. Kiểm thử gồm tranh chỗ cuối, cùng người đặt trùng giờ,
+hủy đồng thời, sinh buổi đồng thời và rollback khi ghi audit khóa thất bại. Mã TC đối chiếu
+với [ma trận truy vết](../docs/testing/ma-tran-truy-vet.md).
 
 Import [collection F8](../postman/f8-lich-lop-dat-cho.postman_collection.json), điền ID thật,
 ngày hiệu lực và access token đúng vai trò. Có request cho từng API trong bảng trên.
 Đợi job sinh buổi rồi chọn `sessionId` đã tồn tại. Không lưu token trong file collection.
 Các thao tác cập nhật buổi/điểm danh/giao diện và dịch vụ gửi email có phần việc riêng;
-API này chưa phải bằng chứng đã nghiệm thu trên staging.
+Nghiệm thu staging theo từng AC sau khi triển khai.

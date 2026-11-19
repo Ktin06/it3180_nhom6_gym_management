@@ -64,8 +64,8 @@ public class ClassController {
 
     @PostMapping("/class-sessions/{id}/bookings")
     @PreAuthorize("hasAnyRole('MEMBER','RECEPTIONIST')")
-    @Operation(summary = "Đặt chỗ hoặc vào danh sách chờ; chỉ TIME ACTIVE; lễ tân đặt hộ đúng chi nhánh",
-        description = "201 cho cả BOOKED và WAITLIST. Xét FIFO trước người mới; createdBy lấy từ JWT.")
+    @Operation(summary = "Đặt chỗ khi lớp còn chỗ; chỉ TIME ACTIVE; lễ tân đặt hộ đúng chi nhánh",
+        description = "201 cho BOOKED, 409 nếu lớp đã đủ chỗ. createdBy lấy từ JWT.")
     public ResponseEntity<Booking> book(Authentication auth, @PathVariable @Positive Long id,
             @Valid @RequestBody BookingRequest request) {
         var b = bookings.book(MemberActor.from(auth), id, request.memberId());
@@ -74,14 +74,14 @@ public class ClassController {
 
     @GetMapping("/class-bookings/{id}")
     @PreAuthorize("hasAnyRole('MEMBER','RECEPTIONIST')")
-    @Operation(summary = "Xem chỗ đặt, vị trí FIFO hiện tại và thời điểm hết khóa đặt lớp")
+    @Operation(summary = "Xem chỗ đặt và thời điểm hết khóa đặt lớp")
     public Booking detail(Authentication auth, @PathVariable @Positive Long id) {
         return bookings.detail(MemberActor.from(auth), id);
     }
 
     @PutMapping("/class-bookings/{id}/cancel")
     @PreAuthorize("hasAnyRole('MEMBER','RECEPTIONIST')")
-    @Operation(summary = "Hủy chỗ trước giờ học; trả isLateCancel và bookingLockedUntil; rời chờ không phạt")
+    @Operation(summary = "Hủy chỗ trước giờ học; buổi đã đổi giờ hủy không phạt")
     public Booking cancel(Authentication auth, @PathVariable @Positive Long id) {
         return bookings.cancel(MemberActor.from(auth), id);
     }

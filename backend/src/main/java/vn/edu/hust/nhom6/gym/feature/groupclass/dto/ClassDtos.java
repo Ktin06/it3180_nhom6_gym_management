@@ -35,10 +35,9 @@ public final class ClassDtos {
 
     public record Session(Long id, Long classScheduleId, Long branchId, Long trainerId, Long roomId,
         LocalDate occurrenceDate, OffsetDateTime startAt, OffsetDateTime endAt, Integer capacity,
-        String status) {}
+        String status, OffsetDateTime originalStartAt) {}
 
     public record Booking(Long id, Long classSessionId, Long memberId, Long createdBy, String status,
-        OffsetDateTime waitlistedAt, OffsetDateTime bookedAt, OffsetDateTime promotedAt,
-        OffsetDateTime graceUntil, OffsetDateTime cancelledAt, String cancelReason,
-        Boolean isLateCancel, Long waitlistPosition, OffsetDateTime bookingLockedUntil) {}
+        OffsetDateTime bookedAt, OffsetDateTime cancelledAt, String cancelReason,
+        Boolean isLateCancel, OffsetDateTime bookingLockedUntil) {}
 }

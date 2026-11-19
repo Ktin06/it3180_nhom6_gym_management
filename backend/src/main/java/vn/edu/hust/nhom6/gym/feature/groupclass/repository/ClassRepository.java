@@ -15,7 +15,7 @@ import vn.edu.hust.nhom6.gym.feature.groupclass.dto.ClassDtos.*;
 @RequiredArgsConstructor
 public class ClassRepository {
     private static final Set<String> ZERO_ALLOWED_CONFIGS = Set.of(
-        "BOOKING_WINDOW_DAYS", "PROMOTION_CUTOFF_MIN", "LATE_CANCEL_HOURS");
+        "BOOKING_WINDOW_DAYS", "BOOKING_CUTOFF_MIN", "LATE_CANCEL_HOURS");
 
     private final NamedParameterJdbcTemplate jdbc;
 
@@ -49,14 +49,8 @@ public class ClassRepository {
             .stream().findFirst().orElseThrow(() -> new NotFoundException("Không tìm thấy hội viên."));
     }
 
-    public List<Long> waitlistMembers(long sessionId) {
-        return jdbc.queryForList("SELECT member_id FROM class_bookings WHERE class_session_id=:id AND status='WAITLIST'",
-            Map.of("id", sessionId), Long.class);
-    }
-
-    public void lockMembers(Set<Long> ids) {
-        jdbc.queryForList("SELECT id FROM members WHERE id IN (:ids) ORDER BY id FOR UPDATE",
-            Map.of("ids", ids), Long.class);
+    public void lockMember(long id) {
+        jdbc.queryForList("SELECT id FROM members WHERE id=:id FOR UPDATE", Map.of("id", id), Long.class);
     }
 
     public void lockBranch(long branchId) {
@@ -179,20 +173,18 @@ public class ClassRepository {
         return value;
     }
 
-    public boolean eligible(long memberId, long branch, LocalDate date, OffsetDateTime now) {
+    public boolean hasActiveTimePackage(long memberId, long branch, LocalDate date) {
         return Boolean.TRUE.equals(jdbc.queryForObject("""
-            SELECT EXISTS(SELECT 1 FROM members m JOIN memberships p ON p.member_id=m.id
-                WHERE m.id=:id AND m.status='ACTIVE' AND m.deleted_at IS NULL
-                AND (m.booking_locked_until IS NULL OR m.booking_locked_until<=:now)
-                AND p.package_type='TIME' AND p.status='ACTIVE' AND (p.branch_id=:branch OR p.branch_id IS NULL)
-                AND p.start_date<=:date AND p.end_date>=:date)
-            """, Map.of("id", memberId, "branch", branch, "date", date, "now", now), Boolean.class));
+            SELECT EXISTS(SELECT 1 FROM memberships WHERE member_id=:id
+                AND package_type='TIME' AND status='ACTIVE' AND (branch_id=:branch OR branch_id IS NULL)
+                AND start_date<=:date AND end_date>=:date)
+            """, Map.of("id", memberId, "branch", branch, "date", date), Boolean.class));
     }
 
     public boolean overlap(long memberId, Session session) {
         return Boolean.TRUE.equals(jdbc.queryForObject("""
             SELECT EXISTS(SELECT 1 FROM class_bookings b JOIN class_sessions s ON s.id=b.class_session_id
-                WHERE b.member_id=:member AND b.status IN ('BOOKED','PENDING_RECONFIRM','ATTENDED','NO_SHOW')
+                WHERE b.member_id=:member AND b.status IN ('BOOKED','ATTENDED','NO_SHOW')
                 AND s.status<>'CANCELLED' AND s.id<>:id AND s.start_at<:end AND s.end_at>:start)
               OR EXISTS(SELECT 1 FROM pt_sessions WHERE member_id=:member AND status<>'CANCELLED'
                 AND start_at<:end AND end_at>:start)
@@ -205,35 +197,23 @@ public class ClassRepository {
     }
 
     public long occupied(long session) {
-        return scalar("SELECT count(*) FROM class_bookings WHERE class_session_id=:id AND status IN ('BOOKED','PENDING_RECONFIRM','ATTENDED','NO_SHOW')",
+        return scalar("SELECT count(*) FROM class_bookings WHERE class_session_id=:id AND status IN ('BOOKED','ATTENDED','NO_SHOW')",
             Map.of("id", session));
     }
 
-    private static final String BOOKING_SELECT = """
-        SELECT b.*, m.booking_locked_until,
-          CASE WHEN b.status='WAITLIST' THEN (SELECT count(*) FROM class_bookings w
-              WHERE w.class_session_id=b.class_session_id AND w.status='WAITLIST'
-              AND (w.waitlisted_at,w.id)<=(b.waitlisted_at,b.id)) ELSE NULL END waitlist_position
-        FROM class_bookings b JOIN members m ON m.id=b.member_id
-        """;
-
     public Booking booking(long id) {
-        return rows(BOOKING_SELECT + " WHERE b.id=:id", Map.of("id", id), Booking.class).stream().findFirst()
+        return rows("""
+            SELECT b.*, m.booking_locked_until
+            FROM class_bookings b JOIN members m ON m.id=b.member_id WHERE b.id=:id
+            """, Map.of("id", id), Booking.class).stream().findFirst()
             .orElseThrow(() -> new NotFoundException("Không tìm thấy chỗ đặt."));
     }
 
-    public List<Booking> waitlist(long sessionId) {
-        return rows(BOOKING_SELECT + " WHERE b.class_session_id=:id AND b.status='WAITLIST' ORDER BY b.waitlisted_at,b.id",
-            Map.of("id", sessionId), Booking.class);
-    }
-
-    public long insertBooking(long session, long member, long actor, boolean wait, OffsetDateTime now) {
+    public long insertBooking(long session, long member, long actor, OffsetDateTime now) {
         return scalar("""
-            INSERT INTO class_bookings(class_session_id,member_id,created_by,status,waitlisted_at,booked_at)
-            VALUES (:session,:member,:actor,:status,:wait,:booked) RETURNING id
-            """, new MapSqlParameterSource().addValue("session", session).addValue("member", member)
-                .addValue("actor", actor).addValue("status", wait ? "WAITLIST" : "BOOKED")
-                .addValue("wait", wait ? now : null).addValue("booked", wait ? null : now).getValues());
+            INSERT INTO class_bookings(class_session_id,member_id,created_by,status,booked_at)
+            VALUES (:session,:member,:actor,'BOOKED',:now) RETURNING id
+            """, Map.of("session", session, "member", member, "actor", actor, "now", now));
     }
 
     public void cancel(long id, boolean late, boolean staff, OffsetDateTime now) {
@@ -241,35 +221,6 @@ public class ClassRepository {
             UPDATE class_bookings SET status='CANCELLED', cancelled_at=:now, cancel_reason=:reason,
                 is_late_cancel=:late,updated_at=:now WHERE id=:id
             """, Map.of("id", id, "now", now, "reason", staff ? "BY_STAFF" : "BY_MEMBER", "late", late));
-    }
-
-    public void promote(Booking booking, OffsetDateTime now, int grace) {
-        jdbc.update("""
-            UPDATE class_bookings SET status='BOOKED',booked_at=:now,promoted_at=:now,grace_until=:grace,
-                updated_at=:now WHERE id=:id
-            """, Map.of("id", booking.id(), "now", now, "grace", now.plusMinutes(grace)));
-    }
-
-    public void promotionNotice(Booking b, Session s, OffsetDateTime now) {
-        // Hồ sơ chưa có tài khoản vẫn có promoted_at/grace_until; không tạo user giả.
-        jdbc.update("""
-            INSERT INTO notifications(user_id,type,title,content,channel,related_entity,related_id,status,sent_at,created_at,updated_at)
-            SELECT user_id,'CLASS_PROMOTED','Bạn đã được đưa vào lớp',:content,'IN_APP','class_bookings',:id,'SENT',:now,:now,:now
-            FROM members WHERE id=:member AND user_id IS NOT NULL
-            """, Map.of("member", b.memberId(), "id", b.id(), "now", now,
-                "content", "Buổi học bắt đầu lúc " + s.startAt().atZoneSameInstant(ZoneId.of("Asia/Ho_Chi_Minh"))));
-        // F10 gửi email từ hàng đợi; trước giờ mở cửa thì hẹn tới giờ mở cửa.
-        jdbc.update("""
-            INSERT INTO notifications(user_id,type,title,content,channel,related_entity,related_id,status,scheduled_at,created_at,updated_at)
-            SELECT m.user_id,'CLASS_PROMOTED','Bạn đã được đưa vào lớp',:content,'EMAIL','class_bookings',:id,'PENDING',
-              CASE WHEN (:now::timestamptz AT TIME ZONE 'Asia/Ho_Chi_Minh')::time < br.open_time
-                THEN (((:now::timestamptz AT TIME ZONE 'Asia/Ho_Chi_Minh')::date + br.open_time) AT TIME ZONE 'Asia/Ho_Chi_Minh')
-                WHEN (:now::timestamptz AT TIME ZONE 'Asia/Ho_Chi_Minh')::time >= br.close_time
-                THEN (((:now::timestamptz AT TIME ZONE 'Asia/Ho_Chi_Minh')::date + 1 + br.open_time) AT TIME ZONE 'Asia/Ho_Chi_Minh')
-                ELSE :now::timestamptz END,:now,:now
-            FROM members m JOIN branches br ON br.id=:branch WHERE m.id=:member AND m.user_id IS NOT NULL
-            """, Map.of("member", b.memberId(), "id", b.id(), "branch", s.branchId(), "now", now,
-                "content", "Buổi học bắt đầu lúc " + s.startAt().atZoneSameInstant(ZoneId.of("Asia/Ho_Chi_Minh"))));
     }
 
     public OffsetDateTime latestLock(long member) {

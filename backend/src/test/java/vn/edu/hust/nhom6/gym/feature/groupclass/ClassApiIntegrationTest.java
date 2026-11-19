@@ -15,6 +15,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.json.JsonMapper;
 import vn.edu.hust.nhom6.gym.TestcontainersConfiguration;
+import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
+import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 import vn.edu.hust.nhom6.gym.feature.auth.service.JwtTokenService;
 import vn.edu.hust.nhom6.gym.feature.groupclass.dto.ClassDtos.*;
@@ -42,16 +44,18 @@ class ClassApiIntegrationTest {
     long branch, otherBranch, manager, receptionist, trainer, room, type, member, user;
 
     @BeforeEach
-    void fixture() throws Exception {
-        // Chỉ database Testcontainers mới, không dùng DB local hoặc staging.
-        jdbc.execute("TRUNCATE users,packages,class_types,rooms RESTART IDENTITY CASCADE");
-        var configSql = new String(new org.springframework.core.io.ClassPathResource(
-            "db/migration/V1_06__create_system_configs.sql").getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-        jdbc.execute(configSql.substring(configSql.indexOf("INSERT INTO system_configs")));
+    void fixture() {
+        // Giữ cấu hình toàn chuỗi đã qua Flyway khi reset dữ liệu trong PostgreSQL cô lập.
+        jdbc.execute("""
+            CREATE TEMP TABLE f8_default_configs ON COMMIT DROP AS
+                SELECT config_key, config_value, description FROM system_configs WHERE branch_id IS NULL;
+            TRUNCATE users, packages, class_types, rooms RESTART IDENTITY CASCADE;
+            INSERT INTO system_configs(config_key, config_value, description)
+                SELECT config_key, config_value, description FROM f8_default_configs;
+            """);
         branch = jdbc.queryForObject("SELECT id FROM branches WHERE code='CN01'", Long.class);
         jdbc.update("INSERT INTO branches(code,name,open_time,close_time) VALUES ('F8TEST','Khác','06:00','22:00') ON CONFLICT DO NOTHING");
         otherBranch = jdbc.queryForObject("SELECT id FROM branches WHERE code='F8TEST'", Long.class);
-        jdbc.update("DELETE FROM system_configs WHERE branch_id IS NOT NULL");
         manager = user("manager", "BRANCH_MANAGER");
         receptionist = user("reception", "RECEPTIONIST");
         long trainerUser = user("trainer", "TRAINER");
@@ -111,24 +115,61 @@ class ClassApiIntegrationTest {
     private MemberActor manager() { return new MemberActor(manager, UserRole.BRANCH_MANAGER); }
     private String bearer(long id, String role) { return "Bearer " + tokens.generateAccessToken(id, "test@f8.example", UserRole.valueOf(role)); }
 
-    @Test @DisplayName("Đặt, vào chờ, FIFO, ân hạn và thông báo cùng giao dịch")
-    void bookingWaitlistCancellationAndPromotion() throws Exception {
-        long s = session(NOW.plusHours(3), 1);
-        var first = bookings.book(actor(), s, member);
-        long u2 = user("second", "MEMBER"); long m2 = member(u2); timePackage(m2);
-        var second = bookings.book(new MemberActor(u2, UserRole.MEMBER), s, m2);
-        assertThat(second.status()).isEqualTo("WAITLIST"); assertThat(second.waitlistPosition()).isEqualTo(1);
-        assertThat(second.createdBy()).isEqualTo(u2);
+    @Test
+    @DisplayName("TC-F8.1.1-03a, TC-F8.3.1-04a: Lớp đầy trả 409; chỗ vừa hủy được đặt bằng yêu cầu mới")
+    void fullClassRejectsBookingAndCancellationReleasesSeat() throws Exception {
+        long session = session(NOW.plusHours(3), 1);
+        var first = bookings.book(actor(), session, member);
+        long secondUser = user("second", "MEMBER");
+        long secondMember = member(secondUser);
+        timePackage(secondMember);
+        var second = new MemberActor(secondUser, UserRole.MEMBER);
+
+        mvc.perform(post("/api/v1/class-sessions/{id}/bookings", session)
+            .header("Authorization", bearer(secondUser, "MEMBER")).contentType(APPLICATION_JSON)
+            .content(json.writeValueAsString(new BookingRequest(secondMember))))
+            .andExpect(status().isConflict()).andExpect(jsonPath("$.detail").value("Lớp đã đủ chỗ"));
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM class_bookings WHERE class_session_id=?", Long.class, session))
+            .isEqualTo(1);
+
         bookings.cancel(actor(), first.id());
-        var promoted = bookings.detail(new MemberActor(u2, UserRole.MEMBER), second.id());
-        assertThat(promoted.status()).isEqualTo("BOOKED"); assertThat(promoted.createdBy()).isEqualTo(u2);
-        assertThat(promoted.promotedAt().toInstant()).isEqualTo(NOW.toInstant());
-        assertThat(promoted.graceUntil().toInstant()).isEqualTo(NOW.plusMinutes(15).toInstant());
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM notifications WHERE related_id=?", Long.class, second.id())).isEqualTo(2);
-        assertThat(bookings.book(actor(), s, member).status()).isEqualTo("WAITLIST");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM class_bookings WHERE class_session_id=?", Long.class, session))
+            .isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM notifications", Long.class)).isZero();
+        assertThat(bookings.book(second, session, secondMember).status()).isEqualTo("BOOKED");
     }
 
-    @ParameterizedTest @ValueSource(strings = {"SESSION", "PT", "EXPIRED", "PENDING", "FROZEN", "WRONG_BRANCH", "ENDED", "LOCKED", "INACTIVE"})
+    @ParameterizedTest
+    @DisplayName("TC-F8.1.1-03b: Các trạng thái chiếm chỗ đều tính vào sĩ số")
+    @ValueSource(strings = {"BOOKED", "ATTENDED", "NO_SHOW"})
+    void occupiedStatusesCountTowardsCapacity(String state) {
+        long session = session(NOW.plusHours(3), 1);
+        var first = bookings.book(actor(), session, member);
+        jdbc.update("UPDATE class_bookings SET status=? WHERE id=?", state, first.id());
+        long secondUser = user("second", "MEMBER");
+        long secondMember = member(secondUser);
+        timePackage(secondMember);
+
+        assertThatThrownBy(() -> bookings.book(new MemberActor(secondUser, UserRole.MEMBER), session, secondMember))
+            .isInstanceOf(ConflictException.class).hasMessage("Lớp đã đủ chỗ");
+    }
+
+    @Test
+    @DisplayName("TC-F8.1.1-06a: Hội viên đặt lại sau hủy và giữ lịch sử")
+    void memberCanBookAgainAfterCancellation() {
+        long session = session(NOW.plusHours(3), 1);
+        var first = bookings.book(actor(), session, member);
+        bookings.cancel(actor(), first.id());
+
+        var second = bookings.book(actor(), session, member);
+        assertThat(second.status()).isEqualTo("BOOKED");
+        assertThat(second.id()).isNotEqualTo(first.id());
+        assertThat(bookings.detail(actor(), first.id()).status()).isEqualTo("CANCELLED");
+    }
+
+    @ParameterizedTest
+    @DisplayName("TC-F8.1.1-02a: Từ chối gói không hợp lệ, hội viên ngừng hoạt động hoặc bị khóa")
+    @ValueSource(strings = {"SESSION", "PT", "EXPIRED", "PENDING", "FROZEN", "WRONG_BRANCH", "ENDED", "LOCKED", "INACTIVE"})
     void rejectsIneligibleMemberships(String condition) {
         switch (condition) {
             case "SESSION", "PT" -> jdbc.update("UPDATE memberships SET package_type=?,total_sessions=10,remaining_sessions=10", condition);
@@ -139,11 +180,17 @@ class ClassApiIntegrationTest {
             default -> jdbc.update("UPDATE memberships SET status=?", condition);
         }
         long s = session(NOW.plusHours(3), 1);
-        assertThatThrownBy(() -> bookings.book(actor(), s, member)).hasMessageContaining("TIME");
+        String reason = switch (condition) {
+            case "LOCKED" -> "đang bị khóa";
+            case "INACTIVE" -> "không ở trạng thái hoạt động";
+            default -> "TIME";
+        };
+        assertThatThrownBy(() -> bookings.book(actor(), s, member)).hasMessageContaining(reason);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM class_bookings", Long.class)).isZero();
     }
 
     @Test
+    @DisplayName("TC-F8.1.1-07a: Cửa sổ theo ngày lịch Việt Nam và cấu hình chi nhánh")
     void dayWindowUsesVietnamDatesAndBranchOverrides() {
         long lastDay = session(NOW.plusDays(7).withHour(23), 1);
         assertThat(bookings.book(actor(), lastDay, member).status()).isEqualTo("BOOKED");
@@ -153,50 +200,75 @@ class ClassApiIntegrationTest {
         assertThat(bookings.book(actor(), outside, member).status()).isEqualTo("BOOKED");
     }
 
-    @ParameterizedTest @CsvSource({"30,true", "29,false"})
+    @ParameterizedTest
+    @DisplayName("TC-F8.1.1-08a: Đúng mốc đóng được xét, dưới mốc từ chối đặt")
+    @CsvSource({"30,true", "29,false"})
     void cutoffBoundary(long minutes, boolean permitted) {
         long s = session(NOW.plusMinutes(minutes), 1);
         if (permitted) { assertThat(bookings.book(actor(), s, member).status()).isEqualTo("BOOKED"); }
         else { assertThatThrownBy(() -> bookings.book(actor(), s, member)).hasMessageContaining("đóng đặt"); }
     }
 
-    @ParameterizedTest @CsvSource({"120,false", "119,true"})
+    @Test
+    @DisplayName("TC-F8.1.1-10a: Ưu tiên mốc đóng đặt của chi nhánh")
+    void branchCutoffOverridesGlobalValue() {
+        long session = session(NOW.plusMinutes(20), 1);
+        assertThatThrownBy(() -> bookings.book(actor(), session, member)).hasMessageContaining("đóng đặt");
+
+        jdbc.update("INSERT INTO system_configs(branch_id,config_key,config_value) VALUES (?,'BOOKING_CUTOFF_MIN','20')", branch);
+        assertThat(bookings.book(actor(), session, member).status()).isEqualTo("BOOKED");
+    }
+
+    @ParameterizedTest
+    @DisplayName("TC-F8.3.1-01a: Hủy sớm kể cả tại đúng mốc; hủy muộn dưới mốc")
+    @CsvSource({"121,false", "120,false", "119,true"})
     void lateCancellationBoundary(long minutes, boolean late) {
         long s = session(NOW.plusMinutes(minutes), 1);
         var b = bookings.book(actor(), s, member);
-        assertThat(bookings.cancel(actor(), b.id()).isLateCancel()).isEqualTo(late);
+        var cancelled = bookings.cancel(actor(), b.id());
+        assertThat(cancelled.status()).isEqualTo("CANCELLED");
+        assertThat(cancelled.isLateCancel()).isEqualTo(late);
         assertThatThrownBy(() -> bookings.cancel(actor(), b.id())).hasMessageContaining("không thể hủy");
     }
 
-    @ParameterizedTest @CsvSource({"0,false", "1,true"})
-    void promotedGraceBoundary(int secondsAfter, boolean late) {
-        long s = session(NOW.plusHours(1), 1);
-        var b = bookings.book(actor(), s, member);
-        jdbc.update("UPDATE class_bookings SET promoted_at=?,grace_until=? WHERE id=?", NOW.minusMinutes(15), NOW, b.id());
-        at(NOW.plusSeconds(secondsAfter));
-        assertThat(bookings.cancel(actor(), b.id()).isLateCancel()).isEqualTo(late);
+    @Test
+    @DisplayName("TC-F8.3.1-03a: Hủy sát giờ sau khi buổi đổi lịch được miễn phạt")
+    void cancellationAfterRescheduleIsNotLate() {
+        long session = session(NOW.plusHours(1), 1);
+        var booking = bookings.book(actor(), session, member);
+        jdbc.update("""
+            UPDATE class_sessions SET original_start_at=start_at,
+                start_at=?, end_at=?, status='RESCHEDULED' WHERE id=?
+            """, NOW.plusMinutes(2), NOW.plusMinutes(62), session);
+        at(NOW.plusMinutes(1));
+
+        var cancelled = bookings.cancel(actor(), booking.id());
+        assertThat(cancelled.status()).isEqualTo("CANCELLED");
+        assertThat(cancelled.isLateCancel()).isFalse();
+        assertThat(cancelled.bookingLockedUntil()).isNull();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action='CLASS_BOOKING_LOCK'", Long.class))
+            .isZero();
     }
 
     @Test
-    void waitlistLeavingOneMinuteBeforeClassNeverPenalizes() {
-        long s = session(NOW.plusHours(1), 1);
-        bookings.book(actor(), s, member);
-        long u2 = user("wait", "MEMBER"); long m2 = member(u2); timePackage(m2);
-        var a2 = new MemberActor(u2, UserRole.MEMBER);
-        var b = bookings.book(a2, s, m2);
-        at(NOW.plusMinutes(59));
-        assertThat(bookings.cancel(a2, b.id()).isLateCancel()).isFalse();
-    }
-
-    @Test
+    @DisplayName("TC-F8.3.1-02a, TC-F8.3.1-06a: Vi phạm thứ ba khóa 7 ngày và không tính lại lỗi cũ")
     void violationsLockOnceAndExpiredLockDoesNotReuseOldViolations() {
         for (int i = 0; i < 3; i++) {
             long s = session(NOW.plusMinutes(60 + i * 61), 1);
             var b = bookings.book(actor(), s, member);
             // Các buổi không giao nhau; hủy muộn tại thời điểm phù hợp của từng buổi.
-            at(NOW.plusMinutes(i * 61)); bookings.cancel(actor(), b.id());
+            at(NOW.plusMinutes(i * 61));
+            var cancelled = bookings.cancel(actor(), b.id());
+            if (i == 2) {
+                assertThat(cancelled.bookingLockedUntil().toInstant())
+                    .isEqualTo(NOW.plusMinutes(122).plusDays(7).toInstant());
+            } else {
+                assertThat(cancelled.bookingLockedUntil()).isNull();
+            }
         }
         assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE action='CLASS_BOOKING_LOCK'", Long.class)).isEqualTo(1);
+        long duringLock = session(NOW.plusDays(1), 1);
+        assertThatThrownBy(() -> bookings.book(actor(), duringLock, member)).hasMessageContaining("đang bị khóa");
         at(NOW.plusDays(8));
         long s = session(NOW.plusDays(8).plusHours(1), 1);
         var b = bookings.book(actor(), s, member);
@@ -205,6 +277,7 @@ class ClassApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F8.3.1-05a: Sang tháng Việt Nam không cộng vi phạm tháng cũ")
     void oldCalendarMonthViolationsDoNotCountAtVietnamMidnight() {
         at(OffsetDateTime.parse("2026-12-01T00:00:00+07:00"));
         long old = session(NOW.minusDays(1), 1);
@@ -218,50 +291,34 @@ class ClassApiIntegrationTest {
     }
 
     @Test
-    void skipsIneligibleWaitersButPreservesPositionAndCreator() {
-        long s = session(NOW.plusHours(3), 1);
-        var first = bookings.book(actor(), s, member);
-        long u2 = user("second", "MEMBER"); long m2 = member(u2); timePackage(m2);
-        long u3 = user("third", "MEMBER"); long m3 = member(u3); timePackage(m3);
-        var waiter = bookings.book(new MemberActor(u2, UserRole.MEMBER), s, m2);
-        var next = bookings.book(new MemberActor(receptionist, UserRole.RECEPTIONIST), s, m3);
-        jdbc.update("UPDATE memberships SET status='EXPIRED' WHERE member_id=?", m2);
-        bookings.cancel(actor(), first.id());
-        assertThat(bookings.detail(new MemberActor(u2, UserRole.MEMBER), waiter.id()).status()).isEqualTo("WAITLIST");
-        assertThat(bookings.detail(new MemberActor(u3, UserRole.MEMBER), next.id()).createdBy()).isEqualTo(receptionist);
-        assertThat(bookings.detail(new MemberActor(u3, UserRole.MEMBER), next.id()).status()).isEqualTo("BOOKED");
+    @DisplayName("TC-F8.1.1-04a: Hai hội viên tranh chỗ cuối, một yêu cầu bị từ chối vì hết chỗ")
+    void concurrentRequestsDoNotExceedCapacity() throws Exception {
+        long session = session(NOW.plusHours(3), 1);
+        long secondUser = user("racer", "MEMBER");
+        long secondMember = member(secondUser);
+        timePackage(secondMember);
+        var result = race(() -> attemptBook(actor(), session, member),
+            () -> attemptBook(new MemberActor(secondUser, UserRole.MEMBER), session, secondMember));
+        assertThat(result).containsExactlyInAnyOrder("BOOKED", "Lớp đã đủ chỗ");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM class_bookings", Long.class)).isEqualTo(1);
     }
 
     @Test
-    void returnedWaiterIsPromotedBeforeNewcomerAndAnonymousProfileGetsGrace() {
-        long s = session(NOW.plusHours(3), 1);
-        var first = bookings.book(actor(), s, member);
-        long m2 = member(null); timePackage(m2);
-        var front = new MemberActor(receptionist, UserRole.RECEPTIONIST);
-        var wait = bookings.book(front, s, m2);
-        jdbc.update("UPDATE memberships SET status='EXPIRED' WHERE member_id=?", m2);
-        bookings.cancel(actor(), first.id());
-        jdbc.update("UPDATE memberships SET status='ACTIVE' WHERE member_id=?", m2);
-        assertThat(bookings.book(actor(), s, member).status()).isEqualTo("WAITLIST");
-        assertThat(bookings.detail(front, wait.id()).graceUntil()).isNotNull();
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM notifications WHERE related_id=?", Long.class, wait.id())).isZero();
+    @DisplayName("TC-F8.1.1-05a: Hai yêu cầu đồng thời của cùng hội viên vào hai buổi trùng giờ")
+    void concurrentOverlappingRequestsRespectMemberLock() throws Exception {
+        long left = session(NOW.plusDays(1), 1);
+        long right = session(NOW.plusDays(1).plusMinutes(30), 1);
+        assertThat(race(() -> attemptBook(actor(), left, member), () -> attemptBook(actor(), right, member)))
+            .containsExactlyInAnyOrder("BOOKED", "Hội viên đã có lịch trùng giờ. Hãy hủy buổi kia trước.");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM class_bookings", Long.class)).isEqualTo(1);
     }
 
-    @Test
-    void concurrentLastSeatAndOverlappingRequestsRespectCapacityAndMemberLock() throws Exception {
-        long s = session(NOW.plusHours(3), 1);
-        long u2 = user("racer", "MEMBER"); long m2 = member(u2); timePackage(m2);
-        var result = race(() -> bookings.book(actor(), s, member).status(),
-            () -> bookings.book(new MemberActor(u2, UserRole.MEMBER), s, m2).status());
-        assertThat(result).containsExactlyInAnyOrder("BOOKED", "WAITLIST");
-        long left = session(NOW.plusDays(1), 1), right = session(NOW.plusDays(1).plusMinutes(30), 1);
-        assertThat(race(() -> attemptBook(left), () -> attemptBook(right)))
-            .containsExactlyInAnyOrder("BOOKED", "CONFLICT");
-    }
-
-    private String attemptBook(long s) {
-        try { return bookings.book(actor(), s, member).status(); }
-        catch (vn.edu.hust.nhom6.gym.common.exception.ConflictException ex) { return "CONFLICT"; }
+    private String attemptBook(MemberActor actor, long session, long member) {
+        try {
+            return bookings.book(actor, session, member).status();
+        } catch (ConflictException ex) {
+            return ex.getMessage();
+        }
     }
 
     private List<String> race(Callable<String> left, Callable<String> right) throws Exception {
@@ -278,21 +335,62 @@ class ClassApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F8.8.1-01a, TC-F8.7.1-05a: Sinh đúng lịch và giữ buổi khi sửa hoặc ngừng lịch")
     void scheduleGenerationIsIdempotentSnapshotsAndDeactivationPreserveSessions() {
         var r = request(2, NOW.toLocalDate(), NOW.toLocalDate().plusDays(14));
         var s = schedules.save(manager(), null, r);
         assertThat(schedules.generate(s.id(), NOW.toLocalDate(), NOW.toLocalDate().plusDays(14))).isEqualTo(2);
         assertThat(schedules.generate(s.id(), NOW.toLocalDate(), NOW.toLocalDate().plusDays(14))).isZero();
-        assertThat(jdbc.queryForObject("SELECT min(start_at)::text FROM class_sessions", String.class)).contains("06:00:00");
+        var bookedDay = NOW.toLocalDate().plusDays(6);
+        long first = jdbc.queryForObject("SELECT id FROM class_sessions WHERE class_schedule_id=? AND occurrence_date=?",
+            Long.class, s.id(), bookedDay);
+        var start = jdbc.queryForObject("SELECT start_at FROM class_sessions WHERE id=?", OffsetDateTime.class, first);
+        assertThat(start.toInstant()).isEqualTo(bookedDay.atTime(6, 0).toInstant(ZoneOffset.UTC));
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM class_sessions WHERE trainer_id=? AND room_id=? AND branch_id=?",
+            Long.class, trainer, room, branch)).isEqualTo(2);
+        var booking = bookings.book(actor(), first, member);
         var changed = new ScheduleRequest(type, trainer, room, 2, LocalTime.of(15,0), LocalTime.of(16,0), 5, r.validFrom(), r.validTo());
         schedules.save(manager(), s.id(), changed);
         assertThat(jdbc.queryForObject("SELECT min(capacity) FROM class_sessions", Integer.class)).isEqualTo(10);
         schedules.deactivate(manager(), s.id());
         assertThat(schedules.generate(s.id(), NOW.toLocalDate(), NOW.toLocalDate().plusDays(14))).isZero();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM class_sessions", Long.class)).isEqualTo(2);
+        assertThat(bookings.detail(actor(), booking.id()).status()).isEqualTo("BOOKED");
     }
 
     @Test
+    @DisplayName("TC-F8.8.1-03a: Không sinh trước ngày hiệu lực, sau hạn hoặc khi lịch ngừng")
+    void generationSkipsInactiveAndOutOfValidityDates() {
+        LocalDate validDay = NOW.toLocalDate().plusWeeks(1);
+        var schedule = schedules.save(manager(), null, request(3, validDay, validDay));
+        assertThat(schedules.generate(schedule.id(), validDay.minusWeeks(1), validDay.minusWeeks(1))).isZero();
+        assertThat(schedules.generate(schedule.id(), validDay.plusWeeks(1), validDay.plusWeeks(1))).isZero();
+
+        schedules.deactivate(manager(), schedule.id());
+        assertThat(schedules.generate(schedule.id(), validDay, validDay)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM class_sessions WHERE class_schedule_id=?",
+            Long.class, schedule.id())).isZero();
+    }
+
+    @Test
+    @DisplayName("TC-F8.8.1-05a: Tác vụ từ chối phòng ngừng hoạt động hoặc đã có buổi trùng giờ")
+    void generationRejectsInactiveRoomOrConflictingSession() {
+        LocalDate day = NOW.toLocalDate();
+        var schedule = schedules.save(manager(), null, request(3, day, day));
+        jdbc.update("UPDATE rooms SET status='INACTIVE' WHERE id=?", room);
+        assertThatThrownBy(() -> schedules.generate(schedule.id(), day, day))
+            .isInstanceOf(BusinessRuleException.class).hasMessageContaining("không hợp lệ");
+
+        jdbc.update("UPDATE rooms SET status='ACTIVE' WHERE id=?", room);
+        session(NOW.withHour(13), 1);
+        assertThatThrownBy(() -> schedules.generate(schedule.id(), day, day))
+            .isInstanceOf(ConflictException.class).hasMessageContaining("Trùng phòng");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM class_sessions WHERE class_schedule_id=?",
+            Long.class, schedule.id())).isZero();
+    }
+
+    @Test
+    @DisplayName("TC-F8.7.1-03a, TC-F8.7.1-04a: Chỉ chặn lịch có ngày phát sinh chồng giờ")
     void recurringOverlapUsesActualWeekdaysNotJustIntersectingDateRanges() {
         schedules.save(manager(), null, request(2, LocalDate.of(2026,11,17), LocalDate.of(2026,11,23)));
         assertThatCode(() -> schedules.save(manager(), null, request(2, LocalDate.of(2026,11,18), LocalDate.of(2026,11,24))))
@@ -302,6 +400,7 @@ class ClassApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F8.7.1-02a: Chặn lịch sai giờ, sức chứa hoặc vai trò người dạy")
     void validatesResourcesDatesCapacityAndRole() {
         var r = request(3, NOW.toLocalDate(), null);
         assertThatThrownBy(() -> schedules.save(actor(), null, r)).hasMessageContaining("quản lý");
@@ -316,6 +415,7 @@ class ClassApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F8.1.1-01a, TC-F8.1.1-05b, TC-F8.1.1-09a: Đặt chính chủ, ghi người tạo, chặn đặt trùng hoặc đặt hộ")
     void apiAuthorizationValidationAndPersistence() throws Exception {
         long s = session(NOW.plusHours(3), 1);
         String body = json.writeValueAsString(new BookingRequest(member));
@@ -339,6 +439,26 @@ class ClassApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F8.1.1-01b, TC-F8.3.1-01b: Lễ tân đúng chi nhánh đặt và hủy hộ")
+    void receptionistIsRecordedWhenBookingForMember() throws Exception {
+        long session = session(NOW.plusHours(3), 1);
+        mvc.perform(post("/api/v1/class-sessions/{id}/bookings", session)
+            .header("Authorization", bearer(receptionist, "RECEPTIONIST")).contentType(APPLICATION_JSON)
+            .content(json.writeValueAsString(new BookingRequest(member))))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.createdBy").value(receptionist))
+            .andExpect(jsonPath("$.memberId").value(member));
+        long booking = jdbc.queryForObject("SELECT id FROM class_bookings WHERE class_session_id=?", Long.class, session);
+
+        mvc.perform(put("/api/v1/class-bookings/{id}/cancel", booking)
+            .header("Authorization", bearer(receptionist, "RECEPTIONIST")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.cancelReason").value("BY_STAFF"))
+            .andExpect(jsonPath("$.isLateCancel").value(false));
+    }
+
+    @Test
+    @DisplayName("TC-F8.1.1-09b, TC-F8.3.1-08a, TC-F8.7.1-08a: Chặn thao tác ngoài chi nhánh hoặc sai chủ chỗ")
     void staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings() throws Exception {
         long s = session(NOW.plusHours(3), 1);
         var b = bookings.book(actor(), s, member);
@@ -352,11 +472,14 @@ class ClassApiIntegrationTest {
             "SELECT class_schedule_id FROM class_sessions WHERE id=?", Long.class, s))).hasMessageContaining("ngoài chi nhánh");
         assertThatThrownBy(() -> bookings.cancel(new MemberActor(receptionist,UserRole.RECEPTIONIST),b.id()))
             .hasMessageContaining("không có quyền");
+        assertThatThrownBy(() -> bookings.book(new MemberActor(receptionist, UserRole.RECEPTIONIST), s, member))
+            .hasMessageContaining("không có quyền");
         assertThat(bookings.detail(actor(),b.id()).status()).isEqualTo("BOOKED");
     }
 
     @ParameterizedTest @ValueSource(strings = {"{\"memberId\":1.5}", "{\"memberId\":\"1\"}",
         "{\"memberId\":1,\"createdBy\":2}", "{\"memberId\":0}", "{}"})
+    @DisplayName("S3, S5: Từ chối trường giả mạo và kiểu dữ liệu không hợp lệ")
     void invalidOrForgedBookingPayloadReturnsFieldErrors(String body) throws Exception {
         long s = session(NOW.plusHours(3),1);
         mvc.perform(post("/api/v1/class-sessions/"+s+"/bookings").header("Authorization",bearer(user,"MEMBER"))
@@ -366,74 +489,61 @@ class ClassApiIntegrationTest {
     }
 
     @Test
-    void doubleCancellationOnlyPromotesOnce() throws Exception {
-        long s = session(NOW.plusHours(3),1);
-        var first = bookings.book(actor(),s,member);
-        long u2=user("waiter","MEMBER"),m2=member(u2); timePackage(m2);
-        var waiter=bookings.book(new MemberActor(u2,UserRole.MEMBER),s,m2);
+    @DisplayName("TC-F8.3.1-07a: Hai lượt hủy đồng thời chỉ trả chỗ và ghi phạt một lần")
+    void doubleCancellationOnlyRecordsOneViolation() throws Exception {
+        long session = session(NOW.plusHours(1), 1);
+        var booking = bookings.book(actor(), session, member);
         Callable<String> cancel = () -> {
-            try { bookings.cancel(actor(),first.id()); return "CANCELLED"; }
-            catch (vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException ex) { return "REJECTED"; }
+            try {
+                return bookings.cancel(actor(), booking.id()).status();
+            } catch (BusinessRuleException ex) {
+                return "REJECTED";
+            }
         };
-        assertThat(race(cancel,cancel)).containsExactlyInAnyOrder("CANCELLED","REJECTED");
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM notifications WHERE related_id=?",Long.class,waiter.id())).isEqualTo(2);
+
+        assertThat(race(cancel, cancel)).containsExactlyInAnyOrder("CANCELLED", "REJECTED");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM class_bookings WHERE is_late_cancel", Long.class))
+            .isEqualTo(1);
     }
 
     @Test
-    void failedNotificationRollsBackCancellationAndPromotion() {
-        long s = session(NOW.plusHours(3),1);
-        var first = bookings.book(actor(),s,member);
-        long u2=user("waiter","MEMBER"),m2=member(u2); timePackage(m2);
-        var second=bookings.book(new MemberActor(u2,UserRole.MEMBER),s,m2);
-        jdbc.execute("""
-            CREATE FUNCTION reject_class_notice() RETURNS trigger LANGUAGE plpgsql AS $$
-            BEGIN RAISE EXCEPTION 'test notification failure'; END $$
-            """);
-        jdbc.execute("CREATE TRIGGER reject_class_notice BEFORE INSERT ON notifications FOR EACH ROW EXECUTE FUNCTION reject_class_notice()");
+    @DisplayName("BR-F8.3-02: Lỗi ghi nhật ký khóa hoàn tác cả hủy chỗ và mốc khóa")
+    void failedPenaltyAuditRollsBackCancellation() {
+        long session = session(NOW.plusHours(1), 1);
+        var booking = bookings.book(actor(), session, member);
+        jdbc.update("INSERT INTO system_configs(branch_id,config_key,config_value) VALUES (?,'PENALTY_LIMIT_PER_MONTH','1')", branch);
+        jdbc.execute("ALTER TABLE audit_logs ADD CONSTRAINT reject_f8_lock CHECK (action <> 'CLASS_BOOKING_LOCK')");
         try {
-            assertThatThrownBy(() -> bookings.cancel(actor(),first.id())).isInstanceOf(RuntimeException.class);
-            assertThat(bookings.detail(actor(),first.id()).status()).isEqualTo("BOOKED");
-            assertThat(bookings.detail(new MemberActor(u2,UserRole.MEMBER),second.id()).status()).isEqualTo("WAITLIST");
-            assertThat(jdbc.queryForObject("SELECT count(*) FROM notifications",Long.class)).isZero();
+            assertThatThrownBy(() -> bookings.cancel(actor(), booking.id()))
+                .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+            var current = bookings.detail(actor(), booking.id());
+            assertThat(current.status()).isEqualTo("BOOKED");
+            assertThat(current.bookingLockedUntil()).isNull();
+            assertThat(current.isLateCancel()).isFalse();
         } finally {
-            jdbc.execute("DROP TRIGGER reject_class_notice ON notifications");
-            jdbc.execute("DROP FUNCTION reject_class_notice()");
+            jdbc.execute("ALTER TABLE audit_logs DROP CONSTRAINT reject_f8_lock");
         }
     }
 
     @Test
-    void equalWaitlistTimestampUsesIdAndNightEmailWaitsForOpening() {
-        at(NOW.withHour(1));
-        long s = session(NOW.withHour(9),1);
-        var first = bookings.book(actor(),s,member);
-        long u2=user("second","MEMBER"),m2=member(u2);timePackage(m2);
-        long u3=user("third","MEMBER"),m3=member(u3);timePackage(m3);
-        var second=bookings.book(new MemberActor(u2,UserRole.MEMBER),s,m2);
-        var third=bookings.book(new MemberActor(u3,UserRole.MEMBER),s,m3);
-        jdbc.update("UPDATE class_bookings SET waitlisted_at=? WHERE status='WAITLIST'",NOW.withHour(1));
-        bookings.cancel(actor(),first.id());
-        var promoted=bookings.detail(new MemberActor(u2,UserRole.MEMBER),second.id());
-        assertThat(promoted.status()).isEqualTo("BOOKED");
-        assertThat(promoted.graceUntil().toInstant()).isEqualTo(NOW.withHour(1).plusMinutes(15).toInstant());
-        assertThat(bookings.detail(new MemberActor(u3,UserRole.MEMBER),third.id()).waitlistPosition()).isEqualTo(1);
-        var sent=jdbc.queryForObject("SELECT scheduled_at FROM notifications WHERE channel='EMAIL' AND related_id=?",
-            OffsetDateTime.class,second.id());
-        assertThat(sent.toInstant()).isEqualTo(NOW.withHour(5).withMinute(30).toInstant());
-    }
-
-    @Test
-    void afterCutoffCancellationLeavesSeatEmpty() {
-        long s=session(NOW.plusHours(1),1);
-        var first=bookings.book(actor(),s,member);
-        long u2=user("waiter","MEMBER"),m2=member(u2);timePackage(m2);
-        var second=bookings.book(new MemberActor(u2,UserRole.MEMBER),s,m2);
+    @DisplayName("TC-F8.1.1-08b: Dưới mốc đóng vẫn từ chối kể cả khi lớp đã đầy hoặc vừa có chỗ")
+    void afterCutoffCancellationReleasesSeatWithoutReopeningBooking() {
+        long session = session(NOW.plusHours(1), 1);
+        var first = bookings.book(actor(), session, member);
+        long secondUser = user("second", "MEMBER");
+        long secondMember = member(secondUser);
+        timePackage(secondMember);
+        var second = new MemberActor(secondUser, UserRole.MEMBER);
         at(NOW.plusMinutes(31));
-        bookings.cancel(actor(),first.id());
-        assertThat(bookings.detail(new MemberActor(u2,UserRole.MEMBER),second.id()).status()).isEqualTo("WAITLIST");
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM notifications",Long.class)).isZero();
+
+        assertThatThrownBy(() -> bookings.book(second, session, secondMember)).hasMessageContaining("đóng đặt");
+        bookings.cancel(actor(), first.id());
+        assertThatThrownBy(() -> bookings.book(second, session, secondMember)).hasMessageContaining("đóng đặt");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM class_bookings WHERE status='BOOKED'", Long.class)).isZero();
     }
 
     @Test
+    @DisplayName("TC-F8.8.1-02a, TC-F8.8.1-04a: Sinh đồng thời hoặc sinh lại sau đổi giờ không tạo bản sao")
     void concurrentGenerationAndChangedSessionDoNotCreateDuplicates() throws Exception {
         var s=schedules.save(manager(),null,request(3,NOW.toLocalDate(),NOW.toLocalDate()));
         var runs=race(() -> Integer.toString(schedules.generate(s.id(),NOW.toLocalDate(),NOW.toLocalDate())),
@@ -446,6 +556,7 @@ class ClassApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F8.7.1-03b: Chặn xung đột với buổi đã đổi giờ thuộc cùng lịch")
     void recurringUpdateRejectsConflictWithItsOwnRescheduledSession() {
         LocalDate wednesday = NOW.toLocalDate();
         LocalDate tuesday = wednesday.minusDays(1);
@@ -459,6 +570,7 @@ class ClassApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F8.7.1-08b: Lịch lặp chặn tài nguyên ngoài phạm vi chi nhánh")
     void scheduleApiDistinguishesMissingOutOfScopeAndIneligibleResources() throws Exception {
         long otherRoom = jdbc.queryForObject("INSERT INTO rooms(branch_id,name,capacity) VALUES (?,'Khác',20) RETURNING id",
             Long.class, otherBranch);
@@ -477,6 +589,7 @@ class ClassApiIntegrationTest {
     }
 
     @ParameterizedTest @ValueSource(strings = {"ROOM", "TRAINER", "PT"})
+    @DisplayName("TC-F8.7.1-03c: Chặn trùng phòng, huấn luyện viên hoặc buổi PT")
     void scheduleRejectsConcreteRoomTrainerAndPtConflicts(String conflict) {
         long otherTrainer = staff(user("other-trainer", "TRAINER"), "PT2");
         long otherRoom = jdbc.queryForObject("INSERT INTO rooms(branch_id,name,capacity) VALUES (?,'Khác',20) RETURNING id",
@@ -508,6 +621,7 @@ class ClassApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F8.7.1-01a: Tạo, đọc, cập nhật và ngừng lịch lặp qua API")
     void scheduleApiCreatesReadsUpdatesDeactivatesAndChecksNumericFields() throws Exception {
         String body=json.writeValueAsString(request(2,NOW.toLocalDate(),null));
         var response=mvc.perform(post("/api/v1/class-schedules").header("Authorization",bearer(manager,"BRANCH_MANAGER"))
