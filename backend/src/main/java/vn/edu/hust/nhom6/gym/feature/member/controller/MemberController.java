@@ -23,7 +23,7 @@ import vn.edu.hust.nhom6.gym.feature.member.service.*;
 @Tag(name = "F2 – Hồ sơ hội viên")
 @RequiredArgsConstructor
 public class MemberController {
-    private final MemberManagementService members;
+    private final MemberService members;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_MANAGER','RECEPTIONIST')")

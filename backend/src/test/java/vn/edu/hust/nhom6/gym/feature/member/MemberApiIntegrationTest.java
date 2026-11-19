@@ -29,8 +29,8 @@ import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 import vn.edu.hust.nhom6.gym.feature.member.dto.CreateMemberRequest;
 import vn.edu.hust.nhom6.gym.feature.member.dto.UpdateMemberRequest;
 import vn.edu.hust.nhom6.gym.feature.member.entity.MemberStatus;
-import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberAccountAccess;
-import vn.edu.hust.nhom6.gym.feature.member.service.MemberRegistrationService;
+import vn.edu.hust.nhom6.gym.feature.auth.service.AccountService;
+import vn.edu.hust.nhom6.gym.feature.member.service.MemberService;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
@@ -38,16 +38,16 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 
-/** Kiểm thử riêng F2 với Authentication và adapter test; không kiểm thử triển khai hay JWT của F1. */
+/** Kiểm thử riêng F2 với Authentication dựng sẵn; dùng AccountService thật của F1, không kiểm thử JWT. */
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import({MemberTestConfiguration.class, StandaloneMemberAccountTestConfiguration.class})
+@Import(MemberTestConfiguration.class)
 class MemberApiIntegrationTest {
     @Autowired MockMvc mvc;
     @Autowired JdbcTemplate jdbc;
     @Autowired JsonMapper json;
-    @MockitoSpyBean MemberAccountAccess accounts;
-    @Autowired MemberRegistrationService registration;
+    @MockitoSpyBean AccountService accounts;
+    @Autowired MemberService registration;
     @Autowired PlatformTransactionManager transactions;
     Long admin;
     Long receptionist;
@@ -386,7 +386,7 @@ class MemberApiIntegrationTest {
             .andExpect(status().isOk());
         assertThat(accountStatus(memberUser)).isEqualTo("ACTIVE");
         jdbc.update("UPDATE users SET status = 'LOCKED' WHERE id = ?", memberUser);
-        accounts.activateIfDisabled(memberUser);
+        accounts.activateAccountIfDisabled(memberUser);
         assertThat(accountStatus(memberUser)).isEqualTo("LOCKED");
     }
 
@@ -397,7 +397,7 @@ class MemberApiIntegrationTest {
         doAnswer(invocation -> {
             invocation.callRealMethod();
             throw new IllegalStateException("Kiểm thử rollback sau cập nhật tài khoản");
-        }).when(accounts).disable(anyLong());
+        }).when(accounts).disableAccount(anyLong());
         mvc.perform(put("/api/v1/members/{id}", id).with(identity(receptionist, UserRole.RECEPTIONIST))
                 .contentType(MediaType.APPLICATION_JSON).content(updateBody("0912345601", "INACTIVE")))
             .andExpect(status().isInternalServerError());

@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -29,20 +28,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.NotFoundException;
-import vn.edu.hust.nhom6.gym.feature.auth.service.MemberService;
 import vn.edu.hust.nhom6.gym.feature.member.entity.Member;
+import vn.edu.hust.nhom6.gym.feature.auth.service.AccountService;
 import vn.edu.hust.nhom6.gym.feature.member.mapper.MemberMapper;
-import vn.edu.hust.nhom6.gym.feature.member.service.MemberRegistrationService;
-import vn.edu.hust.nhom6.gym.feature.member.service.integration.F1MemberAccountAdapter;
-import vn.edu.hust.nhom6.gym.feature.member.service.integration.F1MemberRegistrationAdapter;
-import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberAccountAccess;
-import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberBranchAccess;
-import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberBranchAdapter;
+import vn.edu.hust.nhom6.gym.feature.member.service.MemberService;
 
 /**
  * Kiểm thử tích hợp dùng dịch vụ tài khoản F1 thật (đối chiếu commit 03bab42).
  * Hậu tố *Test để Maven Surefire tự chạy trong verify mặc định và job Backend của CI.
- * Dùng AuthController/AuthService/JWT F1 thật, mọi adapter F2 và service tra cứu production.
+ * Dùng AuthController/AuthService/AccountService/JWT F1 thật, F2 gọi thẳng các service đó (không adapter).
  * Cần schema đầy đủ (đối chiếu PR #101), không tạo bảng staff bằng fixture tạm.
  * Các request qua MockMvc với PostgreSQL thật; không thay cho nghiệm thu staging qua trình duyệt.
  */
@@ -52,25 +46,14 @@ import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberBranchAdap
 class F1RegistrationIntegrationTest {
     @Autowired MockMvc mvc;
     @Autowired JdbcTemplate jdbc;
-    @Autowired ApplicationContext context;
     @Autowired JsonMapper json;
     @Autowired PasswordEncoder passwords;
-    @Autowired MemberBranchAccess branches;
-    @MockitoSpyBean MemberRegistrationService registrations;
-    @MockitoSpyBean MemberAccountAccess accounts;
+    @MockitoSpyBean MemberService registrations;
+    @MockitoSpyBean AccountService accounts;
     @MockitoSpyBean MemberMapper mapper;
 
     @BeforeEach
     void fixtures() {
-        MemberService registration = context.getBean(MemberService.class);
-        assertThat(registration).isInstanceOf(F1MemberRegistrationAdapter.class);
-        assertThat(registration).isSameAs(context.getBean("f2MemberRegistrationAdapter"));
-        assertThat(registration).isNotSameAs(context.getBean("defaultMemberService"));
-        assertThat(context.getBeansOfType(MemberAccountAccess.class)).hasSize(1);
-        assertThat(accounts).isInstanceOf(F1MemberAccountAdapter.class);
-        assertThat(accounts).isSameAs(context.getBean("f1MemberAccountAdapter"));
-        assertThat(context.getBeansOfType(MemberBranchAccess.class)).hasSize(1);
-        assertThat(branches).isInstanceOf(MemberBranchAdapter.class);
         jdbc.execute("TRUNCATE TABLE members, users, staff, refresh_tokens RESTART IDENTITY CASCADE");
         jdbc.update("UPDATE branches SET status = 'ACTIVE' WHERE code = 'CN01'");
     }
@@ -148,7 +131,7 @@ class F1RegistrationIntegrationTest {
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(3))
             .andExpect(jsonPath("$.content[*].email",
                 org.hamcrest.Matchers.hasItems("an@example.com", "binh@example.com")));
-        verify(accounts).emails(Set.of(first.userId(), second.userId()));
+        verify(accounts).getEmailsByUserIds(Set.of(first.userId(), second.userId()));
         mvc.perform(get("/api/v1/members/{id}", unlinked).header("Authorization", "Bearer " + adminToken))
             .andExpect(status().isOk()).andExpect(jsonPath("$.email").isEmpty());
     }
@@ -169,7 +152,7 @@ class F1RegistrationIntegrationTest {
         assertThat(storedStatus("users", member.userId())).isEqualTo("DISABLED");
         assertThat(activeTokens(member.userId())).isZero();
         assertThat(activeTokens(other.userId())).isEqualTo(1);
-        verify(accounts).disable(member.userId());
+        verify(accounts).disableAccount(member.userId());
         mvc.perform(post("/api/v1/auth/refresh").cookie(member.refreshToken()))
             .andExpect(status().isUnauthorized());
         mvc.perform(post("/api/v1/auth/refresh").cookie(secondSession))
@@ -180,7 +163,7 @@ class F1RegistrationIntegrationTest {
 
         update(member.memberId(), adminToken, "ACTIVE", 200);
         assertThat(storedStatus("users", member.userId())).isEqualTo("ACTIVE");
-        verify(accounts).activateIfDisabled(member.userId());
+        verify(accounts).activateAccountIfDisabled(member.userId());
         mvc.perform(post("/api/v1/auth/refresh").cookie(member.refreshToken()))
             .andExpect(status().isUnauthorized());
         mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
@@ -198,7 +181,7 @@ class F1RegistrationIntegrationTest {
 
         assertThat(storedStatus("members", member.memberId())).isEqualTo("ACTIVE");
         assertThat(storedStatus("users", member.userId())).isEqualTo("LOCKED");
-        verify(accounts).activateIfDisabled(member.userId());
+        verify(accounts).activateAccountIfDisabled(member.userId());
     }
 
     @Test
@@ -207,7 +190,7 @@ class F1RegistrationIntegrationTest {
         doAnswer(invocation -> {
             invocation.callRealMethod();
             throw new IllegalStateException("Kiểm thử lỗi sau khi F1 vô hiệu hóa tài khoản");
-        }).when(accounts).disable(member.userId());
+        }).when(accounts).disableAccount(member.userId());
 
         mvc.perform(put("/api/v1/members/{id}", member.memberId())
                 .header("Authorization", "Bearer " + adminToken()).contentType(MediaType.APPLICATION_JSON)
@@ -233,7 +216,7 @@ class F1RegistrationIntegrationTest {
         doAnswer(invocation -> {
             invocation.callRealMethod();
             throw new IllegalStateException("Kiểm thử lỗi sau khi F1 kích hoạt tài khoản");
-        }).when(accounts).activateIfDisabled(member.userId());
+        }).when(accounts).activateAccountIfDisabled(member.userId());
 
         update(member.memberId(), adminToken, "ACTIVE", 500);
 
@@ -254,7 +237,7 @@ class F1RegistrationIntegrationTest {
                 .content(json.writeValueAsString(Map.of("fullName", "Tên mới", "phone", "0912345699", "status", "INACTIVE"))))
             .andExpect(status().isInternalServerError());
 
-        verify(accounts).disable(member.userId());
+        verify(accounts).disableAccount(member.userId());
         assertThat(storedStatus("members", member.memberId())).isEqualTo("ACTIVE");
         assertThat(jdbc.queryForObject("SELECT full_name FROM members WHERE id = ?", String.class, member.memberId()))
             .isEqualTo("Nguyễn An");
@@ -266,7 +249,7 @@ class F1RegistrationIntegrationTest {
 
     @Test
     void adapterPropagatesRealF1NotFoundExceptionForMissingAccount() {
-        assertThatThrownBy(() -> accounts.disable(Long.MAX_VALUE))
+        assertThatThrownBy(() -> accounts.disableAccount(Long.MAX_VALUE))
             .isInstanceOf(NotFoundException.class).hasMessageContaining("Không tìm thấy tài khoản liên kết");
     }
 

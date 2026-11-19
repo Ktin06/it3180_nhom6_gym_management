@@ -3,7 +3,6 @@ package vn.edu.hust.nhom6.gym.feature.member.service;
 import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import java.time.LocalDate;
 import java.util.*;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -13,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
+import lombok.RequiredArgsConstructor;
 import vn.edu.hust.nhom6.gym.common.dto.PageResponse;
 import vn.edu.hust.nhom6.gym.common.exception.*;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
@@ -20,47 +20,47 @@ import vn.edu.hust.nhom6.gym.feature.member.dto.*;
 import vn.edu.hust.nhom6.gym.feature.member.entity.*;
 import vn.edu.hust.nhom6.gym.feature.member.mapper.MemberMapper;
 import vn.edu.hust.nhom6.gym.feature.member.repository.MemberRepository;
-import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberAccountAccess;
-import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberBranchAccess;
+import vn.edu.hust.nhom6.gym.feature.auth.service.AccountService;
+import vn.edu.hust.nhom6.gym.feature.branch.service.BranchLookupService;
+import vn.edu.hust.nhom6.gym.feature.staff.service.StaffService;
 
+/**
+ * Nghiệp vụ hồ sơ hội viên (F2).
+ *
+ * <p>Controller đã kiểm tra vai trò bằng {@code @PreAuthorize} và validate đầu vào. Service này kiểm tra
+ * phạm vi chi nhánh, quyền sở hữu và các quy tắc nghiệp vụ. Gọi chức năng khác thẳng qua service của chức
+ * năng đó (ADR 0007): F1 {@link AccountService}, F7 {@link StaffService}, chi nhánh {@link BranchLookupService}.
+ * F1 ({@code AuthService}) gọi ngược lại {@link #registerMemberProfile} khi tự đăng ký; không có vòng phụ thuộc
+ * vì {@code AccountService} không gọi F2.
+ */
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class MemberServiceImpl implements MemberManagementService, MemberRegistrationService {
+public class MemberService {
     private static final String PHONE_HAS_PROFILE =
         "Số điện thoại đã có hồ sơ hội viên. Vui lòng liên hệ quầy lễ tân.";
     private static final String PHONE_TAKEN_BY_OTHER = "Số điện thoại đã được đăng ký cho hội viên khác.";
 
     private final MemberRepository members;
-    private final MemberAccountAccess accounts;
-    private final MemberBranchAccess branches;
+    private final AccountService accounts;
+    private final StaffService staff;
+    private final BranchLookupService branches;
     private final MemberMapper mapper;
     private final Validator validator;
 
-    /**
-     * {@code @Lazy} cắt vòng phụ thuộc: AuthService (F1) gọi F2 để tạo hồ sơ khi đăng ký,
-     * còn F2 lại gọi AuthService qua MemberAccountAccess để đổi trạng thái tài khoản.
-     */
-    public MemberServiceImpl(MemberRepository members, @Lazy MemberAccountAccess accounts,
-            MemberBranchAccess branches, MemberMapper mapper, Validator validator) {
-        this.members = members;
-        this.accounts = accounts;
-        this.branches = branches;
-        this.mapper = mapper;
-        this.validator = validator;
-    }
-
-    @Override
     @Transactional
     public MemberDetailResponse create(CurrentUser actor, CreateMemberRequest request) {
-        Long branch = actor.role() == UserRole.SUPER_ADMIN
-            ? branches.defaultBranchId() : branches.staffBranchId(actor.userId());
+        Long branch = actor.isOwner() ? branches.defaultBranchId() : staff.requireBranchId(actor.userId());
         Member member = newProfile(null, actor.userId(), branch, request.fullName(), request.phone(),
             request.dob(), request.gender());
         return mapper.detail(save(member, PHONE_HAS_PROFILE), null);
     }
 
-    @Override
     @Transactional
+    /**
+     * Tạo hồ sơ cho tài khoản vừa tự đăng ký (F1 gọi, UC-F1.1). Tham gia giao dịch của F1: trùng số điện thoại
+     * thì ném 409 và tài khoản vừa tạo cũng bị hoàn tác. Kiểm tra lại bằng cùng ràng buộc DTO với API tạo hồ sơ.
+     */
     public void registerMemberProfile(Long userId, String fullName, String phone, LocalDate dob, String gender) {
         if (userId == null || userId <= 0) { throw new InvalidRequestException("Tài khoản liên kết không hợp lệ."); }
         Gender parsedGender;
@@ -111,7 +111,6 @@ public class MemberServiceImpl implements MemberManagementService, MemberRegistr
             "Tài khoản chưa gắn hồ sơ hội viên. Vui lòng liên hệ quầy lễ tân."));
     }
 
-    @Override
     public MemberDetailResponse detail(CurrentUser actor, Long id) {
         Member member = findMember(id);
         if (actor.role() == UserRole.MEMBER) {
@@ -122,11 +121,10 @@ public class MemberServiceImpl implements MemberManagementService, MemberRegistr
         return response(member);
     }
 
-    @Override
     @Transactional
     public MemberDetailResponse update(CurrentUser actor, Long id, UpdateMemberRequest request) {
         // Tuần tự hóa cập nhật cùng hồ sơ để trạng thái member và user không lệch khi hai người cùng sửa.
-        Member member = members.findForUpdate(id).orElseThrow(MemberServiceImpl::notFound);
+        Member member = members.findForUpdate(id).orElseThrow(MemberService::notFound);
         requireBranch(actor, member);
         String phone = MemberPhoneSupport.normalize(request.phone());
         if (members.existsByPhoneAndIdNot(phone, id)) {
@@ -136,8 +134,8 @@ public class MemberServiceImpl implements MemberManagementService, MemberRegistr
         // Thao tác tài khoản trước khi sửa entity hồ sơ; lỗi F1 không làm đổi dữ liệu đang được quản lý.
         // Cả hai thao tác vẫn cùng giao dịch: lỗi khi lưu hồ sơ cũng rollback tài khoản và token.
         if (member.getUserId() != null && previous != request.status()) {
-            if (request.status() == MemberStatus.INACTIVE) { accounts.disable(member.getUserId()); }
-            else { accounts.activateIfDisabled(member.getUserId()); }
+            if (request.status() == MemberStatus.INACTIVE) { accounts.disableAccount(member.getUserId()); }
+            else { accounts.activateAccountIfDisabled(member.getUserId()); }
         }
         member.setFullName(request.fullName().trim());
         member.setPhone(phone);
@@ -148,10 +146,9 @@ public class MemberServiceImpl implements MemberManagementService, MemberRegistr
         return response(member);
     }
 
-    @Override
     public PageResponse<MemberSummaryResponse> search(CurrentUser actor, String keyword,
             MemberStatus status, int page, int size) {
-        Long branchId = actor.role() == UserRole.SUPER_ADMIN ? null : branches.staffBranchId(actor.userId());
+        Long branchId = actor.isOwner() ? null : staff.requireBranchId(actor.userId());
         String term = keyword == null ? "" : keyword.trim();
         String upperTerm = term.toUpperCase(Locale.ROOT);
         boolean code = upperTerm.matches("^HV[0-9]{6}$");
@@ -179,13 +176,13 @@ public class MemberServiceImpl implements MemberManagementService, MemberRegistr
         var result = members.findAll(spec, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
         Set<Long> userIds = new HashSet<>();
         result.forEach(m -> { if (m.getUserId() != null) { userIds.add(m.getUserId()); } });
-        Map<Long, String> emails = userIds.isEmpty() ? Map.of() : accounts.emails(userIds);
+        Map<Long, String> emails = userIds.isEmpty() ? Map.of() : accounts.getEmailsByUserIds(userIds);
         return PageResponse.of(result, m -> mapper.summary(m, m.getUserId() == null ? null : emails.get(m.getUserId())));
     }
 
     private MemberDetailResponse response(Member member) {
         String email = member.getUserId() == null ? null
-            : accounts.emails(Set.of(member.getUserId())).get(member.getUserId());
+            : accounts.getEmailsByUserIds(Set.of(member.getUserId())).get(member.getUserId());
         return mapper.detail(member, email);
     }
 
@@ -204,11 +201,11 @@ public class MemberServiceImpl implements MemberManagementService, MemberRegistr
     }
 
     private Member findMember(Long id) {
-        return members.findByIdAndDeletedAtIsNull(id).orElseThrow(MemberServiceImpl::notFound);
+        return members.findByIdAndDeletedAtIsNull(id).orElseThrow(MemberService::notFound);
     }
 
     private void requireBranch(CurrentUser actor, Member member) {
-        if (actor.role() != UserRole.SUPER_ADMIN && !branches.staffBranchId(actor.userId()).equals(member.getHomeBranchId())) {
+        if (!actor.isOwner() && !staff.requireBranchId(actor.userId()).equals(member.getHomeBranchId())) {
             throw notFound();
         }
     }

@@ -20,10 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
@@ -41,10 +37,9 @@ import vn.edu.hust.nhom6.gym.feature.auth.entity.UserStatus;
 import vn.edu.hust.nhom6.gym.feature.auth.repository.RefreshTokenRepository;
 import vn.edu.hust.nhom6.gym.feature.auth.repository.UserRepository;
 import vn.edu.hust.nhom6.gym.feature.auth.service.AuthService;
-import vn.edu.hust.nhom6.gym.feature.auth.service.DefaultMemberService;
 import vn.edu.hust.nhom6.gym.feature.auth.service.JwtTokenService;
-import vn.edu.hust.nhom6.gym.feature.auth.service.MemberService;
 import vn.edu.hust.nhom6.gym.feature.auth.service.TokenHashUtil;
+import vn.edu.hust.nhom6.gym.feature.member.service.MemberService;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -435,78 +430,11 @@ class AuthServiceTest {
     }
 
     @Test
-    void disableAccountCapNhatDisabledVaThuHoiRefreshToken() {
-        User user = User.builder()
-            .email("member@example.com")
-            .role(UserRole.MEMBER)
-            .status(UserStatus.ACTIVE)
-            .build();
-        when(userRepository.findById(10L)).thenReturn(Optional.of(user));
-
-        authService.disableAccount(10L);
-
-        assertThat(user.getStatus()).isEqualTo(UserStatus.DISABLED);
-        verify(userRepository).saveAndFlush(user);
-        verify(refreshTokenRepository).revokeAllByUserId(eq(10L), any(OffsetDateTime.class));
-    }
-
-    @Test
-    void activateAccountIfDisabledChiMoTaiKhoanDisabledKhongMoLocked() {
-        User disabledUser = User.builder()
-            .email("disabled@example.com")
-            .role(UserRole.MEMBER)
-            .status(UserStatus.DISABLED)
-            .build();
-        when(userRepository.findById(11L)).thenReturn(Optional.of(disabledUser));
-
-        authService.activateAccountIfDisabled(11L);
-        assertThat(disabledUser.getStatus()).isEqualTo(UserStatus.ACTIVE);
-        verify(userRepository).saveAndFlush(disabledUser);
-
-        User lockedUser = User.builder()
-            .email("locked@example.com")
-            .role(UserRole.MEMBER)
-            .status(UserStatus.LOCKED)
-            .build();
-        when(userRepository.findById(12L)).thenReturn(Optional.of(lockedUser));
-
-        authService.activateAccountIfDisabled(12L);
-        assertThat(lockedUser.getStatus()).isEqualTo(UserStatus.LOCKED);
-    }
-
-    @Test
     void chuanHoaSoDienThoaiCacDangPhoBien() {
         assertThat(PhoneUtils.normalizePhone("0912345678")).isEqualTo("0912345678");
         assertThat(PhoneUtils.normalizePhone("+84 912 345 678")).isEqualTo("0912345678");
         assertThat(PhoneUtils.normalizePhone("84912345678")).isEqualTo("0912345678");
         assertThat(PhoneUtils.normalizePhone("0912.345.678")).isEqualTo("0912345678");
         assertThat(PhoneUtils.normalizePhone("0912-345-678")).isEqualTo("0912345678");
-    }
-
-    @Test
-    void defaultMemberServiceTuDongDangKyKhiChuaCoF2VaNhuongQuyenKhiCoF2() {
-        try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ScanOnlyDefaultConfig.class)) {
-            assertThat(ctx.getBean(MemberService.class)).isInstanceOf(DefaultMemberService.class);
-        }
-
-        try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
-                ScanOnlyDefaultConfig.class, CustomMemberServiceStub.class)) {
-            assertThat(ctx.getBean(MemberService.class)).isInstanceOf(CustomMemberServiceStub.class);
-        }
-    }
-
-    @Configuration(proxyBeanMethods = false)
-    @ComponentScan(
-        basePackageClasses = DefaultMemberService.class,
-        useDefaultFilters = false,
-        includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = DefaultMemberService.class)
-    )
-    static class ScanOnlyDefaultConfig {
-    }
-
-    static class CustomMemberServiceStub implements MemberService {
-        @Override
-        public void registerMemberProfile(Long userId, String fullName, String phone, LocalDate dob, String gender) {
-        }
     }
 }
