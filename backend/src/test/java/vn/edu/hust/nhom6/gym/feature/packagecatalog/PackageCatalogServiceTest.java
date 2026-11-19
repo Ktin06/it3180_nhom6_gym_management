@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.access.AccessDeniedException;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.PackageStatus;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.PackageType;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.CreatePackageRequest;
@@ -100,8 +101,9 @@ class PackageCatalogServiceTest {
         verifyNoInteractions(staff, packages);
     }
 
-    private UsernamePasswordAuthenticationToken identity(String id, String role) {
-        return new UsernamePasswordAuthenticationToken(id, "unused",
-            List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+    /** Controller đổi Authentication thành CurrentUser; sub sai thì CurrentUser.from ném 401 trước khi vào service. */
+    private CurrentUser identity(String id, String role) {
+        return CurrentUser.from(new UsernamePasswordAuthenticationToken(id, "unused",
+            List.of(new SimpleGrantedAuthority("ROLE_" + role))));
     }
 }

@@ -1,5 +1,6 @@
 package vn.edu.hust.nhom6.gym.feature.member.controller;
 
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,7 +29,7 @@ public class MemberController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_MANAGER','RECEPTIONIST')")
     @Operation(summary = "Tạo hồ sơ hội viên tại quầy, chưa có ảnh đại diện")
     public ResponseEntity<MemberDetailResponse> create(Authentication auth, @Valid @RequestBody CreateMemberRequest request) {
-        var result = members.create(MemberActor.from(auth), request);
+        var result = members.create(CurrentUser.from(auth), request);
         return ResponseEntity.created(URI.create("/api/v1/members/" + result.id())).body(result);
     }
 
@@ -44,7 +45,7 @@ public class MemberController {
             @RequestParam(defaultValue = "0") @Min(value = 0, message = "Trang phải từ 0") int page,
             @RequestParam(defaultValue = "20") @Min(value = 1, message = "Kích thước trang từ 1 đến 100")
             @Max(value = 100, message = "Kích thước trang từ 1 đến 100") int size) {
-        return members.search(MemberActor.from(auth), keyword, status, page, size);
+        return members.search(CurrentUser.from(auth), keyword, status, page, size);
     }
 
     @GetMapping("/{id}")
@@ -52,7 +53,7 @@ public class MemberController {
     @Operation(summary = "Xem hồ sơ hội viên; ngoài phạm vi trả 404, TRAINER tạm chưa được phép")
     public MemberDetailResponse detail(Authentication auth,
             @PathVariable @Positive(message = "ID hội viên phải lớn hơn 0") Long id) {
-        return members.detail(MemberActor.from(auth), id);
+        return members.detail(CurrentUser.from(auth), id);
     }
 
     @PutMapping("/{id}")
@@ -61,6 +62,6 @@ public class MemberController {
     public MemberDetailResponse update(Authentication auth,
             @PathVariable @Positive(message = "ID hội viên phải lớn hơn 0") Long id,
             @Valid @RequestBody UpdateMemberRequest request) {
-        return members.update(MemberActor.from(auth), id, request);
+        return members.update(CurrentUser.from(auth), id, request);
     }
 }

@@ -1,5 +1,6 @@
 package vn.edu.hust.nhom6.gym.feature.member;
 
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ class MemberServiceTest {
     @Mock MemberBranchAccess branches;
     @Mock Validator validator;
     MemberServiceImpl service;
-    final MemberActor receptionist = new MemberActor(10L, UserRole.RECEPTIONIST);
+    final CurrentUser receptionist = new CurrentUser(10L, UserRole.RECEPTIONIST);
 
     @BeforeEach
     void setUp() {
@@ -105,7 +106,7 @@ class MemberServiceTest {
         Member member = new Member();
         member.setUserId(99L);
         when(repository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(member));
-        assertThatThrownBy(() -> service.detail(new MemberActor(3L, UserRole.MEMBER), 1L))
+        assertThatThrownBy(() -> service.detail(new CurrentUser(3L, UserRole.MEMBER), 1L))
             .isInstanceOf(NotFoundException.class);
         verifyNoInteractions(accounts, branches);
     }

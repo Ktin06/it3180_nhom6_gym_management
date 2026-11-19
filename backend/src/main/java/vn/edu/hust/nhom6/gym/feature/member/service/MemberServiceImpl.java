@@ -1,5 +1,6 @@
 package vn.edu.hust.nhom6.gym.feature.member.service;
 
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import java.time.LocalDate;
 import java.util.*;
 import org.springframework.context.annotation.Lazy;
@@ -50,7 +51,7 @@ public class MemberServiceImpl implements MemberManagementService, MemberRegistr
 
     @Override
     @Transactional
-    public MemberDetailResponse create(MemberActor actor, CreateMemberRequest request) {
+    public MemberDetailResponse create(CurrentUser actor, CreateMemberRequest request) {
         Long branch = actor.role() == UserRole.SUPER_ADMIN
             ? branches.defaultBranchId() : branches.staffBranchId(actor.userId());
         Member member = newProfile(null, actor.userId(), branch, request.fullName(), request.phone(),
@@ -99,7 +100,7 @@ public class MemberServiceImpl implements MemberManagementService, MemberRegistr
     }
 
     @Override
-    public MemberDetailResponse detail(MemberActor actor, Long id) {
+    public MemberDetailResponse detail(CurrentUser actor, Long id) {
         Member member = findMember(id);
         if (actor.role() == UserRole.MEMBER) {
             if (!actor.userId().equals(member.getUserId())) { throw notFound(); }
@@ -111,7 +112,7 @@ public class MemberServiceImpl implements MemberManagementService, MemberRegistr
 
     @Override
     @Transactional
-    public MemberDetailResponse update(MemberActor actor, Long id, UpdateMemberRequest request) {
+    public MemberDetailResponse update(CurrentUser actor, Long id, UpdateMemberRequest request) {
         // Tuần tự hóa cập nhật cùng hồ sơ để trạng thái member và user không lệch khi hai người cùng sửa.
         Member member = members.findForUpdate(id).orElseThrow(MemberServiceImpl::notFound);
         requireBranch(actor, member);
@@ -136,7 +137,7 @@ public class MemberServiceImpl implements MemberManagementService, MemberRegistr
     }
 
     @Override
-    public PageResponse<MemberSummaryResponse> search(MemberActor actor, String keyword,
+    public PageResponse<MemberSummaryResponse> search(CurrentUser actor, String keyword,
             MemberStatus status, int page, int size) {
         Long branchId = actor.role() == UserRole.SUPER_ADMIN ? null : branches.staffBranchId(actor.userId());
         String term = keyword == null ? "" : keyword.trim();
@@ -194,7 +195,7 @@ public class MemberServiceImpl implements MemberManagementService, MemberRegistr
         return members.findByIdAndDeletedAtIsNull(id).orElseThrow(MemberServiceImpl::notFound);
     }
 
-    private void requireBranch(MemberActor actor, Member member) {
+    private void requireBranch(CurrentUser actor, Member member) {
         if (actor.role() != UserRole.SUPER_ADMIN && !branches.staffBranchId(actor.userId()).equals(member.getHomeBranchId())) {
             throw notFound();
         }

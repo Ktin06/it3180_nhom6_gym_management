@@ -1,5 +1,6 @@
 package vn.edu.hust.nhom6.gym.feature.member.service;
 
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.common.dto.PageResponse;
 import vn.edu.hust.nhom6.gym.feature.member.dto.*;
 import vn.edu.hust.nhom6.gym.feature.member.entity.MemberStatus;
@@ -9,8 +10,8 @@ import vn.edu.hust.nhom6.gym.feature.member.entity.MemberStatus;
  * Service kiểm tra phạm vi chi nhánh, quyền sở hữu và các quy tắc nghiệp vụ.
  */
 public interface MemberManagementService {
-    MemberDetailResponse create(MemberActor actor, CreateMemberRequest request);
-    MemberDetailResponse update(MemberActor actor, Long id, UpdateMemberRequest request);
-    MemberDetailResponse detail(MemberActor actor, Long id);
-    PageResponse<MemberSummaryResponse> search(MemberActor actor, String keyword, MemberStatus status, int page, int size);
+    MemberDetailResponse create(CurrentUser actor, CreateMemberRequest request);
+    MemberDetailResponse update(CurrentUser actor, Long id, UpdateMemberRequest request);
+    MemberDetailResponse detail(CurrentUser actor, Long id);
+    PageResponse<MemberSummaryResponse> search(CurrentUser actor, String keyword, MemberStatus status, int page, int size);
 }
