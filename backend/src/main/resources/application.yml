@@ -51,3 +51,6 @@ app:
     # Người gửi email (ADR 0013). Máy cá nhân để trống địa chỉ được: email chỉ ghi ra log.
     from-address: ${MAIL_FROM_ADDRESS:}
     from-name: ${MAIL_FROM_NAME:Gym Nhom 6}
+  scheduling:
+    # Bật tác vụ nền (cron theo giờ Việt Nam, chạy bù khi khởi động). Kiểm thử đặt false.
+    enabled: true
