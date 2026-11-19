@@ -1,6 +1,11 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
-import { afterEach } from 'vitest'
+import { afterEach, beforeEach } from 'vitest'
+import { createTestLockManager } from './web-locks'
+
+beforeEach(() => {
+  Object.defineProperty(navigator, 'locks', { configurable: true, value: createTestLockManager() })
+})
 
 // jsdom chưa hỗ trợ style của pseudo-element; kiểm thử DOM không đo kích thước scrollbar.
 const getComputedStyle = window.getComputedStyle.bind(window)

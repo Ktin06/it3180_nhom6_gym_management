@@ -7,6 +7,12 @@ import {
   suspendSession,
 } from '../auth/session-store'
 import { queueCookieOperation } from '../auth/cookie-operation-queue'
+import {
+  captureCookieRevision,
+  currentTabCookieRevision,
+  publishRefresh,
+  reuseConcurrentRefresh,
+} from '../auth/session-coordination'
 import { requestRefresh } from './refresh-client'
 import { HTTP_BASE_URL, HTTP_TIMEOUT } from './http-config'
 import { isUnauthorized } from './http-errors'
@@ -31,17 +37,27 @@ export function refreshAccessToken(expectedEpoch = getSessionEpoch()): Promise<s
     return Promise.reject(new Error('Phiên đăng nhập đã thay đổi.'))
   if (refreshFlight?.epoch === expectedEpoch) return refreshFlight.promise
 
+  let before: ReturnType<typeof captureCookieRevision>
+  try {
+    before = captureCookieRevision()
+  } catch (error) {
+    return Promise.reject(error)
+  }
   const operation = queueCookieOperation(async () => {
-    if (getSessionEpoch() !== expectedEpoch) throw new Error('Phiên đăng nhập đã thay đổi.')
+    const revision = currentTabCookieRevision(expectedEpoch)
+    if (!revision) throw new Error('Phiên đăng nhập đã thay đổi.')
     try {
-      const response = await requestRefresh()
-      if (typeof response.accessToken !== 'string' || !response.accessToken) {
+      const reused = await reuseConcurrentRefresh(before, revision)
+      if (getSessionEpoch() !== expectedEpoch) throw new Error('Phiên đăng nhập đã thay đổi.')
+      const token = reused ?? (await requestRefresh()).accessToken
+      if (typeof token !== 'string' || !token) {
         throw new Error('Máy chủ không trả access token hợp lệ.')
       }
-      if (!setAccessToken(response.accessToken, expectedEpoch)) {
+      if (!setAccessToken(token, expectedEpoch)) {
         throw new Error('Phiên đăng nhập đã thay đổi.')
       }
-      return response.accessToken
+      if (!reused) publishRefresh(revision, token)
+      return token
     } catch (error) {
       if (getSessionEpoch() === expectedEpoch) {
         if (isUnauthorized(error)) {
