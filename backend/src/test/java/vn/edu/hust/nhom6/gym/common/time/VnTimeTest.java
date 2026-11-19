@@ -2,6 +2,7 @@ package vn.edu.hust.nhom6.gym.common.time;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -54,6 +55,14 @@ class VnTimeTest {
         clock.setVn(LocalDateTime.of(2026, 11, 20, 23, 30));
         clock.advance(Duration.ofHours(1));
         assertThat(vnTime.today()).isEqualTo(LocalDate.of(2026, 11, 21));
+    }
+
+    @Test
+    @DisplayName("Nền tảng: đồng hồ lấy từ MutableClock.withZone vẫn theo các lần đổi giờ sau đó")
+    void withZoneDungChungThoiDiem() {
+        Clock utc = clock.withZone(ZoneOffset.UTC);
+        clock.setInstant(Instant.parse("2026-12-01T00:00:00Z"));
+        assertThat(utc.instant()).isEqualTo(Instant.parse("2026-12-01T00:00:00Z"));
     }
 
     @Test

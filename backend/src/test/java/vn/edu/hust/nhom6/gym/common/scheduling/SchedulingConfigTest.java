@@ -5,6 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.ApplicationContext;
@@ -37,6 +41,16 @@ class SchedulingConfigTest {
         runner.run(ctx -> {
             assertThat(ctx).hasSingleBean(ScheduledAnnotationBeanPostProcessor.class);
             assertThat(ctx).hasSingleBean(SampleJob.class);
+        });
+    }
+
+    @Test
+    @DisplayName("Nền tảng: TaskScheduler của Spring Boot có một luồng, chạy bù và cron không chồng nhau")
+    void boLapLichMotLuong() {
+        runner.withConfiguration(AutoConfigurations.of(TaskSchedulingAutoConfiguration.class)).run(ctx -> {
+            assertThat(ctx).hasSingleBean(TaskScheduler.class);
+            assertThat(ctx.getBean(ThreadPoolTaskScheduler.class).getScheduledThreadPoolExecutor().getCorePoolSize())
+                .isEqualTo(1);
         });
     }
 

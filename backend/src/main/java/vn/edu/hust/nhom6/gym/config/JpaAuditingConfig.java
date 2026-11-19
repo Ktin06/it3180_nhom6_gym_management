@@ -1,5 +1,6 @@
 package vn.edu.hust.nhom6.gym.config;
 
+import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
@@ -17,8 +18,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EnableJpaAuditing(dateTimeProviderRef = "utcDateTimeProvider")
 public class JpaAuditingConfig {
 
+    /** Đọc từ bean {@link Clock} (TimeConfig), để kiểm thử đổi giờ bằng MutableClock thì created_at cũng đổi theo. */
     @Bean
-    DateTimeProvider utcDateTimeProvider() {
-        return () -> Optional.of(OffsetDateTime.now(ZoneOffset.UTC));
+    DateTimeProvider utcDateTimeProvider(Clock clock) {
+        return () -> Optional.of(OffsetDateTime.now(clock.withZone(ZoneOffset.UTC)));
     }
 }

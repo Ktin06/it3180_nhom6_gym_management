@@ -6,7 +6,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
@@ -18,7 +17,9 @@ import org.springframework.stereotype.Component;
  *   <li>Tên lớp {@code <Việc>Job}, đặt ở gói {@code feature/<chức năng>/job}.</li>
  *   <li>Lớp chỉ gọi <b>một</b> hàm public của service; logic và kiểm thử nằm ở service.</li>
  *   <li>Cron luôn ghi múi giờ: {@code @Scheduled(cron = "0 0 0 * * *", zone = VnTime.ZONE_ID)}.</li>
- *   <li>Chạy bù khi khởi động: {@code @EventListener(ApplicationReadyEvent.class)} gọi cùng hàm đó.</li>
+ *   <li>Chạy bù khi khởi động: nghe {@code ApplicationReadyEvent} rồi <b>giao cho {@code TaskScheduler}</b>
+ *       chạy ngay, không gọi thẳng. Bộ lập lịch có một luồng, nên lần chạy bù và lần cron không bao
+ *       giờ chạy cùng lúc (gọi thẳng thì chạy trên luồng main, có thể chồng với cron lúc 00:00).</li>
  *   <li>Hàm service chạy lặp nhiều lần không sinh dữ liệu sai (lọc theo trạng thái hiện tại,
  *       không cộng dồn), vì cron và chạy bù có thể cùng xử lý một ngày.</li>
  * </ol>
@@ -28,12 +29,13 @@ import org.springframework.stereotype.Component;
  * @RequiredArgsConstructor
  * public class MembershipDailyJob {
  *     private final MembershipLifecycleService memberships;
+ *     private final TaskScheduler scheduler;
  *
  *     @Scheduled(cron = "0 0 0 * * *", zone = VnTime.ZONE_ID)
  *     public void runDaily() { memberships.runDailyTransitions(); }
  *
  *     @EventListener(ApplicationReadyEvent.class)
- *     public void catchUpOnStartup() { memberships.runDailyTransitions(); }
+ *     public void catchUpOnStartup() { scheduler.schedule(this::runDaily, Instant.now()); }
  * }
  * }</pre>
  */
@@ -41,6 +43,6 @@ import org.springframework.stereotype.Component;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Component
-@ConditionalOnProperty(prefix = "app.scheduling", name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnSchedulingEnabled
 public @interface ScheduledJob {
 }

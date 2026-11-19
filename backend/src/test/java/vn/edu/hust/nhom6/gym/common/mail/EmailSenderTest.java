@@ -41,6 +41,13 @@ class EmailSenderTest {
     }
 
     @Test
+    @DisplayName("Nền tảng: profile staging không dùng LogEmailSender (tránh ghi liên kết đặt mật khẩu ra log)")
+    void stagingKhongGhiEmailRaLog() {
+        context.withPropertyValues("spring.profiles.active=staging")
+            .run(ctx -> assertThat(ctx).doesNotHaveBean(EmailSender.class));
+    }
+
+    @Test
     @DisplayName("Nền tảng: có bean EmailSender khác (ví dụ Brevo) thì không tạo LogEmailSender")
     void coBanGuiThatThiBoLogEmailSender() {
         EmailSender fake = (to, subject, body) -> { };
