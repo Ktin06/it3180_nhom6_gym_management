@@ -14,4 +14,4 @@ Quy tắc:
 
 - Chức năng khác cần dữ liệu của chức năng này thì gọi qua hàm trong `api/`, không nhân bản kiểu hay lời gọi API.
 - Component dùng chung từ hai chức năng trở lên thì chuyển lên `src/components/`.
-- Khi chức năng xong, bật mục menu tương ứng (`ready: true` trong `layouts/staff-menu.tsx` hoặc `layouts/MemberLayout.tsx`).
+- Khi chức năng xong, khai báo quyền trong `routes/route-access.ts`, thêm route `guarded(...)` trong `app/router.tsx`, rồi bật mục menu (`ready: true`, xóa `roles`) trong `layouts/staff-menu.tsx` hoặc `layouts/member-menu.tsx`.
