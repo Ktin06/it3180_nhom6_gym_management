@@ -1,5 +1,7 @@
 package vn.edu.hust.nhom6.gym.feature.branch.service;
 
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,8 +18,13 @@ public class BranchLookupService {
     private final BranchLookupRepository branches;
 
     public Long defaultBranchId() {
-        return branches.findActiveIdByCode(DEFAULT_BRANCH_CODE)
+        return findActiveDefaultBranchId()
             .orElseThrow(() -> new NotFoundException("Không tìm thấy chi nhánh mặc định CN01 đang hoạt động."));
+    }
+
+    /** Chi nhánh mặc định CN01 nếu đang hoạt động; rỗng nếu đã ngừng, để nơi gọi tự quyết cách xử lý. */
+    public Optional<Long> findActiveDefaultBranchId() {
+        return branches.findActiveIdByCode(DEFAULT_BRANCH_CODE);
     }
 
     public boolean isActive(Long branchId) {

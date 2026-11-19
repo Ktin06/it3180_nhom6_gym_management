@@ -74,7 +74,8 @@ Xem danh sách "chưa đọc" và tự kiểm tra lại những phần đó; k�
 
 ## 7. Nhất quán trong tài liệu và sơ đồ
 
-- [ ] Mỗi thông tin chỉ lưu một nơi (ví dụ: user story nằm ở issue, file trong repo chỉ giữ bảng chỉ mục).
+- [ ] Mỗi thông tin chỉ lưu một nơi (ví dụ: user story, AC, BR nằm trong file SRS; issue chỉ ghi mã và đường dẫn, không chép lại nội dung AC).
+- [ ] Mã US, AC, BR đúng dạng trong [ADR 0012](../decisions/0012-quy-uoc-ma-truy-vet.md); không dùng lại mã đã có, kể cả mã của AC đã bỏ.
 - [ ] Cùng một quy tắc không được ghi nhiều kiểu trong cùng tài liệu (đã gặp: khung "đã đến lớp" ghi 3 cách khác nhau; E6 vừa nói trả 409 vừa nói tự xử lý không báo lỗi).
 - [ ] Số bước, số kịch bản được tham chiếu đúng ("tại bước 8" đúng là bước 8); kịch bản đánh số theo thứ tự. Sửa tài liệu mà người khác đang tham chiếu số bước thì gộp vào bước có sẵn, không chèn bước mới làm lệch số.
 - [ ] Ví dụ số liệu tự kiểm được: tổng các phần bằng tổng chung, ngày tháng tính lại khớp, wireframe khớp đặc tả và dữ liệu mẫu.
@@ -86,6 +87,7 @@ Xem danh sách "chưa đọc" và tự kiểm tra lại những phần đó; k�
 
 - [ ] Mỗi quy tắc nghiệp vụ có kịch bản Given/When/Then, gồm cả trường hợp bị từ chối và giá trị biên (đúng 2 giờ, đúng 30 phút, đúng ngày hết hạn).
 - [ ] Mã có kiểm thử JUnit cho từng quy tắc; API mới có request Postman trong `postman/`.
+- [ ] Kiểm thử chứng minh AC mang mã TC ở đầu tên hiển thị, và AC đó có thật trong SRS ([docs/testing/README.md](../testing/README.md)). Mọi AC mà PR ghi "đã làm" đều có ít nhất một TC.
 - [ ] Kiểm thử kiểm tra hành vi thật, không chỉ kiểm tra mock; không sửa assertion cho "qua", không tắt kiểm thử (`@Disabled`, `.skip`).
 - [ ] Đã thật sự chạy `./mvnw -B verify` hoặc `npm run lint && npm test -- --run && npm run build`. Không chạy được (ví dụ Docker chưa bật) thì ghi rõ trong pull request, không ghi là đã qua.
 
@@ -94,6 +96,6 @@ Xem danh sách "chưa đọc" và tự kiểm tra lại những phần đó; k�
 - [ ] Không ở nhánh `main`; tên nhánh và commit theo [CONTRIBUTING.md](../../CONTRIBUTING.md).
 - [ ] `git status` trước khi `git add`: không lọt file cấu hình AI cá nhân, thư mục riêng, `.env`, file Excel hay file tạm. Không dùng `git add .` khi chưa xem danh sách.
 - [ ] Commit message và mô tả pull request không ghi tên công cụ AI (kể cả dòng `Co-Authored-By` hay "Generated with …" do công cụ tự thêm).
-- [ ] Mô tả pull request có `Closes #<số>` (mỗi issue một dòng), gán đúng người duyệt theo bảng cặp duyệt; không đoán người duyệt theo nội dung.
+- [ ] Mô tả pull request có `Closes #<số>` cho issue task và `Refs #<số>` cho issue user story (mỗi issue một dòng; không ghi `Closes` cho user story), gán đúng người duyệt theo bảng cặp duyệt; không đoán người duyệt theo nội dung.
 - [ ] Ô đánh dấu trong checklist pull request chỉ tích khi đã làm thật (đã gặp: tích "khớp bản chốt phạm vi và ERD", "mở được bằng Draw.io" trong khi chưa đúng).
 - [ ] Đã tự đọc lại toàn bộ thay đổi và giải thích được.

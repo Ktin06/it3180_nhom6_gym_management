@@ -15,6 +15,8 @@ Web quản lý chuỗi phòng tập gym – bài tập lớn IT3180 (Nhập môn
 | Phạm vi, quy tắc nghiệp vụ, yêu cầu phi chức năng (NF1–NF6, S1–S10) | [ban-chot-pham-vi.md](../requirements/ban-chot-pham-vi.md) |
 | Dữ liệu (bản chuẩn của ERD) | [erd-v2.dbml](../design/erd/erd-v2.dbml) |
 | Giải thích dữ liệu, ràng buộc cần kiểm thử | [thiet-ke-du-lieu.md](../design/erd/thiet-ke-du-lieu.md) |
+| User story, tiêu chí chấp nhận (AC), quy tắc nghiệp vụ (BR) của từng chức năng | [srs/](../requirements/srs/), mỗi chức năng một file |
+| Quy ước mã truy vết UC → US → AC → TC | [ADR 0012](../decisions/0012-quy-uoc-ma-truy-vet.md), [docs/testing/README.md](../testing/README.md) |
 | Quyết định kiến trúc | [decisions/](../decisions/) |
 | Quy ước làm việc | [CONTRIBUTING.md](../../CONTRIBUTING.md) |
 
@@ -75,7 +77,7 @@ npm run dev
 11. **Người thao tác trỏ `users.id`**, cột `*_by`; huấn luyện viên trong vai trò dạy trỏ `staff.id` (`trainer_id`).
 12. Mỗi thông tin chỉ lưu một nơi: vai trò `users.role`, email `users.email`, chi nhánh nhân viên `staff.branch_id`, số điện thoại `members.phone` / `staff.phone`.
 13. **Không thêm tính năng ngoài phạm vi** bản chốt (đặc biệt: không thanh toán online, không AI ngoài F20, không đăng nhập bằng số điện thoại).
-14. **Mỗi quy tắc nghiệp vụ phải có kiểm thử JUnit**; API mới có request Postman trong `postman/`.
+14. **Mỗi quy tắc nghiệp vụ phải có kiểm thử JUnit**; API mới có request Postman trong `postman/`. Kiểm thử chứng minh một AC mang mã TC ở đầu tên hiển thị, ví dụ `@DisplayName("TC-F3.3.1-02a: …")` hay `it('TC-F3.1.1-03a: …')` ([docs/testing/README.md](../testing/README.md)).
 15. Tham số có dấu \* trong bản chốt phạm vi đọc từ `system_configs`, không viết cứng.
 
 ## Quy tắc nghiệp vụ dễ làm sai
@@ -85,7 +87,7 @@ Tóm tắt; chi tiết và ngoại lệ xem [bản chốt phạm vi](../requirem
 - **Chỉ đăng nhập bằng email** (F1).
 - **Gói PT không dùng để check-in** vào phòng tập; chỉ gói TIME hoặc SESSION đang ACTIVE (F4).
 - Hội viên có **cả gói TIME và SESSION thì dùng gói TIME**, không trừ buổi (F4).
-- **Chỉ gói TIME được đặt lớp nhóm** hoặc vào danh sách chờ; gói SESSION và PT thì không (F8).
+- **Chỉ gói TIME được đặt lớp nhóm**; gói SESSION và PT thì không. Lớp đầy là hết chỗ, không có danh sách chờ (F8, ADR 0014).
 - **Gói chỉ ACTIVE khi hóa đơn PAID** (F3, F5).
 - **Hóa đơn chờ do F7 tạo tự hủy sau `PENDING_INVOICE_TTL_DAYS`** (mặc định 3 ngày), kèm gói PENDING đi cùng.
 - **Tự đăng ký bằng số điện thoại đã có hồ sơ thì từ chối** và hướng dẫn liên hệ quầy; không tự gắn tài khoản mới vào hồ sơ cũ (F1, F2).
@@ -96,8 +98,8 @@ Tóm tắt; chi tiết và ngoại lệ xem [bản chốt phạm vi](../requirem
 
 ## Quy trình làm một chức năng
 
-1. Nhận issue user story trong sprint; đọc đặc tả của chức năng (user story, tiêu chí chấp nhận, quy tắc nghiệp vụ, bảng liên quan trong ERD).
-2. Lên kế hoạch (API, service, migration, màn hình, kiểm thử). Khi dùng công cụ AI: yêu cầu AI đề xuất kế hoạch trước, đọc và đồng ý rồi mới cho sinh mã.
-3. Viết kiểm thử cho quy tắc nghiệp vụ cùng lúc với mã.
+1. Nhận issue task trong sprint. Mở issue user story mà task thuộc về, rồi đọc mục US đó trong file SRS: user story, các AC có mã, BR liên quan, bảng liên quan trong ERD. **File SRS là bản chuẩn**, issue chỉ ghi mã.
+2. Lên kế hoạch (API, service, migration, màn hình, kiểm thử). Kế hoạch nêu rõ **các mã US, AC, BR sẽ làm** và mỗi AC được chứng minh bằng kiểm thử nào. Khi dùng công cụ AI: yêu cầu AI đề xuất kế hoạch trước, đọc và đồng ý rồi mới cho sinh mã.
+3. Viết kiểm thử cho quy tắc nghiệp vụ cùng lúc với mã; mỗi kiểm thử chứng minh AC mang mã TC. Mã làm ra một hành vi mà SRS chưa có AC thì thêm AC vào SRS trong cùng PR, hoặc hỏi trưởng nhóm nếu đó là quy tắc nghiệp vụ mới.
 4. Chạy `./mvnw -B verify` và/hoặc `npm run lint && npm test -- --run && npm run build`; sửa đến khi qua, không tắt hay bỏ qua kiểm thử.
 5. Tự đọc lại toàn bộ thay đổi theo [checklist tự review](checklist-review.md), rồi mở pull request theo [CONTRIBUTING.md](../../CONTRIBUTING.md).

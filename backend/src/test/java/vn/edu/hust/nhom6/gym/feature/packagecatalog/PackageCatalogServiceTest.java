@@ -1,6 +1,7 @@
 package vn.edu.hust.nhom6.gym.feature.packagecatalog;
 
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,6 +36,7 @@ class PackageCatalogServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F3.1.1-04b: Chủ chuỗi xem danh mục không cần gán chi nhánh (kiểm ở service)")
     void ownerDoesNotRequireStaffAssignment() {
         when(packages.search(eq(true), isNull(), isNull(), eq(PackageStatus.ACTIVE), any(Pageable.class)))
             .thenReturn(Page.empty());
@@ -44,6 +46,7 @@ class PackageCatalogServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"SUPER_ADMIN", "RECEPTIONIST", "MEMBER", "TRAINER"})
+    @DisplayName("TC-F3.2.1-06c: Service tự chặn vai trò khác Quản lý chi nhánh khi thêm gói")
     void createChecksRoleEvenWhenCalledWithoutController(String role) {
         var request = new CreatePackageRequest("TEST", "Gói test", PackageType.TIME, 30, null, 0, null);
         assertThatThrownBy(() -> service.create(identity("1", role), request))
@@ -53,6 +56,7 @@ class PackageCatalogServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"SUPER_ADMIN", "RECEPTIONIST", "MEMBER", "TRAINER"})
+    @DisplayName("TC-F3.3.1-08c: Service tự chặn vai trò khác Quản lý chi nhánh khi sửa gói")
     void updateChecksRoleWithoutController(String role) {
         assertThatThrownBy(() -> service.update(identity("1", role), 1L, new UpdatePackageRequest()))
             .isInstanceOf(AccessDeniedException.class);
@@ -61,6 +65,7 @@ class PackageCatalogServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"SUPER_ADMIN", "RECEPTIONIST", "MEMBER", "TRAINER"})
+    @DisplayName("TC-F3.4.1-06g: Service tự chặn vai trò khác Quản lý chi nhánh khi ngừng bán")
     void deactivateChecksRoleWithoutController(String role) {
         assertThatThrownBy(() -> service.deactivate(identity("1", role), 1L))
             .isInstanceOf(AccessDeniedException.class);
@@ -69,6 +74,7 @@ class PackageCatalogServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"BRANCH_MANAGER", "RECEPTIONIST"})
+    @DisplayName("TC-F3.1.1-05d: Nhân viên chưa gán chi nhánh không bao giờ được xem mọi chi nhánh")
     void missingAssignmentNeverFallsBackToAllBranches(String role) {
         when(staff.activeBranchIdForUser(2L)).thenThrow(new AccessDeniedException("Chưa có chi nhánh"));
         assertThatThrownBy(() -> service.list(identity("2", role), null, PackageStatus.ACTIVE, 0, 20))
@@ -78,6 +84,7 @@ class PackageCatalogServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"TRAINER", "MEMBER"})
+    @DisplayName("TC-F3.1.1-05e: Vai trò không được phép không chạm tới truy vấn danh mục")
     void deniedRolesCannotQueryRepository(String role) {
         assertThatThrownBy(() -> service.list(identity("2", role), null, PackageStatus.ACTIVE, 0, 20))
             .isInstanceOf(AccessDeniedException.class);
@@ -86,6 +93,7 @@ class PackageCatalogServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"0", "-1", "not-an-id"})
+    @DisplayName("S2: JWT có subject không phải id hợp lệ bị từ chối 401")
     void invalidSubjectIsUnauthorized(String subject) {
         assertThatThrownBy(() -> service.list(identity(subject, "SUPER_ADMIN"), null, PackageStatus.ACTIVE, 0, 20))
             .isInstanceOf(UnauthorizedException.class);

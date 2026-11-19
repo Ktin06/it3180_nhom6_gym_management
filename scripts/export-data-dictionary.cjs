@@ -93,9 +93,8 @@ const labels = {
   start_time: 'Giờ bắt đầu', end_time: 'Giờ kết thúc', valid_from: 'Ngày bắt đầu áp dụng lịch',
   valid_to: 'Ngày kết thúc áp dụng lịch', occurrence_date: 'Ngày của buổi theo lịch lặp khi sinh',
   start_at: 'Thời điểm bắt đầu', end_at: 'Thời điểm kết thúc', original_start_at: 'Thời điểm bắt đầu trước khi đổi giờ',
-  waitlisted_at: 'Thời điểm vào danh sách chờ', booked_at: 'Thời điểm có chỗ đặt',
-  promoted_at: 'Thời điểm được đưa từ danh sách chờ vào lớp', grace_until: 'Thời điểm kết thúc ân hạn hủy',
-  reconfirm_expires_at: 'Hạn xác nhận lại sau đổi giờ', arrived_at: 'Thời điểm ghi nhận đã đến tại quầy',
+  booked_at: 'Thời điểm có chỗ đặt', arrived_at: 'Thời điểm ghi nhận đã đến tại quầy',
+  content_type: 'Kiểu nội dung (MIME) của tệp', size_bytes: 'Kích thước tệp (byte)', uploaded_by: 'Tài khoản tải tệp lên',
   cancelled_at: 'Thời điểm hủy', cancel_reason: 'Lý do hủy', is_late_cancel: 'Có bị tính hủy muộn hay không',
   confirmed_at: 'Thời điểm xác nhận buổi PT đã diễn ra', commission_amount: 'Tiền hoa hồng PT (VND)',
   logged_at: 'Ngày ghi nhật ký tập', exercise: 'Tên bài tập', sets: 'Số hiệp', reps: 'Số lần lặp',
@@ -183,7 +182,8 @@ for (const en of enums.values()) {
 }
 lines.push('## 5. Lịch sử thay đổi', '', '| Ngày | Nội dung |', '| --- | --- |',
   '| 05/11/2026 | Xuất từ điển đầy đủ từ ERD v2 cho #15; giữ cột, kiểu, mặc định, khóa, chỉ mục, Enum và ghi chú của nguồn |',
-  '| 12/11/2026 | Xuất lại theo nguồn mới: các CHECK và chỉ mục đã thêm vào DBML sau 05/11; `class_bookings` theo ADR 0010 (`created_by` bắt buộc, ghi chú `waitlisted_at`, `grace_until`, `attendance_marked_by`) |', '');
+  '| 12/11/2026 | Xuất lại theo nguồn mới: các CHECK và chỉ mục đã thêm vào DBML sau 05/11; `class_bookings` theo ADR 0010 (`created_by` bắt buộc, ghi chú `waitlisted_at`, `grace_until`, `attendance_marked_by`) |', '',
+  '| 19/11/2026 | Xuất lại theo ADR 0014 (migration `V9_03`): `class_bookings` bỏ trạng thái `WAITLIST`, `PENDING_RECONFIRM`, lý do hủy `NOT_RECONFIRMED`, các cột `waitlisted_at`, `promoted_at`, `grace_until`, `reconfirm_expires_at` và chỉ mục danh sách chờ; `system_configs` đổi `PROMOTION_CUTOFF_MIN` thành `BOOKING_CUTOFF_MIN`, bỏ `PROMOTION_GRACE_MIN`, `RECONFIRM_TTL_MIN` |');
 const output = lines.join('\n');
 if (args.includes('--check')) {
   const existing = fs.existsSync(outputPath) ? fs.readFileSync(outputPath, 'utf8').replace(/\r\n/g,'\n') : '';

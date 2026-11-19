@@ -24,3 +24,18 @@ export interface PackageQuery extends PageQuery {
 export interface PackagesGateway {
   list(query: PackageQuery): Promise<PageResponse<GymPackage>>
 }
+
+/** Một gói trên bảng giá công khai; khớp PublicPackageDto (US-F3.1.2). */
+export interface PublicPackage {
+  id: number
+  name: string
+  type: PackageType
+  durationDays: number
+  sessionCount?: number | null
+  price: number
+  description?: string | null
+}
+
+export interface PublicPackagesGateway {
+  list(): Promise<PublicPackage[]>
+}

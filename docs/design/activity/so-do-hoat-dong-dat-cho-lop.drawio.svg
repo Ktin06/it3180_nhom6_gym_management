@@ -1,0 +1,176 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1120px" height="1240px" viewBox="-0.5 -0.5 1120 1240" content="&lt;mxfile host=&quot;app.diagrams.net&quot; version=&quot;24.0.0&quot;&gt;
+  &lt;diagram id=&quot;diag_so_do_hoat_dong_dat_cho_lop&quot; name=&quot;so_do_hoat_dong_dat_cho_lop&quot;&gt;
+    &lt;mxGraphModel dx=&quot;1120&quot; dy=&quot;1240&quot; grid=&quot;1&quot; gridSize=&quot;10&quot; guides=&quot;1&quot; tooltips=&quot;1&quot; connect=&quot;1&quot; arrows=&quot;1&quot; fold=&quot;1&quot; page=&quot;1&quot; pageScale=&quot;1&quot; pageWidth=&quot;1120&quot; pageHeight=&quot;1240&quot;&gt;
+      &lt;root&gt;
+        &lt;mxCell id=&quot;0&quot;/&gt;
+        &lt;mxCell id=&quot;1&quot; parent=&quot;0&quot;/&gt;
+      &lt;/root&gt;
+    &lt;/mxGraphModel&gt;
+  &lt;/diagram&gt;
+&lt;/mxfile&gt;">
+  <defs>
+    <style type="text/css">
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+      text { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+      .title { font-size: 18px; font-weight: 700; fill: #1E293B; }
+      .subtitle { font-size: 12px; font-weight: 500; fill: #64748B; }
+      .actor-head { fill: #FEF3C7; stroke: #D97706; stroke-width: 2; }
+      .actor-body { stroke: #D97706; stroke-width: 2; stroke-linecap: round; }
+      .actor-label { font-size: 13px; font-weight: 600; fill: #0F172A; text-anchor: middle; }
+      .sys-rect { fill: #F8FAFC; stroke: #94A3B8; stroke-width: 2; stroke-dasharray: 6 6; rx: 12; }
+      .sys-header { font-size: 15px; font-weight: 700; fill: #334155; }
+      .pkg-rect { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; rx: 8; }
+      .pkg-title { font-size: 13px; font-weight: 700; fill: #0284C7; }
+      .uc-el { fill: #F0F9FF; stroke: #0284C7; stroke-width: 1.8; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05)); }
+      .uc-el-core { fill: #F0FDF4; stroke: #16A34A; stroke-width: 2; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.06)); }
+      .uc-text { font-size: 11px; font-weight: 600; fill: #0369A1; text-anchor: middle; }
+      .uc-text-core { font-size: 11px; font-weight: 700; fill: #15803D; text-anchor: middle; }
+      .line { stroke: #64748B; stroke-width: 1.5; fill: none; }
+      .dash-inc { stroke: #0D9488; stroke-width: 1.5; stroke-dasharray: 4 3; fill: none; }
+      .dash-ext { stroke: #EA580C; stroke-width: 1.5; stroke-dasharray: 4 3; fill: none; }
+      .lbl-inc { font-size: 10px; font-weight: 600; fill: #0F766E; text-anchor: middle; }
+      .lbl-ext { font-size: 10px; font-weight: 600; fill: #C2410C; text-anchor: middle; }
+      .act-node { fill: #F0FDF4; stroke: #16A34A; stroke-width: 1.8; rx: 14; ry: 14; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.04)); }
+      .act-text { font-size: 11px; font-weight: 600; fill: #166534; text-anchor: middle; }
+      .diamond { fill: #FEF9C3; stroke: #CA8A04; stroke-width: 1.8; }
+      .guard { font-size: 11px; font-weight: 600; fill: #B45309; }
+      .swimlane { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.5; }
+      .swimlane-hdr { fill: #F1F5F9; stroke: #CBD5E1; stroke-width: 1.5; }
+      .swimlane-txt { font-size: 13px; font-weight: 700; fill: #1E293B; text-anchor: middle; }
+    </style>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748B" />
+    </marker>
+    <marker id="arr-inc" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0D9488" />
+    </marker>
+    <marker id="arr-ext" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#EA580C" />
+    </marker>
+    <marker id="arr-act" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#16A34A" />
+    </marker>
+  </defs>
+  <rect width="1120" height="1240" fill="#FFFFFF"/>
+    <text x="40" y="45" class="title">Sơ đồ Hoạt động (Activity Diagram): Đặt chỗ và hủy chỗ lớp học nhóm (ADR 0014)</text>
+    <text x="40" y="70" class="subtitle">Còn chỗ thì đặt, đầy là hết chỗ, không có danh sách chờ. Vắng mặt được đếm khi huấn luyện viên điểm danh (UC-F8.6).</text>
+    <rect x="40" y="100" width="320" height="1115" class="swimlane"/>
+    <rect x="40" y="100" width="320" height="40" class="swimlane-hdr"/>
+    <text x="200" y="125" class="swimlane-txt">Hội viên / Lễ tân</text>
+    <rect x="360" y="100" width="450" height="1115" class="swimlane"/>
+    <rect x="360" y="100" width="450" height="40" class="swimlane-hdr"/>
+    <text x="585" y="125" class="swimlane-txt">Hệ thống (Spring Boot)</text>
+    <rect x="810" y="100" width="290" height="1115" class="swimlane"/>
+    <rect x="810" y="100" width="290" height="40" class="swimlane-hdr"/>
+    <text x="955" y="125" class="swimlane-txt">CSDL</text>
+    <text x="52" y="162" font-size="12" font-weight="700" fill="#334155">A. Đặt chỗ (UC-F8.1)</text>
+    <circle cx="200" cy="180" r="12" fill="#1E293B"/>
+    <line x1="200" y1="192" x2="200" y2="205" class="line" marker-end="url(#arr)"/>
+    <rect x="110" y="205" width="180" height="45" class="act-node"/>
+    <text x="200" y="224.5" class="act-text">Chọn buổi lớp, bấm &quot;Đặt chỗ&quot;</text>
+    <text x="200" y="238.5" font-size="10" fill="#15803D" text-anchor="middle">(lễ tân có thể đặt hộ)</text>
+    <line x1="290" y1="227" x2="470" y2="227" class="line" marker-end="url(#arr-act)"/>
+    <rect x="470" y="205" width="240" height="45" class="act-node"/>
+    <text x="590" y="224.5" class="act-text">Khóa members, rồi class_sessions</text>
+    <text x="590" y="238.5" font-size="10" fill="#15803D" text-anchor="middle">SELECT … FOR UPDATE (NF6)</text>
+    <line x1="590" y1="250" x2="590" y2="275" class="line" marker-end="url(#arr)"/>
+    <rect x="450" y="275" width="280" height="62" class="act-node"/>
+    <text x="590" y="296" class="act-text">Kiểm tra điều kiện</text>
+    <text x="590" y="310" font-size="10" fill="#15803D" text-anchor="middle">gói TIME ACTIVE, chưa bị khóa đặt lớp,</text>
+    <text x="590" y="324" font-size="10" fill="#15803D" text-anchor="middle">mở trước 7 ngày, còn ≥ 30 phút, không trùng giờ</text>
+    <line x1="590" y1="337" x2="590" y2="360" class="line" marker-end="url(#arr)"/>
+    <polygon points="590,360 650,385 590,410 530,385" class="diamond"/>
+    <text x="590" y="389" font-size="10" font-weight="700" fill="#CA8A04" text-anchor="middle">Đủ điều kiện?</text>
+    <line x1="530" y1="385" x2="290" y2="385" class="line" marker-end="url(#arr-act)"/>
+    <text x="440" y="377" class="guard">[Không]</text>
+    <rect x="110" y="362" width="180" height="45" class="act-node" fill="#FEF2F2" stroke="#EF4444"/>
+    <text x="200" y="388.5" font-size="11" font-weight="600" fill="#991B1B" text-anchor="middle">Báo lý do không đặt được</text>
+    <polyline points="110,385 85,385" class="line"/>
+    <circle cx="75" cy="385" r="10" fill="none" stroke="#EF4444" stroke-width="2"/>
+    <circle cx="75" cy="385" r="6" fill="#EF4444"/>
+    <line x1="590" y1="410" x2="590" y2="440" class="line" marker-end="url(#arr-act)"/>
+    <text x="600" y="428" class="guard">[Có]</text>
+    <polygon points="590,440 650,465 590,490 530,465" class="diamond"/>
+    <text x="590" y="469" font-size="10" font-weight="700" fill="#CA8A04" text-anchor="middle">Còn chỗ?</text>
+    <text x="656" y="461" font-size="9.5" fill="#64748B">sĩ số tính BOOKED,</text>
+    <text x="656" y="474" font-size="9.5" fill="#64748B">ATTENDED, NO_SHOW</text>
+    <line x1="530" y1="465" x2="290" y2="465" class="line" marker-end="url(#arr-act)"/>
+    <text x="440" y="457" class="guard">[Hết chỗ]</text>
+    <rect x="110" y="442" width="180" height="45" class="act-node" fill="#FEF2F2" stroke="#EF4444"/>
+    <text x="200" y="468.5" font-size="11" font-weight="600" fill="#991B1B" text-anchor="middle">Báo &quot;Lớp đã đủ chỗ&quot;</text>
+    <polyline points="110,465 85,465" class="line"/>
+    <circle cx="75" cy="465" r="10" fill="none" stroke="#EF4444" stroke-width="2"/>
+    <circle cx="75" cy="465" r="6" fill="#EF4444"/>
+    <line x1="590" y1="490" x2="590" y2="520" class="line" marker-end="url(#arr-act)"/>
+    <text x="600" y="508" class="guard">[Còn chỗ]</text>
+    <rect x="470" y="520" width="240" height="45" class="act-node"/>
+    <text x="590" y="546.5" class="act-text">Lưu chỗ đặt, kết thúc giao dịch</text>
+    <line x1="710" y1="542" x2="850" y2="542" class="line" marker-end="url(#arr-act)"/>
+    <rect x="850" y="520" width="230" height="45" class="act-node" fill="#F8FAFC"/>
+    <text x="965" y="539.5" class="act-text" fill="#0369A1">INSERT class_bookings</text>
+    <text x="965" y="553.5" font-size="10" fill="#64748B" text-anchor="middle">status = BOOKED, booked_at, created_by</text>
+    <line x1="470" y1="557" x2="290" y2="557" class="line" marker-end="url(#arr-act)"/>
+    <rect x="110" y="535" width="180" height="45" class="act-node"/>
+    <text x="200" y="561.5" class="act-text">Nhận &quot;Đặt chỗ thành công&quot;</text>
+    <polyline points="200,580 200,588" class="line"/>
+    <circle cx="200" cy="598" r="10" fill="none" stroke="#16A34A" stroke-width="2"/>
+    <circle cx="200" cy="598" r="6" fill="#16A34A"/>
+    <line x1="40" y1="625" x2="1100" y2="625" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="6 6"/>
+    <text x="52" y="650" font-size="12" font-weight="700" fill="#334155">B. Hủy chỗ (UC-F8.3)</text>
+    <circle cx="200" cy="670" r="12" fill="#1E293B"/>
+    <line x1="200" y1="682" x2="200" y2="695" class="line" marker-end="url(#arr)"/>
+    <rect x="110" y="695" width="180" height="45" class="act-node"/>
+    <text x="200" y="714.5" class="act-text">Bấm &quot;Hủy chỗ&quot;</text>
+    <text x="200" y="728.5" font-size="10" fill="#15803D" text-anchor="middle">(lễ tân có thể hủy hộ)</text>
+    <line x1="290" y1="717" x2="470" y2="717" class="line" marker-end="url(#arr-act)"/>
+    <rect x="470" y="695" width="240" height="45" class="act-node"/>
+    <text x="590" y="714.5" class="act-text">Khóa dòng chỗ đặt</text>
+    <text x="590" y="728.5" font-size="10" fill="#15803D" text-anchor="middle">SELECT … FOR UPDATE</text>
+    <line x1="590" y1="740" x2="590" y2="765" class="line" marker-end="url(#arr)"/>
+    <polygon points="590,765 650,790 590,815 530,790" class="diamond"/>
+    <text x="590" y="794" font-size="10" font-weight="700" fill="#CA8A04" text-anchor="middle">Đã đổi giờ?</text>
+    <text x="372" y="784" font-size="9.5" fill="#64748B">class_sessions.</text>
+    <text x="372" y="797" font-size="9.5" fill="#64748B">original_start_at có giá trị</text>
+    <polyline points="650,790 760,790" class="line"/>
+    <text x="660" y="782" class="guard">[Có]</text>
+    <line x1="590" y1="815" x2="590" y2="845" class="line" marker-end="url(#arr-act)"/>
+    <text x="600" y="833" class="guard">[Không]</text>
+    <polygon points="590,845 650,870 590,895 530,870" class="diamond"/>
+    <text x="590" y="874" font-size="10" font-weight="700" fill="#CA8A04" text-anchor="middle">Trước ≥ 2 giờ?</text>
+    <polyline points="650,870 760,870" class="line"/>
+    <text x="660" y="862" class="guard">[Có]</text>
+    <text x="655" y="830" font-size="9.5" fill="#64748B">không tính hủy muộn</text>
+    <line x1="590" y1="895" x2="590" y2="920" class="line" marker-end="url(#arr-act)"/>
+    <text x="600" y="912" class="guard">[Không]</text>
+    <rect x="470" y="920" width="240" height="45" class="act-node"/>
+    <text x="590" y="939.5" class="act-text">Ghi nhận hủy muộn</text>
+    <text x="590" y="953.5" font-size="10" fill="#15803D" text-anchor="middle">is_late_cancel = true</text>
+    <polyline points="760,790 760,975 680,975 680,990" class="line" marker-end="url(#arr-act)"/>
+    <line x1="590" y1="965" x2="590" y2="990" class="line" marker-end="url(#arr-act)"/>
+    <rect x="470" y="990" width="240" height="45" class="act-node"/>
+    <text x="590" y="1009.5" class="act-text">Hủy chỗ, trả chỗ ngay</text>
+    <text x="590" y="1023.5" font-size="10" fill="#15803D" text-anchor="middle">ai đặt trước được trước</text>
+    <line x1="710" y1="1012" x2="850" y2="1012" class="line" marker-end="url(#arr-act)"/>
+    <rect x="850" y="990" width="230" height="45" class="act-node" fill="#F8FAFC"/>
+    <text x="965" y="1009.5" class="act-text" fill="#0369A1">UPDATE class_bookings</text>
+    <text x="965" y="1023.5" font-size="10" fill="#64748B" text-anchor="middle">CANCELLED, cancelled_at, cancel_reason</text>
+    <line x1="590" y1="1035" x2="590" y2="1055" class="line" marker-end="url(#arr)"/>
+    <polygon points="590,1055 650,1080 590,1105 530,1080" class="diamond"/>
+    <text x="590" y="1084" font-size="9.5" font-weight="700" fill="#CA8A04" text-anchor="middle">Vi phạm thứ 3?</text>
+    <text x="372" y="1066" font-size="9.5" fill="#64748B">Đếm hủy muộn và vắng mặt</text>
+    <text x="372" y="1079" font-size="9.5" fill="#64748B">trong tháng (giờ Việt Nam),</text>
+    <text x="372" y="1092" font-size="9.5" fill="#64748B">sau lần khóa gần nhất</text>
+    <line x1="650" y1="1080" x2="850" y2="1080" class="line" marker-end="url(#arr-act)"/>
+    <text x="660" y="1072" class="guard">[Có]</text>
+    <rect x="850" y="1057" width="230" height="45" class="act-node" fill="#F8FAFC"/>
+    <text x="965" y="1076.5" class="act-text" fill="#0369A1">Khóa đặt lớp 7 ngày</text>
+    <text x="965" y="1090.5" font-size="10" fill="#64748B" text-anchor="middle">members.booking_locked_until</text>
+    <polyline points="965,1102 965,1150 290,1150" class="line" marker-end="url(#arr-act)"/>
+    <polyline points="590,1105 590,1150" class="line"/>
+    <text x="600" y="1128" class="guard">[Không]</text>
+    <rect x="110" y="1127" width="180" height="45" class="act-node"/>
+    <text x="200" y="1153.5" class="act-text">Nhận kết quả hủy</text>
+    <polyline points="200,1172 200,1185" class="line"/>
+    <circle cx="200" cy="1195" r="10" fill="none" stroke="#16A34A" stroke-width="2"/>
+    <circle cx="200" cy="1195" r="6" fill="#16A34A"/>
+</svg>

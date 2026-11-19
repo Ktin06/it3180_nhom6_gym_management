@@ -4,6 +4,7 @@
 - **Version:** v1 (Bắt buộc)
 - **Người biên soạn:** Thái Hùng Lân
 - **Người duyệt chéo:** Bùi Trần Đức Việt (theo phân công cặp duyệt mục 2.4 Sprint 1)
+- **Cập nhật 18/11/2026 (Hoàng Kim Tiến):** viết lại mục H của UC-F3.1 đến UC-F3.5 theo cây truy vết ([ADR 0012](../../decisions/0012-quy-uoc-ma-truy-vet.md)): 6 user story, 43 AC có mã. Đây là **bản mẫu** cho các file SRS F1, F2, F4–F10 viết lại theo.
 - **Tài liệu chuẩn tham chiếu:**
   - [Bản chốt phạm vi](../ban-chot-pham-vi.md)
   - [ERD v2 (`erd-v2.dbml`)](../../design/erd/erd-v2.dbml)
@@ -21,7 +22,7 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 
 | # | Năng lực | Người thực hiện |
 |---|---|---|
-| 1 | Xem danh mục gói tập đang bán | Lễ tân, Quản lý, Chủ chuỗi (qua API nội bộ); Khách xem bảng giá qua trang công khai (phạm vi F7/trang khách – không thuộc API này) |
+| 1 | Xem danh mục gói tập đang bán | Lễ tân, Quản lý, Chủ chuỗi (API nội bộ); Khách xem bảng giá công khai (API công khai riêng, US-F3.1.2) |
 | 2 | Thêm gói tập mới vào danh mục | Quản lý chi nhánh |
 | 3 | Sửa thông tin gói tập | Quản lý chi nhánh |
 | 4 | Ngừng bán gói tập | Quản lý chi nhánh |
@@ -30,7 +31,7 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 
 **Phạm vi Sprint 1:** Thực hiện UC-F3.1 đến UC-F3.5 (quản lý danh mục và bán gói tại quầy). Chức năng hội viên tự mua/gia hạn từ cổng hội viên (tạo hóa đơn PENDING) thực hiện ở F7 – Sprint 2.
 
-> **Lưu ý phạm vi:** Trang bảng giá công khai cho Khách (không cần đăng nhập) hiển thị danh sách gói ACTIVE – đây là màn hình tĩnh/riêng thuộc phạm vi trang khách (F7 và frontend chung). API `GET /api/v1/packages` trong F3 yêu cầu đăng nhập và phục vụ các vai trò nội bộ. Hai luồng này dùng cùng dữ liệu nhưng khác endpoint và bảo mật.
+> **Lưu ý phạm vi:** Bảng giá công khai cho Khách (không cần đăng nhập) thuộc UC-F3.1, user story US-F3.1.2. Khách dùng API riêng `GET /api/v1/public/packages`, chỉ trả gói đang bán và các trường cần hiển thị. API `GET /api/v1/packages` vẫn yêu cầu đăng nhập và chỉ phục vụ các vai trò nội bộ. Hai API dùng cùng bảng `packages` nhưng khác đường dẫn và bảo mật.
 
 **Ngoài phạm vi:** Thanh toán online; hội viên xác nhận đã nhận tiền (chỉ lễ tân/quản lý được làm – S7); bảo lưu và chuyển nhượng gói (F15 – v3).
 
@@ -40,7 +41,7 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 
 | Mã UC | Tên Use Case | Tác nhân chính | Mức ưu tiên | Sprint thực hiện |
 | --- | --- | --- | --- | --- |
-| **UC-F3.1** | Xem danh mục gói tập | Lễ tân, Quản lý chi nhánh, Chủ chuỗi | Cao | Sprint 1 |
+| **UC-F3.1** | Xem danh mục gói tập | Lễ tân, Quản lý chi nhánh, Chủ chuỗi; Khách (bảng giá công khai) | Cao | Sprint 1; bảng giá công khai Sprint 2 |
 | **UC-F3.2** | Thêm gói tập mới | Quản lý chi nhánh | Cao | Sprint 1 |
 | **UC-F3.3** | Sửa thông tin gói tập | Quản lý chi nhánh | Trung bình | Sprint 1 |
 | **UC-F3.4** | Ngừng bán gói tập | Quản lý chi nhánh | Trung bình | Sprint 1 |
@@ -56,12 +57,13 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 
 - **Mã UC:** UC-F3.1
 - **Tên Use Case:** Xem danh mục gói tập
-- **Tác nhân chính:** Lễ tân, Quản lý chi nhánh, Chủ chuỗi
+- **Tác nhân chính:** Lễ tân, Quản lý chi nhánh, Chủ chuỗi; Khách (chỉ bảng giá công khai, US-F3.1.2)
 - **Tác nhân phụ:** Không có
-- **Mô tả ngắn gọn:** Người dùng xem danh sách gói tập đang bán (ACTIVE) hoặc ngừng bán (INACTIVE), có thể lọc và phân trang.
+- **Mô tả ngắn gọn:** Nhân viên xem danh sách gói tập đang bán (ACTIVE) hoặc ngừng bán (INACTIVE), có thể lọc và phân trang. Khách xem bảng giá các gói đang bán mà không cần đăng nhập.
 
 #### A. Tiền điều kiện (Preconditions)
-- Người dùng đã đăng nhập với vai trò Lễ tân, Quản lý chi nhánh hoặc Chủ chuỗi (JWT hợp lệ – S2).
+- **Danh mục nội bộ (`GET /api/v1/packages`):** người dùng đã đăng nhập với vai trò Lễ tân, Quản lý chi nhánh hoặc Chủ chuỗi (JWT hợp lệ – S2).
+- **Bảng giá công khai (`GET /api/v1/public/packages`, US-F3.1.2):** không cần đăng nhập. Nếu request có gửi kèm header `Authorization` (kể cả token hết hạn), backend bỏ qua header đó.
 
 #### B. Hậu điều kiện (Postconditions)
 - **Thành công:** Danh sách gói tập được trả về; không có thay đổi dữ liệu nào trong CSDL.
@@ -76,7 +78,7 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
 - **E1 – Token không hợp lệ hoặc hết hạn (401 Unauthorized):**
   - Tại bước 2, JWT hết hạn hoặc không hợp lệ.
-  - Hệ thống trả `ProblemDetail` (401): *"Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại."*
+  - Hệ thống trả `ProblemDetail` (401): *"Bạn cần đăng nhập để truy cập tài nguyên này."*
 - **E2 – Không có quyền truy cập (403 Forbidden):**
   - Tại bước 2, vai trò của người dùng không được phép (ví dụ Huấn luyện viên, Hội viên gọi endpoint này).
   - Hệ thống trả `ProblemDetail` (403): *"Bạn không có quyền thực hiện thao tác này."*
@@ -139,15 +141,89 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
   ```
 - **Màn hình giao diện liên quan:** Màn hình "Danh mục gói tập" – `docs/design/wireframe/f3-danh-muc-goi-tap.drawio.svg`.
 
-#### H. Tiêu chí chấp nhận (Acceptance Criteria)
-- **Kịch bản 1: Lễ tân xem danh mục gói thành công**
-  - **Given** Người dùng đã đăng nhập với vai trò Lễ tân của chi nhánh CN01
-  - **When** Gọi `GET /api/v1/packages?status=ACTIVE`
-  - **Then** Hệ thống trả `200 OK` với danh sách các gói có `status = ACTIVE` thuộc chi nhánh CN01 hoặc gói toàn chuỗi (`branch_id` rỗng); không bao gồm gói của chi nhánh khác
-- **Kịch bản 2: Hội viên cố gọi API này (403)**
-  - **Given** Người dùng đã đăng nhập với vai trò Hội viên
-  - **When** Gọi `GET /api/v1/packages`
-  - **Then** Hệ thống trả `403 Forbidden` với `ProblemDetail`: *"Bạn không có quyền thực hiện thao tác này."*
+**Bảng giá công khai (US-F3.1.2):**
+
+- **API Endpoint:** `GET /api/v1/public/packages`. Không cần đăng nhập, không nhận tham số. Backend bỏ qua header `Authorization` ở mọi request GET tới `/api/v1/public/**`, nên token hết hạn gửi kèm cũng không làm request bị 401. Frontend gọi API này không gửi header đó.
+- **Phạm vi dữ liệu:** gói `ACTIVE` của chi nhánh mặc định `CN01` và gói toàn chuỗi (`branch_id` rỗng). Nếu `CN01` đang ngừng hoạt động thì trả danh sách rỗng `[]`. Từ v1 đến v3 hệ thống chạy một chi nhánh mặc định ([bản chốt phạm vi](../ban-chot-pham-vi.md)). Trả cả danh sách, không phân trang, sắp theo `type` (TIME, SESSION, PT), rồi `price`, rồi `name`.
+- **Response Success (200 OK):** chỉ có các trường cần hiển thị, không có `code`, `status`, `branchId`, thời gian tạo hay người tạo.
+  ```json
+  [
+    {
+      "id": 1,
+      "name": "Gói 1 tháng",
+      "type": "TIME",
+      "durationDays": 30,
+      "sessionCount": null,
+      "price": 500000,
+      "description": "Tập luyện không giới hạn trong 30 ngày"
+    }
+  ]
+  ```
+- **Màn hình giao diện liên quan:** trang `/bang-gia` – [`bang-gia-cong-khai.drawio.svg`](../../design/wireframe/bang-gia-cong-khai.drawio.svg).
+
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F3.1.1: Xem danh mục gói (nội bộ)
+- **User story:** Là **Lễ tân**, tôi muốn **xem gói đang bán và đã ngừng bán, có lọc**, để **tư vấn và bán đúng gói**.
+- **BR liên quan:** BR-F3-01; S3 (lọc chi nhánh ở backend)
+- **Version / Sprint:** v1 / API Sprint 1, giao diện Sprint 2
+- **Issue:** #129
+- **Tiêu chí chấp nhận:**
+  - **AC-F3.1.1-01: Nhân viên chi nhánh chỉ thấy gói của chi nhánh mình và gói toàn chuỗi** (BR-F3-01)
+    - **Given** Lễ tân hoặc Quản lý chi nhánh của `CN01` đã đăng nhập; có gói của `CN01`, gói toàn chuỗi và gói của chi nhánh khác
+    - **When** Gọi `GET /api/v1/packages`, kể cả khi tự gửi thêm tham số `branchId` của chi nhánh khác
+    - **Then** `200 OK`; danh sách và `totalElements` chỉ gồm gói của `CN01` và gói toàn chuỗi; tham số `branchId` bị bỏ qua
+  - **AC-F3.1.1-02: Lọc, sắp xếp và phân trang**
+    - **Given** Nhân viên được phép đã đăng nhập
+    - **When** Gọi danh mục không kèm tham số, hoặc lọc theo `type`, `status`, `page`, `size`
+    - **Then** Mặc định chỉ trả gói `ACTIVE`, `page=0`, `size=20`; sắp theo `type` rồi `name`; lọc `status=INACTIVE` thấy gói đã ngừng bán; `size` từ 1 đến 100; trang vượt quá số trang trả danh sách rỗng, không lỗi
+  - **AC-F3.1.1-03: Lễ tân chỉ xem, không có thao tác quản lý trên giao diện**
+    - **Given** Lễ tân đã đăng nhập
+    - **When** Mở màn hình "Danh mục gói tập"
+    - **Then** Không thấy nút Thêm, Sửa, Ngừng bán; Quản lý chi nhánh mở cùng màn hình thì thấy các nút này (phân quyền thật vẫn ở backend, xem AC-F3.2.1-06, AC-F3.3.1-08, AC-F3.4.1-06)
+  - **AC-F3.1.1-04: Chủ chuỗi xem gói mọi chi nhánh**
+    - **Given** Chủ chuỗi đã đăng nhập, không gắn với chi nhánh nào
+    - **When** Gọi `GET /api/v1/packages`
+    - **Then** `200 OK`, thấy gói của mọi chi nhánh và gói toàn chuỗi
+  - **AC-F3.1.1-05: Từ chối người không được xem**
+    - **Given** Người gọi là Huấn luyện viên hoặc Hội viên; hoặc là nhân viên chưa được gán chi nhánh, hoặc hồ sơ nhân viên đã ngừng hoạt động; hoặc không gửi token
+    - **When** Gọi `GET /api/v1/packages`
+    - **Then** Không gửi token hoặc token sai trả `401`. Huấn luyện viên, Hội viên trả `403` *"Bạn không có quyền thực hiện thao tác này."*; nhân viên chưa có chi nhánh hoặc đã ngừng hoạt động trả `403` *"Nhân viên chưa có chi nhánh làm việc hợp lệ."*
+  - **AC-F3.1.1-06: Tham số lọc sai** (S5)
+    - **Given** Nhân viên được phép đã đăng nhập
+    - **When** Gửi `type` không thuộc TIME/SESSION/PT, `status` lạ, `page < 0` hoặc `size` ngoài 1–100
+    - **Then** `400 Bad Request` kèm lỗi theo từng tham số
+
+##### US-F3.1.2: Bảng giá công khai
+- **User story:** Là **Khách**, tôi muốn **xem bảng giá các gói đang bán mà không cần đăng nhập**, để **chọn gói trước khi đến phòng tập**.
+- **BR liên quan:** BR-F3-01; mọi thanh toán tại quầy, không có thanh toán online ([ADR 0004](../../decisions/0004-thanh-toan-chi-tai-quay.md)).
+- **Version / Sprint:** v1 / Sprint 2
+- **Issue:** #130
+- **Tiêu chí chấp nhận:**
+  - **AC-F3.1.2-01: Khách xem bảng giá không cần đăng nhập** (BR-F3-01)
+    - **Given** Chi nhánh `CN01` có gói ACTIVE, và có gói toàn chuỗi ACTIVE
+    - **When** Khách chưa đăng nhập mở trang `/bang-gia` (gọi `GET /api/v1/public/packages` không kèm `Authorization`)
+    - **Then** Hệ thống trả `200 OK`; trang hiện từng gói với loại, thời hạn (ngày) hoặc số buổi, giá VND đúng giá trong CSDL, quyền lợi theo loại gói, và dòng "Thanh toán tại quầy". Không có giỏ hàng hay nút thanh toán online.
+  - **AC-F3.1.2-02: Không hiện gói ngừng bán và gói chi nhánh khác** (BR-F3-01)
+    - **Given** Có gói INACTIVE của `CN01`, và gói ACTIVE của một chi nhánh khác (không phải `CN01`)
+    - **When** Khách gọi `GET /api/v1/public/packages`
+    - **Then** Kết quả không chứa hai gói đó
+  - **AC-F3.1.2-03: Không lộ trường nội bộ** (S3)
+    - **Given** Có gói ACTIVE
+    - **When** Khách gọi `GET /api/v1/public/packages`
+    - **Then** Mỗi phần tử chỉ có `id`, `name`, `type`, `durationDays`, `sessionCount`, `price`, `description`; không có `code`, `status`, `branchId`, thời gian tạo, người tạo
+  - **AC-F3.1.2-04: Chưa có gói đang bán**
+    - **Given** API trả danh sách rỗng
+    - **When** Khách mở `/bang-gia`
+    - **Then** Trang hiện "Chưa có gói đang bán" và nút đăng ký tài khoản; không hiện giá nào
+  - **AC-F3.1.2-05: Lỗi tải bảng giá**
+    - **Given** API lỗi mạng hoặc lỗi server
+    - **When** Khách mở `/bang-gia`
+    - **Then** Trang hiện thông báo lỗi và nút "Thử lại"; không hiện giá bịa hoặc giá cũ chưa xác minh. Bấm "Thử lại" thì gọi lại API
+  - **AC-F3.1.2-06: Chi nhánh mặc định ngừng hoạt động**
+    - **Given** Chi nhánh `CN01` có trạng thái INACTIVE, dù vẫn còn gói ACTIVE của `CN01` hoặc gói toàn chuỗi
+    - **When** Khách gọi `GET /api/v1/public/packages`
+    - **Then** Hệ thống trả `200 OK` với danh sách rỗng `[]`, không trả lỗi và không lộ thông báo nội bộ; trang hiện "Chưa có gói đang bán" như AC-F3.1.2-04
 
 ---
 
@@ -174,7 +250,7 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
    - `duration_days > 0`; `price >= 0`.
    - Nếu `type` là `SESSION` hoặc `PT` thì `session_count` bắt buộc và `> 0`.
    - Nếu `type` là `TIME` thì `session_count` phải rỗng.
-3. Hệ thống kiểm tra vai trò Quản lý chi nhánh (S3). Gói được gán `branch_id` của chi nhánh quản lý; không cho tự đặt `branch_id` khác.
+3. Hệ thống kiểm tra vai trò Quản lý chi nhánh (S3). Gói được gán `branch_id` của chi nhánh quản lý; request có gửi `branchId` (hoặc `status`, `id`, trường lạ) bị từ chối 400 (AC-F3.2.1-04).
 4. Hệ thống kiểm tra `code` chưa tồn tại trong bảng `packages` (UNIQUE).
 5. Hệ thống tạo bản ghi `packages` trong giao dịch `@Transactional` với `status = ACTIVE`.
 6. Hệ thống trả `201 Created` kèm `PackageDetailDto` của gói vừa tạo.
@@ -233,19 +309,38 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
   ```
 - **Màn hình giao diện liên quan:** Màn hình "Thêm gói tập" – `docs/design/wireframe/f3-danh-muc-goi-tap.drawio.svg`.
 
-#### H. Tiêu chí chấp nhận (Acceptance Criteria)
-- **Kịch bản 1: Tạo gói TIME thành công**
-  - **Given** Người dùng đã đăng nhập với vai trò Quản lý chi nhánh
-  - **When** Gọi `POST /api/v1/packages` với `type=TIME`, `durationDays=30`, `price=500000`, `code=TIME-1M`, `sessionCount` rỗng
-  - **Then** Hệ thống trả `201 Created`; bảng `packages` có thêm một dòng mới với `status=ACTIVE` và `session_count=NULL`
-- **Kịch bản 2: Tạo gói SESSION thiếu `sessionCount` (400)**
-  - **Given** Người dùng đã đăng nhập với vai trò Quản lý chi nhánh
-  - **When** Gọi `POST /api/v1/packages` với `type=SESSION` nhưng không có `sessionCount`
-  - **Then** Hệ thống trả `400 Bad Request` với thông báo lỗi cho trường `sessionCount`
-- **Kịch bản 3: Tạo gói với mã đã tồn tại (409)**
-  - **Given** Trong CSDL đã có gói với `code=TIME-1M`
-  - **When** Gọi `POST /api/v1/packages` với `code=TIME-1M`
-  - **Then** Hệ thống trả `409 Conflict`: *"Mã gói 'TIME-1M' đã tồn tại trên hệ thống."*
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F3.2.1: Thêm gói tập
+- **User story:** Là **Quản lý chi nhánh**, tôi muốn **thêm gói TIME, SESSION hoặc PT**, để **lễ tân có gói mới để bán**.
+- **BR liên quan:** BR-F3-02, BR-F3-03, BR-F3-04; S3, S5
+- **Version / Sprint:** v1 / API Sprint 1, giao diện Sprint 2
+- **Issue:** #131
+- **Tiêu chí chấp nhận:**
+  - **AC-F3.2.1-01: Thêm gói hợp lệ của từng loại** (BR-F3-02, BR-F3-03)
+    - **Given** Quản lý chi nhánh `CN01` đã đăng nhập
+    - **When** Gọi `POST /api/v1/packages` với gói TIME (`durationDays=30`, không có `sessionCount`), gói SESSION hoặc gói PT (có `sessionCount > 0`), giá là số nguyên VND
+    - **Then** `201 Created` kèm header `Location`; gói có `status=ACTIVE`, `branchId` là chi nhánh của quản lý; gói TIME có `sessionCount` rỗng; lễ tân thấy gói mới ngay trong danh mục
+  - **AC-F3.2.1-02: Số buổi đúng theo loại gói** (BR-F3-02)
+    - **Given** Quản lý chi nhánh đã đăng nhập
+    - **When** Thêm gói SESSION hoặc PT thiếu `sessionCount` hoặc `sessionCount <= 0`; hoặc thêm gói TIME có `sessionCount`
+    - **Then** `400 Bad Request` với lỗi ở trường `sessionCount`; không có gói nào được tạo
+  - **AC-F3.2.1-03: Dữ liệu sai bị từ chối, giá trị biên được nhận** (S5)
+    - **Given** Quản lý chi nhánh đã đăng nhập
+    - **When** Thiếu `code`, `name`, `type`, `durationDays` hoặc `price`; `durationDays <= 0`; `price < 0`; `type` lạ; chuỗi quá độ dài cho phép; JSON sai cú pháp
+    - **Then** `400 Bad Request` kèm lỗi từng trường, không ghi gì vào CSDL. Ngược lại `price = 0` và chuỗi đúng độ dài tối đa (`code` 30, `name` 255 ký tự) vẫn tạo được
+  - **AC-F3.2.1-04: Không nhận trường do server quản lý** (S3)
+    - **Given** Quản lý chi nhánh đã đăng nhập
+    - **When** Request có thêm `branchId`, `status`, `id` hoặc một trường lạ
+    - **Then** `400 Bad Request` kèm lỗi ở đúng trường không được phép; không có gói nào được tạo
+  - **AC-F3.2.1-05: Mã gói không trùng**
+    - **Given** Đã có gói mã `TIME-1M`, kể cả khi gói đó đã ngừng bán hoặc là gói toàn chuỗi
+    - **When** Thêm gói mới cũng mã `TIME-1M`; hoặc hai quản lý gửi cùng một mã mới gần như đồng thời
+    - **Then** `409 Conflict` *"Mã gói 'TIME-1M' đã tồn tại trên hệ thống."*; khi gửi đồng thời thì đúng một request thành công, request còn lại nhận `409`
+  - **AC-F3.2.1-06: Chỉ Quản lý chi nhánh được thêm gói** (S3)
+    - **Given** Người gọi là Lễ tân, Chủ chuỗi, Huấn luyện viên hoặc Hội viên; hoặc là quản lý chưa được gán chi nhánh, hoặc hồ sơ nhân viên đã ngừng hoạt động; hoặc không gửi token
+    - **When** Gọi `POST /api/v1/packages`
+    - **Then** Không có token trả `401`; các trường hợp còn lại trả `403`; không có gói nào được tạo
 
 ---
 
@@ -278,7 +373,7 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
   - Tại bước 2, ràng buộc bị vi phạm (ví dụ `price < 0`, `duration_days <= 0`).
   - Hệ thống trả `ProblemDetail` (400) với chi tiết lỗi từng trường.
 - **E2 – Không có quyền (403 Forbidden):**
-  - Tại bước 3, người dùng không phải Quản lý chi nhánh, gói không thuộc chi nhánh của họ, hoặc gói là gói toàn chuỗi (`branch_id` rỗng – chỉ Chủ chuỗi mới được sửa).
+  - Tại bước 3, người dùng không phải Quản lý chi nhánh, gói không thuộc chi nhánh của họ, hoặc gói là gói toàn chuỗi (`branch_id` rỗng; xem BR-F3-07).
   - Hệ thống trả `ProblemDetail` (403): *"Bạn không có quyền thực hiện thao tác này."*
 - **E3 – Không tìm thấy gói (404 Not Found):**
   - Tại bước 4, không có bản ghi `packages` với `id` tương ứng.
@@ -287,7 +382,7 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
 - **BR-F3-05:** Không cho sửa `type` và `code` của gói sau khi đã tạo, vì `memberships.package_type` đã chép giá trị này lúc bán.
 - **BR-F3-06:** Thay đổi giá và thông số gói (giá, thời hạn, số buổi) chỉ áp dụng cho lần bán mới; hóa đơn và gói đã tạo trước đó (kể cả đang ở trạng thái `PENDING` chờ thanh toán) không bị ảnh hưởng. Giá đã bán được bảo toàn trong `invoice_items.unit_price`, số buổi bảo toàn trong `memberships.total_sessions`, và thời hạn gói được bảo toàn qua khoảng ngày `memberships.end_date - memberships.start_date + 1` chốt lúc tạo. ([Thiết kế dữ liệu](../../design/erd/thiet-ke-du-lieu.md))
-- **BR-F3-07:** Quản lý chi nhánh không được sửa gói toàn chuỗi (`branch_id` rỗng); chỉ Chủ chuỗi mới được sửa (để đến v4). Trong v1, gói toàn chuỗi do Chủ chuỗi tạo và quản lý, lễ tân chỉ bán. Mọi attempt sửa gói toàn chuỗi từ Quản lý chi nhánh đều bị từ chối 403.
+- **BR-F3-07:** Quản lý chi nhánh chỉ thêm, sửa, ngừng bán gói của chi nhánh mình; mọi thao tác trên gói toàn chuỗi (`branch_id` rỗng) hoặc gói chi nhánh khác bị từ chối 403. Từ v1 đến v3, gói toàn chuỗi chỉ có từ dữ liệu mẫu, lễ tân bán được nhưng không ai sửa qua API; Chủ chuỗi tạo và sửa gói toàn chuỗi ở F18 (v4, đa chi nhánh – "gói dùng một hoặc toàn chuỗi" trong [bản chốt phạm vi](../ban-chot-pham-vi.md)).
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
 - **Bảng tác động:** `packages`
@@ -323,15 +418,46 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
   ```
 - **Màn hình giao diện liên quan:** Màn hình "Sửa gói tập" – `docs/design/wireframe/f3-danh-muc-goi-tap.drawio.svg`.
 
-#### H. Tiêu chí chấp nhận (Acceptance Criteria)
-- **Kịch bản 1: Quản lý sửa giá gói thành công**
-  - **Given** Người dùng đã đăng nhập với vai trò Quản lý chi nhánh; gói `id=1` thuộc chi nhánh của họ
-  - **When** Gọi `PUT /api/v1/packages/1` với `price=450000`
-  - **Then** Hệ thống trả `200 OK`; bảng `packages` có `price=450000`; các `memberships` đã bán không thay đổi
-- **Kịch bản 2: Sửa gói không thuộc chi nhánh (403)**
-  - **Given** Người dùng đã đăng nhập với vai trò Quản lý chi nhánh CN01; gói `id=99` thuộc chi nhánh CN02
-  - **When** Gọi `PUT /api/v1/packages/99` với `price=100000`
-  - **Then** Hệ thống trả `403 Forbidden`: *"Bạn không có quyền thực hiện thao tác này."*
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F3.3.1: Sửa thông tin gói tập
+- **User story:** Là **Quản lý chi nhánh**, tôi muốn **sửa tên, giá, thời hạn, số buổi của gói**, để **điều chỉnh bảng giá mà không ảnh hưởng gói đã bán**.
+- **BR liên quan:** BR-F3-05, BR-F3-06, BR-F3-07; S3, S5
+- **Version / Sprint:** v1 / API Sprint 1, giao diện Sprint 2
+- **Issue:** #132
+- **Tiêu chí chấp nhận:**
+  - **AC-F3.3.1-01: Sửa giá; gói đã bán không đổi** (BR-F3-06)
+    - **Given** Quản lý chi nhánh `CN01` đã đăng nhập; gói `id=1` thuộc `CN01` đã được bán, có hóa đơn đã thanh toán và có một hóa đơn còn `PENDING`
+    - **When** Gọi `PUT /api/v1/packages/1` chỉ với `price=450000`
+    - **Then** `200 OK`; `price=450000`, các trường không gửi giữ nguyên, `updated_at` thay đổi; `invoice_items.unit_price`, `memberships.total_sessions` và khoảng ngày `end_date - start_date + 1` của mọi gói đã bán (kể cả gói `PENDING`) không đổi
+  - **AC-F3.3.1-02: Sửa gói chi nhánh khác hoặc gói toàn chuỗi bị từ chối 403** (BR-F3-07)
+    - **Given** Quản lý chi nhánh `CN01` đã đăng nhập
+    - **When** Sửa gói thuộc chi nhánh khác, hoặc gói toàn chuỗi (`branch_id` rỗng), dù gói đang bán hay đã ngừng bán
+    - **Then** `403 Forbidden` *"Bạn không có quyền thực hiện thao tác này."*; dữ liệu gói giữ nguyên
+  - **AC-F3.3.1-03: Xóa mô tả và gửi body rỗng**
+    - **Given** Quản lý sửa gói của chi nhánh mình
+    - **When** Gửi `description: null`; hoặc gửi body rỗng `{}`
+    - **Then** Gửi `null` thì mô tả bị xóa; gửi body rỗng thì không trường nào đổi, kể cả `updated_at`
+  - **AC-F3.3.1-04: Không đổi mã, loại và không xóa trường bắt buộc** (BR-F3-05, BR-F3-02)
+    - **Given** Quản lý sửa gói của chi nhánh mình
+    - **When** Gửi `code`, `type` hoặc trường lạ; hoặc gửi `null` cho `name`, `price`, `durationDays`; hoặc xóa `sessionCount` của gói SESSION hay PT
+    - **Then** `400 Bad Request` kèm lỗi theo trường; dữ liệu gói giữ nguyên
+  - **AC-F3.3.1-05: Dữ liệu sai thì không đổi gì** (S5)
+    - **Given** Quản lý sửa gói của chi nhánh mình
+    - **When** Gửi một trường hợp lệ cùng một trường sai (ví dụ `name` mới và `price < 0`); hoặc `id` không phải số nguyên dương; hoặc JSON sai cú pháp
+    - **Then** `400 Bad Request`; không trường nào bị đổi, kể cả trường hợp lệ
+  - **AC-F3.3.1-06: Sửa gói đã ngừng bán không làm gói bán lại**
+    - **Given** Gói của chi nhánh đang `INACTIVE`
+    - **When** Quản lý sửa giá hoặc tên gói đó
+    - **Then** `200 OK`; thông tin được cập nhật; `status` vẫn là `INACTIVE`
+  - **AC-F3.3.1-07: Gói không tồn tại**
+    - **Given** Không có gói với `id` được gửi
+    - **When** Gọi `PUT /api/v1/packages/{id}`
+    - **Then** `404 Not Found` *"Gói tập không tồn tại trên hệ thống."*
+  - **AC-F3.3.1-08: Chỉ Quản lý chi nhánh được sửa** (S3)
+    - **Given** Người gọi là Lễ tân, Chủ chuỗi, Huấn luyện viên hoặc Hội viên; hoặc là quản lý chưa được gán chi nhánh, hoặc hồ sơ nhân viên đã ngừng hoạt động; hoặc không gửi token
+    - **When** Gọi `PUT /api/v1/packages/{id}`
+    - **Then** Không có token trả `401`; các trường hợp còn lại trả `403`; dữ liệu gói giữ nguyên
 
 ---
 
@@ -381,7 +507,7 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 #### G. Thiết kế giao diện và API liên quan
 - **API Endpoint:** `PUT /api/v1/packages/{id}/deactivate`
 - **Header:** `Authorization: Bearer <access_token>`
-- **Request Body:** Không có
+- **Request Body:** Không cần. Gửi `{}` cũng được; nội dung body không được dùng.
 - **Response Success (200 OK):**
   ```json
   {
@@ -393,15 +519,38 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
   ```
 - **Màn hình giao diện liên quan:** Màn hình "Danh mục gói tập" (nút "Ngừng bán") – `docs/design/wireframe/f3-danh-muc-goi-tap.drawio.svg`.
 
-#### H. Tiêu chí chấp nhận (Acceptance Criteria)
-- **Kịch bản 1: Ngừng bán gói thành công**
-  - **Given** Người dùng đã đăng nhập với vai trò Quản lý chi nhánh; gói `id=1` có `status=ACTIVE` thuộc chi nhánh của họ
-  - **When** Gọi `PUT /api/v1/packages/1/deactivate`
-  - **Then** Hệ thống trả `200 OK`; `packages.status = INACTIVE`; các `memberships` cũ vẫn giữ trạng thái ACTIVE
-- **Kịch bản 2: Ngừng bán gói đã INACTIVE (422)**
-  - **Given** Gói `id=2` đã có `status=INACTIVE`
-  - **When** Gọi `PUT /api/v1/packages/2/deactivate`
-  - **Then** Hệ thống trả `422 Unprocessable Content`: *"Gói tập này đã ở trạng thái ngừng bán."*
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F3.4.1: Ngừng bán gói tập
+- **User story:** Là **Quản lý chi nhánh**, tôi muốn **ngừng bán một gói**, để **lễ tân không bán nữa nhưng gói đã bán vẫn dùng được**.
+- **BR liên quan:** BR-F3-07, BR-F3-08, BR-F3-09; S3
+- **Version / Sprint:** v1 / API Sprint 1, giao diện Sprint 2
+- **Issue:** #133
+- **Tiêu chí chấp nhận:**
+  - **AC-F3.4.1-01: Ngừng bán gói đang bán** (BR-F3-08)
+    - **Given** Quản lý chi nhánh `CN01` đã đăng nhập; gói `id=1` thuộc `CN01` đang `ACTIVE`
+    - **When** Gọi `PUT /api/v1/packages/1/deactivate` không có body, hoặc với body `{}`
+    - **Then** `200 OK` trả `id`, `code`, `status=INACTIVE`, `updatedAt`; các trường khác của gói không đổi; bản ghi không bị xóa
+  - **AC-F3.4.1-02: Gói đã bán vẫn dùng được** (BR-F3-08)
+    - **Given** Gói `id=1` đã được bán, có gói hội viên `ACTIVE` và dòng hóa đơn liên quan
+    - **When** Quản lý ngừng bán gói `id=1`
+    - **Then** Mọi bản ghi `memberships`, `invoices`, `invoice_items` liên quan giữ nguyên trạng thái, ngày và giá
+  - **AC-F3.4.1-03: Gói ngừng bán không bán mới được nhưng vẫn tra cứu được** (BR-F3-09)
+    - **Given** Gói `id=1` đã `INACTIVE`
+    - **When** Lễ tân bán gói này (UC-F3.5), hoặc nhân viên lọc danh mục với `status=INACTIVE`
+    - **Then** Bán mới bị từ chối `422` (AC-F3.5.1-08); lọc `status=INACTIVE` vẫn thấy gói
+  - **AC-F3.4.1-04: Ngừng bán lần nữa bị từ chối**
+    - **Given** Gói đã `INACTIVE`; hoặc hai quản lý cùng bấm ngừng bán một gói gần như đồng thời
+    - **When** Gọi lại `PUT /api/v1/packages/{id}/deactivate`
+    - **Then** `422 Unprocessable Content` *"Gói tập này đã ở trạng thái ngừng bán."*; khi gửi đồng thời thì đúng một request `200`, request còn lại `422`; `updated_at` không đổi thêm
+  - **AC-F3.4.1-05: Sửa cùng lúc không làm gói bán lại**
+    - **Given** Một quản lý đang sửa gói trong khi quản lý khác ngừng bán chính gói đó
+    - **When** Hai thao tác diễn ra gần như đồng thời
+    - **Then** Sau khi cả hai xong, gói vẫn `INACTIVE`
+  - **AC-F3.4.1-06: Từ chối gói ngoài chi nhánh, gói không tồn tại và vai trò khác** (BR-F3-07, S3)
+    - **Given** Gói thuộc chi nhánh khác hoặc là gói toàn chuỗi (kể cả đã `INACTIVE`); hoặc `id` không tồn tại; hoặc `id` không phải số nguyên dương; hoặc người gọi không phải Quản lý chi nhánh đang hoạt động; hoặc không gửi token
+    - **When** Gọi `PUT /api/v1/packages/{id}/deactivate`
+    - **Then** Lần lượt trả `403`, `404` *"Gói tập không tồn tại trên hệ thống."*, `400`, `403`, `401`; dữ liệu gói giữ nguyên
 
 ---
 
@@ -461,7 +610,7 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
   - Hệ thống trả `ProblemDetail` (400) với chi tiết lỗi từng trường.
 - **E2 – Chưa đăng nhập hoặc token hết hạn (401 Unauthorized):**
   - Tại bước 2, JWT không có hoặc hết hạn.
-  - Hệ thống trả `ProblemDetail` (401): *"Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại."*
+  - Hệ thống trả `ProblemDetail` (401): *"Bạn cần đăng nhập để truy cập tài nguyên này."*
 - **E3 – Không có quyền (403 Forbidden):**
   - Tại bước 2, người dùng đã xác thực nhưng không phải Lễ tân.
   - Hệ thống trả `ProblemDetail` (403): *"Bạn không có quyền thực hiện thao tác này."*
@@ -582,27 +731,58 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 
 - **Màn hình giao diện liên quan:** Màn hình "Bán gói tập" và "Gia hạn gói" – `docs/design/wireframe/f3-ban-gia-han-goi.drawio.svg`.
 
-#### H. Tiêu chí chấp nhận (Acceptance Criteria)
-- **Kịch bản 1: Bán gói mới cho hội viên chưa có gói (ACTIVE)**
-  - **Given** Lễ tân đã đăng nhập; hội viên `id=123` có `status=ACTIVE` chưa có gói TIME nào; gói `id=1` là TIME `status=ACTIVE`
-  - **When** Gọi `POST /api/v1/invoices` với `memberId=123`, `packageId=1`; sau đó xác nhận thu tiền qua F5
-  - **Then** `invoices.status = PAID`; `memberships.status = ACTIVE`; `start_date` = ngày thanh toán; `end_date = start_date + số ngày gói - 1` (với số ngày gói tính từ khoảng ngày lúc tạo hóa đơn `end_date - start_date + 1`); `invoice_items.unit_price` = giá gói tại thời điểm bán
-- **Kịch bản 2: Gia hạn gói khi gói cũ còn hạn (UPCOMING)**
-  - **Given** Hội viên `id=123` có gói TIME `status=ACTIVE`, `end_date=2026-12-31`; lễ tân bán thêm gói TIME mới
-  - **When** Gọi `POST /api/v1/invoices` với `memberId=123`, `packageId=1` (gói TIME); sau đó xác nhận thu tiền
-  - **Then** Gói mới có `status=UPCOMING`; `start_date = 2027-01-01`; gói cũ vẫn `status=ACTIVE`
-- **Kịch bản 3: Bán gói khi hội viên đã có gói UPCOMING cùng loại (422)**
-  - **Given** Hội viên `id=123` đã có gói TIME `status=ACTIVE` và một gói TIME khác `status=UPCOMING`
-  - **When** Gọi `POST /api/v1/invoices` với `memberId=123`, `packageId=1` (gói TIME)
-  - **Then** Hệ thống trả `422 Unprocessable Content`: *"Hội viên đã có gói gia hạn nối tiếp đang chờ kích hoạt. Không thể gia hạn thêm."*
-- **Kịch bản 4: Bán gói TIME và gói PT đồng thời (cho phép)**
-  - **Given** Hội viên `id=123` có gói TIME `status=ACTIVE` nhưng chưa có gói PT
-  - **When** Gọi `POST /api/v1/invoices` với `memberId=123`, `packageId=5` (gói PT); xác nhận thu tiền
-  - **Then** `memberships.status = ACTIVE` với `package_type = PT`; gói TIME cũ không bị ảnh hưởng
-- **Kịch bản 5: Hai lễ tân cùng bán gói cùng loại cho một hội viên tại cùng thời điểm (422 chặn tuần tự qua SELECT FOR UPDATE)**
-  - **Given** Hội viên `id=123` chưa có gói TIME nào; hai lễ tân A và B cùng mở form và bấm tạo gói TIME cho hội viên này gần như đồng thời
-  - **When** Cả hai request đến server; request A nhận khóa `SELECT ... FOR UPDATE` trên dòng `members id=123` trước, request B đợi
-  - **Then** Request A thành công trả về `201 Created` tạo hóa đơn và gói `PENDING`; request B sau đó đọc lại thấy hội viên đã có gói TIME `status=PENDING` nên bị từ chối và trả về `422 Unprocessable Content`: *"Hội viên đã có gói cùng loại đang chờ thanh toán hoặc chờ kích hoạt. Không thể tạo thêm gói mới."*
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F3.5.1: Bán và gia hạn gói tại quầy
+- **User story:** Là **Lễ tân**, tôi muốn **bán gói mới hoặc gia hạn nối tiếp cho hội viên**, để **hội viên tập liên tục**.
+- **BR liên quan:** BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14; S7, NF6
+- **Version / Sprint:** v1 / Sprint 2
+- **Issue:** #134
+- **Tiêu chí chấp nhận:**
+  - **AC-F3.5.1-01: Bán gói tạo hóa đơn chờ và gói chờ, giá lấy ở server** (BR-F3-04, BR-F3-13, S7)
+    - **Given** Lễ tân `CN01` đã đăng nhập; hội viên `id=123` đang hoạt động; gói `id=1` đang bán, giá 500.000 đ
+    - **When** Gọi `POST /api/v1/invoices` với `memberId=123`, `items=[{itemType: PACKAGE, packageId: 1}]`
+    - **Then** `201 Created` trả `invoiceId`, `membershipId`; hóa đơn `PENDING`, `source=COUNTER`, `subtotal = total = 500000`, `discount = 0`; dòng hóa đơn có `unit_price = 500000` chép từ `packages.price`; gói hội viên `PENDING`. Giá hoặc tổng tiền client gửi kèm (nếu có) không được dùng
+  - **AC-F3.5.1-02: Gói chỉ hiệu lực sau khi hóa đơn PAID; ngày hết hạn tính đúng** (BR-F3-12)
+    - **Given** Hội viên chưa có gói cùng loại; đã có hóa đơn và gói `PENDING` cho gói TIME 30 ngày
+    - **When** Thu tiền qua F5 ngày 01/11/2026 (hóa đơn chuyển `PAID`)
+    - **Then** Gói chuyển `ACTIVE`; `start_date = 2026-11-01`; `end_date = 2026-11-30` (`start_date + số ngày - 1`, không phải 01/12). Số ngày lấy từ khoảng ngày đã chốt lúc tạo hóa đơn, không đọc lại `packages.duration_days`. Trước khi `PAID`, gói không dùng được
+  - **AC-F3.5.1-03: Gia hạn khi gói cũ còn hiệu lực** (BR-F3-11)
+    - **Given** Hội viên có gói TIME `ACTIVE` hết hạn ngày 31/12/2026
+    - **When** Lễ tân bán thêm một gói TIME và thu tiền
+    - **Then** Gói mới `UPCOMING`, `start_date = 2027-01-01`; gói cũ vẫn `ACTIVE` tới hết ngày 31/12/2026
+  - **AC-F3.5.1-04: Gia hạn khi gói SESSION cũ đã hết buổi** (BR-F3-11)
+    - **Given** Hội viên có gói SESSION còn hạn tới 30/11 nhưng đã bị trừ buổi cuối ngày hôm nay (vẫn `ACTIVE` tới hết hôm nay)
+    - **When** Lễ tân bán gói SESSION gia hạn và thu tiền trong ngày
+    - **Then** Gói mới `UPCOMING`, bắt đầu từ ngày mai, không chờ tới 01/12
+  - **AC-F3.5.1-05: Giữ đồng thời nhiều loại gói** (BR-F3-10)
+    - **Given** Hội viên có gói TIME `ACTIVE`, chưa có gói PT
+    - **When** Lễ tân bán gói PT và thu tiền
+    - **Then** Gói PT `ACTIVE`; gói TIME không bị ảnh hưởng
+  - **AC-F3.5.1-06: Chỉ một gói chờ cho mỗi loại** (BR-F3-11)
+    - **Given** Hội viên đã có một gói cùng loại đang `UPCOMING`, hoặc đang có một gói cùng loại `PENDING` chờ thanh toán
+    - **When** Lễ tân bán thêm gói cùng loại
+    - **Then** `422 Unprocessable Content` *"Hội viên đã có gói cùng loại đang chờ thanh toán hoặc chờ kích hoạt. Không thể tạo thêm gói mới."*; không có hóa đơn hay gói nào được tạo
+  - **AC-F3.5.1-07: Hai lễ tân bán cùng lúc cho một hội viên** (NF6)
+    - **Given** Hội viên chưa có gói TIME; hai lễ tân gửi yêu cầu bán gói TIME gần như đồng thời
+    - **When** Cả hai request tới server
+    - **Then** Đúng một request `201 Created`; request còn lại `422` với thông báo như AC-F3.5.1-06; chỉ có một hóa đơn và một gói `PENDING`
+  - **AC-F3.5.1-08: Hội viên hoặc gói không hợp lệ** (BR-F3-09)
+    - **Given** Hội viên đã ngừng hoạt động; hoặc gói đã ngừng bán; hoặc gói thuộc chi nhánh khác; hoặc `memberId`, `packageId` không tồn tại
+    - **When** Lễ tân bán gói
+    - **Then** Lần lượt trả `422` *"Hội viên đã ngừng hoạt động, không thể bán gói tập."*, `422` *"Gói tập này đã ngừng bán."*, `422` *"Gói tập này không áp dụng tại chi nhánh của bạn."*, `404`; không có hóa đơn hay gói nào được tạo
+  - **AC-F3.5.1-09: Hóa đơn tại quầy không tự hủy** (BR-F3-14)
+    - **Given** Hóa đơn `source=COUNTER` còn `PENDING` quá `PENDING_INVOICE_TTL_DAYS` ngày
+    - **When** Tác vụ nền hủy hóa đơn chờ quá hạn chạy
+    - **Then** Hóa đơn và gói `PENDING` đi kèm giữ nguyên; chỉ hóa đơn `source=MEMBER_PORTAL` bị hủy
+  - **AC-F3.5.1-10: Tự kích hoạt gói nối tiếp đúng ngày** (BR-F3-11)
+    - **Given** Hội viên có gói cũ hết hạn hôm qua và gói nối tiếp `UPCOMING` có `start_date` là hôm nay
+    - **When** Tác vụ nền chạy lúc 00:00 giờ Việt Nam (hoặc chạy bù khi ứng dụng khởi động nếu lần chạy trước bị lỡ)
+    - **Then** Tác vụ chuyển gói hết hạn sang `EXPIRED` trước, rồi chuyển gói `UPCOMING` sang `ACTIVE`; không lúc nào có hai gói cùng loại `ACTIVE`. Gói SESSION 0 buổi chỉ chuyển `EXPIRED` khi hôm nay chưa bị trừ buổi
+  - **AC-F3.5.1-11: Dữ liệu sai và vai trò khác bị từ chối** (S3, S5)
+    - **Given** Request thiếu `memberId` hoặc `packageId`; hoặc người gọi không phải Lễ tân; hoặc không gửi token
+    - **When** Gọi `POST /api/v1/invoices`
+    - **Then** Lần lượt trả `400` kèm lỗi từng trường, `403`, `401`; không có hóa đơn hay gói nào được tạo
 
 ---
 

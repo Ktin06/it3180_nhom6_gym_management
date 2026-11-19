@@ -13,12 +13,14 @@ import { NotFoundPage } from '../pages/NotFoundPage'
 import { ProtectedRoute } from '../routes/ProtectedRoute'
 import { MembersPage } from '../features/members/pages/MembersPage'
 import { PackagesPage } from '../features/packages/pages/PackagesPage'
+import { PublicPricingPage } from '../features/packages/pages/PublicPricingPage'
 
 export const routes: RouteObject[] = [
   {
     element: <PublicLayout />,
     children: [
       { path: '/', element: <GuestHomePage /> },
+      { path: '/bang-gia', element: <PublicPricingPage /> },
       { path: '/403', element: <ForbiddenPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
