@@ -18,7 +18,6 @@ import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.NotFoundException;
 import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
-import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.PackageDeactivationDto;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.UpdatePackageRequest;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.CreatePackageRequest;
@@ -31,6 +30,10 @@ import vn.edu.hust.nhom6.gym.feature.packagecatalog.mapper.PackageMapper;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.repository.PackageRepository;
 import vn.edu.hust.nhom6.gym.feature.staff.service.StaffService;
 
+/**
+ * Danh mục gói tập (F3). Vai trò đã được controller kiểm tra bằng {@code @PreAuthorize}; service chỉ kiểm tra
+ * chi nhánh (gói phải thuộc chi nhánh của quản lý) và quy tắc nghiệp vụ, không lặp lại kiểm tra vai trò.
+ */
 @Service
 @RequiredArgsConstructor
 @Validated
@@ -42,9 +45,6 @@ public class PackageCatalogService {
 
     @Transactional
     public PackageDeactivationDto deactivate(CurrentUser me, @NotNull @Positive Long id) {
-        if (!me.is(UserRole.BRANCH_MANAGER)) {
-            throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này.");
-        }
         Long branchId = staff.requireBranchId(me.userId());
         var item = findOwnedPackageForUpdate(id, branchId);
         if (item.getStatus() == PackageStatus.INACTIVE) {
@@ -57,9 +57,6 @@ public class PackageCatalogService {
 
     @Transactional
     public PackageDetailDto update(CurrentUser me, @Positive Long id, @NotNull @Valid UpdatePackageRequest request) {
-        if (!me.is(UserRole.BRANCH_MANAGER)) {
-            throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này.");
-        }
         Long branchId = staff.requireBranchId(me.userId());
         var item = findOwnedPackageForUpdate(id, branchId);
         var merged = new CreatePackageRequest(item.getCode(),
@@ -79,9 +76,6 @@ public class PackageCatalogService {
     public PageResponse<PackageSummaryDto> list(CurrentUser me, PackageType type,
             PackageStatus status, int page, int size) {
         boolean allBranches = me.isOwner();
-        if (!allBranches && !me.is(UserRole.BRANCH_MANAGER) && !me.is(UserRole.RECEPTIONIST)) {
-            throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này.");
-        }
         Long branchId = allBranches ? null : staff.requireBranchId(me.userId());
         return PageResponse.of(packages.search(allBranches, branchId, type, status,
             PageRequest.of(page, size, Sort.by("type", "name", "id"))), PackageMapper::summary);
@@ -89,9 +83,6 @@ public class PackageCatalogService {
 
     @Transactional
     public PackageDetailDto create(CurrentUser me, @NotNull @Valid CreatePackageRequest request) {
-        if (!me.is(UserRole.BRANCH_MANAGER)) {
-            throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này.");
-        }
         Long branchId = staff.requireBranchId(me.userId());
         if (packages.existsByCode(request.code())) { throw duplicateCode(request.code()); }
         var item = GymPackage.create(branchId, request.code(), request.name(), request.type(),

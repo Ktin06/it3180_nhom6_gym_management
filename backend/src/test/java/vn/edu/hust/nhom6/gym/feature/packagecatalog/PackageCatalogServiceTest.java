@@ -14,9 +14,6 @@ import org.springframework.security.access.AccessDeniedException;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
 import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.PackageStatus;
-import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.PackageType;
-import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.CreatePackageRequest;
-import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.UpdatePackageRequest;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.repository.PackageRepository;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.service.PackageCatalogService;
 import vn.edu.hust.nhom6.gym.feature.staff.service.StaffService;
@@ -46,34 +43,6 @@ class PackageCatalogServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"SUPER_ADMIN", "RECEPTIONIST", "MEMBER", "TRAINER"})
-    @DisplayName("TC-F3.2.1-06c: Service tự chặn vai trò khác Quản lý chi nhánh khi thêm gói")
-    void createChecksRoleEvenWhenCalledWithoutController(String role) {
-        var request = new CreatePackageRequest("TEST", "Gói test", PackageType.TIME, 30, null, 0, null);
-        assertThatThrownBy(() -> service.create(identity("1", role), request))
-            .isInstanceOf(AccessDeniedException.class);
-        verifyNoInteractions(staff, packages);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"SUPER_ADMIN", "RECEPTIONIST", "MEMBER", "TRAINER"})
-    @DisplayName("TC-F3.3.1-08c: Service tự chặn vai trò khác Quản lý chi nhánh khi sửa gói")
-    void updateChecksRoleWithoutController(String role) {
-        assertThatThrownBy(() -> service.update(identity("1", role), 1L, new UpdatePackageRequest()))
-            .isInstanceOf(AccessDeniedException.class);
-        verifyNoInteractions(staff, packages);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"SUPER_ADMIN", "RECEPTIONIST", "MEMBER", "TRAINER"})
-    @DisplayName("TC-F3.4.1-06g: Service tự chặn vai trò khác Quản lý chi nhánh khi ngừng bán")
-    void deactivateChecksRoleWithoutController(String role) {
-        assertThatThrownBy(() -> service.deactivate(identity("1", role), 1L))
-            .isInstanceOf(AccessDeniedException.class);
-        verifyNoInteractions(staff, packages);
-    }
-
-    @ParameterizedTest
     @ValueSource(strings = {"BRANCH_MANAGER", "RECEPTIONIST"})
     @DisplayName("TC-F3.1.1-05d: Nhân viên chưa gán chi nhánh không bao giờ được xem mọi chi nhánh")
     void missingAssignmentNeverFallsBackToAllBranches(String role) {
@@ -81,15 +50,6 @@ class PackageCatalogServiceTest {
         assertThatThrownBy(() -> service.list(identity("2", role), null, PackageStatus.ACTIVE, 0, 20))
             .isInstanceOf(AccessDeniedException.class);
         verifyNoInteractions(packages);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"TRAINER", "MEMBER"})
-    @DisplayName("TC-F3.1.1-05e: Vai trò không được phép không chạm tới truy vấn danh mục")
-    void deniedRolesCannotQueryRepository(String role) {
-        assertThatThrownBy(() -> service.list(identity("2", role), null, PackageStatus.ACTIVE, 0, 20))
-            .isInstanceOf(AccessDeniedException.class);
-        verifyNoInteractions(staff, packages);
     }
 
     @ParameterizedTest
