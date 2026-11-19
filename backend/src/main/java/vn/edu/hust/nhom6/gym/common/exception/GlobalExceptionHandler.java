@@ -76,10 +76,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ProblemDetail handleConstraintViolation(ConstraintViolationException ex) {
         Map<String, String> errors = new LinkedHashMap<>();
         ex.getConstraintViolations().forEach(v -> errors.put(v.getPropertyPath().toString(), v.getMessage()));
-        ProblemDetail problem = problem(HttpStatus.BAD_REQUEST, "Dữ liệu không hợp lệ",
-            "Vui lòng kiểm tra lại các trường dữ liệu.");
-        problem.setProperty("errors", errors);
-        return problem;
+        return invalidFields(errors);
     }
 
     /**
@@ -125,10 +122,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.putIfAbsent(error.getField(), error.getDefaultMessage());
         }
-        ProblemDetail problem = problem(HttpStatus.BAD_REQUEST, "Dữ liệu không hợp lệ",
-            "Vui lòng kiểm tra lại các trường dữ liệu.");
-        problem.setProperty("errors", errors);
-        return ResponseEntity.badRequest().body(problem);
+        return ResponseEntity.badRequest().body(invalidFields(errors));
     }
 
     /**
@@ -185,8 +179,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         if (type != null && type.isEnum()) {
             List<String> values = Arrays.stream(type.getEnumConstants()).map(String::valueOf).toList();
             message = "Giá trị phải là " + joinVietnamese(values) + ".";
-        } else {
+        } else if (type != null && (Number.class.isAssignableFrom(type)
+                || type == int.class || type == long.class || type == short.class)) {
             message = "Giá trị phải là số nguyên trong phạm vi cho phép.";
+        } else {
+            message = "Giá trị không đúng định dạng.";
         }
         return ResponseEntity.badRequest().body(invalidFields(Map.of(name == null ? "body" : name, message)));
     }

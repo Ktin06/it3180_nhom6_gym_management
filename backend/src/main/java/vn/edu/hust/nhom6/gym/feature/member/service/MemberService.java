@@ -56,11 +56,11 @@ public class MemberService {
         return mapper.detail(save(member, PHONE_HAS_PROFILE), null);
     }
 
-    @Transactional
     /**
      * Tạo hồ sơ cho tài khoản vừa tự đăng ký (F1 gọi, UC-F1.1). Tham gia giao dịch của F1: trùng số điện thoại
      * thì ném 409 và tài khoản vừa tạo cũng bị hoàn tác. Kiểm tra lại bằng cùng ràng buộc DTO với API tạo hồ sơ.
      */
+    @Transactional
     public void registerMemberProfile(Long userId, String fullName, String phone, LocalDate dob, String gender) {
         if (userId == null || userId <= 0) { throw new InvalidRequestException("Tài khoản liên kết không hợp lệ."); }
         Gender parsedGender;
