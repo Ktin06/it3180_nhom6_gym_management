@@ -160,7 +160,7 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
 - **BR-F9.2:** Chỉ đặt trong giờ PT rảnh.
 - **BR-F9.3:** Không trùng lịch cả PT lẫn hội viên, kể cả giờ PT dạy lớp nhóm.
-- **BR-F9.4:** Số buổi PT đã đặt mà chưa diễn ra phải ít hơn số buổi còn lại của gói.
+- **BR-F9.4:** Số buổi PT đã đặt mà chưa diễn ra phải ít hơn số buổi còn lại của gói. "Chưa diễn ra" là buổi `BOOKED` có giờ bắt đầu sau hiện tại; buổi đã qua giờ mà PT chưa xác nhận không chặn hội viên đặt thêm (chốt 19/11/2026).
 - **BR-F9.5:** Đặt buổi chỉ giữ chỗ, không trừ số buổi của gói.
 - **CONFIG-F9.1:** Đọc từ bảng `system_configs` với key `PT_MIN_LEAD_HOURS` (giá trị mặc định: `12`), không viết cứng trong mã nguồn (Quy tắc số 15).
 - **[Yêu cầu phi chức năng]:**
@@ -239,7 +239,8 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 - Người dùng đã đăng nhập với vai trò PT.
 - Buổi PT thuộc về PT đó (đúng phân công), đã diễn ra và chưa được xác nhận.
 - Gói PT của hội viên hợp lệ.
-- **[Cần chốt với nhóm]:** hệ thống có chặn xác nhận trước giờ bắt đầu của buổi hay không.
+- Chưa tới giờ bắt đầu thì không xác nhận được (chốt 19/11/2026, 422 "Buổi tập chưa diễn ra").
+- PT xác nhận hoặc ghi vắng tới 23:59 cùng ngày giờ Việt Nam của buổi; sau đó chỉ quản lý chi nhánh làm được, có ghi `audit_logs` (BR-F9.19).
 
 #### B. Hậu điều kiện (Postconditions)
 - **Thành công:** Buổi chuyển sang DONE; số buổi của gói giảm 1; `commission_amount` được chốt. Nếu là buổi cuối của gói thì gói chuyển EXPIRED và gói PT nối tiếp (UPCOMING) được kích hoạt (xem bước 6).
@@ -267,6 +268,7 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 - **BR-F9.7:** Xác nhận buổi cuối thì gói PT chuyển EXPIRED ngay (ghi và flush trước), rồi gói PT UPCOMING nối tiếp được dời về hôm nay và ACTIVE, giữ nguyên số ngày hiệu lực, trong cùng giao dịch.
 - **BR-F9.8:** `commission_amount` có giá trị khi và chỉ khi buổi ở trạng thái DONE; bằng tỷ lệ hoa hồng × (giá gói sau giảm / số buổi), làm tròn VND và chốt lúc xác nhận, không đổi về sau.
 - **BR-F9.9:** Chỉ PT được phân công cho buổi đó mới được xác nhận (S3).
+- **BR-F9.19:** Hạn xác nhận hoặc ghi vắng: PT được phân công làm tới 23:59 cùng ngày giờ Việt Nam của buổi; quá hạn thì PT bị từ chối (422 "Đã quá hạn xác nhận, liên hệ quản lý chi nhánh"), quản lý chi nhánh vẫn làm được và có ghi `audit_logs`. Giống quy tắc điểm danh lớp nhóm (chốt 19/11/2026).
 - **BR-F9.18:** Hội viên vắng mặt không báo: sau giờ bắt đầu, PT được phân công ghi buổi là `NO_SHOW`. Buổi `NO_SHOW` **vẫn trừ một buổi** của gói, giống buổi `DONE` (hội viên không hủy đúng hạn theo BR-F9.16 thì mất buổi). Nếu là buổi cuối thì áp dụng BR-F9.7. Buổi `NO_SHOW` không có `commission_amount` (theo BR-F9.8, chỉ buổi `DONE` mới có). Chốt 19/11/2026.
 - **Ngoài phạm vi Sprint 2:** tính lương và giao diện hoa hồng (F13) thuộc v3.
 

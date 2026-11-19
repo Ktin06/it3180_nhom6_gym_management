@@ -508,7 +508,7 @@ Mỗi lượt vào phòng tập. [Khai báo nguồn](erd-v2.dbml#L455).
 | --- | --- | --- | --- | --- |
 | `id` | `bigint` | Không | PK; IDENTITY | Khóa chính của bản ghi |
 | `member_id` | `bigint` | Không | FK → `members.id` | Tham chiếu members.id<br>DBML: phải trùng memberships.member_id của gói dùng (kiểm tra trong code) |
-| `membership_id` | `bigint` | Không | FK → `memberships.id` | Tham chiếu memberships.id<br>DBML: chỉ gói TIME hoặc SESSION đang ACTIVE; gói PT không dùng để check-in. Có cả hai thì dùng gói TIME, không trừ buổi (chốt 01/11) |
+| `membership_id` | `bigint` | Không | FK → `memberships.id` | Tham chiếu memberships.id<br>DBML: gói TIME hoặc SESSION đang ACTIVE; có cả hai thì dùng gói TIME, không trừ buổi (chốt 01/11). Gói PT chỉ dùng khi hội viên không có gói TIME, SESSION và hôm nay có buổi PT BOOKED tại chi nhánh, session_deducted = false (chốt 19/11) |
 | `branch_id` | `bigint` | Không | FK → `branches.id` | Tham chiếu branches.id |
 | `created_by` | `bigint` | Không | FK → `users.id` | Tham chiếu users.id<br>DBML: lễ tân thực hiện |
 | `method` | `checkin_method` | Không | DEFAULT `'MANUAL'`; [Tập giá trị](#enum-checkin_method) | Phương thức thực hiện |

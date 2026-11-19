@@ -121,7 +121,8 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
        - Nếu `remaining_sessions <= 0`: Hệ thống từ chối check-in với mã lỗi 422 (xem luồng ngoại lệ E4).
      - Nếu **đã có lượt trừ buổi trong ngày**:
        - Kể cả khi `remaining_sessions = 0`, hệ thống vẫn cho phép check-in vào phòng tập bình thường theo quy tắc một ngày chỉ trừ tối đa một buổi. Giữ nguyên số buổi (0 buổi) và đặt `session_deducted = false`.
-   - **Trường hợp 3 (Chỉ có gói PT hoặc không có gói hợp lệ):** Hệ thống từ chối check-in (xem luồng ngoại lệ E3, E4).
+   - **Trường hợp 3 (Chỉ có gói PT, hôm nay có buổi PT, chốt 19/11/2026):** Nếu hội viên không có gói `TIME`/`SESSION` dùng được, nhưng có gói `PT` đang `ACTIVE` và **hôm nay (giờ Việt Nam) có buổi PT `BOOKED` của chính hội viên tại chi nhánh này** → cho check-in bằng gói PT: `membership_id = gói_PT.id`, `session_deducted = false`. Check-in **không trừ buổi PT**; buổi PT chỉ trừ khi huấn luyện viên xác nhận hoặc ghi vắng (F9, BR-F9.6). Xem BR-F4.8.
+   - **Trường hợp 4 (Chỉ có gói PT mà hôm nay không có buổi PT, hoặc không có gói hợp lệ):** Hệ thống từ chối check-in (xem luồng ngoại lệ E3, E4).
 6. Hệ thống tạo bản ghi mới vào bảng `checkins`:
    - `member_id`: ID hội viên
    - `membership_id`: ID gói tập đã chọn ở bước 5
@@ -142,8 +143,8 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 - **E2 – Không có gói tập nào đang hoạt động (422 Unprocessable Content):**
   - Hội viên chưa mua gói nào hoặc mọi gói đều đã hết hạn (`EXPIRED`), bị hủy (`CANCELLED`), hoặc đang bảo lưu (`FROZEN`).
   - Hệ thống từ chối: *"Hội viên không có gói tập nào đang hoạt động. Vui lòng đăng ký hoặc gia hạn gói tập tại quầy."*
-- **E3 – Hội viên chỉ có gói tập cá nhân PT (422 Unprocessable Content):**
-  - Hội viên chỉ sở hữu gói `package_type = 'PT'`.
+- **E3 – Hội viên chỉ có gói tập cá nhân PT và hôm nay không có buổi PT (422 Unprocessable Content):**
+  - Hội viên chỉ sở hữu gói `package_type = 'PT'` và hôm nay không có buổi PT `BOOKED` tại chi nhánh này (BR-F4.8).
   - Hệ thống từ chối theo quy tắc nghiệp vụ: *"Gói huấn luyện viên cá nhân (PT) chỉ dùng cho các buổi tập 1-1 có lịch hẹn, không dùng để check-in tự do vào phòng tập. Hội viên cần có thêm gói theo thời gian hoặc theo lượt."*
 - **E4 – Gói theo lượt đã hết số buổi (422 Unprocessable Content):**
   - Gói `SESSION` có `remaining_sessions <= 0` và trong ngày hôm nay hội viên chưa có lượt check-in nào được ghi nhận trừ buổi (`session_deducted = true`).
@@ -241,6 +242,7 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 - **BR-F4.4 (Giờ mở cửa phòng tập):** Giờ mở cửa và đóng cửa đọc từ `branches.open_time`, `branches.close_time` của chi nhánh (theo ERD), không viết cứng mã nguồn. Được check-in khi `open_time <= giờ hiện tại < close_time`.
 - **BR-F4.5 (Hiệu năng):** Phản hồi tra cứu hội viên và xác nhận check-in phải đạt dưới 2 giây trên tập dữ liệu 10.000 hội viên (NF1).
 - **BR-F4.6 (Phân quyền):** Chỉ tài khoản nhân viên gắn với chi nhánh mới được thực hiện check-in cho chi nhánh đó (S3). Dữ liệu check-in được tự động gắn `branch_id` của nhân viên thao tác.
+- **BR-F4.8 (Hội viên chỉ có gói PT, chốt 19/11/2026):** Gói PT không dùng để tập tự do. Hội viên chỉ có gói PT được check-in **đúng ngày có buổi PT `BOOKED`** của mình tại chi nhánh đó, để vào tập với huấn luyện viên; lượt check-in gắn gói PT, `session_deducted = false`, không trừ buổi. Ngày không có buổi PT thì từ chối (E3).
 - **BR-F4.7 (Gói SESSION hết buổi trước hạn, chốt 03/11):** Khi lượt check-in trừ buổi cuối (`remaining_sessions` về 0), hệ thống tìm các gói của cùng hội viên có `status = 'UPCOMING'`, cùng `package_type = 'SESSION'`, cùng `branch_id` (so sánh `IS NOT DISTINCT FROM` vì gói toàn chuỗi có `branch_id` rỗng). Gọi `D` = `start_date` của gói UPCOMING sớm nhất − (`:today` + 1 ngày); nếu `D > 0`, mọi gói UPCOMING đó được trừ `D` ngày ở cả `start_date` và `end_date` (giữ nguyên số ngày hiệu lực và thứ tự nối tiếp). Thao tác nằm trong cùng giao dịch check-in, dùng khóa lạc quan `@Version` của `memberships`. Tác vụ nền chạy lúc 00:00 giờ Việt Nam (chạy bù mỗi khi máy chủ khởi động) chuyển `EXPIRED` các gói `SESSION` `ACTIVE` có `remaining_sessions = 0` mà hôm nay chưa có lượt check-in trừ buổi trước, rồi mới kích hoạt gói `UPCOMING` có `start_date <= :today`, để không vi phạm `uq_one_active_per_type`.
 
 ---
@@ -360,10 +362,15 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
   - **When** Lễ tân bấm xác nhận check-in lần nữa.
   - **Then** Hệ thống tạo bản ghi `checkins` với `session_deducted = false`, giữ nguyên số buổi là 9, và trả về mã 201 Created.
 
-- **Scenario 4: Chặn check-in khi hội viên chỉ có gói PT**
-  - **Given** Hội viên chỉ sở hữu 01 gói `PT` (không có gói `TIME` hoặc `SESSION`).
+- **Scenario 4: Chặn check-in khi hội viên chỉ có gói PT và hôm nay không có buổi PT**
+  - **Given** Hội viên chỉ sở hữu 01 gói `PT` (không có gói `TIME` hoặc `SESSION`), hôm nay không có buổi PT `BOOKED`.
   - **When** Lễ tân bấm xác nhận check-in.
   - **Then** Hệ thống từ chối với mã 422 Unprocessable Content và thông báo gói PT không dùng để check-in tự do.
+
+- **Scenario 4b: Hội viên chỉ có gói PT check-in đúng ngày có buổi PT (BR-F4.8)**
+  - **Given** Hội viên chỉ có gói `PT` 10 buổi đang `ACTIVE`, hôm nay 18:00 có buổi PT `BOOKED` tại chi nhánh của lễ tân.
+  - **When** Lễ tân bấm xác nhận check-in lúc 17:45.
+  - **Then** Hệ thống tạo bản ghi `checkins` gắn gói PT, `session_deducted = false`, gói PT vẫn còn 10 buổi, trả 201 Created.
 
 - **Scenario 5: Ưu tiên gói TIME khi có cả TIME và SESSION**
   - **Given** Hội viên sở hữu đồng thời gói `TIME` 1 tháng (ACTIVE) và gói `SESSION` 30 buổi (ACTIVE).
