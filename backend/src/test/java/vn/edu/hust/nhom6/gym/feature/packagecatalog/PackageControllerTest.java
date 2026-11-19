@@ -16,7 +16,6 @@ import vn.edu.hust.nhom6.gym.common.dto.PageResponse;
 import vn.edu.hust.nhom6.gym.common.exception.GlobalExceptionHandler;
 import vn.edu.hust.nhom6.gym.config.SecurityConfig;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.controller.PackageController;
-import vn.edu.hust.nhom6.gym.feature.packagecatalog.controller.PackageExceptionHandler;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.PackageStatus;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.service.PackageCatalogService;
 import static org.mockito.Mockito.*;
@@ -27,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @WebMvcTest(PackageController.class)
-@ContextConfiguration(classes = {PackageController.class, PackageExceptionHandler.class,
+@ContextConfiguration(classes = {PackageController.class,
     GlobalExceptionHandler.class, SecurityConfig.class})
 class PackageControllerTest {
     @Autowired MockMvc mvc;
