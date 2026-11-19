@@ -1,6 +1,6 @@
 # Tích hợp frontend F1
 
-Cập nhật 14/11/2026. Hợp đồng JSON đã được Bùi Trần Đức Việt (`VietBTD306`, phụ trách backend F1) xác nhận tại [comment PR #80](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80#issuecomment-6624574276) và bổ sung vào [SRS F1 mục 6.1 tại commit a2fa017](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/a2fa01764b377fad74dac68cbeee97dce8c569d1/docs/requirements/srs/dac-ta-use-case-f1-tai-khoan-va-phan-quyen.md). Backend auth đã merge qua [#87](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/87) và [#91](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/91); vá JWT và giới hạn BCrypt đã merge qua [#105](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/105) (merge commit `4610765`); schema chung [#101](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/101) và API hồ sơ hội viên F2 [#97](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/97) cũng đã vào main. Ngày 12/11 đã kiểm tra frontend với `origin/main` `336e13c` (có #105) bằng backend, PostgreSQL và trình duyệt thật trên máy phát triển (mục [Kết quả tích hợp](#kết-quả-tích-hợp-với-backend-thật-12112026)). Kiểm tra HTTPS trên preview Vercel và backend Render staging đã đạt (mục [Staging](#kiểm-tra-https-staging-12112026-đạt)). Postman F1–F3 do [#31](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/31) theo dõi và không thuộc phạm vi của PR này.
+Cập nhật 17/11/2026. Hợp đồng JSON đã được Bùi Trần Đức Việt (`VietBTD306`, phụ trách backend F1) xác nhận tại [comment PR #80](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/80#issuecomment-6624574276) và bổ sung vào [SRS F1 mục 6.1 tại commit a2fa017](https://github.com/Ktin06/it3180_nhom6_gym_management/blob/a2fa01764b377fad74dac68cbeee97dce8c569d1/docs/requirements/srs/dac-ta-use-case-f1-tai-khoan-va-phan-quyen.md). Backend auth đã merge qua [#87](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/87) và [#91](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/91); vá JWT và giới hạn BCrypt đã merge qua [#105](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/105) (merge commit `4610765`); schema chung [#101](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/101) và API hồ sơ hội viên F2 [#97](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/97) cũng đã vào main. Ngày 12/11 đã kiểm tra frontend với `origin/main` `336e13c` (có #105) bằng backend, PostgreSQL và trình duyệt thật trên máy phát triển (mục [Kết quả tích hợp](#kết-quả-tích-hợp-với-backend-thật-12112026)). Kiểm tra HTTPS trên preview Vercel và backend Render staging đã đạt (mục [Staging](#kiểm-tra-https-staging-12112026-đạt)). Postman F1–F3 do [#31](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/31) theo dõi và không thuộc phạm vi của PR này.
 
 ## Đường dẫn và dữ liệu đã thống nhất
 
@@ -51,13 +51,26 @@ Các ca này được kiểm thử bằng Vitest (giả lập ở ranh giới fr
 
 Mỗi phiên ghim claim `sub` của JWT trong bộ nhớ tab. Nếu token làm mới có chủ thể khác (ví dụ tab khác đăng nhập tài khoản B trong khi tab này đang hiển thị A), frontend bỏ token mới trước khi retry request, xóa phiên của tab hiện tại và về `/login` với thông báo “Tài khoản đã đổi ở tab khác”. Không gọi logout bằng cookie chung vì có thể làm mất phiên B ở tab khác. Lỗi mạng khi refresh giữ chủ thể đã ghim cho lần khôi phục; đăng nhập mới đặt lại chủ thể. Backend vẫn xác minh JWT và phân quyền.
 
-Refresh, đăng nhập, đăng ký và đăng xuất cùng dùng Web Locks tên `gym-auth-cookie`. Khóa giữ đến khi response xử lý xong; tab sau gửi request với cookie mới nhất, không gửi lại cookie đã bị thu hồi. Mỗi tab vẫn tự giữ access token; không truyền hoặc lưu token qua Web Storage. Khóa được trình duyệt nhả khi tab đóng. Yêu cầu HTTPS hoặc `localhost` và Web Locks (Chrome, Edge, Firefox bản mới theo NF4). Nếu API không có, frontend từ chối thao tác cookie thay vì âm thầm chạy không khóa. Không thêm grace window hoặc thay quy tắc chống dùng lại token của backend; phần backend tiếp tục theo #104/#112.
+Refresh, đăng nhập, đăng ký và đăng xuất cùng dùng Web Lock `gym-auth-cookie`. Tab đang chờ
+nhận access token vừa làm mới qua `BroadcastChannel`; nếu tab gửi đã đóng, nó có thể dùng cookie
+hiện tại sau khi lấy khóa. `localStorage` chỉ chứa hai mã ngẫu nhiên để nhận diện lần đổi phiên
+và lần refresh. Access token chỉ ở bộ nhớ. Refresh cookie vẫn là HttpOnly.
 
-Kiểm thử hai tab với API/CSDL thật nằm ở `frontend/e2e/multi-tab-session.mjs`. Test dùng hai trang cùng context, chặn tạm request đầu để xác nhận tab sau chờ khóa, rồi chuyển nguyên request tới backend; không giả lập response. Sau đó tải lại đồng thời, kiểm `/me`, HttpOnly, Web Storage và gửi lại refresh token cũ để xác nhận backend trả 401. Vitest dùng LockManager test double của jsdom; không thay thế lần chạy trình duyệt này.
+Đăng xuất hoặc đăng nhập tài khoản khác phát tín hiệu để các tab cũ xóa phiên và về trang
+đăng nhập. Tab cùng tài khoản giữ phiên khi đăng nhập lại ở tab khác. Logout kiểm tra phiên
+sau khi lấy khóa, gửi Bearer đang giữ kể cả đã hết hạn và tắt tự refresh. Logout đang chờ
+không được gửi nếu một lần đăng nhập khác đã đổi cookie. Backend [#116](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/116)
+đối chiếu chủ Bearer với cookie.
 
-Runner [run-multi-tab-session.py](../../frontend/e2e/run-multi-tab-session.py) dùng Docker, Node/npm và Python có `bcrypt`. Sau `npm ci` và `npx playwright install chromium` trong `frontend/`, chạy `python3 frontend/e2e/run-multi-tab-session.py` từ gốc repo. Runner đóng gói backend hiện tại, tạo PostgreSQL/backend riêng, backup trước migration và trước đăng ký/đổi phiên, tạo tài khoản thử riêng và Vite tại `localhost:5173` (backend `127.0.0.1:8081`). Nếu port hoặc tên tài nguyên đã có, runner dừng để tránh đụng phiên khác. Bí mật chỉ tồn tại tạm; runner dọn tiến trình/container/network thuộc lần chạy, giữ backup và log đã che bí mật trong thư mục `/tmp/gym-auth-tabs-*` có quyền riêng. Có thể đặt `GYM_BROWSER_EXECUTABLE` khi dùng Chromium cài sẵn; `--check-local` chỉ kiểm tra điều kiện tĩnh, không gọi Docker/API. Job CI **Phiên nhiều tab** chạy runner sau Backend/Frontend khi một trong hai phần thay đổi.
+Kiểm thử [Playwright hai tab](../../frontend/e2e/multi-tab-session.mjs) dùng Vite, backend và
+PostgreSQL thật. Nó kiểm tra tab chờ không gửi lần refresh thứ hai, tải lại đồng thời giữ
+phiên, logout chờ của A không làm mất phiên B và logout B cập nhật cả hai tab.
 
-Nếu đã có môi trường thử riêng: **sao lưu CSDL trước**, chạy Vite với backend đó, cấp `GYM_E2E_EMAIL`, `GYM_E2E_PASSWORD` qua môi trường và `GYM_E2E_DB_BACKUP` trỏ tới file backup; chạy `npm run test:auth:tabs` trong `frontend/`. Có thể đổi `GYM_E2E_BASE_URL` hoặc `GYM_BROWSER_EXECUTABLE`; cần Vite để import các module nguồn trong trình duyệt. Không dùng tài khoản hay CSDL vận hành cho bài thử có gửi lại token cũ này.
+Sau `npm ci` và `npx playwright install chromium` trong `frontend/`, chạy
+`python3 frontend/e2e/run-multi-tab-session.py` từ gốc repo với Docker và Python có `bcrypt`.
+Runner sao lưu database thử trước migration và thao tác ghi, tự dọn tiến trình và container.
+Có thể đặt `GYM_BROWSER_EXECUTABLE` cho Chromium cài sẵn. Job CI **Phiên nhiều tab** chạy cùng
+backend của nhánh kiểm thử.
 
 ## Kết quả tích hợp với backend thật (12/11/2026)
 

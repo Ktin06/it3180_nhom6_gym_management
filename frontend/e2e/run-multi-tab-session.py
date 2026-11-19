@@ -2,6 +2,8 @@
 """Run the real two-tab test on an isolated, disposable local backend/database."""
 
 import argparse
+import hashlib
+import io
 import json
 import os
 from pathlib import Path
@@ -12,6 +14,7 @@ import signal
 import socket
 import subprocess
 import tempfile
+import tarfile
 import time
 import urllib.error
 import urllib.request
@@ -73,6 +76,9 @@ def vite_ready():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check-local", action="store_true")
+    parser.add_argument("--allow-dirty", action="store_true",
+                        help="Kiểm thử thay đổi chưa commit; lưu diff và checksum cùng kết quả.")
+    parser.add_argument("--backend-ref", help="Commit backend riêng để kiểm thử tích hợp trước khi gộp.")
     options = parser.parse_args()
     for name in ("docker", "node", "npm"):
         if not shutil.which(name):
@@ -85,12 +91,16 @@ def main():
         print(f"Kiểm tra cục bộ đạt; head {head}; chưa tạo container, tiến trình hoặc gọi API.")
         return
 
-    if command("git", "-C", str(WORKTREE), "status", "--porcelain").stdout.strip():
+    source_diff = command("git", "-C", str(WORKTREE), "diff", "--binary", "HEAD").stdout
+    if command("git", "-C", str(WORKTREE), "ls-files", "--others", "--exclude-standard").stdout.strip():
+        raise RuntimeError("Có tệp chưa được Git theo dõi; chưa thể ghi snapshot nguồn đầy đủ.")
+    if source_diff and not options.allow_dirty:
         raise RuntimeError("Worktree còn thay đổi chưa commit; chốt nguồn trước khi ghi bằng chứng theo head.")
 
     command("docker", "info")
     for port in (5173, 8081):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+            probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             try:
                 probe.bind(("127.0.0.1", port))
             except OSError as error:
@@ -102,6 +112,16 @@ def main():
 
     artifacts = Path(tempfile.mkdtemp(prefix="gym-auth-tabs-"))
     os.chmod(artifacts, 0o700)
+    (artifacts / "source.diff").write_bytes(source_diff)
+    backend_source = WORKTREE / "backend"
+    backend_head = head
+    if options.backend_ref:
+        backend_head = command("git", "-C", str(WORKTREE), "rev-parse", "--verify",
+                               f"{options.backend_ref}^{{commit}}").stdout.decode().strip()
+        archive = command("git", "-C", str(WORKTREE), "archive", backend_head, "backend").stdout
+        with tarfile.open(fileobj=io.BytesIO(archive)) as source:
+            source.extractall(artifacts / "backend-source", filter="data")
+        backend_source = artifacts / "backend-source/backend"
     run_id = secrets.token_hex(10)
     password = "T" + secrets.token_urlsafe(24) + "7"
     database_password = secrets.token_urlsafe(32)
@@ -179,8 +199,8 @@ def main():
         if not Path(browser).is_file() or not os.access(browser, os.X_OK):
             raise RuntimeError("Thiếu Chromium. Chạy npx playwright install chromium trong frontend, hoặc đặt GYM_BROWSER_EXECUTABLE.")
         print("Đóng gói backend thật từ worktree; có thể mất vài phút.", flush=True)
-        image = f"gym-auth-tabs-backend:{head[:12]}"
-        logged_process(("docker", "build", "-t", image, str(WORKTREE / "backend")), "backend-build.log", 1200)
+        image = f"gym-auth-tabs-backend:{backend_head[:12]}"
+        logged_process(("docker", "build", "-t", image, str(backend_source)), "backend-build.log", 1200)
         command("docker", "network", "create", "--label", f"{LABEL}={run_id}", NETWORK)
         command("docker", "run", "-d", "--name", DB, "--label", f"{LABEL}={run_id}",
                 "--network", NETWORK, "--env-file", str(db_env), "postgres:16-alpine", timeout=180)
@@ -193,15 +213,18 @@ def main():
         wait_until(healthy, 180, "backend health UP")
         baseline = backup("before-session-test.dump")
         email = f"tabs-{run_id}@example.com"
-        data = json.dumps({"fullName": "Kiem thu phien nhieu tab", "email": email,
+        other_email = f"other-tabs-{run_id}@example.com"
+        for account_email in (email, other_email):
+            data = json.dumps({"fullName": "Kiem thu phien nhieu tab", "email": account_email,
                            "phone": "09" + f"{secrets.randbelow(10**8):08d}", "password": password}).encode()
-        request = urllib.request.Request("http://127.0.0.1:8081/api/v1/auth/register", data=data,
+            request = urllib.request.Request("http://127.0.0.1:8081/api/v1/auth/register", data=data,
                                          headers={"Content-Type": "application/json", "Origin": "http://localhost:5173"})
-        with urllib.request.urlopen(request, timeout=20) as response:
-            if response.status != 201:
-                raise RuntimeError("Đăng ký tài khoản kiểm thử không trả 201.")
+            with urllib.request.urlopen(request, timeout=20) as response:
+                if response.status != 201:
+                    raise RuntimeError("Đăng ký tài khoản kiểm thử không trả 201.")
         environment = dict(os.environ, VITE_API_URL="/api/v1", GYM_TEMP_DIR=str(artifacts),
                            GYM_E2E_EMAIL=email, GYM_E2E_PASSWORD=password, GYM_E2E_DB_BACKUP=str(baseline),
+                           GYM_E2E_OTHER_EMAIL=other_email,
                            GYM_BROWSER_EXECUTABLE=browser)
         code = """import {createServer} from 'vite';
 const server=await createServer({envDir:process.env.GYM_TEMP_DIR,server:{host:'localhost',port:5173,strictPort:true,proxy:{'/api':'http://127.0.0.1:8081'}}});
@@ -213,13 +236,18 @@ await server.listen();"""
         wait_until(vite_ready, 30, "Vite")
         print("Chạy Playwright hai tab với API/cookie thật.", flush=True)
         logged_process(("npm", "run", "test:auth:tabs"), "playwright.log", 150, cwd=FRONTEND, env=environment)
+        if command("git", "-C", str(WORKTREE), "diff", "--binary", "HEAD").stdout != source_diff:
+            raise RuntimeError("Nguồn thay đổi trong lúc kiểm thử; không ghi kết quả PASS.")
         (artifacts / "result.json").write_text(json.dumps({
-            "head": head, "result": "PASS", "backend": "worktree Dockerfile", "database": "postgres:16-alpine",
+            "head": head, "sourceDiffSha256": hashlib.sha256(source_diff).hexdigest(),
+            "result": "PASS", "backend": backend_head, "database": "postgres:16-alpine",
             "browser": browser,
-            "checks": ["cross-tab lock before dispatch", "real cookie rotation", "concurrent reload",
-                       "same identity", "HttpOnly", "empty Web Storage", "replayed token rejected"],
+            "checks": ["cross-tab lock before dispatch", "one refresh for both waiting tabs",
+                       "real cookie rotation", "concurrent reload", "same identity", "HttpOnly",
+                       "no tokens in Web Storage", "stale logout A preserves cookie B",
+                       "B refreshes after A exits", "B logout clears both tabs"],
         }, indent=2))
-        print("PASS: hai tab giữ phiên; token cũ vẫn bị từ chối. Kết quả ở result.json.", flush=True)
+        print("PASS: hai tab giữ phiên khi refresh và đồng bộ khi đổi tài khoản hoặc đăng xuất.", flush=True)
     finally:
         cleanup_errors = []
         if vite is not None:

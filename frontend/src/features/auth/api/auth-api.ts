@@ -1,4 +1,10 @@
 import { queueCookieOperation } from '../../../auth/cookie-operation-queue'
+import {
+  captureCookieRevision,
+  currentTabCookieRevision,
+  publishSessionChange,
+} from '../../../auth/session-coordination'
+import { getSessionEpoch } from '../../../auth/session-store'
 import { ROLES, type Role } from '../../../auth/roles'
 import type { AuthUser } from '../../../auth/AuthContext'
 import { http } from '../../../services/http'
@@ -14,18 +20,22 @@ const publicAuthRequest = publicRequest
 
 export function login(request: LoginRequest) {
   return queueCookieOperation(async () => {
+    captureCookieRevision()
     const response = await http.post<AccessTokenResponse>('/auth/login', request, {
       ...publicAuthRequest,
     })
+    publishSessionChange(response.data.accessToken)
     return response.data
   })
 }
 
 export function register(request: RegisterRequest) {
   return queueCookieOperation(async () => {
+    captureCookieRevision()
     const response = await http.post<AccessTokenResponse>('/auth/register', request, {
       ...publicAuthRequest,
     })
+    publishSessionChange(response.data.accessToken)
     return response.data
   })
 }
@@ -46,8 +56,14 @@ export async function getCurrentUser(): Promise<AuthUser> {
 }
 
 export function logout() {
+  const authEpoch = getSessionEpoch()
+  captureCookieRevision()
   return queueCookieOperation(async () => {
-    await http.post('/auth/logout', undefined, { ...publicAuthRequest })
+    if (authEpoch !== getSessionEpoch()) throw new Error('Phiên đăng nhập đã thay đổi.')
+    if (!currentTabCookieRevision(authEpoch)) return
+    // Bearer cho backend đối chiếu chủ cookie; không refresh sang tài khoản ở tab khác.
+    await http.post('/auth/logout', undefined, { skipAuthRefresh: true, authEpoch })
+    publishSessionChange(null)
   })
 }
 
