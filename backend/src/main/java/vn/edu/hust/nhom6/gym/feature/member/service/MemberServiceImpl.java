@@ -99,6 +99,18 @@ public class MemberServiceImpl implements MemberManagementService, MemberRegistr
         return member;
     }
 
+    /**
+     * Hồ sơ hội viên gắn với tài khoản đang đăng nhập. Chức năng khác dùng khi hội viên tự thao tác
+     * (xem gói của mình, đặt lớp, đặt buổi PT...) để biết {@code member.id} và chi nhánh gốc.
+     * Không lọc theo trạng thái: hồ sơ INACTIVE vẫn trả về, nơi gọi tự quyết có cho làm tiếp không.
+     *
+     * @throws ForbiddenException (403) khi tài khoản chưa gắn hồ sơ hoặc hồ sơ đã xóa mềm
+     */
+    public Member requireByUserId(Long userId) {
+        return members.findByUserIdAndDeletedAtIsNull(userId).orElseThrow(() -> new ForbiddenException(
+            "Tài khoản chưa gắn hồ sơ hội viên. Vui lòng liên hệ quầy lễ tân."));
+    }
+
     @Override
     public MemberDetailResponse detail(CurrentUser actor, Long id) {
         Member member = findMember(id);

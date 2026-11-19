@@ -29,7 +29,7 @@ import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.PackageStatus;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.PackageType;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.mapper.PackageMapper;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.repository.PackageRepository;
-import vn.edu.hust.nhom6.gym.feature.staff.service.StaffLookupService;
+import vn.edu.hust.nhom6.gym.feature.staff.service.StaffService;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +37,7 @@ import vn.edu.hust.nhom6.gym.feature.staff.service.StaffLookupService;
 @Transactional(readOnly = true)
 public class PackageCatalogService {
     private final PackageRepository packages;
-    private final StaffLookupService staff;
+    private final StaffService staff;
     private final Validator validator;
 
     @Transactional
@@ -45,7 +45,7 @@ public class PackageCatalogService {
         if (!me.is(UserRole.BRANCH_MANAGER)) {
             throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này.");
         }
-        Long branchId = staff.activeBranchIdForUser(me.userId());
+        Long branchId = staff.requireBranchId(me.userId());
         var item = findOwnedPackageForUpdate(id, branchId);
         if (item.getStatus() == PackageStatus.INACTIVE) {
             throw new BusinessRuleException("Gói tập này đã ở trạng thái ngừng bán.");
@@ -60,7 +60,7 @@ public class PackageCatalogService {
         if (!me.is(UserRole.BRANCH_MANAGER)) {
             throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này.");
         }
-        Long branchId = staff.activeBranchIdForUser(me.userId());
+        Long branchId = staff.requireBranchId(me.userId());
         var item = findOwnedPackageForUpdate(id, branchId);
         var merged = new CreatePackageRequest(item.getCode(),
             request.has("name") ? request.getName() : item.getName(), item.getType(),
@@ -82,7 +82,7 @@ public class PackageCatalogService {
         if (!allBranches && !me.is(UserRole.BRANCH_MANAGER) && !me.is(UserRole.RECEPTIONIST)) {
             throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này.");
         }
-        Long branchId = allBranches ? null : staff.activeBranchIdForUser(me.userId());
+        Long branchId = allBranches ? null : staff.requireBranchId(me.userId());
         return PageResponse.of(packages.search(allBranches, branchId, type, status,
             PageRequest.of(page, size, Sort.by("type", "name", "id"))), PackageMapper::summary);
     }
@@ -92,7 +92,7 @@ public class PackageCatalogService {
         if (!me.is(UserRole.BRANCH_MANAGER)) {
             throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này.");
         }
-        Long branchId = staff.activeBranchIdForUser(me.userId());
+        Long branchId = staff.requireBranchId(me.userId());
         if (packages.existsByCode(request.code())) { throw duplicateCode(request.code()); }
         var item = GymPackage.create(branchId, request.code(), request.name(), request.type(),
             request.durationDays(), request.sessionCount(), request.price(), request.description());

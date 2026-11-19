@@ -3,6 +3,7 @@ package vn.edu.hust.nhom6.gym.feature.member;
 import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -144,6 +145,23 @@ class MemberServiceTest {
         assertThat(result.email()).isEqualTo("member@example.com");
         verify(accounts, never()).disable(any());
         verify(accounts, never()).activateIfDisabled(any());
+    }
+
+    @Test
+    @DisplayName("Nền tảng: tài khoản đã gắn hồ sơ thì lấy được hồ sơ của chính mình")
+    void requireByUserIdReturnsLinkedProfile() {
+        Member member = linkedMember();
+        when(repository.findByUserIdAndDeletedAtIsNull(42L)).thenReturn(Optional.of(member));
+
+        assertThat(service.requireByUserId(42L)).isSameAs(member);
+    }
+
+    @Test
+    @DisplayName("Nền tảng: tài khoản chưa gắn hồ sơ hội viên thì 403")
+    void requireByUserIdWithoutProfileIsForbidden() {
+        when(repository.findByUserIdAndDeletedAtIsNull(43L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.requireByUserId(43L)).isInstanceOf(ForbiddenException.class);
     }
 
     private Member linkedMember() {

@@ -19,20 +19,20 @@ import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.CreatePackageRequest;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.UpdatePackageRequest;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.repository.PackageRepository;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.service.PackageCatalogService;
-import vn.edu.hust.nhom6.gym.feature.staff.service.StaffLookupService;
+import vn.edu.hust.nhom6.gym.feature.staff.service.StaffService;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 import static org.mockito.ArgumentMatchers.*;
 
 class PackageCatalogServiceTest {
     PackageRepository packages;
-    StaffLookupService staff;
+    StaffService staff;
     PackageCatalogService service;
 
     @BeforeEach
     void setUp() {
         packages = mock(PackageRepository.class);
-        staff = mock(StaffLookupService.class);
+        staff = mock(StaffService.class);
         service = new PackageCatalogService(packages, staff, mock(jakarta.validation.Validator.class));
     }
 
@@ -77,7 +77,7 @@ class PackageCatalogServiceTest {
     @ValueSource(strings = {"BRANCH_MANAGER", "RECEPTIONIST"})
     @DisplayName("TC-F3.1.1-05d: Nhân viên chưa gán chi nhánh không bao giờ được xem mọi chi nhánh")
     void missingAssignmentNeverFallsBackToAllBranches(String role) {
-        when(staff.activeBranchIdForUser(2L)).thenThrow(new AccessDeniedException("Chưa có chi nhánh"));
+        when(staff.requireBranchId(2L)).thenThrow(new AccessDeniedException("Chưa có chi nhánh"));
         assertThatThrownBy(() -> service.list(identity("2", role), null, PackageStatus.ACTIVE, 0, 20))
             .isInstanceOf(AccessDeniedException.class);
         verifyNoInteractions(packages);
