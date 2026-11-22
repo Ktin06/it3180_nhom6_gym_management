@@ -141,7 +141,7 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 5. Hệ thống kiểm tra khung giờ nằm trong giờ PT rảnh.
 6. Hệ thống kiểm tra thời điểm bắt đầu còn ít nhất `PT_MIN_LEAD_HOURS` giờ.
 7. Hệ thống kiểm tra không trùng lịch của PT (kể cả giờ PT dạy lớp nhóm) và không trùng lịch của hội viên.
-8. Hệ thống kiểm tra số buổi PT hội viên đã đặt mà chưa diễn ra **ít hơn** số buổi còn lại của gói.
+8. Hệ thống kiểm tra số buổi PT `BOOKED` của gói (kể cả buổi đã qua giờ mà chưa xác nhận) **ít hơn** số buổi còn lại của gói (BR-F9.4).
 9. Hệ thống khóa bản ghi theo thứ tự `members` rồi `staff` (NF6), tạo buổi PT trong một giao dịch (`@Transactional`).
 10. Hệ thống trả về kết quả (201 Created) kèm thông tin buổi PT.
 
@@ -155,12 +155,12 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
   - Giờ đặt nằm ngoài giờ PT rảnh.
   - Đặt sát giờ, chưa đủ `PT_MIN_LEAD_HOURS` giờ.
   - Trùng lịch với buổi PT hoặc lớp nhóm của PT, hoặc với lịch của hội viên.
-  - Đã đặt đủ số buổi còn lại của gói. Ví dụ: gói còn 2 buổi và hội viên đã đặt 2 buổi chưa diễn ra thì từ chối buổi thứ ba.
+  - Đã đặt đủ số buổi còn lại của gói. Ví dụ: gói còn 2 buổi và hội viên đang có 2 buổi `BOOKED` (chưa diễn ra, hoặc đã qua giờ mà chưa xác nhận) thì từ chối buổi thứ ba; hệ thống trả `ProblemDetail` (422): *"Bạn đã đặt đủ số buổi còn lại của gói PT. Vui lòng gia hạn gói để đặt thêm."*
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
 - **BR-F9.2:** Chỉ đặt trong giờ PT rảnh.
 - **BR-F9.3:** Không trùng lịch cả PT lẫn hội viên, kể cả giờ PT dạy lớp nhóm.
-- **BR-F9.4:** Số buổi PT đã đặt mà chưa diễn ra phải ít hơn số buổi còn lại của gói. "Chưa diễn ra" là buổi `BOOKED` có giờ bắt đầu sau hiện tại; buổi đã qua giờ mà PT chưa xác nhận không chặn hội viên đặt thêm (chốt 19/11/2026).
+- **BR-F9.4:** Số buổi PT `BOOKED` của gói (gồm cả buổi đã qua giờ bắt đầu mà huấn luyện viên chưa xác nhận) phải ít hơn số buổi còn lại của gói thì mới đặt thêm được. Lý do: sau giờ bắt đầu không ai hủy được buổi PT, buổi đó chỉ kết thúc bằng xác nhận hoặc ghi vắng, cả hai đều trừ buổi; nên buổi `BOOKED` đã qua giờ chắc chắn đã tiêu một buổi. Ví dụ: gói còn 1 buổi, hội viên tập buổi sáng nay mà huấn luyện viên chưa bấm xác nhận thì chưa đặt được buổi chiều (chốt 21/11/2026, thay câu chốt 19/11 "buổi đã qua giờ không chặn").
 - **BR-F9.5:** Đặt buổi chỉ giữ chỗ, không trừ số buổi của gói.
 - **CONFIG-F9.1:** Đọc từ bảng `system_configs` với key `PT_MIN_LEAD_HOURS` (giá trị mặc định: `12`), không viết cứng trong mã nguồn (Quy tắc số 15).
 - **[Yêu cầu phi chức năng]:**

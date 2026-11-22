@@ -112,7 +112,7 @@ Các giá trị có dấu \* là tham số cấu hình (bảng `system_configs`)
 
 **Huấn luyện viên (F9)**
 
-- Hội viên có gói PT đang ACTIVE mới đặt được buổi PT; chỉ đặt vào khung giờ huấn luyện viên đã khai báo rảnh, trước ít nhất 12 giờ\*. Số buổi PT đã đặt mà chưa diễn ra phải ít hơn số buổi còn lại của gói thì mới đặt thêm được, để không bao giờ đặt quá số buổi.
+- Hội viên có gói PT đang ACTIVE mới đặt được buổi PT; chỉ đặt vào khung giờ huấn luyện viên đã khai báo rảnh, trước ít nhất 12 giờ\*. Số buổi PT `BOOKED` của gói (kể cả buổi đã qua giờ mà huấn luyện viên chưa xác nhận) phải ít hơn số buổi còn lại của gói thì mới đặt thêm được, để không bao giờ đặt quá số buổi.
 - Hệ thống chặn trùng lịch cho cả huấn luyện viên (kể cả với giờ dạy lớp nhóm) và hội viên.
 - Khung giờ rảnh của cùng một huấn luyện viên không được chồng nhau; huấn luyện viên chỉ xóa hoặc thu hẹp khung khi không còn buổi đã đặt chưa diễn ra trong khung đó.
 - Hội viên (hoặc lễ tân hủy hộ) hủy buổi PT trước giờ bắt đầu ít nhất 12 giờ\* (cùng mốc đặt trước), không trừ buổi, không phạt; muộn hơn thì không hủy được; vắng mặt không báo thì huấn luyện viên ghi vắng (NO_SHOW) và vẫn trừ buổi như buổi đã tập (không tính hoa hồng). Huấn luyện viên xác nhận hoặc ghi vắng tới 23:59 cùng ngày; sau đó chỉ quản lý chi nhánh sửa. Huấn luyện viên không tự hủy buổi đã có khách; quản lý chi nhánh hủy hộ (bắt buộc ghi lý do, báo hội viên, ghi nhật ký).
