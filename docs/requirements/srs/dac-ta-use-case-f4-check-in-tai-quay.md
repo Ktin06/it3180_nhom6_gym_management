@@ -23,7 +23,7 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
   - **Gói tập cá nhân 1-1 (`PT`) tuyệt đối không dùng để check-in** vào phòng tập.
   - Trường hợp hội viên sở hữu đồng thời cả gói `TIME` và gói `SESSION`, hệ thống **ưu tiên sử dụng gói `TIME`** và không trừ lượt của gói `SESSION`.
   - Đối với gói `SESSION`: Hệ thống chỉ trừ **1 buổi ở lần check-in đầu tiên trong ngày** (căn cứ theo ngày dương lịch giờ Việt Nam `UTC+7`); các lần check-in tiếp theo trong cùng ngày không bị trừ thêm.
-- Tự động kiểm tra lịch đặt lớp học nhóm (`class_bookings` thuộc F8) của hội viên trong ngày: nếu hội viên có lịch học sắp diễn ra (trong khoảng trước giờ học 30–60 phút), hệ thống tự động cập nhật mốc thời gian **đã đến (`arrived_at`)** cho chỗ đặt lớp.
+- Tự động kiểm tra lịch đặt lớp học nhóm (`class_bookings` thuộc F8) của hội viên trong ngày: nếu hội viên có chỗ lớp `BOOKED` bắt đầu trong khoảng `[thời điểm check-in − 15 phút, thời điểm check-in + 60 phút]` (tức đến sớm tối đa 60 phút hoặc đến muộn tối đa 15 phút, xem UC-F4.3; chốt 22/11/2026), hệ thống tự động cập nhật mốc thời gian **đã đến (`arrived_at`)** cho chỗ đặt lớp.
 - Ghi nhận lượt check-out khi hội viên rời cơ sở tập luyện để phục vụ tính toán số lượng hội viên đang có mặt theo thời gian thực (Dashboard F6).
 - Đảm bảo thời gian phản hồi tra cứu và thực hiện check-in **dưới 2 giây** (NF1).
 

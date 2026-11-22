@@ -23,7 +23,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 - **Phân quyền chặt chẽ:** Chỉ Lễ tân và Quản lý chi nhánh được xác nhận thu tiền (S7). Riêng nghiệp vụ **Hoàn tiền (`REFUND`)**, chỉ Quản lý chi nhánh mới có thẩm quyền và mọi thao tác hoàn tiền bắt buộc phải lưu vết vào nhật ký kiểm toán (`audit_logs` – S9).
 - **Hoàn tiền chỉ để sửa sai sót khi thu tiền:** phòng tập không hoàn tiền khi hội viên đổi ý hay không muốn tập nữa (hội viên dùng bảo lưu hoặc chuyển nhượng gói, F15). Hệ thống chỉ cho hoàn khi gói tập của hóa đơn **chưa được dùng** (BR-F5-14), ví dụ lễ tân bán nhầm gói hoặc xác nhận thu tiền hai lần.
 - **Phạm vi Sprint 1:** Lập hóa đơn và xác nhận thanh toán tại quầy (`CASH`, `VietQR`), tra cứu hóa đơn chi nhánh, hủy hóa đơn chờ tại quầy, xuất/in hóa đơn PDF.
-- **Phạm vi Sprint 2:** Xử lý tiếp nhận hóa đơn chờ từ Cổng hội viên (F7), tác vụ nền tự động hủy hóa đơn chờ `PENDING` quá hạn 3 ngày (`PENDING_INVOICE_TTL_DAYS`).
+- **Phạm vi Sprint 2:** Xử lý tiếp nhận hóa đơn chờ từ Cổng hội viên (F7). Tác vụ nền tự động hủy hóa đơn chờ `PENDING` quá hạn `PENDING_INVOICE_TTL_DAYS` thuộc **F7** (UC-F7.4 A1, BR-F7.5), không làm ở F5 (chốt 22/11/2026).
 
 ---
 
@@ -311,10 +311,10 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   - Tại bước 2, JWT không có hoặc hết hạn.
   - Hệ thống trả `ProblemDetail` (401): *"Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại."*
 - **E2 – Không có quyền thao tác (403 Forbidden):**
-  - Người dùng không thuộc các vai trò Lễ tân, Quản lý chi nhánh, Chủ chuỗi (ví dụ Hội viên, Huấn luyện viên cố truy cập API này), hoặc Lễ tân/Quản lý chi nhánh cố tình truy cập hóa đơn của chi nhánh khác (S3).
+  - Người dùng không thuộc các vai trò Lễ tân, Quản lý chi nhánh, Chủ chuỗi (ví dụ Hội viên, Huấn luyện viên cố truy cập API này) (S3). Lễ tân hoặc Quản lý chi nhánh truy cập hóa đơn của chi nhánh khác thuộc E3 (404).
   - Hệ thống trả `ProblemDetail` (403): *"Bạn không có quyền thực hiện thao tác này."*
 - **E3 – Không tìm thấy hóa đơn (404 Not Found):**
-  - Hóa đơn yêu cầu hủy không tồn tại trên hệ thống.
+  - Hóa đơn yêu cầu không tồn tại trên hệ thống, **hoặc thuộc chi nhánh khác** với chi nhánh của Lễ tân/Quản lý. Hai trường hợp trả cùng một câu để không lộ hóa đơn của chi nhánh khác có tồn tại hay không (chốt 22/11/2026).
   - Hệ thống trả `ProblemDetail` (404): *"Hóa đơn không tồn tại trên hệ thống."*
 - **E4 – Hóa đơn không thể hủy (422 Unprocessable Content):**
   - Lễ tân cố bấm hủy một hóa đơn đã `PAID` hoặc đã `REFUNDED`.
@@ -422,11 +422,11 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 - **E1 – Chưa đăng nhập (401 Unauthorized):**
   - JWT không hợp lệ hoặc hết hạn.
   - Hệ thống trả `ProblemDetail` (401).
-- **E2 – Không có quyền truy cập hóa đơn (403 Forbidden):**
-  - Hội viên A cố tình truy cập tải hóa đơn của Hội viên B (vi phạm S3).
-  - Hệ thống trả `ProblemDetail` (403): *"Bạn không có quyền xem hóa đơn này."*
+- **E2 – Không có quyền truy cập (403 Forbidden):**
+  - Người dùng không thuộc vai trò được tải PDF (Lễ tân, Quản lý chi nhánh, Hội viên).
+  - Hệ thống trả `ProblemDetail` (403).
 - **E3 – Hóa đơn không tồn tại (404 Not Found):**
-  - Không tìm thấy hóa đơn theo `id`.
+  - Không tìm thấy hóa đơn theo `id`, **hoặc** Hội viên A tải hóa đơn của Hội viên B, **hoặc** nhân viên tải hóa đơn chi nhánh khác (S3). Các trường hợp trả cùng một câu, để không ai dò được hóa đơn nào đang tồn tại (chốt 22/11/2026).
   - Hệ thống trả `ProblemDetail` (404): *"Hóa đơn không tồn tại trên hệ thống."*
 - **E4 – Hóa đơn chưa thanh toán (422 Unprocessable Content):**
   - Hóa đơn đang ở trạng thái `PENDING` hoặc `CANCELLED`.
@@ -463,10 +463,10 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   - **Given** Hóa đơn `id=88` có `status=PAID` thuộc chi nhánh Lễ tân đang trực
   - **When** Lễ tân gọi `GET /api/v1/invoices/88/pdf`
   - **Then** Hệ thống trả về `200 OK` với stream file PDF, hiển thị đúng mã hóa đơn `HD000088`, tên gói tập và đơn giá tại thời điểm bán
-- **Kịch bản 2: Hội viên A cố tải hóa đơn của Hội viên B (403)**
+- **Kịch bản 2: Hội viên A cố tải hóa đơn của Hội viên B (404)**
   - **Given** Hội viên A đã đăng nhập; hóa đơn `id=90` thuộc về Hội viên B
   - **When** Hội viên A gọi `GET /api/v1/invoices/90/pdf`
-  - **Then** Hệ thống chặn lại và trả về `403 Forbidden`
+  - **Then** Hệ thống chặn lại và trả về `404 Not Found` *"Hóa đơn không tồn tại trên hệ thống."*, giống như hóa đơn không tồn tại
 
 ---
 

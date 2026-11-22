@@ -244,7 +244,7 @@ Vai trò được phép dùng: **Hội viên** (đã đăng nhập, có hồ sơ
 - **E4 – Xung đột dữ liệu / Trùng lặp (409 Conflict):**
   - Tại bước 4, hội viên đã có hóa đơn chờ cho gói này; hệ thống không tạo thêm và trả `ProblemDetail` (409).
 - **E5 – Vi phạm quy tắc nghiệp vụ (422 Unprocessable Content):**
-  - Tại bước 4, gói đã ngừng bán (`INACTIVE`); hệ thống trả `ProblemDetail` (422): *"Gói này hiện không còn được bán."*
+  - Tại bước 4, gói đã ngừng bán (`INACTIVE`); hệ thống trả `ProblemDetail` (422): *"Gói tập này đã ngừng bán."* (cùng câu với F3, chốt 22/11/2026)
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
 - **BR-F7.5:** Hóa đơn chờ tạo từ cổng hội viên tự hủy sau `PENDING_INVOICE_TTL_DAYS`; gói PENDING đi kèm cũng bị hủy (CANCELLED). Chỉ hóa đơn `MEMBER_PORTAL` bị tự hủy.
@@ -323,7 +323,7 @@ Vai trò được phép dùng: **Hội viên** (đã đăng nhập, có hồ sơ
 - **E4 – Xung đột dữ liệu / Trùng lặp (409 Conflict):**
   - Tại bước 4, đã có hóa đơn chờ cho gói này; hệ thống không tạo thêm và trả `ProblemDetail` (409).
 - **E5 – Vi phạm quy tắc nghiệp vụ (422 Unprocessable Content):**
-  - Tại bước 4, loại gói đã ngừng bán; hệ thống trả `ProblemDetail` (422): *"Gói này hiện không còn được bán."*
+  - Tại bước 4, loại gói đã ngừng bán; hệ thống trả `ProblemDetail` (422): *"Gói tập này đã ngừng bán."* (cùng câu với F3, chốt 22/11/2026)
   - Tại bước 4, gói ở trạng thái CANCELLED (hóa đơn của gói đã bị hủy hoặc đã hoàn tiền); hệ thống trả `ProblemDetail` (422): *"Gói này đã hủy. Vui lòng chọn gói ở mục Mua gói."* (BR-F7.9).
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
