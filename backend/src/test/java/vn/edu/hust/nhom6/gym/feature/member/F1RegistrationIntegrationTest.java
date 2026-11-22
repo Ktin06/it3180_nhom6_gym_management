@@ -32,6 +32,7 @@ import vn.edu.hust.nhom6.gym.feature.member.entity.Member;
 import vn.edu.hust.nhom6.gym.feature.auth.service.AccountService;
 import vn.edu.hust.nhom6.gym.feature.member.mapper.MemberMapper;
 import vn.edu.hust.nhom6.gym.feature.member.service.MemberService;
+import vn.edu.hust.nhom6.gym.DatabaseCleaner;
 
 /**
  * Kiểm thử tích hợp dùng dịch vụ tài khoản F1 thật (đối chiếu commit 03bab42).
@@ -54,7 +55,7 @@ class F1RegistrationIntegrationTest {
 
     @BeforeEach
     void fixtures() {
-        jdbc.execute("TRUNCATE TABLE members, users, staff, refresh_tokens RESTART IDENTITY CASCADE");
+        DatabaseCleaner.truncate(jdbc, "members", "users", "staff", "refresh_tokens");
         jdbc.update("UPDATE branches SET status = 'ACTIVE' WHERE code = 'CN01'");
     }
 

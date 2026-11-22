@@ -37,6 +37,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import vn.edu.hust.nhom6.gym.DatabaseCleaner;
 
 /** Kiểm thử riêng F2 với Authentication dựng sẵn; dùng AccountService thật của F1, không kiểm thử JWT. */
 @SpringBootTest
@@ -59,7 +60,7 @@ class MemberApiIntegrationTest {
 
     @BeforeEach
     void fixtures() {
-        jdbc.execute("TRUNCATE TABLE members, users, staff, refresh_tokens RESTART IDENTITY CASCADE");
+        DatabaseCleaner.truncate(jdbc, "members", "users", "staff", "refresh_tokens");
         branch = jdbc.queryForObject("SELECT id FROM branches WHERE code = 'CN01'", Long.class);
         jdbc.update("""
             INSERT INTO branches(code, name, open_time, close_time) VALUES ('CN02','Chi nhánh kiểm thử','06:00','22:00')
