@@ -1,25 +1,10 @@
-import { CalendarOutlined, HomeOutlined, IdcardOutlined, UserOutlined } from '@ant-design/icons'
 import { Layout, Typography } from 'antd'
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
+import { memberMenu } from './member-menu'
 import { UserMenu } from './UserMenu'
 
 const { Header, Content } = Layout
-
-interface NavItem {
-  to: string
-  label: string
-  icon: ReactNode
-  /** false khi chức năng chưa làm. */
-  ready: boolean
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { to: '/member', label: 'Trang chủ', icon: <HomeOutlined />, ready: true },
-  { to: '/member/memberships', label: 'Gói tập', icon: <IdcardOutlined />, ready: false }, // F7
-  { to: '/member/classes', label: 'Lớp học', icon: <CalendarOutlined />, ready: false }, // F8
-  { to: '/member/pt', label: 'PT', icon: <UserOutlined />, ready: false }, // F9
-]
 
 /** Giao diện hội viên, ưu tiên điện thoại: nội dung một cột, thanh điều hướng cố định ở đáy. */
 export function MemberLayout() {
@@ -42,11 +27,11 @@ export function MemberLayout() {
         <Outlet />
       </Content>
       <nav aria-label="Điều hướng hội viên" style={bottomNavStyle}>
-        {NAV_ITEMS.map((item) =>
+        {memberMenu().map((item) =>
           item.ready ? (
             <NavLink
-              key={item.to}
-              to={item.to}
+              key={item.path}
+              to={item.path}
               end
               style={({ isActive }) => ({
                 ...navItemStyle,
@@ -58,7 +43,7 @@ export function MemberLayout() {
             </NavLink>
           ) : (
             <span
-              key={item.to}
+              key={item.path}
               title="Sẽ bổ sung"
               style={{ ...navItemStyle, color: 'rgba(0, 0, 0, 0.25)' }}
             >

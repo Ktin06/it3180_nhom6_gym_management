@@ -11,11 +11,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hust.nhom6.gym.common.dto.PageResponse;
-import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.NotFoundException;
 import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
@@ -29,24 +28,24 @@ import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.PackageStatus;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.PackageType;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.mapper.PackageMapper;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.repository.PackageRepository;
-import vn.edu.hust.nhom6.gym.feature.staff.service.StaffLookupService;
+import vn.edu.hust.nhom6.gym.feature.staff.service.StaffService;
 
+/**
+ * Danh mục gói tập (F3). Vai trò đã được controller kiểm tra bằng {@code @PreAuthorize}; service chỉ kiểm tra
+ * chi nhánh (gói phải thuộc chi nhánh của quản lý) và quy tắc nghiệp vụ, không lặp lại kiểm tra vai trò.
+ */
 @Service
 @RequiredArgsConstructor
 @Validated
 @Transactional(readOnly = true)
 public class PackageCatalogService {
     private final PackageRepository packages;
-    private final StaffLookupService staff;
+    private final StaffService staff;
     private final Validator validator;
 
     @Transactional
-    public PackageDeactivationDto deactivate(Authentication auth, @NotNull @Positive Long id) {
-        long userId = userId(auth);
-        if (auth.getAuthorities().stream().noneMatch(a -> "ROLE_BRANCH_MANAGER".equals(a.getAuthority()))) {
-            throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này.");
-        }
-        Long branchId = staff.activeBranchIdForUser(userId);
+    public PackageDeactivationDto deactivate(CurrentUser me, @NotNull @Positive Long id) {
+        Long branchId = staff.requireBranchId(me.userId());
         var item = findOwnedPackageForUpdate(id, branchId);
         if (item.getStatus() == PackageStatus.INACTIVE) {
             throw new BusinessRuleException("Gói tập này đã ở trạng thái ngừng bán.");
@@ -57,12 +56,8 @@ public class PackageCatalogService {
     }
 
     @Transactional
-    public PackageDetailDto update(Authentication auth, @Positive Long id, @NotNull @Valid UpdatePackageRequest request) {
-        long userId = userId(auth);
-        if (auth.getAuthorities().stream().noneMatch(a -> "ROLE_BRANCH_MANAGER".equals(a.getAuthority()))) {
-            throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này.");
-        }
-        Long branchId = staff.activeBranchIdForUser(userId);
+    public PackageDetailDto update(CurrentUser me, @Positive Long id, @NotNull @Valid UpdatePackageRequest request) {
+        Long branchId = staff.requireBranchId(me.userId());
         var item = findOwnedPackageForUpdate(id, branchId);
         var merged = new CreatePackageRequest(item.getCode(),
             request.has("name") ? request.getName() : item.getName(), item.getType(),
@@ -78,26 +73,17 @@ public class PackageCatalogService {
         return PackageMapper.detail(item);
     }
 
-    public PageResponse<PackageSummaryDto> list(Authentication auth, PackageType type,
+    public PageResponse<PackageSummaryDto> list(CurrentUser me, PackageType type,
             PackageStatus status, int page, int size) {
-        long userId = userId(auth);
-        var roles = auth.getAuthorities().stream().map(a -> a.getAuthority()).toList();
-        boolean allBranches = roles.contains("ROLE_SUPER_ADMIN");
-        if (!allBranches && !roles.contains("ROLE_BRANCH_MANAGER") && !roles.contains("ROLE_RECEPTIONIST")) {
-            throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này.");
-        }
-        Long branchId = allBranches ? null : staff.activeBranchIdForUser(userId);
+        boolean allBranches = me.isOwner();
+        Long branchId = allBranches ? null : staff.requireBranchId(me.userId());
         return PageResponse.of(packages.search(allBranches, branchId, type, status,
             PageRequest.of(page, size, Sort.by("type", "name", "id"))), PackageMapper::summary);
     }
 
     @Transactional
-    public PackageDetailDto create(Authentication auth, @NotNull @Valid CreatePackageRequest request) {
-        long userId = userId(auth);
-        if (auth.getAuthorities().stream().noneMatch(a -> "ROLE_BRANCH_MANAGER".equals(a.getAuthority()))) {
-            throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này.");
-        }
-        Long branchId = staff.activeBranchIdForUser(userId);
+    public PackageDetailDto create(CurrentUser me, @NotNull @Valid CreatePackageRequest request) {
+        Long branchId = staff.requireBranchId(me.userId());
         if (packages.existsByCode(request.code())) { throw duplicateCode(request.code()); }
         var item = GymPackage.create(branchId, request.code(), request.name(), request.type(),
             request.durationDays(), request.sessionCount(), request.price(), request.description());
@@ -126,19 +112,5 @@ public class PackageCatalogService {
 
     private ConflictException duplicateCode(String code) {
         return new ConflictException("Mã gói '" + code + "' đã tồn tại trên hệ thống.");
-    }
-
-    private long userId(Authentication auth) {
-        if (auth == null || !auth.isAuthenticated()) {
-            throw new UnauthorizedException("Thông tin xác thực không hợp lệ.");
-        }
-        long userId;
-        try {
-            userId = Long.parseLong(auth.getName());
-            if (userId <= 0) { throw new NumberFormatException(); }
-        } catch (NumberFormatException ex) {
-            throw new UnauthorizedException("Thông tin xác thực không hợp lệ.");
-        }
-        return userId;
     }
 }

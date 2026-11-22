@@ -8,27 +8,22 @@ import {
   ShopOutlined,
   TeamOutlined,
 } from '@ant-design/icons'
-import type { ReactNode } from 'react'
 import { HOME_PATH_BY_ROLE, type Role } from '../auth/roles'
+import { menuItemsForRole, type MenuItem } from './menu'
 
-export interface StaffMenuItem {
-  path: string
-  label: string
-  icon: ReactNode
-  roles: Role[]
-  /** false khi chức năng chưa làm; đổi thành true khi gộp chức năng tương ứng. */
-  ready: boolean
-}
+export type StaffMenuItem = MenuItem
 
 const home = (role: Role): StaffMenuItem => ({
   path: HOME_PATH_BY_ROLE[role],
   label: 'Trang chủ',
   icon: <HomeOutlined />,
-  roles: [role],
   ready: true,
 })
 
-/** Menu bên trái của nhân viên; mỗi vai trò chỉ thấy mục có trong `roles`. */
+/**
+ * Menu bên trái của nhân viên. Mục `ready: true` hiện cho vai trò được mở trang trong
+ * ROUTE_ACCESS; mục chưa làm hiện mờ cho các vai trò ghi tạm trong `roles`.
+ */
 export const STAFF_MENU: StaffMenuItem[] = [
   home('SUPER_ADMIN'),
   home('BRANCH_MANAGER'),
@@ -38,14 +33,12 @@ export const STAFF_MENU: StaffMenuItem[] = [
     path: '/members',
     label: 'Hội viên (F2)',
     icon: <TeamOutlined />,
-    roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'RECEPTIONIST'],
     ready: true,
   },
   {
     path: '/packages',
     label: 'Gói tập (F3)',
     icon: <IdcardOutlined />,
-    roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'RECEPTIONIST'],
     ready: true,
   },
   {
@@ -86,5 +79,5 @@ export const STAFF_MENU: StaffMenuItem[] = [
 ]
 
 export function menuForRole(role: Role): StaffMenuItem[] {
-  return STAFF_MENU.filter((item) => item.roles.includes(role))
+  return menuItemsForRole(STAFF_MENU, role)
 }

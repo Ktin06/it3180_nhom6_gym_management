@@ -2,10 +2,7 @@ package vn.edu.hust.nhom6.gym.feature.auth.service;
 
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -15,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.ForbiddenException;
-import vn.edu.hust.nhom6.gym.common.exception.NotFoundException;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
 import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.AuthMeResponse;
@@ -27,6 +23,7 @@ import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.UserStatus;
 import vn.edu.hust.nhom6.gym.feature.auth.repository.RefreshTokenRepository;
 import vn.edu.hust.nhom6.gym.feature.auth.repository.UserRepository;
+import vn.edu.hust.nhom6.gym.feature.member.service.MemberService;
 
 /**
  * Xử lý nghiệp vụ xác thực người dùng: đăng ký, đăng nhập, làm mới và đăng xuất (F1).
@@ -90,7 +87,7 @@ public class AuthService {
             .build();
         user = userRepository.save(user);
 
-        // Tạo hồ sơ hội viên qua MemberService (F2) theo ADR 0007; trùng SĐT sẽ ném 409
+        // Gọi thẳng service F2 (ADR 0007) trong cùng giao dịch; trùng SĐT ném 409 và hoàn tác cả tài khoản
         memberService.registerMemberProfile(
             user.getId(), request.fullName().trim(), normalizedPhone, request.dob(), request.gender());
 
@@ -246,43 +243,6 @@ public class AuthService {
             refreshTokenRepository.save(token);
         }
         return true;
-    }
-
-    /**
-     * Tra cứu email theo danh sách ID tài khoản (phục vụ tích hợp liên chức năng theo ADR 0007).
-     */
-    @Transactional(readOnly = true)
-    public Map<Long, String> getEmailsByUserIds(Collection<Long> userIds) {
-        if (userIds == null || userIds.isEmpty()) {
-            return Map.of();
-        }
-        return userRepository.findAllById(userIds).stream()
-            .collect(Collectors.toMap(User::getId, User::getEmail));
-    }
-
-    /**
-     * Ngừng hoạt động tài khoản (DISABLED) và thu hồi toàn bộ refresh token đang hiệu lực (UC-F1.6, UC-F2.4).
-     */
-    @Transactional
-    public void disableAccount(Long userId) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản liên kết."));
-        user.setStatus(UserStatus.DISABLED);
-        userRepository.saveAndFlush(user);
-        refreshTokenRepository.revokeAllByUserId(userId, OffsetDateTime.now());
-    }
-
-    /**
-     * Kích hoạt lại tài khoản đang ở trạng thái DISABLED; không mở khóa tài khoản đang LOCKED (UC-F1.6, UC-F2.4).
-     */
-    @Transactional
-    public void activateAccountIfDisabled(Long userId) {
-        userRepository.findById(userId).ifPresent(user -> {
-            if (user.getStatus() == UserStatus.DISABLED) {
-                user.setStatus(UserStatus.ACTIVE);
-                userRepository.saveAndFlush(user);
-            }
-        });
     }
 
     private String issueRefreshToken(User user) {

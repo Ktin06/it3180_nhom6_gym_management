@@ -9,6 +9,7 @@ public interface MemberRepository extends JpaRepository<Member, Long>, JpaSpecif
     boolean existsByPhone(String phone);
     boolean existsByPhoneAndIdNot(String phone, Long id);
     Optional<Member> findByIdAndDeletedAtIsNull(Long id);
+    Optional<Member> findByUserIdAndDeletedAtIsNull(Long userId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT m FROM Member m WHERE m.id = :id AND m.deletedAt IS NULL")

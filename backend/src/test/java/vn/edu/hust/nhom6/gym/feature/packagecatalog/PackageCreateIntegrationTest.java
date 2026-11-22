@@ -30,6 +30,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.doAnswer;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import vn.edu.hust.nhom6.gym.DatabaseCleaner;
 
 /** API thật, JWT F1, schema chuẩn, DB UNIQUE và rollback; không mock service nghiệp vụ. */
 @SpringBootTest
@@ -49,7 +50,7 @@ class PackageCreateIntegrationTest {
 
     @BeforeEach
     void fixtures() {
-        jdbc.execute("TRUNCATE TABLE users, packages RESTART IDENTITY CASCADE");
+        DatabaseCleaner.truncate(jdbc, "users", "packages");
         branch = jdbc.queryForObject("SELECT id FROM branches WHERE code='CN01'", Long.class);
         manager = jdbc.queryForObject("INSERT INTO users(email,password_hash,role) VALUES ('create-f3@example.com','test-only','BRANCH_MANAGER') RETURNING id", Long.class);
         jdbc.update("INSERT INTO staff(user_id,branch_id,staff_code,full_name) VALUES (?,?,'F3CREATE','Quản lý test')", manager, branch);
