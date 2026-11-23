@@ -26,6 +26,7 @@ export const ROUTE_ACCESS = {
   '/trainer': { roles: ['TRAINER'], includeChildren: true },
   '/member': { roles: ['MEMBER'], includeChildren: true },
   // Trang chức năng của nhân viên.
+  '/checkins': { roles: ['RECEPTIONIST', 'BRANCH_MANAGER'] }, // F4
   '/members': { roles: MEMBER_MANAGEMENT_ROLES }, // F2
   '/packages': { roles: MEMBER_MANAGEMENT_ROLES }, // F3
 } satisfies RouteAccessTable

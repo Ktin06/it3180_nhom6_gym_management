@@ -111,6 +111,44 @@ public class MemberService {
             "Tài khoản chưa gắn hồ sơ hội viên. Vui lòng liên hệ quầy lễ tân."));
     }
 
+    /**
+     * Khóa dòng hội viên ({@code SELECT ... FOR UPDATE}) đến hết giao dịch của nơi gọi (NF6, ADR 0005 mục 21).
+     *
+     * @throws NotFoundException (404) khi không có hồ sơ hoặc hồ sơ đã xóa mềm
+     */
+    @Transactional
+    public Member lockForUpdate(Long memberId) {
+        return members.findForUpdate(memberId)
+            .orElseThrow(() -> new NotFoundException("Hội viên không tồn tại trên hệ thống."));
+    }
+
+    /**
+     * Khóa dòng hội viên như {@link #lockForUpdate} nhưng <b>không chờ</b>: dòng đang bị giao dịch khác khóa (check-in,
+     * đặt lớp, đặt PT của cùng hội viên) thì ném ngay {@link org.springframework.dao.PessimisticLockingFailureException}.
+     * Chỉ dùng cho check-in tại quầy (SRS F4 Scenario 7: bên đến sau nhận 409 ngay); F8, F9 vẫn dùng
+     * {@link #lockForUpdate} (chờ).
+     *
+     * @throws NotFoundException (404) khi không có hồ sơ hoặc hồ sơ đã xóa mềm
+     */
+    @Transactional
+    public Member lockForUpdateNoWait(Long memberId) {
+        return members.findForUpdateNoWait(memberId)
+            .orElseThrow(() -> new NotFoundException("Hội viên không tồn tại trên hệ thống."));
+    }
+
+    /**
+     * Hồ sơ hội viên trong phạm vi nhân viên đang gọi: chủ chuỗi thấy mọi chi nhánh, quản lý và lễ tân chỉ thấy
+     * hội viên có chi nhánh gốc là chi nhánh của mình. Chức năng khác dùng khi nhân viên xem dữ liệu con của một
+     * hội viên (ví dụ danh sách gói). Nơi gọi chỉ được đọc entity trả về.
+     *
+     * @throws NotFoundException (404) không có hồ sơ, hoặc hồ sơ ngoài chi nhánh (giấu như F2)
+     */
+    public Member requireInStaffScope(CurrentUser actor, Long memberId) {
+        Member member = findMember(memberId);
+        requireBranch(actor, member);
+        return member;
+    }
+
     public MemberDetailResponse detail(CurrentUser actor, Long id) {
         Member member = findMember(id);
         if (actor.role() == UserRole.MEMBER) {

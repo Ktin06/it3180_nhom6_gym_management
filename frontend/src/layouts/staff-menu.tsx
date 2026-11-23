@@ -45,8 +45,7 @@ export const STAFF_MENU: StaffMenuItem[] = [
     path: '/checkins',
     label: 'Check-in (F4)',
     icon: <LoginOutlined />,
-    roles: ['RECEPTIONIST'],
-    ready: false,
+    ready: true,
   },
   {
     path: '/invoices',
