@@ -88,7 +88,7 @@ describe('auth-api', () => {
     })
   })
 
-  it('US-F1.5.1 API: forgotPassword và resetPassword gọi API công khai với publicRequest', async () => {
+  it('TC-F1.5.1-01e: forgotPassword và resetPassword gọi API công khai với publicRequest', async () => {
     const genericMessage =
       'Nếu email có trong hệ thống, bạn sẽ nhận được liên kết đặt lại mật khẩu.'
     post.mockResolvedValueOnce({ data: { message: genericMessage } })

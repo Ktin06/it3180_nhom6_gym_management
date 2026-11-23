@@ -162,7 +162,7 @@ describe('LoginPage', () => {
     expect(screen.queryByText('Trang hội viên')).not.toBeInTheDocument()
   })
 
-  it('US-F1.5.1 KB1: LoginPage có liên kết Quên mật khẩu? tới /quen-mat-khau và hiện thông báo đặt mật khẩu thành công', async () => {
+  it('TC-F1.5.1-01d: LoginPage có liên kết Quên mật khẩu? tới /quen-mat-khau và hiện thông báo đặt mật khẩu thành công', async () => {
     const user = userEvent.setup()
     render(
       <AuthContext.Provider

@@ -8,17 +8,17 @@
 
 | Chức năng | UC | US | AC | AC đã có TC | AC chưa có TC | TC |
 | --- | --- | --- | --- | --- | --- | --- |
-| F1 | 6 | 0 | 0 | 0 | 0 | 0 |
+| F1 | 6 | 1 | 6 | 6 | 0 | 26 |
 | F2 | 5 | 0 | 0 | 0 | 0 | 0 |
-| F3 | 5 | 6 | 43 | 31 | 12 | 63 |
+| F3 | 5 | 6 | 43 | 31 | 12 | 59 |
 | F4 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F5 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F6 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F7 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F8 | 9 | 0 | 0 | 0 | 0 | 0 |
-| F9 | 6 | 0 | 0 | 0 | 0 | 0 |
+| F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **56** | **6** | **43** | **31** | **12** | **63** |
+| **Tổng** | **57** | **7** | **49** | **37** | **12** | **85** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -57,6 +57,48 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 
 ## 4. Cây xuôi: chức năng → UC → US → AC → TC
 
+### F1
+
+- **UC-F1.1** Khách tự đăng ký tài khoản hội viên
+- **UC-F1.2** Đăng nhập bằng email
+- **UC-F1.3** Làm mới phiên đăng nhập (Refresh Token) & Đăng xuất
+- **UC-F1.4** Đổi mật khẩu
+- **UC-F1.5** Quên mật khẩu và đặt lại mật khẩu (Sprint 2)
+  - **US-F1.5.1** Quên và đặt lại mật khẩu (#121) ✅ mọi AC có TC
+    - AC-F1.5.1-01 Yêu cầu quên mật khẩu cho tài khoản ACTIVE tạo token băm SHA-256 hạn 30 phút, gửi email và trả 200 câu chung (BR-F1-01, BR-F1-08)
+      - TC-F1.5.1-01a `PasswordResetServiceTest#emailActiveTaoPasswordResetBamHan30PhutVaGuiEmail`
+      - TC-F1.5.1-01b `AuthControllerTest#quenMatKhauCongKhaiTra200CauChung`
+      - TC-F1.5.1-01c `features/auth/pages/ForgotPasswordPage.test.tsx › TC-F1.5.1-01c: nhập email ở /quen-mat-khau gửi email chuẩn h`
+      - TC-F1.5.1-01d `features/auth/pages/LoginPage.test.tsx › TC-F1.5.1-01d: LoginPage có liên kết Quên mật khẩu? tới /que`
+      - TC-F1.5.1-01e `features/auth/api/auth-api.test.ts › TC-F1.5.1-01e: forgotPassword và resetPassword gọi API công `
+      - TC-F1.5.1-01f `PasswordResetServiceTest#phatHanhTokenTheoUserIdVaThoiHan72GioChoS236`
+    - AC-F1.5.1-02 Không lộ email khi email không tồn tại, tài khoản không ACTIVE hoặc gửi email gặp lỗi (BR-F1-08)
+      - TC-F1.5.1-02a `PasswordResetServiceTest#khongLoEmailKhiKhongTonTaiHoacKhongActive`
+      - TC-F1.5.1-02b `PasswordResetServiceTest#guiEmailLoiVanKhongNemNgoaiLeVaKhongGhiTokenRaLog`
+    - AC-F1.5.1-03 Đặt lại mật khẩu với token hợp lệ cập nhật mật khẩu, ghi used_at, mở khóa tạm và thu hồi toàn bộ refresh token (BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08)
+      - TC-F1.5.1-03a `PasswordResetServiceTest#datLaiMatKhauDungTokenKhoaUserGhiUsedAtXoaKhoaTamVaThuHoiPhien`
+      - TC-F1.5.1-03b `AuthControllerTest#datLaiMatKhauHopLeCongKhaiTra204`
+      - TC-F1.5.1-03c `PasswordResetIntegrationTest#luongTronVenQuenVaDatLaiMatKhau`
+      - TC-F1.5.1-03d `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-03d: Trang Đặt mật khẩu gửi token và mật khẩu mới `
+      - TC-F1.5.1-03e `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-03e: /quen-mat-khau và /dat-lai-mat-khau là trang `
+    - AC-F1.5.1-04 Từ chối token sai, hết hạn sau 30 phút, đã dùng (kể cả gửi đồng thời) hoặc tài khoản không ACTIVE với 422 (BR-F1-08)
+      - TC-F1.5.1-04a `PasswordResetServiceTest#tokenSaiDaDungHoacHetHanTra422`
+      - TC-F1.5.1-04b `AuthControllerTest#datLaiMatKhauTokenLoiTra422`
+      - TC-F1.5.1-04c `PasswordResetIntegrationTest#tokenHetHanSau30PhutTra422VaEmailKhongTonTaiTra200`
+      - TC-F1.5.1-04d `PasswordResetIntegrationTest#datLaiMatKhauDongThoiCungMotTokenChiMotLanThanhCong`
+      - TC-F1.5.1-04e `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-04e: lỗi 422 hết hạn hoặc đã dùng hiển thị đúng câ`
+    - AC-F1.5.1-05 Từ chối dữ liệu đầu vào sai định dạng, thiếu token trên URL hoặc mật khẩu mới không đạt chuẩn S1 (BR-F1-01, BR-F1-03)
+      - TC-F1.5.1-05a `AuthControllerTest#quenMatKhauEmailSaiDinhDangTra400`
+      - TC-F1.5.1-05b `AuthControllerTest#datLaiMatKhauSaiChuanS1Tra400`
+      - TC-F1.5.1-05c `features/auth/pages/ForgotPasswordPage.test.tsx › TC-F1.5.1-05c: email sai định dạng ở trình duyệt không gọi A`
+      - TC-F1.5.1-05d `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-05d: thiếu hoặc rỗng token trên URL báo lỗi ngay, `
+      - TC-F1.5.1-05e `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-05e: kiểm tra chuẩn S1, hai mật khẩu không khớp kh`
+    - AC-F1.5.1-06 Gửi email qua API HTTPS của Brevo khi có BREVO_API_KEY và fallback sang LogEmailSender khi khóa rỗng (BR-F1-08)
+      - TC-F1.5.1-06a `BrevoEmailSenderTest#guiEmailQuaBrevoBangRestClientKhongGoiMangThat`
+      - TC-F1.5.1-06b `BrevoEmailSenderTest#khoaBrevoRongThiBeanLaLogEmailSender`
+      - TC-F1.5.1-06c `BrevoEmailSenderTest#coKhoaBrevoThiBeanLaBrevoEmailSender`
+- **UC-F1.6** Phân quyền truy cập API theo vai trò
+
 ### F3
 
 - **UC-F3.1** Xem danh mục gói tập
@@ -79,7 +121,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F3.1.1-05b `PackageControllerTest#rejectsDeniedRole`
       - TC-F3.1.1-05c `PackageControllerTest#missingAndInvalidBearerAreUnauthorized`
       - TC-F3.1.1-05d `PackageCatalogServiceTest#missingAssignmentNeverFallsBackToAllBranches`
-      - TC-F3.1.1-05e `PackageCatalogServiceTest#deniedRolesCannotQueryRepository`
     - AC-F3.1.1-06 Tham số lọc sai
       - TC-F3.1.1-06a `PackageControllerTest#rejectsInvalidQueryWithFieldErrors`
   - **US-F3.1.2** Bảng giá công khai (#130) ✅ mọi AC có TC
@@ -117,7 +158,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F3.2.1-06 Chỉ Quản lý chi nhánh được thêm gói
       - TC-F3.2.1-06a `PackageCreateIntegrationTest#onlyManagerCanCreate`
       - TC-F3.2.1-06b `PackageCreateIntegrationTest#missingTokenOrInactiveStaffCannotCreate`
-      - TC-F3.2.1-06c `PackageCatalogServiceTest#createChecksRoleEvenWhenCalledWithoutController`
 - **UC-F3.3** Sửa thông tin gói tập
   - **US-F3.3.1** Sửa thông tin gói tập (#132) ✅ mọi AC có TC
     - AC-F3.3.1-01 Sửa giá; gói đã bán không đổi (BR-F3-06)
@@ -141,7 +181,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F3.3.1-08 Chỉ Quản lý chi nhánh được sửa
       - TC-F3.3.1-08a `PackageUpdateIntegrationTest#deniedRolesCannotUpdate`
       - TC-F3.3.1-08b `PackageUpdateIntegrationTest#noTokenOrInactiveMissingStaffCannotUpdate`
-      - TC-F3.3.1-08c `PackageCatalogServiceTest#updateChecksRoleWithoutController`
 - **UC-F3.4** Ngừng bán gói tập
   - **US-F3.4.1** Ngừng bán gói tập (#133) ✅ mọi AC có TC
     - AC-F3.4.1-01 Ngừng bán gói đang bán (BR-F3-08)
@@ -162,7 +201,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F3.4.1-06d `PackageDeactivateIntegrationTest#missingAndBadTokenAre401`
       - TC-F3.4.1-06e `PackageDeactivateIntegrationTest#inactiveAndMissingStaffAre403`
       - TC-F3.4.1-06f `PackageDeactivateIntegrationTest#missingPackageIs404WithEmptyJsonBodyWithoutMutation`
-      - TC-F3.4.1-06g `PackageCatalogServiceTest#deactivateChecksRoleWithoutController`
 - **UC-F3.5** Bán gói tập tại quầy (đăng ký mới / gia hạn)
   - **US-F3.5.1** Bán và gia hạn gói tại quầy (#134)
     - AC-F3.5.1-01 Bán gói tạo hóa đơn chờ và gói chờ, giá lấy ở server (BR-F3-04, BR-F3-13) ❌ chưa có TC
@@ -183,6 +221,32 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 
 | TC | AC | US | UC | BR | Kiểm thử |
 | --- | --- | --- | --- | --- | --- |
+| TC-F1.5.1-01a | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#emailActiveTaoPasswordResetBamHan30PhutVaGuiEmail` |
+| TC-F1.5.1-01b | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `AuthControllerTest#quenMatKhauCongKhaiTra200CauChung` |
+| TC-F1.5.1-01c | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `features/auth/pages/ForgotPasswordPage.test.tsx › TC-F1.5.1-01c: nhập email ở /quen-mat-khau gửi email chuẩn h` |
+| TC-F1.5.1-01d | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `features/auth/pages/LoginPage.test.tsx › TC-F1.5.1-01d: LoginPage có liên kết Quên mật khẩu? tới /que` |
+| TC-F1.5.1-01e | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `features/auth/api/auth-api.test.ts › TC-F1.5.1-01e: forgotPassword và resetPassword gọi API công ` |
+| TC-F1.5.1-01f | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#phatHanhTokenTheoUserIdVaThoiHan72GioChoS236` |
+| TC-F1.5.1-02a | AC-F1.5.1-02 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#khongLoEmailKhiKhongTonTaiHoacKhongActive` |
+| TC-F1.5.1-02b | AC-F1.5.1-02 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#guiEmailLoiVanKhongNemNgoaiLeVaKhongGhiTokenRaLog` |
+| TC-F1.5.1-03a | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `PasswordResetServiceTest#datLaiMatKhauDungTokenKhoaUserGhiUsedAtXoaKhoaTamVaThuHoiPhien` |
+| TC-F1.5.1-03b | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `AuthControllerTest#datLaiMatKhauHopLeCongKhaiTra204` |
+| TC-F1.5.1-03c | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `PasswordResetIntegrationTest#luongTronVenQuenVaDatLaiMatKhau` |
+| TC-F1.5.1-03d | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-03d: Trang Đặt mật khẩu gửi token và mật khẩu mới ` |
+| TC-F1.5.1-03e | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-03e: /quen-mat-khau và /dat-lai-mat-khau là trang ` |
+| TC-F1.5.1-04a | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#tokenSaiDaDungHoacHetHanTra422` |
+| TC-F1.5.1-04b | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `AuthControllerTest#datLaiMatKhauTokenLoiTra422` |
+| TC-F1.5.1-04c | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetIntegrationTest#tokenHetHanSau30PhutTra422VaEmailKhongTonTaiTra200` |
+| TC-F1.5.1-04d | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetIntegrationTest#datLaiMatKhauDongThoiCungMotTokenChiMotLanThanhCong` |
+| TC-F1.5.1-04e | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-04e: lỗi 422 hết hạn hoặc đã dùng hiển thị đúng câ` |
+| TC-F1.5.1-05a | AC-F1.5.1-05 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08 | `AuthControllerTest#quenMatKhauEmailSaiDinhDangTra400` |
+| TC-F1.5.1-05b | AC-F1.5.1-05 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08 | `AuthControllerTest#datLaiMatKhauSaiChuanS1Tra400` |
+| TC-F1.5.1-05c | AC-F1.5.1-05 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08 | `features/auth/pages/ForgotPasswordPage.test.tsx › TC-F1.5.1-05c: email sai định dạng ở trình duyệt không gọi A` |
+| TC-F1.5.1-05d | AC-F1.5.1-05 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-05d: thiếu hoặc rỗng token trên URL báo lỗi ngay, ` |
+| TC-F1.5.1-05e | AC-F1.5.1-05 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-05e: kiểm tra chuẩn S1, hai mật khẩu không khớp kh` |
+| TC-F1.5.1-06a | AC-F1.5.1-06 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `BrevoEmailSenderTest#guiEmailQuaBrevoBangRestClientKhongGoiMangThat` |
+| TC-F1.5.1-06b | AC-F1.5.1-06 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `BrevoEmailSenderTest#khoaBrevoRongThiBeanLaLogEmailSender` |
+| TC-F1.5.1-06c | AC-F1.5.1-06 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `BrevoEmailSenderTest#coKhoaBrevoThiBeanLaBrevoEmailSender` |
 | TC-F3.1.1-01a | AC-F3.1.1-01 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#scopesRowsAndCountAndIgnoresClientBranch` |
 | TC-F3.1.1-02a | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#defaultActiveAndOrderingMatchContract` |
 | TC-F3.1.1-02b | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#inactiveFilterAndEmptyResults` |
@@ -196,7 +260,6 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.1.1-05b | AC-F3.1.1-05 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageControllerTest#rejectsDeniedRole` |
 | TC-F3.1.1-05c | AC-F3.1.1-05 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageControllerTest#missingAndInvalidBearerAreUnauthorized` |
 | TC-F3.1.1-05d | AC-F3.1.1-05 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogServiceTest#missingAssignmentNeverFallsBackToAllBranches` |
-| TC-F3.1.1-05e | AC-F3.1.1-05 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogServiceTest#deniedRolesCannotQueryRepository` |
 | TC-F3.1.1-06a | AC-F3.1.1-06 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageControllerTest#rejectsInvalidQueryWithFieldErrors` |
 | TC-F3.1.2-01a | AC-F3.1.2-01 | US-F3.1.2 | UC-F3.1 | BR-F3-01 | `PublicPackageIntegrationTest#guestSeesActiveBranchAndGlobalPackagesInDisplayOrder` |
 | TC-F3.1.2-01b | AC-F3.1.2-01 | US-F3.1.2 | UC-F3.1 | BR-F3-01 | `features/packages/pages/PublicPricingPage.test.tsx › TC-F3.1.2-01b: hiện giá từ server, thời hạn hoặc số buổi, qu` |
@@ -218,7 +281,6 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.2.1-05b | AC-F3.2.1-05 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCreateIntegrationTest#concurrentDuplicateCodeCreatesOneAndRollsBackOther` |
 | TC-F3.2.1-06a | AC-F3.2.1-06 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCreateIntegrationTest#onlyManagerCanCreate` |
 | TC-F3.2.1-06b | AC-F3.2.1-06 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCreateIntegrationTest#missingTokenOrInactiveStaffCannotCreate` |
-| TC-F3.2.1-06c | AC-F3.2.1-06 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCatalogServiceTest#createChecksRoleEvenWhenCalledWithoutController` |
 | TC-F3.3.1-01a | AC-F3.3.1-01 | US-F3.3.1 | UC-F3.3 | BR-F3-06, BR-F3-05, BR-F3-07 | `PackageUpdateIntegrationTest#priceOnlyKeepsOmittedFieldsAndAudit` |
 | TC-F3.3.1-01b | AC-F3.3.1-01 | US-F3.3.1 | UC-F3.3 | BR-F3-06, BR-F3-05, BR-F3-07 | `PackageUpdateIntegrationTest#historyIncludingPendingPurchaseRemainsIdentical` |
 | TC-F3.3.1-02a | AC-F3.3.1-02 | US-F3.3.1 | UC-F3.3 | BR-F3-07, BR-F3-05, BR-F3-06 | `PackageUpdateIntegrationTest#outsideBranchAndGlobalAre403WithoutMutation` |
@@ -232,7 +294,6 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.3.1-07a | AC-F3.3.1-07 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `PackageUpdateIntegrationTest#missingPackageIs404WithoutMutation` |
 | TC-F3.3.1-08a | AC-F3.3.1-08 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `PackageUpdateIntegrationTest#deniedRolesCannotUpdate` |
 | TC-F3.3.1-08b | AC-F3.3.1-08 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `PackageUpdateIntegrationTest#noTokenOrInactiveMissingStaffCannotUpdate` |
-| TC-F3.3.1-08c | AC-F3.3.1-08 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `PackageCatalogServiceTest#updateChecksRoleWithoutController` |
 | TC-F3.4.1-01a | AC-F3.4.1-01 | US-F3.4.1 | UC-F3.4 | BR-F3-08, BR-F3-07, BR-F3-09 | `PackageDeactivateIntegrationTest#deactivatesWithNoBodyOrEmptyJsonWithoutChangingOtherFields` |
 | TC-F3.4.1-02a | AC-F3.4.1-02 | US-F3.4.1 | UC-F3.4 | BR-F3-08, BR-F3-07, BR-F3-09 | `PackageDeactivateIntegrationTest#preservesAllHistoricalRows` |
 | TC-F3.4.1-03a | AC-F3.4.1-03 | US-F3.4.1 | UC-F3.4 | BR-F3-09, BR-F3-07, BR-F3-08 | `PackageCatalogIntegrationTest#inactiveFilterAndEmptyResults` |
@@ -245,36 +306,42 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.4.1-06d | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#missingAndBadTokenAre401` |
 | TC-F3.4.1-06e | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#inactiveAndMissingStaffAre403` |
 | TC-F3.4.1-06f | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#missingPackageIs404WithEmptyJsonBodyWithoutMutation` |
-| TC-F3.4.1-06g | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageCatalogServiceTest#deactivateChecksRoleWithoutController` |
 
 ## 6. Kiểm thử chưa mang mã TC
 
-Có 225 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
+Có 264 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
 
 | File | Số kiểm thử |
 | --- | --- |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/common/exception/GlobalExceptionHandlerTest.java` | 9 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/common/mail/EmailSenderTest.java` | 4 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/common/scheduling/SchedulingConfigTest.java` | 4 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/common/security/CurrentUserTest.java` | 6 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/common/time/VnTimeTest.java` | 5 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/common/util/PhoneUtilsTest.java` | 2 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/DatabaseCleanerTest.java` | 3 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/DatabaseConstraintsTest.java` | 21 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AccountServiceTest.java` | 2 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthControllerTest.java` | 18 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthServiceTest.java` | 20 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthServiceTest.java` | 17 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthSessionConcurrencyIntegrationTest.java` | 3 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/JwtSecurityIntegrationTest.java` | 9 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/JwtTokenServiceTest.java` | 5 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/F1RegistrationIntegrationTest.java` | 13 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberApiIntegrationTest.java` | 25 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberBranchAccessIntegrationTest.java` | 8 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberPhoneSupportTest.java` | 6 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberServiceTest.java` | 9 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/service/integration/F1MemberAccountAdapterTest.java` | 5 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/service/integration/F1MemberRegistrationAdapterTest.java` | 2 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberServiceTest.java` | 11 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/StaffBranchIntegrationTest.java` | 8 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PackageCatalogServiceTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PackageMapperTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PublicPackageIntegrationTest.java` | 1 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/staff/StaffServiceTest.java` | 4 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/systemconfig/SystemConfigServiceTest.java` | 4 |
+| `frontend/src/app/router.test.ts` | 3 |
 | `frontend/src/auth/account-change.test.tsx` | 1 |
 | `frontend/src/auth/AuthProvider.test.tsx` | 9 |
 | `frontend/src/auth/cookie-operation-queue.test.ts` | 1 |
-| `frontend/src/auth/redirect.test.ts` | 4 |
+| `frontend/src/auth/redirect.test.ts` | 7 |
 | `frontend/src/auth/session-store.test.ts` | 3 |
 | `frontend/src/features/auth/api/auth-api.test.ts` | 4 |
 | `frontend/src/features/auth/api/validation.test.ts` | 3 |
@@ -285,6 +352,9 @@ Có 225 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `frontend/src/features/members/pages/MembersPage.test.tsx` | 6 |
 | `frontend/src/features/packages/api/packages.test.ts` | 1 |
 | `frontend/src/features/shared/use-remote-query.test.ts` | 2 |
+| `frontend/src/layouts/member-menu.test.ts` | 2 |
+| `frontend/src/layouts/staff-menu.test.ts` | 2 |
 | `frontend/src/layouts/UserMenu.test.tsx` | 1 |
 | `frontend/src/routes/ProtectedRoute.test.tsx` | 5 |
+| `frontend/src/routes/route-access.test.ts` | 5 |
 | `frontend/src/services/http.test.ts` | 9 |

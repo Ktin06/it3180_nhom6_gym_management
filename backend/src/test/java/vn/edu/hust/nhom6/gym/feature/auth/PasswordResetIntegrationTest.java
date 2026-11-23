@@ -85,7 +85,7 @@ class PasswordResetIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F1.5.1 KB3: đi trọn forgot -> lấy token từ EmailSender giả -> reset -> login mật khẩu mới 200, cũ 401, thu hồi mọi refresh token và mở khóa tạm")
+    @DisplayName("TC-F1.5.1-03c: đi trọn forgot -> lấy token từ EmailSender giả -> reset -> login mật khẩu mới 200, cũ 401, thu hồi mọi refresh token và mở khóa tạm")
     void luongTronVenQuenVaDatLaiMatKhau() throws Exception {
         // 1. Tạo tài khoản và 2 phiên đăng nhập
         Cookie refreshCookie1 = registerMember("Nguyễn Văn Quên", TEST_EMAIL, TEST_PHONE, "OldPass123");
@@ -188,7 +188,7 @@ class PasswordResetIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F1.5.1 KB3: token hết hạn sau 30 phút theo Clock bị từ chối 422 và email không tồn tại vẫn trả 200")
+    @DisplayName("TC-F1.5.1-04c: token hết hạn sau 30 phút theo Clock bị từ chối 422 và email không tồn tại vẫn trả 200")
     void tokenHetHanSau30PhutTra422VaEmailKhongTonTaiTra200() throws Exception {
         // Email không tồn tại -> 200 câu chung, không gửi email
         mockMvc.perform(post("/api/v1/auth/forgot-password")
@@ -223,7 +223,7 @@ class PasswordResetIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F1.5.1 KB3: hai yêu cầu đặt lại mật khẩu dùng cùng một token đồng thời chỉ có đúng 1 yêu cầu thành công (204), yêu cầu còn lại trả 422")
+    @DisplayName("TC-F1.5.1-04d: hai yêu cầu đặt lại mật khẩu dùng cùng một token đồng thời chỉ có đúng 1 yêu cầu thành công (204), yêu cầu còn lại trả 422")
     void datLaiMatKhauDongThoiCungMotTokenChiMotLanThanhCong() throws Exception {
         registerMember("Nguyễn Văn Quên", TEST_EMAIL, TEST_PHONE, "OldPass123");
         mockMvc.perform(post("/api/v1/auth/forgot-password")

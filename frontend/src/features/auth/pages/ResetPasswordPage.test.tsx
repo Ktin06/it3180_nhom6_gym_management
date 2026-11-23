@@ -99,7 +99,7 @@ describe('ResetPasswordPage', () => {
     http.defaults.adapter = originalAdapter
   })
 
-  it('US-F1.5.1 KB2: Trang Đặt mật khẩu gửi token và mật khẩu mới hợp lệ rồi chuyển về /login kèm thông báo', async () => {
+  it('TC-F1.5.1-03d: Trang Đặt mật khẩu gửi token và mật khẩu mới hợp lệ rồi chuyển về /login kèm thông báo', async () => {
     let resolveReset!: (value: { status: number; data?: unknown }) => void
     const calls = setupResetPasswordHttp(
       () =>
@@ -142,29 +142,31 @@ describe('ResetPasswordPage', () => {
     ])
   })
 
-  it.each([
-    { label: 'không có tham số token', url: '/dat-lai-mat-khau' },
-    { label: 'tham số token rỗng', url: '/dat-lai-mat-khau?token=%20%20' },
-  ])(
-    'US-F1.5.1 E1: Thiếu token trên URL ($label) báo lỗi ngay, hiện nút Gửi lại liên kết và không gọi API',
-    async ({ url }) => {
-      const onResetPassword = vi.fn(async () => ({ status: 204 }))
-      const calls = setupResetPasswordHttp(onResetPassword)
-      const user = userEvent.setup()
-      renderResetPasswordFlow(url)
+  describe('TC-F1.5.1-05d: thiếu hoặc rỗng token trên URL báo lỗi ngay, hiện nút Gửi lại liên kết và không gọi API', () => {
+    it.each([
+      { label: 'không có tham số token', url: '/dat-lai-mat-khau' },
+      { label: 'tham số token rỗng', url: '/dat-lai-mat-khau?token=%20%20' },
+    ])(
+      'Thiếu token trên URL ($label) báo lỗi ngay, hiện nút Gửi lại liên kết và không gọi API',
+      async ({ url }) => {
+        const onResetPassword = vi.fn(async () => ({ status: 204 }))
+        const calls = setupResetPasswordHttp(onResetPassword)
+        const user = userEvent.setup()
+        renderResetPasswordFlow(url)
 
-      expect(screen.getByRole('heading', { name: 'Đặt mật khẩu' })).toBeInTheDocument()
-      expect(screen.getByRole('alert')).toHaveTextContent(/liên kết.*không hợp lệ|thiếu/i)
-      expect(screen.queryByLabelText('Mật khẩu mới')).not.toBeInTheDocument()
-      expect(onResetPassword).not.toHaveBeenCalled()
-      expect(calls).toHaveLength(0)
+        expect(screen.getByRole('heading', { name: 'Đặt mật khẩu' })).toBeInTheDocument()
+        expect(screen.getByRole('alert')).toHaveTextContent(/liên kết.*không hợp lệ|thiếu/i)
+        expect(screen.queryByLabelText('Mật khẩu mới')).not.toBeInTheDocument()
+        expect(onResetPassword).not.toHaveBeenCalled()
+        expect(calls).toHaveLength(0)
 
-      await user.click(screen.getByRole('button', { name: 'Gửi lại liên kết' }))
-      expect(await screen.findByText('Trang quên mật khẩu')).toBeInTheDocument()
-    },
-  )
+        await user.click(screen.getByRole('button', { name: 'Gửi lại liên kết' }))
+        expect(await screen.findByText('Trang quên mật khẩu')).toBeInTheDocument()
+      },
+    )
+  })
 
-  it('US-F1.5.1 E1: Kiểm tra chuẩn S1, hai mật khẩu không khớp không gọi API và gắn lỗi 400 vào trường', async () => {
+  it('TC-F1.5.1-05e: kiểm tra chuẩn S1, hai mật khẩu không khớp không gọi API và gắn lỗi 400 vào trường', async () => {
     const onResetPassword = vi.fn(async () => ({
       status: 400,
       data: {
@@ -222,7 +224,7 @@ describe('ResetPasswordPage', () => {
     expect(calls).toHaveLength(1)
   })
 
-  it('US-F1.5.1 E2: Lỗi 422 hết hạn hoặc đã dùng hiển thị đúng câu detail của API kèm nút Gửi lại liên kết dẫn về /quen-mat-khau', async () => {
+  it('TC-F1.5.1-04e: lỗi 422 hết hạn hoặc đã dùng hiển thị đúng câu detail của API kèm nút Gửi lại liên kết dẫn về /quen-mat-khau', async () => {
     const expiredDetail = 'Liên kết đã hết hạn hoặc đã được dùng.'
     setupResetPasswordHttp(async () => ({
       status: 422,
@@ -244,27 +246,29 @@ describe('ResetPasswordPage', () => {
     expect(await screen.findByText('Trang quên mật khẩu')).toBeInTheDocument()
   })
 
-  it.each([
-    { path: '/quen-mat-khau', heading: 'Quên mật khẩu' },
-    { path: '/dat-lai-mat-khau?token=abc', heading: 'Đặt mật khẩu' },
-  ])('US-F1.5.1 route: $path là trang công khai trong AuthLayout', async ({ path, heading }) => {
-    const memoryRouter = createMemoryRouter(routes, { initialEntries: [path] })
-    render(
-      <AuthContext.Provider
-        value={{
-          status: 'anonymous',
-          user: null,
-          sessionError: null,
-          login: vi.fn(),
-          register: vi.fn(),
-          logout: vi.fn(),
-          retrySession: vi.fn(),
-        }}
-      >
-        <RouterProvider router={memoryRouter} />
-      </AuthContext.Provider>,
-    )
+  describe('TC-F1.5.1-03e: /quen-mat-khau và /dat-lai-mat-khau là trang công khai trong AuthLayout', () => {
+    it.each([
+      { path: '/quen-mat-khau', heading: 'Quên mật khẩu' },
+      { path: '/dat-lai-mat-khau?token=abc', heading: 'Đặt mật khẩu' },
+    ])('$path là trang công khai trong AuthLayout', async ({ path, heading }) => {
+      const memoryRouter = createMemoryRouter(routes, { initialEntries: [path] })
+      render(
+        <AuthContext.Provider
+          value={{
+            status: 'anonymous',
+            user: null,
+            sessionError: null,
+            login: vi.fn(),
+            register: vi.fn(),
+            logout: vi.fn(),
+            retrySession: vi.fn(),
+          }}
+        >
+          <RouterProvider router={memoryRouter} />
+        </AuthContext.Provider>,
+      )
 
-    expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
+      expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
+    })
   })
 })

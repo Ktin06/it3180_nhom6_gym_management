@@ -123,9 +123,42 @@ Chức năng **F1 – Tài khoản và phân quyền** cung cấp cơ chế xác
 
 - **Tác nhân:** Người dùng quên mật khẩu, hoặc Hội viên có hồ sơ tại quầy vừa được lễ tân tạo tài khoản (UC-F2.2).
 - **Luồng chính:**
-  1. Người dùng nhập `email` yêu cầu đặt lại mật khẩu.
-  2. Nếu `email` tồn tại và đang `ACTIVE`, hệ thống sinh token ngẫu nhiên, lưu mã băm SHA-256 vào bảng `password_resets` (`token_hash`, `expires_at`), gửi đường dẫn đặt lại mật khẩu qua email.
-  3. Khi người dùng gửi token kèm mật khẩu mới hợp lệ: kiểm tra `used_at IS NULL` và `expires_at > now()`, cập nhật `users.password_hash`, đánh dấu `password_resets.used_at = now()`, và thu hồi mọi `refresh_tokens` của tài khoản đó.
+  1. Người dùng nhập `email` yêu cầu đặt lại mật khẩu (`POST /api/v1/auth/forgot-password`).
+  2. Nếu `email` tồn tại và đang `ACTIVE`, hệ thống sinh token ngẫu nhiên, lưu mã băm SHA-256 vào bảng `password_resets` (`token_hash`, `expires_at` = `now + 30 phút`), gửi đường dẫn `${FRONTEND_BASE_URL}/dat-lai-mat-khau?token=...` qua API HTTPS của Brevo (hoặc ghi log ở máy cá nhân khi `BREVO_API_KEY` rỗng theo ADR 0013). Dù email có tồn tại hay không, tài khoản không `ACTIVE` hay gửi email lỗi, API vẫn trả `200 OK` cùng một câu thông báo chung.
+  3. Khi người dùng gửi token kèm mật khẩu mới hợp lệ (`POST /api/v1/auth/reset-password`): khóa dòng `password_resets` và `users` (`SELECT ... FOR UPDATE`), kiểm tra `used_at IS NULL`, `expires_at > now()` và `users.status = 'ACTIVE'`, cập nhật `users.password_hash`, xóa khóa đăng nhập tạm (`failed_login_count = 0`, `locked_until = null`), đánh dấu `password_resets.used_at = now()`, và thu hồi mọi `refresh_tokens` của tài khoản đó.
+
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F1.5.1: Quên và đặt lại mật khẩu
+- **User story:** Là **người dùng quên mật khẩu**, tôi muốn **nhận email đặt lại mật khẩu**, để **lấy lại quyền truy cập mà không cần nhờ quầy**.
+- **BR liên quan:** BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08; S1, S2, S4, S6
+- **Version / Sprint:** v1 / Sprint 2
+- **Issue:** #121
+- **Tiêu chí chấp nhận:**
+  - **AC-F1.5.1-01: Yêu cầu quên mật khẩu cho tài khoản ACTIVE tạo token băm SHA-256 hạn 30 phút, gửi email và trả 200 câu chung** (BR-F1-01, BR-F1-08)
+    - **Given** Người dùng mở `/quen-mat-khau` (từ liên kết **Quên mật khẩu?** trên `/login`) hoặc gọi công khai `POST /api/v1/auth/forgot-password` với email của tài khoản đang `ACTIVE` (kể cả viết hoa hoặc có khoảng trắng đầu/cuối)
+    - **When** Hệ thống xử lý yêu cầu quên mật khẩu (hoặc phát hành token theo `userId` và thời hạn `ttl` 72 giờ cho luồng tạo tài khoản S2-36)
+    - **Then** Hệ thống chuẩn hóa email về chữ thường, lưu duy nhất mã băm SHA-256 vào `password_resets` với `expires_at = now + 30 phút`, gửi email chứa liên kết `${FRONTEND_BASE_URL}/dat-lai-mat-khau?token=<rawToken>` và trả `200 OK` với câu thông báo chung *"Nếu email có trong hệ thống, bạn sẽ nhận được liên kết đặt lại mật khẩu."* (giao diện luôn gọi bằng `publicRequest` và hiển thị nguyên câu chung từ API)
+  - **AC-F1.5.1-02: Không lộ email khi email không tồn tại, tài khoản không ACTIVE hoặc gửi email gặp lỗi** (BR-F1-08)
+    - **Given** Email chưa tồn tại trong `users`, hoặc tài khoản đang `DISABLED`/`LOCKED`, hoặc dịch vụ gửi email Brevo gặp sự cố
+    - **When** Người dùng gửi `POST /api/v1/auth/forgot-password`
+    - **Then** Hệ thống không tạo bản ghi `password_resets` và không gửi email nếu email không tồn tại hoặc tài khoản không `ACTIVE`; nếu gửi email gặp lỗi thì bắt ngoại lệ và ghi log `ERROR` không chứa token thô; trong mọi trường hợp API vẫn trả `200 OK` cùng câu thông báo chung
+  - **AC-F1.5.1-03: Đặt lại mật khẩu với token hợp lệ cập nhật mật khẩu, ghi used_at, mở khóa tạm và thu hồi toàn bộ refresh token** (BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08)
+    - **Given** Tài khoản `ACTIVE` có token đặt lại mật khẩu còn hạn, chưa dùng (kể cả tài khoản đang bị khóa tạm 15 phút và có nhiều phiên `refresh_tokens` đang hiệu lực)
+    - **When** Người dùng mở trang công khai `/dat-lai-mat-khau?token=...` (tiêu đề chung **Đặt mật khẩu**) hoặc gọi `POST /api/v1/auth/reset-password` với token hợp lệ và mật khẩu mới đạt chuẩn S1
+    - **Then** Hệ thống khóa dòng `password_resets` và `users`, trả `204 No Content`, cập nhật `users.password_hash`, đặt `failed_login_count = 0`, `locked_until = null`, ghi `password_resets.used_at = now` và thu hồi toàn bộ `refresh_tokens` của tài khoản; mật khẩu mới đăng nhập được ngay (`200`), mật khẩu cũ và các refresh token cũ bị từ chối (`401`); giao diện chuyển về `/login` kèm thông báo đặt mật khẩu thành công
+  - **AC-F1.5.1-04: Từ chối token sai, hết hạn sau 30 phút, đã dùng (kể cả gửi đồng thời) hoặc tài khoản không ACTIVE với 422** (BR-F1-08)
+    - **Given** Token không tồn tại, đã quá hạn 30 phút (`expires_at <= now`), đã được sử dụng (`used_at IS NOT NULL`), tài khoản đã bị vô hiệu hóa (`DISABLED`), hoặc có 2 yêu cầu gửi đồng thời dùng cùng một token
+    - **When** Người dùng gửi `POST /api/v1/auth/reset-password`
+    - **Then** Hệ thống từ chối với `422 Unprocessable Content` kèm thông báo *"Liên kết đã hết hạn hoặc đã được dùng."* (khi gửi đồng thời cùng một token thì chỉ đúng 1 yêu cầu thành công `204`, yêu cầu còn lại nhận `422`), không thu hồi refresh token và không đổi mật khẩu; giao diện hiển thị đúng câu `detail` từ API kèm nút **Gửi lại liên kết** dẫn về `/quen-mat-khau`
+  - **AC-F1.5.1-05: Từ chối dữ liệu đầu vào sai định dạng, thiếu token trên URL hoặc mật khẩu mới không đạt chuẩn S1** (BR-F1-01, BR-F1-03)
+    - **Given** Người dùng ở `/quen-mat-khau`, `/dat-lai-mat-khau` hoặc gọi trực tiếp API
+    - **When** Nhập email sai định dạng, mở `/dat-lai-mat-khau` thiếu/rỗng tham số `token`, nhập mật khẩu mới dưới 8 ký tự, thiếu chữ cái hoặc chữ số, vượt quá 72 byte UTF-8, hoặc ô nhập lại mật khẩu không khớp
+    - **Then** Trình duyệt chặn gửi (hoặc báo lỗi thiếu token ngay kèm nút **Gửi lại liên kết** mà không gọi API); nếu gọi thẳng API với dữ liệu sai định dạng thì backend trả `400 Bad Request` kèm danh sách lỗi theo từng trường (`errors.email`, `errors.token`, `errors.newPassword`) và giao diện gắn lỗi vào đúng ô nhập
+  - **AC-F1.5.1-06: Gửi email qua API HTTPS của Brevo khi có BREVO_API_KEY và fallback sang LogEmailSender khi khóa rỗng** (BR-F1-08)
+    - **Given** Ứng dụng khởi chạy với hoặc không có cấu hình `app.mail.brevo-api-key` (`BREVO_API_KEY`) ở profile mặc định hoặc `staging`
+    - **When** Spring chọn bean `EmailSender` và gửi email đặt lại mật khẩu
+    - **Then** Khi có `BREVO_API_KEY` hợp lệ, bean là `BrevoEmailSender` gửi `POST https://api.brevo.com/v3/smtp/email` kèm header `api-key` và JSON body chuẩn Brevo; khi khóa rỗng hoặc toàn khoảng trắng ở profile khác `staging` thì bean là `LogEmailSender`; ở profile `staging` mà khóa rỗng thì không tạo `LogEmailSender` để tránh lộ liên kết ra log
 
 ---
 
@@ -145,12 +178,13 @@ Chức năng **F1 – Tài khoản và phân quyền** cung cấp cơ chế xác
 ## 4. Quy tắc nghiệp vụ và bảo mật áp dụng
 
 Chi tiết đối chiếu với [Bản chốt phạm vi](../ban-chot-pham-vi.md):
-- **Chỉ đăng nhập bằng email:** Email luôn chuyển về chữ thường trước khi lưu và tìm kiếm (`CHECK email = lower(email)`).
-- **Chống chiếm đoạt hồ sơ qua số điện thoại (S3):** Khi khách tự đăng ký mà số điện thoại đã thuộc một hồ sơ hội viên có sẵn, hệ thống **bắt buộc từ chối (409)** và hướng dẫn liên hệ quầy; tuyệt đối không tự gắn tài khoản mới vào hồ sơ cũ.
-- **Mật khẩu (S1):** Băm bằng bcrypt (`BCryptPasswordEncoder`), tối thiểu 8 ký tự gồm cả chữ cái và chữ số.
-- **Phiên đăng nhập (S2, ADR 0008):** Access Token (JWT) hết hạn sau **15 phút**; Refresh Token lưu mã băm SHA-256 trong bảng `refresh_tokens`, truyền qua cookie `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`.
-- **Phân quyền ở Backend (S3):** Mọi API nghiệp vụ dưới `/api/v1/**` (trừ các endpoint đăng ký/đăng nhập/làm mới/công khai) đều kiểm tra vai trò và quyền sở hữu dữ liệu ở backend.
-- **Khóa đăng nhập tạm thời (S4):** Khóa 15 phút (`locked_until`) sau 5 lần nhập sai mật khẩu liên tiếp (`failed_login_count`).
+- **BR-F1-01 – Chỉ đăng nhập bằng email:** Email luôn chuyển về chữ thường trước khi lưu và tìm kiếm (`CHECK email = lower(email)`).
+- **BR-F1-02 – Chống chiếm đoạt hồ sơ qua số điện thoại (S3):** Khi khách tự đăng ký mà số điện thoại đã thuộc một hồ sơ hội viên có sẵn, hệ thống **bắt buộc từ chối (409)** và hướng dẫn liên hệ quầy; tuyệt đối không tự gắn tài khoản mới vào hồ sơ cũ.
+- **BR-F1-03 – Mật khẩu (S1):** Băm bằng bcrypt (`BCryptPasswordEncoder`), tối thiểu 8 ký tự gồm cả chữ cái và chữ số, không vượt quá 72 byte UTF-8.
+- **BR-F1-04 – Phiên đăng nhập (S2, ADR 0008):** Access Token (JWT) hết hạn sau **15 phút**; Refresh Token lưu mã băm SHA-256 trong bảng `refresh_tokens`, truyền qua cookie `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`. Khi đổi mật khẩu hoặc đặt lại mật khẩu, toàn bộ refresh token đang hiệu lực của tài khoản bị thu hồi ngay trong cùng giao dịch.
+- **BR-F1-05 – Phân quyền ở Backend (S3):** Mọi API nghiệp vụ dưới `/api/v1/**` (trừ các endpoint đăng ký/đăng nhập/làm mới/công khai) đều kiểm tra vai trò và quyền sở hữu dữ liệu ở backend.
+- **BR-F1-06 – Khóa đăng nhập tạm thời (S4):** Khóa 15 phút (`locked_until`) sau 5 lần nhập sai mật khẩu liên tiếp (`failed_login_count`).
+- **BR-F1-08 – Liên kết đặt lại mật khẩu dùng một lần và không lộ email (UC-F1.5, ADR 0013):** Token đặt lại mật khẩu chỉ lưu mã băm SHA-256 trong `password_resets` với hạn 30 phút (quên mật khẩu) hoặc 72 giờ (tạo tài khoản lần đầu cho hồ sơ có sẵn), chỉ dùng một lần (`used_at`), gửi qua API HTTPS của Brevo khi có `BREVO_API_KEY`. Yêu cầu quên mật khẩu luôn trả `200 OK` cùng câu thông báo chung dù email không tồn tại, không `ACTIVE` hay gửi email gặp sự cố, và tuyệt đối không ghi token ra log lỗi.
 
 ---
 
@@ -176,6 +210,8 @@ Chi tiết đối chiếu với [Bản chốt phạm vi](../ban-chot-pham-vi.md)
 | `POST /api/v1/auth/logout` | Công khai / Đã đăng nhập | Thu hồi Refresh Token và xóa cookie | `204` |
 | `GET /api/v1/auth/me` | Mọi vai trò đã đăng nhập | Lấy thông tin tài khoản hiện tại từ JWT | `200`, `401` |
 | `POST /api/v1/auth/change-password` | Mọi vai trò đã đăng nhập | Đổi mật khẩu và thu hồi toàn bộ refresh token | `204`, `400`, `401`, `422` |
+| `POST /api/v1/auth/forgot-password` | Công khai | Yêu cầu gửi liên kết đặt lại mật khẩu qua email (câu thông báo chung) | `200`, `400` |
+| `POST /api/v1/auth/reset-password` | Công khai | Đặt lại mật khẩu bằng token dùng một lần, mở khóa tạm và thu hồi toàn bộ refresh token | `204`, `400`, `422` |
 
 ### 6.1. Định dạng JSON Request / Response chuẩn (dùng chung Backend & Frontend)
 

@@ -94,7 +94,7 @@ class PasswordResetServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.5.1 KB1: email ACTIVE tạo password_resets băm hạn 30 phút, gửi email chứa liên kết và trả 200 câu chung")
+    @DisplayName("TC-F1.5.1-01a: email ACTIVE tạo password_resets băm hạn 30 phút, gửi email chứa liên kết")
     void emailActiveTaoPasswordResetBamHan30PhutVaGuiEmail() {
         User user = createUser(10L, "member@example.com", UserStatus.ACTIVE);
         when(userRepository.findByEmail("member@example.com")).thenReturn(Optional.of(user));
@@ -125,7 +125,7 @@ class PasswordResetServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.5.1 C1: không lộ email khi email không tồn tại hoặc tài khoản không ACTIVE")
+    @DisplayName("TC-F1.5.1-02a: không lộ email khi email không tồn tại hoặc tài khoản không ACTIVE")
     void khongLoEmailKhiKhongTonTaiHoacKhongActive() {
         when(userRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());
         passwordResetService.forgotPassword(new ForgotPasswordRequest("missing@example.com"));
@@ -143,7 +143,7 @@ class PasswordResetServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.5.1 C1: khi Brevo gửi email lỗi vẫn không ném ngoại lệ và ghi log ERROR không chứa token")
+    @DisplayName("TC-F1.5.1-02b: khi Brevo gửi email lỗi vẫn không ném ngoại lệ và ghi log ERROR không chứa token")
     void guiEmailLoiVanKhongNemNgoaiLeVaKhongGhiTokenRaLog(CapturedOutput output) {
         User user = createUser(15L, "member@example.com", UserStatus.ACTIVE);
         when(userRepository.findByEmail("member@example.com")).thenReturn(Optional.of(user));
@@ -162,7 +162,7 @@ class PasswordResetServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.5.1 KB3: đặt lại mật khẩu đúng token trả 204, ghi used_at, thu hồi mọi refresh token và mở khóa tạm")
+    @DisplayName("TC-F1.5.1-03a: đặt lại mật khẩu đúng token khóa user, ghi used_at, thu hồi mọi refresh token và mở khóa tạm")
     void datLaiMatKhauDungTokenKhoaUserGhiUsedAtXoaKhoaTamVaThuHoiPhien() {
         User user = createUser(20L, "member@example.com", UserStatus.ACTIVE);
         user.setFailedLoginCount(5);
@@ -200,7 +200,7 @@ class PasswordResetServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.5.1 KB3: token đã dùng, hết hạn hoặc sai trả 422 Liên kết đã hết hạn hoặc đã được dùng")
+    @DisplayName("TC-F1.5.1-04a: token đã dùng, hết hạn, sai hoặc tài khoản DISABLED trả 422")
     void tokenSaiDaDungHoacHetHanTra422() {
         // 1. Token không tồn tại
         when(passwordResetRepository.findByTokenHashForUpdate(TokenHashUtil.sha256Hex("unknown-token")))
@@ -263,7 +263,7 @@ class PasswordResetServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.5.1 issue: phát hành token theo userId và thời hạn 72 giờ cho S2-36")
+    @DisplayName("TC-F1.5.1-01f: phát hành token theo userId và thời hạn 72 giờ cho S2-36")
     void phatHanhTokenTheoUserIdVaThoiHan72GioChoS236() {
         User user = createUser(30L, "newmember@example.com", UserStatus.ACTIVE);
         when(userRepository.findById(30L)).thenReturn(Optional.of(user));

@@ -31,7 +31,7 @@ class BrevoEmailSenderTest {
         );
 
     @Test
-    @DisplayName("US-F1.5.1 ADR0013: gửi email qua Brevo gửi đúng POST /v3/smtp/email, header api-key và JSON body")
+    @DisplayName("TC-F1.5.1-06a: gửi email qua Brevo gửi đúng POST /v3/smtp/email, header api-key và JSON body")
     void guiEmailQuaBrevoBangRestClientKhongGoiMangThat() {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
@@ -65,7 +65,7 @@ class BrevoEmailSenderTest {
     }
 
     @Test
-    @DisplayName("US-F1.5.1 ADR0013: khi khóa Brevo rỗng hoặc toàn khoảng trắng thì bean EmailSender là LogEmailSender")
+    @DisplayName("TC-F1.5.1-06b: khi khóa Brevo rỗng hoặc toàn khoảng trắng thì bean EmailSender là LogEmailSender")
     void khoaBrevoRongThiBeanLaLogEmailSender() {
         // Không khai báo khóa
         contextRunner.run(ctx -> {
@@ -89,7 +89,7 @@ class BrevoEmailSenderTest {
     }
 
     @Test
-    @DisplayName("US-F1.5.1 ADR0013: khi có khóa Brevo hợp lệ thì bean EmailSender là BrevoEmailSender, bỏ LogEmailSender")
+    @DisplayName("TC-F1.5.1-06c: khi có khóa Brevo hợp lệ thì bean EmailSender là BrevoEmailSender, bỏ LogEmailSender")
     void coKhoaBrevoThiBeanLaBrevoEmailSender() {
         contextRunner.withPropertyValues("app.mail.brevo-api-key=fake-brevo-test-key")
             .run(ctx -> {

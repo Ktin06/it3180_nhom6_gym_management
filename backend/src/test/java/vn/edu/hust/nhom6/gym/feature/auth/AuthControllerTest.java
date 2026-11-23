@@ -341,7 +341,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("US-F1.5.1 KB1: yêu cầu quên mật khẩu công khai trả 200 với câu thông báo chung")
+    @DisplayName("TC-F1.5.1-01b: yêu cầu quên mật khẩu công khai trả 200 với câu thông báo chung")
     void quenMatKhauCongKhaiTra200CauChung() throws Exception {
         ForgotPasswordRequest request = new ForgotPasswordRequest("member@example.com");
 
@@ -356,7 +356,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("US-F1.5.1 C1: yêu cầu quên mật khẩu sai định dạng email trả 400 kèm errors")
+    @DisplayName("TC-F1.5.1-05a: yêu cầu quên mật khẩu sai định dạng email trả 400 kèm errors")
     void quenMatKhauEmailSaiDinhDangTra400() throws Exception {
         mockMvc.perform(post("/api/v1/auth/forgot-password")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -370,7 +370,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("US-F1.5.1 KB3: đặt lại mật khẩu hợp lệ công khai trả 204 No Content")
+    @DisplayName("TC-F1.5.1-03b: đặt lại mật khẩu hợp lệ công khai trả 204 No Content")
     void datLaiMatKhauHopLeCongKhaiTra204() throws Exception {
         ResetPasswordRequest request = new ResetPasswordRequest("valid-reset-token", "NewPass123");
 
@@ -383,7 +383,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("US-F1.5.1 S1: mật khẩu mới sai chuẩn S1 hoặc thiếu token trả 400 kèm errors")
+    @DisplayName("TC-F1.5.1-05b: mật khẩu mới sai chuẩn S1 hoặc thiếu token trả 400 kèm errors")
     void datLaiMatKhauSaiChuanS1Tra400() throws Exception {
         // Thiếu token và mật khẩu dưới 8 ký tự
         mockMvc.perform(post("/api/v1/auth/reset-password")
@@ -415,7 +415,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("US-F1.5.1 KB3: đặt lại mật khẩu với token hết hạn hoặc đã dùng trả 422")
+    @DisplayName("TC-F1.5.1-04b: đặt lại mật khẩu với token hết hạn hoặc đã dùng trả 422")
     void datLaiMatKhauTokenLoiTra422() throws Exception {
         ResetPasswordRequest request = new ResetPasswordRequest("expired-token", "NewPass123");
         doThrow(new BusinessRuleException(PasswordResetService.INVALID_OR_EXPIRED_TOKEN_MESSAGE))

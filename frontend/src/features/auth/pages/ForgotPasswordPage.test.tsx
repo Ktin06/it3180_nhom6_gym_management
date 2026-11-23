@@ -84,58 +84,60 @@ describe('ForgotPasswordPage', () => {
     http.defaults.adapter = originalAdapter
   })
 
-  it.each([
-    {
-      label: 'email có trong hệ thống',
-      inputEmail: '  HV@EXAMPLE.COM  ',
-      normalized: 'hv@example.com',
-    },
-    {
-      label: 'email không tồn tại trong hệ thống',
-      inputEmail: 'khongtontai@example.com',
-      normalized: 'khongtontai@example.com',
-    },
-  ])(
-    'US-F1.5.1 KB1: Nhập $label ở /quen-mat-khau gửi email chuẩn hóa và luôn hiện câu chung từ API',
-    async ({ inputEmail, normalized }) => {
-      let resolveRequest!: (value: { status: number; data?: unknown }) => void
-      const calls = setupForgotPasswordHttp(
-        () =>
-          new Promise((resolve) => {
-            resolveRequest = resolve
-          }),
-      )
-      const user = userEvent.setup()
-      renderForgotPasswordPage()
+  describe('TC-F1.5.1-01c: nhập email ở /quen-mat-khau gửi email chuẩn hóa và luôn hiện câu chung từ API', () => {
+    it.each([
+      {
+        label: 'email có trong hệ thống',
+        inputEmail: '  HV@EXAMPLE.COM  ',
+        normalized: 'hv@example.com',
+      },
+      {
+        label: 'email không tồn tại trong hệ thống',
+        inputEmail: 'khongtontai@example.com',
+        normalized: 'khongtontai@example.com',
+      },
+    ])(
+      'Nhập $label ở /quen-mat-khau gửi email chuẩn hóa và luôn hiện câu chung từ API',
+      async ({ inputEmail, normalized }) => {
+        let resolveRequest!: (value: { status: number; data?: unknown }) => void
+        const calls = setupForgotPasswordHttp(
+          () =>
+            new Promise((resolve) => {
+              resolveRequest = resolve
+            }),
+        )
+        const user = userEvent.setup()
+        renderForgotPasswordPage()
 
-      const emailInput = screen.getByLabelText('Email')
-      fireEvent.change(emailInput, { target: { value: inputEmail } })
-      const submitButton = screen.getByRole('button', { name: 'Gửi liên kết đặt lại mật khẩu' })
-      await user.click(submitButton)
+        const emailInput = screen.getByLabelText('Email')
+        fireEvent.change(emailInput, { target: { value: inputEmail } })
+        const submitButton = screen.getByRole('button', { name: 'Gửi liên kết đặt lại mật khẩu' })
+        await user.click(submitButton)
 
-      await waitFor(() => {
-        expect(submitButton).toHaveAttribute('aria-busy', 'true')
-        expect(emailInput).toBeDisabled()
-      })
+        await waitFor(() => {
+          expect(submitButton).toHaveAttribute('aria-busy', 'true')
+          expect(emailInput).toBeDisabled()
+        })
 
-      resolveRequest({ status: 200, data: { message: GENERIC_MESSAGE } })
+        resolveRequest({ status: 200, data: { message: GENERIC_MESSAGE } })
 
-      expect(await screen.findByRole('alert')).toHaveTextContent(GENERIC_MESSAGE)
-      expect(calls).toEqual([
-        {
-          url: '/auth/forgot-password',
-          method: 'post',
-          data: { email: normalized },
-          authorization: undefined,
-        },
-      ])
+        expect(await screen.findByRole('alert')).toHaveTextContent(GENERIC_MESSAGE)
+        expect(calls).toEqual([
+          {
+            url: '/auth/forgot-password',
+            method: 'post',
+            data: { email: normalized },
+            authorization: undefined,
+          },
+        ])
 
-      const backLink = screen.getByRole('link', { name: 'Quay lại đăng nhập' })
-      expect(backLink).toHaveAttribute('href', '/login')
-    },
-  )
+        const backLink = screen.getByRole('link', { name: 'Quay lại đăng nhập' })
+        expect(backLink).toHaveAttribute('href', '/login')
+      },
+    )
+  })
 
-  it('US-F1.5.1 E1: Email sai định dạng ở trình duyệt không gọi API và lỗi 400 từ API gắn vào trường email', async () => {
+  it('TC-F1.5.1-05c: email sai định dạng ở trình duyệt không gọi API và lỗi 400 từ API gắn vào trường email', async () => {
     const onForgotPassword = vi.fn(async () => ({
       status: 400,
       data: {
