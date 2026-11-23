@@ -454,7 +454,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.2.1 E1: sai mật khẩu lần 1 đến 4 trả 401 câu chung và tăng bộ đếm")
+    @DisplayName("TC-F1.2.1-01a: sai mật khẩu lần 1 đến 4 trả 401 câu chung và tăng bộ đếm")
     void saiMatKhauLan1Den4Tra401CauChungVaTangBoDem() {
         LoginRequest request = new LoginRequest("member@example.com", "WrongPass123");
         User user = User.builder()
@@ -481,7 +481,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.2.1 E1: lần sai thứ 5 khóa 15 phút")
+    @DisplayName("TC-F1.2.1-02a: lần sai thứ 5 khóa 15 phút")
     void lanSaiThu5Khoa15Phut() {
         LoginRequest request = new LoginRequest("member@example.com", "WrongPass123");
         User user = User.builder()
@@ -507,7 +507,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.2.1 E2: đang khóa nhập đúng mật khẩu vẫn trả 403 kèm thời gian còn lại")
+    @DisplayName("TC-F1.2.1-03a: đang khóa nhập đúng mật khẩu vẫn trả 403 kèm thời gian còn lại")
     void dangKhoaNhapDungMatKhauVanTra403KemThoiGianConLai() {
         LoginRequest request = new LoginRequest("member@example.com", "Password123");
         OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-20T03:00:00Z");
@@ -533,7 +533,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.2.1 E2: hết khóa thì đăng nhập lại được")
+    @DisplayName("TC-F1.2.1-04a: hết khóa thì đăng nhập lại được")
     void hetKhoaThiDangNhapLaiDuoc() {
         LoginRequest request = new LoginRequest("member@example.com", "Password123");
         OffsetDateTime lockTime = OffsetDateTime.parse("2026-11-20T03:00:00Z");
@@ -563,7 +563,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.2.1 KB: đăng nhập đúng đặt lại bộ đếm về 0 và xóa locked_until")
+    @DisplayName("TC-F1.2.1-04b: đăng nhập đúng đặt lại bộ đếm về 0 và xóa locked_until")
     void dangNhapDungDatLaiBoDemVe0VaXoaLockedUntil() {
         LoginRequest request = new LoginRequest("member@example.com", "Password123");
         OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-20T03:00:00Z");
@@ -592,7 +592,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.2.1 E1: không lộ email")
+    @DisplayName("TC-F1.2.1-01b: không lộ email khi email không tồn tại")
     void khongLoEmailKhiEmailKhongTonTai() {
         LoginRequest request = new LoginRequest("nonexistent@example.com", "Password123");
 
@@ -607,7 +607,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.2.1 E1: tài khoản DISABLED nhập sai mật khẩu trả 401, không phải 403")
+    @DisplayName("TC-F1.2.1-01c: tài khoản DISABLED nhập sai mật khẩu trả 401, không phải 403")
     void taiKhoanDisabledNhapSaiMatKhauTra401KhongPhai403() {
         LoginRequest request = new LoginRequest("disabled@example.com", "WrongPass123");
         OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-20T03:00:00Z");
@@ -632,7 +632,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.2.1 E2: hết khóa rồi nhập sai thì bộ đếm tính lại từ 1 và không khóa lại ngay")
+    @DisplayName("TC-F1.2.1-04c: hết khóa rồi nhập sai thì bộ đếm tính lại từ 1 và không khóa lại ngay")
     void hetKhoaRoiNhapSaiThiBoDemTinhLaiTu1() {
         LoginRequest request = new LoginRequest("member@example.com", "WrongPass123");
         OffsetDateTime lockTime = OffsetDateTime.parse("2026-11-20T03:00:00Z");

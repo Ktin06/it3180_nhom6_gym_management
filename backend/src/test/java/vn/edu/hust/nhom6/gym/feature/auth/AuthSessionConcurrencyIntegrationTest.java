@@ -157,7 +157,7 @@ class AuthSessionConcurrencyIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F1.2.1 S4: đếm đúng khi đồng thời")
+    @DisplayName("TC-F1.2.1-02b: 5 request đăng nhập sai đồng thời tăng bộ đếm đúng 5 và khóa tài khoản")
     void namRequestDangNhapSaiDongThoiTangBoDemDung5VaKhoaTaiKhoan() throws Exception {
         registerMember("Người dùng Khóa Tạm", "lockout.concurrent@example.com", "0933333333");
 

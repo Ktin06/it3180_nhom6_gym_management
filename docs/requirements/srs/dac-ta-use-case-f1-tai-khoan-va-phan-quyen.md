@@ -84,6 +84,31 @@ Chức năng **F1 – Tài khoản và phân quyền** cung cấp cơ chế xác
   - **E2 – Tài khoản bị khóa tạm thời do nhập sai quá 5 lần (403 Forbidden):** Khi `locked_until > now()`, từ chối đăng nhập và trả `ProblemDetail` (403) thông báo tài khoản đang bị khóa tạm thời kèm thời gian mở khóa còn lại (không dùng mã `423 Locked` vì `GlobalExceptionHandler` thống nhất trả `403 Forbidden`).
   - **E3 – Tài khoản bị khóa hoặc ngừng hoạt động (403 Forbidden):** Khi `status` là `LOCKED` hoặc `DISABLED`, trả `ProblemDetail` (403): *"Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên."*
 
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F1.2.1: Đăng nhập bằng email và khóa tạm sau 5 lần sai
+- **User story:** Là **người dùng có tài khoản**, tôi muốn **đăng nhập bằng email và mật khẩu, đồng thời tài khoản tự khóa tạm 15 phút sau 5 lần nhập sai liên tiếp**, để **vào đúng không gian làm việc theo vai trò và chống dò mật khẩu**.
+- **BR liên quan:** BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06; S1, S2, S4
+- **Version / Sprint:** v1 / Sprint 2
+- **Issue:** #118
+- **Tiêu chí chấp nhận:**
+  - **AC-F1.2.1-01: Nhập sai mật khẩu từ lần 1 đến lần 4 trả 401 thông báo chung, tăng bộ đếm và không lộ email tồn tại** (BR-F1-01, BR-F1-03, BR-F1-06)
+    - **Given** Người dùng gửi `POST /api/v1/auth/login` với mật khẩu không khớp (kể cả mật khẩu vượt quá 72 byte UTF-8), hoặc gửi email không tồn tại, hoặc tài khoản `DISABLED`/`LOCKED` nhưng nhập sai mật khẩu
+    - **When** Hệ thống đối chiếu thông tin đăng nhập từ lần sai thứ 1 đến lần thứ 4 liên tiếp
+    - **Then** Hệ thống luôn chạy `BCryptPasswordEncoder.matches` (dùng mã băm giả khi email không tồn tại) rồi trả `401 Unauthorized` với câu thông báo chung *"Email hoặc mật khẩu không chính xác."* (không trả `403` cho tài khoản `DISABLED` khi mật khẩu sai); nếu email tồn tại thì tăng `users.failed_login_count` lên tương ứng `1..4` và giữ `users.locked_until = null`
+  - **AC-F1.2.1-02: Nhập sai mật khẩu lần thứ 5 liên tiếp (kể cả gửi đồng thời) đặt bộ đếm bằng 5 và khóa tạm 15 phút** (BR-F1-06)
+    - **Given** Tài khoản đã có `failed_login_count = 4` và gửi thêm 1 lần mật khẩu sai, hoặc có 5 yêu cầu đăng nhập sai mật khẩu gửi đồng thời vào cùng một email
+    - **When** Hệ thống khóa dòng tài khoản (`SELECT ... FOR UPDATE`) và ghi nhận lần sai thứ 5
+    - **Then** Hệ thống trả `401 Unauthorized` với câu thông báo chung, đồng thời lưu `users.failed_login_count = 5` và `users.locked_until = now + 15 phút`
+  - **AC-F1.2.1-03: Từ chối mọi yêu cầu đăng nhập trong thời gian đang bị khóa tạm 15 phút, kể cả nhập đúng mật khẩu** (BR-F1-06)
+    - **Given** Tài khoản đang có `users.locked_until > now`
+    - **When** Người dùng gửi `POST /api/v1/auth/login` với mật khẩu đúng hoặc sai
+    - **Then** Hệ thống từ chối ngay ở bước kiểm tra khóa tạm với `403 Forbidden` và thông báo *"Tài khoản đang bị khóa tạm thời do nhập sai mật khẩu nhiều lần. Vui lòng thử lại sau N phút."* (`N` làm tròn lên theo phút, tối thiểu 1 phút), không tăng thêm `failed_login_count` và không cấp token
+  - **AC-F1.2.1-04: Tự mở khóa sau 15 phút và đặt lại bộ đếm khi đăng nhập thành công hoặc tính lại từ 1 khi nhập sai** (BR-F1-04, BR-F1-06)
+    - **Given** Tài khoản từng có `failed_login_count` từ 1 đến 4, hoặc đã hết thời gian khóa tạm (`users.locked_until <= now`)
+    - **When** Người dùng gửi `POST /api/v1/auth/login` với mật khẩu đúng (hoặc nhập sai mật khẩu sau khi đã hết hạn khóa tạm)
+    - **Then** Nếu mật khẩu đúng và tài khoản `ACTIVE`, hệ thống trả `200 OK` kèm cặp Access Token + Refresh Token, đặt lại `failed_login_count = 0`, xóa `locked_until = null` và cập nhật `last_login_at = now`; nếu đã hết hạn khóa tạm mà lại nhập sai mật khẩu thì bộ đếm tính lại từ `1` và xóa `locked_until = null` (không khóa lại ngay ở lần sai đầu tiên)
+
 ---
 
 ### 3.3. UC-F1.3: Làm mới phiên đăng nhập (Refresh Token) & Đăng xuất
@@ -145,12 +170,12 @@ Chức năng **F1 – Tài khoản và phân quyền** cung cấp cơ chế xác
 ## 4. Quy tắc nghiệp vụ và bảo mật áp dụng
 
 Chi tiết đối chiếu với [Bản chốt phạm vi](../ban-chot-pham-vi.md):
-- **Chỉ đăng nhập bằng email:** Email luôn chuyển về chữ thường trước khi lưu và tìm kiếm (`CHECK email = lower(email)`).
-- **Chống chiếm đoạt hồ sơ qua số điện thoại (S3):** Khi khách tự đăng ký mà số điện thoại đã thuộc một hồ sơ hội viên có sẵn, hệ thống **bắt buộc từ chối (409)** và hướng dẫn liên hệ quầy; tuyệt đối không tự gắn tài khoản mới vào hồ sơ cũ.
-- **Mật khẩu (S1):** Băm bằng bcrypt (`BCryptPasswordEncoder`), tối thiểu 8 ký tự gồm cả chữ cái và chữ số.
-- **Phiên đăng nhập (S2, ADR 0008):** Access Token (JWT) hết hạn sau **15 phút**; Refresh Token lưu mã băm SHA-256 trong bảng `refresh_tokens`, truyền qua cookie `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`.
-- **Phân quyền ở Backend (S3):** Mọi API nghiệp vụ dưới `/api/v1/**` (trừ các endpoint đăng ký/đăng nhập/làm mới/công khai) đều kiểm tra vai trò và quyền sở hữu dữ liệu ở backend.
-- **Khóa đăng nhập tạm thời (S4):** Khóa 15 phút (`locked_until`) sau 5 lần nhập sai mật khẩu liên tiếp (`failed_login_count`).
+- **BR-F1-01 – Chỉ đăng nhập bằng email:** Email luôn chuyển về chữ thường trước khi lưu và tìm kiếm (`CHECK email = lower(email)`).
+- **BR-F1-02 – Chống chiếm đoạt hồ sơ qua số điện thoại (S3):** Khi khách tự đăng ký mà số điện thoại đã thuộc một hồ sơ hội viên có sẵn, hệ thống **bắt buộc từ chối (409)** và hướng dẫn liên hệ quầy; tuyệt đối không tự gắn tài khoản mới vào hồ sơ cũ.
+- **BR-F1-03 – Mật khẩu (S1):** Băm bằng bcrypt (`BCryptPasswordEncoder`), tối thiểu 8 ký tự gồm cả chữ cái và chữ số, không vượt quá 72 byte UTF-8.
+- **BR-F1-04 – Phiên đăng nhập (S2, ADR 0008):** Access Token (JWT) hết hạn sau **15 phút**; Refresh Token lưu mã băm SHA-256 trong bảng `refresh_tokens`, truyền qua cookie `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`.
+- **BR-F1-05 – Phân quyền ở Backend (S3):** Mọi API nghiệp vụ dưới `/api/v1/**` (trừ các endpoint đăng ký/đăng nhập/làm mới/công khai) đều kiểm tra vai trò và quyền sở hữu dữ liệu ở backend.
+- **BR-F1-06 – Khóa đăng nhập tạm thời (S4):** Khóa 15 phút (`locked_until`) sau 5 lần nhập sai mật khẩu liên tiếp (`failed_login_count`).
 
 ---
 
