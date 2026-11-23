@@ -2,10 +2,12 @@ package vn.edu.hust.nhom6.gym.feature.member.controller;
 
 import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import java.net.URI;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -24,6 +26,7 @@ import vn.edu.hust.nhom6.gym.feature.member.service.*;
 @RequiredArgsConstructor
 public class MemberController {
     private final MemberService members;
+    private final MemberAvatarService avatars;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_MANAGER','RECEPTIONIST')")
@@ -63,5 +66,27 @@ public class MemberController {
             @PathVariable @Positive(message = "ID hội viên phải lớn hơn 0") Long id,
             @Valid @RequestBody UpdateMemberRequest request) {
         return members.update(CurrentUser.from(auth), id, request);
+    }
+
+    @GetMapping(value = "/{id}/avatar", produces = MediaType.IMAGE_JPEG_VALUE)
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_MANAGER','RECEPTIONIST','MEMBER')")
+    @Operation(summary = "Xem ảnh đại diện hội viên (US-F2.4.2)",
+        description = "Cùng phạm vi quyền với xem hồ sơ; trả JPEG, chưa có ảnh hoặc ngoài phạm vi trả 404.")
+    public ResponseEntity<byte[]> getAvatar(Authentication auth,
+            @PathVariable @Positive(message = "ID hội viên phải lớn hơn 0") Long id) {
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG)
+            .body(avatars.getAvatar(CurrentUser.from(auth), id));
+    }
+
+    @PutMapping(value = "/{id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_MANAGER','RECEPTIONIST')")
+    @Operation(summary = "Tải lên hoặc thay ảnh đại diện hội viên (US-F2.4.2)",
+        description = "Multipart trường file: JPEG/PNG tối đa 5 MiB, mỗi cạnh tối đa 8000 px; "
+            + "thu nhỏ cạnh dài nhất tối đa 256 px, lưu JPEG tối đa 100 KiB. Trả 200 với body rỗng.")
+    public ResponseEntity<Void> uploadAvatar(Authentication auth,
+            @PathVariable @Positive(message = "ID hội viên phải lớn hơn 0") Long id,
+            @RequestParam("file") MultipartFile file) {
+        avatars.uploadAvatar(CurrentUser.from(auth), id, file);
+        return ResponseEntity.ok().build();
     }
 }

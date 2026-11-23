@@ -111,21 +111,33 @@ public class MemberService {
             "Tài khoản chưa gắn hồ sơ hội viên. Vui lòng liên hệ quầy lễ tân."));
     }
 
-    public MemberDetailResponse detail(CurrentUser actor, Long id) {
+    /** Quyền đọc dùng chung cho hồ sơ và ảnh: ngoài phạm vi trả 404 (S3, ADR 0011). */
+    public Member requireReadable(CurrentUser actor, Long id) {
         Member member = findMember(id);
         if (actor.role() == UserRole.MEMBER) {
             if (!actor.userId().equals(member.getUserId())) { throw notFound(); }
         } else {
             requireBranch(actor, member);
         }
-        return response(member);
+        return member;
+    }
+
+    /** Khóa dòng cha trước khi thay hồ sơ hoặc ảnh, kể cả khi ảnh chưa tồn tại (NF6). */
+    @Transactional
+    public Member requireEditableForUpdate(CurrentUser actor, Long id) {
+        Member member = members.findForUpdate(id).orElseThrow(MemberService::notFound);
+        requireBranch(actor, member);
+        return member;
+    }
+
+    public MemberDetailResponse detail(CurrentUser actor, Long id) {
+        return response(requireReadable(actor, id));
     }
 
     @Transactional
     public MemberDetailResponse update(CurrentUser actor, Long id, UpdateMemberRequest request) {
         // Tuần tự hóa cập nhật cùng hồ sơ để trạng thái member và user không lệch khi hai người cùng sửa.
-        Member member = members.findForUpdate(id).orElseThrow(MemberService::notFound);
-        requireBranch(actor, member);
+        Member member = requireEditableForUpdate(actor, id);
         String phone = MemberPhoneSupport.normalize(request.phone());
         if (members.existsByPhoneAndIdNot(phone, id)) {
             throw new ConflictException(PHONE_TAKEN_BY_OTHER);

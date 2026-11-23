@@ -122,6 +122,43 @@ Chức năng **F2 – Hồ sơ hội viên** giúp lễ tân, quản lý chi nh�
 
 ---
 
+#### H. User story và tiêu chí chấp nhận cho ảnh đại diện
+
+##### US-F2.4.2: Ảnh đại diện hội viên
+
+- **User story:** Là lễ tân, tôi muốn tải ảnh đại diện cho hồ sơ để đối chiếu đúng người khi check-in, chống mượn thẻ.
+- **Issue:** [#127](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/127); API: [#183](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/183); giao diện: #203.
+- **BR liên quan:** BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04; nguồn: ADR 0011, S2, S3, S5 và NF6. Các AC dưới đây cụ thể hóa quyết định đã chốt, không đổi phạm vi các US F2 khác.
+
+- **AC-F2.4.2-01: Tải và chuẩn hóa ảnh hợp lệ** (BR-F2-01, BR-F2-02)
+  - **Given** nhân viên có quyền sửa hồ sơ và một file JPEG/PNG hợp lệ, không rỗng, tối đa 5 MiB (5.242.880 byte), mỗi cạnh tối đa 8.000 px,
+  - **When** gửi `PUT /api/v1/members/{id}/avatar` với multipart trường `file`,
+  - **Then** trả `200` với body rỗng; lưu JPEG trong `member_avatars`, giữ tỷ lệ với cạnh dài nhất ≤ 256 px, dung lượng ≤ 102.400 byte, đúng `uploaded_by`; không phóng lớn ảnh nhỏ và chuyển nền trong suốt thành trắng.
+- **AC-F2.4.2-02: Thay ảnh trên cùng bản ghi** (BR-F2-03)
+  - **Given** hồ sơ đã có ảnh và nhân viên có quyền sửa,
+  - **When** tải ảnh mới hợp lệ, kể cả hai yêu cầu cùng lúc,
+  - **Then** mỗi hội viên vẫn chỉ có một bản ghi ảnh, cập nhật nội dung và người tải gần nhất; các thao tác được tuần tự hóa bằng khóa dòng hội viên. Tải ảnh sai bị từ chối thì ảnh cũ giữ nguyên.
+- **AC-F2.4.2-03: Từ chối file không hợp lệ** (BR-F2-01)
+  - **Given** nhân viên có quyền sửa hồ sơ,
+  - **When** tải file rỗng, không phải JPEG/PNG thực, ảnh hỏng, file quá 5 MiB hoặc một cạnh quá 8.000 px,
+  - **Then** trả `400` dạng `ProblemDetail`, không lưu hoặc thay ảnh; lỗi vượt dung lượng có `errors.file`. Định dạng được kiểm tra từ nội dung, kích thước được đọc trước khi giải nén bitmap.
+- **AC-F2.4.2-04: Xem ảnh theo quyền hồ sơ** (BR-F2-04)
+  - **Given** hội viên đã có ảnh,
+  - **When** chủ chuỗi, quản lý/lễ tân cùng chi nhánh hoặc hội viên sở hữu hồ sơ gọi `GET /api/v1/members/{id}/avatar`,
+  - **Then** trả `200` và đúng nội dung nhị phân `image/jpeg`; nhân viên khác chi nhánh hoặc hội viên khác nhận `404`. TRAINER hiện nhận `403`, cùng giới hạn của API hồ sơ trên main; quyền học viên của TRAINER không thuộc task này.
+- **AC-F2.4.2-05: Chỉ nhân viên có quyền sửa mới đổi ảnh** (BR-F2-04)
+  - **Given** người gọi đã đăng nhập,
+  - **When** gửi PUT ảnh,
+  - **Then** chủ chuỗi được thao tác toàn chuỗi, quản lý/lễ tân chỉ trong chi nhánh đang hoạt động của mình; ngoài chi nhánh trả `404`, nhân viên không có phân công hợp lệ trả `403`, MEMBER/TRAINER trả `403`; bị từ chối thì dữ liệu giữ nguyên.
+- **AC-F2.4.2-06: Chưa có ảnh hoặc không có hồ sơ** (BR-F2-04)
+  - **Given** người gọi có vai trò phù hợp,
+  - **When** GET hồ sơ chưa có ảnh hoặc GET/PUT hồ sơ không tồn tại hay đã xóa mềm,
+  - **Then** trả `404` và không tạo dữ liệu ảnh mới.
+- **AC-F2.4.2-07: Xác thực và kiểm tra request** (S2, S5)
+  - **Given** hai endpoint ảnh,
+  - **When** chưa đăng nhập, **Then** trả `401`;
+  - **When** người có quyền gửi ID không phải số nguyên dương hoặc PUT thiếu trường `file`, **Then** trả `400`, không thay dữ liệu.
+
 ### 3.5. UC-F2.5: Ghi nhận và xem lịch sử chỉ số cơ thể (`body_metrics`)
 
 - **Tác nhân:** Huấn luyện viên (`TRAINER`), Lễ tân (`RECEPTIONIST`), Quản lý chi nhánh (`BRANCH_MANAGER`), Hội viên (`MEMBER` – chỉ xem chỉ số của chính mình).
@@ -147,6 +184,15 @@ Chức năng **F2 – Hồ sơ hội viên** giúp lễ tân, quản lý chi nh�
    - Trên `GET /api/v1/members/{id}`, nhân viên (`BRANCH_MANAGER`, `RECEPTIONIST`) chỉ xem được hội viên thuộc chi nhánh của mình (`members.home_branch_id = staff.branch_id`), trừ `SUPER_ADMIN` được xem toàn chuỗi.
 
 ---
+
+Các quy tắc ảnh đại diện có mã (ADR 0011, áp dụng cho US-F2.4.2):
+
+| Mã | Quy tắc |
+| --- | --- |
+| BR-F2-01 | Chỉ nhận nội dung JPEG/PNG hợp lệ, tối đa 5 MiB, mỗi cạnh tối đa 8.000 px; đọc kích thước trước khi giải nén. |
+| BR-F2-02 | Server giữ tỷ lệ, cạnh dài nhất tối đa 256 px, không phóng lớn; chuyển RGB nền trắng và nén JPEG chất lượng khởi điểm 0,8, tối đa 102.400 byte; lưu PostgreSQL theo ERD. |
+| BR-F2-03 | Một hội viên một ảnh; tải lại ghi đè cùng bản ghi và ghi `uploaded_by`, cập nhật trong giao dịch có khóa dòng hội viên; không có API xóa ảnh. |
+| BR-F2-04 | Dùng chung kiểm tra phạm vi hồ sơ và ảnh; hội viên chỉ xem chính mình và không tự đổi ảnh; trả 404 cho hồ sơ ngoài phạm vi, không tồn tại hoặc đã xóa mềm. |
 
 ## 5. Bảng dữ liệu liên quan
 

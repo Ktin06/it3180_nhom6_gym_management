@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import jakarta.validation.ConstraintViolationException;
@@ -186,6 +187,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             message = "Giá trị không đúng định dạng.";
         }
         return ResponseEntity.badRequest().body(invalidFields(Map.of(name == null ? "body" : name, message)));
+    }
+
+    /** Giới hạn multipart của API ảnh: dùng lỗi đầu vào 400, có trường file (ADR 0011). */
+    @Override
+    protected ResponseEntity<Object> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        return ResponseEntity.badRequest().body(invalidFields(
+            Map.of("file", "Dung lượng file tối đa là 5 MiB (5.242.880 byte).")));
     }
 
     private static ProblemDetail invalidFields(Map<String, String> errors) {
