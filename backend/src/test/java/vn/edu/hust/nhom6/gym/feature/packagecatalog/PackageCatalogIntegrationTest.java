@@ -21,6 +21,7 @@ import vn.edu.hust.nhom6.gym.feature.auth.service.JwtTokenService;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import vn.edu.hust.nhom6.gym.DatabaseCleaner;
 
 /** PostgreSQL thật, schema Flyway chuẩn, service staff production và JWT ký bởi F1. */
 @SpringBootTest
@@ -42,7 +43,7 @@ class PackageCatalogIntegrationTest {
 
     @BeforeEach
     void fixtures() {
-        jdbc.execute("TRUNCATE TABLE users, packages RESTART IDENTITY CASCADE");
+        DatabaseCleaner.truncate(jdbc, "users", "packages");
         branch = jdbc.queryForObject("SELECT id FROM branches WHERE code='CN01'", Long.class);
         jdbc.update("INSERT INTO branches(code,name,open_time,close_time) VALUES ('F3TEST','F3 test','06:00','22:00') ON CONFLICT(code) DO NOTHING");
         otherBranch = jdbc.queryForObject("SELECT id FROM branches WHERE code='F3TEST'", Long.class);

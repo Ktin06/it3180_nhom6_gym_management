@@ -1,4 +1,5 @@
-import { HOME_PATH_BY_ROLE, MEMBER_MANAGEMENT_ROLES, type Role } from './roles'
+import { canOpen, ROUTE_ACCESS, type RouteAccessTable } from '../routes/route-access'
+import { HOME_PATH_BY_ROLE, type Role } from './roles'
 
 /** Chỉ dùng đường dẫn cùng origin được ProtectedRoute lưu vào history state. */
 export function safeReturnPath(state: unknown, origin: string) {
@@ -18,18 +19,20 @@ export function safeReturnPath(state: unknown, origin: string) {
   }
 }
 
-/** Giữ đường dẫn cũ nếu nó thuộc role mới đăng nhập; còn lại về trang chủ của role đó. */
-export function roleAwareReturnPath(state: unknown, origin: string, role: Role) {
-  const returnPath = safeReturnPath(state, origin)
-  if (!returnPath) return HOME_PATH_BY_ROLE[role]
-
+/**
+ * Giữ đường dẫn cũ nếu role mới đăng nhập được mở nó theo ROUTE_ACCESS; còn lại về trang chủ của role.
+ * `access` chỉ truyền khi kiểm thử; mã thật dùng bảng mặc định.
+ */
+export function roleAwareReturnPath(
+  state: unknown,
+  origin: string,
+  role: Role,
+  access: RouteAccessTable = ROUTE_ACCESS,
+) {
   const roleHome = HOME_PATH_BY_ROLE[role]
+  const returnPath = safeReturnPath(state, origin)
+  if (!returnPath) return roleHome
+
   const pathname = new URL(returnPath, origin).pathname
-  if (
-    MEMBER_MANAGEMENT_ROLES.includes(role) &&
-    (pathname === '/members' || pathname === '/packages')
-  ) {
-    return returnPath
-  }
-  return pathname === roleHome || pathname.startsWith(`${roleHome}/`) ? returnPath : roleHome
+  return canOpen(role, pathname, access) ? returnPath : roleHome
 }

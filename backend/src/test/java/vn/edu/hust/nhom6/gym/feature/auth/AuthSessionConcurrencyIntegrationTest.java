@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import jakarta.servlet.http.Cookie;
 import tools.jackson.databind.json.JsonMapper;
+import vn.edu.hust.nhom6.gym.DatabaseCleaner;
 import vn.edu.hust.nhom6.gym.TestcontainersConfiguration;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 
@@ -53,7 +54,7 @@ class AuthSessionConcurrencyIntegrationTest {
 
     @BeforeEach
     void cleanDatabase() {
-        jdbcTemplate.execute("TRUNCATE TABLE members, users, staff, refresh_tokens RESTART IDENTITY CASCADE");
+        DatabaseCleaner.truncate(jdbcTemplate, "members", "users", "staff", "refresh_tokens");
         jdbcTemplate.update("UPDATE branches SET status = 'ACTIVE' WHERE code = 'CN01'");
     }
 

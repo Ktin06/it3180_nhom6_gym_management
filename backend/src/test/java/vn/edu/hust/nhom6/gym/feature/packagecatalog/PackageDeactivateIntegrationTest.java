@@ -26,6 +26,7 @@ import vn.edu.hust.nhom6.gym.feature.auth.service.JwtTokenService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import vn.edu.hust.nhom6.gym.DatabaseCleaner;
 
 /** JWT, phân công chi nhánh, khóa dòng, schema/FK và dữ liệu lịch sử đều production/PostgreSQL thật. */
 @SpringBootTest
@@ -43,7 +44,7 @@ class PackageDeactivateIntegrationTest {
 
     @BeforeEach
     void fixtures() {
-        jdbc.execute("TRUNCATE TABLE users, packages RESTART IDENTITY CASCADE");
+        DatabaseCleaner.truncate(jdbc, "users", "packages");
         branch = jdbc.queryForObject("SELECT id FROM branches WHERE code='CN01'", Long.class);
         jdbc.update("INSERT INTO branches(code,name,open_time,close_time) VALUES ('F3STOP','Other','06:00','22:00') ON CONFLICT(code) DO NOTHING");
         otherBranch = jdbc.queryForObject("SELECT id FROM branches WHERE code='F3STOP'", Long.class);

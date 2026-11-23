@@ -85,7 +85,7 @@ npm run dev
 Tóm tắt; chi tiết và ngoại lệ xem [bản chốt phạm vi](../requirements/ban-chot-pham-vi.md).
 
 - **Chỉ đăng nhập bằng email** (F1).
-- **Gói PT không dùng để check-in** vào phòng tập; chỉ gói TIME hoặc SESSION đang ACTIVE (F4).
+- **Gói PT không dùng để check-in tập tự do**; check-in dùng gói TIME hoặc SESSION đang ACTIVE. Ngoại lệ: hội viên chỉ có gói PT được check-in đúng ngày có buổi PT đã đặt, không trừ buổi (F4, BR-F4.8).
 - Hội viên có **cả gói TIME và SESSION thì dùng gói TIME**, không trừ buổi (F4).
 - **Chỉ gói TIME được đặt lớp nhóm**; gói SESSION và PT thì không. Lớp đầy là hết chỗ, không có danh sách chờ (F8, ADR 0014).
 - **Gói chỉ ACTIVE khi hóa đơn PAID** (F3, F5).

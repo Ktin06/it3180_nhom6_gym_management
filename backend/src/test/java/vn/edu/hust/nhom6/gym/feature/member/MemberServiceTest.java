@@ -1,7 +1,9 @@
 package vn.edu.hust.nhom6.gym.feature.member;
 
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -16,27 +18,29 @@ import vn.edu.hust.nhom6.gym.feature.member.entity.*;
 import vn.edu.hust.nhom6.gym.feature.member.mapper.MemberMapper;
 import vn.edu.hust.nhom6.gym.feature.member.repository.MemberRepository;
 import vn.edu.hust.nhom6.gym.feature.member.service.*;
-import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberAccountAccess;
-import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberBranchAccess;
+import vn.edu.hust.nhom6.gym.feature.auth.service.AccountService;
+import vn.edu.hust.nhom6.gym.feature.branch.service.BranchLookupService;
+import vn.edu.hust.nhom6.gym.feature.staff.service.StaffService;
 import org.springframework.dao.DataIntegrityViolationException;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
     @Mock MemberRepository repository;
-    @Mock MemberAccountAccess accounts;
-    @Mock MemberBranchAccess branches;
+    @Mock AccountService accounts;
+    @Mock StaffService staff;
+    @Mock BranchLookupService branches;
     @Mock Validator validator;
-    MemberServiceImpl service;
-    final MemberActor receptionist = new MemberActor(10L, UserRole.RECEPTIONIST);
+    MemberService service;
+    final CurrentUser receptionist = new CurrentUser(10L, UserRole.RECEPTIONIST);
 
     @BeforeEach
     void setUp() {
-        service = new MemberServiceImpl(repository, accounts, branches, new MemberMapper(), validator);
+        service = new MemberService(repository, accounts, staff, branches, new MemberMapper(), validator);
     }
 
     @Test
     void createsWithStaffBranchAndNormalizedPhone() {
-        when(branches.staffBranchId(10L)).thenReturn(7L);
+        when(staff.requireBranchId(10L)).thenReturn(7L);
         when(repository.nextMemberCode()).thenReturn(123L);
         when(repository.saveAndFlush(any())).thenAnswer(inv -> inv.getArgument(0));
         var result = service.create(receptionist, new CreateMemberRequest("  Nguyễn An  ", "+84 912 345 678", null, null));
@@ -50,7 +54,7 @@ class MemberServiceTest {
 
     @Test
     void duplicatePhoneDoesNotConsumeSequence() {
-        when(branches.staffBranchId(10L)).thenReturn(7L);
+        when(staff.requireBranchId(10L)).thenReturn(7L);
         when(repository.existsByPhone("0912345678")).thenReturn(true);
         assertThatThrownBy(() -> service.create(receptionist,
             new CreateMemberRequest("An", "0912345678", null, null))).isInstanceOf(ConflictException.class);
@@ -60,7 +64,7 @@ class MemberServiceTest {
 
     @Test
     void concurrentDuplicatePhoneStillGetsFrontDeskGuidance() {
-        when(branches.staffBranchId(10L)).thenReturn(7L);
+        when(staff.requireBranchId(10L)).thenReturn(7L);
         when(repository.nextMemberCode()).thenReturn(1L);
         when(repository.saveAndFlush(any())).thenThrow(new DataIntegrityViolationException("lỗi",
             new RuntimeException("duplicate key value violates unique constraint \"uq_members_phone\"")));
@@ -71,7 +75,7 @@ class MemberServiceTest {
 
     @Test
     void otherConstraintViolationsAreNotReportedAsDuplicatePhone() {
-        when(branches.staffBranchId(10L)).thenReturn(7L);
+        when(staff.requireBranchId(10L)).thenReturn(7L);
         when(repository.nextMemberCode()).thenReturn(1L);
         var failure = new DataIntegrityViolationException("lỗi", new RuntimeException("violates uq_members_member_code"));
         when(repository.saveAndFlush(any())).thenThrow(failure);
@@ -81,7 +85,7 @@ class MemberServiceTest {
 
     @Test
     void exhaustedSequenceDoesNotTruncateCode() {
-        when(branches.staffBranchId(10L)).thenReturn(7L);
+        when(staff.requireBranchId(10L)).thenReturn(7L);
         when(repository.nextMemberCode()).thenReturn(1000000L);
         assertThatThrownBy(() -> service.create(receptionist,
             new CreateMemberRequest("An", "0912345678", null, null))).isInstanceOf(BusinessRuleException.class);
@@ -93,11 +97,11 @@ class MemberServiceTest {
         Member member = new Member();
         member.setHomeBranchId(8L);
         when(repository.findForUpdate(1L)).thenReturn(Optional.of(member));
-        when(branches.staffBranchId(10L)).thenReturn(7L);
+        when(staff.requireBranchId(10L)).thenReturn(7L);
         assertThatThrownBy(() -> service.update(receptionist, 1L,
             new UpdateMemberRequest("An", "0912345678", null, null, MemberStatus.INACTIVE)))
             .isInstanceOf(NotFoundException.class);
-        verify(accounts, never()).disable(any());
+        verify(accounts, never()).disableAccount(any());
     }
 
     @Test
@@ -105,18 +109,18 @@ class MemberServiceTest {
         Member member = new Member();
         member.setUserId(99L);
         when(repository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(member));
-        assertThatThrownBy(() -> service.detail(new MemberActor(3L, UserRole.MEMBER), 1L))
+        assertThatThrownBy(() -> service.detail(new CurrentUser(3L, UserRole.MEMBER), 1L))
             .isInstanceOf(NotFoundException.class);
-        verifyNoInteractions(accounts, branches);
+        verifyNoInteractions(accounts, staff, branches);
     }
 
     @Test
     void failedAccountTransitionDoesNotMutateNamePhoneOrStatus() {
         Member member = linkedMember();
         when(repository.findForUpdate(1L)).thenReturn(Optional.of(member));
-        when(branches.staffBranchId(10L)).thenReturn(7L);
+        when(staff.requireBranchId(10L)).thenReturn(7L);
         var failure = new NotFoundException("Không tìm thấy tài khoản liên kết.");
-        doThrow(failure).when(accounts).disable(42L);
+        doThrow(failure).when(accounts).disableAccount(42L);
 
         assertThatThrownBy(() -> service.update(receptionist, 1L,
             new UpdateMemberRequest("Tên mới", "0912345699", null, null, MemberStatus.INACTIVE)))
@@ -132,8 +136,8 @@ class MemberServiceTest {
     void editingProfileWithoutStatusTransitionDoesNotDisableOrActivateAccount() {
         Member member = linkedMember();
         when(repository.findForUpdate(1L)).thenReturn(Optional.of(member));
-        when(branches.staffBranchId(10L)).thenReturn(7L);
-        when(accounts.emails(Set.of(42L))).thenReturn(Map.of(42L, "member@example.com"));
+        when(staff.requireBranchId(10L)).thenReturn(7L);
+        when(accounts.getEmailsByUserIds(Set.of(42L))).thenReturn(Map.of(42L, "member@example.com"));
 
         var result = service.update(receptionist, 1L,
             new UpdateMemberRequest("Tên mới", "0912345699", null, null, MemberStatus.ACTIVE));
@@ -141,8 +145,25 @@ class MemberServiceTest {
         assertThat(result.fullName()).isEqualTo("Tên mới");
         assertThat(result.phone()).isEqualTo("0912345699");
         assertThat(result.email()).isEqualTo("member@example.com");
-        verify(accounts, never()).disable(any());
-        verify(accounts, never()).activateIfDisabled(any());
+        verify(accounts, never()).disableAccount(any());
+        verify(accounts, never()).activateAccountIfDisabled(any());
+    }
+
+    @Test
+    @DisplayName("Nền tảng: tài khoản đã gắn hồ sơ thì lấy được hồ sơ của chính mình")
+    void requireByUserIdReturnsLinkedProfile() {
+        Member member = linkedMember();
+        when(repository.findByUserIdAndDeletedAtIsNull(42L)).thenReturn(Optional.of(member));
+
+        assertThat(service.requireByUserId(42L)).isSameAs(member);
+    }
+
+    @Test
+    @DisplayName("Nền tảng: tài khoản chưa gắn hồ sơ hội viên thì 403")
+    void requireByUserIdWithoutProfileIsForbidden() {
+        when(repository.findByUserIdAndDeletedAtIsNull(43L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.requireByUserId(43L)).isInstanceOf(ForbiddenException.class);
     }
 
     private Member linkedMember() {
