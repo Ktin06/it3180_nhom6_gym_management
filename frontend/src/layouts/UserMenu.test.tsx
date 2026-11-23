@@ -3,18 +3,19 @@ import userEvent from '@testing-library/user-event'
 import { App } from 'antd'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Role } from '../auth/roles'
 import { AuthContext } from '../auth/AuthContext'
 import { UserMenu } from './UserMenu'
 
 const logout = vi.fn()
 
-function renderUserMenu() {
+function renderUserMenu(role: Role = 'RECEPTIONIST', initialPath = '/reception') {
   return render(
     <App>
       <AuthContext.Provider
         value={{
           status: 'authenticated',
-          user: { email: 'lt@example.com', role: 'RECEPTIONIST' },
+          user: { email: 'user@example.com', role },
           sessionError: null,
           login: vi.fn(),
           register: vi.fn(),
@@ -22,10 +23,10 @@ function renderUserMenu() {
           retrySession: vi.fn(),
         }}
       >
-        <MemoryRouter initialEntries={['/reception']}>
+        <MemoryRouter initialEntries={[initialPath]}>
           <Routes>
             <Route
-              path="/reception"
+              path={initialPath}
               element={
                 <>
                   <header style={{ width: 360, height: 64 }}>
@@ -35,6 +36,7 @@ function renderUserMenu() {
                 </>
               }
             />
+            <Route path="/doi-mat-khau" element={<p>Trang đổi mật khẩu</p>} />
             <Route path="/login" element={<p>Trang đăng nhập</p>} />
           </Routes>
         </MemoryRouter>
@@ -64,5 +66,32 @@ describe('UserMenu', () => {
 
     expect(await screen.findByText('Trang đăng nhập')).toBeInTheDocument()
     expect(logout).toHaveBeenCalledTimes(2)
+  })
+
+  it.each([
+    { role: 'RECEPTIONIST' as const, path: '/reception' },
+    { role: 'MEMBER' as const, path: '/member' },
+  ])(
+    'US-F1.4.1 menu: UserMenu có mục Đổi mật khẩu cho $role, mở /doi-mat-khau',
+    async ({ role, path }) => {
+      const user = userEvent.setup()
+      renderUserMenu(role, path)
+
+      const changePasswordButton = screen.getByRole('button', { name: 'Đổi mật khẩu' })
+      expect(changePasswordButton).toBeInTheDocument()
+
+      await user.click(changePasswordButton)
+
+      expect(await screen.findByText('Trang đổi mật khẩu')).toBeInTheDocument()
+    },
+  )
+
+  it.each(['Đổi mật khẩu', 'Đăng xuất'])('ẩn chữ của nút "%s" trên màn hẹp, giữ tên nút', (name) => {
+    renderUserMenu('MEMBER', '/member')
+
+    const button = screen.getByRole('button', { name })
+    const label = Array.from(button.querySelectorAll('span')).find((el) => el.textContent === name)
+    expect(label).toBeDefined()
+    expect(label).toHaveClass('hide-on-mobile')
   })
 })

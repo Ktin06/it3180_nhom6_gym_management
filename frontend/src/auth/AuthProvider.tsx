@@ -26,6 +26,7 @@ import type {
 type BootstrapResult = AuthUser | null | 'recoverable-error'
 const RECOVERABLE_SESSION_MESSAGE =
   'Chưa thể xác minh phiên đăng nhập. Hãy kiểm tra kết nối rồi thử lại.'
+const PASSWORD_CHANGED_MESSAGE = 'Đã đổi mật khẩu, vui lòng đăng nhập lại'
 
 let bootstrapFlight: { epoch: number; promise: Promise<BootstrapResult> } | null = null
 
@@ -190,9 +191,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (getSessionEpoch() === epoch) expireSession(epoch)
   }, [])
 
+  const completePasswordChange = useCallback(() => {
+    expireSession(getSessionEpoch(), PASSWORD_CHANGED_MESSAGE)
+  }, [])
+
   const value = useMemo(
-    () => ({ status, user, sessionError, login, register, logout, retrySession }),
-    [status, user, sessionError, login, register, logout, retrySession],
+    () => ({
+      status,
+      user,
+      sessionError,
+      login,
+      register,
+      logout,
+      retrySession,
+      completePasswordChange,
+    }),
+    [status, user, sessionError, login, register, logout, retrySession, completePasswordChange],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -40,6 +40,7 @@ export interface AuthContextValue {
   register: (request: RegisterRequest) => Promise<AuthUser>
   logout: () => Promise<void>
   retrySession: () => Promise<AuthUser>
+  completePasswordChange?: () => void
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

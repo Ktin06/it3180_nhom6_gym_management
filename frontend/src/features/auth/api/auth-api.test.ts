@@ -4,7 +4,7 @@ const { get, post } = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn() }))
 
 vi.mock('../../../services/http', () => ({ http: { get, post } }))
 
-import { getCurrentUser, getProblemDetail, login, register } from './auth-api'
+import { changePassword, getCurrentUser, getProblemDetail, login, register } from './auth-api'
 import { ROLES } from '../../../auth/roles'
 import type { RegisterRequest } from '../types/auth'
 
@@ -78,6 +78,19 @@ describe('auth-api', () => {
       detail: 'Số điện thoại này đã có hồ sơ. Vui lòng liên hệ quầy lễ tân.',
       errors: { phone: 'Số điện thoại đã tồn tại' },
       status: 409,
+    })
+  })
+
+  it('US-F1.4.1 API: changePassword gọi POST /auth/change-password đúng payload', async () => {
+    post.mockResolvedValueOnce({ data: undefined })
+
+    await expect(
+      changePassword({ currentPassword: 'OldPassword1', newPassword: 'NewPassword2' }),
+    ).resolves.toBeUndefined()
+
+    expect(post).toHaveBeenCalledWith('/auth/change-password', {
+      currentPassword: 'OldPassword1',
+      newPassword: 'NewPassword2',
     })
   })
 })

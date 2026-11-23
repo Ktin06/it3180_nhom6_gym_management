@@ -224,6 +224,48 @@
             "description": "Đọc thông tin người dùng hiện tại từ JWT Access Token (HS256)."
           },
           "response": []
+        },
+        {
+          "name": "Đổi mật khẩu (POST /api/v1/auth/change-password)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Trả mã 204 No Content khi đổi mật khẩu thành công', function () {",
+                  "  pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Password123\",\n  \"newPassword\": \"NewPassword456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "change-password"]
+            },
+            "description": "Đổi mật khẩu tài khoản hiện tại và thu hồi toàn bộ phiên đăng nhập (F1, UC-F1.4)."
+          },
+          "response": []
         }
       ]
     }

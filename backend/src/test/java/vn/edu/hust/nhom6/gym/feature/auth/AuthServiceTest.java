@@ -15,6 +15,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -26,8 +27,11 @@ import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.ForbiddenException;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
+import vn.edu.hust.nhom6.gym.common.time.VnTime;
 import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.AuthMeResponse;
+import vn.edu.hust.nhom6.gym.feature.auth.dto.ChangePasswordRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.RegisterRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.RefreshToken;
@@ -59,6 +63,9 @@ class AuthServiceTest {
     @Mock
     private MemberService memberService;
 
+    @Mock
+    private VnTime vnTime;
+
     private AuthService authService;
 
     @BeforeEach
@@ -68,7 +75,8 @@ class AuthServiceTest {
             refreshTokenRepository,
             jwtTokenService,
             passwordEncoder,
-            memberService
+            memberService,
+            vnTime
         );
     }
 
@@ -436,5 +444,89 @@ class AuthServiceTest {
         assertThat(PhoneUtils.normalizePhone("84912345678")).isEqualTo("0912345678");
         assertThat(PhoneUtils.normalizePhone("0912.345.678")).isEqualTo("0912345678");
         assertThat(PhoneUtils.normalizePhone("0912-345-678")).isEqualTo("0912345678");
+    }
+
+    @Test
+    @DisplayName("US-F1.4.1 KB1: đổi mật khẩu thành công")
+    void doiMatKhauThanhCongCapNhatPasswordHash() {
+        CurrentUser me = new CurrentUser(10L, UserRole.MEMBER);
+        ChangePasswordRequest request = new ChangePasswordRequest("OldPass123", "NewPass456");
+        User user = User.builder()
+            .email("member@example.com")
+            .passwordHash("old-hash")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .build();
+        OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-19T16:45:00Z");
+
+        when(userRepository.findById(10L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("OldPass123", "old-hash")).thenReturn(true);
+        when(passwordEncoder.encode("NewPass456")).thenReturn("new-hash");
+        when(vnTime.now()).thenReturn(fixedNow);
+
+        authService.changePassword(me, request);
+
+        assertThat(user.getPasswordHash()).isEqualTo("new-hash");
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("US-F1.4.1 KB1: thu hồi mọi phiên")
+    void doiMatKhauThuHoiMoiPhienCuaNguoiDung() {
+        CurrentUser me = new CurrentUser(10L, UserRole.MEMBER);
+        ChangePasswordRequest request = new ChangePasswordRequest("OldPass123", "NewPass456");
+        User user = User.builder()
+            .email("member@example.com")
+            .passwordHash("old-hash")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .build();
+        OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-19T16:45:00Z");
+
+        when(userRepository.findById(10L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("OldPass123", "old-hash")).thenReturn(true);
+        when(passwordEncoder.encode("NewPass456")).thenReturn("new-hash");
+        when(vnTime.now()).thenReturn(fixedNow);
+
+        authService.changePassword(me, request);
+
+        verify(refreshTokenRepository).revokeAllByUserId(10L, fixedNow);
+    }
+
+    @Test
+    @DisplayName("US-F1.4.1 E2: mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ trả 422")
+    void doiMatKhauHienTaiSaiHoacMatKhauMoiTrungCuNemBusinessRuleException() {
+        CurrentUser me = new CurrentUser(10L, UserRole.MEMBER);
+        User user = User.builder()
+            .email("member@example.com")
+            .passwordHash("old-hash")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .build();
+
+        when(userRepository.findById(10L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("WrongPass123", "old-hash")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.changePassword(
+                me, new ChangePasswordRequest("WrongPass123", "NewPass456")))
+            .isInstanceOf(BusinessRuleException.class)
+            .hasMessage("Mật khẩu hiện tại không đúng.");
+
+        String currentTooLong = "ă".repeat(30) + "Pass1234567890123456";
+        assertThatThrownBy(() -> authService.changePassword(
+                me, new ChangePasswordRequest(currentTooLong, "NewPass456")))
+            .isInstanceOf(BusinessRuleException.class)
+            .hasMessage("Mật khẩu hiện tại không đúng.");
+        verify(passwordEncoder, never()).matches(eq(currentTooLong), anyString());
+
+        when(passwordEncoder.matches("OldPass123", "old-hash")).thenReturn(true);
+
+        assertThatThrownBy(() -> authService.changePassword(
+                me, new ChangePasswordRequest("OldPass123", "OldPass123")))
+            .isInstanceOf(BusinessRuleException.class)
+            .hasMessage("Mật khẩu mới phải khác mật khẩu hiện tại.");
+
+        verify(userRepository, never()).save(any());
+        verify(refreshTokenRepository, never()).revokeAllByUserId(any(), any());
     }
 }

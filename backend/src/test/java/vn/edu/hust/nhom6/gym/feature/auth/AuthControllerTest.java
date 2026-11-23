@@ -1,6 +1,9 @@
 package vn.edu.hust.nhom6.gym.feature.auth;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -14,6 +17,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -27,12 +31,15 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import jakarta.servlet.http.Cookie;
 import tools.jackson.databind.json.JsonMapper;
+import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ForbiddenException;
 import vn.edu.hust.nhom6.gym.common.exception.GlobalExceptionHandler;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.config.SecurityConfig;
 import vn.edu.hust.nhom6.gym.feature.auth.controller.AuthController;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.AuthMeResponse;
+import vn.edu.hust.nhom6.gym.feature.auth.dto.ChangePasswordRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.RegisterRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
@@ -328,5 +335,74 @@ class AuthControllerTest {
             .andExpect(jsonPath("$.role").value("MEMBER"));
 
         verify(authService).getCurrentUser(any(Jwt.class));
+    }
+
+    @Test
+    @DisplayName("US-F1.4.1 E1: thiếu trường hoặc mật khẩu mới dưới 8 ký tự, thiếu chữ hay số trả 400 kèm errors")
+    void doiMatKhauSaiDinhDangTra400KemErrors() throws Exception {
+        String bearer = JwtTestSupport.bearerToken(10L, "member@example.com", UserRole.MEMBER);
+
+        // Thiếu trường currentPassword và mật khẩu mới dưới 8 ký tự
+        mockMvc.perform(post("/api/v1/auth/change-password")
+                .header(HttpHeaders.AUTHORIZATION, bearer)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(new ChangePasswordRequest("", "short1"))))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.errors.currentPassword").exists())
+            .andExpect(jsonPath("$.errors.newPassword").exists());
+
+        // Mật khẩu mới thiếu chữ số
+        mockMvc.perform(post("/api/v1/auth/change-password")
+                .header(HttpHeaders.AUTHORIZATION, bearer)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(new ChangePasswordRequest("OldPass123", "OnlyLettersPass"))))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.errors.newPassword").exists());
+
+        // Mật khẩu mới thiếu chữ cái
+        mockMvc.perform(post("/api/v1/auth/change-password")
+                .header(HttpHeaders.AUTHORIZATION, bearer)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(new ChangePasswordRequest("OldPass123", "123456789"))))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.errors.newPassword").exists());
+
+        verify(authService, never()).changePassword(any(), any());
+    }
+
+    @Test
+    @DisplayName("US-F1.4.1 E2: mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ trả 422")
+    void doiMatKhauViPhamQuyTacNghiepVuTra422() throws Exception {
+        String bearer = JwtTestSupport.bearerToken(10L, "member@example.com", UserRole.MEMBER);
+        ChangePasswordRequest request = new ChangePasswordRequest("WrongOld123", "NewPass456");
+
+        doThrow(new BusinessRuleException("Mật khẩu hiện tại không đúng."))
+            .when(authService).changePassword(eq(new CurrentUser(10L, UserRole.MEMBER)), eq(request));
+
+        mockMvc.perform(post("/api/v1/auth/change-password")
+                .header(HttpHeaders.AUTHORIZATION, bearer)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(request)))
+            .andExpect(status().isUnprocessableContent())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.status").value(422))
+            .andExpect(jsonPath("$.detail").value("Mật khẩu hiện tại không đúng."));
+    }
+
+    @Test
+    @DisplayName("US-F1.4.1 S2: gọi đổi mật khẩu không có token trả 401")
+    void doiMatKhauKhongCoTokenTra401() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/change-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(new ChangePasswordRequest("OldPass123", "NewPass456"))))
+            .andExpect(status().isUnauthorized())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.status").value(401));
+
+        verify(authService, never()).changePassword(any(), any());
     }
 }

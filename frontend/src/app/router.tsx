@@ -2,12 +2,14 @@ import type { ReactNode } from 'react'
 import { createBrowserRouter, type RouteObject } from 'react-router-dom'
 import { HOME_PATH_BY_ROLE, STAFF_ROLES } from '../auth/roles'
 import { AuthLayout } from '../layouts/AuthLayout'
+import { AuthenticatedShell } from '../layouts/AuthenticatedShell'
 import { MemberLayout } from '../layouts/MemberLayout'
 import { PublicLayout } from '../layouts/PublicLayout'
 import { StaffLayout } from '../layouts/StaffLayout'
 import { ForbiddenPage } from '../pages/ForbiddenPage'
 import { GuestHomePage } from '../pages/home/GuestHomePage'
 import { RoleHomePage } from '../pages/home/RoleHomePage'
+import { ChangePasswordPage } from '../features/auth/pages/ChangePasswordPage'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
@@ -65,6 +67,14 @@ export const routes: RouteObject[] = [
       guarded(HOME_PATH_BY_ROLE.MEMBER, <RoleHomePage role="MEMBER" />),
       // Trang mới của hội viên: thêm một dòng guarded(...) ở đây.
     ],
+  },
+  {
+    element: (
+      <ProtectedRoute allowedRoles={rolesFor('/doi-mat-khau')}>
+        <AuthenticatedShell />
+      </ProtectedRoute>
+    ),
+    children: [guarded('/doi-mat-khau', <ChangePasswordPage />)],
   },
 ]
 

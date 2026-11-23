@@ -13,8 +13,11 @@ import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.ForbiddenException;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
+import vn.edu.hust.nhom6.gym.common.time.VnTime;
 import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.AuthMeResponse;
+import vn.edu.hust.nhom6.gym.feature.auth.dto.ChangePasswordRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.RegisterRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.RefreshToken;
@@ -46,18 +49,21 @@ public class AuthService {
     private final JwtTokenService jwtTokenService;
     private final PasswordEncoder passwordEncoder;
     private final MemberService memberService;
+    private final VnTime vnTime;
 
     public AuthService(
             UserRepository userRepository,
             RefreshTokenRepository refreshTokenRepository,
             JwtTokenService jwtTokenService,
             PasswordEncoder passwordEncoder,
-            MemberService memberService) {
+            MemberService memberService,
+            VnTime vnTime) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtTokenService = jwtTokenService;
         this.passwordEncoder = passwordEncoder;
         this.memberService = memberService;
+        this.vnTime = vnTime;
     }
 
     /** Kết quả xác thực chứa JWT Access Token và Refresh Token thô (để đưa vào cookie). */
@@ -243,6 +249,32 @@ public class AuthService {
             refreshTokenRepository.save(token);
         }
         return true;
+    }
+
+    /**
+     * Đổi mật khẩu và thu hồi toàn bộ các phiên đăng nhập hiện có của người dùng (UC-F1.4).
+     */
+    @Transactional
+    public void changePassword(CurrentUser me, ChangePasswordRequest request) {
+        User user = userRepository.findById(me.userId())
+            .orElseThrow(() -> new UnauthorizedException("Token không hợp lệ."));
+
+        validatePasswordLength(request.newPassword());
+
+        String currentPassword = request.currentPassword();
+        boolean currentTooLong = currentPassword == null
+            || currentPassword.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES;
+        if (currentTooLong || !passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new BusinessRuleException("Mật khẩu hiện tại không đúng.");
+        }
+
+        if (currentPassword.equals(request.newPassword())) {
+            throw new BusinessRuleException("Mật khẩu mới phải khác mật khẩu hiện tại.");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+        refreshTokenRepository.revokeAllByUserId(me.userId(), vnTime.now());
     }
 
     private String issueRefreshToken(User user) {

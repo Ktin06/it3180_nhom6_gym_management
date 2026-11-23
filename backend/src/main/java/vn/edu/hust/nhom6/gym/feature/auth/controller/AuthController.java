@@ -4,6 +4,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -20,9 +21,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.config.LogoutTokenDecoder;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.AccessTokenResponse;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.AuthMeResponse;
+import vn.edu.hust.nhom6.gym.feature.auth.dto.ChangePasswordRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.RegisterRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.service.AuthCookieHelper;
@@ -115,5 +118,15 @@ public class AuthController {
     @GetMapping("/me")
     public AuthMeResponse getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
         return authService.getCurrentUser(jwt);
+    }
+
+    @Operation(summary = "Đổi mật khẩu và thu hồi toàn bộ phiên đăng nhập")
+    @PostMapping("/change-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> changePassword(
+            Authentication auth,
+            @Valid @RequestBody ChangePasswordRequest request) {
+        authService.changePassword(CurrentUser.from(auth), request);
+        return ResponseEntity.noContent().build();
     }
 }

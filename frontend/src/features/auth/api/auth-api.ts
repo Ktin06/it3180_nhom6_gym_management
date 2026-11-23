@@ -6,6 +6,7 @@ import { publicRequest } from '../../../services/request-options'
 import type {
   AccessTokenResponse,
   AuthMeResponse,
+  ChangePasswordRequest,
   LoginRequest,
   RegisterRequest,
 } from '../types/auth'
@@ -62,6 +63,10 @@ export function getProblemDetail(error: unknown) {
     })
   }
   return { detail, errors, status: typeof response?.status === 'number' ? response.status : null }
+}
+
+export async function changePassword(request: ChangePasswordRequest): Promise<void> {
+  await http.post('/auth/change-password', request)
 }
 
 function isRole(value: unknown): value is Role {
