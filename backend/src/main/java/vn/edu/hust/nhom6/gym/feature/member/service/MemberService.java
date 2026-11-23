@@ -149,6 +149,32 @@ public class MemberService {
         return member;
     }
 
+    /**
+     * Kiểm tra quyền đọc hồ sơ và ảnh đại diện hội viên:
+     * hội viên chỉ xem được hồ sơ của chính mình; nhân viên chỉ xem được hội viên trong chi nhánh mình;
+     * chủ chuỗi xem mọi chi nhánh. Ngoài phạm vi hoặc không tồn tại trả 404.
+     */
+    public Member requireReadable(CurrentUser actor, Long memberId) {
+        Member member = findMember(memberId);
+        if (actor.role() == UserRole.MEMBER) {
+            if (!actor.userId().equals(member.getUserId())) { throw notFound(); }
+        } else {
+            requireBranch(actor, member);
+        }
+        return member;
+    }
+
+    /**
+     * Khóa dòng hội viên (SELECT ... FOR UPDATE) và kiểm tra phạm vi chi nhánh của nhân viên
+     * đang thao tác. Ngoài phạm vi hoặc không tồn tại trả 404.
+     */
+    @Transactional
+    public Member requireEditableForUpdate(CurrentUser actor, Long memberId) {
+        Member member = members.findForUpdate(memberId).orElseThrow(MemberService::notFound);
+        requireBranch(actor, member);
+        return member;
+    }
+
     public MemberDetailResponse detail(CurrentUser actor, Long id) {
         Member member = findMember(id);
         if (actor.role() == UserRole.MEMBER) {
