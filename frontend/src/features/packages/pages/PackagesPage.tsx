@@ -1,5 +1,7 @@
-import { ReloadOutlined } from '@ant-design/icons'
-import { Alert, Button, Select, Table, Tag } from 'antd'
+import { EditOutlined, PlusOutlined, ReloadOutlined, StopOutlined } from '@ant-design/icons'
+import { Alert, App, Button, Modal, Select, Space, Table, Tag } from 'antd'
+import { useContext, useState } from 'react'
+import { AuthContext } from '../../../auth/AuthContext'
 import type { Status } from '../../shared/types'
 import { errorMessage } from '../../shared/api-error'
 import { DemoNotice } from '../../shared/DemoNotice'
@@ -7,12 +9,30 @@ import { useRemoteQuery } from '../../shared/use-remote-query'
 import { packagesApi } from '../api/packages'
 import { packageTypeLabels as typeLabels, vndFormat as money } from '../package-format'
 import type { PackageQuery, PackagesGateway, PackageType } from '../types/package'
+import type { GymPackage } from '../types/package'
+import { PackageFormModal } from '../components/PackageFormModal'
 import '../../shared/feature-pages.css'
 
 const initialQuery: PackageQuery = { page: 0, size: 20, status: 'ACTIVE' }
 
 export function PackagesPage({ api = packagesApi }: { api?: PackagesGateway }) {
+  const auth = useContext(AuthContext)
+  const { message } = App.useApp()
   const list = useRemoteQuery(api.list, initialQuery)
+  const [editing, setEditing] = useState<GymPackage | null>()
+  const canManage = auth?.user?.role === 'BRANCH_MANAGER'
+
+  function deactivate(item: GymPackage) {
+    Modal.confirm({
+      title: 'Ngừng bán gói tập?',
+      content: `Gói ${item.code} sẽ không dùng để bán mới. Hội viên đã mua vẫn tiếp tục sử dụng.`,
+      okText: 'Ngừng bán', cancelText: 'Hủy', okButtonProps: { danger: true },
+      onOk: async () => {
+        try { await api.deactivate(item.id); message.success('Đã ngừng bán gói tập.'); list.reload() }
+        catch (cause) { message.error(errorMessage(cause)) }
+      },
+    })
+  }
   return (
     <section className="feature-page" aria-labelledby="packages-heading">
       <div className="feature-heading">
@@ -20,6 +40,7 @@ export function PackagesPage({ api = packagesApi }: { api?: PackagesGateway }) {
           <h2 id="packages-heading">Danh mục gói tập</h2>
           <p>Tra cứu loại gói, thời hạn, số buổi và giá bán.</p>
         </div>
+        {canManage && <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>Thêm gói</Button>}
       </div>
       <DemoNotice />
       <div className="feature-content">
@@ -127,6 +148,13 @@ export function PackagesPage({ api = packagesApi }: { api?: PackagesGateway }) {
                   </Tag>
                 ),
               },
+              ...(canManage ? [{
+                title: 'Thao tác', key: 'actions', width: 150,
+                render: (_: unknown, item: GymPackage) => <Space>
+                  <Button aria-label={`Sửa ${item.code}`} icon={<EditOutlined />} onClick={() => setEditing(item)} />
+                  {item.status === 'ACTIVE' && <Button danger aria-label={`Ngừng bán ${item.code}`} icon={<StopOutlined />} onClick={() => deactivate(item)} />}
+                </Space>,
+              }] : []),
             ]}
             expandable={{
               rowExpandable: (item) => Boolean(item.description),
@@ -150,6 +178,7 @@ export function PackagesPage({ api = packagesApi }: { api?: PackagesGateway }) {
           />
         </div>
       </div>
+      {editing !== undefined && <PackageFormModal item={editing} api={api} onClose={() => setEditing(undefined)} onSaved={() => { setEditing(undefined); message.success('Đã lưu gói tập.'); list.reload() }} />}
     </section>
   )
 }

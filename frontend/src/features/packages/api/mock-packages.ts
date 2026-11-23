@@ -1,4 +1,4 @@
-import type { GymPackage, PackagesGateway } from '../types/package'
+import type { CreatePackageInput, GymPackage, PackagesGateway, UpdatePackageInput } from '../types/package'
 
 const packages: GymPackage[] = [
   {
@@ -91,5 +91,22 @@ export const mockPackagesApi: PackagesGateway = {
       totalElements: filtered.length,
       totalPages: Math.ceil(filtered.length / query.size),
     })
+  },
+  async create(input: CreatePackageInput) {
+    const item: GymPackage = { ...input, id: Math.max(...packages.map((x) => x.id)) + 1, status: 'ACTIVE', branchId: 1 }
+    packages.push(item)
+    return structuredClone(item)
+  },
+  async update(id: number, input: UpdatePackageInput) {
+    const index = packages.findIndex((item) => item.id === id)
+    if (index < 0) throw new Error('Không tìm thấy gói tập.')
+    packages[index] = { ...packages[index], ...input }
+    return structuredClone(packages[index])
+  },
+  async deactivate(id: number) {
+    const item = packages.find((candidate) => candidate.id === id)
+    if (!item) throw new Error('Không tìm thấy gói tập.')
+    if (item.status !== 'ACTIVE') throw new Error('Gói tập đã ngừng bán.')
+    item.status = 'INACTIVE'
   },
 }

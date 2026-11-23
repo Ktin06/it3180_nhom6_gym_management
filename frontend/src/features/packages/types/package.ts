@@ -21,8 +21,23 @@ export interface PackageQuery extends PageQuery {
   status?: Status
 }
 
+export interface CreatePackageInput {
+  code: string
+  name: string
+  type: PackageType
+  durationDays: number
+  sessionCount: number | null
+  price: number
+  description: string | null
+}
+
+export type UpdatePackageInput = Partial<Pick<CreatePackageInput, 'name' | 'durationDays' | 'sessionCount' | 'price' | 'description'>>
+
 export interface PackagesGateway {
   list(query: PackageQuery): Promise<PageResponse<GymPackage>>
+  create(input: CreatePackageInput): Promise<GymPackage>
+  update(id: number, input: UpdatePackageInput): Promise<GymPackage>
+  deactivate(id: number): Promise<void>
 }
 
 /** Một gói trên bảng giá công khai; khớp PublicPackageDto (US-F3.1.2). */
