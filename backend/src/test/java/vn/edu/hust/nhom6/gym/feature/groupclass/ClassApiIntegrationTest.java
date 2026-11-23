@@ -654,7 +654,7 @@ class ClassApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("TC-F8.7.1-08c, TC-F8.7.1-09a, TC-F8.7.1-10a, TC-F8.7.1-11a: Đổi phòng, đổi giờ nhiều lần và hủy buổi với dữ liệu F10")
+    @DisplayName("TC-F8.7.1-08c, TC-F8.7.1-09a, TC-F8.7.1-10a, TC-F8.7.1-11a, TC-F8.3.1-09a: Đổi phòng, đổi giờ nhiều lần và hủy buổi với dữ liệu F10")
     void changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot() throws Exception {
         long id = session(NOW.plusHours(2), 2);
         long booking = bookings.book(actor(), id, member).id();
@@ -681,18 +681,26 @@ class ClassApiIntegrationTest {
         assertThat(bookings.cancel(actor(), booking).isLateCancel()).isFalse();
         long nextId = session(secondStart.plusDays(1), 2);
         long nextBooking = bookings.book(actor(), nextId, member).id();
+        long secondUser = user("second-recipient", "MEMBER");
+        long secondMember = member(secondUser);
+        timePackage(secondMember);
+        var secondActor = new CurrentUser(secondUser, UserRole.MEMBER);
+        long secondBooking = bookings.book(secondActor, nextId, secondMember).id();
+
         sessions.cancel(manager(), nextId);
         sessions.cancel(manager(), nextId);
-        assertThat(bookings.detail(actor(), nextBooking)).satisfies(cancelled -> {
-            assertThat(cancelled.status()).isEqualTo("CANCELLED");
-            assertThat(cancelled.cancelReason()).isEqualTo("SESSION_CANCELLED");
-            assertThat(cancelled.isLateCancel()).isFalse();
-        });
+        assertThat(List.of(bookings.detail(actor(), nextBooking), bookings.detail(secondActor, secondBooking)))
+            .allSatisfy(cancelled -> {
+                assertThat(cancelled.status()).isEqualTo("CANCELLED");
+                assertThat(cancelled.cancelReason()).isEqualTo("SESSION_CANCELLED");
+                assertThat(cancelled.isLateCancel()).isFalse();
+            });
 
         var published = events.stream(ClassSessionChanged.class).toList();
         assertThat(published).extracting(ClassSessionChanged::kind)
             .containsExactly(Kind.ROOM_CHANGED, Kind.TIME_CHANGED, Kind.TIME_CHANGED, Kind.CANCELLED);
-        assertThat(published).allSatisfy(event -> assertThat(event.affectedMemberIds()).containsExactly(member));
+        assertThat(published.subList(0, 3)).allSatisfy(event -> assertThat(event.affectedMemberIds()).containsExactly(member));
+        assertThat(published.get(3).affectedMemberIds()).containsExactlyInAnyOrder(member, secondMember);
         assertThat(published.get(0).before().roomId()).isEqualTo(room);
         assertThat(published.get(2).before().startAt().toInstant()).isEqualTo(firstStart.toInstant());
         assertThat(published.get(2).after().startAt().toInstant()).isEqualTo(secondStart.toInstant());
