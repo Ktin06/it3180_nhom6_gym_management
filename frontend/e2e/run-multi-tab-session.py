@@ -204,8 +204,15 @@ def main():
         command("docker", "network", "create", "--label", f"{LABEL}={run_id}", NETWORK)
         command("docker", "run", "-d", "--name", DB, "--label", f"{LABEL}={run_id}",
                 "--network", NETWORK, "--env-file", str(db_env), "postgres:16-alpine", timeout=180)
-        wait_until(lambda: subprocess.run(("docker", "exec", DB, "pg_isready", "-U", "gym_test"),
-                                         capture_output=True, timeout=5).returncode == 0, 60, "PostgreSQL")
+        # Entry point khởi tạo dùng server tạm chỉ mở Unix socket. Đợi server thật trước khi pg_dump.
+        wait_until(
+            lambda: subprocess.run(
+                ("docker", "exec", DB, "pg_isready", "-h", "127.0.0.1", "-U", "gym_test", "-d", "gym_test"),
+                capture_output=True, timeout=5,
+            ).returncode == 0,
+            60,
+            "PostgreSQL qua TCP",
+        )
         backup("before-migrations.dump")
         print("Đã backup DB mới trước migration; khởi động backend.", flush=True)
         command("docker", "run", "-d", "--name", API, "--label", f"{LABEL}={run_id}",
