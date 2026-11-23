@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1500px" height="1160px" viewBox="-0.5 -0.5 1500 1160" content="&lt;mxfile host=&quot;app.diagrams.net&quot; version=&quot;24.0.0&quot;&gt;&lt;diagram id=&quot;class_analysis_f1_f10&quot; name=&quot;Lop phan tich F1-F10&quot;&gt;&lt;mxGraphModel dx=&quot;1500&quot; dy=&quot;1160&quot; grid=&quot;1&quot; gridSize=&quot;10&quot; guides=&quot;1&quot; tooltips=&quot;1&quot; connect=&quot;1&quot; arrows=&quot;1&quot; fold=&quot;1&quot; page=&quot;1&quot; pageScale=&quot;1&quot; pageWidth=&quot;1500&quot; pageHeight=&quot;1160&quot;&gt;&lt;root&gt;&lt;mxCell id=&quot;0&quot;/&gt;&lt;mxCell id=&quot;1&quot; parent=&quot;0&quot;/&gt;&lt;mxCell id=&quot;note&quot; value=&quot;So do lop phan tich F1-F10 | Lop nghiep vu va quan he chinh; khong thay the ERD hay lop thiet ke&quot; style=&quot;text;html=1;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&lt;mxGeometry x=&quot;90&quot; y=&quot;20&quot; width=&quot;1320&quot; height=&quot;50&quot; as=&quot;geometry&quot;/&gt;&lt;/mxCell&gt;&lt;/root&gt;&lt;/mxGraphModel&gt;&lt;/diagram&gt;&lt;/mxfile&gt;">
+<defs><style>text{font-family:Arial,sans-serif}.title{font-size:24px;font-weight:bold;fill:#17324d}.sub{font-size:14px;fill:#52677a}.group{fill:#f8fafc;stroke:#94a3b8;stroke-width:2;rx:16}.gt{font-size:18px;font-weight:bold;fill:#176b87}.box{fill:white;stroke:#247ba0;stroke-width:2;rx:8}.entity{fill:#edf7fa;stroke:#176b87;stroke-width:2}.control{fill:#fff4e6;stroke:#d97706;stroke-width:2}.head{font-size:15px;font-weight:bold;fill:#17324d}.body{font-size:12px;fill:#334155}.edge{fill:none;stroke:#64748b;stroke-width:2}.label{font-size:11px;fill:#475569}.legend{font-size:13px;fill:#334155}</style></defs>
+<text x="750" y="42" class="title" text-anchor="middle">Sơ đồ lớp phân tích F1–F10</text><text x="750" y="66" class="sub" text-anchor="middle">Mô hình khái niệm nghiệp vụ · tập trung vào lớp miền và quan hệ · chi tiết thuộc tính xem ERD</text>
+<!-- group backgrounds -->
+<rect x="25" y="95" width="450" height="920" class="group"/><text x="50" y="128" class="gt">Tài khoản, hội viên và gói tập (F1–F3)</text>
+<rect x="500" y="95" width="470" height="920" class="group"/><text x="525" y="128" class="gt">Vận hành tại quầy (F4–F6)</text>
+<rect x="995" y="95" width="480" height="920" class="group"/><text x="1020" y="128" class="gt">Cổng hội viên, lớp và thông báo (F7–F10)</text>
+<!-- links, behind classes -->
+<path d="M230 250 V305" class="edge"/><text x="240" y="282" class="label">1 — 0..1</text>
+<path d="M355 365 H420 V525 H355" class="edge"/><text x="362" y="452" class="label">quản lý</text>
+<path d="M230 365 V525" class="edge"/><text x="240" y="455" class="label">sở hữu</text>
+<path d="M355 585 H420 V705 H355" class="edge"/><text x="361" y="650" class="label">đăng ký</text>
+<path d="M230 585 V705" class="edge"/><text x="240" y="650" class="label">mua</text>
+<path d="M355 765 H440 V885 H355" class="edge"/><text x="365" y="833" class="label">phát sinh</text>
+<path d="M850 360 V425" class="edge"/><text x="862" y="398" class="label">thuộc</text>
+<path d="M850 495 V560" class="edge"/><text x="862" y="535" class="label">có dòng</text>
+<path d="M850 630 V695" class="edge"/><text x="862" y="675" class="label">ghi nhận</text>
+<path d="M850 765 V830" class="edge"/><text x="862" y="810" class="label">tại</text>
+<path d="M1125 255 H1300" class="edge"/><text x="1185" y="246" class="label">đặt bởi</text>
+<path d="M1220 320 V415" class="edge"/><text x="1230" y="374" class="label">đặt</text>
+<path d="M1375 320 V415" class="edge"/><text x="1385" y="374" class="label">lịch</text>
+<path d="M1220 500 V595" class="edge"/><text x="1230" y="550" class="label">áp dụng</text>
+<path d="M1375 500 V595" class="edge"/><text x="1385" y="550" class="label">được đăng ký</text>
+<path d="M1220 680 V775" class="edge"/><text x="1230" y="730" class="label">nhận</text>
+<path d="M1375 680 V775" class="edge"/><text x="1385" y="730" class="label">gửi cho</text>
+<!-- left classes -->
+<g><rect x="65" y="165" width="165" height="85" class="box entity"/><text x="147" y="190" class="head" text-anchor="middle">User</text><text x="78" y="214" class="body">Tài khoản, vai trò</text><text x="78" y="233" class="body">phiên đăng nhập</text></g>
+<g><rect x="65" y="305" width="165" height="85" class="box entity"/><text x="147" y="330" class="head" text-anchor="middle">Member</text><text x="78" y="354" class="body">Hồ sơ hội viên</text><text x="78" y="373" class="body">chỉ số cơ thể</text></g>
+<g><rect x="265" y="305" width="165" height="85" class="box entity"/><text x="347" y="330" class="head" text-anchor="middle">Staff</text><text x="278" y="354" class="body">Nhân viên / huấn luyện viên</text><text x="278" y="373" class="body">thuộc chi nhánh</text></g>
+<g><rect x="65" y="525" width="165" height="85" class="box entity"/><text x="147" y="550" class="head" text-anchor="middle">Membership</text><text x="78" y="574" class="body">Gói đã mua</text><text x="78" y="593" class="body">trạng thái, thời hạn</text></g>
+<g><rect x="265" y="525" width="165" height="85" class="box entity"/><text x="347" y="550" class="head" text-anchor="middle">Package</text><text x="278" y="574" class="body">Loại gói / giá</text><text x="278" y="593" class="body">TIME, SESSION, PT</text></g>
+<g><rect x="65" y="705" width="165" height="85" class="box entity"/><text x="147" y="730" class="head" text-anchor="middle">Invoice</text><text x="78" y="754" class="body">Hóa đơn mua / gia hạn</text><text x="78" y="773" class="body">trạng thái thanh toán</text></g>
+<g><rect x="265" y="705" width="165" height="85" class="box entity"/><text x="347" y="730" class="head" text-anchor="middle">InvoiceItem</text><text x="278" y="754" class="body">Chi tiết gói trên hóa đơn</text></g>
+<g><rect x="165" y="865" width="165" height="85" class="box entity"/><text x="247" y="890" class="head" text-anchor="middle">Payment</text><text x="178" y="914" class="body">Lần ghi nhận thanh toán</text></g>
+<!-- middle -->
+<g><rect x="570" y="165" width="165" height="85" class="box entity"/><text x="652" y="190" class="head" text-anchor="middle">Branch</text><text x="583" y="214" class="body">Chi nhánh vận hành</text></g>
+<g><rect x="770" y="275" width="165" height="85" class="box entity"/><text x="852" y="300" class="head" text-anchor="middle">Checkin</text><text x="783" y="324" class="body">Vào / ra phòng tập</text><text x="783" y="343" class="body">trừ lượt gói SESSION</text></g>
+<g><rect x="770" y="425" width="165" height="85" class="box entity"/><text x="852" y="450" class="head" text-anchor="middle">DashboardView</text><text x="783" y="474" class="body">Tổng hợp hiện diện, lượt</text><text x="783" y="493" class="body">doanh thu, cảnh báo</text></g>
+<g><rect x="770" y="560" width="165" height="85" class="box entity"/><text x="852" y="585" class="head" text-anchor="middle">ClassBooking</text><text x="783" y="609" class="body">Đặt chỗ lớp học</text><text x="783" y="628" class="body">điểm danh qua check-in</text></g>
+<g><rect x="770" y="695" width="165" height="85" class="box entity"/><text x="852" y="720" class="head" text-anchor="middle">Invoice</text><text x="783" y="744" class="body">Nguồn số liệu doanh thu</text></g>
+<g><rect x="770" y="830" width="165" height="85" class="box entity"/><text x="852" y="855" class="head" text-anchor="middle">AuditLog</text><text x="783" y="879" class="body">Ghi vết thao tác nhạy cảm</text></g>
+<path d="M735 207 H770 V317" class="edge"/><text x="741" y="198" class="label">phạm vi chi nhánh</text>
+<path d="M735 207 H750 V602 H770" class="edge"/><text x="744" y="580" class="label">lớp theo chi nhánh</text>
+<!-- right -->
+<g><rect x="1040" y="165" width="165" height="85" class="box entity"/><text x="1122" y="190" class="head" text-anchor="middle">Member</text><text x="1053" y="214" class="body">Tra cứu gói, lịch sử</text><text x="1053" y="233" class="body">gửi yêu cầu mua / gia hạn</text></g>
+<g><rect x="1290" y="165" width="165" height="85" class="box entity"/><text x="1372" y="190" class="head" text-anchor="middle">Trainer</text><text x="1303" y="214" class="body">Staff có vai trò PT</text><text x="1303" y="233" class="body">lịch rảnh, buổi PT</text></g>
+<g><rect x="1040" y="320" width="165" height="85" class="box entity"/><text x="1122" y="345" class="head" text-anchor="middle">PTSession</text><text x="1053" y="369" class="body">Buổi tập cá nhân</text><text x="1053" y="388" class="body">Member ↔ Trainer</text></g>
+<g><rect x="1290" y="320" width="165" height="85" class="box entity"/><text x="1372" y="345" class="head" text-anchor="middle">ClassSchedule</text><text x="1303" y="369" class="body">Lịch lặp lớp nhóm</text><text x="1303" y="388" class="body">sinh các buổi học</text></g>
+<g><rect x="1040" y="415" width="165" height="85" class="box entity"/><text x="1122" y="440" class="head" text-anchor="middle">WorkoutPlan</text><text x="1053" y="464" class="body">Giáo án cho hội viên</text></g>
+<g><rect x="1290" y="415" width="165" height="85" class="box entity"/><text x="1372" y="440" class="head" text-anchor="middle">ClassSession</text><text x="1303" y="464" class="body">Buổi học, phòng, sĩ số</text></g>
+<g><rect x="1040" y="595" width="165" height="85" class="box entity"/><text x="1122" y="620" class="head" text-anchor="middle">WorkoutLog</text><text x="1053" y="644" class="body">Nhật ký tập và tiến độ</text></g>
+<g><rect x="1290" y="595" width="165" height="85" class="box entity"/><text x="1372" y="620" class="head" text-anchor="middle">ClassBooking</text><text x="1303" y="644" class="body">Đặt / hủy chỗ lớp nhóm</text></g>
+<g><rect x="1040" y="775" width="165" height="85" class="box entity"/><text x="1122" y="800" class="head" text-anchor="middle">BodyMetric</text><text x="1053" y="824" class="body">Chỉ số cơ thể theo thời gian</text></g>
+<g><rect x="1290" y="775" width="165" height="85" class="box entity"/><text x="1372" y="800" class="head" text-anchor="middle">Notification</text><text x="1303" y="824" class="body">Nhắc gói / lớp, đã đọc</text></g>
+<!-- semantic note -->
+<rect x="65" y="1045" width="1370" height="80" rx="10" fill="#fff" stroke="#cbd5e1"/><text x="85" y="1074" class="legend">Ghi chú: Các lớp biểu diễn khái niệm nghiệp vụ, không phải entity/controller/service cụ thể. Quan hệ được giản lược để đọc ở mức phân tích.</text><text x="85" y="1098" class="legend">User/Member/Staff liên kết theo vai trò; ClassBooking liên kết Member và ClassSession; lớp kín chỗ từ chối đặt mới (ADR 0014); Invoice/Payment và Package/Membership xem ERD.</text>
+</svg>
