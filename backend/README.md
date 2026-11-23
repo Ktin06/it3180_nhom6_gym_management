@@ -188,3 +188,16 @@ F8 phát `ClassSessionChanged` sau khi commit. Payload gồm loại thay đổi 
 phòng và giờ trước/sau, cùng mã hội viên có chỗ BOOKED lúc thay đổi. F10 nhận bằng Spring
 `@EventListener` và lưu thông báo trong giao dịch riêng (`REQUIRES_NEW`). Hợp đồng nhận sự kiện
 cần được đối chiếu khi triển khai [#180](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/180).
+
+### Lịch công khai, lịch hội viên và lịch dạy
+
+- `GET /api/v1/public/class-branches` trả mã và tên chi nhánh đang hoạt động.
+- `GET /api/v1/public/class-sessions` trả loại lớp, giờ, chi nhánh, phòng, người dạy và trạng thái buổi.
+  Khách có thể truyền `branchId` và không cần JWT. Phản hồi không có danh tính, chỗ đặt hoặc số suất của hội viên.
+- `GET /api/v1/members/me/class-sessions` dùng cùng bộ lọc, trả thêm số suất trống và thông tin chỗ đặt
+  của hội viên đang đăng nhập. API đặt chỗ luôn kiểm tra lại điều kiện, cửa sổ và sĩ số.
+- `GET /api/v1/trainers/me/class-sessions` trả lớp nhóm theo người được phân công ở từng buổi.
+  Dùng `GET /api/v1/class-sessions/{id}/attendance` để mở danh sách điểm danh.
+
+Ba API lịch dùng `from` và `to` theo `yyyy-MM-dd`. Hai mốc đều được tính trong khoảng ngày Việt Nam.
+Mặc định trả hôm nay và sáu ngày kế tiếp. Khoảng dài hơn 31 ngày hoặc đảo thứ tự trả 400.

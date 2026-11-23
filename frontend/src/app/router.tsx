@@ -15,6 +15,12 @@ import { ProtectedRoute } from '../routes/ProtectedRoute'
 import { rolesFor, type ProtectedPath } from '../routes/route-access'
 import { MembersPage } from '../features/members/pages/MembersPage'
 import { PackagesPage } from '../features/packages/pages/PackagesPage'
+import {
+  MemberClassCalendarPage,
+  PublicClassCalendarPage,
+  TrainerClassCalendarPage,
+} from '../features/classes/ClassCalendarPages'
+import { TrainerAttendancePage } from '../features/classes/TrainerAttendancePage'
 import { PublicPricingPage } from '../features/packages/pages/PublicPricingPage'
 
 /** Route cần đăng nhập; vai trò được vào đọc từ ROUTE_ACCESS (routes/route-access.ts). */
@@ -31,6 +37,7 @@ export const routes: RouteObject[] = [
     children: [
       { path: '/', element: <GuestHomePage /> },
       { path: '/bang-gia', element: <PublicPricingPage /> },
+      { path: '/lich-lop', element: <PublicClassCalendarPage /> },
       { path: '/403', element: <ForbiddenPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
@@ -52,6 +59,8 @@ export const routes: RouteObject[] = [
       ...STAFF_ROLES.map((role) => guarded(HOME_PATH_BY_ROLE[role], <RoleHomePage role={role} />)),
       guarded('/members', <MembersPage />),
       guarded('/packages', <PackagesPage />),
+      guarded('/trainer/classes', <TrainerClassCalendarPage />),
+      guarded('/trainer/classes/:sessionId/attendance', <TrainerAttendancePage />),
       // Trang mới của nhân viên: thêm một dòng guarded(...) ở đây.
     ],
   },
@@ -63,7 +72,7 @@ export const routes: RouteObject[] = [
     ),
     children: [
       guarded(HOME_PATH_BY_ROLE.MEMBER, <RoleHomePage role="MEMBER" />),
-      // Trang mới của hội viên: thêm một dòng guarded(...) ở đây.
+      guarded('/member/classes', <MemberClassCalendarPage />),
     ],
   },
 ]
