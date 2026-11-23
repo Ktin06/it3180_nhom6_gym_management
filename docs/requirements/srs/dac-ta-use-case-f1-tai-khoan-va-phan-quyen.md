@@ -117,6 +117,31 @@ Chức năng **F1 – Tài khoản và phân quyền** cung cấp cơ chế xác
   - **E1 – Dữ liệu đầu vào sai định dạng (400 Bad Request):** Để trống trường bắt buộc hoặc `newPassword` dưới 8 ký tự / thiếu chữ cái hoặc chữ số (Bean Validation) → Trả `ProblemDetail` (400) kèm danh sách lỗi theo từng trường (`errors`).
   - **E2 – Vi phạm quy tắc nghiệp vụ (422 Unprocessable Content):** Mật khẩu hiện tại (`currentPassword`) không đúng, hoặc mật khẩu mới (`newPassword`) trùng với mật khẩu hiện tại (`BusinessRuleException`) → Trả `ProblemDetail` (422) thông báo chi tiết lý do.
 
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F1.4.1: Đổi mật khẩu
+- **User story:** Là **người dùng đã đăng nhập**, tôi muốn **đổi mật khẩu**, để **giữ tài khoản an toàn**.
+- **BR liên quan:** BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07; S1, S2, S3
+- **Version / Sprint:** v1 / Sprint 2
+- **Issue:** #120
+- **Tiêu chí chấp nhận:**
+  - **AC-F1.4.1-01: Đổi mật khẩu thành công, thu hồi toàn bộ phiên và yêu cầu đăng nhập lại** (BR-F1-03, BR-F1-04)
+    - **Given** Người dùng đã đăng nhập (bất kỳ vai trò nào trong 5 vai trò) và có một hoặc nhiều phiên `refresh_tokens` đang hiệu lực
+    - **When** Gửi `POST /api/v1/auth/change-password` (hoặc gửi biểu mẫu tại `/doi-mat-khau`) với `currentPassword` đúng và `newPassword` hợp lệ, khác mật khẩu hiện tại
+    - **Then** Hệ thống trả `204 No Content`, cập nhật `users.password_hash` bằng BCrypt, đánh dấu `revoked_at` cho toàn bộ `refresh_tokens` đang hiệu lực của tài khoản đó (không ảnh hưởng tài khoản khác); mật khẩu mới đăng nhập được, mật khẩu cũ và các refresh token cũ bị từ chối `401`; giao diện xóa phiên cục bộ và chuyển về `/login` kèm thông báo *"Đã đổi mật khẩu, vui lòng đăng nhập lại"*
+  - **AC-F1.4.1-02: Từ chối khi mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ** (BR-F1-07)
+    - **Given** Người dùng đã đăng nhập
+    - **When** Gửi `POST /api/v1/auth/change-password` với `currentPassword` không khớp (kể cả vượt quá 72 byte UTF-8) hoặc `newPassword` trùng `currentPassword`
+    - **Then** Hệ thống trả `422 Unprocessable Content` kèm thông báo tiếng Việt (*"Mật khẩu hiện tại không đúng."* hoặc *"Mật khẩu mới phải khác mật khẩu hiện tại."*), không thay đổi `password_hash` và không thu hồi `refresh_tokens`; giao diện hiển thị thông báo lỗi qua `Alert` và giữ nguyên phiên đăng nhập hiện tại
+  - **AC-F1.4.1-03: Từ chối khi dữ liệu đầu vào sai định dạng hoặc mật khẩu mới không đạt chuẩn bảo mật** (BR-F1-03)
+    - **Given** Người dùng đã đăng nhập mở màn hình `/doi-mat-khau` hoặc gọi API
+    - **When** Bỏ trống trường bắt buộc, nhập `newPassword` dưới 8 ký tự, thiếu chữ cái hoặc chữ số, vượt quá 72 byte UTF-8, hoặc ô nhập lại mật khẩu mới không khớp
+    - **Then** Trình duyệt chặn gửi và hiển thị lỗi tại ô nhập; nếu gọi thẳng API với dữ liệu không hợp lệ thì backend trả `400 Bad Request` kèm danh sách lỗi theo từng trường (`errors.currentPassword`, `errors.newPassword`) và giao diện gắn lỗi vào đúng trường
+  - **AC-F1.4.1-04: Chặn truy cập khi chưa đăng nhập và mở đúng khung giao diện cho mọi vai trò đã đăng nhập** (BR-F1-05)
+    - **Given** Người dùng chưa đăng nhập hoặc đã đăng nhập với bất kỳ vai trò nào (`SUPER_ADMIN`, `BRANCH_MANAGER`, `RECEPTIONIST`, `TRAINER`, `MEMBER`)
+    - **When** Gọi `POST /api/v1/auth/change-password` không kèm JWT hợp lệ, hoặc bấm **Đổi mật khẩu** trên `UserMenu` để mở `/doi-mat-khau`
+    - **Then** Request không có JWT hợp lệ bị chặn với `401 Unauthorized`; người dùng đã đăng nhập thấy nút **Đổi mật khẩu** trên thanh tiêu đề (thu gọn chỉ hiện biểu tượng ở màn hình hẹp 360px, giữ `aria-label`) và mở `/doi-mat-khau` trong đúng khung giao diện của vai trò mình (`MemberLayout` cho hội viên, `StaffLayout` cho nhân viên) mà không bị chuyển sang `/403`
+
 ---
 
 ### 3.5. UC-F1.5: Quên mật khẩu và đặt lại mật khẩu (Sprint 2)
@@ -145,12 +170,13 @@ Chức năng **F1 – Tài khoản và phân quyền** cung cấp cơ chế xác
 ## 4. Quy tắc nghiệp vụ và bảo mật áp dụng
 
 Chi tiết đối chiếu với [Bản chốt phạm vi](../ban-chot-pham-vi.md):
-- **Chỉ đăng nhập bằng email:** Email luôn chuyển về chữ thường trước khi lưu và tìm kiếm (`CHECK email = lower(email)`).
-- **Chống chiếm đoạt hồ sơ qua số điện thoại (S3):** Khi khách tự đăng ký mà số điện thoại đã thuộc một hồ sơ hội viên có sẵn, hệ thống **bắt buộc từ chối (409)** và hướng dẫn liên hệ quầy; tuyệt đối không tự gắn tài khoản mới vào hồ sơ cũ.
-- **Mật khẩu (S1):** Băm bằng bcrypt (`BCryptPasswordEncoder`), tối thiểu 8 ký tự gồm cả chữ cái và chữ số.
-- **Phiên đăng nhập (S2, ADR 0008):** Access Token (JWT) hết hạn sau **15 phút**; Refresh Token lưu mã băm SHA-256 trong bảng `refresh_tokens`, truyền qua cookie `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`.
-- **Phân quyền ở Backend (S3):** Mọi API nghiệp vụ dưới `/api/v1/**` (trừ các endpoint đăng ký/đăng nhập/làm mới/công khai) đều kiểm tra vai trò và quyền sở hữu dữ liệu ở backend.
-- **Khóa đăng nhập tạm thời (S4):** Khóa 15 phút (`locked_until`) sau 5 lần nhập sai mật khẩu liên tiếp (`failed_login_count`).
+- **BR-F1-01 – Chỉ đăng nhập bằng email:** Email luôn chuyển về chữ thường trước khi lưu và tìm kiếm (`CHECK email = lower(email)`).
+- **BR-F1-02 – Chống chiếm đoạt hồ sơ qua số điện thoại (S3):** Khi khách tự đăng ký mà số điện thoại đã thuộc một hồ sơ hội viên có sẵn, hệ thống **bắt buộc từ chối (409)** và hướng dẫn liên hệ quầy; tuyệt đối không tự gắn tài khoản mới vào hồ sơ cũ.
+- **BR-F1-03 – Mật khẩu (S1):** Băm bằng bcrypt (`BCryptPasswordEncoder`), tối thiểu 8 ký tự gồm cả chữ cái và chữ số, không vượt quá 72 byte UTF-8.
+- **BR-F1-04 – Phiên đăng nhập (S2, ADR 0008):** Access Token (JWT) hết hạn sau **15 phút**; Refresh Token lưu mã băm SHA-256 trong bảng `refresh_tokens`, truyền qua cookie `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`. Khi đổi mật khẩu hoặc đặt lại mật khẩu, toàn bộ refresh token đang hiệu lực của tài khoản bị thu hồi ngay trong cùng giao dịch.
+- **BR-F1-05 – Phân quyền ở Backend (S3):** Mọi API nghiệp vụ dưới `/api/v1/**` (trừ các endpoint đăng ký/đăng nhập/làm mới/công khai) đều kiểm tra vai trò và quyền sở hữu dữ liệu ở backend.
+- **BR-F1-06 – Khóa đăng nhập tạm thời (S4):** Khóa 15 phút (`locked_until`) sau 5 lần nhập sai mật khẩu liên tiếp (`failed_login_count`).
+- **BR-F1-07 – Đối chiếu khi đổi mật khẩu (UC-F1.4):** Mật khẩu hiện tại phải khớp `users.password_hash` và mật khẩu mới phải khác mật khẩu hiện tại (vi phạm trả `422 Unprocessable Content`).
 
 ---
 

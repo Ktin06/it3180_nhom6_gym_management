@@ -338,7 +338,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("US-F1.4.1 E1: thiếu trường hoặc mật khẩu mới dưới 8 ký tự, thiếu chữ hay số trả 400 kèm errors")
+    @DisplayName("TC-F1.4.1-03a: thiếu trường hoặc mật khẩu mới dưới 8 ký tự, thiếu chữ hay số trả 400 kèm errors")
     void doiMatKhauSaiDinhDangTra400KemErrors() throws Exception {
         String bearer = JwtTestSupport.bearerToken(10L, "member@example.com", UserRole.MEMBER);
 
@@ -375,7 +375,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("US-F1.4.1 E2: mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ trả 422")
+    @DisplayName("TC-F1.4.1-02b: mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ trả 422")
     void doiMatKhauViPhamQuyTacNghiepVuTra422() throws Exception {
         String bearer = JwtTestSupport.bearerToken(10L, "member@example.com", UserRole.MEMBER);
         ChangePasswordRequest request = new ChangePasswordRequest("WrongOld123", "NewPass456");
@@ -394,7 +394,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("US-F1.4.1 S2: gọi đổi mật khẩu không có token trả 401")
+    @DisplayName("TC-F1.4.1-04a: gọi đổi mật khẩu không có token trả 401")
     void doiMatKhauKhongCoTokenTra401() throws Exception {
         mockMvc.perform(post("/api/v1/auth/change-password")
                 .contentType(MediaType.APPLICATION_JSON)

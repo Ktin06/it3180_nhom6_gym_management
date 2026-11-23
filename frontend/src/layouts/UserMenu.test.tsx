@@ -68,30 +68,34 @@ describe('UserMenu', () => {
     expect(logout).toHaveBeenCalledTimes(2)
   })
 
-  it.each([
-    { role: 'RECEPTIONIST' as const, path: '/reception' },
-    { role: 'MEMBER' as const, path: '/member' },
-  ])(
-    'US-F1.4.1 menu: UserMenu có mục Đổi mật khẩu cho $role, mở /doi-mat-khau',
-    async ({ role, path }) => {
-      const user = userEvent.setup()
-      renderUserMenu(role, path)
+  describe('TC-F1.4.1-04c: UserMenu có mục Đổi mật khẩu cho mọi vai trò, mở /doi-mat-khau', () => {
+    it.each([
+      { role: 'RECEPTIONIST' as const, path: '/reception' },
+      { role: 'MEMBER' as const, path: '/member' },
+    ])(
+      'UserMenu có mục Đổi mật khẩu cho $role, mở /doi-mat-khau',
+      async ({ role, path }) => {
+        const user = userEvent.setup()
+        renderUserMenu(role, path)
 
-      const changePasswordButton = screen.getByRole('button', { name: 'Đổi mật khẩu' })
-      expect(changePasswordButton).toBeInTheDocument()
+        const changePasswordButton = screen.getByRole('button', { name: 'Đổi mật khẩu' })
+        expect(changePasswordButton).toBeInTheDocument()
 
-      await user.click(changePasswordButton)
+        await user.click(changePasswordButton)
 
-      expect(await screen.findByText('Trang đổi mật khẩu')).toBeInTheDocument()
-    },
-  )
+        expect(await screen.findByText('Trang đổi mật khẩu')).toBeInTheDocument()
+      },
+    )
+  })
 
-  it.each(['Đổi mật khẩu', 'Đăng xuất'])('ẩn chữ của nút "%s" trên màn hẹp, giữ tên nút', (name) => {
-    renderUserMenu('MEMBER', '/member')
+  describe('TC-F1.4.1-04d: ẩn chữ của nút trên màn hẹp 360px, giữ tên nút qua aria-label', () => {
+    it.each(['Đổi mật khẩu', 'Đăng xuất'])('ẩn chữ của nút "%s" trên màn hẹp, giữ tên nút', (name) => {
+      renderUserMenu('MEMBER', '/member')
 
-    const button = screen.getByRole('button', { name })
-    const label = Array.from(button.querySelectorAll('span')).find((el) => el.textContent === name)
-    expect(label).toBeDefined()
-    expect(label).toHaveClass('hide-on-mobile')
+      const button = screen.getByRole('button', { name })
+      const label = Array.from(button.querySelectorAll('span')).find((el) => el.textContent === name)
+      expect(label).toBeDefined()
+      expect(label).toHaveClass('hide-on-mobile')
+    })
   })
 })

@@ -81,7 +81,7 @@ describe('auth-api', () => {
     })
   })
 
-  it('US-F1.4.1 API: changePassword gọi POST /auth/change-password đúng payload', async () => {
+  it('TC-F1.4.1-01e: changePassword gọi POST /auth/change-password đúng payload', async () => {
     post.mockResolvedValueOnce({ data: undefined })
 
     await expect(

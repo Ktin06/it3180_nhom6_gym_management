@@ -116,7 +116,7 @@ describe('ChangePasswordPage', () => {
     http.defaults.adapter = originalAdapter
   })
 
-  it('US-F1.4.1 KB1: Đổi mật khẩu thành công gọi API, xóa phiên trình duyệt và chuyển về /login kèm thông báo', async () => {
+  it('TC-F1.4.1-01f: Đổi mật khẩu thành công gọi API, xóa phiên trình duyệt và chuyển về /login kèm thông báo', async () => {
     let resolveChangePassword!: (value: { status: number; data?: unknown }) => void
     const calls = renderChangePasswordFlow(
       'RECEPTIONIST',
@@ -159,7 +159,7 @@ describe('ChangePasswordPage', () => {
     })
   })
 
-  it('US-F1.4.1 E1: Kiểm tra quy tắc mật khẩu S1, khớp mật khẩu nhập lại và hiển thị lỗi 400 theo trường', async () => {
+  it('TC-F1.4.1-03b: Kiểm tra quy tắc mật khẩu S1, khớp mật khẩu nhập lại và hiển thị lỗi 400 theo trường', async () => {
     const onChangePassword = vi.fn(async () => ({
       status: 400,
       data: {
@@ -234,7 +234,7 @@ describe('ChangePasswordPage', () => {
     expect(calls.filter((call) => call.url === '/auth/change-password')).toHaveLength(1)
   })
 
-  it('US-F1.4.1 E2: Lỗi 422 từ API hiển thị đúng thông báo và không xóa phiên', async () => {
+  it('TC-F1.4.1-02c: Lỗi 422 từ API hiển thị đúng thông báo và không xóa phiên', async () => {
     const onChangePassword = vi
       .fn()
       .mockResolvedValueOnce({
@@ -273,30 +273,32 @@ describe('ChangePasswordPage', () => {
     expect(getAccessToken()).toBe(jwt('15'))
   })
 
-  it.each([
-    { role: 'RECEPTIONIST' as const },
-    { role: 'MEMBER' as const },
-  ])(
-    'US-F1.4.1 route: $role mở /doi-mat-khau đúng layout của mình và không bị /403',
-    async ({ role }) => {
-      setupAuthenticatedHttp(role, async () => ({ status: 204 }))
-      const memoryRouter = createMemoryRouter(routes, { initialEntries: ['/doi-mat-khau'] })
+  describe('TC-F1.4.1-04b: mở /doi-mat-khau đúng layout theo vai trò và không bị /403', () => {
+    it.each([
+      { role: 'RECEPTIONIST' as const },
+      { role: 'MEMBER' as const },
+    ])(
+      '$role mở /doi-mat-khau đúng layout của mình và không bị /403',
+      async ({ role }) => {
+        setupAuthenticatedHttp(role, async () => ({ status: 204 }))
+        const memoryRouter = createMemoryRouter(routes, { initialEntries: ['/doi-mat-khau'] })
 
-      render(
-        <App>
-          <AuthProvider>
-            <RouterProvider router={memoryRouter} />
-          </AuthProvider>
-        </App>,
-      )
+        render(
+          <App>
+            <AuthProvider>
+              <RouterProvider router={memoryRouter} />
+            </AuthProvider>
+          </App>,
+        )
 
-      expect(await screen.findByRole('heading', { name: 'Đổi mật khẩu' })).toBeInTheDocument()
-      if (role === 'MEMBER') {
-        expect(screen.getByRole('navigation', { name: 'Điều hướng hội viên' })).toBeInTheDocument()
-      } else {
-        expect(screen.getByRole('button', { name: 'Mở menu' })).toBeInTheDocument()
-      }
-      expect(screen.queryByText(/không có quyền/i)).not.toBeInTheDocument()
-    },
-  )
+        expect(await screen.findByRole('heading', { name: 'Đổi mật khẩu' })).toBeInTheDocument()
+        if (role === 'MEMBER') {
+          expect(screen.getByRole('navigation', { name: 'Điều hướng hội viên' })).toBeInTheDocument()
+        } else {
+          expect(screen.getByRole('button', { name: 'Mở menu' })).toBeInTheDocument()
+        }
+        expect(screen.queryByText(/không có quyền/i)).not.toBeInTheDocument()
+      },
+    )
+  })
 })

@@ -49,7 +49,7 @@ class ChangePasswordIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F1.4.1 KB1: đổi mật khẩu thành công")
+    @DisplayName("TC-F1.4.1-01a: đổi mật khẩu thành công, mật khẩu mới đăng nhập được, mật khẩu cũ không")
     void doiMatKhauThanhCongMatKhauMoiDangNhapDuocMatKhauCuKhong() throws Exception {
         SessionTokens session = registerMember("Nguyễn Văn A", "member@example.com", "0912345678", "OldPass123");
 
@@ -83,7 +83,7 @@ class ChangePasswordIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F1.4.1 KB1: thu hồi mọi phiên")
+    @DisplayName("TC-F1.4.1-01b: thu hồi mọi refresh token của người dùng khi đổi mật khẩu")
     void doiMatKhauThuHoiMoiRefreshTokenCuaNguoiDung() throws Exception {
         SessionTokens session1 = registerMember("Nguyễn Văn A", "member@example.com", "0912345678", "OldPass123");
         SessionTokens session2 = loginMember("member@example.com", "OldPass123");

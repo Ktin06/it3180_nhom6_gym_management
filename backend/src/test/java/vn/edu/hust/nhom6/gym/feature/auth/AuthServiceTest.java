@@ -447,7 +447,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.4.1 KB1: đổi mật khẩu thành công")
+    @DisplayName("TC-F1.4.1-01c: đổi mật khẩu thành công cập nhật password_hash")
     void doiMatKhauThanhCongCapNhatPasswordHash() {
         CurrentUser me = new CurrentUser(10L, UserRole.MEMBER);
         ChangePasswordRequest request = new ChangePasswordRequest("OldPass123", "NewPass456");
@@ -471,7 +471,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.4.1 KB1: thu hồi mọi phiên")
+    @DisplayName("TC-F1.4.1-01d: đổi mật khẩu thu hồi mọi phiên của người dùng")
     void doiMatKhauThuHoiMoiPhienCuaNguoiDung() {
         CurrentUser me = new CurrentUser(10L, UserRole.MEMBER);
         ChangePasswordRequest request = new ChangePasswordRequest("OldPass123", "NewPass456");
@@ -494,7 +494,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("US-F1.4.1 E2: mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ trả 422")
+    @DisplayName("TC-F1.4.1-02a: mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ trả 422")
     void doiMatKhauHienTaiSaiHoacMatKhauMoiTrungCuNemBusinessRuleException() {
         CurrentUser me = new CurrentUser(10L, UserRole.MEMBER);
         User user = User.builder()
