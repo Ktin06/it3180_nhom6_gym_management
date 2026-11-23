@@ -21,7 +21,7 @@ import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 import vn.edu.hust.nhom6.gym.feature.auth.service.JwtTokenService;
 import vn.edu.hust.nhom6.gym.feature.groupclass.dto.ClassDtos.*;
 import vn.edu.hust.nhom6.gym.feature.groupclass.service.*;
-import vn.edu.hust.nhom6.gym.feature.member.service.MemberActor;
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -39,7 +39,7 @@ class ClassApiIntegrationTest {
     @Autowired JwtTokenService tokens;
     @Autowired ClassBookingService bookings;
     @Autowired ClassScheduleService schedules;
-    @MockitoBean(name = "classClock") Clock clock;
+    @MockitoBean(name = "clock") Clock clock;
     static final OffsetDateTime NOW = OffsetDateTime.parse("2026-11-18T10:00:00+07:00");
     long branch, otherBranch, manager, receptionist, trainer, room, type, member, user;
 
@@ -111,8 +111,8 @@ class ClassApiIntegrationTest {
             """, Long.class, schedule, branch, trainer, room, start.toLocalDate(), start, start.plusHours(1), capacity);
     }
 
-    private MemberActor actor() { return new MemberActor(user, UserRole.MEMBER); }
-    private MemberActor manager() { return new MemberActor(manager, UserRole.BRANCH_MANAGER); }
+    private CurrentUser actor() { return new CurrentUser(user, UserRole.MEMBER); }
+    private CurrentUser manager() { return new CurrentUser(manager, UserRole.BRANCH_MANAGER); }
     private String bearer(long id, String role) { return "Bearer " + tokens.generateAccessToken(id, "test@f8.example", UserRole.valueOf(role)); }
 
     @Test
@@ -123,7 +123,7 @@ class ClassApiIntegrationTest {
         long secondUser = user("second", "MEMBER");
         long secondMember = member(secondUser);
         timePackage(secondMember);
-        var second = new MemberActor(secondUser, UserRole.MEMBER);
+        var second = new CurrentUser(secondUser, UserRole.MEMBER);
 
         mvc.perform(post("/api/v1/class-sessions/{id}/bookings", session)
             .header("Authorization", bearer(secondUser, "MEMBER")).contentType(APPLICATION_JSON)
@@ -150,7 +150,7 @@ class ClassApiIntegrationTest {
         long secondMember = member(secondUser);
         timePackage(secondMember);
 
-        assertThatThrownBy(() -> bookings.book(new MemberActor(secondUser, UserRole.MEMBER), session, secondMember))
+        assertThatThrownBy(() -> bookings.book(new CurrentUser(secondUser, UserRole.MEMBER), session, secondMember))
             .isInstanceOf(ConflictException.class).hasMessage("Lớp đã đủ chỗ");
     }
 
@@ -298,7 +298,7 @@ class ClassApiIntegrationTest {
         long secondMember = member(secondUser);
         timePackage(secondMember);
         var result = race(() -> attemptBook(actor(), session, member),
-            () -> attemptBook(new MemberActor(secondUser, UserRole.MEMBER), session, secondMember));
+            () -> attemptBook(new CurrentUser(secondUser, UserRole.MEMBER), session, secondMember));
         assertThat(result).containsExactlyInAnyOrder("BOOKED", "Lớp đã đủ chỗ");
         assertThat(jdbc.queryForObject("SELECT count(*) FROM class_bookings", Long.class)).isEqualTo(1);
     }
@@ -313,7 +313,7 @@ class ClassApiIntegrationTest {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM class_bookings", Long.class)).isEqualTo(1);
     }
 
-    private String attemptBook(MemberActor actor, long session, long member) {
+    private String attemptBook(CurrentUser actor, long session, long member) {
         try {
             return bookings.book(actor, session, member).status();
         } catch (ConflictException ex) {
@@ -470,9 +470,9 @@ class ClassApiIntegrationTest {
         jdbc.update("UPDATE staff SET branch_id=? WHERE user_id IN (?,?)", otherBranch, manager, receptionist);
         assertThatThrownBy(() -> schedules.detail(manager(), jdbc.queryForObject(
             "SELECT class_schedule_id FROM class_sessions WHERE id=?", Long.class, s))).hasMessageContaining("ngoài chi nhánh");
-        assertThatThrownBy(() -> bookings.cancel(new MemberActor(receptionist,UserRole.RECEPTIONIST),b.id()))
+        assertThatThrownBy(() -> bookings.cancel(new CurrentUser(receptionist,UserRole.RECEPTIONIST),b.id()))
             .hasMessageContaining("không có quyền");
-        assertThatThrownBy(() -> bookings.book(new MemberActor(receptionist, UserRole.RECEPTIONIST), s, member))
+        assertThatThrownBy(() -> bookings.book(new CurrentUser(receptionist, UserRole.RECEPTIONIST), s, member))
             .hasMessageContaining("không có quyền");
         assertThat(bookings.detail(actor(),b.id()).status()).isEqualTo("BOOKED");
     }
@@ -533,7 +533,7 @@ class ClassApiIntegrationTest {
         long secondUser = user("second", "MEMBER");
         long secondMember = member(secondUser);
         timePackage(secondMember);
-        var second = new MemberActor(secondUser, UserRole.MEMBER);
+        var second = new CurrentUser(secondUser, UserRole.MEMBER);
         at(NOW.plusMinutes(31));
 
         assertThatThrownBy(() -> bookings.book(second, session, secondMember)).hasMessageContaining("đóng đặt");

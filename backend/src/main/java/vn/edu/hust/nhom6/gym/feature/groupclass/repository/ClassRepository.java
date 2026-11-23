@@ -14,9 +14,6 @@ import vn.edu.hust.nhom6.gym.feature.groupclass.dto.ClassDtos.*;
 @Repository
 @RequiredArgsConstructor
 public class ClassRepository {
-    private static final Set<String> ZERO_ALLOWED_CONFIGS = Set.of(
-        "BOOKING_WINDOW_DAYS", "BOOKING_CUTOFF_MIN", "LATE_CANCEL_HOURS");
-
     private final NamedParameterJdbcTemplate jdbc;
 
     public record MemberRow(Long id, Long userId, Long homeBranchId, String status,
@@ -158,19 +155,6 @@ public class ClassRepository {
             ON CONFLICT (class_schedule_id,occurrence_date) DO NOTHING
             """, Map.of("id", s.id(), "branch", s.branchId(), "trainer", s.trainerId(), "room", s.roomId(),
                 "date", date, "start", start, "end", end, "capacity", s.capacity()));
-    }
-
-    public int config(long branch, String key) {
-        var values = jdbc.queryForList("""
-            SELECT config_value FROM system_configs WHERE config_key=:key AND (branch_id=:branch OR branch_id IS NULL)
-            ORDER BY branch_id NULLS LAST LIMIT 1
-            """, Map.of("key", key, "branch", branch), String.class);
-        if (values.isEmpty()) { throw new IllegalStateException("Thiếu cấu hình " + key); }
-        int value = Integer.parseInt(values.getFirst());
-        if (value < 0 || value > 3660 || (value == 0 && !ZERO_ALLOWED_CONFIGS.contains(key))) {
-            throw new IllegalStateException("Cấu hình không hợp lệ: " + key);
-        }
-        return value;
     }
 
     public boolean hasActiveTimePackage(long memberId, long branch, LocalDate date) {

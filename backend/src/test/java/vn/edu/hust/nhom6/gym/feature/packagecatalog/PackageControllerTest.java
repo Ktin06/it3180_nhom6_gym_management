@@ -16,7 +16,6 @@ import vn.edu.hust.nhom6.gym.common.dto.PageResponse;
 import vn.edu.hust.nhom6.gym.common.exception.GlobalExceptionHandler;
 import vn.edu.hust.nhom6.gym.config.SecurityConfig;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.controller.PackageController;
-import vn.edu.hust.nhom6.gym.feature.packagecatalog.controller.PackageExceptionHandler;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.PackageStatus;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.service.PackageCatalogService;
 import static org.mockito.Mockito.*;
@@ -27,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @WebMvcTest(PackageController.class)
-@ContextConfiguration(classes = {PackageController.class, PackageExceptionHandler.class,
+@ContextConfiguration(classes = {PackageController.class,
     GlobalExceptionHandler.class, SecurityConfig.class})
 class PackageControllerTest {
     @Autowired MockMvc mvc;
@@ -42,7 +41,8 @@ class PackageControllerTest {
     @Test
     @DisplayName("TC-F3.1.1-02d: Không gửi tham số thì dùng mặc định ACTIVE, trang 0, 20 gói")
     void defaultContract() throws Exception {
-        mvc.perform(get("/api/v1/packages").with(jwt().authorities(new SimpleGrantedAuthority("ROLE_RECEPTIONIST"))))
+        mvc.perform(get("/api/v1/packages").with(jwt().jwt(j -> j.subject("7"))
+                .authorities(new SimpleGrantedAuthority("ROLE_RECEPTIONIST"))))
             .andExpect(status().isOk()).andExpect(jsonPath("$.content").isArray())
             .andExpect(jsonPath("$.page").value(0)).andExpect(jsonPath("$.size").value(20))
             .andExpect(jsonPath("$.totalElements").value(0)).andExpect(jsonPath("$.totalPages").value(0));

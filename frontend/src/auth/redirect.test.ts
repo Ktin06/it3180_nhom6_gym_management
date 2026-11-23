@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { roleAwareReturnPath, safeReturnPath } from './redirect'
+import { ROUTE_ACCESS } from '../routes/route-access'
 import { HOME_PATH_BY_ROLE, MEMBER_MANAGEMENT_ROLES, type Role } from './roles'
 
 describe('safeReturnPath', () => {
@@ -76,5 +77,41 @@ describe('roleAwareReturnPath', () => {
         'MEMBER',
       ),
     ).toBe('/member')
+  })
+
+  describe('trang mới chỉ cần khai báo một dòng trong ROUTE_ACCESS', () => {
+    const access = { ...ROUTE_ACCESS, '/checkins': { roles: ['RECEPTIONIST'] as const } }
+
+    it('lễ tân quay lại đúng trang mới sau khi đăng nhập', () => {
+      expect(
+        roleAwareReturnPath(
+          { from: { pathname: '/checkins', search: '?date=2026-11-19' } },
+          'https://gym.example',
+          'RECEPTIONIST',
+          access,
+        ),
+      ).toBe('/checkins?date=2026-11-19')
+    })
+
+    it('hội viên mở trang mới của lễ tân thì về trang chủ hội viên', () => {
+      expect(
+        roleAwareReturnPath(
+          { from: { pathname: '/checkins' } },
+          'https://gym.example',
+          'MEMBER',
+          access,
+        ),
+      ).toBe('/member')
+    })
+
+    it('chưa khai báo thì lễ tân cũng về trang chủ của mình', () => {
+      expect(
+        roleAwareReturnPath(
+          { from: { pathname: '/checkins' } },
+          'https://gym.example',
+          'RECEPTIONIST',
+        ),
+      ).toBe('/reception')
+    })
   })
 })

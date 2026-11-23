@@ -1,16 +1,18 @@
 package vn.edu.hust.nhom6.gym.feature.groupclass.service;
 
-import java.time.*;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hust.nhom6.gym.common.dto.PageResponse;
+import vn.edu.hust.nhom6.gym.common.time.VnTime;
 import vn.edu.hust.nhom6.gym.common.exception.*;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
-import vn.edu.hust.nhom6.gym.feature.member.service.MemberActor;
-import vn.edu.hust.nhom6.gym.feature.staff.service.StaffLookupService;
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
+import vn.edu.hust.nhom6.gym.feature.staff.service.StaffService;
 import vn.edu.hust.nhom6.gym.feature.groupclass.dto.ClassDtos.*;
 import vn.edu.hust.nhom6.gym.feature.groupclass.repository.ClassRepository;
 
@@ -18,24 +20,24 @@ import vn.edu.hust.nhom6.gym.feature.groupclass.repository.ClassRepository;
 @RequiredArgsConstructor
 @Transactional
 public class ClassScheduleService {
-    public static final ZoneId VIETNAM = ZoneId.of("Asia/Ho_Chi_Minh");
     private final ClassRepository classes;
-    private final StaffLookupService staff;
+    private final StaffService staff;
+    private final VnTime time;
 
-    public long managerBranch(MemberActor actor) {
+    public long managerBranch(CurrentUser actor) {
         if (actor.role() != UserRole.BRANCH_MANAGER) { throw new ForbiddenException("Chỉ quản lý chi nhánh được quản lý lịch lặp."); }
-        return staff.activeBranchIdForUser(actor.userId());
+        return staff.requireBranchId(actor.userId());
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<Schedule> list(MemberActor actor, int page, int size) {
+    public PageResponse<Schedule> list(CurrentUser actor, int page, int size) {
         long branch = managerBranch(actor);
         long total = classes.scheduleCount(branch);
         return new PageResponse<>(classes.schedules(branch, page, size), page, size, total,
             (int) ((total + size - 1) / size));
     }
 
-    public Schedule save(MemberActor actor, Long id, ScheduleRequest r) {
+    public Schedule save(CurrentUser actor, Long id, ScheduleRequest r) {
         long branch = managerBranch(actor);
         classes.lockBranch(branch);
         if (id != null) {
@@ -62,7 +64,7 @@ public class ClassScheduleService {
         return classes.saveSchedule(id, branch, r);
     }
 
-    public Schedule deactivate(MemberActor actor, long id) {
+    public Schedule deactivate(CurrentUser actor, long id) {
         long branch = managerBranch(actor);
         classes.lockBranch(branch);
         if (!classes.schedule(id).branchId().equals(branch)) { throw new ForbiddenException("Lịch lớp nằm ngoài chi nhánh quản lý."); }
@@ -71,7 +73,7 @@ public class ClassScheduleService {
     }
 
     @Transactional(readOnly = true)
-    public Schedule detail(MemberActor actor, long id) {
+    public Schedule detail(CurrentUser actor, long id) {
         var s = classes.schedule(id);
         if (!s.branchId().equals(managerBranch(actor))) { throw new ForbiddenException("Lịch lớp nằm ngoài chi nhánh quản lý."); }
         return s;
@@ -109,8 +111,8 @@ public class ClassScheduleService {
         int inserted = 0;
         for (LocalDate date = first; !date.isAfter(last); date = date.plusWeeks(1)) {
             if (classes.occurrenceExists(id, date)) { continue; }
-            var start = date.atTime(s.startTime()).atZone(VIETNAM).toOffsetDateTime();
-            var end = date.atTime(s.endTime()).atZone(VIETNAM).toOffsetDateTime();
+            var start = time.at(date, s.startTime());
+            var end = time.at(date, s.endTime());
             if (classes.resourceConflict(s.trainerId(), s.roomId(), start, end)) {
                 throw new ConflictException("Trùng phòng hoặc huấn luyện viên khi sinh buổi ngày " + date + ".");
             }

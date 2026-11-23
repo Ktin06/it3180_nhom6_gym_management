@@ -1,5 +1,6 @@
+import type { ReactNode } from 'react'
 import { createBrowserRouter, type RouteObject } from 'react-router-dom'
-import { HOME_PATH_BY_ROLE, MEMBER_MANAGEMENT_ROLES, STAFF_ROLES } from '../auth/roles'
+import { HOME_PATH_BY_ROLE, STAFF_ROLES } from '../auth/roles'
 import { AuthLayout } from '../layouts/AuthLayout'
 import { MemberLayout } from '../layouts/MemberLayout'
 import { PublicLayout } from '../layouts/PublicLayout'
@@ -11,9 +12,18 @@ import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { ProtectedRoute } from '../routes/ProtectedRoute'
+import { rolesFor, type ProtectedPath } from '../routes/route-access'
 import { MembersPage } from '../features/members/pages/MembersPage'
 import { PackagesPage } from '../features/packages/pages/PackagesPage'
 import { PublicPricingPage } from '../features/packages/pages/PublicPricingPage'
+
+/** Route cần đăng nhập; vai trò được vào đọc từ ROUTE_ACCESS (routes/route-access.ts). */
+function guarded(path: ProtectedPath, element: ReactNode): RouteObject {
+  return {
+    path,
+    element: <ProtectedRoute allowedRoles={rolesFor(path)}>{element}</ProtectedRoute>,
+  }
+}
 
 export const routes: RouteObject[] = [
   {
@@ -39,30 +49,10 @@ export const routes: RouteObject[] = [
       </ProtectedRoute>
     ),
     children: [
-      ...STAFF_ROLES.map((role) => ({
-        path: HOME_PATH_BY_ROLE[role],
-        element: (
-          <ProtectedRoute allowedRoles={[role]}>
-            <RoleHomePage role={role} />
-          </ProtectedRoute>
-        ),
-      })),
-      {
-        path: '/members',
-        element: (
-          <ProtectedRoute allowedRoles={MEMBER_MANAGEMENT_ROLES}>
-            <MembersPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/packages',
-        element: (
-          <ProtectedRoute allowedRoles={MEMBER_MANAGEMENT_ROLES}>
-            <PackagesPage />
-          </ProtectedRoute>
-        ),
-      },
+      ...STAFF_ROLES.map((role) => guarded(HOME_PATH_BY_ROLE[role], <RoleHomePage role={role} />)),
+      guarded('/members', <MembersPage />),
+      guarded('/packages', <PackagesPage />),
+      // Trang mới của nhân viên: thêm một dòng guarded(...) ở đây.
     ],
   },
   {
@@ -71,7 +61,10 @@ export const routes: RouteObject[] = [
         <MemberLayout />
       </ProtectedRoute>
     ),
-    children: [{ path: HOME_PATH_BY_ROLE.MEMBER, element: <RoleHomePage role="MEMBER" /> }],
+    children: [
+      guarded(HOME_PATH_BY_ROLE.MEMBER, <RoleHomePage role="MEMBER" />),
+      // Trang mới của hội viên: thêm một dòng guarded(...) ở đây.
+    ],
   },
 ]
 

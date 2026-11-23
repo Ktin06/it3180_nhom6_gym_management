@@ -1,30 +1,43 @@
 package vn.edu.hust.nhom6.gym.common.exception;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.method.ParameterErrors;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.core.JacksonException;
 
 /**
- * Chuyển ngoại lệ thành phản hồi lỗi dạng ProblemDetail (RFC 7807), nội dung tiếng Việt.
+ * Nơi <b>duy nhất</b> chuyển ngoại lệ thành phản hồi lỗi dạng ProblemDetail (RFC 7807), nội dung tiếng Việt.
+ * Chức năng mới không viết {@code @RestControllerAdvice} riêng: service ném ngoại lệ trong
+ * {@code common/exception} (hoặc {@code AccessDeniedException} cho 403), lớp này lo phần còn lại.
  *
- * <p>Các lỗi chuẩn của Spring MVC (sai phương thức, thiếu tham số...) do lớp cha xử lý.
+ * <p>Lỗi dữ liệu đầu vào (400) luôn có {@code errors} dạng {@code {"tênTrường": "thông báo"}} khi biết trường
+ * nào sai: body {@code @Valid}, tham số {@code @Positive}/{@code @Max}, tham số sai kiểu, JSON sai cú pháp.
+ * Các lỗi chuẩn khác của Spring MVC (sai phương thức, thiếu tham số...) do lớp cha xử lý.
  */
 @Slf4j
 @RestControllerAdvice
@@ -64,10 +77,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ProblemDetail handleConstraintViolation(ConstraintViolationException ex) {
         Map<String, String> errors = new LinkedHashMap<>();
         ex.getConstraintViolations().forEach(v -> errors.put(v.getPropertyPath().toString(), v.getMessage()));
-        ProblemDetail problem = problem(HttpStatus.BAD_REQUEST, "Dữ liệu không hợp lệ",
-            "Vui lòng kiểm tra lại các trường dữ liệu.");
-        problem.setProperty("errors", errors);
-        return problem;
+        return invalidFields(errors);
     }
 
     /**
@@ -76,6 +86,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ProblemDetail handleOptimisticLock(OptimisticLockingFailureException ex) {
+        return lockConflict();
+    }
+
+    @ExceptionHandler(PessimisticLockingFailureException.class)
+    public ProblemDetail handlePessimisticLock(PessimisticLockingFailureException ex) {
+        return lockConflict();
+    }
+
+    private static ProblemDetail lockConflict() {
         return problem(HttpStatus.CONFLICT, "Xung đột dữ liệu",
             "Dữ liệu vừa được người khác cập nhật. Vui lòng tải lại và thử lại.");
     }
@@ -113,10 +132,85 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.putIfAbsent(error.getField(), error.getDefaultMessage());
         }
+        return ResponseEntity.badRequest().body(invalidFields(errors));
+    }
+
+    /**
+     * Lỗi validate tham số đường dẫn/truy vấn, ví dụ {@code @Positive Long id} hay {@code @Max(100) int size}:
+     * trả {@code errors} theo tên tham số, cùng dạng với lỗi {@code @Valid} trên body.
+     */
+    @Override
+    protected ResponseEntity<Object> handleHandlerMethodValidationException(HandlerMethodValidationException ex,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        if (ex.isForReturnValue()) {
+            log.error("Giá trị trả về không hợp lệ", ex);
+            return ResponseEntity.internalServerError().body(problem(HttpStatus.INTERNAL_SERVER_ERROR,
+                "Lỗi hệ thống", "Đã có lỗi xảy ra, vui lòng thử lại sau."));
+        }
+        Map<String, String> errors = new LinkedHashMap<>();
+        ex.getParameterValidationResults().forEach(result -> {
+            if (result instanceof ParameterErrors fields) {
+                fields.getFieldErrors().forEach(error -> errors.putIfAbsent(error.getField(), error.getDefaultMessage()));
+            } else {
+                String name = result.getMethodParameter().getParameterName();
+                result.getResolvableErrors().forEach(error -> errors.putIfAbsent(name, error.getDefaultMessage()));
+            }
+        });
+        return ResponseEntity.badRequest().body(invalidFields(errors));
+    }
+
+    /**
+     * Body không đọc được: JSON sai cú pháp, sai kiểu, hoặc có trường không được phép (DTO đặt
+     * {@code @JsonIgnoreProperties(ignoreUnknown = false)}). {@code errors} trỏ vào trường gây lỗi nếu biết.
+     */
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String field = "body";
+        for (Throwable cause = ex; cause != null; cause = cause.getCause()) {
+            if (cause instanceof JacksonException json && !json.getPath().isEmpty()) {
+                String name = json.getPath().getLast().getPropertyName();
+                if (name != null) {
+                    field = name;
+                }
+            }
+        }
+        return ResponseEntity.badRequest().body(invalidFields(
+            Map.of(field, "Trường không được phép hoặc giá trị JSON không hợp lệ.")));
+    }
+
+    /** Tham số truy vấn sai kiểu, ví dụ {@code ?page=abc} hay {@code ?type=INVALID} cho tham số enum. */
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request) {
+        String name = ex instanceof MethodArgumentTypeMismatchException arg ? arg.getName() : ex.getPropertyName();
+        Class<?> type = ex.getRequiredType();
+        String message;
+        if (type != null && type.isEnum()) {
+            List<String> values = Arrays.stream(type.getEnumConstants()).map(String::valueOf).toList();
+            message = "Giá trị phải là " + joinVietnamese(values) + ".";
+        } else if (type != null && (Number.class.isAssignableFrom(type)
+                || type == int.class || type == long.class || type == short.class)) {
+            message = "Giá trị phải là số nguyên trong phạm vi cho phép.";
+        } else {
+            message = "Giá trị không đúng định dạng.";
+        }
+        return ResponseEntity.badRequest().body(invalidFields(Map.of(name == null ? "body" : name, message)));
+    }
+
+    private static ProblemDetail invalidFields(Map<String, String> errors) {
         ProblemDetail problem = problem(HttpStatus.BAD_REQUEST, "Dữ liệu không hợp lệ",
             "Vui lòng kiểm tra lại các trường dữ liệu.");
         problem.setProperty("errors", errors);
-        return ResponseEntity.badRequest().body(problem);
+        return problem;
+    }
+
+    /** ["TIME", "SESSION", "PT"] thành "TIME, SESSION hoặc PT". */
+    private static String joinVietnamese(List<String> values) {
+        if (values.size() <= 1) {
+            return String.join("", values);
+        }
+        return String.join(", ", values.subList(0, values.size() - 1)) + " hoặc " + values.getLast();
     }
 
     private static ProblemDetail problem(HttpStatus status, String title, String detail) {

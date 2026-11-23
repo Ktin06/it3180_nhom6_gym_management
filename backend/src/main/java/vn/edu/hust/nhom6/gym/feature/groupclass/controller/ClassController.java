@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import vn.edu.hust.nhom6.gym.common.dto.PageResponse;
 import vn.edu.hust.nhom6.gym.feature.groupclass.dto.ClassDtos.*;
 import vn.edu.hust.nhom6.gym.feature.groupclass.service.*;
-import vn.edu.hust.nhom6.gym.feature.member.service.MemberActor;
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -29,14 +29,14 @@ public class ClassController {
     public PageResponse<Schedule> schedules(Authentication auth,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
-        return schedules.list(MemberActor.from(auth), page, size);
+        return schedules.list(CurrentUser.from(auth), page, size);
     }
 
     @PostMapping("/class-schedules")
     @PreAuthorize("hasRole('BRANCH_MANAGER')")
     @Operation(summary = "Tạo lịch lặp; thứ ISO 1–7, giờ Việt Nam; chi nhánh lấy từ nhân viên")
     public ResponseEntity<Schedule> create(Authentication auth, @Valid @RequestBody ScheduleRequest request) {
-        var s = schedules.save(MemberActor.from(auth), null, request);
+        var s = schedules.save(CurrentUser.from(auth), null, request);
         return ResponseEntity.created(URI.create("/api/v1/class-schedules/" + s.id())).body(s);
     }
 
@@ -44,7 +44,7 @@ public class ClassController {
     @PreAuthorize("hasRole('BRANCH_MANAGER')")
     @Operation(summary = "Xem lịch lặp trong chi nhánh quản lý")
     public Schedule scheduleDetail(Authentication auth, @PathVariable @Positive Long id) {
-        return schedules.detail(MemberActor.from(auth), id);
+        return schedules.detail(CurrentUser.from(auth), id);
     }
 
     @PutMapping("/class-schedules/{id}")
@@ -52,14 +52,14 @@ public class ClassController {
     @Operation(summary = "Sửa lịch lặp đang hoạt động; giữ nguyên mọi buổi đã sinh")
     public Schedule update(Authentication auth, @PathVariable @Positive Long id,
             @Valid @RequestBody ScheduleRequest request) {
-        return schedules.save(MemberActor.from(auth), id, request);
+        return schedules.save(CurrentUser.from(auth), id, request);
     }
 
     @PutMapping("/class-schedules/{id}/deactivate")
     @PreAuthorize("hasRole('BRANCH_MANAGER')")
     @Operation(summary = "Ngừng lịch lặp; không xóa hoặc hủy buổi đã sinh")
     public Schedule deactivate(Authentication auth, @PathVariable @Positive Long id) {
-        return schedules.deactivate(MemberActor.from(auth), id);
+        return schedules.deactivate(CurrentUser.from(auth), id);
     }
 
     @PostMapping("/class-sessions/{id}/bookings")
@@ -68,7 +68,7 @@ public class ClassController {
         description = "201 cho BOOKED, 409 nếu lớp đã đủ chỗ. createdBy lấy từ JWT.")
     public ResponseEntity<Booking> book(Authentication auth, @PathVariable @Positive Long id,
             @Valid @RequestBody BookingRequest request) {
-        var b = bookings.book(MemberActor.from(auth), id, request.memberId());
+        var b = bookings.book(CurrentUser.from(auth), id, request.memberId());
         return ResponseEntity.created(URI.create("/api/v1/class-bookings/" + b.id())).body(b);
     }
 
@@ -76,13 +76,13 @@ public class ClassController {
     @PreAuthorize("hasAnyRole('MEMBER','RECEPTIONIST')")
     @Operation(summary = "Xem chỗ đặt và thời điểm hết khóa đặt lớp")
     public Booking detail(Authentication auth, @PathVariable @Positive Long id) {
-        return bookings.detail(MemberActor.from(auth), id);
+        return bookings.detail(CurrentUser.from(auth), id);
     }
 
     @PutMapping("/class-bookings/{id}/cancel")
     @PreAuthorize("hasAnyRole('MEMBER','RECEPTIONIST')")
     @Operation(summary = "Hủy chỗ trước giờ học; buổi đã đổi giờ hủy không phạt")
     public Booking cancel(Authentication auth, @PathVariable @Positive Long id) {
-        return bookings.cancel(MemberActor.from(auth), id);
+        return bookings.cancel(CurrentUser.from(auth), id);
     }
 }

@@ -2,3 +2,6 @@
 app:
   jwt:
     secret: khoa-bi-mat-kiem-thu-jwt-rieng-biet-toi-thieu-32-byte
+  scheduling:
+    # Tác vụ nền không tự chạy trong kiểm thử; kiểm thử gọi thẳng hàm service của tác vụ.
+    enabled: false

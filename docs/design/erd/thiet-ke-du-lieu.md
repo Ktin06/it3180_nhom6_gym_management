@@ -156,7 +156,7 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 
 - [x] Hội viên được giữ đồng thời gói TIME và gói PT (31/10). Lớp nhóm đã gồm trong gói TIME; gói PT chỉ dùng cho tập 1-1.
 - [x] Gói SESSION và gói PT không dùng để đặt lớp nhóm (31/10).
-- [x] Gói PT không dùng để check-in vào phòng tập; có cả TIME và SESSION thì dùng TIME (01/11).
+- [x] Gói PT không dùng để check-in tập tự do; có cả TIME và SESSION thì dùng TIME (01/11). Hội viên chỉ có gói PT được check-in đúng ngày có buổi PT đã đặt, không trừ buổi (19/11).
 - [x] Khách lẻ mua hàng tại quầy: `invoices.member_id` để rỗng, không tạo hồ sơ mặc định (31/10).
 - [x] Không lưu lịch sử giá gói tập; giá lúc bán trong `invoice_items.unit_price` là đủ (31/10).
 - [x] Giới hạn check-in liên chi nhánh của gói toàn chuỗi: để đến v4 (31/10).
