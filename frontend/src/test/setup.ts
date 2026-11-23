@@ -1,7 +1,19 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
-import { afterEach, beforeEach } from 'vitest'
+import { afterEach, beforeEach, vi } from 'vitest'
+import type { CookieRevision } from '../auth/session-revision'
 import { createTestLockManager } from './web-locks'
+
+// jsdom không có IndexedDB. Chromium E2E kiểm tra giao dịch thật của trình duyệt.
+vi.mock('../auth/session-revision', () => {
+  let revision: CookieRevision = { session: null, refresh: null }
+  return {
+    readCookieRevision: () => Promise.resolve({ ...revision }),
+    writeCookieRevision: async (next: CookieRevision) => {
+      revision = { ...next }
+    },
+  }
+})
 
 beforeEach(() => {
   Object.defineProperty(navigator, 'locks', { configurable: true, value: createTestLockManager() })

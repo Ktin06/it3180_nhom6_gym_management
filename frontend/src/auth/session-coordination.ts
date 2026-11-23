@@ -6,31 +6,21 @@ import {
   tokenSubject,
 } from './session-store'
 
-const REVISION_KEY = 'gym-auth-cookie-revision'
+import { readCookieRevision, writeCookieRevision, type CookieRevision } from './session-revision'
+
 const CHANNEL_NAME = 'gym-auth-session'
 const TOKEN_WAIT_MS = 200
 const TOKEN_REUSE_MS = 5_000
 const ACCOUNT_CHANGED = 'Tài khoản đã đổi ở tab khác. Vui lòng đăng nhập lại.'
 
-type Revision = { session: string | null; refresh: string | null }
 type RefreshMessage = { type: 'refreshed'; refresh: string; token: string; issuedAt: number }
 type SessionMessage = { type: 'session'; session: string; subject: string | null }
 type SyncMessage = RefreshMessage | SessionMessage | { type: 'request'; refresh: string }
 
 let channel: BroadcastChannel | undefined
-let tabSession: Revision['session'] | undefined
+let tabSession: CookieRevision['session'] | undefined
 let lastRefresh: RefreshMessage | undefined
 let receiveRefresh: ((result: RefreshMessage) => void) | undefined
-
-function readRevision(): Revision {
-  const stored = localStorage.getItem(REVISION_KEY)
-  return stored ? JSON.parse(stored) : { session: null, refresh: null }
-}
-
-function writeRevision(revision: Revision) {
-  // Chỉ ghi mã ngẫu nhiên. Token và chủ thể không vào Web Storage.
-  localStorage.setItem(REVISION_KEY, JSON.stringify(revision))
-}
 
 function freshResult(refresh: string) {
   if (lastRefresh?.refresh === refresh && Date.now() - lastRefresh.issuedAt < TOKEN_REUSE_MS) {
@@ -39,8 +29,7 @@ function freshResult(refresh: string) {
 }
 
 function applySessionChange(message: SessionMessage) {
-  if (message.session !== readRevision().session) return false
-  if (tabSession === message.session) return true
+  if (tabSession === message.session) return
 
   lastRefresh = undefined
   if (tabSession === undefined || (message.subject && message.subject === getSessionSubject())) {
@@ -48,66 +37,53 @@ function applySessionChange(message: SessionMessage) {
   } else if (getSessionSubject() || getAccessToken()) {
     expireSession(getSessionEpoch(), message.subject ? ACCOUNT_CHANGED : undefined)
   }
-  return true
 }
 
-function receiveSessionChange(message: SessionMessage) {
-  if (applySessionChange(message)) return
-
-  // BroadcastChannel và sự kiện storage có thể đến theo hai thứ tự khác nhau.
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), TOKEN_REUSE_MS)
-  window.addEventListener(
-    'storage',
-    (event) => {
-      if (event.key !== REVISION_KEY || !applySessionChange(message)) return
-      clearTimeout(timeout)
-      controller.abort()
-    },
-    { signal: controller.signal },
-  )
+async function syncMessage(data: SyncMessage) {
+  if (!data || typeof data !== 'object') return
+  const current = await readCookieRevision()
+  if (data.type === 'session') {
+    if (data.session === current.session) applySessionChange(data)
+    return
+  }
+  if (
+    data.type === 'refreshed' &&
+    tabSession === current.session &&
+    data.refresh === current.refresh &&
+    typeof data.token === 'string' &&
+    data.token
+  ) {
+    lastRefresh = data
+    if (freshResult(data.refresh)) receiveRefresh?.(data)
+  } else if (data.type === 'request' && data.refresh === current.refresh) {
+    const cached = freshResult(data.refresh)
+    if (cached) channel?.postMessage(cached)
+  }
 }
 
 function getChannel() {
   if (!channel) {
     channel = new BroadcastChannel(CHANNEL_NAME)
     channel.onmessage = ({ data }: MessageEvent<SyncMessage>) => {
-      if (!data || typeof data !== 'object') return
-      if (data.type === 'session') {
-        receiveSessionChange(data)
-        return
-      }
-      const current = readRevision()
-      if (
-        data.type === 'refreshed' &&
-        tabSession === current.session &&
-        data.refresh === current.refresh &&
-        typeof data.token === 'string' &&
-        data.token
-      ) {
-        lastRefresh = data
-        if (freshResult(data.refresh)) receiveRefresh?.(data)
-      } else if (data.type === 'request' && data.refresh === current.refresh) {
-        const cached = freshResult(data.refresh)
-        if (cached) channel?.postMessage(cached)
-      }
+      void syncMessage(data).catch(() => {
+        expireSession(getSessionEpoch(), 'Không thể đồng bộ phiên đăng nhập giữa các tab.')
+      })
     }
   }
   return channel
 }
 
-export function captureCookieRevision() {
+export async function captureCookieRevision() {
   getChannel()
-  const revision = readRevision()
+  const revision = await readCookieRevision()
   if (tabSession === undefined) tabSession = revision.session
   return revision
 }
 
 /** Kiểm tra quyền sở hữu cookie của tab sau khi lấy Web Lock. */
-export function currentTabCookieRevision(epoch: number) {
+export async function currentTabCookieRevision(epoch: number) {
+  const revision = await readCookieRevision()
   if (getSessionEpoch() !== epoch) return null
-
-  const revision = readRevision()
   if (tabSession !== revision.session) {
     expireSession(epoch, ACCOUNT_CHANGED)
     return null
@@ -116,9 +92,9 @@ export function currentTabCookieRevision(epoch: number) {
 }
 
 /** Ghi dấu đổi phiên trước khi nhả Web Lock để tab chờ nhìn thấy ngay. */
-export function publishSessionChange(token: string | null) {
+export async function publishSessionChange(token: string | null) {
   const session = crypto.randomUUID()
-  writeRevision({ session, refresh: null })
+  await writeCookieRevision({ session, refresh: null })
   tabSession = session
   lastRefresh = undefined
   const message: SessionMessage = {
@@ -129,14 +105,14 @@ export function publishSessionChange(token: string | null) {
   getChannel().postMessage(message)
 }
 
-export function publishRefresh(revision: Revision, token: string) {
+export async function publishRefresh(revision: CookieRevision, token: string) {
   const refresh = crypto.randomUUID()
-  writeRevision({ session: revision.session, refresh })
+  await writeCookieRevision({ session: revision.session, refresh })
   lastRefresh = { type: 'refreshed', refresh, token, issuedAt: Date.now() }
   getChannel().postMessage(lastRefresh)
 }
 
-export async function reuseConcurrentRefresh(before: Revision, current: Revision) {
+export async function reuseConcurrentRefresh(before: CookieRevision, current: CookieRevision) {
   const refresh = current.refresh
   if (!refresh || refresh === before.refresh || current.session !== before.session) return null
 

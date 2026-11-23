@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { readCookieRevision, writeCookieRevision } from './session-revision'
 
 const revisionKey = 'gym-auth-cookie-revision'
 const cookieSession = 'current-session'
@@ -18,7 +19,7 @@ class TestChannel {
 }
 
 function setRevision(session: string, refresh: string | null = null) {
-  localStorage.setItem(revisionKey, JSON.stringify({ session, refresh }))
+  return writeCookieRevision({ session, refresh })
 }
 
 function tokenFor(subject: string) {
@@ -26,10 +27,10 @@ function tokenFor(subject: string) {
 }
 
 describe('đồng bộ phiên giữa các tab', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.resetModules()
     vi.stubGlobal('BroadcastChannel', TestChannel)
-    setRevision(cookieSession)
+    await setRevision(cookieSession)
   })
 
   afterEach(() => {
@@ -40,9 +41,9 @@ describe('đồng bộ phiên giữa các tab', () => {
 
   it('tab chờ lấy token của lần refresh mới và bỏ qua kết quả cũ', async () => {
     const sync = await import('./session-coordination')
-    const before = sync.captureCookieRevision()
-    setRevision(cookieSession, 'new-refresh')
-    const revision = sync.currentTabCookieRevision(0)!
+    const before = await sync.captureCookieRevision()
+    await setRevision(cookieSession, 'new-refresh')
+    const revision = (await sync.currentTabCookieRevision(0))!
     const waiting = sync.reuseConcurrentRefresh(before, revision)
     const channel = TestChannel.current
     expect(channel.postMessage).toHaveBeenCalledWith({ type: 'request', refresh: 'new-refresh' })
@@ -60,15 +61,15 @@ describe('đồng bộ phiên giữa các tab', () => {
       issuedAt: Date.now(),
     })
     await expect(waiting).resolves.toBe('fresh-token')
-    expect(localStorage.getItem(revisionKey)).not.toContain('fresh-token')
+    expect(await readCookieRevision()).toEqual({ session: cookieSession, refresh: 'new-refresh' })
   })
 
   it('khi tab refresh đã đóng, cho lần chờ gửi request tuần tự với cookie hiện tại', async () => {
     vi.useFakeTimers()
     const sync = await import('./session-coordination')
-    const before = sync.captureCookieRevision()
-    setRevision(cookieSession, 'new-refresh')
-    const waiting = sync.reuseConcurrentRefresh(before, sync.currentTabCookieRevision(0)!)
+    const before = await sync.captureCookieRevision()
+    await setRevision(cookieSession, 'new-refresh')
+    const waiting = sync.reuseConcurrentRefresh(before, (await sync.currentTabCookieRevision(0))!)
     await vi.runAllTimersAsync()
     await expect(waiting).resolves.toBeNull()
   })
@@ -78,53 +79,56 @@ describe('đồng bộ phiên giữa các tab', () => {
     async (subject) => {
       const sync = await import('./session-coordination')
       const store = await import('./session-store')
-      sync.captureCookieRevision()
+      await sync.captureCookieRevision()
       store.setAccessToken(tokenFor('18'), 0)
       const expired = vi.fn()
       store.subscribeToSessionExpiry(expired)
-      setRevision('new-session')
+      await setRevision('new-session')
 
       TestChannel.current.receive({ type: 'session', session: 'new-session', subject })
-      expect(store.getAccessToken()).toBeNull()
+      await vi.waitFor(() => expect(store.getAccessToken()).toBeNull())
       expect(expired).toHaveBeenCalledOnce()
-      expect(sync.currentTabCookieRevision(0)).toBeNull()
+      await expect(sync.currentTabCookieRevision(0)).resolves.toBeNull()
     },
   )
 
-  it('áp dụng logout dù broadcast đến trước khi tab thấy dấu phiên mới', async () => {
+  it('áp dụng logout đã commit dù bản localStorage ở tab hiện tại còn cũ', async () => {
     const sync = await import('./session-coordination')
     const store = await import('./session-store')
-    sync.captureCookieRevision()
+    await sync.captureCookieRevision()
     store.setAccessToken(tokenFor('18'), 0)
+    localStorage.setItem(revisionKey, JSON.stringify({ session: cookieSession, refresh: null }))
 
+    await setRevision('new-session')
     TestChannel.current.receive({ type: 'session', session: 'new-session', subject: null })
-    expect(store.getAccessToken()).not.toBeNull()
-    setRevision('new-session')
-    window.dispatchEvent(new StorageEvent('storage', { key: revisionKey }))
-    expect(store.getAccessToken()).toBeNull()
+    await vi.waitFor(() => expect(store.getAccessToken()).toBeNull())
   })
 
   it('đăng nhập cùng tài khoản ở tab khác không làm mất phiên', async () => {
     const sync = await import('./session-coordination')
     const store = await import('./session-store')
-    sync.captureCookieRevision()
+    await sync.captureCookieRevision()
     const token = tokenFor('18')
     store.setAccessToken(token, 0)
-    setRevision('new-session')
+    await setRevision('new-session')
 
     TestChannel.current.receive({ type: 'session', session: 'new-session', subject: '18' })
     expect(store.getAccessToken()).toBe(token)
-    expect(sync.currentTabCookieRevision(0)?.session).toBe('new-session')
+    await vi.waitFor(() => expect(store.getAccessToken()).toBe(token))
+    await expect(sync.currentTabCookieRevision(0)).resolves.toMatchObject({
+      session: 'new-session',
+    })
   })
 
   it('chặn thao tác cookie cũ ngay cả khi thông báo đổi phiên chưa đến', async () => {
     const sync = await import('./session-coordination')
     const store = await import('./session-store')
-    sync.captureCookieRevision()
+    await sync.captureCookieRevision()
     store.setAccessToken(tokenFor('18'), 0)
-    setRevision('new-session')
+    localStorage.setItem(revisionKey, JSON.stringify({ session: cookieSession, refresh: null }))
+    await setRevision('new-session')
 
-    expect(sync.currentTabCookieRevision(0)).toBeNull()
+    await expect(sync.currentTabCookieRevision(0)).resolves.toBeNull()
     expect(store.getAccessToken()).toBeNull()
   })
 })

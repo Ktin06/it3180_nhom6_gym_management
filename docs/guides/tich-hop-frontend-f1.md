@@ -53,8 +53,9 @@ Mỗi phiên ghim claim `sub` của JWT trong bộ nhớ tab. Nếu token làm m
 
 Refresh, đăng nhập, đăng ký và đăng xuất cùng dùng Web Lock `gym-auth-cookie`. Tab đang chờ
 nhận access token vừa làm mới qua `BroadcastChannel`; nếu tab gửi đã đóng, nó có thể dùng cookie
-hiện tại sau khi lấy khóa. `localStorage` chỉ chứa hai mã ngẫu nhiên để nhận diện lần đổi phiên
-và lần refresh. Access token chỉ ở bộ nhớ. Refresh cookie vẫn là HttpOnly.
+hiện tại sau khi lấy khóa. IndexedDB chỉ lưu hai mã ngẫu nhiên để nhận diện lần đổi phiên
+và lần refresh. Tab cập nhật mã đợi giao dịch IndexedDB commit trước khi nhả khóa để tab chờ
+đọc được phiên vừa đổi. Access token chỉ ở bộ nhớ. Refresh cookie vẫn là HttpOnly.
 
 Đăng xuất hoặc đăng nhập tài khoản khác phát tín hiệu để các tab cũ xóa phiên và về trang
 đăng nhập. Tab cùng tài khoản giữ phiên khi đăng nhập lại ở tab khác. Logout kiểm tra phiên

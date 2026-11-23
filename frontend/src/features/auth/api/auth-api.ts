@@ -20,22 +20,22 @@ const publicAuthRequest = publicRequest
 
 export function login(request: LoginRequest) {
   return queueCookieOperation(async () => {
-    captureCookieRevision()
+    await captureCookieRevision()
     const response = await http.post<AccessTokenResponse>('/auth/login', request, {
       ...publicAuthRequest,
     })
-    publishSessionChange(response.data.accessToken)
+    await publishSessionChange(response.data.accessToken)
     return response.data
   })
 }
 
 export function register(request: RegisterRequest) {
   return queueCookieOperation(async () => {
-    captureCookieRevision()
+    await captureCookieRevision()
     const response = await http.post<AccessTokenResponse>('/auth/register', request, {
       ...publicAuthRequest,
     })
-    publishSessionChange(response.data.accessToken)
+    await publishSessionChange(response.data.accessToken)
     return response.data
   })
 }
@@ -55,15 +55,15 @@ export async function getCurrentUser(): Promise<AuthUser> {
   return { email, role }
 }
 
-export function logout() {
+export async function logout() {
   const authEpoch = getSessionEpoch()
-  captureCookieRevision()
+  await captureCookieRevision()
   return queueCookieOperation(async () => {
     if (authEpoch !== getSessionEpoch()) throw new Error('Phiên đăng nhập đã thay đổi.')
-    if (!currentTabCookieRevision(authEpoch)) return
+    if (!(await currentTabCookieRevision(authEpoch))) return
     // Bearer cho backend đối chiếu chủ cookie; không refresh sang tài khoản ở tab khác.
     await http.post('/auth/logout', undefined, { skipAuthRefresh: true, authEpoch })
-    publishSessionChange(null)
+    await publishSessionChange(null)
   })
 }
 

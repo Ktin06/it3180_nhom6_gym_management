@@ -131,11 +131,27 @@ test(
       }))
       assert.deepEqual(storage.session, [])
       assert.equal(storage.cookieVisible, false)
-      assert.equal(storage.local.length, 1)
-      assert.equal(storage.local[0][0], 'gym-auth-cookie-revision')
-      const marker = JSON.parse(storage.local[0][1])
-      assert.deepEqual(Object.keys(marker).sort(), ['refresh', 'session'])
-      for (const revision of Object.values(marker)) {
+      assert.deepEqual(storage.local, [])
+      const marker = await page.evaluate(
+        () =>
+          new Promise((resolve, reject) => {
+            const open = indexedDB.open('gym-auth-cookie', 1)
+            open.onerror = () => reject(open.error)
+            open.onsuccess = () => {
+              const database = open.result
+              const transaction = database.transaction('coordination')
+              const request = transaction.objectStore('coordination').getAll()
+              transaction.oncomplete = () => {
+                database.close()
+                resolve(request.result)
+              }
+              transaction.onabort = () => reject(transaction.error)
+            }
+          }),
+      )
+      assert.equal(marker.length, 1, 'IndexedDB chỉ có một bản ghi mã phiên.')
+      assert.deepEqual(Object.keys(marker[0]).sort(), ['refresh', 'session'])
+      for (const revision of Object.values(marker[0])) {
         assert.match(revision, /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/)
       }
     }
