@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import vn.edu.hust.nhom6.gym.common.dto.PageResponse;
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.PackageSummaryDto;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.CreatePackageRequest;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.PackageDetailDto;
@@ -52,7 +53,7 @@ public class PackageController {
     @ApiResponse(responseCode = "422", description = "Gói đã ngừng bán")
     public PackageDeactivationDto deactivate(Authentication auth,
             @PathVariable @Positive(message = "ID gói phải lớn hơn 0.") Long id) {
-        return packages.deactivate(auth, id);
+        return packages.deactivate(CurrentUser.from(auth), id);
     }
 
     @PutMapping("/{id}")
@@ -69,7 +70,7 @@ public class PackageController {
     public PackageDetailDto update(Authentication auth,
             @PathVariable @Positive(message = "ID gói phải lớn hơn 0.") Long id,
             @Valid @RequestBody UpdatePackageRequest request) {
-        return packages.update(auth, id, request);
+        return packages.update(CurrentUser.from(auth), id, request);
     }
 
     @PostMapping
@@ -84,7 +85,7 @@ public class PackageController {
     @ApiResponse(responseCode = "403", description = "Không phải quản lý hoặc thiếu chi nhánh ACTIVE")
     @ApiResponse(responseCode = "409", description = "Mã gói đã tồn tại, kể cả gói INACTIVE")
     public ResponseEntity<PackageDetailDto> create(Authentication auth, @Valid @RequestBody CreatePackageRequest request) {
-        var result = packages.create(auth, request);
+        var result = packages.create(CurrentUser.from(auth), request);
         return ResponseEntity.created(URI.create("/api/v1/packages/" + result.id())).body(result);
     }
 
@@ -105,6 +106,6 @@ public class PackageController {
             @Parameter(description = "Số gói mỗi trang, từ 1 đến 100") @RequestParam(defaultValue = "20")
             @Min(value = 1, message = "Kích thước trang phải từ 1 đến 100.")
             @Max(value = 100, message = "Kích thước trang phải từ 1 đến 100.") int size) {
-        return packages.list(auth, type, status, page, size);
+        return packages.list(CurrentUser.from(auth), type, status, page, size);
     }
 }

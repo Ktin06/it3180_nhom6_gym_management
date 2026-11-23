@@ -244,7 +244,7 @@ Vai trò được phép dùng: **Hội viên** (đã đăng nhập, có hồ sơ
 - **E4 – Xung đột dữ liệu / Trùng lặp (409 Conflict):**
   - Tại bước 4, hội viên đã có hóa đơn chờ cho gói này; hệ thống không tạo thêm và trả `ProblemDetail` (409).
 - **E5 – Vi phạm quy tắc nghiệp vụ (422 Unprocessable Content):**
-  - Tại bước 4, gói đã ngừng bán (`INACTIVE`); hệ thống trả `ProblemDetail` (422): *"Gói này hiện không còn được bán."*
+  - Tại bước 4, gói đã ngừng bán (`INACTIVE`); hệ thống trả `ProblemDetail` (422): *"Gói tập này đã ngừng bán."* (cùng câu với F3, chốt 22/11/2026)
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
 - **BR-F7.5:** Hóa đơn chờ tạo từ cổng hội viên tự hủy sau `PENDING_INVOICE_TTL_DAYS`; gói PENDING đi kèm cũng bị hủy (CANCELLED). Chỉ hóa đơn `MEMBER_PORTAL` bị tự hủy.
@@ -306,7 +306,7 @@ Vai trò được phép dùng: **Hội viên** (đã đăng nhập, có hồ sơ
 1. Hội viên mở "Gói của tôi", chọn gói cần gia hạn và bấm "Gia hạn".
 2. Hệ thống kiểm tra tính hợp lệ của dữ liệu đầu vào (mã gói của hội viên bắt buộc).
 3. Hệ thống kiểm tra quyền và vai trò (S3); hội viên được xác định từ token.
-4. Hệ thống kiểm tra gói thuộc về hội viên đó, loại gói còn được bán, và chưa có hóa đơn chờ cho gói này.
+4. Hệ thống kiểm tra gói thuộc về hội viên đó, gói chưa ở trạng thái CANCELLED, loại gói còn được bán, và chưa có hóa đơn chờ cho gói này.
 5. Hệ thống tính số tiền ở phía server (S7), tạo trong một giao dịch (`@Transactional`) hóa đơn PENDING, dòng hóa đơn PACKAGE và gói mới PENDING (cùng `package_id`), gắn qua `memberships.invoice_item_id`.
 6. Hệ thống trả về kết quả (201 Created) kèm mã hóa đơn, tổng tiền và hạn tự hủy.
 7. Hệ thống hiển thị hướng dẫn thanh toán tại quầy.
@@ -317,17 +317,19 @@ Vai trò được phép dùng: **Hội viên** (đã đăng nhập, có hồ sơ
 - **E1 – Dữ liệu đầu vào không hợp lệ (400 Bad Request):**
   - Tại bước 2, thiếu hoặc sai mã gói; hệ thống trả `ProblemDetail` (400).
 - **E2 – Không có quyền truy cập tài nguyên (403 Forbidden):**
-  - Tại bước 3, người thao tác không phải Hội viên, hoặc tại bước 4 gói không thuộc hội viên này.
+  - Tại bước 3, người thao tác không phải Hội viên; hệ thống trả `ProblemDetail` (403).
 - **E3 – Không tìm thấy bản ghi dữ liệu (404 Not Found):**
-  - Tại bước 4, gói của hội viên không tồn tại; hệ thống trả `ProblemDetail` (404).
+  - Tại bước 4, gói không tồn tại **hoặc thuộc hội viên khác**; hệ thống trả cùng một `ProblemDetail` (404), để không lộ gói của người khác có tồn tại hay không (chốt 22/11/2026, giống các API khác của hội viên).
 - **E4 – Xung đột dữ liệu / Trùng lặp (409 Conflict):**
   - Tại bước 4, đã có hóa đơn chờ cho gói này; hệ thống không tạo thêm và trả `ProblemDetail` (409).
 - **E5 – Vi phạm quy tắc nghiệp vụ (422 Unprocessable Content):**
-  - Tại bước 4, loại gói đã ngừng bán; hệ thống trả `ProblemDetail` (422): *"Gói này hiện không còn được bán."*
+  - Tại bước 4, loại gói đã ngừng bán; hệ thống trả `ProblemDetail` (422): *"Gói tập này đã ngừng bán."* (cùng câu với F3, chốt 22/11/2026)
+  - Tại bước 4, gói ở trạng thái CANCELLED (hóa đơn của gói đã bị hủy hoặc đã hoàn tiền); hệ thống trả `ProblemDetail` (422): *"Gói này đã hủy. Vui lòng chọn gói ở mục Mua gói."* (BR-F7.9).
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
 - **BR-F7.5:** Hóa đơn chờ tạo từ cổng hội viên tự hủy sau `PENDING_INVOICE_TTL_DAYS`; gói PENDING đi kèm cũng bị hủy.
 - **BR-F7.8:** Mỗi hội viên chỉ có một gói ACTIVE hoặc FROZEN cho mỗi loại gói và chi nhánh (chỉ mục duy nhất `uq_one_active_per_type`), nên gia hạn không sửa gói cũ mà tạo gói mới. Khi hóa đơn PAID, gói mới nối tiếp sau ngày gói cũ cùng loại hết hiệu lực (trạng thái UPCOMING nếu chưa đến ngày bắt đầu).
+- **BR-F7.9:** Gói CANCELLED không gia hạn được, vì hội viên chưa từng dùng gói đó; muốn mua lại thì dùng "Mua gói" (UC-F7.4). Ví dụ: hóa đơn gói PT bị hủy tại quầy thì gói PT đó không có nút "Gia hạn" trên cổng hội viên. Gói hết hạn (EXPIRED) vẫn gia hạn được (chốt 22/11/2026).
 - **CONFIG-F7.1:** Đọc từ bảng `system_configs` với key `PENDING_INVOICE_TTL_DAYS` (giá trị mặc định: `3`).
 - **[Yêu cầu phi chức năng]:**
   - Toàn vẹn đồng thời (NF6): không tạo hai hóa đơn chờ cho cùng một gói khi có hai yêu cầu đồng thời; bảng `invoices` và `memberships` dùng khóa lạc quan (`version`).

@@ -2,11 +2,9 @@ package vn.edu.hust.nhom6.gym.feature.member;
 
 import java.util.Arrays;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.AccessDeniedException;
@@ -15,23 +13,20 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.assertj.core.api.Assertions.*;
 
 import vn.edu.hust.nhom6.gym.common.exception.NotFoundException;
-import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberBranchAccess;
-import vn.edu.hust.nhom6.gym.feature.member.service.integration.MemberBranchAdapter;
+import vn.edu.hust.nhom6.gym.feature.branch.service.BranchLookupService;
+import vn.edu.hust.nhom6.gym.feature.staff.service.StaffService;
 
-/** Kiểm tra adapter, hai service và truy vấn production với PostgreSQL thật. */
+/**
+ * Chi nhánh mặc định (BranchLookupService) và chi nhánh nhân viên (StaffService.requireBranchId) với PostgreSQL thật.
+ * F2 dùng hai hàm này khi tạo, tìm, xem hồ sơ; trước nền tảng N0.1 lớp này kiểm thử MemberBranchAdapter.
+ */
 @SpringBootTest
 @Import(MemberTestConfiguration.class)
 @Transactional
-class MemberBranchAccessIntegrationTest {
-    @Autowired MemberBranchAccess branches;
+class StaffBranchIntegrationTest {
+    @Autowired BranchLookupService branches;
+    @Autowired StaffService staffService;
     @Autowired JdbcTemplate jdbc;
-    @Autowired ApplicationContext context;
-
-    @BeforeEach
-    void usesOnlyProductionBranchAdapter() {
-        assertThat(context.getBeansOfType(MemberBranchAccess.class)).hasSize(1);
-        assertThat(branches).isInstanceOf(MemberBranchAdapter.class);
-    }
 
     @Test
     void defaultBranchIsLookedUpByCodeRatherThanFixedId() {
@@ -69,15 +64,15 @@ class MemberBranchAccessIntegrationTest {
         staff(firstUser, firstBranch, "NV_TEST_01");
         staff(secondUser, secondBranch, "NV_TEST_02");
 
-        assertThat(branches.staffBranchId(firstUser)).isEqualTo(firstBranch);
-        assertThat(branches.staffBranchId(secondUser)).isEqualTo(secondBranch);
+        assertThat(staffService.requireBranchId(firstUser)).isEqualTo(firstBranch);
+        assertThat(staffService.requireBranchId(secondUser)).isEqualTo(secondBranch);
     }
 
     @Test
     void userWithoutStaffProfileIsDeniedRatherThanAssignedToCn01() {
         Long userId = user("unassigned-branch@example.com");
 
-        assertThatThrownBy(() -> branches.staffBranchId(userId)).isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> staffService.requireBranchId(userId)).isInstanceOf(AccessDeniedException.class);
     }
 
     @Test
@@ -86,7 +81,7 @@ class MemberBranchAccessIntegrationTest {
         staff(userId, defaultBranchId(), "NV_TEST_01");
         jdbc.update("UPDATE staff SET status = 'INACTIVE' WHERE user_id = ?", userId);
 
-        assertThatThrownBy(() -> branches.staffBranchId(userId)).isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> staffService.requireBranchId(userId)).isInstanceOf(AccessDeniedException.class);
     }
 
     @Test
@@ -95,13 +90,13 @@ class MemberBranchAccessIntegrationTest {
         staff(userId, defaultBranchId(), "NV_TEST_01");
         jdbc.update("UPDATE branches SET status = 'INACTIVE' WHERE code = 'CN01'");
 
-        assertThatThrownBy(() -> branches.staffBranchId(userId)).isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> staffService.requireBranchId(userId)).isInstanceOf(AccessDeniedException.class);
     }
 
     @Test
     void invalidOrUnknownUserIdsNeverReceiveDefaultBranch() {
         for (Long userId : Arrays.asList(null, 0L, -1L, Long.MAX_VALUE)) {
-            assertThatThrownBy(() -> branches.staffBranchId(userId)).isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> staffService.requireBranchId(userId)).isInstanceOf(AccessDeniedException.class);
         }
     }
 
