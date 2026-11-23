@@ -10,15 +10,15 @@
 
 - **Tài liệu chuẩn tham chiếu:**
 
-  - [Bản chốt phạm vi](../ban-chot-pham-vi.md)
+&#x20; - [Bản chốt phạm vi](../ban-chot-pham-vi.md)
 
-  - [ERD v2 (`erd-v2.dbml`)](../../design/erd/erd-v2.dbml)
+&#x20; - [ERD v2 (`erd-v2.dbml`)](../../design/erd/erd-v2.dbml)
 
-  - [Thiết kế dữ liệu](../../design/erd/thiet-ke-du-lieu.md)
+&#x20; - [Thiết kế dữ liệu](../../design/erd/thiet-ke-du-lieu.md)
 
-  - [Quy tắc mã nguồn](../../guides/quy-tac-ma-nguon.md)
+&#x20; - [Quy tắc mã nguồn](../../guides/quy-tac-ma-nguon.md)
 
-  - [ADR liên quan](../../decisions/)
+&#x20; - [ADR liên quan](../../decisions/)
 
 ---
 
@@ -74,9 +74,9 @@ Mỗi sự kiện tạo **hai dòng** trong bảng `notifications`: một dòng 
 
 - Hội viên có tài khoản (`members.user_id` có giá trị) và có một trong hai loại gói sau:
 
-  - Gói ACTIVE hết hạn trong 7 ngày tới (theo `ban-chot-pham-vi.md`, mục "Dashboard (F6)").
+&#x20; - Gói ACTIVE hết hạn trong 7 ngày tới (theo `ban-chot-pham-vi.md`, mục "Dashboard (F6)").
 
-  - Gói SESSION ACTIVE còn không quá `SESSION_WARNING_THRESHOLD` buổi (mặc định 2).
+&#x20; - Gói SESSION ACTIVE còn không quá `SESSION_WARNING_THRESHOLD` buổi (mặc định 2).
 
 - Hội viên chưa có gói nối tiếp (UPCOMING) cùng loại.
 
@@ -90,37 +90,37 @@ Mỗi sự kiện tạo **hai dòng** trong bảng `notifications`: một dòng 
 
 #### C. Luồng sự kiện chính (Basic Flow / Happy Path)
 
-1. Tác vụ định kỳ chạy và truy vấn `memberships`: gói ACTIVE có `end_date` trong 7 ngày tới, và gói SESSION ACTIVE có `remaining_sessions` không quá `SESSION_WARNING_THRESHOLD`.
+1\. Tác vụ định kỳ chạy và truy vấn `memberships`: gói ACTIVE có `end_date` trong 7 ngày tới, và gói SESSION ACTIVE có `remaining_sessions` không quá `SESSION_WARNING_THRESHOLD`.
 
-2. Hệ thống loại những gói đã có thông báo `MEMBERSHIP_EXPIRING` (tìm theo `related_entity`, `related_id`) và những gói mà hội viên đã có gói cùng loại nối tiếp ở trạng thái UPCOMING.
+2\. Hệ thống loại những gói đã có thông báo `MEMBERSHIP_EXPIRING` (tìm theo `related_entity`, `related_id`) và những gói mà hội viên đã có gói cùng loại nối tiếp ở trạng thái UPCOMING.
 
-3. Hệ thống xác định tài khoản nhận qua `members.user_id`; hội viên chưa có tài khoản thì bỏ qua.
+3\. Hệ thống xác định tài khoản nhận qua `members.user_id`; hội viên chưa có tài khoản thì bỏ qua.
 
-4. Hệ thống tạo trong một giao dịch (`@Transactional`) hai dòng `notifications`: kênh `IN_APP` và kênh `EMAIL` (`status` = `PENDING`, `scheduled_at` = thời điểm gửi cho phép theo giờ mở cửa chi nhánh). Sau khi lưu, hệ thống đẩy thông báo `IN_APP` tới trình duyệt hội viên đang mở qua WebSocket (STOMP).
+4\. Hệ thống tạo trong một giao dịch (`@Transactional`) hai dòng `notifications`: kênh `IN_APP` và kênh `EMAIL` (`status` = `PENDING`, `scheduled_at` = thời điểm gửi cho phép theo giờ mở cửa chi nhánh). Sau khi lưu, hệ thống đẩy thông báo `IN_APP` tới trình duyệt hội viên đang mở qua WebSocket (STOMP).
 
-5. Tác vụ gửi email quét các dòng `EMAIL` có `status` = `PENDING` và `scheduled_at` đã đến, gửi tới `users.email` qua SMTP, rồi cập nhật `status` = `SENT` và `sent_at`.
+5\. Tác vụ gửi email quét các dòng `EMAIL` có `status` = `PENDING` và `scheduled_at` đã đến, gửi tới `users.email` qua SMTP, rồi cập nhật `status` = `SENT` và `sent_at`.
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
 
 - **A1 – Hội viên chưa có tài khoản:**
 
-  - Tại bước 3, vì `notifications.user_id` bắt buộc có giá trị, hệ thống không tạo thông báo cho hội viên này.
+&#x20; - Tại bước 3, vì `notifications.user_id` bắt buộc có giá trị, hệ thống không tạo thông báo cho hội viên này.
 
 - **A2 – Email phát sinh ngoài giờ mở cửa:**
 
-  - Tại bước 4, hệ thống đặt `scheduled_at` vào giờ mở cửa kế tiếp; thông báo trong web hiển thị ngay.
+&#x20; - Tại bước 4, hệ thống đặt `scheduled_at` vào giờ mở cửa kế tiếp; thông báo trong web hiển thị ngay.
 
 - **A3 – Hội viên không mở web lúc có thông báo:**
 
-  - Tại bước 4, không có kết nối WebSocket nào; thông báo vẫn lưu trong `notifications` và hội viên thấy khi mở web (UC-F10.5).
+&#x20; - Tại bước 4, không có kết nối WebSocket nào; thông báo vẫn lưu trong `notifications` và hội viên thấy khi mở web (UC-F10.5).
 
 - **E1 – Gửi email thất bại:**
 
-  - Tại bước 5, dịch vụ email lỗi. Dòng email chuyển `FAILED`, thông báo trong web không bị ảnh hưởng **(cơ chế thử lại là đề xuất, cần nhóm xác nhận)**.
+&#x20; - Tại bước 5, dịch vụ email lỗi. Dòng email chuyển `FAILED`, thông báo trong web không bị ảnh hưởng **(cơ chế thử lại là đề xuất, cần nhóm xác nhận)**.
 
 - **E5 – Vi phạm quy tắc nghiệp vụ:**
 
-  - Hội viên đã gia hạn trước khi tác vụ chạy (có gói UPCOMING cùng loại): hệ thống không gửi thông báo, theo `ban-chot-pham-vi.md`.
+&#x20; - Hội viên đã gia hạn trước khi tác vụ chạy (có gói UPCOMING cùng loại): hệ thống không gửi thông báo, theo `ban-chot-pham-vi.md`.
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
 
@@ -170,6 +170,45 @@ Mỗi sự kiện tạo **hai dòng** trong bảng `notifications`: một dòng 
 
 - **Giao diện:** Thông báo hiện trong cổng hội viên (xem UC-F10.5) và trong email.
 
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F10.1.1: Nhận thông báo khi gói tập sắp hết hạn hoặc sắp hết buổi
+
+- **User story:** Là **Hội viên**, tôi muốn **nhận thông báo khi gói tập sắp hết hạn hoặc sắp hết buổi**, để **chủ động gia hạn và không bị gián đoạn quá trình tập luyện**.
+- **BR liên quan:** BR-F10.1, BR-F10.2, BR-F10.3; CONFIG-F10.1.
+- **Version / Sprint:** v2 / Sprint 2.
+- **Tiêu chí chấp nhận:**
+  - **AC-F10.1.1-01: Thông báo khi gói TIME hoặc gói ACTIVE sắp hết hạn** (BR-F10.1)
+    - **Given** Hội viên có tài khoản và sở hữu gói tập đang ở trạng thái `ACTIVE`, có `end_date` nằm trong 7 ngày tới, đồng thời chưa có gói cùng loại ở trạng thái `UPCOMING`.
+    - **When** Tác vụ định kỳ kiểm tra các gói tập sắp hết hạn.
+    - **Then** Hệ thống tạo hai dòng thông báo trong bảng `notifications`: một dòng `IN_APP` và một dòng `EMAIL`, cùng có `type = MEMBERSHIP_EXPIRING`, `related_entity = memberships` và `related_id` là mã gói tập.
+  - **AC-F10.1.1-02: Thông báo khi gói SESSION sắp hết buổi** (CONFIG-F10.1)
+    - **Given** Hội viên có tài khoản và sở hữu gói `SESSION` đang `ACTIVE`, số buổi còn lại không vượt quá giá trị `SESSION_WARNING_THRESHOLD` trong `system_configs` (mặc định là 2), đồng thời chưa có gói cùng loại nối tiếp ở trạng thái `UPCOMING`.
+    - **When** Tác vụ định kỳ kiểm tra số buổi còn lại của các gói tập.
+    - **Then** Hệ thống tạo hai dòng thông báo `IN_APP` và `EMAIL` có `type = MEMBERSHIP_EXPIRING`, nội dung thể hiện tên gói và số buổi còn lại; không viết cứng ngưỡng cảnh báo trong mã nguồn.
+  - **AC-F10.1.1-03: Không gửi thông báo trùng cho cùng một gói** (BR-F10.2)
+    - **Given** Gói tập đã có thông báo `MEMBERSHIP_EXPIRING` với `related_entity = memberships` và `related_id` tương ứng.
+    - **When** Tác vụ định kỳ tiếp tục chạy và kiểm tra lại gói tập đó.
+    - **Then** Hệ thống không tạo thêm thông báo `IN_APP` hoặc `EMAIL` cho cùng gói tập.
+  - **AC-F10.1.1-04: Không gửi thông báo khi hội viên đã có gói nối tiếp**
+    - **Given** Hội viên đã đăng ký một gói tập cùng loại ở trạng thái `UPCOMING`.
+    - **When** Tác vụ định kỳ kiểm tra gói tập hiện tại sắp hết hạn hoặc sắp hết buổi.
+    - **Then** Hệ thống không tạo thông báo `MEMBERSHIP_EXPIRING` cho gói hiện tại.
+  - **AC-F10.1.1-05: Không tạo thông báo cho hội viên chưa có tài khoản**
+    - **Given** Hội viên đáp ứng điều kiện sắp hết hạn hoặc sắp hết buổi nhưng `members.user_id` không có giá trị.
+    - **When** Tác vụ định kỳ xử lý gói tập.
+    - **Then** Hệ thống bỏ qua hội viên này, không tạo bản ghi `notifications` vì không xác định được tài khoản nhận.
+  - **AC-F10.1.1-06: Hiển thị thông báo trong web và gửi email đúng thời gian**
+    - **Given** Hội viên có tài khoản, gói tập thỏa mãn điều kiện cảnh báo và chi nhánh đang trong giờ mở cửa.
+    - **When** Hệ thống tạo thông báo cho gói tập.
+    - **Then** Thông báo `IN_APP` được đẩy tới trình duyệt hội viên đang mở qua WebSocket (STOMP); thông báo `EMAIL` được gửi tới `users.email` qua SMTP và cập nhật `status = SENT`, `sent_at` sau khi gửi thành công.
+  - **AC-F10.1.1-07: Hẹn gửi email khi phát sinh ngoài giờ mở cửa và xử lý lỗi gửi**
+    - **Given** Thông báo phát sinh ngoài giờ mở cửa của chi nhánh hoặc dịch vụ SMTP gặp lỗi khi gửi email.
+    - **When** Hệ thống xử lý hai dòng thông báo.
+    - **Then** Nếu ngoài giờ mở cửa, dòng `EMAIL` được đặt `scheduled_at` vào giờ mở cửa kế tiếp, còn `IN_APP` vẫn hiển thị ngay. Nếu gửi email thất bại, dòng `EMAIL` chuyển `FAILED`, thông báo `IN_APP` vẫn được giữ nguyên và không bị ảnh hưởng.
+
+---
+
 ---
 
 ### 3.2. UC-F10.2: Gửi thông báo nhắc lịch lớp
@@ -198,15 +237,15 @@ Mỗi sự kiện tạo **hai dòng** trong bảng `notifications`: một dòng 
 
 #### C. Luồng sự kiện chính (Basic Flow / Happy Path)
 
-1. Tác vụ định kỳ chạy và truy vấn các buổi lớp (`class_sessions`) sắp bắt đầu.
+1\. Tác vụ định kỳ chạy và truy vấn các buổi lớp (`class_sessions`) sắp bắt đầu.
 
-2. Hệ thống lấy các lượt đặt chỗ BOOKED của buổi đó, loại các lượt đã có thông báo `CLASS_REMINDER` (theo `related_entity`, `related_id`).
+2\. Hệ thống lấy các lượt đặt chỗ BOOKED của buổi đó, loại các lượt đã có thông báo `CLASS_REMINDER` (theo `related_entity`, `related_id`).
 
-3. Hệ thống xác định tài khoản nhận qua `members.user_id`.
+3\. Hệ thống xác định tài khoản nhận qua `members.user_id`.
 
-4. Hệ thống tạo hai dòng `notifications` (kênh `IN_APP` và `EMAIL`) trong một giao dịch (`@Transactional`), rồi đẩy thông báo `IN_APP` tới trình duyệt hội viên đang mở qua WebSocket (STOMP).
+4\. Hệ thống tạo hai dòng `notifications` (kênh `IN_APP` và `EMAIL`) trong một giao dịch (`@Transactional`), rồi đẩy thông báo `IN_APP` tới trình duyệt hội viên đang mở qua WebSocket (STOMP).
 
-5. Email được gửi như UC-F10.1 bước 5.
+5\. Email được gửi như UC-F10.1 bước 5.
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
 
@@ -254,6 +293,44 @@ Mỗi sự kiện tạo **hai dòng** trong bảng `notifications`: một dòng 
 
 ---
 
+### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F10.2.1: Nhận thông báo nhắc lịch lớp học nhóm
+
+- **User story:** Là **Hội viên**, tôi muốn **nhận thông báo nhắc về lớp học nhóm đã đặt trước khi lớp bắt đầu**, để **không bỏ lỡ lịch tập và chủ động sắp xếp thời gian tham gia**.
+- **BR liên quan:** BR-F10.1, BR-F10.3, BR-F10.4; tích hợp F8.
+- **Version / Sprint:** v2 / Sprint 2.
+- **Tiêu chí chấp nhận:**
+  - **AC-F10.2.1-01: Tạo thông báo nhắc cho lượt đặt chỗ BOOKED** (BR-F10.4)
+    - **Given** Hội viên có tài khoản và có lượt đặt chỗ lớp học nhóm ở trạng thái `BOOKED`; buổi lớp có trạng thái `SCHEDULED` hoặc `RESCHEDULED`.
+    - **When** Tác vụ định kỳ phát hiện buổi lớp sắp bắt đầu theo khoảng thời gian nhắc đã được thống nhất.
+    - **Then** Hệ thống tạo hai dòng thông báo `IN_APP` và `EMAIL`, có `type = CLASS_REMINDER`, `related_entity = class_bookings` và `related_id` là mã lượt đặt chỗ.
+  - **AC-F10.2.1-02: Không gửi thông báo nhắc trùng cho cùng lượt đặt chỗ** (BR-F10.4)
+    - **Given** Lượt đặt chỗ đã có thông báo `CLASS_REMINDER` tương ứng.
+    - **When** Tác vụ định kỳ tiếp tục quét các buổi lớp sắp diễn ra.
+    - **Then** Hệ thống không tạo thêm thông báo nhắc cho lượt đặt chỗ đó.
+  - **AC-F10.2.1-03: Không gửi nhắc khi hội viên đã hủy chỗ hoặc lớp bị hủy**
+    - **Given** Lượt đặt chỗ đã chuyển sang `CANCELLED` hoặc buổi lớp đã chuyển sang trạng thái `CANCELLED`.
+    - **When** Tác vụ định kỳ kiểm tra danh sách lượt đặt chỗ cần gửi thông báo.
+    - **Then** Hệ thống không tạo thông báo `CLASS_REMINDER` cho lượt đặt chỗ hoặc buổi lớp này.
+  - **AC-F10.2.1-04: Không tạo thông báo cho hội viên chưa có tài khoản**
+    - **Given** Hội viên có lượt đặt chỗ `BOOKED` hợp lệ nhưng chưa liên kết tài khoản (`members.user_id` không có giá trị).
+    - **When** Hệ thống xử lý thông báo nhắc lịch lớp.
+    - **Then** Hệ thống bỏ qua hội viên này và không tạo hai dòng `notifications`.
+  - **AC-F10.2.1-05: Hiển thị thông báo trong web và gửi email nhắc lịch**
+    - **Given** Lượt đặt chỗ và buổi lớp thỏa mãn điều kiện gửi nhắc, hội viên có tài khoản và chi nhánh đang trong giờ mở cửa.
+    - **When** Hệ thống tạo thông báo `CLASS_REMINDER`.
+    - **Then** Hệ thống đẩy thông báo `IN_APP` qua WebSocket (STOMP); email được gửi tới `users.email` qua SMTP và cập nhật trạng thái gửi tương ứng.
+  - **AC-F10.2.1-06: Xử lý email phát sinh ngoài giờ và lỗi gửi email**
+    - **Given** Thông báo nhắc lịch lớp phát sinh ngoài giờ mở cửa hoặc dịch vụ SMTP gặp lỗi.
+    - **When** Hệ thống xử lý thông báo.
+    - **Then** Nếu ngoài giờ mở cửa, email được đặt lịch gửi vào giờ mở cửa kế tiếp, thông báo trong web vẫn hiển thị ngay. Nếu gửi thất bại, dòng `EMAIL` chuyển `FAILED`, không làm mất thông báo `IN_APP`.
+- **Ghi chú cần chốt:** Khoảng thời gian gửi thông báo trước giờ bắt đầu lớp chưa được xác định trong `ban-chot-pham-vi.md` và danh sách khóa cấu hình của ERD. Không tự đặt số phút hoặc giá trị mặc định cho đến khi nhóm thống nhất.
+
+---
+
+---
+
 ### 3.3. UC-F10.3: Gửi thông báo được đưa vào lớp từ danh sách chờ
 
 - **Mã UC:** UC-F10.3
@@ -280,15 +357,15 @@ Mỗi sự kiện tạo **hai dòng** trong bảng `notifications`: một dòng 
 
 #### C. Luồng sự kiện chính (Basic Flow / Happy Path)
 
-1. Có chỗ trống trong buổi lớp (ví dụ hội viên khác hủy chỗ).
+1\. Có chỗ trống trong buổi lớp (ví dụ hội viên khác hủy chỗ).
 
-2. Hệ thống chọn lượt WAITLIST đứng đầu và đủ điều kiện theo `waitlisted_at`, có khóa bản ghi để chống xung đột (NF6).
+2\. Hệ thống chọn lượt WAITLIST đứng đầu và đủ điều kiện theo `waitlisted_at`, có khóa bản ghi để chống xung đột (NF6).
 
-3. Hệ thống cập nhật lượt đặt chỗ sang BOOKED, ghi `promoted_at` (việc đưa vào lớp thuộc F8; F10 chỉ gửi thông báo).
+3\. Hệ thống cập nhật lượt đặt chỗ sang BOOKED, ghi `promoted_at` (việc đưa vào lớp thuộc F8; F10 chỉ gửi thông báo).
 
-4. Hệ thống tạo hai dòng `notifications` (kênh `IN_APP` và `EMAIL`) trong cùng giao dịch, rồi đẩy thông báo `IN_APP` tới trình duyệt hội viên đang mở qua WebSocket (STOMP).
+4\. Hệ thống tạo hai dòng `notifications` (kênh `IN_APP` và `EMAIL`) trong cùng giao dịch, rồi đẩy thông báo `IN_APP` tới trình duyệt hội viên đang mở qua WebSocket (STOMP).
 
-5. Email được gửi như UC-F10.1 bước 5 (chỉ trong giờ mở cửa chi nhánh). Hạn hủy không phạt `grace_until` do F8 ghi ở bước 3, bằng `promoted_at` cộng `PROMOTION_GRACE_MIN` (mặc định 15 phút); việc gửi email không sửa `grace_until` ([ADR 0010](../../decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md)).
+5\. Email được gửi như UC-F10.1 bước 5 (chỉ trong giờ mở cửa chi nhánh). Hạn hủy không phạt `grace_until` do F8 ghi ở bước 3, bằng `promoted_at` cộng `PROMOTION_GRACE_MIN` (mặc định 15 phút); việc gửi email không sửa `grace_until` ([ADR 0010](../../decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md)).
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
 
@@ -310,7 +387,7 @@ Mỗi sự kiện tạo **hai dòng** trong bảng `notifications`: một dòng 
 
 - **[Yêu cầu phi chức năng]:**
 
-  - Toàn vẹn đồng thời (NF6): không đưa cùng một hội viên vào lớp hai lần.
+&#x20; - Toàn vẹn đồng thời (NF6): không đưa cùng một hội viên vào lớp hai lần.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
 
@@ -340,6 +417,47 @@ Mỗi sự kiện tạo **hai dòng** trong bảng `notifications`: một dòng 
 
 ---
 
+### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F10.3.1: Nhận thông báo khi được đưa vào lớp từ danh sách chờ
+
+- **User story:** Là **Hội viên đang ở danh sách chờ**, tôi muốn **nhận thông báo khi được tự động đưa vào lớp học nhóm**, để **biết mình đã có chỗ và chủ động tham gia buổi học đúng giờ**.
+- **BR liên quan:** BR-F10.1, BR-F10.3, BR-F10.5; NF6; ADR 0010.
+- **Version / Sprint:** v2 / Sprint 2.
+- **Tiêu chí chấp nhận:**
+  - **AC-F10.3.1-01: Tạo thông báo khi hội viên được đưa từ WAITLIST sang BOOKED** (BR-F10.5)
+    - **Given** Hội viên có tài khoản và lượt đặt chỗ đang ở trạng thái `WAITLIST`; hệ thống F8 xác định hội viên đủ điều kiện và tự động đưa vào lớp.
+    - **When** F8 cập nhật lượt đặt chỗ sang `BOOKED` và ghi nhận `promoted_at`.
+    - **Then** F10 tạo hai dòng thông báo `IN_APP` và `EMAIL`, có `type = CLASS_PROMOTED`, `related_entity = class_bookings` và `related_id` là mã lượt đặt chỗ.
+  - **AC-F10.3.1-02: Nội dung thông báo thể hiện đầy đủ thông tin được đưa vào lớp**
+    - **Given** Hội viên vừa được đưa từ danh sách chờ vào lớp thành công.
+    - **When** Hệ thống tạo nội dung thông báo.
+    - **Then** Thông báo thể hiện tối thiểu tên lớp, thời gian buổi học và thời hạn hủy không phạt (`grace_until`) để hội viên biết thời điểm cần thực hiện thao tác nếu không thể tham gia.
+  - **AC-F10.3.1-03: Thời hạn hủy không phạt được tính từ thời điểm đưa vào lớp** (ADR 0010)
+    - **Given** Hội viên được đưa vào lớp tại thời điểm `promoted_at`; cấu hình `PROMOTION_GRACE_MIN` có giá trị mặc định 15 phút.
+    - **When** Hệ thống tạo thông báo `CLASS_PROMOTED`.
+    - **Then** Nội dung thông báo sử dụng đúng `grace_until` do F8 ghi nhận, tương ứng với `promoted_at` cộng thời hạn ân hạn; F10 không tự tính lại hoặc thay đổi `grace_until`.
+  - **AC-F10.3.1-04: Không trì hoãn việc đưa vào lớp để chờ gửi thông báo**
+    - **Given** Có chỗ trống và hội viên đủ điều kiện được đưa vào lớp trong thời gian cho phép, kể cả khi sự kiện phát sinh ngoài giờ mở cửa.
+    - **When** F8 thực hiện đưa hội viên từ `WAITLIST` sang `BOOKED`.
+    - **Then** Việc đưa vào lớp được thực hiện ngay theo quy tắc F8; thông báo `IN_APP` hiển thị ngay và email được hẹn gửi vào giờ mở cửa kế tiếp. Thời hạn `grace_until` vẫn tính từ `promoted_at`, không phụ thuộc thời điểm email được gửi.
+  - **AC-F10.3.1-05: Không tạo thông báo khi hội viên chưa có tài khoản**
+    - **Given** Hội viên được đưa vào lớp thành công nhưng `members.user_id` không có giá trị.
+    - **When** F10 xử lý sự kiện đưa vào lớp.
+    - **Then** Hệ thống không tạo hai dòng `notifications`; việc đưa vào lớp và thời hạn ân hạn do F8 ghi nhận vẫn được giữ nguyên.
+  - **AC-F10.3.1-06: Không gửi thông báo nếu hội viên không thực sự được đưa vào lớp**
+    - **Given** Lượt đặt chỗ vẫn ở trạng thái `WAITLIST`, hội viên không đủ điều kiện, hoặc thao tác đưa vào lớp của F8 thất bại.
+    - **When** Hệ thống xử lý sự kiện danh sách chờ.
+    - **Then** F10 không tạo thông báo `CLASS_PROMOTED` khi chưa có kết quả đưa vào lớp thành công.
+  - **AC-F10.3.1-07: Xử lý lỗi gửi email mà không ảnh hưởng kết quả đưa vào lớp**
+    - **Given** Hội viên đã được F8 đưa vào lớp thành công nhưng dịch vụ SMTP gặp lỗi.
+    - **When** F10 gửi email thông báo.
+    - **Then** Lượt đặt chỗ vẫn giữ trạng thái `BOOKED`, `promoted_at` và `grace_until` không thay đổi; dòng `EMAIL` chuyển `FAILED`, thông báo `IN_APP` vẫn được lưu và hiển thị.
+
+---
+
+---
+
 ### 3.4. UC-F10.4: Gửi thông báo đổi giờ lớp
 
 - **Mã UC:** UC-F10.4
@@ -364,13 +482,13 @@ Mỗi sự kiện tạo **hai dòng** trong bảng `notifications`: một dòng 
 
 #### C. Luồng sự kiện chính (Basic Flow / Happy Path)
 
-1. Người có quyền đổi giờ buổi lớp và lưu thành công; hệ thống ghi giờ cũ vào `original_start_at`.
+1\. Người có quyền đổi giờ buổi lớp và lưu thành công; hệ thống ghi giờ cũ vào `original_start_at`.
 
-2. Hệ thống lấy danh sách hội viên có chỗ trong buổi lớp đó (`class_bookings`).
+2\. Hệ thống lấy danh sách hội viên có chỗ trong buổi lớp đó (`class_bookings`).
 
-3. Hệ thống tạo hai dòng `notifications` (kênh `IN_APP` và `EMAIL`) cho từng hội viên có tài khoản, ghi giờ cũ, giờ mới và hạn xác nhận lại (`RECONFIRM_TTL_MIN` phút), rồi đẩy thông báo `IN_APP` tới trình duyệt hội viên đang mở qua WebSocket (STOMP).
+3\. Hệ thống tạo hai dòng `notifications` (kênh `IN_APP` và `EMAIL`) cho từng hội viên có tài khoản, ghi giờ cũ, giờ mới và hạn xác nhận lại (`RECONFIRM_TTL_MIN` phút), rồi đẩy thông báo `IN_APP` tới trình duyệt hội viên đang mở qua WebSocket (STOMP).
 
-4. Email được gửi như UC-F10.1 bước 5.
+4\. Email được gửi như UC-F10.1 bước 5.
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
 
@@ -420,6 +538,43 @@ Mỗi sự kiện tạo **hai dòng** trong bảng `notifications`: một dòng 
 
 ---
 
+### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F10.4.1: Nhận thông báo khi lịch lớp học nhóm thay đổi
+
+- **User story:** Là **Hội viên đã đặt chỗ lớp học nhóm**, tôi muốn **nhận thông báo khi buổi lớp thay đổi giờ**, để **biết lịch mới và xác nhận lại khả năng tham gia trước thời hạn quy định**.
+- **BR liên quan:** BR-F10.1, BR-F10.3, BR-F10.6; CONFIG-F10.3; tích hợp F8.
+- **Version / Sprint:** v2 / Sprint 2.
+- **Tiêu chí chấp nhận:**
+  - **AC-F10.4.1-01: Tạo thông báo khi buổi lớp đã được đổi giờ thành công** (BR-F10.6)
+    - **Given** Buổi lớp có hội viên đã đặt chỗ và người có quyền thực hiện đổi giờ thành công; buổi lớp chuyển sang trạng thái `RESCHEDULED`.
+    - **When** Hệ thống ghi nhận sự kiện đổi giờ lớp.
+    - **Then** F10 tạo hai dòng thông báo `IN_APP` và `EMAIL` cho mỗi hội viên có tài khoản và có lượt đặt chỗ liên quan, với `type = CLASS_RESCHEDULED`, `related_entity = class_bookings` và `related_id` là mã lượt đặt chỗ.
+  - **AC-F10.4.1-02: Nội dung thông báo có giờ cũ, giờ mới và hạn xác nhận lại** (BR-F10.6)
+    - **Given** Buổi lớp có `original_start_at`, `start_at` và lượt đặt chỗ có `reconfirm_expires_at`.
+    - **When** Hệ thống tạo thông báo đổi giờ lớp.
+    - **Then** Nội dung thông báo thể hiện rõ giờ bắt đầu cũ, giờ bắt đầu mới và hạn xác nhận lại để hội viên chủ động quyết định có tiếp tục tham gia hay không.
+  - **AC-F10.4.1-03: Hạn xác nhận lại sử dụng cấu hình RECONFIRM_TTL_MIN** (CONFIG-F10.3)
+    - **Given** Hệ thống có cấu hình `RECONFIRM_TTL_MIN` trong `system_configs` (mặc định 60 phút).
+    - **When** F8 xử lý việc đổi giờ và ghi nhận hạn xác nhận lại cho lượt đặt chỗ.
+    - **Then** F10 sử dụng đúng `reconfirm_expires_at` do F8 ghi nhận để đưa vào thông báo; không viết cứng thời hạn xác nhận lại trong mã nguồn.
+  - **AC-F10.4.1-04: Không tạo thông báo khi buổi lớp không có hội viên đặt chỗ**
+    - **Given** Buổi lớp được đổi giờ nhưng không có lượt đặt chỗ nào liên quan.
+    - **When** Hệ thống xử lý sự kiện đổi giờ lớp.
+    - **Then** Không có dòng thông báo nào được tạo.
+  - **AC-F10.4.1-05: Không tạo thông báo cho hội viên chưa có tài khoản**
+    - **Given** Hội viên có lượt đặt chỗ trong buổi lớp được đổi giờ nhưng `members.user_id` không có giá trị.
+    - **When** F10 xử lý danh sách người nhận thông báo.
+    - **Then** Hệ thống bỏ qua hội viên này, không tạo hai dòng `notifications`; việc đổi giờ và trạng thái lượt đặt chỗ do F8 xử lý vẫn được giữ nguyên.
+  - **AC-F10.4.1-06: Gửi thông báo qua hai kênh và xử lý lỗi email**
+    - **Given** Buổi lớp đã đổi giờ thành công, hội viên có tài khoản và dịch vụ gửi email có thể hoạt động hoặc gặp lỗi.
+    - **When** F10 tạo và gửi thông báo `CLASS_RESCHEDULED`.
+    - **Then** Thông báo `IN_APP` được đẩy qua WebSocket (STOMP); email được gửi trong giờ mở cửa hoặc đặt lịch vào giờ mở cửa kế tiếp. Nếu SMTP thất bại, dòng `EMAIL` chuyển `FAILED`, nhưng việc đổi giờ lớp không bị rollback và thông báo `IN_APP` vẫn được giữ nguyên.
+
+---
+
+---
+
 ### 3.5. UC-F10.5: Xem thông báo trong web
 
 - **Mã UC:** UC-F10.5
@@ -444,15 +599,15 @@ Mỗi sự kiện tạo **hai dòng** trong bảng `notifications`: một dòng 
 
 #### C. Luồng sự kiện chính (Basic Flow / Happy Path)
 
-1. Hội viên mở mục "Thông báo" trong cổng hội viên.
+1\. Hội viên mở mục "Thông báo" trong cổng hội viên.
 
-2. Hệ thống kiểm tra tham số phân trang (Bean Validation).
+2\. Hệ thống kiểm tra tham số phân trang (Bean Validation).
 
-3. Hệ thống kiểm tra quyền và vai trò (S3); tài khoản lấy từ token.
+3\. Hệ thống kiểm tra quyền và vai trò (S3); tài khoản lấy từ token.
 
-4. Hệ thống truy vấn các thông báo kênh `IN_APP` có `user_id` là tài khoản đó, mới nhất trước.
+4\. Hệ thống truy vấn các thông báo kênh `IN_APP` có `user_id` là tài khoản đó, mới nhất trước.
 
-5. Hệ thống trả về kết quả (200 OK) dạng `PageResponse` gồm: loại, tiêu đề, nội dung, thời điểm, trạng thái đã đọc (`read_at` khác rỗng là đã đọc), và đối tượng liên quan (`related_entity`, `related_id`) để mở đúng màn hình.
+5\. Hệ thống trả về kết quả (200 OK) dạng `PageResponse` gồm: loại, tiêu đề, nội dung, thời điểm, trạng thái đã đọc (`read_at` khác rỗng là đã đọc), và đối tượng liên quan (`related_entity`, `related_id`) để mở đúng màn hình.
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
 
@@ -460,11 +615,11 @@ Mỗi sự kiện tạo **hai dòng** trong bảng `notifications`: một dòng 
 
 - **A2 – Đánh dấu đã đọc:**
 
-  - Khi hội viên mở một thông báo chưa đọc, hệ thống ghi `read_at` bằng thời điểm hiện tại (chỉ ghi nếu thông báo thuộc về chính hội viên đó).
+&#x20; - Khi hội viên mở một thông báo chưa đọc, hệ thống ghi `read_at` bằng thời điểm hiện tại (chỉ ghi nếu thông báo thuộc về chính hội viên đó).
 
 - **A3 – Thông báo mới đến khi đang mở web:**
 
-  - Hệ thống đẩy thông báo qua WebSocket (STOMP); giao diện hiển thị ngay, không cần tải lại trang.
+&#x20; - Hệ thống đẩy thông báo qua WebSocket (STOMP); giao diện hiển thị ngay, không cần tải lại trang.
 
 - **E1 – Dữ liệu đầu vào không hợp lệ (400 Bad Request):** tham số phân trang sai; trả `ProblemDetail` (400).
 
@@ -507,3 +662,39 @@ Mỗi sự kiện tạo **hai dòng** trong bảng `notifications`: một dòng 
 - **Header:** `Authorization: Bearer \<access_token>`
 
 - **Request Body:** Không có.
+
+
+rồi gửi cho mình file markdown hoàn chỉn
+
+### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F10.5.1: Xem và quản lý trạng thái đã đọc của thông báo
+
+- **User story:** Là **Hội viên**, tôi muốn **xem danh sách thông báo trong cổng hội viên và biết thông báo nào đã đọc hoặc chưa đọc**, để **theo dõi các thông tin quan trọng về gói tập và lịch học**.
+- **BR liên quan:** BR-F10.7, BR-F10.8; S3, S5.
+- **Version / Sprint:** v2 / Sprint 2.
+- **Tiêu chí chấp nhận:**
+  - **AC-F10.5.1-01: Xem danh sách thông báo của tài khoản đang đăng nhập** (BR-F10.7, S3)
+    - **Given** Hội viên đã đăng nhập hợp lệ vào cổng hội viên và tài khoản có các thông báo trong bảng `notifications`.
+    - **When** Hội viên truy cập màn hình "Thông báo".
+    - **Then** Hệ thống chỉ trả về các thông báo có `user_id` bằng ID tài khoản lấy từ token và `channel = IN_APP`; không trả về thông báo của tài khoản khác hoặc các dòng kênh `EMAIL`.
+  - **AC-F10.5.1-02: Sắp xếp và phân trang danh sách thông báo** (S5)
+    - **Given** Hội viên có nhiều thông báo `IN_APP`.
+    - **When** Hội viên truy cập danh sách thông báo với tham số phân trang hợp lệ, ví dụ `page = 0`, `size = 20`.
+    - **Then** Hệ thống trả về `200 OK` theo cấu trúc `PageResponse`, sắp xếp thông báo mới nhất trước và trả về đúng số bản ghi theo tham số phân trang.
+  - **AC-F10.5.1-03: Hiển thị đầy đủ nội dung và trạng thái đã đọc**
+    - **Given** Hội viên có các thông báo với `read_at` khác nhau.
+    - **When** Hệ thống trả danh sách thông báo cho giao diện.
+    - **Then** Mỗi thông báo hiển thị loại, tiêu đề, nội dung, thời điểm tạo, đối tượng liên quan (`related_entity`, `related_id`) và trạng thái đọc; `read_at` khác rỗng là đã đọc, `read_at` rỗng là chưa đọc.
+  - **AC-F10.5.1-04: Đánh dấu thông báo đã đọc**
+    - **Given** Hội viên đang sở hữu một thông báo `IN_APP` chưa đọc (`read_at IS NULL`).
+    - **When** Hội viên mở thông báo hoặc gọi API `PATCH /api/v1/me/notifications/{id}/read`.
+    - **Then** Hệ thống cập nhật `read_at` bằng thời điểm hiện tại; thông báo chuyển sang trạng thái đã đọc trên giao diện. Chỉ cập nhật nếu thông báo thuộc chính tài khoản đang đăng nhập.
+  - **AC-F10.5.1-05: Không cho phép xem hoặc đánh dấu thông báo của người khác** (BR-F10.7, S3)
+    - **Given** Hội viên A đăng nhập và gửi yêu cầu truy cập hoặc đánh dấu đã đọc thông báo thuộc tài khoản hội viên B.
+    - **When** Hội viên A gọi API tương ứng.
+    - **Then** Hệ thống trả về `403 Forbidden` theo quy tắc phân quyền; không tiết lộ nội dung thông báo của hội viên B và không thay đổi `read_at`.
+  - **AC-F10.5.1-06: Xử lý dữ liệu đầu vào sai và thông báo không tồn tại**
+    - **Given** Hội viên gửi tham số phân trang không hợp lệ (`page < 0`, `size < 1` hoặc `size > 100`), hoặc yêu cầu đánh dấu một thông báo không tồn tại.
+    - **When** Hệ thống xử lý yêu cầu xem hoặc đánh dấu đã đọc.
+    - **Then** Tham số phân trang sai trả về `400 Bad Request`; thông báo không tồn tại trả về `404 Not Found`. Nếu hội viên chưa có thông báo nào, hệ thống trả danh sách rỗng với `200 OK` và giao diện hiển thị "Bạn chưa có thông báo".
