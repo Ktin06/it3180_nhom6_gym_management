@@ -106,7 +106,7 @@ public class ClassBookingService {
         return value;
     }
 
-    private void applyPenalty(long memberId, long branch, long actor, OffsetDateTime now) {
+    void applyPenalty(long memberId, long branch, long actor, OffsetDateTime now) {
         var member = classes.member(memberId);
         if (member.bookingLockedUntil() != null && member.bookingLockedUntil().isAfter(now)) { return; }
         var month = time.dayStart(time.toVnDate(now).withDayOfMonth(1));
