@@ -6,8 +6,11 @@ import { publicRequest } from '../../../services/request-options'
 import type {
   AccessTokenResponse,
   AuthMeResponse,
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
   LoginRequest,
   RegisterRequest,
+  ResetPasswordRequest,
 } from '../types/auth'
 
 const publicAuthRequest = publicRequest
@@ -48,6 +51,21 @@ export async function getCurrentUser(): Promise<AuthUser> {
 export function logout() {
   return queueCookieOperation(async () => {
     await http.post('/auth/logout', undefined, { ...publicAuthRequest })
+  })
+}
+
+export async function forgotPassword(
+  request: ForgotPasswordRequest,
+): Promise<ForgotPasswordResponse> {
+  const response = await http.post<ForgotPasswordResponse>('/auth/forgot-password', request, {
+    ...publicAuthRequest,
+  })
+  return response.data
+}
+
+export async function resetPassword(request: ResetPasswordRequest): Promise<void> {
+  await http.post('/auth/reset-password', request, {
+    ...publicAuthRequest,
   })
 }
 

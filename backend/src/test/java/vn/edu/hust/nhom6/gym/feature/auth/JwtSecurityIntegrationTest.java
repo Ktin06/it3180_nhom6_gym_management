@@ -30,6 +30,7 @@ import vn.edu.hust.nhom6.gym.feature.auth.controller.AuthController;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 import vn.edu.hust.nhom6.gym.feature.auth.service.AuthCookieHelper;
 import vn.edu.hust.nhom6.gym.feature.auth.service.AuthService;
+import vn.edu.hust.nhom6.gym.feature.auth.service.PasswordResetService;
 
 /**
  * Kiểm thử tích hợp tầng bảo mật cho UC-F1.6 (Đọc JWT HS256 và chặn API theo vai trò).
@@ -47,6 +48,9 @@ class JwtSecurityIntegrationTest {
 
     @MockitoBean
     private AuthService authService;
+
+    @MockitoBean
+    private PasswordResetService passwordResetService;
 
     @MockitoBean
     private AuthCookieHelper cookieHelper;
