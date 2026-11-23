@@ -56,6 +56,7 @@ export const routes: RouteObject[] = [
       guarded('/packages', <PackagesPage />),
       guarded('/checkins', <CheckinPage />),
       guarded('/dashboard', <DashboardPage />),
+      guarded('/ban-goi', <div>Trang bán gói (F3)</div>),
       // Trang mới của nhân viên: thêm một dòng guarded(...) ở đây.
     ],
   },
