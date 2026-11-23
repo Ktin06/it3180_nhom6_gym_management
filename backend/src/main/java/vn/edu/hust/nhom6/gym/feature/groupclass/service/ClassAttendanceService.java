@@ -45,9 +45,10 @@ public class ClassAttendanceService {
         boolean afterDay = !now.isBefore(time.dayEnd(time.toVnDate(session.startAt())));
         boolean trainer = actor.is(UserRole.TRAINER);
         boolean first = "BOOKED".equals(row.status());
-        if ("CANCELLED".equals(session.status()) || "CANCELLED".equals(row.status())
-                || (trainer && (now.isBefore(session.startAt()) || afterDay))
-                || (!trainer && (!afterDay || first))) {
+        boolean cancelled = "CANCELLED".equals(session.status()) || "CANCELLED".equals(row.status());
+        boolean trainerOutsideAttendanceWindow = trainer && (now.isBefore(session.startAt()) || afterDay);
+        boolean managerOutsideCorrectionWindow = !trainer && (!afterDay || first);
+        if (cancelled || trainerOutsideAttendanceWindow || managerOutsideCorrectionWindow) {
             throw new BusinessRuleException("Không thể điểm danh với thời gian hoặc trạng thái hiện tại.");
         }
 

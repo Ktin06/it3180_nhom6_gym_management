@@ -654,7 +654,7 @@ class ClassApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("TC-F8.7.1-08c/09/10/11: Đổi phòng, đổi giờ nhiều lần và hủy buổi với dữ liệu F10")
+    @DisplayName("TC-F8.7.1-08c, TC-F8.7.1-09a, TC-F8.7.1-10a, TC-F8.7.1-11a: Đổi phòng, đổi giờ nhiều lần và hủy buổi với dữ liệu F10")
     void changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot() throws Exception {
         long id = session(NOW.plusHours(2), 2);
         long booking = bookings.book(actor(), id, member).id();
@@ -699,7 +699,7 @@ class ClassApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("TC-F8.7.1-09b/10b: Giữ nguyên buổi khi xung đột hoặc phòng không hợp lệ")
+    @DisplayName("TC-F8.7.1-09b, TC-F8.7.1-10b: Giữ nguyên buổi khi xung đột hoặc phòng không hợp lệ")
     void rejectsRoomCapacityAndActualTimeConflict() {
         long id = session(NOW.plusHours(2), 2);
         session(NOW.plusHours(4), 2);
@@ -717,7 +717,7 @@ class ClassApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("TC-F8.7.1-12: Rollback không phát sự kiện, lỗi thông báo không đảo ngược F8")
+    @DisplayName("TC-F8.7.1-12a: Rollback không phát sự kiện, lỗi thông báo không đảo ngược F8")
     void notificationFailureIsIsolatedAndRollbackDoesNotPublish() {
         long id = session(NOW.plusHours(2), 2);
         long booking = bookings.book(actor(), id, member).id();
@@ -739,7 +739,7 @@ class ClassApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("TC-F8.6.1-01/03/04/05/06: Check-in, phân công, biên giờ Việt Nam và audit khi sửa")
+    @DisplayName("TC-F8.6.1-01a, TC-F8.6.1-03a, TC-F8.6.1-04a, TC-F8.6.1-05a, TC-F8.6.1-06a: Check-in, phân công, biên giờ Việt Nam và audit khi sửa")
     void attendanceHonorsAssignmentAndVietnameseDay() throws Exception {
         long id = session(NOW.plusHours(2), 2);
         long booking = bookings.book(actor(), id, member).id();
@@ -782,7 +782,7 @@ class ClassApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("TC-F8.6.1-02/07/08/09/10/11: Chỉ NO_SHOW lần đầu áp khóa, gỡ khóa riêng có audit")
+    @DisplayName("TC-F8.6.1-02a, TC-F8.6.1-07a, TC-F8.6.1-08a, TC-F8.6.1-09a, TC-F8.6.1-10a, TC-F8.6.1-11a: Chỉ NO_SHOW lần đầu áp khóa, gỡ khóa riêng có audit")
     void firstNoShowLocksAndCorrectionDoesNotReevaluateLock() throws Exception {
         var trainerActor = new CurrentUser(trainerUser, UserRole.TRAINER);
         jdbc.update("INSERT INTO system_configs(branch_id,config_key,config_value) VALUES (?,'PENALTY_LIMIT_PER_MONTH','1')", branch);
