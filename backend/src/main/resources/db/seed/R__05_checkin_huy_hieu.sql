@@ -10,9 +10,10 @@ ON CONFLICT (code) DO NOTHING;
 INSERT INTO checkins (member_id,membership_id,branch_id,created_by,method,checkin_date,session_deducted,checked_in_at)
 SELECT m.id,ms.id,b.id,u.id,'MANUAL',ms.start_date,false,
 (ms.start_date::timestamp + TIME '17:30') AT TIME ZONE 'Asia/Ho_Chi_Minh'
-FROM members m JOIN memberships ms ON ms.member_id=m.id JOIN branches b ON b.id=ms.branch_id
+FROM members m JOIN memberships ms ON ms.member_id=m.id JOIN branches b ON b.id=ms.sold_branch_id
 JOIN users u ON u.email='receptionist@example.com'
 WHERE m.member_code='HV999001' AND b.code='CN01' AND ms.package_type='TIME' AND ms.status='ACTIVE'
+AND (ms.branch_id IS NULL OR ms.branch_id=b.id)
 AND ms.start_date <= (now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date
 AND ms.end_date >= (now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date
 AND TIME '17:30' >= b.open_time AND TIME '17:30' < b.close_time
