@@ -529,4 +529,29 @@ class AuthServiceTest {
         verify(userRepository, never()).save(any());
         verify(refreshTokenRepository, never()).revokeAllByUserId(any(), any());
     }
+
+    @Test
+    @DisplayName("TC-F1.4.1-04e: tài khoản DISABLED hoặc LOCKED không thể đổi mật khẩu và trả 403")
+    void doiMatKhauTaiKhoanKhongActiveNemForbiddenException() {
+        CurrentUser me = new CurrentUser(10L, UserRole.MEMBER);
+        ChangePasswordRequest request = new ChangePasswordRequest("OldPass123", "NewPass456");
+
+        for (UserStatus nonActive : new UserStatus[] { UserStatus.DISABLED, UserStatus.LOCKED }) {
+            User user = User.builder()
+                .email("member@example.com")
+                .passwordHash("old-hash")
+                .role(UserRole.MEMBER)
+                .status(nonActive)
+                .build();
+            when(userRepository.findById(10L)).thenReturn(Optional.of(user));
+
+            assertThatThrownBy(() -> authService.changePassword(me, request))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên.");
+        }
+
+        verify(passwordEncoder, never()).matches(anyString(), anyString());
+        verify(userRepository, never()).save(any());
+        verify(refreshTokenRepository, never()).revokeAllByUserId(any(), any());
+    }
 }

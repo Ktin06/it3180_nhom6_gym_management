@@ -19,6 +19,7 @@ function renderLogin(sessionError: string | null = null) {
         register: vi.fn(),
         logout: vi.fn(),
         retrySession,
+        completePasswordChange: vi.fn(),
       }}
     >
       <MemoryRouter initialEntries={['/login']}>
@@ -87,6 +88,7 @@ describe('LoginPage', () => {
           register: vi.fn(),
           logout: vi.fn(),
           retrySession: vi.fn(),
+          completePasswordChange: vi.fn(),
         }}
       >
         <MemoryRouter
@@ -140,6 +142,7 @@ describe('LoginPage', () => {
           register: vi.fn(),
           logout: vi.fn(),
           retrySession: vi.fn(),
+          completePasswordChange: vi.fn(),
         }}
       >
         <MemoryRouter

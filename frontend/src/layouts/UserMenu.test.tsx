@@ -21,6 +21,7 @@ function renderUserMenu(role: Role = 'RECEPTIONIST', initialPath = '/reception')
           register: vi.fn(),
           logout,
           retrySession: vi.fn(),
+          completePasswordChange: vi.fn(),
         }}
       >
         <MemoryRouter initialEntries={[initialPath]}>

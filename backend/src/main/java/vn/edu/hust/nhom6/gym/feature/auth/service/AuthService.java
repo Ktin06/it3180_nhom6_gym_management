@@ -259,6 +259,10 @@ public class AuthService {
         User user = userRepository.findById(me.userId())
             .orElseThrow(() -> new UnauthorizedException("Token không hợp lệ."));
 
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new ForbiddenException("Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên.");
+        }
+
         validatePasswordLength(request.newPassword());
 
         String currentPassword = request.currentPassword();

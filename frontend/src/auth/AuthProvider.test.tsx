@@ -10,9 +10,11 @@ const authApi = vi.hoisted(() => ({
   register: vi.fn(),
 }))
 const refresh = vi.hoisted(() => vi.fn())
+const publishSessionChange = vi.hoisted(() => vi.fn())
 
 vi.mock('../features/auth/api/auth-api', () => authApi)
 vi.mock('../services/http', () => ({ refreshAccessToken: refresh }))
+vi.mock('./session-coordination', () => ({ publishSessionChange }))
 
 import { AuthProvider } from './AuthProvider'
 import { useAuth } from './useAuth'
@@ -58,6 +60,7 @@ function AuthProbe() {
       <button onClick={() => void auth.logout().catch(() => setLastError('logout failed'))}>
         Đăng xuất thử
       </button>
+      <button onClick={() => void auth.completePasswordChange()}>Hoàn tất đổi mật khẩu</button>
     </>
   )
 }
@@ -90,6 +93,7 @@ describe('AuthProvider', () => {
     authApi.logout.mockReset().mockResolvedValue(undefined)
     authApi.register.mockReset()
     refresh.mockReset().mockRejectedValue(unauthorizedError())
+    publishSessionChange.mockReset().mockResolvedValue(undefined)
   })
 
   it('bootstrap làm mới cookie rồi lấy user từ /me', async () => {
@@ -262,5 +266,23 @@ describe('AuthProvider', () => {
     pendingMe.resolve({ email: 'cu@example.com', role: 'MEMBER' })
     await waitFor(() => expect(getAccessToken()).toBeNull())
     expect(screen.queryByText('authenticated')).not.toBeInTheDocument()
+  })
+
+  it('TC-F1.4.1-01g: completePasswordChange phát publishSessionChange(null) cho các tab khác và xóa phiên hiện tại kèm thông báo', async () => {
+    refresh.mockImplementation(async (epoch: number) => {
+      setAccessToken('bootstrap-jwt', epoch)
+      return 'bootstrap-jwt'
+    })
+    authApi.getCurrentUser.mockResolvedValue({ email: 'hv@example.com', role: 'MEMBER' })
+    const user = userEvent.setup()
+    renderProvider()
+    await screen.findByText('authenticated')
+
+    await user.click(screen.getByRole('button', { name: 'Hoàn tất đổi mật khẩu' }))
+
+    expect(await screen.findByText('anonymous')).toBeInTheDocument()
+    expect(publishSessionChange).toHaveBeenCalledWith(null)
+    expect(getAccessToken()).toBeNull()
+    expect(screen.getByText('Đã đổi mật khẩu, vui lòng đăng nhập lại')).toBeInTheDocument()
   })
 })

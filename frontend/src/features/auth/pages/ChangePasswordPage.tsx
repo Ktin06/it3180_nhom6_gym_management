@@ -32,7 +32,7 @@ export function ChangePasswordPage() {
           currentPassword: values.currentPassword,
           newPassword: values.newPassword,
         })
-        completePasswordChange?.()
+        await completePasswordChange()
         navigate('/login', { replace: true })
       } catch (error) {
         const problem = getProblemDetail(error)

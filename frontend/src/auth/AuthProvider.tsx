@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { AuthCompletionError, AuthContext, type AuthStatus, type AuthUser } from './AuthContext'
+import { queueCookieOperation } from './cookie-operation-queue'
+import { publishSessionChange } from './session-coordination'
 import {
   beginSession,
   expireSession,
@@ -191,8 +193,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (getSessionEpoch() === epoch) expireSession(epoch)
   }, [])
 
-  const completePasswordChange = useCallback(() => {
-    expireSession(getSessionEpoch(), PASSWORD_CHANGED_MESSAGE)
+  const completePasswordChange = useCallback(async () => {
+    const epoch = getSessionEpoch()
+    try {
+      await queueCookieOperation(() => publishSessionChange(null))
+    } catch {
+      // Không chặn việc xóa phiên cục bộ nếu đồng bộ liên tab gặp lỗi.
+    }
+    if (getSessionEpoch() === epoch) {
+      expireSession(epoch, PASSWORD_CHANGED_MESSAGE)
+    }
   }, [])
 
   const value = useMemo(
