@@ -10,15 +10,15 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | F1 | 6 | 0 | 0 | 0 | 0 | 0 |
 | F2 | 5 | 0 | 0 | 0 | 0 | 0 |
-| F3 | 5 | 6 | 43 | 31 | 12 | 63 |
+| F3 | 5 | 6 | 45 | 43 | 2 | 106 |
 | F4 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F5 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F6 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F7 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F8 | 9 | 0 | 0 | 0 | 0 | 0 |
-| F9 | 6 | 0 | 0 | 0 | 0 | 0 |
+| F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **56** | **6** | **43** | **31** | **12** | **63** |
+| **Tổng** | **57** | **6** | **45** | **43** | **2** | **106** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -43,17 +43,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC | Tên | US |
 | --- | --- | --- |
 | AC-F3.1.1-03 | Lễ tân chỉ xem, không có thao tác quản lý trên giao diện | US-F3.1.1 |
-| AC-F3.5.1-01 | Bán gói tạo hóa đơn chờ và gói chờ, giá lấy ở server | US-F3.5.1 |
-| AC-F3.5.1-02 | Gói chỉ hiệu lực sau khi hóa đơn PAID; ngày hết hạn tính đúng | US-F3.5.1 |
-| AC-F3.5.1-03 | Gia hạn khi gói cũ còn hiệu lực | US-F3.5.1 |
-| AC-F3.5.1-04 | Gia hạn khi gói SESSION cũ đã hết buổi | US-F3.5.1 |
-| AC-F3.5.1-05 | Giữ đồng thời nhiều loại gói | US-F3.5.1 |
-| AC-F3.5.1-06 | Chỉ một gói chờ cho mỗi loại | US-F3.5.1 |
-| AC-F3.5.1-07 | Hai lễ tân bán cùng lúc cho một hội viên | US-F3.5.1 |
-| AC-F3.5.1-08 | Hội viên hoặc gói không hợp lệ | US-F3.5.1 |
 | AC-F3.5.1-09 | Hóa đơn tại quầy không tự hủy | US-F3.5.1 |
-| AC-F3.5.1-10 | Tự kích hoạt gói nối tiếp đúng ngày | US-F3.5.1 |
-| AC-F3.5.1-11 | Dữ liệu sai và vai trò khác bị từ chối | US-F3.5.1 |
 
 ## 4. Cây xuôi: chức năng → UC → US → AC → TC
 
@@ -79,7 +69,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F3.1.1-05b `PackageControllerTest#rejectsDeniedRole`
       - TC-F3.1.1-05c `PackageControllerTest#missingAndInvalidBearerAreUnauthorized`
       - TC-F3.1.1-05d `PackageCatalogServiceTest#missingAssignmentNeverFallsBackToAllBranches`
-      - TC-F3.1.1-05e `PackageCatalogServiceTest#deniedRolesCannotQueryRepository`
     - AC-F3.1.1-06 Tham số lọc sai
       - TC-F3.1.1-06a `PackageControllerTest#rejectsInvalidQueryWithFieldErrors`
   - **US-F3.1.2** Bảng giá công khai (#130) ✅ mọi AC có TC
@@ -117,7 +106,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F3.2.1-06 Chỉ Quản lý chi nhánh được thêm gói
       - TC-F3.2.1-06a `PackageCreateIntegrationTest#onlyManagerCanCreate`
       - TC-F3.2.1-06b `PackageCreateIntegrationTest#missingTokenOrInactiveStaffCannotCreate`
-      - TC-F3.2.1-06c `PackageCatalogServiceTest#createChecksRoleEvenWhenCalledWithoutController`
 - **UC-F3.3** Sửa thông tin gói tập
   - **US-F3.3.1** Sửa thông tin gói tập (#132) ✅ mọi AC có TC
     - AC-F3.3.1-01 Sửa giá; gói đã bán không đổi (BR-F3-06)
@@ -141,7 +129,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F3.3.1-08 Chỉ Quản lý chi nhánh được sửa
       - TC-F3.3.1-08a `PackageUpdateIntegrationTest#deniedRolesCannotUpdate`
       - TC-F3.3.1-08b `PackageUpdateIntegrationTest#noTokenOrInactiveMissingStaffCannotUpdate`
-      - TC-F3.3.1-08c `PackageCatalogServiceTest#updateChecksRoleWithoutController`
 - **UC-F3.4** Ngừng bán gói tập
   - **US-F3.4.1** Ngừng bán gói tập (#133) ✅ mọi AC có TC
     - AC-F3.4.1-01 Ngừng bán gói đang bán (BR-F3-08)
@@ -162,20 +149,68 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F3.4.1-06d `PackageDeactivateIntegrationTest#missingAndBadTokenAre401`
       - TC-F3.4.1-06e `PackageDeactivateIntegrationTest#inactiveAndMissingStaffAre403`
       - TC-F3.4.1-06f `PackageDeactivateIntegrationTest#missingPackageIs404WithEmptyJsonBodyWithoutMutation`
-      - TC-F3.4.1-06g `PackageCatalogServiceTest#deactivateChecksRoleWithoutController`
 - **UC-F3.5** Bán gói tập tại quầy (đăng ký mới / gia hạn)
   - **US-F3.5.1** Bán và gia hạn gói tại quầy (#134)
-    - AC-F3.5.1-01 Bán gói tạo hóa đơn chờ và gói chờ, giá lấy ở server (BR-F3-04, BR-F3-13) ❌ chưa có TC
-    - AC-F3.5.1-02 Gói chỉ hiệu lực sau khi hóa đơn PAID; ngày hết hạn tính đúng (BR-F3-12) ❌ chưa có TC
-    - AC-F3.5.1-03 Gia hạn khi gói cũ còn hiệu lực (BR-F3-11) ❌ chưa có TC
-    - AC-F3.5.1-04 Gia hạn khi gói SESSION cũ đã hết buổi (BR-F3-11) ❌ chưa có TC
-    - AC-F3.5.1-05 Giữ đồng thời nhiều loại gói (BR-F3-10) ❌ chưa có TC
-    - AC-F3.5.1-06 Chỉ một gói chờ cho mỗi loại (BR-F3-11) ❌ chưa có TC
-    - AC-F3.5.1-07 Hai lễ tân bán cùng lúc cho một hội viên ❌ chưa có TC
-    - AC-F3.5.1-08 Hội viên hoặc gói không hợp lệ (BR-F3-09) ❌ chưa có TC
+    - AC-F3.5.1-01 Bán gói tạo hóa đơn chờ và gói chờ, giá lấy ở server (BR-F3-04, BR-F3-13)
+      - TC-F3.5.1-01a `InvoiceSaleIntegrationTest#sellCreatesPendingInvoiceAndMembershipWithServerPrice`
+      - TC-F3.5.1-01b `InvoiceSaleIntegrationTest#sessionPackageCopiesSessionCount`
+      - TC-F3.5.1-01c `InvoiceSaleIntegrationTest#membershipFailureRollsBackEntireSale`
+    - AC-F3.5.1-02 Gói chỉ hiệu lực sau khi hóa đơn PAID; ngày hết hạn tính đúng (BR-F3-12)
+      - TC-F3.5.1-02a `MembershipListIntegrationTest#pendingSaleIsNotUsableBeforePayment`
+    - AC-F3.5.1-03 Gia hạn khi gói cũ còn hiệu lực (BR-F3-11)
+      - TC-F3.5.1-03a `InvoiceSaleIntegrationTest#renewalStartsDayAfterOldTimePackage`
+      - TC-F3.5.1-03b `MembershipServiceTest#newOrTimeRenewal`
+    - AC-F3.5.1-04 Gia hạn khi gói SESSION cũ đã hết buổi (BR-F3-11)
+      - TC-F3.5.1-04a `InvoiceSaleIntegrationTest#renewalAfterEmptySessionPackageStartsTomorrow`
+      - TC-F3.5.1-04b `InvoiceSaleIntegrationTest#renewalAfterSessionPackageWithSessionsLeftStartsAfterEndDate`
+      - TC-F3.5.1-04c `MembershipServiceTest#sessionRenewal`
+    - AC-F3.5.1-05 Giữ đồng thời nhiều loại gói (BR-F3-10)
+      - TC-F3.5.1-05a `InvoiceSaleIntegrationTest#differentPackageTypesKeepExistingMembershipIntact`
+    - AC-F3.5.1-06 Chỉ một gói chờ cho mỗi loại (BR-F3-11)
+      - TC-F3.5.1-06a `InvoiceSaleIntegrationTest#secondWaitingPackageOfSameTypeIsRejected`
+      - TC-F3.5.1-06b `InvoiceSaleIntegrationTest#pendingWithoutActiveAlsoBlocks`
+      - TC-F3.5.1-06c `InvoiceSaleIntegrationTest#waitingPackageOfOtherTypeDoesNotBlock`
+    - AC-F3.5.1-07 Hai lễ tân bán cùng lúc cho một hội viên
+      - TC-F3.5.1-07a `InvoiceSaleConcurrencyIntegrationTest#twoReceptionistsSellingAtOnceCreateExactlyOne`
+    - AC-F3.5.1-08 Hội viên hoặc gói không hợp lệ (BR-F3-09)
+      - TC-F3.5.1-08a `InvoiceSaleIntegrationTest#inactiveMemberIsRejected`
+      - TC-F3.5.1-08b `InvoiceSaleIntegrationTest#inactivePackageIsRejected`
+      - TC-F3.5.1-08c `InvoiceSaleIntegrationTest#otherBranchPackageIsRejected`
+      - TC-F3.5.1-08d `InvoiceSaleIntegrationTest#unknownMemberOrPackageIsNotFound`
+      - TC-F3.5.1-08e `InvoiceSaleIntegrationTest#memberOfOtherBranchIsHidden`
+      - TC-F3.5.1-08f `InvoiceSaleConcurrencyIntegrationTest#saleWaitsForCatalogChangeAndReadsCommittedValues`
     - AC-F3.5.1-09 Hóa đơn tại quầy không tự hủy (BR-F3-14) ❌ chưa có TC
-    - AC-F3.5.1-10 Tự kích hoạt gói nối tiếp đúng ngày (BR-F3-11) ❌ chưa có TC
-    - AC-F3.5.1-11 Dữ liệu sai và vai trò khác bị từ chối ❌ chưa có TC
+    - AC-F3.5.1-10 Tự kích hoạt gói nối tiếp đúng ngày (BR-F3-11)
+      - TC-F3.5.1-10a `MembershipLifecycleIntegrationTest#expiresOldBeforeActivatingNext`
+      - TC-F3.5.1-10b `MembershipLifecycleIntegrationTest#lastDeductionTodayRetainsAccess`
+      - TC-F3.5.1-10c `MembershipLifecycleIntegrationTest#zeroSessionsFromYesterdayExpire`
+      - TC-F3.5.1-10d `MembershipLifecycleIntegrationTest#repeatedRunDoesNotMutateAgain`
+      - TC-F3.5.1-10e `MembershipLifecycleIntegrationTest#catchesUpAfterSeveralMissedDays`
+      - TC-F3.5.1-10f `MembershipLifecycleIntegrationTest#endDateIsInclusive`
+      - TC-F3.5.1-10g `MembershipLifecycleIntegrationTest#ignoresOtherStates`
+      - TC-F3.5.1-10h `MembershipLifecycleIntegrationTest#frozenBlocksWithoutChangingWaitingPackage`
+      - TC-F3.5.1-10i `MembershipLifecycleIntegrationTest#chainAndBranchAreIndependentGroups`
+      - TC-F3.5.1-10j `MembershipLifecycleIntegrationTest#expiredPtKeepsRemainingSessions`
+      - TC-F3.5.1-10k `MembershipLifecycleIntegrationTest#activationFailureRollsBackExpiration`
+      - TC-F3.5.1-10l `MembershipLifecycleJobTest#annotations`
+      - TC-F3.5.1-10m `MembershipLifecycleJobTest#passesVietnamDate`
+      - TC-F3.5.1-10n `MembershipLifecycleJobTest#catchUpGoesThroughScheduler`
+      - TC-F3.5.1-10o `MembershipLifecycleJobTest#retriesEveryFiveMinutesUntilSuccess`
+      - TC-F3.5.1-10p `MembershipLifecycleJobTest#stopsRetryingOnNewDay`
+    - AC-F3.5.1-11 Dữ liệu sai và vai trò khác bị từ chối
+      - TC-F3.5.1-11a `InvoiceSaleIntegrationTest#invalidBodyIsBadRequest`
+      - TC-F3.5.1-11b `InvoiceSaleIntegrationTest#otherRolesAreForbidden`
+      - TC-F3.5.1-11c `InvoiceSaleIntegrationTest#missingTokenIsUnauthorized`
+      - TC-F3.5.1-11d `InvoiceSaleIntegrationTest#missingFieldsAreNamed`
+    - AC-F3.5.1-12 Xem gói đang giữ và ngày gia hạn dự kiến (BR-F3-11)
+      - TC-F3.5.1-12a `MembershipListIntegrationTest#listsHeldMembershipsWithRenewalStartDate`
+      - TC-F3.5.1-12b `MembershipListIntegrationTest#renewalStartDateMatchesSale`
+      - TC-F3.5.1-12c `MembershipListIntegrationTest#scopeAndRoles`
+      - TC-F3.5.1-12d `MembershipListIntegrationTest#invalidMemberIdIsRejected`
+      - TC-F3.5.1-12e `MembershipServiceTest#neverBeforeToday`
+    - AC-F3.5.1-13 Mã hóa đơn tự sinh và duy nhất
+      - TC-F3.5.1-13a `InvoiceSaleIntegrationTest#invoiceCodesAreSequential`
+      - TC-F3.5.1-13b `InvoiceCodeMigrationIntegrationTest#upgradesExistingDatabaseWithoutChangingInvoiceHistory`
 
 ## 5. Bảng ngược: TC → AC → US → UC → BR
 
@@ -196,7 +231,6 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.1.1-05b | AC-F3.1.1-05 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageControllerTest#rejectsDeniedRole` |
 | TC-F3.1.1-05c | AC-F3.1.1-05 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageControllerTest#missingAndInvalidBearerAreUnauthorized` |
 | TC-F3.1.1-05d | AC-F3.1.1-05 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogServiceTest#missingAssignmentNeverFallsBackToAllBranches` |
-| TC-F3.1.1-05e | AC-F3.1.1-05 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogServiceTest#deniedRolesCannotQueryRepository` |
 | TC-F3.1.1-06a | AC-F3.1.1-06 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageControllerTest#rejectsInvalidQueryWithFieldErrors` |
 | TC-F3.1.2-01a | AC-F3.1.2-01 | US-F3.1.2 | UC-F3.1 | BR-F3-01 | `PublicPackageIntegrationTest#guestSeesActiveBranchAndGlobalPackagesInDisplayOrder` |
 | TC-F3.1.2-01b | AC-F3.1.2-01 | US-F3.1.2 | UC-F3.1 | BR-F3-01 | `features/packages/pages/PublicPricingPage.test.tsx › TC-F3.1.2-01b: hiện giá từ server, thời hạn hoặc số buổi, qu` |
@@ -218,7 +252,6 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.2.1-05b | AC-F3.2.1-05 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCreateIntegrationTest#concurrentDuplicateCodeCreatesOneAndRollsBackOther` |
 | TC-F3.2.1-06a | AC-F3.2.1-06 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCreateIntegrationTest#onlyManagerCanCreate` |
 | TC-F3.2.1-06b | AC-F3.2.1-06 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCreateIntegrationTest#missingTokenOrInactiveStaffCannotCreate` |
-| TC-F3.2.1-06c | AC-F3.2.1-06 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCatalogServiceTest#createChecksRoleEvenWhenCalledWithoutController` |
 | TC-F3.3.1-01a | AC-F3.3.1-01 | US-F3.3.1 | UC-F3.3 | BR-F3-06, BR-F3-05, BR-F3-07 | `PackageUpdateIntegrationTest#priceOnlyKeepsOmittedFieldsAndAudit` |
 | TC-F3.3.1-01b | AC-F3.3.1-01 | US-F3.3.1 | UC-F3.3 | BR-F3-06, BR-F3-05, BR-F3-07 | `PackageUpdateIntegrationTest#historyIncludingPendingPurchaseRemainsIdentical` |
 | TC-F3.3.1-02a | AC-F3.3.1-02 | US-F3.3.1 | UC-F3.3 | BR-F3-07, BR-F3-05, BR-F3-06 | `PackageUpdateIntegrationTest#outsideBranchAndGlobalAre403WithoutMutation` |
@@ -232,7 +265,6 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.3.1-07a | AC-F3.3.1-07 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `PackageUpdateIntegrationTest#missingPackageIs404WithoutMutation` |
 | TC-F3.3.1-08a | AC-F3.3.1-08 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `PackageUpdateIntegrationTest#deniedRolesCannotUpdate` |
 | TC-F3.3.1-08b | AC-F3.3.1-08 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `PackageUpdateIntegrationTest#noTokenOrInactiveMissingStaffCannotUpdate` |
-| TC-F3.3.1-08c | AC-F3.3.1-08 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `PackageCatalogServiceTest#updateChecksRoleWithoutController` |
 | TC-F3.4.1-01a | AC-F3.4.1-01 | US-F3.4.1 | UC-F3.4 | BR-F3-08, BR-F3-07, BR-F3-09 | `PackageDeactivateIntegrationTest#deactivatesWithNoBodyOrEmptyJsonWithoutChangingOtherFields` |
 | TC-F3.4.1-02a | AC-F3.4.1-02 | US-F3.4.1 | UC-F3.4 | BR-F3-08, BR-F3-07, BR-F3-09 | `PackageDeactivateIntegrationTest#preservesAllHistoricalRows` |
 | TC-F3.4.1-03a | AC-F3.4.1-03 | US-F3.4.1 | UC-F3.4 | BR-F3-09, BR-F3-07, BR-F3-08 | `PackageCatalogIntegrationTest#inactiveFilterAndEmptyResults` |
@@ -245,36 +277,91 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.4.1-06d | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#missingAndBadTokenAre401` |
 | TC-F3.4.1-06e | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#inactiveAndMissingStaffAre403` |
 | TC-F3.4.1-06f | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#missingPackageIs404WithEmptyJsonBodyWithoutMutation` |
-| TC-F3.4.1-06g | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageCatalogServiceTest#deactivateChecksRoleWithoutController` |
+| TC-F3.5.1-01a | AC-F3.5.1-01 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-13, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-14 | `InvoiceSaleIntegrationTest#sellCreatesPendingInvoiceAndMembershipWithServerPrice` |
+| TC-F3.5.1-01b | AC-F3.5.1-01 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-13, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-14 | `InvoiceSaleIntegrationTest#sessionPackageCopiesSessionCount` |
+| TC-F3.5.1-01c | AC-F3.5.1-01 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-13, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-14 | `InvoiceSaleIntegrationTest#membershipFailureRollsBackEntireSale` |
+| TC-F3.5.1-02a | AC-F3.5.1-02 | US-F3.5.1 | UC-F3.5 | BR-F3-12, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-13, BR-F3-14 | `MembershipListIntegrationTest#pendingSaleIsNotUsableBeforePayment` |
+| TC-F3.5.1-03a | AC-F3.5.1-03 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#renewalStartsDayAfterOldTimePackage` |
+| TC-F3.5.1-03b | AC-F3.5.1-03 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipServiceTest#newOrTimeRenewal` |
+| TC-F3.5.1-04a | AC-F3.5.1-04 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#renewalAfterEmptySessionPackageStartsTomorrow` |
+| TC-F3.5.1-04b | AC-F3.5.1-04 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#renewalAfterSessionPackageWithSessionsLeftStartsAfterEndDate` |
+| TC-F3.5.1-04c | AC-F3.5.1-04 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipServiceTest#sessionRenewal` |
+| TC-F3.5.1-05a | AC-F3.5.1-05 | US-F3.5.1 | UC-F3.5 | BR-F3-10, BR-F3-04, BR-F3-09, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#differentPackageTypesKeepExistingMembershipIntact` |
+| TC-F3.5.1-06a | AC-F3.5.1-06 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#secondWaitingPackageOfSameTypeIsRejected` |
+| TC-F3.5.1-06b | AC-F3.5.1-06 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#pendingWithoutActiveAlsoBlocks` |
+| TC-F3.5.1-06c | AC-F3.5.1-06 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#waitingPackageOfOtherTypeDoesNotBlock` |
+| TC-F3.5.1-07a | AC-F3.5.1-07 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleConcurrencyIntegrationTest#twoReceptionistsSellingAtOnceCreateExactlyOne` |
+| TC-F3.5.1-08a | AC-F3.5.1-08 | US-F3.5.1 | UC-F3.5 | BR-F3-09, BR-F3-04, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#inactiveMemberIsRejected` |
+| TC-F3.5.1-08b | AC-F3.5.1-08 | US-F3.5.1 | UC-F3.5 | BR-F3-09, BR-F3-04, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#inactivePackageIsRejected` |
+| TC-F3.5.1-08c | AC-F3.5.1-08 | US-F3.5.1 | UC-F3.5 | BR-F3-09, BR-F3-04, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#otherBranchPackageIsRejected` |
+| TC-F3.5.1-08d | AC-F3.5.1-08 | US-F3.5.1 | UC-F3.5 | BR-F3-09, BR-F3-04, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#unknownMemberOrPackageIsNotFound` |
+| TC-F3.5.1-08e | AC-F3.5.1-08 | US-F3.5.1 | UC-F3.5 | BR-F3-09, BR-F3-04, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#memberOfOtherBranchIsHidden` |
+| TC-F3.5.1-08f | AC-F3.5.1-08 | US-F3.5.1 | UC-F3.5 | BR-F3-09, BR-F3-04, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleConcurrencyIntegrationTest#saleWaitsForCatalogChangeAndReadsCommittedValues` |
+| TC-F3.5.1-10a | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#expiresOldBeforeActivatingNext` |
+| TC-F3.5.1-10b | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#lastDeductionTodayRetainsAccess` |
+| TC-F3.5.1-10c | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#zeroSessionsFromYesterdayExpire` |
+| TC-F3.5.1-10d | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#repeatedRunDoesNotMutateAgain` |
+| TC-F3.5.1-10e | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#catchesUpAfterSeveralMissedDays` |
+| TC-F3.5.1-10f | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#endDateIsInclusive` |
+| TC-F3.5.1-10g | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#ignoresOtherStates` |
+| TC-F3.5.1-10h | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#frozenBlocksWithoutChangingWaitingPackage` |
+| TC-F3.5.1-10i | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#chainAndBranchAreIndependentGroups` |
+| TC-F3.5.1-10j | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#expiredPtKeepsRemainingSessions` |
+| TC-F3.5.1-10k | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#activationFailureRollsBackExpiration` |
+| TC-F3.5.1-10l | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleJobTest#annotations` |
+| TC-F3.5.1-10m | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleJobTest#passesVietnamDate` |
+| TC-F3.5.1-10n | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleJobTest#catchUpGoesThroughScheduler` |
+| TC-F3.5.1-10o | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleJobTest#retriesEveryFiveMinutesUntilSuccess` |
+| TC-F3.5.1-10p | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleJobTest#stopsRetryingOnNewDay` |
+| TC-F3.5.1-11a | AC-F3.5.1-11 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#invalidBodyIsBadRequest` |
+| TC-F3.5.1-11b | AC-F3.5.1-11 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#otherRolesAreForbidden` |
+| TC-F3.5.1-11c | AC-F3.5.1-11 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#missingTokenIsUnauthorized` |
+| TC-F3.5.1-11d | AC-F3.5.1-11 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#missingFieldsAreNamed` |
+| TC-F3.5.1-12a | AC-F3.5.1-12 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipListIntegrationTest#listsHeldMembershipsWithRenewalStartDate` |
+| TC-F3.5.1-12b | AC-F3.5.1-12 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipListIntegrationTest#renewalStartDateMatchesSale` |
+| TC-F3.5.1-12c | AC-F3.5.1-12 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipListIntegrationTest#scopeAndRoles` |
+| TC-F3.5.1-12d | AC-F3.5.1-12 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipListIntegrationTest#invalidMemberIdIsRejected` |
+| TC-F3.5.1-12e | AC-F3.5.1-12 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipServiceTest#neverBeforeToday` |
+| TC-F3.5.1-13a | AC-F3.5.1-13 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#invoiceCodesAreSequential` |
+| TC-F3.5.1-13b | AC-F3.5.1-13 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceCodeMigrationIntegrationTest#upgradesExistingDatabaseWithoutChangingInvoiceHistory` |
 
 ## 6. Kiểm thử chưa mang mã TC
 
-Có 225 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
+Có 267 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
 
 | File | Số kiểm thử |
 | --- | --- |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/common/exception/GlobalExceptionHandlerTest.java` | 9 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/common/mail/EmailSenderTest.java` | 4 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/common/scheduling/SchedulingConfigTest.java` | 4 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/common/security/CurrentUserTest.java` | 6 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/common/time/VnTimeTest.java` | 5 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/common/util/PhoneUtilsTest.java` | 2 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/DatabaseCleanerTest.java` | 3 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/DatabaseConstraintsTest.java` | 21 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AccountServiceTest.java` | 2 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthControllerTest.java` | 18 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthServiceTest.java` | 20 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthServiceTest.java` | 17 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthSessionConcurrencyIntegrationTest.java` | 3 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/JwtSecurityIntegrationTest.java` | 9 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/JwtTokenServiceTest.java` | 5 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/invoice/InvoiceSaleIntegrationTest.java` | 2 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/F1RegistrationIntegrationTest.java` | 13 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberApiIntegrationTest.java` | 25 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberBranchAccessIntegrationTest.java` | 8 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberPhoneSupportTest.java` | 6 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberServiceTest.java` | 9 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/service/integration/F1MemberAccountAdapterTest.java` | 5 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/service/integration/F1MemberRegistrationAdapterTest.java` | 2 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberServiceTest.java` | 11 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/StaffBranchIntegrationTest.java` | 8 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/membership/MembershipListIntegrationTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PackageCatalogServiceTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PackageMapperTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PublicPackageIntegrationTest.java` | 1 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/staff/StaffServiceTest.java` | 4 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/systemconfig/SystemConfigServiceTest.java` | 4 |
+| `frontend/src/app/router.test.ts` | 3 |
 | `frontend/src/auth/account-change.test.tsx` | 1 |
 | `frontend/src/auth/AuthProvider.test.tsx` | 9 |
 | `frontend/src/auth/cookie-operation-queue.test.ts` | 1 |
-| `frontend/src/auth/redirect.test.ts` | 4 |
+| `frontend/src/auth/redirect.test.ts` | 7 |
 | `frontend/src/auth/session-store.test.ts` | 3 |
 | `frontend/src/features/auth/api/auth-api.test.ts` | 4 |
 | `frontend/src/features/auth/api/validation.test.ts` | 3 |
@@ -285,6 +372,9 @@ Có 225 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `frontend/src/features/members/pages/MembersPage.test.tsx` | 6 |
 | `frontend/src/features/packages/api/packages.test.ts` | 1 |
 | `frontend/src/features/shared/use-remote-query.test.ts` | 2 |
+| `frontend/src/layouts/member-menu.test.ts` | 2 |
+| `frontend/src/layouts/staff-menu.test.ts` | 2 |
 | `frontend/src/layouts/UserMenu.test.tsx` | 1 |
 | `frontend/src/routes/ProtectedRoute.test.tsx` | 5 |
+| `frontend/src/routes/route-access.test.ts` | 5 |
 | `frontend/src/services/http.test.ts` | 9 |

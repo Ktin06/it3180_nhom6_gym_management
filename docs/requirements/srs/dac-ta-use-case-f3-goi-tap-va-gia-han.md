@@ -711,6 +711,7 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
   ```json
   {
     "invoiceId": 88,
+    "invoiceCode": "HD000088",
     "membershipId": 77,
     "memberId": 123,
     "packageId": 5,
@@ -783,6 +784,23 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
     - **Given** Request thiếu `memberId` hoặc `packageId`; hoặc người gọi không phải Lễ tân; hoặc không gửi token
     - **When** Gọi `POST /api/v1/invoices`
     - **Then** Lần lượt trả `400` kèm lỗi từng trường, `403`, `401`; không có hóa đơn hay gói nào được tạo
+  - **AC-F3.5.1-12: Xem gói đang giữ và ngày gia hạn dự kiến** (BR-F3-11, S3)
+    - **Given** Chủ chuỗi, Quản lý chi nhánh hoặc Lễ tân đã đăng nhập
+    - **When** Gọi `GET /api/v1/memberships?memberId={id}` với ID nguyên dương
+    - **Then** Trả `200` và danh sách gói `PENDING`, `UPCOMING`, `ACTIVE`, `FROZEN`, kèm tên gói, ngày, số buổi và `renewalStartDate`. Ngày dự kiến dùng cùng phép tính với lúc bán, không sớm hơn hôm nay; trả `null` nếu gói đang chờ hoặc cùng nhóm đã có gói chờ. Nhóm được xét theo loại và phạm vi chi nhánh (toàn chuỗi là một nhóm riêng). Nhân viên chỉ xem hội viên trong chi nhánh mình; ngoài phạm vi hoặc không tồn tại trả `404`; Chủ chuỗi xem mọi chi nhánh. Vai trò khác trả `403`, thiếu token `401`, thiếu/sai ID `400`
+  - **AC-F3.5.1-13: Mã hóa đơn tự sinh và duy nhất**
+    - **Given** Yêu cầu bán hợp lệ
+    - **When** Tạo hóa đơn tại quầy
+    - **Then** Response trả thêm `invoiceCode` dạng `HD` + 6 chữ số, sinh từ sequence dùng chung; các hóa đơn mới có mã khác nhau. Không đổi mã hóa đơn cũ. Sequence có thể có khoảng trống khi giao dịch rollback; không cam kết mã liên tục
+
+#### I. Ranh giới triển khai S2-07 (#182)
+
+- S2-07 tạo hóa đơn/gói `PENDING`, tính ngày dự kiến, chặn gói chờ và triển khai tác vụ vòng đời. Khi bán, hội viên ngoài chi nhánh lễ tân trả `404` theo phạm vi F2; hồ sơ xóa mềm coi như không tồn tại.
+- Phần thu tiền của AC-02, AC-03, AC-04, AC-05 do S2-09 (#184) kích hoạt, tính lại ngày theo thời hạn đã chốt. Kiểm thử ngày dự kiến trong S2-07 chỉ chứng minh phần trước thanh toán.
+- AC-09 phải nghiệm thu cùng tác vụ hủy hóa đơn của S2-14 (#194). S2-07 lưu `source=COUNTER`; tác vụ vòng đời không sửa hóa đơn hoặc gói `PENDING`.
+- Tác vụ dùng ngày Việt Nam, chuyển `EXPIRED` và flush trước khi kích hoạt `UPCOMING`; chạy lại không đổi thêm. Chạy bù xử lý cả gói có `start_date < hôm nay`; gói chờ đã trôi hết hạn chuyển `EXPIRED`. Nếu cùng nhóm còn `ACTIVE`/`FROZEN`, giữ gói chờ và ghi cảnh báo, kể cả đã qua ngày cuối. Các giả định xử lý dữ liệu lệch này cần được người duyệt nghiệp vụ xác nhận.
+- Khi tác vụ lỗi, rollback toàn bộ lượt; thử lại sau 5 phút trong cùng ngày Việt Nam. Kiểm thử tắt lịch tự động và gọi service với ngày cố định.
+- Mỗi hóa đơn hiện nhận đúng một dòng `PACKAGE`. Mã hóa đơn sáu chữ số kế thừa hướng tham khảo, cần người duyệt xác nhận AC-13 trước nghiệm thu; hết dải mã trả `422`, không quay vòng.
 
 ---
 

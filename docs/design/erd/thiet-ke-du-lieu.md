@@ -170,6 +170,7 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 - [x] Hoa hồng PT: phần trăm giá mỗi buổi, chụp vào `pt_sessions.commission_amount` lúc DONE (01/11).
 - [x] Gói TIME tính theo số ngày (`duration_days`); "1 tháng" = 30 ngày (01/11).
 - [x] Mã hội viên dạng `HV` + 6 chữ số (`HV000123`), sinh từ sequence `member_code_seq` dùng chung cả chuỗi (01/11).
+- [ ] S2-07 đề xuất mã hóa đơn mới dạng `HD` + 6 chữ số, sequence `invoice_code_seq` (migration `V9_05`); giữ mã lịch sử, không yêu cầu số liên tục khi rollback. Cần người duyệt xác nhận AC-F3.5.1-13.
 - [ ] Tác vụ chuyển EXPIRED lúc 00:00 bị lỗi trong khi máy chủ vẫn chạy (không có lần chạy bù): gói SESSION 0 buổi còn ACTIVE, gói nối tiếp chưa kích hoạt, hội viên bị từ chối check-in cả ngày. Trường hợp ngoại vi, để xử lý sau (hướng đã bàn: cho tác vụ chạy lại mỗi giờ, chạy lặp không gây sai) (03/11).
 - [x] Ảnh đại diện hội viên lưu trong PostgreSQL, bảng `member_avatars`, server thu nhỏ và nén; bỏ `members.avatar_url` (14/11, [ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md)).
 

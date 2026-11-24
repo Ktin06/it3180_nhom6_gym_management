@@ -40,6 +40,38 @@
     {
       "key": "emptyBodyPackageId",
       "value": ""
+    },
+    {
+      "key": "receptionistToken",
+      "value": ""
+    },
+    {
+      "key": "memberId",
+      "value": ""
+    },
+    {
+      "key": "salePackageId",
+      "value": ""
+    },
+    {
+      "key": "expectedSalePrice",
+      "value": ""
+    },
+    {
+      "key": "inactiveSalePackageId",
+      "value": ""
+    },
+    {
+      "key": "inactiveSaleMemberId",
+      "value": ""
+    },
+    {
+      "key": "invoiceId",
+      "value": ""
+    },
+    {
+      "key": "membershipId",
+      "value": ""
     }
   ],
   "auth": {
@@ -1036,6 +1068,359 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Kiểm tra phản hồi',()=>pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "S2-07 ? B?n v? gia h?n t?i qu?y (#182)",
+      "description": "D?ng receptionistToken ri?ng. C?u h?nh ID s? h?p l? v? expectedSalePrice b?ng gi? th?t. Ch?y 201 tr??c 422 g?i ch?; ch?n h?i vi?n ch?a c? g?i ch?. C?c request n?y t?o d? li?u local, kh?ng t? x?a. baseUrl bao g?m /api/v1.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{receptionistToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "TC-F3.5.1-12a 200 ? G?i ?ang gi? v? ng?y gia h?n",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/memberships?memberId={{memberId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Danh s?ch tr?ng th?i ??ng',()=>{pm.expect(pm.response.json()).to.be.an('array'); pm.response.json().forEach(m=>pm.expect(['PENDING','UPCOMING','ACTIVE','FROZEN']).to.include(m.status));});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-01a, TC-F3.5.1-13a 201 ? B?n/gia h?n, b? qua gi? client",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{memberId}},\n  \"items\": [\n    {\n      \"itemType\": \"PACKAGE\",\n      \"packageId\": {{salePackageId}},\n      \"price\": 1\n    }\n  ],\n  \"total\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "pm.test('H?a ??n v? g?i ch?', () => { const r=pm.response.json(); pm.expect(r.status).to.eql('PENDING'); pm.expect(r.membershipStatus).to.eql('PENDING'); pm.expect(r.invoiceCode).to.match(/^HD[0-9]{6}$/); pm.expect(r.discount).to.eql(0); pm.expect(r.total).to.eql(r.subtotal); });",
+                  "pm.test('Gi? server ??ng b?ng gi?', () => { const expected=pm.variables.get('expectedSalePrice'); pm.expect(String(expected || '')).to.match(/^[0-9]+$/); pm.expect(pm.response.json().total).to.eql(Number(expected)); });",
+                  "if(pm.response.code===201) { const r=pm.response.json(); pm.collectionVariables.set('invoiceId',String(r.invoiceId)); pm.collectionVariables.set('membershipId',String(r.membershipId)); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-06a 422 ? G?i l?i khi ?? c? g?i ch?",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{memberId}},\n  \"items\": [\n    {\n      \"itemType\": \"PACKAGE\",\n      \"packageId\": {{salePackageId}},\n      \"price\": 1\n    }\n  ],\n  \"total\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('L?i ProblemDetail', () => { const r = pm.response.json(); pm.expect(r.status).to.eql(pm.response.code); pm.expect(r.detail).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-08b 422 ? G?i ng?ng b?n",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{memberId}},\n  \"items\": [\n    {\n      \"itemType\": \"PACKAGE\",\n      \"packageId\": {{inactiveSalePackageId}},\n      \"price\": 1\n    }\n  ],\n  \"total\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('L?i ProblemDetail', () => { const r = pm.response.json(); pm.expect(r.status).to.eql(pm.response.code); pm.expect(r.detail).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-08a 422 ? H?i vi?n ng?ng ho?t ??ng",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{inactiveSaleMemberId}},\n  \"items\": [\n    {\n      \"itemType\": \"PACKAGE\",\n      \"packageId\": {{salePackageId}},\n      \"price\": 1\n    }\n  ],\n  \"total\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('L?i ProblemDetail', () => { const r = pm.response.json(); pm.expect(r.status).to.eql(pm.response.code); pm.expect(r.detail).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-08d 404 ? G?i kh?ng t?n t?i",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{memberId}},\n  \"items\": [\n    {\n      \"itemType\": \"PACKAGE\",\n      \"packageId\": 9223372036854775807,\n      \"price\": 1\n    }\n  ],\n  \"total\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-08d 404 ? H?i vi?n kh?ng t?n t?i",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": 9223372036854775807,\n  \"items\": [\n    {\n      \"itemType\": \"PACKAGE\",\n      \"packageId\": {{salePackageId}},\n      \"price\": 1\n    }\n  ],\n  \"total\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-11a 400 ? Thi?u memberId v? items",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('C? errors theo tr??ng',()=>pm.expect(pm.response.json().errors).to.be.an('object'));",
+                  "pm.test('L?i ProblemDetail', () => { const r = pm.response.json(); pm.expect(r.status).to.eql(pm.response.code); pm.expect(r.detail).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-11b 403 ? Qu?n l? kh?ng ???c b?n",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{memberId}},\n  \"items\": [\n    {\n      \"itemType\": \"PACKAGE\",\n      \"packageId\": {{salePackageId}},\n      \"price\": 1\n    }\n  ],\n  \"total\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{managerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-11c 401 ? Kh?ng token",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{memberId}},\n  \"items\": [\n    {\n      \"itemType\": \"PACKAGE\",\n      \"packageId\": {{salePackageId}},\n      \"price\": 1\n    }\n  ],\n  \"total\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
                 ]
               }
             }
