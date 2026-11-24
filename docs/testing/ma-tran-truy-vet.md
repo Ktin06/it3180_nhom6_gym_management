@@ -8,17 +8,17 @@
 
 | Chức năng | UC | US | AC | AC đã có TC | AC chưa có TC | TC |
 | --- | --- | --- | --- | --- | --- | --- |
-| F1 | 6 | 1 | 4 | 4 | 0 | 15 |
-| F2 | 5 | 0 | 0 | 0 | 0 | 0 |
+| F1 | 6 | 6 | 29 | 4 | 25 | 17 |
+| F2 | 5 | 6 | 31 | 0 | 31 | 0 |
 | F3 | 5 | 6 | 43 | 31 | 12 | 59 |
 | F4 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F5 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F6 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F7 | 5 | 0 | 0 | 0 | 0 | 0 |
-| F8 | 9 | 9 | 55 | 0 | 55 | 0 |
+| F8 | 9 | 9 | 55 | 29 | 26 | 38 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **16** | **102** | **35** | **67** | **74** |
+| **Tổng** | **57** | **27** | **158** | **64** | **94** | **114** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -42,6 +42,62 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 
 | AC | Tên | US |
 | --- | --- | --- |
+| AC-F1.1.1-01 | Đăng ký thành công tạo đồng thời tài khoản và hồ sơ hội viên | US-F1.1.1 |
+| AC-F1.1.1-02 | Từ chối khi số điện thoại đã thuộc hồ sơ hội viên có sẵn | US-F1.1.1 |
+| AC-F1.1.1-03 | Từ chối khi email đã được sử dụng | US-F1.1.1 |
+| AC-F1.1.1-04 | Từ chối dữ liệu đầu vào sai định dạng | US-F1.1.1 |
+| AC-F1.1.1-05 | Hoàn tác toàn bộ giao dịch khi xảy ra lỗi giữa chừng hoặc chi nhánh mặc định ngừng hoạt động | US-F1.1.1 |
+| AC-F1.2.1-01 | Nhập sai mật khẩu từ lần 1 đến lần 4 trả 401 thông báo chung, tăng bộ đếm và không lộ email tồn tại | US-F1.2.1 |
+| AC-F1.2.1-02 | Nhập sai mật khẩu lần thứ 5 liên tiếp (kể cả gửi đồng thời) đặt bộ đếm bằng 5 và khóa tạm 15 phút | US-F1.2.1 |
+| AC-F1.2.1-03 | Từ chối mọi yêu cầu đăng nhập trong thời gian đang bị khóa tạm 15 phút, kể cả nhập đúng mật khẩu | US-F1.2.1 |
+| AC-F1.2.1-04 | Đăng nhập thành công hoặc hết thời gian khóa tạm | US-F1.2.1 |
+| AC-F1.2.1-05 | Từ chối tài khoản bị khóa hoặc ngừng hoạt động khi nhập đúng mật khẩu | US-F1.2.1 |
+| AC-F1.2.1-06 | Từ chối dữ liệu đăng nhập sai định dạng (không hỗ trợ đăng nhập bằng số điện thoại) | US-F1.2.1 |
+| AC-F1.3.1-01 | Xoay vòng refresh token và chặn dùng lại token cũ | US-F1.3.1 |
+| AC-F1.3.1-02 | Đăng xuất thu hồi refresh token và xóa cookie | US-F1.3.1 |
+| AC-F1.3.1-03 | Từ chối khi phiên không hợp lệ và xóa cookie | US-F1.3.1 |
+| AC-F1.3.1-04 | Đồng bộ làm mới phiên và đăng xuất giữa nhiều tab trình duyệt | US-F1.3.1 |
+| AC-F1.5.1-01 | Yêu cầu quên mật khẩu cho tài khoản ACTIVE tạo token băm SHA-256 hạn 30 phút, gửi email và trả 200 câu chung | US-F1.5.1 |
+| AC-F1.5.1-02 | Không lộ email khi email không tồn tại, tài khoản không ACTIVE hoặc gửi email gặp lỗi | US-F1.5.1 |
+| AC-F1.5.1-03 | Đặt lại mật khẩu với token hợp lệ cập nhật mật khẩu, ghi used_at, mở khóa tạm và thu hồi toàn bộ refresh token | US-F1.5.1 |
+| AC-F1.5.1-04 | Từ chối token sai, hết hạn sau 30 phút, đã dùng (kể cả gửi đồng thời) hoặc tài khoản không ACTIVE với 422 | US-F1.5.1 |
+| AC-F1.5.1-05 | Từ chối dữ liệu đầu vào sai định dạng, thiếu token trên URL hoặc mật khẩu mới không đạt chuẩn S1 | US-F1.5.1 |
+| AC-F1.5.1-06 | Gửi email qua API HTTPS của Brevo khi có cấu hình khóa API và chỉ ghi log ở môi trường phát triển khi khóa rỗng | US-F1.5.1 |
+| AC-F1.6.1-01 | Chưa đăng nhập hoặc token không hợp lệ bị từ chối 401 tiếng Việt | US-F1.6.1 |
+| AC-F1.6.1-02 | Chặn API khi sai vai trò và cho phép khi đúng vai trò | US-F1.6.1 |
+| AC-F1.6.1-03 | Nhân viên chi nhánh phải gắn với chi nhánh đang hoạt động | US-F1.6.1 |
+| AC-F1.6.1-04 | Tài khoản ngừng hoạt động mất quyền và bị thu hồi phiên ngay | US-F1.6.1 |
+| AC-F2.1.1-01 | Tạo hồ sơ mới thành công, chuẩn hóa SĐT và tự sinh mã HV | US-F2.1.1 |
+| AC-F2.1.1-02 | Từ chối khi số điện thoại sai định dạng hoặc đã tồn tại (kể cả tạo đồng thời) | US-F2.1.1 |
+| AC-F2.1.1-03 | Chỉ lễ tân, quản lý chi nhánh (đã gắn chi nhánh) và chủ chuỗi được tạo hồ sơ | US-F2.1.1 |
+| AC-F2.2.1-01 | Tạo tài khoản và gửi email đặt mật khẩu hạn 72 giờ | US-F2.2.1 |
+| AC-F2.2.1-02 | Hội viên đặt mật khẩu lần đầu rồi đăng nhập; quá 72 giờ liên kết hết hạn | US-F2.2.1 |
+| AC-F2.2.1-03 | Từ chối khi hồ sơ đã có tài khoản | US-F2.2.1 |
+| AC-F2.2.1-04 | Từ chối khi email đã được sử dụng (kể cả đồng thời) | US-F2.2.1 |
+| AC-F2.2.1-05 | Từ chối khi hồ sơ đang ngừng hoạt động | US-F2.2.1 |
+| AC-F2.2.1-06 | Gửi email gặp lỗi vẫn giữ tài khoản và ghi log không chứa token | US-F2.2.1 |
+| AC-F2.2.1-07 | Kiểm tra quyền theo vai trò, chi nhánh và dữ liệu đầu vào | US-F2.2.1 |
+| AC-F2.3.1-01 | Tìm kiếm, lọc, phân trang trong chi nhánh mình đạt hiệu năng dưới 2 giây | US-F2.3.1 |
+| AC-F2.3.1-02 | Chủ chuỗi tra cứu và xem chi tiết hồ sơ mọi chi nhánh | US-F2.3.1 |
+| AC-F2.3.1-03 | Xem chi tiết đúng phạm vi; ngoài phạm vi hoặc đã xóa mềm trả 404 | US-F2.3.1 |
+| AC-F2.3.1-04 | Huấn luyện viên chỉ xem chi tiết học viên PT của mình và không được gọi danh sách | US-F2.3.1 |
+| AC-F2.4.1-01 | Cập nhật thông tin hồ sơ trong chi nhánh và chuẩn hóa số điện thoại | US-F2.4.1 |
+| AC-F2.4.1-02 | Từ chối trùng số điện thoại, thiếu trạng thái hoặc hồ sơ ngoài phạm vi | US-F2.4.1 |
+| AC-F2.4.1-03 | Ngừng hoạt động hồ sơ đồng thời khóa tài khoản và thu hồi mọi phiên trong cùng giao dịch | US-F2.4.1 |
+| AC-F2.4.1-04 | Kích hoạt lại hồ sơ khôi phục tài khoản nhưng không khôi phục token cũ và không gỡ khóa tạm | US-F2.4.1 |
+| AC-F2.4.1-05 | Cập nhật trạng thái đồng thời luôn giữ hồ sơ và tài khoản khớp nhau | US-F2.4.1 |
+| AC-F2.4.2-01 | Tải và chuẩn hóa ảnh hợp lệ | US-F2.4.2 |
+| AC-F2.4.2-02 | Thay ảnh trên cùng bản ghi | US-F2.4.2 |
+| AC-F2.4.2-03 | Từ chối file không hợp lệ | US-F2.4.2 |
+| AC-F2.4.2-04 | Xem ảnh theo quyền hồ sơ | US-F2.4.2 |
+| AC-F2.4.2-05 | Chỉ nhân viên có quyền sửa mới đổi ảnh | US-F2.4.2 |
+| AC-F2.4.2-06 | Chưa có ảnh hoặc không có hồ sơ | US-F2.4.2 |
+| AC-F2.4.2-07 | Xác thực và kiểm tra request ảnh | US-F2.4.2 |
+| AC-F2.4.2-08 | Chưa có ảnh hoặc tải ảnh lỗi thì hiện chữ cái đầu của tên trên giao diện | US-F2.4.2 |
+| AC-F2.5.1-01 | Ghi chỉ số cơ thể thành công với ít nhất một chỉ số | US-F2.5.1 |
+| AC-F2.5.1-02 | Từ chối dữ liệu chỉ số cơ thể không hợp lệ | US-F2.5.1 |
+| AC-F2.5.1-03 | Xem lịch sử chỉ số cơ thể sắp xếp mới nhất trước | US-F2.5.1 |
+| AC-F2.5.1-04 | Phân quyền ghi và xem chỉ số cơ thể theo vai trò, chi nhánh và quan hệ PT | US-F2.5.1 |
 | AC-F3.1.1-03 | Lễ tân chỉ xem, không có thao tác quản lý trên giao diện | US-F3.1.1 |
 | AC-F3.5.1-01 | Bán gói tạo hóa đơn chờ và gói chờ, giá lấy ở server | US-F3.5.1 |
 | AC-F3.5.1-02 | Gói chỉ hiệu lực sau khi hóa đơn PAID; ngày hết hạn tính đúng | US-F3.5.1 |
@@ -58,24 +114,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F8.0.1-02 | Lịch rỗng | US-F8.0.1 |
 | AC-F8.0.1-03 | Bộ lọc không hợp lệ | US-F8.0.1 |
 | AC-F8.0.1-04 | Khách muốn đặt | US-F8.0.1 |
-| AC-F8.1.1-01 | Đặt khi còn chỗ và ghi người tạo | US-F8.1.1 |
-| AC-F8.1.1-02 | Gói hoặc quyền đặt không hợp lệ | US-F8.1.1 |
-| AC-F8.1.1-03 | Lớp đủ chỗ | US-F8.1.1 |
-| AC-F8.1.1-04 | Hai yêu cầu tranh chỗ cuối | US-F8.1.1 |
-| AC-F8.1.1-05 | Trùng buổi và trùng giờ | US-F8.1.1 |
-| AC-F8.1.1-06 | Đặt lại sau khi hủy | US-F8.1.1 |
-| AC-F8.1.1-07 | Biên cửa sổ theo ngày Việt Nam | US-F8.1.1 |
-| AC-F8.1.1-08 | Đúng và dưới mốc đóng đặt | US-F8.1.1 |
-| AC-F8.1.1-09 | Phạm vi đặt hộ | US-F8.1.1 |
-| AC-F8.1.1-10 | Cấu hình theo chi nhánh | US-F8.1.1 |
-| AC-F8.3.1-01 | Hủy sớm hoặc đúng biên | US-F8.3.1 |
-| AC-F8.3.1-02 | Hủy muộn đạt ngưỡng khóa | US-F8.3.1 |
-| AC-F8.3.1-03 | Hủy chỗ buổi đã đổi giờ | US-F8.3.1 |
-| AC-F8.3.1-04 | Đặt suất vừa hủy | US-F8.3.1 |
-| AC-F8.3.1-05 | Qua tháng Việt Nam | US-F8.3.1 |
-| AC-F8.3.1-06 | Hết khóa rồi có vi phạm mới | US-F8.3.1 |
-| AC-F8.3.1-07 | Hai yêu cầu hủy cùng chỗ | US-F8.3.1 |
-| AC-F8.3.1-08 | Phạm vi và trạng thái hủy | US-F8.3.1 |
 | AC-F8.3.1-09 | Hủy buổi từ phía quản lý | US-F8.3.1 |
 | AC-F8.5.1-01 | Lịch của người được phân công | US-F8.5.1 |
 | AC-F8.5.1-02 | Buổi có người dạy thay | US-F8.5.1 |
@@ -92,31 +130,38 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F8.6.1-09 | Trạng thái không đủ điều kiện | US-F8.6.1 |
 | AC-F8.6.1-10 | Gỡ khóa thủ công có audit | US-F8.6.1 |
 | AC-F8.6.1-11 | Gỡ khóa sai quyền | US-F8.6.1 |
-| AC-F8.7.1-01 | Tạo lịch lặp hợp lệ | US-F8.7.1 |
-| AC-F8.7.1-02 | Sức chứa, giờ hoặc vai trò không hợp lệ | US-F8.7.1 |
-| AC-F8.7.1-03 | Chặn xung đột thực tế | US-F8.7.1 |
-| AC-F8.7.1-04 | Cùng giờ nhưng khác ngày thực tế | US-F8.7.1 |
-| AC-F8.7.1-05 | Sửa hoặc ngừng lịch không đổi buổi đã sinh | US-F8.7.1 |
 | AC-F8.7.1-06 | Giảm sức chứa đúng biên | US-F8.7.1 |
 | AC-F8.7.1-07 | Buổi không cho sửa sức chứa | US-F8.7.1 |
-| AC-F8.7.1-08 | Quyền lịch lặp và buổi riêng lẻ | US-F8.7.1 |
 | AC-F8.7.1-09 | Đổi phòng giữ chỗ | US-F8.7.1 |
 | AC-F8.7.1-10 | Đổi giờ giữ chỗ | US-F8.7.1 |
 | AC-F8.7.1-11 | Hủy buổi không phạt | US-F8.7.1 |
 | AC-F8.7.1-12 | Lỗi xử lý thông báo không đảo ngược thay đổi | US-F8.7.1 |
-| AC-F8.8.1-01 | Sinh đúng thứ, dữ liệu và múi giờ | US-F8.8.1 |
-| AC-F8.8.1-02 | Chạy lại hoặc chạy đồng thời | US-F8.8.1 |
-| AC-F8.8.1-03 | Lịch ngoài hiệu lực hoặc đã ngừng | US-F8.8.1 |
-| AC-F8.8.1-04 | Sinh lại sau khi buổi đổi giờ | US-F8.8.1 |
-| AC-F8.8.1-05 | Tài nguyên không còn dùng được | US-F8.8.1 |
 
 ## 4. Cây xuôi: chức năng → UC → US → AC → TC
 
 ### F1
 
 - **UC-F1.1** Khách tự đăng ký tài khoản hội viên
+  - **US-F1.1.1** Tự đăng ký tài khoản hội viên (#117)
+    - AC-F1.1.1-01 Đăng ký thành công tạo đồng thời tài khoản và hồ sơ hội viên (BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-09) ❌ chưa có TC
+    - AC-F1.1.1-02 Từ chối khi số điện thoại đã thuộc hồ sơ hội viên có sẵn (BR-F1-02) ❌ chưa có TC
+    - AC-F1.1.1-03 Từ chối khi email đã được sử dụng (BR-F1-01) ❌ chưa có TC
+    - AC-F1.1.1-04 Từ chối dữ liệu đầu vào sai định dạng (BR-F1-01, BR-F1-03) ❌ chưa có TC
+    - AC-F1.1.1-05 Hoàn tác toàn bộ giao dịch khi xảy ra lỗi giữa chừng hoặc chi nhánh mặc định ngừng hoạt động (BR-F1-09) ❌ chưa có TC
 - **UC-F1.2** Đăng nhập bằng email
+  - **US-F1.2.1** Đăng nhập bằng email (#118)
+    - AC-F1.2.1-01 Nhập sai mật khẩu từ lần 1 đến lần 4 trả 401 thông báo chung, tăng bộ đếm và không lộ email tồn tại (BR-F1-01, BR-F1-03, BR-F1-06) ❌ chưa có TC
+    - AC-F1.2.1-02 Nhập sai mật khẩu lần thứ 5 liên tiếp (kể cả gửi đồng thời) đặt bộ đếm bằng 5 và khóa tạm 15 phút (BR-F1-06) ❌ chưa có TC
+    - AC-F1.2.1-03 Từ chối mọi yêu cầu đăng nhập trong thời gian đang bị khóa tạm 15 phút, kể cả nhập đúng mật khẩu (BR-F1-06) ❌ chưa có TC
+    - AC-F1.2.1-04 Đăng nhập thành công hoặc hết thời gian khóa tạm (BR-F1-01, BR-F1-04, BR-F1-06) ❌ chưa có TC
+    - AC-F1.2.1-05 Từ chối tài khoản bị khóa hoặc ngừng hoạt động khi nhập đúng mật khẩu (BR-F1-05) ❌ chưa có TC
+    - AC-F1.2.1-06 Từ chối dữ liệu đăng nhập sai định dạng (không hỗ trợ đăng nhập bằng số điện thoại) (BR-F1-01) ❌ chưa có TC
 - **UC-F1.3** Làm mới phiên đăng nhập (Refresh Token) & Đăng xuất
+  - **US-F1.3.1** Làm mới phiên và đăng xuất (#119)
+    - AC-F1.3.1-01 Xoay vòng refresh token và chặn dùng lại token cũ (BR-F1-04) ❌ chưa có TC
+    - AC-F1.3.1-02 Đăng xuất thu hồi refresh token và xóa cookie (BR-F1-04) ❌ chưa có TC
+    - AC-F1.3.1-03 Từ chối khi phiên không hợp lệ và xóa cookie (BR-F1-04) ❌ chưa có TC
+    - AC-F1.3.1-04 Đồng bộ làm mới phiên và đăng xuất giữa nhiều tab trình duyệt (BR-F1-04) ❌ chưa có TC
 - **UC-F1.4** Đổi mật khẩu
   - **US-F1.4.1** Đổi mật khẩu (#120) ✅ mọi AC có TC
     - AC-F1.4.1-01 Đổi mật khẩu thành công, thu hồi toàn bộ phiên và yêu cầu đăng nhập lại (BR-F1-03, BR-F1-04)
@@ -126,6 +171,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F1.4.1-01d `AuthServiceTest#doiMatKhauThuHoiMoiPhienCuaNguoiDung`
       - TC-F1.4.1-01e `features/auth/api/auth-api.test.ts › TC-F1.4.1-01e: changePassword gọi POST /auth/change-password`
       - TC-F1.4.1-01f `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-01f: Đổi mật khẩu thành công gọi API, xóa phiên tr`
+      - TC-F1.4.1-01g `auth/AuthProvider.test.tsx › TC-F1.4.1-01g: completePasswordChange phát publishSessionCha`
     - AC-F1.4.1-02 Từ chối khi mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ (BR-F1-07)
       - TC-F1.4.1-02a `AuthServiceTest#doiMatKhauHienTaiSaiHoacMatKhauMoiTrungCuNemBusinessRuleException`
       - TC-F1.4.1-02b `AuthControllerTest#doiMatKhauViPhamQuyTacNghiepVuTra422`
@@ -138,8 +184,66 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F1.4.1-04b `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-04b: mở /doi-mat-khau đúng layout theo vai trò và `
       - TC-F1.4.1-04c `layouts/UserMenu.test.tsx › TC-F1.4.1-04c: UserMenu có mục Đổi mật khẩu cho mọi vai trò,`
       - TC-F1.4.1-04d `layouts/UserMenu.test.tsx › TC-F1.4.1-04d: ẩn chữ của nút trên màn hẹp 360px, giữ tên nú`
+      - TC-F1.4.1-04e `AuthServiceTest#doiMatKhauTaiKhoanKhongActiveNemForbiddenException`
 - **UC-F1.5** Quên mật khẩu và đặt lại mật khẩu (Sprint 2)
-- **UC-F1.6** Phân quyền truy cập API theo vai trò
+  - **US-F1.5.1** Quên và đặt lại mật khẩu (#121)
+    - AC-F1.5.1-01 Yêu cầu quên mật khẩu cho tài khoản ACTIVE tạo token băm SHA-256 hạn 30 phút, gửi email và trả 200 câu chung (BR-F1-01, BR-F1-08) ❌ chưa có TC
+    - AC-F1.5.1-02 Không lộ email khi email không tồn tại, tài khoản không ACTIVE hoặc gửi email gặp lỗi (BR-F1-08) ❌ chưa có TC
+    - AC-F1.5.1-03 Đặt lại mật khẩu với token hợp lệ cập nhật mật khẩu, ghi used_at, mở khóa tạm và thu hồi toàn bộ refresh token (BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08) ❌ chưa có TC
+    - AC-F1.5.1-04 Từ chối token sai, hết hạn sau 30 phút, đã dùng (kể cả gửi đồng thời) hoặc tài khoản không ACTIVE với 422 (BR-F1-08) ❌ chưa có TC
+    - AC-F1.5.1-05 Từ chối dữ liệu đầu vào sai định dạng, thiếu token trên URL hoặc mật khẩu mới không đạt chuẩn S1 (BR-F1-01, BR-F1-03) ❌ chưa có TC
+    - AC-F1.5.1-06 Gửi email qua API HTTPS của Brevo khi có cấu hình khóa API và chỉ ghi log ở môi trường phát triển khi khóa rỗng (BR-F1-08) ❌ chưa có TC
+- **UC-F1.6** Quản lý trạng thái tài khoản & Phân quyền truy cập API
+  - **US-F1.6.1** Trạng thái tài khoản và phân quyền (#122)
+    - AC-F1.6.1-01 Chưa đăng nhập hoặc token không hợp lệ bị từ chối 401 tiếng Việt (BR-F1-04, BR-F1-05) ❌ chưa có TC
+    - AC-F1.6.1-02 Chặn API khi sai vai trò và cho phép khi đúng vai trò (BR-F1-05) ❌ chưa có TC
+    - AC-F1.6.1-03 Nhân viên chi nhánh phải gắn với chi nhánh đang hoạt động (BR-F1-05) ❌ chưa có TC
+    - AC-F1.6.1-04 Tài khoản ngừng hoạt động mất quyền và bị thu hồi phiên ngay (BR-F1-04, BR-F1-05) ❌ chưa có TC
+
+### F2
+
+- **UC-F2.1** Tạo hồ sơ hội viên tại quầy
+  - **US-F2.1.1** Tạo hồ sơ hội viên tại quầy (#123)
+    - AC-F2.1.1-01 Tạo hồ sơ mới thành công, chuẩn hóa SĐT và tự sinh mã HV (BR-F2-05, BR-F2-06, BR-F2-07) ❌ chưa có TC
+    - AC-F2.1.1-02 Từ chối khi số điện thoại sai định dạng hoặc đã tồn tại (kể cả tạo đồng thời) (BR-F2-06) ❌ chưa có TC
+    - AC-F2.1.1-03 Chỉ lễ tân, quản lý chi nhánh (đã gắn chi nhánh) và chủ chuỗi được tạo hồ sơ (BR-F2-10) ❌ chưa có TC
+- **UC-F2.2** Tạo tài khoản đăng nhập cho hồ sơ hội viên có sẵn
+  - **US-F2.2.1** Tạo tài khoản cho hồ sơ có sẵn (#124)
+    - AC-F2.2.1-01 Tạo tài khoản và gửi email đặt mật khẩu hạn 72 giờ (BR-F2-06, BR-F2-11) ❌ chưa có TC
+    - AC-F2.2.1-02 Hội viên đặt mật khẩu lần đầu rồi đăng nhập; quá 72 giờ liên kết hết hạn (BR-F2-11) ❌ chưa có TC
+    - AC-F2.2.1-03 Từ chối khi hồ sơ đã có tài khoản (BR-F2-11) ❌ chưa có TC
+    - AC-F2.2.1-04 Từ chối khi email đã được sử dụng (kể cả đồng thời) (BR-F2-06, BR-F2-11) ❌ chưa có TC
+    - AC-F2.2.1-05 Từ chối khi hồ sơ đang ngừng hoạt động (BR-F2-11) ❌ chưa có TC
+    - AC-F2.2.1-06 Gửi email gặp lỗi vẫn giữ tài khoản và ghi log không chứa token (BR-F2-11) ❌ chưa có TC
+    - AC-F2.2.1-07 Kiểm tra quyền theo vai trò, chi nhánh và dữ liệu đầu vào (BR-F2-10, BR-F2-11) ❌ chưa có TC
+- **UC-F2.3** Tra cứu, lọc và xem chi tiết hồ sơ hội viên
+  - **US-F2.3.1** Tra cứu và xem hồ sơ hội viên (#125)
+    - AC-F2.3.1-01 Tìm kiếm, lọc, phân trang trong chi nhánh mình đạt hiệu năng dưới 2 giây (BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10) ❌ chưa có TC
+    - AC-F2.3.1-02 Chủ chuỗi tra cứu và xem chi tiết hồ sơ mọi chi nhánh (BR-F2-10) ❌ chưa có TC
+    - AC-F2.3.1-03 Xem chi tiết đúng phạm vi; ngoài phạm vi hoặc đã xóa mềm trả 404 (BR-F2-09, BR-F2-10) ❌ chưa có TC
+    - AC-F2.3.1-04 Huấn luyện viên chỉ xem chi tiết học viên PT của mình và không được gọi danh sách (BR-F2-10) ❌ chưa có TC
+- **UC-F2.4** Cập nhật hồ sơ, Ảnh đại diện & Ngừng hoạt động hội viên
+  - **US-F2.4.1** Cập nhật và ngừng hoạt động hồ sơ (#126)
+    - AC-F2.4.1-01 Cập nhật thông tin hồ sơ trong chi nhánh và chuẩn hóa số điện thoại (BR-F2-06, BR-F2-10) ❌ chưa có TC
+    - AC-F2.4.1-02 Từ chối trùng số điện thoại, thiếu trạng thái hoặc hồ sơ ngoài phạm vi (BR-F2-06, BR-F2-10) ❌ chưa có TC
+    - AC-F2.4.1-03 Ngừng hoạt động hồ sơ đồng thời khóa tài khoản và thu hồi mọi phiên trong cùng giao dịch (BR-F2-08, BR-F2-09) ❌ chưa có TC
+    - AC-F2.4.1-04 Kích hoạt lại hồ sơ khôi phục tài khoản nhưng không khôi phục token cũ và không gỡ khóa tạm (BR-F2-08) ❌ chưa có TC
+    - AC-F2.4.1-05 Cập nhật trạng thái đồng thời luôn giữ hồ sơ và tài khoản khớp nhau (BR-F2-08) ❌ chưa có TC
+  - **US-F2.4.2** Ảnh đại diện hội viên (#127)
+    - AC-F2.4.2-01 Tải và chuẩn hóa ảnh hợp lệ (BR-F2-01, BR-F2-02) ❌ chưa có TC
+    - AC-F2.4.2-02 Thay ảnh trên cùng bản ghi (BR-F2-03) ❌ chưa có TC
+    - AC-F2.4.2-03 Từ chối file không hợp lệ (BR-F2-01) ❌ chưa có TC
+    - AC-F2.4.2-04 Xem ảnh theo quyền hồ sơ (BR-F2-04) ❌ chưa có TC
+    - AC-F2.4.2-05 Chỉ nhân viên có quyền sửa mới đổi ảnh (BR-F2-04) ❌ chưa có TC
+    - AC-F2.4.2-06 Chưa có ảnh hoặc không có hồ sơ (BR-F2-04) ❌ chưa có TC
+    - AC-F2.4.2-07 Xác thực và kiểm tra request ảnh ❌ chưa có TC
+    - AC-F2.4.2-08 Chưa có ảnh hoặc tải ảnh lỗi thì hiện chữ cái đầu của tên trên giao diện (BR-F2-04) ❌ chưa có TC
+- **UC-F2.5** Ghi nhận và xem lịch sử chỉ số cơ thể (`body_metrics`)
+  - **US-F2.5.1** Chỉ số cơ thể (#128)
+    - AC-F2.5.1-01 Ghi chỉ số cơ thể thành công với ít nhất một chỉ số (BR-F2-12) ❌ chưa có TC
+    - AC-F2.5.1-02 Từ chối dữ liệu chỉ số cơ thể không hợp lệ (BR-F2-12) ❌ chưa có TC
+    - AC-F2.5.1-03 Xem lịch sử chỉ số cơ thể sắp xếp mới nhất trước (BR-F2-12) ❌ chưa có TC
+    - AC-F2.5.1-04 Phân quyền ghi và xem chỉ số cơ thể theo vai trò, chi nhánh và quan hệ PT (BR-F2-10, BR-F2-12) ❌ chưa có TC
 
 ### F3
 
@@ -266,29 +370,53 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F8.0.1-03 Bộ lọc không hợp lệ (BR-F8.0-01) ❌ chưa có TC
     - AC-F8.0.1-04 Khách muốn đặt (BR-F8.0-01) ❌ chưa có TC
 - **UC-F8.1** Đặt chỗ lớp nhóm
-  - **US-F8.1.1** Đặt chỗ lớp nhóm (#156)
-    - AC-F8.1.1-01 Đặt khi còn chỗ và ghi người tạo (BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01) ❌ chưa có TC
-    - AC-F8.1.1-02 Gói hoặc quyền đặt không hợp lệ (BR-F8.1-01, BR-F8.3-02) ❌ chưa có TC
-    - AC-F8.1.1-03 Lớp đủ chỗ (BR-F8.1-03, BR-F8-01) ❌ chưa có TC
-    - AC-F8.1.1-04 Hai yêu cầu tranh chỗ cuối (BR-F8.1-03) ❌ chưa có TC
-    - AC-F8.1.1-05 Trùng buổi và trùng giờ (BR-F8.1-04) ❌ chưa có TC
-    - AC-F8.1.1-06 Đặt lại sau khi hủy (BR-F8.1-04) ❌ chưa có TC
-    - AC-F8.1.1-07 Biên cửa sổ theo ngày Việt Nam (BR-F8.1-02) ❌ chưa có TC
-    - AC-F8.1.1-08 Đúng và dưới mốc đóng đặt (BR-F8.1-02, BR-F8-01) ❌ chưa có TC
-    - AC-F8.1.1-09 Phạm vi đặt hộ (BR-F8-01) ❌ chưa có TC
-    - AC-F8.1.1-10 Cấu hình theo chi nhánh (BR-F8.1-02) ❌ chưa có TC
+  - **US-F8.1.1** Đặt chỗ lớp nhóm (#156) ✅ mọi AC có TC
+    - AC-F8.1.1-01 Đặt khi còn chỗ và ghi người tạo (BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01)
+      - TC-F8.1.1-01a `ClassApiIntegrationTest#apiAuthorizationValidationAndPersistence`
+      - TC-F8.1.1-01b `ClassApiIntegrationTest#receptionistIsRecordedWhenBookingForMember`
+    - AC-F8.1.1-02 Gói hoặc quyền đặt không hợp lệ (BR-F8.1-01, BR-F8.3-02)
+      - TC-F8.1.1-02a `ClassApiIntegrationTest#rejectsIneligibleMemberships`
+    - AC-F8.1.1-03 Lớp đủ chỗ (BR-F8.1-03, BR-F8-01)
+      - TC-F8.1.1-03a `ClassApiIntegrationTest#fullClassRejectsBookingAndCancellationReleasesSeat`
+      - TC-F8.1.1-03b `ClassApiIntegrationTest#occupiedStatusesCountTowardsCapacity`
+    - AC-F8.1.1-04 Hai yêu cầu tranh chỗ cuối (BR-F8.1-03)
+      - TC-F8.1.1-04a `ClassApiIntegrationTest#concurrentRequestsDoNotExceedCapacity`
+    - AC-F8.1.1-05 Trùng buổi và trùng giờ (BR-F8.1-04)
+      - TC-F8.1.1-05a `ClassApiIntegrationTest#concurrentOverlappingRequestsRespectMemberLock`
+      - TC-F8.1.1-05b `ClassApiIntegrationTest#apiAuthorizationValidationAndPersistence`
+    - AC-F8.1.1-06 Đặt lại sau khi hủy (BR-F8.1-04)
+      - TC-F8.1.1-06a `ClassApiIntegrationTest#memberCanBookAgainAfterCancellation`
+    - AC-F8.1.1-07 Biên cửa sổ theo ngày Việt Nam (BR-F8.1-02)
+      - TC-F8.1.1-07a `ClassApiIntegrationTest#dayWindowUsesVietnamDatesAndBranchOverrides`
+    - AC-F8.1.1-08 Đúng và dưới mốc đóng đặt (BR-F8.1-02, BR-F8-01)
+      - TC-F8.1.1-08a `ClassApiIntegrationTest#cutoffBoundary`
+      - TC-F8.1.1-08b `ClassApiIntegrationTest#afterCutoffCancellationReleasesSeatWithoutReopeningBooking`
+    - AC-F8.1.1-09 Phạm vi đặt hộ (BR-F8-01)
+      - TC-F8.1.1-09a `ClassApiIntegrationTest#apiAuthorizationValidationAndPersistence`
+      - TC-F8.1.1-09b `ClassApiIntegrationTest#staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings`
+    - AC-F8.1.1-10 Cấu hình theo chi nhánh (BR-F8.1-02)
+      - TC-F8.1.1-10a `ClassApiIntegrationTest#branchCutoffOverridesGlobalValue`
 - **UC-F8.2** Đã bỏ (ADR 0014)
   - **US-F8.2.1** Đã bỏ (ADR 0014) (#157)
 - **UC-F8.3** Hủy chỗ lớp nhóm
   - **US-F8.3.1** Hủy chỗ lớp nhóm (#158)
-    - AC-F8.3.1-01 Hủy sớm hoặc đúng biên (BR-F8.3-01, BR-F8.3-04) ❌ chưa có TC
-    - AC-F8.3.1-02 Hủy muộn đạt ngưỡng khóa (BR-F8.3-01, BR-F8.3-02) ❌ chưa có TC
-    - AC-F8.3.1-03 Hủy chỗ buổi đã đổi giờ (BR-F8.3-01, BR-F8-03) ❌ chưa có TC
-    - AC-F8.3.1-04 Đặt suất vừa hủy (BR-F8.3-04, BR-F8.1-03) ❌ chưa có TC
-    - AC-F8.3.1-05 Qua tháng Việt Nam (BR-F8.3-02) ❌ chưa có TC
-    - AC-F8.3.1-06 Hết khóa rồi có vi phạm mới (BR-F8.3-02) ❌ chưa có TC
-    - AC-F8.3.1-07 Hai yêu cầu hủy cùng chỗ (BR-F8.3-02, BR-F8.3-04) ❌ chưa có TC
-    - AC-F8.3.1-08 Phạm vi và trạng thái hủy (BR-F8.3-04) ❌ chưa có TC
+    - AC-F8.3.1-01 Hủy sớm hoặc đúng biên (BR-F8.3-01, BR-F8.3-04)
+      - TC-F8.3.1-01a `ClassApiIntegrationTest#lateCancellationBoundary`
+      - TC-F8.3.1-01b `ClassApiIntegrationTest#receptionistIsRecordedWhenBookingForMember`
+    - AC-F8.3.1-02 Hủy muộn đạt ngưỡng khóa (BR-F8.3-01, BR-F8.3-02)
+      - TC-F8.3.1-02a `ClassApiIntegrationTest#violationsLockOnceAndExpiredLockDoesNotReuseOldViolations`
+    - AC-F8.3.1-03 Hủy chỗ buổi đã đổi giờ (BR-F8.3-01, BR-F8-03)
+      - TC-F8.3.1-03a `ClassApiIntegrationTest#cancellationAfterRescheduleIsNotLate`
+    - AC-F8.3.1-04 Đặt suất vừa hủy (BR-F8.3-04, BR-F8.1-03)
+      - TC-F8.3.1-04a `ClassApiIntegrationTest#fullClassRejectsBookingAndCancellationReleasesSeat`
+    - AC-F8.3.1-05 Qua tháng Việt Nam (BR-F8.3-02)
+      - TC-F8.3.1-05a `ClassApiIntegrationTest#oldCalendarMonthViolationsDoNotCountAtVietnamMidnight`
+    - AC-F8.3.1-06 Hết khóa rồi có vi phạm mới (BR-F8.3-02)
+      - TC-F8.3.1-06a `ClassApiIntegrationTest#violationsLockOnceAndExpiredLockDoesNotReuseOldViolations`
+    - AC-F8.3.1-07 Hai yêu cầu hủy cùng chỗ (BR-F8.3-02, BR-F8.3-04)
+      - TC-F8.3.1-07a `ClassApiIntegrationTest#doubleCancellationOnlyRecordsOneViolation`
+    - AC-F8.3.1-08 Phạm vi và trạng thái hủy (BR-F8.3-04)
+      - TC-F8.3.1-08a `ClassApiIntegrationTest#staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings`
     - AC-F8.3.1-09 Hủy buổi từ phía quản lý (BR-F8.7-05) ❌ chưa có TC
 - **UC-F8.4** Đã bỏ (ADR 0014)
   - **US-F8.4.1** Đã bỏ (ADR 0014) (#159)
@@ -313,25 +441,39 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F8.6.1-11 Gỡ khóa sai quyền (BR-F8-02) ❌ chưa có TC
 - **UC-F8.7** Quản lý lịch lặp lớp học và phân công huấn luyện viên
   - **US-F8.7.1** Quản lý lịch lặp và buổi riêng lẻ (#162)
-    - AC-F8.7.1-01 Tạo lịch lặp hợp lệ (BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04) ❌ chưa có TC
-    - AC-F8.7.1-02 Sức chứa, giờ hoặc vai trò không hợp lệ (BR-F8.7-02) ❌ chưa có TC
-    - AC-F8.7.1-03 Chặn xung đột thực tế (BR-F8.7-06) ❌ chưa có TC
-    - AC-F8.7.1-04 Cùng giờ nhưng khác ngày thực tế (BR-F8.7-06) ❌ chưa có TC
-    - AC-F8.7.1-05 Sửa hoặc ngừng lịch không đổi buổi đã sinh (BR-F8.7-02, BR-F8.7-04) ❌ chưa có TC
+    - AC-F8.7.1-01 Tạo lịch lặp hợp lệ (BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04)
+      - TC-F8.7.1-01a `ClassApiIntegrationTest#scheduleApiCreatesReadsUpdatesDeactivatesAndChecksNumericFields`
+    - AC-F8.7.1-02 Sức chứa, giờ hoặc vai trò không hợp lệ (BR-F8.7-02)
+      - TC-F8.7.1-02a `ClassApiIntegrationTest#validatesResourcesDatesCapacityAndRole`
+    - AC-F8.7.1-03 Chặn xung đột thực tế (BR-F8.7-06)
+      - TC-F8.7.1-03a `ClassApiIntegrationTest#recurringOverlapUsesActualWeekdaysNotJustIntersectingDateRanges`
+      - TC-F8.7.1-03b `ClassApiIntegrationTest#recurringUpdateRejectsConflictWithItsOwnRescheduledSession`
+      - TC-F8.7.1-03c `ClassApiIntegrationTest#scheduleRejectsConcreteRoomTrainerAndPtConflicts`
+    - AC-F8.7.1-04 Cùng giờ nhưng khác ngày thực tế (BR-F8.7-06)
+      - TC-F8.7.1-04a `ClassApiIntegrationTest#recurringOverlapUsesActualWeekdaysNotJustIntersectingDateRanges`
+    - AC-F8.7.1-05 Sửa hoặc ngừng lịch không đổi buổi đã sinh (BR-F8.7-02, BR-F8.7-04)
+      - TC-F8.7.1-05a `ClassApiIntegrationTest#scheduleGenerationIsIdempotentSnapshotsAndDeactivationPreserveSessions`
     - AC-F8.7.1-06 Giảm sức chứa đúng biên (BR-F8.7-02, BR-F8.1-03) ❌ chưa có TC
     - AC-F8.7.1-07 Buổi không cho sửa sức chứa (BR-F8.7-02) ❌ chưa có TC
-    - AC-F8.7.1-08 Quyền lịch lặp và buổi riêng lẻ (BR-F8-04) ❌ chưa có TC
+    - AC-F8.7.1-08 Quyền lịch lặp và buổi riêng lẻ (BR-F8-04)
+      - TC-F8.7.1-08a `ClassApiIntegrationTest#staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings`
+      - TC-F8.7.1-08b `ClassApiIntegrationTest#scheduleApiDistinguishesMissingOutOfScopeAndIneligibleResources`
     - AC-F8.7.1-09 Đổi phòng giữ chỗ (BR-F8.4-03, BR-F8.7-02, BR-F8.7-06) ❌ chưa có TC
     - AC-F8.7.1-10 Đổi giờ giữ chỗ (BR-F8-03, BR-F8.8-02) ❌ chưa có TC
     - AC-F8.7.1-11 Hủy buổi không phạt (BR-F8.7-05) ❌ chưa có TC
     - AC-F8.7.1-12 Lỗi xử lý thông báo không đảo ngược thay đổi (BR-F8.4-03, BR-F8-03, BR-F8.7-05) ❌ chưa có TC
 - **UC-F8.8** Sinh buổi học từ lịch lặp
-  - **US-F8.8.1** Sinh buổi học từ lịch lặp (#163)
-    - AC-F8.8.1-01 Sinh đúng thứ, dữ liệu và múi giờ (BR-F8.8-01, BR-F8.8-03) ❌ chưa có TC
-    - AC-F8.8.1-02 Chạy lại hoặc chạy đồng thời (BR-F8.8-02) ❌ chưa có TC
-    - AC-F8.8.1-03 Lịch ngoài hiệu lực hoặc đã ngừng (BR-F8.8-01) ❌ chưa có TC
-    - AC-F8.8.1-04 Sinh lại sau khi buổi đổi giờ (BR-F8.8-02) ❌ chưa có TC
-    - AC-F8.8.1-05 Tài nguyên không còn dùng được (BR-F8.8-01, BR-F8.8-03, BR-F8.7-06) ❌ chưa có TC
+  - **US-F8.8.1** Sinh buổi học từ lịch lặp (#163) ✅ mọi AC có TC
+    - AC-F8.8.1-01 Sinh đúng thứ, dữ liệu và múi giờ (BR-F8.8-01, BR-F8.8-03)
+      - TC-F8.8.1-01a `ClassApiIntegrationTest#scheduleGenerationIsIdempotentSnapshotsAndDeactivationPreserveSessions`
+    - AC-F8.8.1-02 Chạy lại hoặc chạy đồng thời (BR-F8.8-02)
+      - TC-F8.8.1-02a `ClassApiIntegrationTest#concurrentGenerationAndChangedSessionDoNotCreateDuplicates`
+    - AC-F8.8.1-03 Lịch ngoài hiệu lực hoặc đã ngừng (BR-F8.8-01)
+      - TC-F8.8.1-03a `ClassApiIntegrationTest#generationSkipsInactiveAndOutOfValidityDates`
+    - AC-F8.8.1-04 Sinh lại sau khi buổi đổi giờ (BR-F8.8-02)
+      - TC-F8.8.1-04a `ClassApiIntegrationTest#concurrentGenerationAndChangedSessionDoNotCreateDuplicates`
+    - AC-F8.8.1-05 Tài nguyên không còn dùng được (BR-F8.8-01, BR-F8.8-03, BR-F8.7-06)
+      - TC-F8.8.1-05a `ClassApiIntegrationTest#generationRejectsInactiveRoomOrConflictingSession`
 
 ## 5. Bảng ngược: TC → AC → US → UC → BR
 
@@ -345,6 +487,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F1.4.1-01d | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `AuthServiceTest#doiMatKhauThuHoiMoiPhienCuaNguoiDung` |
 | TC-F1.4.1-01e | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `features/auth/api/auth-api.test.ts › TC-F1.4.1-01e: changePassword gọi POST /auth/change-password` |
 | TC-F1.4.1-01f | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-01f: Đổi mật khẩu thành công gọi API, xóa phiên tr` |
+| TC-F1.4.1-01g | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `auth/AuthProvider.test.tsx › TC-F1.4.1-01g: completePasswordChange phát publishSessionCha` |
 | TC-F1.4.1-02a | AC-F1.4.1-02 | US-F1.4.1 | UC-F1.4 | BR-F1-07, BR-F1-03, BR-F1-04, BR-F1-05 | `AuthServiceTest#doiMatKhauHienTaiSaiHoacMatKhauMoiTrungCuNemBusinessRuleException` |
 | TC-F1.4.1-02b | AC-F1.4.1-02 | US-F1.4.1 | UC-F1.4 | BR-F1-07, BR-F1-03, BR-F1-04, BR-F1-05 | `AuthControllerTest#doiMatKhauViPhamQuyTacNghiepVuTra422` |
 | TC-F1.4.1-02c | AC-F1.4.1-02 | US-F1.4.1 | UC-F1.4 | BR-F1-07, BR-F1-03, BR-F1-04, BR-F1-05 | `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-02c: Lỗi 422 từ API hiển thị đúng thông báo và khô` |
@@ -354,6 +497,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F1.4.1-04b | AC-F1.4.1-04 | US-F1.4.1 | UC-F1.4 | BR-F1-05, BR-F1-03, BR-F1-04, BR-F1-07 | `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-04b: mở /doi-mat-khau đúng layout theo vai trò và ` |
 | TC-F1.4.1-04c | AC-F1.4.1-04 | US-F1.4.1 | UC-F1.4 | BR-F1-05, BR-F1-03, BR-F1-04, BR-F1-07 | `layouts/UserMenu.test.tsx › TC-F1.4.1-04c: UserMenu có mục Đổi mật khẩu cho mọi vai trò,` |
 | TC-F1.4.1-04d | AC-F1.4.1-04 | US-F1.4.1 | UC-F1.4 | BR-F1-05, BR-F1-03, BR-F1-04, BR-F1-07 | `layouts/UserMenu.test.tsx › TC-F1.4.1-04d: ẩn chữ của nút trên màn hẹp 360px, giữ tên nú` |
+| TC-F1.4.1-04e | AC-F1.4.1-04 | US-F1.4.1 | UC-F1.4 | BR-F1-05, BR-F1-03, BR-F1-04, BR-F1-07 | `AuthServiceTest#doiMatKhauTaiKhoanKhongActiveNemForbiddenException` |
 | TC-F3.1.1-01a | AC-F3.1.1-01 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#scopesRowsAndCountAndIgnoresClientBranch` |
 | TC-F3.1.1-02a | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#defaultActiveAndOrderingMatchContract` |
 | TC-F3.1.1-02b | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#inactiveFilterAndEmptyResults` |
@@ -413,10 +557,48 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.4.1-06d | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#missingAndBadTokenAre401` |
 | TC-F3.4.1-06e | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#inactiveAndMissingStaffAre403` |
 | TC-F3.4.1-06f | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#missingPackageIs404WithEmptyJsonBodyWithoutMutation` |
+| TC-F8.1.1-01a | AC-F8.1.1-01 | US-F8.1.1 | UC-F8.1 | BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#apiAuthorizationValidationAndPersistence` |
+| TC-F8.1.1-01b | AC-F8.1.1-01 | US-F8.1.1 | UC-F8.1 | BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#receptionistIsRecordedWhenBookingForMember` |
+| TC-F8.1.1-02a | AC-F8.1.1-02 | US-F8.1.1 | UC-F8.1 | BR-F8.1-01, BR-F8.3-02, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.1-04 | `ClassApiIntegrationTest#rejectsIneligibleMemberships` |
+| TC-F8.1.1-03a | AC-F8.1.1-03 | US-F8.1.1 | UC-F8.1 | BR-F8.1-03, BR-F8-01, BR-F8.1-01, BR-F8.1-02, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#fullClassRejectsBookingAndCancellationReleasesSeat` |
+| TC-F8.1.1-03b | AC-F8.1.1-03 | US-F8.1.1 | UC-F8.1 | BR-F8.1-03, BR-F8-01, BR-F8.1-01, BR-F8.1-02, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#occupiedStatusesCountTowardsCapacity` |
+| TC-F8.1.1-04a | AC-F8.1.1-04 | US-F8.1.1 | UC-F8.1 | BR-F8.1-03, BR-F8.1-01, BR-F8.1-02, BR-F8-01, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#concurrentRequestsDoNotExceedCapacity` |
+| TC-F8.1.1-05a | AC-F8.1.1-05 | US-F8.1.1 | UC-F8.1 | BR-F8.1-04, BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02 | `ClassApiIntegrationTest#concurrentOverlappingRequestsRespectMemberLock` |
+| TC-F8.1.1-05b | AC-F8.1.1-05 | US-F8.1.1 | UC-F8.1 | BR-F8.1-04, BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02 | `ClassApiIntegrationTest#apiAuthorizationValidationAndPersistence` |
+| TC-F8.1.1-06a | AC-F8.1.1-06 | US-F8.1.1 | UC-F8.1 | BR-F8.1-04, BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02 | `ClassApiIntegrationTest#memberCanBookAgainAfterCancellation` |
+| TC-F8.1.1-07a | AC-F8.1.1-07 | US-F8.1.1 | UC-F8.1 | BR-F8.1-02, BR-F8.1-01, BR-F8.1-03, BR-F8-01, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#dayWindowUsesVietnamDatesAndBranchOverrides` |
+| TC-F8.1.1-08a | AC-F8.1.1-08 | US-F8.1.1 | UC-F8.1 | BR-F8.1-02, BR-F8-01, BR-F8.1-01, BR-F8.1-03, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#cutoffBoundary` |
+| TC-F8.1.1-08b | AC-F8.1.1-08 | US-F8.1.1 | UC-F8.1 | BR-F8.1-02, BR-F8-01, BR-F8.1-01, BR-F8.1-03, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#afterCutoffCancellationReleasesSeatWithoutReopeningBooking` |
+| TC-F8.1.1-09a | AC-F8.1.1-09 | US-F8.1.1 | UC-F8.1 | BR-F8-01, BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#apiAuthorizationValidationAndPersistence` |
+| TC-F8.1.1-09b | AC-F8.1.1-09 | US-F8.1.1 | UC-F8.1 | BR-F8-01, BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings` |
+| TC-F8.1.1-10a | AC-F8.1.1-10 | US-F8.1.1 | UC-F8.1 | BR-F8.1-02, BR-F8.1-01, BR-F8.1-03, BR-F8-01, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#branchCutoffOverridesGlobalValue` |
+| TC-F8.3.1-01a | AC-F8.3.1-01 | US-F8.3.1 | UC-F8.3 | BR-F8.3-01, BR-F8.3-04, BR-F8.3-02, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#lateCancellationBoundary` |
+| TC-F8.3.1-01b | AC-F8.3.1-01 | US-F8.3.1 | UC-F8.3 | BR-F8.3-01, BR-F8.3-04, BR-F8.3-02, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#receptionistIsRecordedWhenBookingForMember` |
+| TC-F8.3.1-02a | AC-F8.3.1-02 | US-F8.3.1 | UC-F8.3 | BR-F8.3-01, BR-F8.3-02, BR-F8.3-04, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#violationsLockOnceAndExpiredLockDoesNotReuseOldViolations` |
+| TC-F8.3.1-03a | AC-F8.3.1-03 | US-F8.3.1 | UC-F8.3 | BR-F8.3-01, BR-F8-03, BR-F8.3-04, BR-F8.3-02, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#cancellationAfterRescheduleIsNotLate` |
+| TC-F8.3.1-04a | AC-F8.3.1-04 | US-F8.3.1 | UC-F8.3 | BR-F8.3-04, BR-F8.1-03, BR-F8.3-01, BR-F8.3-02, BR-F8-03, BR-F8.7-05 | `ClassApiIntegrationTest#fullClassRejectsBookingAndCancellationReleasesSeat` |
+| TC-F8.3.1-05a | AC-F8.3.1-05 | US-F8.3.1 | UC-F8.3 | BR-F8.3-02, BR-F8.3-01, BR-F8.3-04, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#oldCalendarMonthViolationsDoNotCountAtVietnamMidnight` |
+| TC-F8.3.1-06a | AC-F8.3.1-06 | US-F8.3.1 | UC-F8.3 | BR-F8.3-02, BR-F8.3-01, BR-F8.3-04, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#violationsLockOnceAndExpiredLockDoesNotReuseOldViolations` |
+| TC-F8.3.1-07a | AC-F8.3.1-07 | US-F8.3.1 | UC-F8.3 | BR-F8.3-02, BR-F8.3-04, BR-F8.3-01, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#doubleCancellationOnlyRecordsOneViolation` |
+| TC-F8.3.1-08a | AC-F8.3.1-08 | US-F8.3.1 | UC-F8.3 | BR-F8.3-04, BR-F8.3-01, BR-F8.3-02, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings` |
+| TC-F8.7.1-01a | AC-F8.7.1-01 | US-F8.7.1 | UC-F8.7 | BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#scheduleApiCreatesReadsUpdatesDeactivatesAndChecksNumericFields` |
+| TC-F8.7.1-02a | AC-F8.7.1-02 | US-F8.7.1 | UC-F8.7 | BR-F8.7-02, BR-F8.7-01, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#validatesResourcesDatesCapacityAndRole` |
+| TC-F8.7.1-03a | AC-F8.7.1-03 | US-F8.7.1 | UC-F8.7 | BR-F8.7-06, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#recurringOverlapUsesActualWeekdaysNotJustIntersectingDateRanges` |
+| TC-F8.7.1-03b | AC-F8.7.1-03 | US-F8.7.1 | UC-F8.7 | BR-F8.7-06, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#recurringUpdateRejectsConflictWithItsOwnRescheduledSession` |
+| TC-F8.7.1-03c | AC-F8.7.1-03 | US-F8.7.1 | UC-F8.7 | BR-F8.7-06, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#scheduleRejectsConcreteRoomTrainerAndPtConflicts` |
+| TC-F8.7.1-04a | AC-F8.7.1-04 | US-F8.7.1 | UC-F8.7 | BR-F8.7-06, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#recurringOverlapUsesActualWeekdaysNotJustIntersectingDateRanges` |
+| TC-F8.7.1-05a | AC-F8.7.1-05 | US-F8.7.1 | UC-F8.7 | BR-F8.7-02, BR-F8.7-04, BR-F8.7-01, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#scheduleGenerationIsIdempotentSnapshotsAndDeactivationPreserveSessions` |
+| TC-F8.7.1-08a | AC-F8.7.1-08 | US-F8.7.1 | UC-F8.7 | BR-F8-04, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings` |
+| TC-F8.7.1-08b | AC-F8.7.1-08 | US-F8.7.1 | UC-F8.7 | BR-F8-04, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#scheduleApiDistinguishesMissingOutOfScopeAndIneligibleResources` |
+| TC-F8.8.1-01a | AC-F8.8.1-01 | US-F8.8.1 | UC-F8.8 | BR-F8.8-01, BR-F8.8-03, BR-F8.8-02, BR-F8.7-06 | `ClassApiIntegrationTest#scheduleGenerationIsIdempotentSnapshotsAndDeactivationPreserveSessions` |
+| TC-F8.8.1-02a | AC-F8.8.1-02 | US-F8.8.1 | UC-F8.8 | BR-F8.8-02, BR-F8.8-01, BR-F8.8-03, BR-F8.7-06 | `ClassApiIntegrationTest#concurrentGenerationAndChangedSessionDoNotCreateDuplicates` |
+| TC-F8.8.1-03a | AC-F8.8.1-03 | US-F8.8.1 | UC-F8.8 | BR-F8.8-01, BR-F8.8-03, BR-F8.8-02, BR-F8.7-06 | `ClassApiIntegrationTest#generationSkipsInactiveAndOutOfValidityDates` |
+| TC-F8.8.1-04a | AC-F8.8.1-04 | US-F8.8.1 | UC-F8.8 | BR-F8.8-02, BR-F8.8-01, BR-F8.8-03, BR-F8.7-06 | `ClassApiIntegrationTest#concurrentGenerationAndChangedSessionDoNotCreateDuplicates` |
+| TC-F8.8.1-05a | AC-F8.8.1-05 | US-F8.8.1 | UC-F8.8 | BR-F8.8-01, BR-F8.8-03, BR-F8.7-06, BR-F8.8-02 | `ClassApiIntegrationTest#generationRejectsInactiveRoomOrConflictingSession` |
 
 ## 6. Kiểm thử chưa mang mã TC
 
-Có 277 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
+Có 280 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
 
 | File | Số kiểm thử |
 | --- | --- |
@@ -434,6 +616,7 @@ Có 277 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthSessionConcurrencyIntegrationTest.java` | 3 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/JwtSecurityIntegrationTest.java` | 9 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/JwtTokenServiceTest.java` | 5 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/groupclass/ClassApiIntegrationTest.java` | 2 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/F1RegistrationIntegrationTest.java` | 13 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberApiIntegrationTest.java` | 25 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberPhoneSupportTest.java` | 6 |
@@ -444,6 +627,7 @@ Có 277 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PublicPackageIntegrationTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/staff/StaffServiceTest.java` | 4 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/systemconfig/SystemConfigServiceTest.java` | 4 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/SeedDataMigrationIntegrationTest.java` | 1 |
 | `frontend/src/app/router.test.ts` | 3 |
 | `frontend/src/auth/account-change.test.tsx` | 1 |
 | `frontend/src/auth/AuthProvider.test.tsx` | 9 |
