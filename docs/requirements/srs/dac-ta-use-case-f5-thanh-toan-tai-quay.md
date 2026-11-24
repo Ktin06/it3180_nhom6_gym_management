@@ -1,15 +1,18 @@
 # Đặc tả Use Case – F5: Thanh toán tại quầy
 
+- **Cập nhật:** 24/11/2026 — S2-50 (#186), chuẩn hóa 5 US và AC theo ADR 0012.
 - **Mã chức năng:** F5
 - **Version:** v1 (Bắt buộc)
 - **Người biên soạn:** Thái Hùng Lân
-- **Người duyệt chéo:** Bùi Trần Đức Việt (theo phân công cặp duyệt mục 2.4 Sprint 1)
+- **Người duyệt chéo:** Nguyễn Anh Tú (S2-32, #204; cập nhật theo phân công Sprint 2).
 - **Tài liệu chuẩn tham chiếu:**
   - [Bản chốt phạm vi](../ban-chot-pham-vi.md) (mục Thanh toán; quy tắc S3, S7, S9, NF1, NF6)
   - [ERD v2 (`erd-v2.dbml`)](../../design/erd/erd-v2.dbml) (Nhóm 6: Bán hàng và thanh toán – `invoices`, `invoice_items`, `payments`)
   - [Thiết kế dữ liệu](../../design/erd/thiet-ke-du-lieu.md)
   - [ADR 0004: Thanh toán chỉ tại quầy](../../decisions/0004-thanh-toan-chi-tai-quay.md)
   - [Quy tắc mã nguồn](../../guides/quy-tac-ma-nguon.md)
+  - [ADR 0012: Quy ước mã truy vết](../../decisions/0012-quy-uoc-ma-truy-vet.md)
+  - [Chốt phạm vi F5 của trưởng nhóm tại #186](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/186#issuecomment-7082427117)
 
 ---
 
@@ -75,10 +78,10 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   - Tại bước 2, JWT không hợp lệ hoặc hết hạn.
   - Hệ thống trả `ProblemDetail` (401): *"Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại."*
 - **E2 – Không có quyền truy cập (403 Forbidden):**
-  - Tại bước 2, người dùng không phải Lễ tân/Quản lý, hoặc hóa đơn thuộc chi nhánh khác chi nhánh người dùng đang làm việc (S3).
+  - Tại bước 2, người dùng không phải Lễ tân/Quản lý, gồm Huấn luyện viên, Hội viên và Chủ chuỗi (S3). Ngoài chi nhánh được xử lý ở E3 (404).
   - Hệ thống trả `ProblemDetail` (403): *"Bạn không có quyền thực hiện thao tác này."*
 - **E3 – Hóa đơn không tồn tại (404 Not Found):**
-  - Tại bước 3, không tìm thấy `invoices` với `id` được yêu cầu.
+  - Tại bước 3, không tìm thấy hóa đơn theo `id` hoặc hóa đơn ngoài chi nhánh của nhân viên. Hai trường hợp trả cùng thông báo (VD-16).
   - Hệ thống trả `ProblemDetail` (404): *"Hóa đơn không tồn tại trên hệ thống."*
 - **E4 – Hóa đơn không ở trạng thái chờ thanh toán (422 Unprocessable Content):**
   - Tại bước 3, hóa đơn có `status` là `PAID`, `CANCELLED` hoặc `REFUNDED`.
@@ -121,15 +124,35 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   ```
 - **Màn hình liên quan:** Màn hình "Thanh toán VietQR tại quầy" – `docs/design/wireframe/f5-thanh-toan-vietqr.drawio.svg`.
 
-#### H. Tiêu chí chấp nhận (Acceptance Criteria)
-- **Kịch bản 1: Sinh mã VietQR cho hóa đơn PENDING thành công**
-  - **Given** Lễ tân chi nhánh CN01 đã đăng nhập; hóa đơn `id=88` có `status=PENDING`, `total=3000000` thuộc CN01
-  - **When** Gọi `GET /api/v1/invoices/88/vietqr`
-  - **Then** Hệ thống trả `200 OK` với đường dẫn `qrImageUrl` chứa số tiền `3000000` và nội dung chuyển khoản `CN01 HD000088`
-- **Kịch bản 2: Gọi VietQR cho hóa đơn đã thanh toán (422)**
-  - **Given** Hóa đơn `id=88` có `status=PAID`
-  - **When** Gọi `GET /api/v1/invoices/88/vietqr`
-  - **Then** Hệ thống trả `422 Unprocessable Content`: *"Hóa đơn này không ở trạng thái chờ thanh toán."*
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F5.1.1: Mã VietQR cho hóa đơn
+- **User story:** Là **Lễ tân**, tôi muốn **hiện mã VietQR có sẵn số tiền và nội dung**, để **khách chuyển khoản đúng, không nhầm**.
+- **BR liên quan:** BR-F5-01, BR-F5-02; S2, S3, S7, NF1
+- **Version / Sprint:** v1 / Sprint 2
+- **Issue:** #140
+- **Tiêu chí chấp nhận:**
+  - **AC-F5.1.1-01: Sinh VietQR cho hóa đơn chờ bằng số tiền server** (BR-F5-01, BR-F5-02, S7)
+    - **Given** Lễ tân hoặc Quản lý CN01 đã đăng nhập; hóa đơn PENDING thuộc CN01 có tổng tiền 3.000.000 đ
+    - **When** Gọi GET /api/v1/invoices/{id}/vietqr
+    - **Then** 200 OK; thông tin QR có đúng tài khoản thụ hưởng, số tiền 3000000 và nội dung {branch_code} {invoice_code}; dữ liệu chứa khoảng trắng hoặc dấu tiếng Việt được mã hóa đúng trong URL. Trình duyệt không quyết định số tiền; hóa đơn và gói tập không đổi trạng thái
+  - **AC-F5.1.1-02: Chỉ sinh VietQR khi hóa đơn PENDING**
+    - **Given** Hóa đơn cùng chi nhánh đã PAID, CANCELLED hoặc REFUNDED
+    - **When** Gọi API VietQR
+    - **Then** 422 Unprocessable Content: “Hóa đơn này không ở trạng thái chờ thanh toán.”; không thay đổi dữ liệu; giao diện hiển thị đúng thông báo lỗi
+  - **AC-F5.1.1-03: Cấu hình ngân hàng ưu tiên theo chi nhánh**
+    - **Given** Các khóa BANK_ID, BANK_ACCOUNT_NO, BANK_ACCOUNT_NAME có giá trị riêng tại CN01 và giá trị mặc định toàn chuỗi
+    - **When** Sinh VietQR cho hóa đơn CN01
+    - **Then** Dùng giá trị của CN01; với từng khóa không có giá trị riêng thì dùng giá trị toàn chuỗi. Không dùng tài khoản của chi nhánh khác
+  - **AC-F5.1.1-04: Từ chối chưa đăng nhập và sai vai trò** (S2, S3)
+    - **Given** Không có token hợp lệ; hoặc người gọi là Huấn luyện viên, Hội viên, Chủ chuỗi
+    - **When** Gọi API VietQR
+    - **Then** Chưa đăng nhập/token hết hạn trả 401: “Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.”; sai vai trò trả 403: “Bạn không có quyền thực hiện thao tác này.”; không sinh QR
+  - **AC-F5.1.1-05: Hóa đơn ngoài chi nhánh được giấu như không tồn tại** (S3)
+    - **Given** Lễ tân hoặc Quản lý CN01 gọi hóa đơn CN02, hoặc ID không tồn tại
+    - **When** Gọi API VietQR
+    - **Then** Cả hai trả 404 cùng câu “Hóa đơn không tồn tại trên hệ thống.”; không lộ thông tin hóa đơn, không thay đổi dữ liệu
+
 
 ---
 
@@ -161,7 +184,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 #### C. Luồng sự kiện chính (Basic Flow / Happy Path)
 1. Lễ tân chọn phương thức thanh toán (`CASH` hoặc `BANK_TRANSFER`), nhập mã tham chiếu giao dịch `transactionRef` (tùy chọn với chuyển khoản), và bấm "Xác nhận đã nhận tiền".
 2. Hệ thống kiểm tra JWT hợp lệ và vai trò Lễ tân/Quản lý chi nhánh (Spring Security – S2, S3, S7).
-3. Hệ thống kiểm tra tính hợp lệ của dữ liệu đầu vào (Bean Validation – S5): `method` bắt buộc là `CASH` hoặc `BANK_TRANSFER`.
+3. Hệ thống kiểm tra tính hợp lệ của dữ liệu đầu vào (Bean Validation – S5): `method` bắt buộc là `CASH` hoặc `BANK_TRANSFER`; `transactionRef` tùy chọn, tối đa 100 ký tự theo ERD.
 4. Hệ thống nạp hóa đơn từ bảng `invoices`, kiểm tra thuộc chi nhánh và có `status = PENDING`.
 5. Hệ thống thực hiện các thay đổi dữ liệu trong cùng một giao dịch an toàn `@Transactional`:
    - a. Khóa lạc quan kiểm tra phiên bản `@Version` trên bản ghi `invoices` để chống ghi đè đồng thời.
@@ -180,16 +203,16 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
 - **E1 – Dữ liệu đầu vào không hợp lệ (400 Bad Request):**
-  - Tại bước 3, `method` không hợp lệ (khác `CASH` và `BANK_TRANSFER`).
-  - Hệ thống trả `ProblemDetail` (400) thông báo lỗi chi tiết trường `method`.
+  - Tại bước 3, thiếu `method`, `method` khác `CASH`/`BANK_TRANSFER`, hoặc `transactionRef` dài quá 100 ký tự.
+  - Hệ thống trả `ProblemDetail` (400) với lỗi theo trường `method` hoặc `transactionRef`; không ghi thay đổi.
 - **E2 – Chưa đăng nhập hoặc token hết hạn (401 Unauthorized):**
   - Tại bước 2, JWT không hợp lệ hoặc hết hạn.
   - Hệ thống trả `ProblemDetail` (401): *"Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại."*
 - **E3 – Không có quyền thao tác (403 Forbidden):**
-  - Tại bước 2, người dùng không phải Lễ tân hoặc Quản lý chi nhánh (ví dụ: Huấn luyện viên, Hội viên cố gọi API xác nhận – vi phạm S7).
+  - Tại bước 2, người dùng không phải Lễ tân hoặc Quản lý chi nhánh (gồm Chủ chuỗi, Huấn luyện viên, Hội viên cố gọi API xác nhận – vi phạm S7).
   - Hệ thống trả `ProblemDetail` (403): *"Bạn không có quyền thực hiện thao tác này."*
 - **E4 – Hóa đơn không tồn tại (404 Not Found):**
-  - Tại bước 4, không tìm thấy hóa đơn theo `id`.
+  - Tại bước 4, không tìm thấy hóa đơn theo `id` hoặc hóa đơn thuộc chi nhánh khác; không phân biệt hai trường hợp trong thông báo (VD-16).
   - Hệ thống trả `ProblemDetail` (404): *"Hóa đơn không tồn tại trên hệ thống."*
 - **E5 – Xung đột dữ liệu đồng thời (409 Conflict):**
   - Tại bước 5a/5c, hai lễ tân cùng mở màn hình và cùng bấm xác nhận thu tiền cho cùng một hóa đơn; phiên bản `invoices.version` bị xung đột (`@Version`).
@@ -205,7 +228,9 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 - **BR-F5-04:** Gói tập chỉ kích hoạt (`ACTIVE` hoặc `UPCOMING`) khi và chỉ khi hóa đơn chuyển sang trạng thái `PAID`. Ngày bắt đầu và ngày kết thúc của gói được tính toán lại tại chính thời điểm thanh toán thành công theo ngày hiện tại (`:today` theo múi giờ `Asia/Ho_Chi_Minh` – BR-F3-12). Số ngày hiệu lực của gói được bảo toàn nguyên vẹn dựa trên khoảng ngày dự kiến đã lưu lúc lập hóa đơn (`memberships.end_date - memberships.start_date + 1`), không bị ảnh hưởng nếu Quản lý chi nhánh thay đổi `packages.duration_days` trong danh mục sau đó (BR-F3-06).
   - Nếu hội viên đã có gói cùng loại đang `ACTIVE` hoặc `FROZEN`, gói mới bắt buộc chuyển `UPCOMING` để đảm bảo ràng buộc duy nhất `uq_one_active_per_type` (BR-F3-10, BR-F3-11).
   - Quy tắc xác định `start_date` cho gói `UPCOMING`: nếu gói cũ là `TIME` hoặc `SESSION`/`PT` còn buổi, `start_date = end_date_gói_cũ + 1 ngày`; nếu gói cũ là `SESSION`/`PT` đã về 0 buổi (`remaining_sessions = 0`, vẫn giữ `ACTIVE` hết hôm nay), gói mới bắt đầu từ ngày mai: `start_date = :today + 1 ngày` (`ban-chot-pham-vi.md` dòng 85, `ADR 0005` mục 27).
+  - **Điểm lệch cần duyệt:** nhánh PT 0 buổi trong mô tả cũ ở B/C/E chưa khớp bản chốt phạm vi (PT hết hiệu lực ngay khi xác nhận buổi cuối). Giữ lại để trưởng nhóm đối chiếu tại mục 4.3; AC-F5.2.1-02 chỉ xác nhận nhánh SESSION 0 buổi, chưa cấp AC cho nhánh PT 0 buổi.
 - **BR-F5-05:** Toàn vẹn đồng thời (NF6): Bảng `invoices` sử dụng khóa lạc quan `@Version`. Service sử dụng `invoiceRepository.saveAndFlush(invoice)`, bắt `OptimisticLockingFailureException` và ném `ConflictException` (409) để trả thông báo xung đột cụ thể. Nếu hai nhân viên cùng xác nhận một hóa đơn, chỉ một giao dịch thành công, giao dịch còn lại nhận lỗi 409.
+- **Quyết định VD-10 (20/11/2026):** Hóa đơn tổng tiền 0 vẫn chuyển PAID và ghi phiếu thu CONFIRMED amount=0; không bỏ phiếu thu. ERD/schema đang ghi amount > 0 cần được đồng bộ bằng thay đổi phù hợp trong S2-09; PR SRS này không sửa migration đã gộp.
 - **NF1:** Phản hồi xác nhận thanh toán và kích hoạt gói dưới 2 giây.
 
 #### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
@@ -216,7 +241,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   | `payments` | `id` | `bigint` | PK, Generated Always | Khóa chính tự tăng |
   | `payments` | `invoice_id` | `bigint` | NOT NULL, FK → `invoices.id` | Hóa đơn được thanh toán |
   | `payments` | `method` | `varchar(20)` | NOT NULL, CHECK IN ('CASH','BANK_TRANSFER') | Hình thức thanh toán |
-  | `payments` | `amount` | `int` | NOT NULL, CHECK amount > 0 | Số tiền thu (bằng `invoices.total`) |
+  | `payments` | `amount` | `int` | NOT NULL, yêu cầu amount >= 0 theo VD-10 | Số tiền thu bằng `invoices.total`, kể cả 0 đồng; schema hiện tại cần được điều chỉnh trong nhiệm vụ API |
   | `payments` | `status` | `varchar(20)` | NOT NULL, default 'CONFIRMED', CHECK IN ('CONFIRMED','CANCELLED') | Trạng thái phiếu thu (CONFIRMED khi thu tiền, CANCELLED khi hoàn tiền) |
   | `payments` | `transaction_ref` | `varchar(100)` | nullable | Mã giao dịch ngân hàng / tham chiếu VietQR |
   | `payments` | `received_by` | `bigint` | NOT NULL, FK → `users.id` | Nhân viên xác nhận thu tiền |
@@ -264,19 +289,55 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   ```
 - **Màn hình liên quan:** Màn hình "Xác nhận thanh toán tại quầy" – `docs/design/wireframe/f5-thanh-toan-vietqr.drawio.svg`.
 
-#### H. Tiêu chí chấp nhận (Acceptance Criteria)
-- **Kịch bản 1: Xác nhận thanh toán tiền mặt kích hoạt gói ACTIVE**
-  - **Given** Lễ tân đã đăng nhập; hóa đơn `id=88` (`status=PENDING`, `total=500000`) chứa gói TIME 30 ngày của hội viên chưa có gói
-  - **When** Gọi `POST /api/v1/invoices/88/payments` với `method=CASH`
-  - **Then** Hệ thống trả `200 OK`; `invoices.status = PAID`; bảng `payments` ghi nhận 1 bản ghi `amount=500000`; gói tập chuyển `status=ACTIVE`, `start_date` = ngày hôm nay, `end_date` = hôm nay + 29 ngày
-- **Kịch bản 2: Xác nhận thanh toán chuyển khoản kích hoạt gói gia hạn nối tiếp UPCOMING**
-  - **Given** Hội viên có gói TIME `status=ACTIVE` (hoặc `status=FROZEN`) đến hết ngày `2026-12-31`; hóa đơn `id=89` là hóa đơn gia hạn gói TIME 30 ngày đang `PENDING`
-  - **When** Lễ tân gọi `POST /api/v1/invoices/89/payments` với `method=BANK_TRANSFER`
-  - **Then** Hệ thống trả `200 OK`; gói mới chuyển `status=UPCOMING`, `start_date=2027-01-01`, `end_date=2027-01-30`; gói cũ vẫn giữ nguyên trạng thái `ACTIVE` (hoặc `FROZEN`)
-- **Kịch bản 3: Hai lễ tân cùng bấm xác nhận một hóa đơn (409 Conflict)**
-  - **Given** Hóa đơn `id=88` đang `PENDING` với `version=0`
-  - **When** Lễ tân A và Lễ tân B cùng bấm xác nhận gần như đồng thời
-  - **Then** Một request thành công trả về `200 OK` (tăng `version=1`); request còn lại bị từ chối trả về `409 Conflict`
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F5.2.1: Ghi nhận thanh toán, kích hoạt gói
+- **User story:** Là **Lễ tân**, tôi muốn **xác nhận đã thu tiền để hóa đơn chuyển PAID và gói tự kích hoạt**, để **không phải kích hoạt tay**.
+- **BR liên quan:** BR-F5-03, BR-F5-04, BR-F5-05; BR-F3-06, BR-F3-11, BR-F3-12; S2, S3, S5, S7, NF6
+- **Version / Sprint:** v1 / Sprint 2
+- **Issue:** #141
+- **Tiêu chí chấp nhận:**
+  - **AC-F5.2.1-01: Thu tiền mặt kích hoạt gói mới đúng ngày và giữ thời hạn đã chốt** (BR-F5-03, BR-F5-04, BR-F3-06, S7)
+    - **Given** Hóa đơn PENDING có gói TIME đã chốt 30 ngày; hội viên chưa có gói cùng loại đang giữ; sau khi lập hóa đơn quản lý có thể đã sửa thông số danh mục
+    - **When** Lễ tân xác nhận thu tiền ngày 01/11/2026 giờ Việt Nam bằng POST /api/v1/invoices/{id}/payments với method=CASH
+    - **Then** 200 OK; hóa đơn PAID, ghi đúng một phiếu thu CONFIRMED có amount=invoices.total và người/thời điểm thu; gói ACTIVE từ 01/11 đến hết 30/11. Số ngày và số buổi giữ bản đã chốt lúc lập hóa đơn, không đọc lại cấu hình danh mục; trước PAID gói không dùng được. Nếu một bước lỗi thì rollback toàn bộ, không có phiếu thu rác
+  - **AC-F5.2.1-02: Thu chuyển khoản cho gia hạn nối tiếp** (BR-F5-04, BR-F3-11)
+    - **Given** Hội viên có gói TIME ACTIVE hoặc FROZEN tới hết 31/12/2026; hoặc gói SESSION/PT còn buổi; hoặc SESSION vừa hết buổi nhưng vẫn ACTIVE trong ngày; hóa đơn gia hạn đang PENDING
+    - **When** Lễ tân/Quản lý xác nhận BANK_TRANSFER sau khi đối chiếu đã nhận đủ tiền, kèm transactionRef nếu có
+    - **Then** 200 OK; phiếu thu lưu phương thức và mã tham chiếu đã nhập; hóa đơn PAID, gói cũ giữ nguyên. Gói mới UPCOMING: TIME hoặc SESSION/PT còn buổi bắt đầu sau ngày cuối hiện tại của gói cũ; SESSION 0 buổi bắt đầu ngày mai theo giờ Việt Nam. Với FROZEN dùng ngày cuối đã cộng thời gian bảo lưu. Giữ số ngày và số buổi đã chốt lúc lập hóa đơn; end_date = start_date + số ngày - 1. Ví dụ gia hạn TIME 30 ngày sau 31/12/2026 có hạn 01/01–30/01/2027
+  - **AC-F5.2.1-03: Hóa đơn 0 đồng vẫn ghi phiếu thu và kích hoạt gói** (BR-F5-04; VD-10 (đã chốt 20/11))
+    - **Given** Hóa đơn PENDING có total=0 và gói đủ điều kiện kích hoạt
+    - **When** Lễ tân/Quản lý xác nhận thu tiền với phương thức hợp lệ
+    - **Then** 200 OK; hóa đơn PAID; ghi đúng một phiếu thu CONFIRMED có amount=0, người thu, thời điểm và phương thức; gói ACTIVE hoặc UPCOMING theo cùng quy tắc như hóa đơn có tiền. Không bỏ phiếu thu, không để hóa đơn kẹt PENDING
+  - **AC-F5.2.1-04: Chỉ Lễ tân và Quản lý chi nhánh được xác nhận thu** (BR-F5-03, S2, S3)
+    - **Given** Hóa đơn PENDING đủ điều kiện; người gọi là Quản lý cùng chi nhánh, hoặc Chủ chuỗi/Huấn luyện viên/Hội viên, hoặc không có token hợp lệ
+    - **When** Gọi API xác nhận thu tiền
+    - **Then** Quản lý cùng chi nhánh được xử lý 200 như Lễ tân; ba vai trò còn lại trả 403 “Bạn không có quyền thực hiện thao tác này.”; chưa đăng nhập trả 401. Trường hợp từ chối không ghi phiếu thu, không đổi hóa đơn/gói
+  - **AC-F5.2.1-05: Dữ liệu thu tiền sai không làm thay đổi hóa đơn** (S5)
+    - **Given** Người gọi đúng quyền; method thiếu hoặc không phải CASH/BANK_TRANSFER; hoặc transactionRef vượt 100 ký tự theo ERD
+    - **When** Gửi yêu cầu xác nhận thu tiền
+    - **Then** 400 Bad Request kèm errors theo trường method hoặc transactionRef; không ghi phiếu thu hoặc đổi hóa đơn/gói. transactionRef là tùy chọn với chuyển khoản
+  - **AC-F5.2.1-06: Thu tiền hóa đơn không tồn tại hoặc ngoài chi nhánh** (S3)
+    - **Given** Lễ tân/Quản lý CN01 gọi hóa đơn CN02 hoặc ID không tồn tại
+    - **When** Gửi yêu cầu xác nhận thu tiền hợp lệ
+    - **Then** 404 cùng câu “Hóa đơn không tồn tại trên hệ thống.”; không đổi hóa đơn/gói, không ghi phiếu thu
+  - **AC-F5.2.1-07: Hai nhân viên cùng thu một hóa đơn** (BR-F5-05, NF6)
+    - **Given** Hai Lễ tân cùng mở một hóa đơn PENDING và gửi xác nhận gần như đồng thời
+    - **When** Hệ thống xử lý hai yêu cầu thu tiền
+    - **Then** Đúng một bên 200; bên còn lại 409 “Hóa đơn này vừa được xác nhận thanh toán bởi một nhân viên khác.”; chỉ có một phiếu thu, gói chỉ kích hoạt một lần; giao diện bên lỗi tải lại hóa đơn
+  - **AC-F5.2.1-08: Không thu lại hóa đơn đã xử lý**
+    - **Given** Hóa đơn cùng chi nhánh đã PAID, CANCELLED hoặc REFUNDED
+    - **When** Gửi yêu cầu xác nhận thu tiền lần nữa
+    - **Then** 422 “Hóa đơn đã được thanh toán hoặc đã bị hủy trước đó.”; không thêm phiếu thu, không đổi trạng thái; gói đã CANCELLED không được kích hoạt lại
+  - **AC-F5.2.1-09: Kiểm tra lại gói UPCOMING ở thời điểm thu tiền** (BR-F5-04, BR-F3-11, NF6)
+    - **Given** Một hóa đơn gia hạn khác đã tạo gói UPCOMING cùng hội viên, cùng loại và cùng phạm vi chi nhánh
+    - **When** Thu tiền hóa đơn gia hạn thứ hai; hoặc hai nhân viên thu hai hóa đơn gia hạn cùng nhóm gần như đồng thời
+    - **Then** Yêu cầu thứ hai trả 422 “Hội viên đã có gói cùng loại đang chờ kích hoạt (UPCOMING). Không thể kích hoạt thêm gói này. Vui lòng liên hệ quản lý để kiểm tra hoặc hoàn tiền hóa đơn.”; không ghi phiếu thu cho yêu cầu bị chặn. Khi đồng thời, đúng một bên 200. UPCOMING khác loại hoặc khác phạm vi không chặn
+  - **AC-F5.2.1-10: Không sử dụng số tiền giả từ trình duyệt** (BR-F5-01, S7)
+    - **Given** Hóa đơn PENDING có tổng tiền đã được server chốt; client gửi thêm amount hoặc total giả vào yêu cầu thu tiền
+    - **When** Lễ tân/Quản lý xác nhận thu bằng CASH hoặc BANK_TRANSFER
+    - **Then** Số tiền ghi nhận phải bằng invoices.total; giá và tổng tiền do client gửi không được dùng để thay đổi khoản thu hoặc hóa đơn. Không sửa đơn giá lịch sử trong invoice_items
+
 
 ---
 
@@ -303,7 +364,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
 - **A1 – Hủy hóa đơn chờ tại quầy (Cancel Pending Invoice):**
-  - Tại danh sách, Lễ tân chọn một hóa đơn đang ở trạng thái `PENDING` và bấm "Hủy hóa đơn".
+  - Tại danh sách, Lễ tân, Quản lý chi nhánh hoặc Chủ chuỗi chọn hóa đơn PENDING trong phạm vi được phép và bấm "Hủy hóa đơn".
   - Hệ thống kiểm tra hóa đơn đang ở trạng thái `PENDING`.
   - Trong giao dịch `@Transactional`, hệ thống cập nhật `invoices.status = CANCELLED`. Đồng thời tìm các gói `memberships` đang `PENDING` gắn với hóa đơn này và cập nhật sang `CANCELLED`.
   - Hệ thống trả `200 OK` xác nhận đã hủy hóa đơn.
@@ -317,7 +378,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   - Hóa đơn yêu cầu không tồn tại trên hệ thống, **hoặc thuộc chi nhánh khác** với chi nhánh của Lễ tân/Quản lý. Hai trường hợp trả cùng một câu để không lộ hóa đơn của chi nhánh khác có tồn tại hay không (chốt 22/11/2026).
   - Hệ thống trả `ProblemDetail` (404): *"Hóa đơn không tồn tại trên hệ thống."*
 - **E4 – Hóa đơn không thể hủy (422 Unprocessable Content):**
-  - Lễ tân cố bấm hủy một hóa đơn đã `PAID` hoặc đã `REFUNDED`.
+  - Người có quyền cố hủy hóa đơn PAID, REFUNDED hoặc đã CANCELLED.
   - Hệ thống từ chối và trả `ProblemDetail` (422): *"Chỉ có thể hủy hóa đơn đang ở trạng thái chờ thanh toán."*
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
@@ -343,7 +404,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 
 #### G. Thiết kế giao diện và API liên quan
 - **API Tra cứu danh sách:** `GET /api/v1/invoices`
-  - **Query Parameters:** `status`, `source`, `keyword`, `fromDate`, `toDate`, `page=0&size=20`
+  - **Query Parameters:** `status`, `source`, `keyword`, `fromDate`, `toDate`, `branchId` (chỉ có tác dụng với Chủ chuỗi), `page=0&size=20`. Giới hạn chi tiết của bộ lọc đang chờ chốt ở mục 4.
   - **Response Success (200 OK):**
     ```json
     {
@@ -366,6 +427,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
       "totalPages": 1
     }
     ```
+- **API Chi tiết hóa đơn:** `GET /api/v1/invoices/{id}`; trả đủ thông tin hóa đơn, dòng hóa đơn và phiếu thu kèm tên người thu trong phạm vi được phép.
 - **API Hủy hóa đơn chờ:** `PUT /api/v1/invoices/{id}/cancel`
   - **Header:** `Authorization: Bearer <access_token>`
   - **Response Success (200 OK):**
@@ -379,15 +441,47 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
     ```
 - **Màn hình liên quan:** Màn hình "Quản lý hóa đơn tại quầy" – `docs/design/wireframe/f5-hoa-don.drawio.svg`.
 
-#### H. Tiêu chí chấp nhận (Acceptance Criteria)
-- **Kịch bản 1: Lễ tân hủy hóa đơn PENDING thành công**
-  - **Given** Hóa đơn `id=88` đang `PENDING` kèm gói tập `id=77` đang `PENDING`
-  - **When** Lễ tân gọi `PUT /api/v1/invoices/88/cancel`
-  - **Then** Hệ thống trả `200 OK`; `invoices.status = CANCELLED`; `memberships.status = CANCELLED`
-- **Kịch bản 2: Lễ tân cố hủy hóa đơn đã thanh toán (422)**
-  - **Given** Hóa đơn `id=89` có `status=PAID`
-  - **When** Lễ tân gọi `PUT /api/v1/invoices/89/cancel`
-  - **Then** Hệ thống trả `422 Unprocessable Content`: *"Chỉ có thể hủy hóa đơn đang ở trạng thái chờ thanh toán."*
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F5.3.1: Tra cứu và hủy hóa đơn chờ
+- **User story:** Là **Lễ tân**, tôi muốn **tìm hóa đơn và hủy hóa đơn chờ khi khách đổi ý**, để **quản lý thu tiền tại quầy**.
+- **BR liên quan:** BR-F5-06, BR-F5-07, BR-F5-08; S2, S3, S5, NF1
+- **Version / Sprint:** v1 / Sprint 2
+- **Issue:** #142
+- **Tiêu chí chấp nhận:**
+  - **AC-F5.3.1-01: Danh sách hóa đơn theo chi nhánh của nhân viên** (BR-F5-06, S3)
+    - **Given** Lễ tân/Quản lý CN01 đã đăng nhập; có hóa đơn ở CN01 và CN02
+    - **When** Gọi GET /api/v1/invoices, kể cả khi tự truyền branchId của CN02
+    - **Then** 200 OK; chỉ có hóa đơn CN01, mới nhất trước, có phân trang và tổng số kết quả đúng; branchId client gửi không mở rộng phạm vi
+  - **AC-F5.3.1-02: Lọc và tìm hóa đơn theo ngày Việt Nam** (BR-F5-06)
+    - **Given** Có hóa đơn nhiều trạng thái, nguồn, mã, tên/số điện thoại hội viên và ngày tạo khác nhau
+    - **When** Lọc status, source, fromDate/toDate hoặc keyword riêng lẻ hay kết hợp
+    - **Then** Trả đúng hóa đơn khớp trong phạm vi được phép; khoảng ngày tính theo Asia/Ho_Chi_Minh. Khi lọc cùng ngày D, hóa đơn 23:30 ngày D được lấy, hóa đơn 00:00 ngày D+1 không lọt; không có kết quả thì danh sách rỗng
+  - **AC-F5.3.1-03: Hóa đơn có member_id rỗng vẫn tra cứu được** (BR-F5-06)
+    - **Given** Có sẵn hóa đơn khách lẻ với member_id rỗng
+    - **When** Người có quyền xem danh sách hoặc chi tiết hóa đơn
+    - **Then** Hóa đơn vẫn xuất hiện với các thông tin hội viên rỗng; dòng hóa đơn và số tiền hiển thị đầy đủ, tiền là số nguyên VND. AC này chỉ mô tả tra cứu dữ liệu có sẵn, không mở chức năng tạo hóa đơn POS v3
+  - **AC-F5.3.1-04: Chủ chuỗi xem toàn chuỗi hoặc lọc chi nhánh** (BR-F5-06)
+    - **Given** Chủ chuỗi đã đăng nhập; có hóa đơn tại nhiều chi nhánh
+    - **When** Gọi danh sách có hoặc không có branchId
+    - **Then** Không lọc thì thấy mọi chi nhánh; có branchId thì chỉ thấy chi nhánh đó; không áp đặt chi nhánh nhân viên cho Chủ chuỗi
+  - **AC-F5.3.1-05: Chi tiết hóa đơn gồm dòng hóa đơn và lịch sử thu** (BR-F5-06)
+    - **Given** Hóa đơn thuộc phạm vi người gọi; hóa đơn PAID đã có phiếu thu hoặc hóa đơn PENDING chưa thu tiền
+    - **When** Gọi GET /api/v1/invoices/{id}
+    - **Then** 200 OK; đủ thông tin hóa đơn, khách hàng nếu có, danh sách dòng và các phiếu thu kèm tên người thu; chưa thu thì danh sách phiếu thu rỗng
+  - **AC-F5.3.1-06: Hủy hóa đơn chờ đồng thời hủy gói chờ** (BR-F5-06, BR-F5-08)
+    - **Given** Hóa đơn PENDING kèm gói PENDING trong phạm vi người gọi
+    - **When** Lễ tân, Quản lý chi nhánh hoặc Chủ chuỗi gọi PUT /api/v1/invoices/{id}/cancel
+    - **Then** 200 OK; hóa đơn và mọi gói PENDING gắn với hóa đơn cùng chuyển CANCELLED trong một giao dịch, không ghi phiếu thu. Sau đó có thể bán lại cùng loại nếu không còn ràng buộc gói chờ khác; không xóa lịch sử
+  - **AC-F5.3.1-07: Không hủy hóa đơn ngoài trạng thái PENDING**
+    - **Given** Hóa đơn PAID, REFUNDED hoặc đã CANCELLED
+    - **When** Người có quyền gửi yêu cầu hủy
+    - **Then** 422 “Chỉ có thể hủy hóa đơn đang ở trạng thái chờ thanh toán.”; hóa đơn, gói và phiếu thu giữ nguyên
+  - **AC-F5.3.1-08: Phân biệt sai vai trò với hóa đơn ngoài phạm vi** (BR-F5-06, S2, S3)
+    - **Given** Người gọi không có token hợp lệ; hoặc là Huấn luyện viên/Hội viên; hoặc Lễ tân/Quản lý gọi hóa đơn ngoài chi nhánh hay ID không tồn tại
+    - **When** Gọi danh sách, chi tiết hoặc hủy theo tình huống tương ứng
+    - **Then** Chưa đăng nhập trả 401; sai vai trò trả 403 “Bạn không có quyền thực hiện thao tác này.”; chi tiết/hủy ngoài chi nhánh hoặc không tồn tại trả 404 cùng câu “Hóa đơn không tồn tại trên hệ thống.”. Không thay đổi dữ liệu khi bị từ chối
+
 
 ---
 
@@ -458,15 +552,35 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   - Header: `Content-Type: application/pdf`
   - Body: Binary stream dữ liệu PDF
 
-#### H. Tiêu chí chấp nhận (Acceptance Criteria)
-- **Kịch bản 1: Lễ tân in hóa đơn đã thanh toán thành công**
-  - **Given** Hóa đơn `id=88` có `status=PAID` thuộc chi nhánh Lễ tân đang trực
-  - **When** Lễ tân gọi `GET /api/v1/invoices/88/pdf`
-  - **Then** Hệ thống trả về `200 OK` với stream file PDF, hiển thị đúng mã hóa đơn `HD000088`, tên gói tập và đơn giá tại thời điểm bán
-- **Kịch bản 2: Hội viên A cố tải hóa đơn của Hội viên B (404)**
-  - **Given** Hội viên A đã đăng nhập; hóa đơn `id=90` thuộc về Hội viên B
-  - **When** Hội viên A gọi `GET /api/v1/invoices/90/pdf`
-  - **Then** Hệ thống chặn lại và trả về `404 Not Found` *"Hóa đơn không tồn tại trên hệ thống."*, giống như hóa đơn không tồn tại
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F5.4.1: Hóa đơn PDF
+- **User story:** Là **Lễ tân**, tôi muốn **in hoặc tải hóa đơn PDF**, để **đưa khách làm chứng từ**.
+- **BR liên quan:** BR-F5-09, BR-F5-10; S2, S3, NF1
+- **Version / Sprint:** v1 / Sprint 2
+- **Issue:** #143
+- **Tiêu chí chấp nhận:**
+  - **AC-F5.4.1-01: Xuất PDF hóa đơn PAID hoặc REFUNDED**
+    - **Given** Hóa đơn trong phạm vi nhân viên, ở trạng thái PAID hoặc REFUNDED
+    - **When** Lễ tân/Quản lý gọi GET /api/v1/invoices/{id}/pdf
+    - **Then** 200 OK, Content-Type application/pdf; tên file hoa-don-{code}.pdf; PDF có mã hóa đơn, chi nhánh, dòng hóa đơn và số tiền, tiếng Việt hiển thị đúng dấu. Giao diện mở PDF ở tab mới hoặc tải file nếu trình duyệt chặn cửa sổ
+  - **AC-F5.4.1-02: PDF giữ tên và giá ở thời điểm bán** (BR-F5-09, S7)
+    - **Given** Hóa đơn đã thu tiền; sau đó tên/giá danh mục gói bị sửa
+    - **When** Xuất lại PDF
+    - **Then** Tên và đơn giá lấy từ invoice_items.description, invoice_items.unit_price của hóa đơn; không thay theo danh mục hiện tại
+  - **AC-F5.4.1-03: Không xuất PDF hóa đơn chưa thanh toán**
+    - **Given** Hóa đơn cùng phạm vi đang PENDING hoặc CANCELLED
+    - **When** Gọi xuất PDF
+    - **Then** 422 “Chỉ có thể xuất hóa đơn cho các giao dịch đã thanh toán hoặc đã hoàn tiền.”; không trả file; giao diện không hiện nút in/tải cho hóa đơn PENDING
+  - **AC-F5.4.1-04: Hội viên chỉ tải hóa đơn của mình; nhân viên đúng chi nhánh** (S3)
+    - **Given** Hội viên A có hóa đơn đã thanh toán; hóa đơn khác thuộc B; hoặc Lễ tân/Quản lý CN01 gọi hóa đơn CN02
+    - **When** Gọi xuất PDF các hóa đơn tương ứng
+    - **Then** A tải hóa đơn của A nhận 200; tải hóa đơn B hoặc nhân viên tải ngoài chi nhánh trả 404 giống ID không tồn tại: “Hóa đơn không tồn tại trên hệ thống.”
+  - **AC-F5.4.1-05: Vai trò không được tải PDF và chưa đăng nhập** (S2, S3)
+    - **Given** Người gọi là Huấn luyện viên, Chủ chuỗi hoặc không có token hợp lệ
+    - **When** Gọi xuất PDF
+    - **Then** Huấn luyện viên và Chủ chuỗi nhận 403; chưa đăng nhập nhận 401; không trả file. Giữ đúng danh sách vai trò hiện có của UC-F5.4, không mở rộng quyền chỉ vì Chủ chuỗi xem được danh sách hóa đơn
+
 
 ---
 
@@ -508,16 +622,16 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
 - **E1 – Thiếu lý do hoàn tiền (400 Bad Request):**
-  - Tại bước 3, quản lý không nhập `refundReason`.
+  - Tại bước 3, quản lý không gửi body, thiếu `refundReason`, hoặc lý do rỗng/chỉ có khoảng trắng. Giới hạn 500 ký tự của prototype chưa được chốt, xem mục 4.
   - Hệ thống trả `ProblemDetail` (400) thông báo lỗi trường `refundReason` là bắt buộc.
 - **E2 – Chưa đăng nhập (401 Unauthorized):**
   - JWT không hợp lệ hoặc hết hạn.
   - Hệ thống trả `ProblemDetail` (401).
 - **E3 – Không có quyền hoàn tiền (403 Forbidden):**
-  - Tại bước 2, Lễ tân hoặc Huấn luyện viên gọi API này.
+  - Tại bước 2, Lễ tân, Huấn luyện viên, Hội viên hoặc Chủ chuỗi gọi API này; kiểm tra quyền trước lỗi lý do đầu vào.
   - Hệ thống từ chối và trả `ProblemDetail` (403): *"Chỉ quản lý chi nhánh mới có quyền hoàn tiền hóa đơn."*
 - **E4 – Hóa đơn không tồn tại (404 Not Found):**
-  - Không tìm thấy hóa đơn theo `id`.
+  - Không tìm thấy hóa đơn theo `id` hoặc hóa đơn ngoài chi nhánh của quản lý; cả hai trả cùng thông báo (VD-16).
   - Hệ thống trả `ProblemDetail` (404): *"Hóa đơn không tồn tại trên hệ thống."*
 - **E5 – Xung đột dữ liệu đồng thời (409 Conflict):**
   - Tại bước 5a/5b, hai thao tác cập nhật hóa đơn diễn ra đồng thời dẫn đến xung đột phiên bản `invoices.version` (`@Version`).
@@ -537,7 +651,9 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   1. Gói đang ở `ACTIVE` hoặc `UPCOMING` (không `FROZEN`, `TRANSFERRED`, `EXPIRED`, `CANCELLED`).
   2. Không có lượt check-in nào gắn với gói (`checkins.membership_id`).
   3. Không có buổi PT nào gắn với gói (`pt_sessions.membership_id`), kể cả buổi `BOOKED` hay `CANCELLED`. Ghi chú: buổi đã hủy cũng tính, để quy tắc đơn giản và dễ kiểm thử.
-  4. Với gói TIME: hội viên không còn chỗ đặt lớp nhóm `BOOKED` chưa diễn ra. Lý do: `class_bookings` không gắn với gói, nên nếu để lại thì chỗ đặt mất gói làm căn cứ. Quản lý hủy chỗ đặt bằng thao tác có sẵn của F8 rồi mới hoàn tiền.
+  4. Với gói TIME: hội viên không còn chỗ đặt lớp nhóm BOOKED của buổi **chưa kết thúc** (`class_sessions.end_at > thời điểm hiện tại`). Xét mọi chỗ BOOKED của hội viên, kể cả khi gói bị hoàn là UPCOMING hoặc chỗ đặt dựa trên gói TIME khác. Buổi đang diễn ra vẫn chặn; chỗ CANCELLED hoặc buổi đã kết thúc không chặn. Quản lý hủy chỗ bằng thao tác có sẵn của F8 trước khi hoàn tiền (VD-22, chốt 21/11/2026).
+
+  Giữ đúng bốn điều kiện: chỉ có chỗ ATTENDED mà không có check-in không được tự bổ sung thành điều kiện đã dùng thứ năm (VD-22).
 
   Ví dụ: lễ tân bán nhầm gói TIME 3 tháng thay vì 1 tháng, phát hiện trước khi hội viên check-in lần đầu: hoàn được. Hội viên đã tập 2 tuần rồi xin hoàn: bị từ chối (E7).
 
@@ -583,29 +699,107 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   ```
 - **Màn hình liên quan:** Màn hình "Chi tiết hóa đơn và hoàn tiền" – `docs/design/wireframe/f5-hoa-don.drawio.svg`.
 
-#### H. Tiêu chí chấp nhận (Acceptance Criteria)
-- **Kịch bản 1: Quản lý chi nhánh hoàn tiền thành công**
-  - **Given** Người dùng là Quản lý chi nhánh CN01; hóa đơn `id=88` có `status=PAID` thuộc CN01, gói tập `id=77` đang `ACTIVE`, chưa có lượt check-in, buổi PT hay chỗ đặt lớp nào (BR-F5-14)
-  - **When** Gọi `POST /api/v1/invoices/88/refund` với lý do hợp lệ
-  - **Then** Hệ thống trả `200 OK`; `invoices.status = REFUNDED`; gói tập `id=77` chuyển `CANCELLED`; một bản ghi mới được ghi vào `audit_logs`
-- **Kịch bản 2: Lễ tân cố tình thực hiện hoàn tiền (403)**
-  - **Given** Người dùng là Lễ tân
-  - **When** Gọi `POST /api/v1/invoices/88/refund`
-  - **Then** Hệ thống chặn lại và trả về `403 Forbidden`: *"Chỉ quản lý chi nhánh mới có quyền hoàn tiền hóa đơn."*
-- **Kịch bản 3: Gói đã check-in thì không hoàn được (422)** (BR-F5-14)
-  - **Given** Hóa đơn `id=88` `PAID` thuộc CN01; gói TIME `id=77` đang `ACTIVE` và đã có một lượt check-in
-  - **When** Quản lý chi nhánh CN01 gọi `POST /api/v1/invoices/88/refund`
-  - **Then** Hệ thống trả `422`: *"Gói tập của hóa đơn đã được sử dụng nên không thể hoàn tiền. Hội viên có thể bảo lưu hoặc chuyển nhượng gói."*; hóa đơn vẫn `PAID`, gói vẫn `ACTIVE`, không ghi `audit_logs`
-- **Kịch bản 4: Gói PT đã có buổi đặt thì không hoàn được (422)** (BR-F5-14)
-  - **Given** Hóa đơn `id=89` `PAID` có gói PT `id=78` `ACTIVE`; có một buổi PT `BOOKED` gắn với gói `id=78`
-  - **When** Quản lý chi nhánh gọi `POST /api/v1/invoices/89/refund`
-  - **Then** Hệ thống trả `422` như kịch bản 3; buổi PT giữ nguyên `BOOKED`
-- **Kịch bản 5: Gói TIME còn chỗ đặt lớp thì không hoàn được (422)** (BR-F5-14)
-  - **Given** Hóa đơn `id=90` `PAID` có gói TIME `id=79` `ACTIVE`, chưa check-in; hội viên có một chỗ đặt lớp `BOOKED` vào ngày mai
-  - **When** Quản lý chi nhánh gọi `POST /api/v1/invoices/90/refund`
-  - **Then** Hệ thống trả `422`: *"Hội viên còn chỗ đặt lớp nhóm chưa hủy. Hủy chỗ đặt trước khi hoàn tiền."*
-- **Kịch bản 6: Hoàn gói đang dùng không ảnh hưởng gói nối tiếp** (BR-F5-13)
-  - **Given** Hội viên có gói TIME A `ACTIVE` (hóa đơn `id=91`, chưa dùng) và gói TIME B `UPCOMING` từ 01/01 (hóa đơn khác)
-  - **When** Quản lý chi nhánh hoàn hóa đơn `id=91`
-  - **Then** Gói A chuyển `CANCELLED`; gói B vẫn `UPCOMING`, `start_date` vẫn là 01/01
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
 
+##### US-F5.5.1: Hoàn tiền có kiểm soát
+- **User story:** Là **Quản lý chi nhánh**, tôi muốn **hoàn toàn bộ hóa đơn thu sai khi gói chưa được dùng, có ghi nhật ký**, để **sửa sai sót và kiểm tra lại được**.
+- **BR liên quan:** BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14; S2, S3, S5, S7, S9, NF6
+- **Version / Sprint:** v1 / Sprint 2
+- **Issue:** #144
+- **Tiêu chí chấp nhận:**
+  - **AC-F5.5.1-01: Hoàn toàn bộ hóa đơn có gói chưa dùng** (BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14, S7, S9)
+    - **Given** Quản lý CN01 đã đăng nhập; hóa đơn PAID thuộc CN01, các gói ACTIVE/UPCOMING đều chưa dùng theo BR-F5-14
+    - **When** Nhập lý do hợp lệ và xác nhận hoàn hai bước qua POST /api/v1/invoices/{id}/refund, không gửi số tiền hoàn từ trình duyệt
+    - **Then** 200 OK; hóa đơn REFUNDED, mọi gói sinh từ hóa đơn CANCELLED, phiếu thu CANCELLED; ghi một nhật ký REFUND có người duyệt, thời gian, số tiền và lý do. Giao diện hiện người hoàn, thời gian giờ Việt Nam, lý do. Hoàn toàn bộ số tiền của hóa đơn để sửa sai sót thu tiền; không hoàn một phần hoặc vì hội viên đổi ý; lỗi giữa chừng rollback toàn bộ
+  - **AC-F5.5.1-02: Không làm thay đổi gói nối tiếp mua bằng hóa đơn khác** (BR-F5-13)
+    - **Given** Hội viên có gói TIME A ACTIVE chưa dùng thuộc hóa đơn 1 và gói B UPCOMING thuộc hóa đơn 2; các điều kiện hoàn khác đều hợp lệ
+    - **When** Quản lý hoàn hóa đơn 1
+    - **Then** Gói A CANCELLED; gói B giữ nguyên trạng thái, ngày bắt đầu/kết thúc và số buổi; không tự kéo lịch gói B
+  - **AC-F5.5.1-03: Chỉ Quản lý chi nhánh được hoàn tiền** (BR-F5-11, S3)
+    - **Given** Người gọi đã đăng nhập là Lễ tân, Huấn luyện viên, Hội viên hoặc Chủ chuỗi
+    - **When** Gọi hoàn tiền, kể cả khi thiếu lý do
+    - **Then** 403 “Chỉ quản lý chi nhánh mới có quyền hoàn tiền hóa đơn.”; kiểm tra quyền trước lỗi dữ liệu; không đổi hóa đơn, gói, phiếu thu và không ghi nhật ký hoàn. Giao diện chỉ hiện nút Hoàn tiền cho Quản lý khi hóa đơn PAID
+  - **AC-F5.5.1-04: Bắt buộc lý do hoàn tiền có nội dung** (S5)
+    - **Given** Người gọi đúng quyền, hóa đơn PAID; body không có hoặc refundReason thiếu/rỗng/chỉ có khoảng trắng
+    - **When** Gọi hoàn tiền
+    - **Then** 400 Bad Request kèm errors.refundReason; hóa đơn vẫn PAID, không hủy gói/phiếu thu và không ghi nhật ký hoàn
+  - **AC-F5.5.1-05: Hóa đơn không tồn tại, ngoài chi nhánh và chưa đăng nhập** (BR-F5-11, S2, S3)
+    - **Given** Quản lý CN01 gọi hóa đơn CN02 hoặc ID không tồn tại; hoặc người gọi không có token hợp lệ
+    - **When** Gọi hoàn tiền
+    - **Then** Đúng vai trò nhưng ngoài chi nhánh/không tồn tại đều trả 404 “Hóa đơn không tồn tại trên hệ thống.”; thiếu token trả 401; không thay đổi dữ liệu
+  - **AC-F5.5.1-06: Hai quản lý cùng hoàn một hóa đơn** (BR-F5-12, NF6)
+    - **Given** Hai Quản lý cùng chi nhánh mở một hóa đơn PAID đủ điều kiện
+    - **When** Cùng xác nhận hoàn gần như đồng thời
+    - **Then** Một yêu cầu 200, yêu cầu còn lại 409 “Dữ liệu hóa đơn vừa được cập nhật bởi thao tác khác. Vui lòng thử lại.”; chỉ một nhật ký REFUND và một lần chuyển trạng thái. Giao diện nhận 409 tải lại chi tiết
+  - **AC-F5.5.1-07: Chỉ hoàn hóa đơn đang PAID**
+    - **Given** Hóa đơn PENDING, CANCELLED hoặc REFUNDED
+    - **When** Quản lý gọi hoàn tiền với lý do hợp lệ
+    - **Then** 422 “Chỉ có thể hoàn tiền cho hóa đơn đã thanh toán thành công.”; không đổi gói/phiếu thu; hoàn lại hóa đơn REFUNDED không sinh thêm nhật ký REFUND
+  - **AC-F5.5.1-08: Gói ngoài ACTIVE hoặc UPCOMING không đủ điều kiện** (BR-F5-14)
+    - **Given** Hóa đơn PAID có ít nhất một gói FROZEN, EXPIRED, TRANSFERRED hoặc CANCELLED
+    - **When** Quản lý gọi hoàn tiền
+    - **Then** 422 “Gói tập của hóa đơn đã được sử dụng nên không thể hoàn tiền. Hội viên có thể bảo lưu hoặc chuyển nhượng gói.”; hóa đơn vẫn PAID, không đổi gói/phiếu thu và không ghi nhật ký hoàn
+  - **AC-F5.5.1-09: Gói đã có check-in không được hoàn** (BR-F5-14)
+    - **Given** Hóa đơn PAID có gói TIME/SESSION hoặc PT đã có ít nhất một check-in gắn với chính gói đó
+    - **When** Quản lý gọi hoàn tiền
+    - **Then** 422 “Gói tập của hóa đơn đã được sử dụng nên không thể hoàn tiền. Hội viên có thể bảo lưu hoặc chuyển nhượng gói.”; hóa đơn vẫn PAID, gói và phiếu thu giữ nguyên, không ghi nhật ký hoàn
+  - **AC-F5.5.1-10: Gói PT có buổi đặt kể cả đã hủy không được hoàn** (BR-F5-14)
+    - **Given** Hóa đơn PAID có gói PT đã có buổi BOOKED hoặc buổi CANCELLED gắn với chính gói đó
+    - **When** Quản lý gọi hoàn tiền
+    - **Then** 422 “Gói tập của hóa đơn đã được sử dụng nên không thể hoàn tiền. Hội viên có thể bảo lưu hoặc chuyển nhượng gói.”; không hủy hoặc sửa buổi PT, không đổi hóa đơn/gói/phiếu thu và không ghi nhật ký hoàn
+  - **AC-F5.5.1-11: Chỗ lớp BOOKED chưa kết thúc chặn hoàn gói TIME** (BR-F5-14; VD-22 (đã chốt 21/11))
+    - **Given** Hóa đơn PAID có gói TIME ACTIVE hoặc UPCOMING; hội viên còn chỗ BOOKED của buổi chưa kết thúc, gồm buổi tương lai hoặc đang diễn ra
+    - **When** Quản lý gọi hoàn tiền
+    - **Then** 422 “Hội viên còn chỗ đặt lớp nhóm chưa hủy. Hủy chỗ đặt trước khi hoàn tiền.”; xét mọi chỗ BOOKED của hội viên, không chỉ chỗ dựa trên gói bị hoàn, kể cả gói đó UPCOMING. Chỗ CANCELLED hoặc buổi đã kết thúc không chặn; điều kiện lớp không áp cho gói PT. Chỉ có ATTENDED mà không có check-in không tự thêm điều kiện đã dùng thứ năm
+  - **AC-F5.5.1-12: Lượt dùng gắn với gói khác không chặn hoàn gói chưa dùng** (BR-F5-14)
+    - **Given** Hội viên có check-in/buổi PT gắn với gói thuộc hóa đơn khác; gói cần hoàn chưa dùng và mọi điều kiện khác đều hợp lệ
+    - **When** Quản lý hoàn hóa đơn của gói chưa dùng
+    - **Then** 200 OK; không lấy check-in/buổi PT của gói khác để chặn hoàn. Riêng điều kiện chỗ lớp BOOKED của gói TIME vẫn xét toàn hội viên như AC-F5.5.1-11
+
+
+---
+
+## 4. Nguồn, điểm lệch và nội dung chờ duyệt của S2-50
+
+**Bản chuẩn:** US và AC ở mục H của từng UC. Bộ gợi ý S2-50 đóng gói 23/11/2026, đối chiếu main 7c1ebae và prototype 62f1802, chỉ dùng hỗ trợ tìm kịch bản. Không coi danh sách 95 tên test là kết quả chạy test hoặc bằng chứng AC đã nghiệm thu. Không thay danh sách 5 US và không đổi mã BR-F5-01…14.
+
+### 4.1. Chuyển kịch bản từ issue cũ
+
+| Nguồn | Kịch bản | Nơi tiếp nhận |
+| --- | --- | --- |
+| #59, kịch bản 1 | Thu tiền mặt/chuyển khoản, kích hoạt và PDF | AC-F5.1.1-01; AC-F5.2.1-01, -02; AC-F5.4.1-01 |
+| #59, kịch bản 2 | Client sửa giá/tổng tiền | AC-F5.2.1-10, AC-F5.1.1-01, AC-F5.4.1-02; khâu tạo hóa đơn thuộc SRS F3 (US-F3.5.1) |
+| #59, kịch bản 3 | Hội viên tự xác nhận thu hoặc hóa đơn gói thiếu hội viên | AC-F5.2.1-04 chặn sai vai trò; tiền điều kiện hóa đơn PACKAGE phải có hội viên giữ theo bản chốt và SRS F3. Không mở POS v3 |
+| #60, kịch bản 1 | Quản lý sửa khoản thu sai, lưu người và thời điểm | AC-F5.5.1-01, -05; giữ BR-F5-11…14 đã chốt |
+| #60, kịch bản 2 | Lễ tân/hội viên không được hoàn | AC-F5.5.1-03 |
+
+### 4.2. Điểm lệch đã có quyết định
+
+| Nội dung | Căn cứ | Xử lý trong SRS này |
+| --- | --- | --- |
+| Phạm vi tác vụ tự hủy hóa đơn chờ | VD-04; bình luận trưởng nhóm ở #186 | Giao F7 #194; F5 giữ hàm hủy tại UC-F5.3 A1 và BR-F5-07/08, không có AC tác vụ nền F5 |
+| Ngoài phạm vi hóa đơn 403 hay 404 | VD-16; bình luận trưởng nhóm ở #186 | Đồng bộ UC-F5.1/2/3/4/5: ngoài phạm vi 404 cùng câu như không tồn tại; sai vai trò 403 |
+| Hóa đơn 0 đồng nhưng schema CHECK > 0 | VD-10, trưởng nhóm chốt 20/11 | AC-F5.2.1-03 yêu cầu phiếu thu 0 đồng; ghi rõ phụ thuộc điều chỉnh ERD/schema ở nhiệm vụ API, không sửa migration cũ |
+| Chỗ lớp chưa diễn ra và gói UPCOMING khi hoàn | VD-22, trưởng nhóm chốt 21/11 | BR-F5-14 và AC-F5.5.1-11 xét mọi chỗ BOOKED của buổi chưa kết thúc, không thêm điều kiện thứ năm |
+| Issue #144 dùng cụm khiếu nại hợp lệ quá rộng | Bản chốt phạm vi; UC-F5.5/BR-F5-14 đã chốt 19/11 | US-F5.5.1 chỉ hoàn toàn bộ để sửa sai sót thu tiền khi gói chưa dùng; không hoàn do đổi ý hoặc một phần |
+
+### 4.3. Giả định chưa chốt — chưa cấp mã AC
+
+Các mục sau cần trưởng nhóm Hoàng Kim Tiến duyệt, chưa phải yêu cầu được chấp nhận. Chỉ bổ sung AC với số tiếp theo sau khi có quyết định; không dùng giả định prototype để đánh dấu AC đã hoàn thành.
+
+| Nội dung cần quyết định | Gợi ý prototype / căn cứ hiện có | Trạng thái |
+| --- | --- | --- |
+| Gói PT hết buổi trong mô tả gia hạn cũ | B/C/BR-F5-04 đang gộp SESSION/PT 0 buổi và cho bắt đầu ngày mai; bản chốt quy định PT hết hiệu lực ngay khi xác nhận buổi cuối. Cần đồng bộ với F3/F9; chưa cấp AC cho nhánh PT 0 buổi | Chờ Hoàng Kim Tiến chốt cách sửa điểm lệch |
+| Thiếu BANK_* ở cả chi nhánh và toàn chuỗi | Prototype VietQR chọn 422; N0 SystemConfigService coi thiếu cấu hình là lỗi hệ thống 500. Cần chốt mã lỗi và câu thông báo riêng | Chờ trưởng nhóm |
+| Nhân viên không có phân công chi nhánh hoạt động | Prototype và N0 trả 403; cần xác nhận cách ghi AC riêng cho F5 | Chờ trưởng nhóm; không tự gán chi nhánh mặc định |
+| Giới hạn bộ lọc danh sách | Prototype chọn page >= 0, size 1..100, fromDate <= toDate, enum/ngày sai trả 400; SRS gốc mới ghi mặc định page=0,size=20. Giữ S5 nhưng chưa chốt giới hạn chi tiết | Chờ trưởng nhóm |
+| PDF khách lẻ và ID sai định dạng | README đánh dấu giả định; AC tra cứu khách lẻ có sẵn không mở quyền tạo POS hoặc tự chốt toàn bộ hành vi PDF khách lẻ | Chờ trưởng nhóm |
+| Giới hạn lý do hoàn và chuẩn hóa khoảng trắng | Prototype giới hạn 500 ký tự và trim; ERD refund_reason là text, SRS gốc chỉ yêu cầu không trống. AC-F5.5.1-04 chưa áp giới hạn 500 | Chờ trưởng nhóm |
+| Mở rộng PDF cho Chủ chuỗi | SRS hiện chỉ cho Lễ tân, Quản lý và Hội viên; giữ Chủ chuỗi 403 tại AC-F5.4.1-05 cho tới khi có quyết định đổi quyền | Chờ nếu muốn mở rộng quyền |
+
+### 4.4. Bàn giao kiểm thử và truy vết
+
+- Các API/luồng giao diện thuộc S2-09 #184, S2-10 #185 và S2-38 #213. PR này chỉ chuẩn hóa tài liệu, không triển khai API, migration hay logic kiểm thử.
+- Khi gắn TC cho test đã có, chỉ đổi tên hiển thị trong commit riêng theo ADR 0012 mục 8, không đổi logic; một AC có thể có nhiều TC.
+- Ma trận docs/testing/ma-tran-truy-vet.md được sinh từ SRS và mã test đang có. AC F5 chưa có TC trên main phải giữ trạng thái chưa có TC; danh sách test prototype không được dùng để đánh dấu đã chạy thành công.
+- Các giả định chờ duyệt được đặt ngoài mục H để không bị công cụ truy vết tính là AC chính thức.
