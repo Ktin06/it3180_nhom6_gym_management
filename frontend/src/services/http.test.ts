@@ -14,6 +14,8 @@ import {
   subscribeToSessionRecovery,
 } from '../auth/session-store'
 import { http, refreshAccessToken } from './http'
+import { logout } from '../features/auth/api/auth-api'
+import { queueCookieOperation } from '../auth/cookie-operation-queue'
 
 function response(config: Parameters<AxiosAdapter>[0], data: unknown, status = 200): AxiosResponse {
   return {
@@ -216,5 +218,51 @@ describe('http auth interceptors', () => {
       http.post('/auth/login', {}, { skipBearer: true, skipAuthRefresh: true }),
     ).rejects.toMatchObject({ response: { status: 401 } })
     expect(requestRefresh).not.toHaveBeenCalled()
+  })
+
+  it('logout gửi Bearer đã hết hạn để backend đối chiếu chủ cookie', async () => {
+    const expiredToken = `header.${btoa(JSON.stringify({ sub: '42', exp: 1 }))}.signature`
+    setAccessToken(expiredToken, beginSession())
+    const adapter = vi.fn(async (config: Parameters<AxiosAdapter>[0]) => {
+      expect(config.url).toBe('/auth/logout')
+      expect(config.headers.get('Authorization')).toBe(`Bearer ${expiredToken}`)
+      return response(config, undefined, 204)
+    })
+    http.defaults.adapter = adapter
+    await logout()
+    expect(adapter).toHaveBeenCalledOnce()
+    expect(requestRefresh).not.toHaveBeenCalled()
+  })
+
+  it('logout 401 không refresh bằng cookie chung hoặc tự xóa phiên đang hiển thị', async () => {
+    const adapter = vi.fn(async (config: Parameters<AxiosAdapter>[0]) => {
+      throw unauthorized(config)
+    })
+    http.defaults.adapter = adapter
+    await expect(logout()).rejects.toMatchObject({ response: { status: 401 } })
+    expect(adapter).toHaveBeenCalledOnce()
+    expect(requestRefresh).not.toHaveBeenCalled()
+    expect(getAccessToken()).toBe('old-jwt')
+  })
+
+  it('logout đang đợi khóa không được gửi bằng tài khoản vừa đăng nhập trong cùng tab', async () => {
+    const started = deferred<void>()
+    const release = deferred<void>()
+    const blocking = queueCookieOperation(async () => {
+      started.resolve()
+      await release.promise
+    })
+    await started.promise
+    const adapter = vi.fn(async (config: Parameters<AxiosAdapter>[0]) =>
+      response(config, null, 204),
+    )
+    http.defaults.adapter = adapter
+    const pendingLogout = logout()
+    setAccessToken('new-login-jwt', beginSession())
+    release.resolve()
+    await blocking
+    await expect(pendingLogout).rejects.toThrow('Phiên đăng nhập đã thay đổi.')
+    expect(adapter).not.toHaveBeenCalled()
+    expect(getAccessToken()).toBe('new-login-jwt')
   })
 })
