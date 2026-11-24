@@ -15,10 +15,10 @@
 | F5 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F6 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F7 | 5 | 0 | 0 | 0 | 0 | 0 |
-| F8 | 9 | 0 | 0 | 0 | 0 | 0 |
+| F8 | 9 | 9 | 55 | 0 | 55 | 0 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **18** | **103** | **59** | **44** | **198** |
+| **Tổng** | **57** | **27** | **158** | **59** | **99** | **198** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -86,6 +86,61 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F3.5.1-09 | Hóa đơn tại quầy không tự hủy | US-F3.5.1 |
 | AC-F3.5.1-10 | Tự kích hoạt gói nối tiếp đúng ngày | US-F3.5.1 |
 | AC-F3.5.1-11 | Dữ liệu sai và vai trò khác bị từ chối | US-F3.5.1 |
+| AC-F8.0.1-01 | Xem lịch không cần đăng nhập | US-F8.0.1 |
+| AC-F8.0.1-02 | Lịch rỗng | US-F8.0.1 |
+| AC-F8.0.1-03 | Bộ lọc không hợp lệ | US-F8.0.1 |
+| AC-F8.0.1-04 | Khách muốn đặt | US-F8.0.1 |
+| AC-F8.1.1-01 | Đặt khi còn chỗ và ghi người tạo | US-F8.1.1 |
+| AC-F8.1.1-02 | Gói hoặc quyền đặt không hợp lệ | US-F8.1.1 |
+| AC-F8.1.1-03 | Lớp đủ chỗ | US-F8.1.1 |
+| AC-F8.1.1-04 | Hai yêu cầu tranh chỗ cuối | US-F8.1.1 |
+| AC-F8.1.1-05 | Trùng buổi và trùng giờ | US-F8.1.1 |
+| AC-F8.1.1-06 | Đặt lại sau khi hủy | US-F8.1.1 |
+| AC-F8.1.1-07 | Biên cửa sổ theo ngày Việt Nam | US-F8.1.1 |
+| AC-F8.1.1-08 | Đúng và dưới mốc đóng đặt | US-F8.1.1 |
+| AC-F8.1.1-09 | Phạm vi đặt hộ | US-F8.1.1 |
+| AC-F8.1.1-10 | Cấu hình theo chi nhánh | US-F8.1.1 |
+| AC-F8.3.1-01 | Hủy sớm hoặc đúng biên | US-F8.3.1 |
+| AC-F8.3.1-02 | Hủy muộn đạt ngưỡng khóa | US-F8.3.1 |
+| AC-F8.3.1-03 | Hủy chỗ buổi đã đổi giờ | US-F8.3.1 |
+| AC-F8.3.1-04 | Đặt suất vừa hủy | US-F8.3.1 |
+| AC-F8.3.1-05 | Qua tháng Việt Nam | US-F8.3.1 |
+| AC-F8.3.1-06 | Hết khóa rồi có vi phạm mới | US-F8.3.1 |
+| AC-F8.3.1-07 | Hai yêu cầu hủy cùng chỗ | US-F8.3.1 |
+| AC-F8.3.1-08 | Phạm vi và trạng thái hủy | US-F8.3.1 |
+| AC-F8.3.1-09 | Hủy buổi từ phía quản lý | US-F8.3.1 |
+| AC-F8.5.1-01 | Lịch của người được phân công | US-F8.5.1 |
+| AC-F8.5.1-02 | Buổi có người dạy thay | US-F8.5.1 |
+| AC-F8.5.1-03 | Không có lớp | US-F8.5.1 |
+| AC-F8.5.1-04 | Sai vai trò hoặc yêu cầu lịch người khác | US-F8.5.1 |
+| AC-F8.6.1-01 | Điểm danh lần đầu từ BOOKED | US-F8.6.1 |
+| AC-F8.6.1-02 | Vắng mặt lần đầu đạt ngưỡng | US-F8.6.1 |
+| AC-F8.6.1-03 | Check-in không thay điểm danh | US-F8.6.1 |
+| AC-F8.6.1-04 | Sai phân công hoặc chi nhánh | US-F8.6.1 |
+| AC-F8.6.1-05 | Biên thời gian của huấn luyện viên | US-F8.6.1 |
+| AC-F8.6.1-06 | Quản lý sửa sau hạn | US-F8.6.1 |
+| AC-F8.6.1-07 | Sửa NO_SHOW không gỡ khóa | US-F8.6.1 |
+| AC-F8.6.1-08 | Sửa ATTENDED không tạo hoặc kéo dài khóa | US-F8.6.1 |
+| AC-F8.6.1-09 | Trạng thái không đủ điều kiện | US-F8.6.1 |
+| AC-F8.6.1-10 | Gỡ khóa thủ công có audit | US-F8.6.1 |
+| AC-F8.6.1-11 | Gỡ khóa sai quyền | US-F8.6.1 |
+| AC-F8.7.1-01 | Tạo lịch lặp hợp lệ | US-F8.7.1 |
+| AC-F8.7.1-02 | Sức chứa, giờ hoặc vai trò không hợp lệ | US-F8.7.1 |
+| AC-F8.7.1-03 | Chặn xung đột thực tế | US-F8.7.1 |
+| AC-F8.7.1-04 | Cùng giờ nhưng khác ngày thực tế | US-F8.7.1 |
+| AC-F8.7.1-05 | Sửa hoặc ngừng lịch không đổi buổi đã sinh | US-F8.7.1 |
+| AC-F8.7.1-06 | Giảm sức chứa đúng biên | US-F8.7.1 |
+| AC-F8.7.1-07 | Buổi không cho sửa sức chứa | US-F8.7.1 |
+| AC-F8.7.1-08 | Quyền lịch lặp và buổi riêng lẻ | US-F8.7.1 |
+| AC-F8.7.1-09 | Đổi phòng giữ chỗ | US-F8.7.1 |
+| AC-F8.7.1-10 | Đổi giờ giữ chỗ | US-F8.7.1 |
+| AC-F8.7.1-11 | Hủy buổi không phạt | US-F8.7.1 |
+| AC-F8.7.1-12 | Lỗi xử lý thông báo không đảo ngược thay đổi | US-F8.7.1 |
+| AC-F8.8.1-01 | Sinh đúng thứ, dữ liệu và múi giờ | US-F8.8.1 |
+| AC-F8.8.1-02 | Chạy lại hoặc chạy đồng thời | US-F8.8.1 |
+| AC-F8.8.1-03 | Lịch ngoài hiệu lực hoặc đã ngừng | US-F8.8.1 |
+| AC-F8.8.1-04 | Sinh lại sau khi buổi đổi giờ | US-F8.8.1 |
+| AC-F8.8.1-05 | Tài nguyên không còn dùng được | US-F8.8.1 |
 
 ## 4. Cây xuôi: chức năng → UC → US → AC → TC
 
@@ -433,6 +488,82 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F3.5.1-10 Tự kích hoạt gói nối tiếp đúng ngày (BR-F3-11) ❌ chưa có TC
     - AC-F3.5.1-11 Dữ liệu sai và vai trò khác bị từ chối ❌ chưa có TC
 
+### F8
+
+- **UC-F8.0** Xem lịch lớp học nhóm công khai
+  - **US-F8.0.1** Xem lịch lớp công khai (#155)
+    - AC-F8.0.1-01 Xem lịch không cần đăng nhập (BR-F8.0-01, BR-F8.0-02) ❌ chưa có TC
+    - AC-F8.0.1-02 Lịch rỗng (BR-F8.0-01) ❌ chưa có TC
+    - AC-F8.0.1-03 Bộ lọc không hợp lệ (BR-F8.0-01) ❌ chưa có TC
+    - AC-F8.0.1-04 Khách muốn đặt (BR-F8.0-01) ❌ chưa có TC
+- **UC-F8.1** Đặt chỗ lớp nhóm
+  - **US-F8.1.1** Đặt chỗ lớp nhóm (#156)
+    - AC-F8.1.1-01 Đặt khi còn chỗ và ghi người tạo (BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01) ❌ chưa có TC
+    - AC-F8.1.1-02 Gói hoặc quyền đặt không hợp lệ (BR-F8.1-01, BR-F8.3-02) ❌ chưa có TC
+    - AC-F8.1.1-03 Lớp đủ chỗ (BR-F8.1-03, BR-F8-01) ❌ chưa có TC
+    - AC-F8.1.1-04 Hai yêu cầu tranh chỗ cuối (BR-F8.1-03) ❌ chưa có TC
+    - AC-F8.1.1-05 Trùng buổi và trùng giờ (BR-F8.1-04) ❌ chưa có TC
+    - AC-F8.1.1-06 Đặt lại sau khi hủy (BR-F8.1-04) ❌ chưa có TC
+    - AC-F8.1.1-07 Biên cửa sổ theo ngày Việt Nam (BR-F8.1-02) ❌ chưa có TC
+    - AC-F8.1.1-08 Đúng và dưới mốc đóng đặt (BR-F8.1-02, BR-F8-01) ❌ chưa có TC
+    - AC-F8.1.1-09 Phạm vi đặt hộ (BR-F8-01) ❌ chưa có TC
+    - AC-F8.1.1-10 Cấu hình theo chi nhánh (BR-F8.1-02) ❌ chưa có TC
+- **UC-F8.2** Đã bỏ (ADR 0014)
+  - **US-F8.2.1** Đã bỏ (ADR 0014) (#157)
+- **UC-F8.3** Hủy chỗ lớp nhóm
+  - **US-F8.3.1** Hủy chỗ lớp nhóm (#158)
+    - AC-F8.3.1-01 Hủy sớm hoặc đúng biên (BR-F8.3-01, BR-F8.3-04) ❌ chưa có TC
+    - AC-F8.3.1-02 Hủy muộn đạt ngưỡng khóa (BR-F8.3-01, BR-F8.3-02) ❌ chưa có TC
+    - AC-F8.3.1-03 Hủy chỗ buổi đã đổi giờ (BR-F8.3-01, BR-F8-03) ❌ chưa có TC
+    - AC-F8.3.1-04 Đặt suất vừa hủy (BR-F8.3-04, BR-F8.1-03) ❌ chưa có TC
+    - AC-F8.3.1-05 Qua tháng Việt Nam (BR-F8.3-02) ❌ chưa có TC
+    - AC-F8.3.1-06 Hết khóa rồi có vi phạm mới (BR-F8.3-02) ❌ chưa có TC
+    - AC-F8.3.1-07 Hai yêu cầu hủy cùng chỗ (BR-F8.3-02, BR-F8.3-04) ❌ chưa có TC
+    - AC-F8.3.1-08 Phạm vi và trạng thái hủy (BR-F8.3-04) ❌ chưa có TC
+    - AC-F8.3.1-09 Hủy buổi từ phía quản lý (BR-F8.7-05) ❌ chưa có TC
+- **UC-F8.4** Đã bỏ (ADR 0014)
+  - **US-F8.4.1** Đã bỏ (ADR 0014) (#159)
+- **UC-F8.5** Xem lịch dạy lớp nhóm
+  - **US-F8.5.1** Xem lịch dạy lớp nhóm (#160)
+    - AC-F8.5.1-01 Lịch của người được phân công (BR-F8.5-01, BR-F8.5-02, BR-F8.5-03) ❌ chưa có TC
+    - AC-F8.5.1-02 Buổi có người dạy thay (BR-F8.5-01) ❌ chưa có TC
+    - AC-F8.5.1-03 Không có lớp (BR-F8.5-01) ❌ chưa có TC
+    - AC-F8.5.1-04 Sai vai trò hoặc yêu cầu lịch người khác (BR-F8.5-02) ❌ chưa có TC
+- **UC-F8.6** Điểm danh học viên lớp học nhóm
+  - **US-F8.6.1** Điểm danh học viên lớp học nhóm (#161)
+    - AC-F8.6.1-01 Điểm danh lần đầu từ BOOKED (BR-F8.6-01, BR-F8.6-04, BR-F8.6-05) ❌ chưa có TC
+    - AC-F8.6.1-02 Vắng mặt lần đầu đạt ngưỡng (BR-F8.6-03, BR-F8.3-02) ❌ chưa có TC
+    - AC-F8.6.1-03 Check-in không thay điểm danh (BR-F8.6-02) ❌ chưa có TC
+    - AC-F8.6.1-04 Sai phân công hoặc chi nhánh (BR-F8.6-01) ❌ chưa có TC
+    - AC-F8.6.1-05 Biên thời gian của huấn luyện viên (BR-F8.6-01, BR-F8.6-05) ❌ chưa có TC
+    - AC-F8.6.1-06 Quản lý sửa sau hạn (BR-F8.6-01, BR-F8.6-05) ❌ chưa có TC
+    - AC-F8.6.1-07 Sửa NO_SHOW không gỡ khóa (BR-F8.6-01, BR-F8.6-03) ❌ chưa có TC
+    - AC-F8.6.1-08 Sửa ATTENDED không tạo hoặc kéo dài khóa (BR-F8.6-01, BR-F8.6-03) ❌ chưa có TC
+    - AC-F8.6.1-09 Trạng thái không đủ điều kiện (BR-F8.6-05, BR-F8.6-06) ❌ chưa có TC
+    - AC-F8.6.1-10 Gỡ khóa thủ công có audit (BR-F8-02) ❌ chưa có TC
+    - AC-F8.6.1-11 Gỡ khóa sai quyền (BR-F8-02) ❌ chưa có TC
+- **UC-F8.7** Quản lý lịch lặp lớp học và phân công huấn luyện viên
+  - **US-F8.7.1** Quản lý lịch lặp và buổi riêng lẻ (#162)
+    - AC-F8.7.1-01 Tạo lịch lặp hợp lệ (BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04) ❌ chưa có TC
+    - AC-F8.7.1-02 Sức chứa, giờ hoặc vai trò không hợp lệ (BR-F8.7-02) ❌ chưa có TC
+    - AC-F8.7.1-03 Chặn xung đột thực tế (BR-F8.7-06) ❌ chưa có TC
+    - AC-F8.7.1-04 Cùng giờ nhưng khác ngày thực tế (BR-F8.7-06) ❌ chưa có TC
+    - AC-F8.7.1-05 Sửa hoặc ngừng lịch không đổi buổi đã sinh (BR-F8.7-02, BR-F8.7-04) ❌ chưa có TC
+    - AC-F8.7.1-06 Giảm sức chứa đúng biên (BR-F8.7-02, BR-F8.1-03) ❌ chưa có TC
+    - AC-F8.7.1-07 Buổi không cho sửa sức chứa (BR-F8.7-02) ❌ chưa có TC
+    - AC-F8.7.1-08 Quyền lịch lặp và buổi riêng lẻ (BR-F8-04) ❌ chưa có TC
+    - AC-F8.7.1-09 Đổi phòng giữ chỗ (BR-F8.4-03, BR-F8.7-02, BR-F8.7-06) ❌ chưa có TC
+    - AC-F8.7.1-10 Đổi giờ giữ chỗ (BR-F8-03, BR-F8.8-02) ❌ chưa có TC
+    - AC-F8.7.1-11 Hủy buổi không phạt (BR-F8.7-05) ❌ chưa có TC
+    - AC-F8.7.1-12 Lỗi xử lý thông báo không đảo ngược thay đổi (BR-F8.4-03, BR-F8-03, BR-F8.7-05) ❌ chưa có TC
+- **UC-F8.8** Sinh buổi học từ lịch lặp
+  - **US-F8.8.1** Sinh buổi học từ lịch lặp (#163)
+    - AC-F8.8.1-01 Sinh đúng thứ, dữ liệu và múi giờ (BR-F8.8-01, BR-F8.8-03) ❌ chưa có TC
+    - AC-F8.8.1-02 Chạy lại hoặc chạy đồng thời (BR-F8.8-02) ❌ chưa có TC
+    - AC-F8.8.1-03 Lịch ngoài hiệu lực hoặc đã ngừng (BR-F8.8-01) ❌ chưa có TC
+    - AC-F8.8.1-04 Sinh lại sau khi buổi đổi giờ (BR-F8.8-02) ❌ chưa có TC
+    - AC-F8.8.1-05 Tài nguyên không còn dùng được (BR-F8.8-01, BR-F8.8-03, BR-F8.7-06) ❌ chưa có TC
+
 ## 5. Bảng ngược: TC → AC → US → UC → BR
 
 Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm AC, US và quy tắc nghiệp vụ nào.
@@ -640,7 +771,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 
 ## 6. Kiểm thử chưa mang mã TC
 
-Có 148 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
+Có 161 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
 
 | File | Số kiểm thử |
 | --- | --- |
@@ -667,10 +798,11 @@ Có 148 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/systemconfig/SystemConfigServiceTest.java` | 4 |
 | `frontend/src/app/router.test.ts` | 3 |
 | `frontend/src/auth/AuthProvider.test.tsx` | 6 |
-| `frontend/src/auth/cookie-operation-queue.test.ts` | 1 |
+| `frontend/src/auth/cookie-operation-queue.test.ts` | 5 |
 | `frontend/src/auth/redirect.test.ts` | 7 |
+| `frontend/src/auth/session-coordination.test.ts` | 5 |
 | `frontend/src/auth/session-store.test.ts` | 3 |
-| `frontend/src/features/auth/api/auth-api.test.ts` | 4 |
+| `frontend/src/features/auth/api/auth-api.test.ts` | 5 |
 | `frontend/src/features/auth/api/validation.test.ts` | 1 |
 | `frontend/src/features/auth/pages/LoginPage.test.tsx` | 5 |
 | `frontend/src/features/auth/pages/RegisterPage.test.tsx` | 1 |
@@ -683,4 +815,4 @@ Có 148 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `frontend/src/layouts/UserMenu.test.tsx` | 1 |
 | `frontend/src/routes/ProtectedRoute.test.tsx` | 2 |
 | `frontend/src/routes/route-access.test.ts` | 5 |
-| `frontend/src/services/http.test.ts` | 9 |
+| `frontend/src/services/http.test.ts` | 12 |
