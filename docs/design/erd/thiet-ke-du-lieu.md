@@ -89,7 +89,7 @@ Trạng thái gói (`memberships.status`): PENDING (đã có hóa đơn, chưa t
 | `promotions` | Mã giảm giá | `branch_id`, `code`, `type` (PERCENT, FIXED), `value`, `max_discount`, `min_amount`, `start_at`, `end_at`, `usage_limit`, `used_count`, `version` | F14 |
 | `invoices` | Hóa đơn | `branch_id`, `member_id` (rỗng nếu khách lẻ), `created_by` (lễ tân, hoặc hội viên với hóa đơn chờ từ F7), `source` (COUNTER, MEMBER_PORTAL), `promotion_id`, `subtotal`, `discount`, `total`, `status`, `paid_at`, thông tin hoàn tiền, `version` | F5, F7, F12, F14 |
 | `invoice_items` | Dòng hóa đơn | `invoice_id`, `item_type` (PACKAGE, PRODUCT, TRANSFER_FEE), `package_id`, `product_id`, `description`, `quantity`, `unit_price`, `amount`, `discount_amount` (phần giảm giá phân bổ cho dòng) | F5, F12, F15, F16 |
-| `payments` | Mỗi lần thu tiền | `invoice_id`, `method` (CASH, BANK_TRANSFER), `amount`, `status`, `transaction_ref`, `received_by`, `paid_at` | F5 |
+| `payments` | Mỗi lần thu tiền | `invoice_id`, `method` (CASH, BANK_TRANSFER), `amount` (≥ 0: hóa đơn 0 đồng vẫn có phiếu thu 0 đồng), `status`, `transaction_ref`, `received_by`, `paid_at` | F5 |
 
 ### 7. Nhân sự (4 bảng)
 
