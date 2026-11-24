@@ -16,6 +16,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -59,6 +60,7 @@ class AuthSessionConcurrencyIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.3.1-01d: hai yêu cầu refresh đồng thời chỉ một thành công 200 và một nhận 401")
     void haiYeuCauRefreshDongThoiChiMotThanhCongVaMotNhan401() throws Exception {
         SessionTokens session = registerMember("Người dùng Test", "concurrent@example.com", "0912345678");
 
@@ -99,6 +101,7 @@ class AuthSessionConcurrencyIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.3.1-04d: đăng xuất bằng JWT tài khoản A không thu hồi hay xóa cookie tài khoản B")
     void dangXuatBangJwtCuaTaiKhoanAKhongThuHoiHoacXoaCookieCuaTaiKhoanB() throws Exception {
         SessionTokens sessionA = registerMember("Thành viên A", "user.a@example.com", "0911111111");
         SessionTokens sessionB = registerMember("Thành viên B", "user.b@example.com", "0922222222");
@@ -135,6 +138,7 @@ class AuthSessionConcurrencyIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.3.1-02f, TC-F1.3.1-04e: đăng xuất bằng JWT hết hạn của tài khoản A vẫn giữ phiên tài khoản B")
     void dangXuatBangJwtHetHanCuaTaiKhoanAVanGiuPhienCuaTaiKhoanB() throws Exception {
         registerMember("Thành viên A", "user.a@example.com", "0911111111");
         SessionTokens sessionB = registerMember("Thành viên B", "user.b@example.com", "0922222222");
