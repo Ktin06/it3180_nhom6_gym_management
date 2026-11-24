@@ -113,19 +113,24 @@ public class PasswordResetService {
     }
 
     /**
-     * Đặt lại mật khẩu bằng token dùng một lần (UC-F1.5 bước 3): khóa dòng token và dòng {@code users},
-     * đổi mật khẩu mới, xóa khóa đăng nhập tạm, đánh dấu {@code used_at} và thu hồi mọi refresh token.
+     * Đặt lại mật khẩu bằng token dùng một lần (UC-F1.5 bước 3): khóa dòng {@code users} và dòng token,
+     * đổi mật khẩu mới, xóa khóa đăng nhập tạm, đánh dấu {@code used_at = now} cho mọi token đặt lại
+     * mật khẩu chưa dùng của tài khoản và thu hồi mọi refresh token trong cùng giao dịch.
      */
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
         authService.validatePasswordLength(request.newPassword());
 
         String tokenHash = TokenHashUtil.sha256Hex(request.token().trim());
-        PasswordReset reset = passwordResetRepository.findByTokenHashForUpdate(tokenHash)
+        Long userId = passwordResetRepository.findUserIdByTokenHash(tokenHash)
             .orElseThrow(() -> new BusinessRuleException(INVALID_OR_EXPIRED_TOKEN_MESSAGE));
 
-        // Khóa dòng users trước (SELECT ... FOR UPDATE) để không có refresh token mới nào sống sót
-        User user = userRepository.findByIdForUpdate(reset.getUser().getId())
+        // Khóa dòng users trước (thứ tự nhất quán users -> password_resets) để tránh deadlock khi
+        // hai yêu cầu gửi hai token khác nhau của cùng một user đồng thời và không có refresh token mới nào sống sót.
+        User user = userRepository.findByIdForUpdate(userId)
+            .orElseThrow(() -> new BusinessRuleException(INVALID_OR_EXPIRED_TOKEN_MESSAGE));
+
+        PasswordReset reset = passwordResetRepository.findByTokenHashForUpdate(tokenHash)
             .orElseThrow(() -> new BusinessRuleException(INVALID_OR_EXPIRED_TOKEN_MESSAGE));
 
         OffsetDateTime now = vnTime.now();
@@ -140,8 +145,8 @@ public class PasswordResetService {
         user.setLockedUntil(null);
         userRepository.save(user);
 
-        reset.setUsedAt(now);
-        passwordResetRepository.save(reset);
+        // Đánh dấu used_at = now cho mọi password_resets còn used_at IS NULL của user (kể cả token vừa dùng)
+        passwordResetRepository.markAllUnusedAsUsedByUserId(user.getId(), now);
 
         refreshTokenRepository.revokeAllByUserId(user.getId(), now);
     }

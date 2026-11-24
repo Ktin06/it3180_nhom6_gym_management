@@ -8,7 +8,7 @@
 
 | Chức năng | UC | US | AC | AC đã có TC | AC chưa có TC | TC |
 | --- | --- | --- | --- | --- | --- | --- |
-| F1 | 6 | 1 | 6 | 6 | 0 | 26 |
+| F1 | 6 | 1 | 6 | 6 | 0 | 27 |
 | F2 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F3 | 5 | 6 | 43 | 31 | 12 | 59 |
 | F4 | 5 | 0 | 0 | 0 | 0 | 0 |
@@ -18,7 +18,7 @@
 | F8 | 9 | 9 | 55 | 0 | 55 | 0 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **16** | **104** | **37** | **67** | **85** |
+| **Tổng** | **57** | **16** | **104** | **37** | **67** | **86** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -136,6 +136,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F1.5.1-03c `PasswordResetIntegrationTest#luongTronVenQuenVaDatLaiMatKhau`
       - TC-F1.5.1-03d `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-03d: Trang Đặt mật khẩu gửi token và mật khẩu mới `
       - TC-F1.5.1-03e `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-03e: /quen-mat-khau và /dat-lai-mat-khau là trang `
+      - TC-F1.5.1-03f `PasswordResetIntegrationTest#datLaiMatKhauVoHieuHoaTatCaLienKetQuenMatKhauKhacCuaCungUser`
     - AC-F1.5.1-04 Từ chối token sai, hết hạn sau 30 phút, đã dùng (kể cả gửi đồng thời) hoặc tài khoản không ACTIVE với 422 (BR-F1-08)
       - TC-F1.5.1-04a `PasswordResetServiceTest#tokenSaiDaDungHoacHetHanTra422`
       - TC-F1.5.1-04b `AuthControllerTest#datLaiMatKhauTokenLoiTra422`
@@ -365,6 +366,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F1.5.1-03c | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `PasswordResetIntegrationTest#luongTronVenQuenVaDatLaiMatKhau` |
 | TC-F1.5.1-03d | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-03d: Trang Đặt mật khẩu gửi token và mật khẩu mới ` |
 | TC-F1.5.1-03e | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-03e: /quen-mat-khau và /dat-lai-mat-khau là trang ` |
+| TC-F1.5.1-03f | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `PasswordResetIntegrationTest#datLaiMatKhauVoHieuHoaTatCaLienKetQuenMatKhauKhacCuaCungUser` |
 | TC-F1.5.1-04a | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#tokenSaiDaDungHoacHetHanTra422` |
 | TC-F1.5.1-04b | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `AuthControllerTest#datLaiMatKhauTokenLoiTra422` |
 | TC-F1.5.1-04c | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetIntegrationTest#tokenHetHanSau30PhutTra422VaEmailKhongTonTaiTra200` |

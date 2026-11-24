@@ -177,33 +177,34 @@ class PasswordResetServiceTest {
             .usedAt(null)
             .build();
 
-        when(passwordResetRepository.findByTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(reset));
+        when(passwordResetRepository.findUserIdByTokenHash(tokenHash)).thenReturn(Optional.of(20L));
         when(userRepository.findByIdForUpdate(20L)).thenReturn(Optional.of(user));
+        when(passwordResetRepository.findByTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(reset));
         when(passwordEncoder.encode("NewPassword123")).thenReturn("$2a$10$newEncodedHash");
 
         OffsetDateTime expectedNow = vnTime.now();
         passwordResetService.resetPassword(new ResetPasswordRequest(rawToken, "NewPassword123"));
 
         verify(authService).validatePasswordLength("NewPassword123");
-        // Đảm bảo khóa dòng users trước khi cập nhật và thu hồi refresh token
+        // Đảm bảo khóa dòng users trước khi khóa token, cập nhật mật khẩu, vô hiệu hóa mọi token chưa dùng và thu hồi refresh token
         InOrder order = inOrder(passwordResetRepository, userRepository, refreshTokenRepository);
-        order.verify(passwordResetRepository).findByTokenHashForUpdate(tokenHash);
+        order.verify(passwordResetRepository).findUserIdByTokenHash(tokenHash);
         order.verify(userRepository).findByIdForUpdate(20L);
+        order.verify(passwordResetRepository).findByTokenHashForUpdate(tokenHash);
         order.verify(userRepository).save(user);
-        order.verify(passwordResetRepository).save(reset);
+        order.verify(passwordResetRepository).markAllUnusedAsUsedByUserId(20L, expectedNow);
         order.verify(refreshTokenRepository).revokeAllByUserId(20L, expectedNow);
 
         assertThat(user.getPasswordHash()).isEqualTo("$2a$10$newEncodedHash");
         assertThat(user.getFailedLoginCount()).isZero();
         assertThat(user.getLockedUntil()).isNull();
-        assertThat(reset.getUsedAt()).isEqualTo(expectedNow);
     }
 
     @Test
     @DisplayName("TC-F1.5.1-04a: token đã dùng, hết hạn, sai hoặc tài khoản DISABLED trả 422")
     void tokenSaiDaDungHoacHetHanTra422() {
         // 1. Token không tồn tại
-        when(passwordResetRepository.findByTokenHashForUpdate(TokenHashUtil.sha256Hex("unknown-token")))
+        when(passwordResetRepository.findUserIdByTokenHash(TokenHashUtil.sha256Hex("unknown-token")))
             .thenReturn(Optional.empty());
         assertThatThrownBy(() -> passwordResetService.resetPassword(
                 new ResetPasswordRequest("unknown-token", "NewPassword123")))
@@ -218,9 +219,11 @@ class PasswordResetServiceTest {
             .expiresAt(vnTime.now().plusMinutes(20))
             .usedAt(vnTime.now().minusMinutes(1))
             .build();
+        when(passwordResetRepository.findUserIdByTokenHash(usedReset.getTokenHash()))
+            .thenReturn(Optional.of(21L));
+        when(userRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(activeUser));
         when(passwordResetRepository.findByTokenHashForUpdate(usedReset.getTokenHash()))
             .thenReturn(Optional.of(usedReset));
-        when(userRepository.findByIdForUpdate(21L)).thenReturn(Optional.of(activeUser));
 
         assertThatThrownBy(() -> passwordResetService.resetPassword(
                 new ResetPasswordRequest("used-token", "NewPassword123")))
@@ -234,6 +237,8 @@ class PasswordResetServiceTest {
             .expiresAt(vnTime.now())
             .usedAt(null)
             .build();
+        when(passwordResetRepository.findUserIdByTokenHash(expiredReset.getTokenHash()))
+            .thenReturn(Optional.of(21L));
         when(passwordResetRepository.findByTokenHashForUpdate(expiredReset.getTokenHash()))
             .thenReturn(Optional.of(expiredReset));
 
@@ -250,15 +255,18 @@ class PasswordResetServiceTest {
             .expiresAt(vnTime.now().plusMinutes(20))
             .usedAt(null)
             .build();
+        when(passwordResetRepository.findUserIdByTokenHash(disabledReset.getTokenHash()))
+            .thenReturn(Optional.of(22L));
+        when(userRepository.findByIdForUpdate(22L)).thenReturn(Optional.of(disabledUser));
         when(passwordResetRepository.findByTokenHashForUpdate(disabledReset.getTokenHash()))
             .thenReturn(Optional.of(disabledReset));
-        when(userRepository.findByIdForUpdate(22L)).thenReturn(Optional.of(disabledUser));
 
         assertThatThrownBy(() -> passwordResetService.resetPassword(
                 new ResetPasswordRequest("disabled-token", "NewPassword123")))
             .isInstanceOf(BusinessRuleException.class)
             .hasMessage(PasswordResetService.INVALID_OR_EXPIRED_TOKEN_MESSAGE);
 
+        verify(passwordResetRepository, never()).markAllUnusedAsUsedByUserId(any(), any());
         verify(refreshTokenRepository, never()).revokeAllByUserId(any(), any());
     }
 

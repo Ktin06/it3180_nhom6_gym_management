@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -54,6 +55,8 @@ class PasswordResetIntegrationTest {
 
     private static final String TEST_EMAIL = "forgot.member@reset-test.example.com";
     private static final String TEST_PHONE = "0977111222";
+    private static final String OTHER_EMAIL = "other.member@reset-test.example.com";
+    private static final String OTHER_PHONE = "0977111333";
 
     @Autowired
     private MockMvc mockMvc;
@@ -79,7 +82,7 @@ class PasswordResetIntegrationTest {
             "DELETE FROM password_resets WHERE user_id IN (SELECT id FROM users WHERE email LIKE '%@reset-test.example.com')");
         jdbcTemplate.update(
             "DELETE FROM refresh_tokens WHERE user_id IN (SELECT id FROM users WHERE email LIKE '%@reset-test.example.com')");
-        jdbcTemplate.update("DELETE FROM members WHERE phone = ?", TEST_PHONE);
+        jdbcTemplate.update("DELETE FROM members WHERE phone IN (?, ?)", TEST_PHONE, OTHER_PHONE);
         jdbcTemplate.update("DELETE FROM users WHERE email LIKE '%@reset-test.example.com'");
         jdbcTemplate.update("UPDATE branches SET status = 'ACTIVE' WHERE code = 'CN01'");
     }
@@ -268,6 +271,108 @@ class PasswordResetIntegrationTest {
         } finally {
             pool.shutdownNow();
         }
+    }
+
+    @Test
+    @DisplayName("TC-F1.5.1-03f: bấm quên mật khẩu 2 lần, đặt lại bằng một liên kết sẽ đánh dấu used_at cho mọi liên kết còn lại của user (422) và không ảnh hưởng tài khoản khác")
+    void datLaiMatKhauVoHieuHoaTatCaLienKetQuenMatKhauKhacCuaCungUser() throws Exception {
+        registerMember("Nguyễn Văn Quên", TEST_EMAIL, TEST_PHONE, "OldPass123");
+        registerMember("Trần Văn Khác", OTHER_EMAIL, OTHER_PHONE, "OtherOld123");
+
+        Long userId = jdbcTemplate.queryForObject(
+            "SELECT id FROM users WHERE email = ?", Long.class, TEST_EMAIL);
+        Long otherUserId = jdbcTemplate.queryForObject(
+            "SELECT id FROM users WHERE email = ?", Long.class, OTHER_EMAIL);
+
+        // User 1 bấm "Quên mật khẩu" 2 lần liên tiếp -> có 2 liên kết chưa dùng
+        mockMvc.perform(post("/api/v1/auth/forgot-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(Map.of("email", TEST_EMAIL))))
+            .andExpect(status().isOk());
+        mockMvc.perform(post("/api/v1/auth/forgot-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(Map.of("email", TEST_EMAIL))))
+            .andExpect(status().isOk());
+
+        // User 2 cũng có 1 liên kết chưa dùng để kiểm tra cô lập giữa các tài khoản
+        mockMvc.perform(post("/api/v1/auth/forgot-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(Map.of("email", OTHER_EMAIL))))
+            .andExpect(status().isOk());
+
+        ArgumentCaptor<String> user1BodyCaptor = ArgumentCaptor.forClass(String.class);
+        verify(emailSender, times(2)).send(eq(TEST_EMAIL), anyString(), user1BodyCaptor.capture());
+        String firstToken = extractTokenFromBody(user1BodyCaptor.getAllValues().get(0));
+        String secondToken = extractTokenFromBody(user1BodyCaptor.getAllValues().get(1));
+        assertThat(secondToken).isNotEqualTo(firstToken);
+
+        ArgumentCaptor<String> user2BodyCaptor = ArgumentCaptor.forClass(String.class);
+        verify(emailSender).send(eq(OTHER_EMAIL), anyString(), user2BodyCaptor.capture());
+        String otherUserToken = extractTokenFromBody(user2BodyCaptor.getValue());
+
+        Integer unusedBefore = jdbcTemplate.queryForObject(
+            "SELECT count(*) FROM password_resets WHERE user_id = ? AND used_at IS NULL",
+            Integer.class, userId);
+        assertThat(unusedBefore).isEqualTo(2);
+
+        // Đặt lại mật khẩu bằng liên kết đầu tiên -> 204
+        mockMvc.perform(post("/api/v1/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(Map.of(
+                    "token", firstToken,
+                    "newPassword", "FirstReset123"
+                ))))
+            .andExpect(status().isNoContent());
+
+        // Cả 2 bản ghi password_resets của user 1 đều đã được đánh dấu used_at IS NOT NULL
+        Integer unusedAfter = jdbcTemplate.queryForObject(
+            "SELECT count(*) FROM password_resets WHERE user_id = ? AND used_at IS NULL",
+            Integer.class, userId);
+        Integer usedAfter = jdbcTemplate.queryForObject(
+            "SELECT count(*) FROM password_resets WHERE user_id = ? AND used_at IS NOT NULL",
+            Integer.class, userId);
+        assertThat(unusedAfter).isZero();
+        assertThat(usedAfter).isEqualTo(2);
+
+        // Liên kết thứ hai của user 1 không thể dùng để đặt lại mật khẩu nữa -> 422
+        mockMvc.perform(post("/api/v1/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(Map.of(
+                    "token", secondToken,
+                    "newPassword", "SecondReset456"
+                ))))
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(jsonPath("$.detail").value(PasswordResetService.INVALID_OR_EXPIRED_TOKEN_MESSAGE));
+
+        // Mật khẩu vẫn là FirstReset123, không bị ghi đè bởi liên kết thứ hai
+        mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(Map.of(
+                    "email", TEST_EMAIL,
+                    "password", "FirstReset123"
+                ))))
+            .andExpect(status().isOk());
+        mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(Map.of(
+                    "email", TEST_EMAIL,
+                    "password", "SecondReset456"
+                ))))
+            .andExpect(status().isUnauthorized());
+
+        // Tài khoản khác vẫn còn nguyên liên kết chưa dùng và đặt lại được bình thường
+        Integer otherUnused = jdbcTemplate.queryForObject(
+            "SELECT count(*) FROM password_resets WHERE user_id = ? AND used_at IS NULL",
+            Integer.class, otherUserId);
+        assertThat(otherUnused).isEqualTo(1);
+
+        mockMvc.perform(post("/api/v1/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(Map.of(
+                    "token", otherUserToken,
+                    "newPassword", "OtherNewPass123"
+                ))))
+            .andExpect(status().isNoContent());
     }
 
     private Cookie registerMember(String fullName, String email, String phone, String password) throws Exception {
