@@ -9,6 +9,7 @@ import {
   getCurrentUser,
   getProblemDetail,
   login,
+  logout,
   register,
   resetPassword,
 } from './auth-api'
@@ -56,6 +57,15 @@ describe('auth-api', () => {
 
     await expect(getCurrentUser()).resolves.toEqual({ email: 'anh@example.com', role })
     expect(get).toHaveBeenCalledWith('/auth/me')
+  })
+
+  it('logout cho phép gửi Bearer của tab hiện tại và tắt tự refresh', async () => {
+    post.mockResolvedValue({ status: 204 })
+    await logout()
+    expect(post).toHaveBeenCalledWith('/auth/logout', undefined, {
+      skipAuthRefresh: true,
+      authEpoch: expect.any(Number),
+    })
   })
 
   it('từ chối role lạ trong phản hồi /me', async () => {
