@@ -232,4 +232,28 @@ public class ClassRepository {
                 jsonb_build_object('lockedUntil',:until::text),:now,:now)
             """, Map.of("actor", actor, "branch", branch, "member", member, "until", until, "now", now));
     }
+
+    /**
+     * Ghi {@code arrived_at = now} cho các chỗ BOOKED chưa có arrived_at của hội viên ở buổi chưa hủy thuộc chi nhánh
+     * {@code branchId}, bắt đầu trong {@code [from, to]} (S2-11.1, UC-F4.3).
+     *
+     * @return danh sách id các chỗ vừa ghi, tăng dần
+     */
+    public List<Long> markArrived(long memberId, long branchId, OffsetDateTime from, OffsetDateTime to, OffsetDateTime now) {
+        return jdbc.queryForList("""
+            UPDATE class_bookings b
+            SET arrived_at = :now
+            FROM class_sessions s
+            WHERE b.class_session_id = s.id
+              AND b.member_id = :memberId
+              AND s.branch_id = :branchId
+              AND b.status = 'BOOKED'
+              AND b.arrived_at IS NULL
+              AND s.status <> 'CANCELLED'
+              AND s.start_at >= :from
+              AND s.start_at <= :to
+            RETURNING b.id
+            """, Map.of("memberId", memberId, "branchId", branchId, "from", from, "to", to, "now", now), Long.class)
+            .stream().sorted().toList();
+    }
 }
