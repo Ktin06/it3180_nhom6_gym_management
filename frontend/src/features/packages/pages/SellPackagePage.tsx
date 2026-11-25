@@ -108,17 +108,17 @@ export function SellPackagePage({
     [],
   )
 
-  async function loadMemberships(memberId: number, suppressError = false) {
+  async function loadMemberships(memberId: number) {
     const requestId = ++membershipRequest.current
     setLoadingMemberships(true)
-    if (!suppressError) setMembershipsError(undefined)
+    setMembershipsError(undefined)
     try {
       const rows = await sales.listMemberships(memberId)
-      if (requestId === membershipRequest.current && Array.isArray(rows)) {
+      if (requestId === membershipRequest.current) {
         setMemberships(rows)
       }
     } catch (cause) {
-      if (requestId === membershipRequest.current && !suppressError) {
+      if (requestId === membershipRequest.current) {
         setMemberships([])
         setMembershipsError(cause)
       }
@@ -153,7 +153,8 @@ export function SellPackagePage({
   }
 
   async function submitInvoice() {
-    if (!selectedMember || !selectedPackage) return
+    if (!selectedMember || !selectedPackage || creating || !saleMode || saleMode.kind === 'waiting')
+      return
     setCreating(true)
     setInvoiceError(undefined)
     const payload: CreatePackageInvoiceInput = {
@@ -163,8 +164,8 @@ export function SellPackagePage({
     try {
       const invoice = await sales.createInvoice(payload)
       setCreatedInvoice(invoice)
-      void message?.success?.(`Đã tạo hóa đơn ${invoice.invoiceCode}.`)
-      void loadMemberships(selectedMember.id, true)
+      void message.success(`Đã tạo hóa đơn ${invoice.invoiceCode}.`)
+      void loadMemberships(selectedMember.id)
     } catch (cause) {
       setInvoiceError(cause)
     } finally {
@@ -243,14 +244,15 @@ export function SellPackagePage({
                       }}
                     >
                       <div>
-                        <strong>{member.memberCode}</strong> · {member.fullName} · {member.phone}{' '}
-                        {member.status === 'INACTIVE' && <Tag>Ngừng hoạt động</Tag>}
+                        <strong>{member.memberCode}</strong> · {member.fullName} ·{' '}
+                        {member.phone}{' '}
                       </div>
                       <Button
                         type={isSelected ? 'primary' : 'default'}
                         icon={isSelected ? <CheckOutlined /> : undefined}
                         aria-label={`Chọn ${member.memberCode}`}
                         onClick={() => selectMember(member)}
+                        disabled={creating}
                         style={{ minHeight: 40 }}
                       >
                         {isSelected ? 'Đang chọn' : 'Chọn'}
@@ -406,6 +408,7 @@ export function SellPackagePage({
                         icon={isSelected ? <CheckOutlined /> : undefined}
                         aria-label={`Chọn gói ${pkg.code}`}
                         onClick={() => selectPackage(pkg)}
+                        disabled={creating}
                         style={{ minHeight: 40 }}
                       >
                         {isSelected ? 'Đã chọn' : 'Chọn gói'}
@@ -467,7 +470,7 @@ export function SellPackagePage({
                   type="primary"
                   icon={<ShoppingCartOutlined />}
                   loading={creating}
-                  disabled={loadingMemberships}
+                  disabled={!saleMode || saleMode.kind === 'waiting'}
                   onClick={() => void submitInvoice()}
                   style={{ minHeight: 40 }}
                 >

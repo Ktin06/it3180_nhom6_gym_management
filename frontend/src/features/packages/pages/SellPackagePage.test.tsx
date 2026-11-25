@@ -171,45 +171,90 @@ describe('màn hình bán và gia hạn gói tại quầy F3', () => {
     expect(screen.queryByText(/01\/12\/2026/)).not.toBeInTheDocument()
   })
 
-  it('TC-F3.5.1-06d: Lỗi 422 khi hội viên đã có gói cùng loại PENDING hoặc UPCOMING hiển thị đúng thông báo từ API', async () => {
-    const user = userEvent.setup()
-    const membersApi = createMockMembersApi()
-    const packagesApi = mockPackagesApi
-    const salesApi = createSalesStub({
-      30: [
-        {
-          id: 13,
-          packageId: 1,
-          packageName: 'Gói 1 tháng',
-          packageType: 'TIME',
-          branchId: 1,
-          status: 'PENDING',
-          startDate: '2026-11-20',
-          endDate: '2026-12-19',
-          totalSessions: null,
-          remainingSessions: null,
-          renewalStartDate: null,
-        },
-      ],
-    })
-    const conflictText =
-      'Hội viên đã có gói cùng loại đang chờ thanh toán hoặc chờ kích hoạt. Không thể tạo thêm gói mới.'
-    vi.spyOn(salesApi, 'createInvoice').mockRejectedValueOnce(
-      axiosProblem(422, { detail: conflictText }),
-    )
+  it.each(['PENDING', 'UPCOMING'] as const)(
+    'TC-F3.5.1-06d: chặn lập hóa đơn khi đã có gói %s cùng phạm vi',
+    async (status) => {
+      const user = userEvent.setup()
+      const membersApi = createMockMembersApi()
+      const packagesApi = mockPackagesApi
+      const salesApi = createSalesStub({
+        30: [
+          {
+            id: 13,
+            packageId: 1,
+            packageName: 'Gói 1 tháng',
+            packageType: 'TIME',
+            branchId: 1,
+            status,
+            startDate: '2026-11-20',
+            endDate: '2026-12-19',
+            totalSessions: null,
+            remainingSessions: null,
+            renewalStartDate: null,
+          },
+        ],
+      })
+      const create = vi.spyOn(salesApi, 'createInvoice')
 
+      render(
+        <App>
+          <SellPackagePage members={membersApi} packages={packagesApi} sales={salesApi} />
+        </App>,
+      )
+
+      await user.click(await screen.findByRole('button', { name: 'Chọn HV000030' }))
+      await user.click(await screen.findByRole('button', { name: 'Chọn gói TIME-1M' }))
+      expect(await screen.findByText('Đang có gói chờ cùng loại')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Tạo hóa đơn/ })).toBeDisabled()
+      await user.click(screen.getByRole('button', { name: /Tạo hóa đơn/ }))
+      expect(create).not.toHaveBeenCalled()
+    },
+  )
+
+  it('TC-F3.5.1-01: giữ lựa chọn khi tạo hóa đơn và yêu cầu tải lại nếu kiểm tra gói thất bại', async () => {
+    const user = userEvent.setup()
+    const sales = createSalesStub()
+    const load = vi.spyOn(sales, 'listMemberships')
+    let finish!: () => void
+    const pending = new Promise<void>((resolve) => {
+      finish = resolve
+    })
+    const original = sales.createInvoice
+    const create = vi.spyOn(sales, 'createInvoice').mockImplementation(async (input) => {
+      await pending
+      return original(input)
+    })
     render(
       <App>
-        <SellPackagePage members={membersApi} packages={packagesApi} sales={salesApi} />
+        <SellPackagePage
+          members={createMockMembersApi()}
+          packages={mockPackagesApi}
+          sales={sales}
+        />
       </App>,
     )
-
     await user.click(await screen.findByRole('button', { name: 'Chọn HV000030' }))
-    expect(await screen.findByText('Chờ thanh toán')).toBeInTheDocument()
     await user.click(await screen.findByRole('button', { name: 'Chọn gói TIME-1M' }))
-    await user.click(screen.getByRole('button', { name: /Tạo hóa đơn/ }))
-
-    expect(await screen.findByText(conflictText)).toBeInTheDocument()
+    const submit = screen.getByRole('button', { name: /Tạo hóa đơn/ })
+    await user.click(submit)
+    const other = screen.getByRole('button', { name: 'Chọn HV000028' })
+    expect(other).toBeDisabled()
+    for (const button of screen.getAllByRole('button', { name: /^Chọn gói / })) {
+      expect(button).toBeDisabled()
+    }
+    await user.click(other)
+    expect(load).not.toHaveBeenCalledWith(28)
+    load.mockRejectedValueOnce(new Error('Chưa tải được gói'))
+    await act(async () => finish())
+    expect(await screen.findByText('HD000088')).toBeInTheDocument()
+    expect(await screen.findByText('Chưa tải được gói')).toBeInTheDocument()
+    expect(submit).toBeDisabled()
+    await user.click(screen.getByRole('button', { name: 'Thử lại' }))
+    await waitFor(() => expect(submit).toBeEnabled())
+    await user.click(other)
+    expect(load).toHaveBeenLastCalledWith(28)
+    expect(screen.queryByText('HD000088')).not.toBeInTheDocument()
+    expect(create).toHaveBeenCalledTimes(1)
   })
 
   it('TC-F3.5.1-08g: Lỗi 422 hoặc 404 khi hội viên ngừng hoạt động, gói ngừng bán hoặc ngoài chi nhánh hiển thị đúng thông báo từ API', async () => {
