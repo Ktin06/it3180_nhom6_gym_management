@@ -130,7 +130,7 @@ public class MembershipService {
      * <ul>
      *   <li>Đã có gói cùng loại, cùng phạm vi chi nhánh đang UPCOMING: 422 E6b.</li>
      *   <li>Chưa có gói cùng loại ACTIVE/FROZEN: ACTIVE từ hôm nay (giờ Việt Nam).</li>
-     *   <li>Có: UPCOMING từ {@link #plannedStartDate} (sau {@code end_date} gói cũ, hoặc ngày mai nếu gói cũ 0 buổi).</li>
+     *   <li>Có: UPCOMING từ {@link #plannedStartDate} (sau {@code end_date} gói cũ; chỉ SESSION 0 buổi bắt đầu ngày mai).</li>
      * </ul>
      * Số ngày hiệu lực giữ đúng số đã chốt lúc lập hóa đơn ({@link Membership#durationDays()}). Không đổi gói cũ.
      *

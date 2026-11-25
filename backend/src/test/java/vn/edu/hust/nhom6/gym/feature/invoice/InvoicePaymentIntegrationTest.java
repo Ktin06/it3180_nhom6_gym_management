@@ -376,8 +376,8 @@ class InvoicePaymentIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"ACTIVE", "FROZEN"})
-    @DisplayName("TC-F5.2.1-11a: PT 0 buổi còn ACTIVE hoặc FROZEN xếp gói mới từ ngày mai theo nền S2-07")
-    void zeroSessionPtStillHeldSchedulesTomorrow(String oldStatus) throws Exception {
+    @DisplayName("TC-F5.2.1-11a: PT 0 buổi còn ACTIVE hoặc FROZEN xếp gói mới sau ngày hết hạn gói cũ, không áp dụng ngoại lệ SESSION")
+    void zeroSessionPtStillHeldSchedulesAfterOldEndDate(String oldStatus) throws Exception {
         Long pt = f.pkg("PT_EMPTY", "PT", 10, 3_000_000, f.cn01, "ACTIVE");
         Long old = f.membership(member, pt, "PT", f.cn01, oldStatus,
             SALE_DAY.minusDays(5), SALE_DAY.plusDays(15), 0);
@@ -385,8 +385,8 @@ class InvoicePaymentIntegrationTest {
         pay(receptionist, sale.invoiceId(), "{\"method\":\"CASH\"}")
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.activatedMemberships[0].status").value("UPCOMING"))
-            .andExpect(jsonPath("$.activatedMemberships[0].startDate").value("2026-11-21"))
-            .andExpect(jsonPath("$.activatedMemberships[0].endDate").value("2026-12-20"))
+            .andExpect(jsonPath("$.activatedMemberships[0].startDate").value("2026-12-06"))
+            .andExpect(jsonPath("$.activatedMemberships[0].endDate").value("2027-01-04"))
             .andExpect(jsonPath("$.activatedMemberships[0].remainingSessions").value(10));
         assertThat(jdbc.queryForObject("SELECT status FROM memberships WHERE id=?", String.class, old))
             .isEqualTo(oldStatus);
