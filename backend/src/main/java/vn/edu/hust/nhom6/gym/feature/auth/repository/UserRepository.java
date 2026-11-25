@@ -17,6 +17,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     /**
+     * Khóa dòng tài khoản theo {@code email} ({@code SELECT ... FOR UPDATE})
+     * để nhiều yêu cầu đăng nhập đồng thời tăng đúng bộ đếm {@code failed_login_count} (S4).
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM User u WHERE u.email = :email")
+    Optional<User> findByEmailForUpdate(@Param("email") String email);
+
+    /**
      * Khóa dòng tài khoản theo {@code id} ({@code SELECT ... FOR UPDATE})
      * để các thao tác nhạy cảm (đặt lại mật khẩu và thu hồi phiên) không tranh chấp với luồng cấp phiên.
      */
