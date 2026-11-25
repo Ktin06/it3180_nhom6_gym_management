@@ -1,6 +1,6 @@
 # Đặc tả Use Case – F5: Thanh toán tại quầy
 
-- **Cập nhật:** 26/11/2026 — S2-09 (#184), đồng bộ SRS từ S2-50 (#186, PR #256); bổ sung quy tắc chặn hóa đơn cổng hội viên quá hạn theo [nhận xét PR #257](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/257#issuecomment-7157367483).
+- **Cập nhật:** 26/11/2026 — S2-09/S2-10 (#184, #185), đồng bộ SRS từ S2-50 (#186, PR #256), bổ sung các lựa chọn triển khai đã thống nhất và giữ quy tắc chặn hóa đơn cổng hội viên quá hạn theo [nhận xét PR #257](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/257#issuecomment-7157367483).
 - **Mã chức năng:** F5
 - **Version:** v1 (Bắt buộc)
 - **Người biên soạn:** Thái Hùng Lân
@@ -466,7 +466,9 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
       "totalPages": 1
     }
     ```
+- **Danh mục chi nhánh cho bộ lọc (S2-10, AC-F5.3.1-04):** `GET /api/v1/invoices/branches`, chỉ Chủ chuỗi được gọi; trả mảng `{ id, code, name }` sắp theo mã, gồm cả chi nhánh ngừng hoạt động để tra cứu lịch sử. Chưa đăng nhập trả 401; vai trò khác trả 403. API chỉ đọc, không quản lý chi nhánh và không thay đổi quyền tra cứu hóa đơn.
 - **API Chi tiết hóa đơn:** `GET /api/v1/invoices/{id}`; trả đủ thông tin hóa đơn, dòng hóa đơn và phiếu thu kèm tên người thu trong phạm vi được phép.
+- **Đường dẫn giao diện S2-10:** `/hoa-don` và `/hoa-don/:id`; quyền trang khai báo trong `ROUTE_ACCESS`, quyền thao tác vẫn do backend kiểm tra.
 - **API Hủy hóa đơn chờ:** `PUT /api/v1/invoices/{id}/cancel`
   - **Header:** `Authorization: Bearer <access_token>`
   - **Response Success (200 OK):**
@@ -601,6 +603,8 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 - **Response Success (200 OK):**
   - Header: `Content-Type: application/pdf`
   - Body: Binary stream dữ liệu PDF
+
+- **Điểm vào giao diện hội viên (S2-10):** `/member/invoices/:id/pdf`, chỉ dành cho MEMBER, nhận ID từ liên kết lịch sử giao dịch F7. Trang chỉ gọi API PDF, không gọi API danh sách/chi tiết dành cho nhân viên; backend kiểm tra quyền sở hữu. Màn hình lịch sử giao dịch vẫn thuộc F7.
 
 #### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
 

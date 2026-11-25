@@ -19,6 +19,9 @@ import { MembersPage } from '../features/members/pages/MembersPage'
 import { PackagesPage } from '../features/packages/pages/PackagesPage'
 import { PublicPricingPage } from '../features/packages/pages/PublicPricingPage'
 import { SellPackagePage } from '../features/packages/pages/SellPackagePage'
+import { InvoicesPage } from '../features/invoices/pages/InvoicesPage'
+import { InvoiceDetailPage } from '../features/invoices/pages/InvoiceDetailPage'
+import { MemberInvoicePdfPage } from '../features/invoices/pages/MemberInvoicePdfPage'
 
 /** Route cần đăng nhập; vai trò được vào đọc từ ROUTE_ACCESS (routes/route-access.ts). */
 function guarded(path: ProtectedPath, element: ReactNode): RouteObject {
@@ -58,6 +61,8 @@ export const routes: RouteObject[] = [
       guarded('/members', <MembersPage />),
       guarded('/packages', <PackagesPage />),
       guarded('/ban-goi', <SellPackagePage />),
+      guarded('/hoa-don', <InvoicesPage />),
+      guarded('/hoa-don/:id', <InvoiceDetailPage />),
       // Trang mới của nhân viên: thêm một dòng guarded(...) ở đây.
     ],
   },
@@ -69,6 +74,7 @@ export const routes: RouteObject[] = [
     ),
     children: [
       guarded(HOME_PATH_BY_ROLE.MEMBER, <RoleHomePage role="MEMBER" />),
+      guarded('/member/invoices/:id/pdf', <MemberInvoicePdfPage />),
       // Trang mới của hội viên: thêm một dòng guarded(...) ở đây.
     ],
   },

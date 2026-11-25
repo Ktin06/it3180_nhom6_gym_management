@@ -983,6 +983,88 @@
           ]
         }
       ]
+    },
+    {
+      "name": "S2-10 – Danh mục chi nhánh lọc hóa đơn",
+      "item": [
+        {
+          "name": "AC-F5.3.1-04 – Chủ chuỗi đọc danh mục chi nhánh",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices/branches",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200, danh mục chi nhánh',()=>{pm.response.to.have.status(200); const rows=pm.response.json(); pm.expect(rows).to.be.an('array'); rows.forEach(b=>{pm.expect(b.id).to.be.above(0);pm.expect(b.code).to.be.a('string');pm.expect(b.name).to.be.a('string');});});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AC-F5.3.1-08 – Lễ tân không được đọc danh mục toàn chuỗi",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices/branches",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403',()=>pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AC-F5.3.1-08 – Chưa đăng nhập",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices/branches",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401',()=>pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "variable": [
