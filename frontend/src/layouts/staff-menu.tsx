@@ -6,6 +6,7 @@ import {
   IdcardOutlined,
   LoginOutlined,
   ShopOutlined,
+  ShoppingCartOutlined,
   TeamOutlined,
 } from '@ant-design/icons'
 import { HOME_PATH_BY_ROLE, type Role } from '../auth/roles'
@@ -39,6 +40,12 @@ export const STAFF_MENU: StaffMenuItem[] = [
     path: '/packages',
     label: 'Gói tập (F3)',
     icon: <IdcardOutlined />,
+    ready: true,
+  },
+  {
+    path: '/ban-goi',
+    label: 'Bán gói (F3)',
+    icon: <ShoppingCartOutlined />,
     ready: true,
   },
   {
