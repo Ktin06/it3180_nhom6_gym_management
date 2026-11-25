@@ -12,13 +12,13 @@
 | F2 | 5 | 6 | 31 | 0 | 31 | 0 |
 | F3 | 5 | 6 | 45 | 43 | 2 | 110 |
 | F4 | 5 | 0 | 0 | 0 | 0 | 0 |
-| F5 | 5 | 5 | 47 | 35 | 12 | 61 |
+| F5 | 5 | 5 | 49 | 37 | 12 | 65 |
 | F6 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F7 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F8 | 9 | 9 | 55 | 29 | 26 | 38 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **32** | **207** | **107** | **100** | **209** |
+| **Tổng** | **57** | **32** | **209** | **109** | **100** | **213** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -424,6 +424,8 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F5.1.1-07 ID VietQR không hợp lệ
       - TC-F5.1.1-07a `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId`
       - TC-F5.1.1-07b `InvoiceDocumentIntegrationTest#invalidDocumentIdsReturnFieldErrors`
+    - AC-F5.1.1-08 Không sinh VietQR cho hóa đơn cổng hội viên quá hạn (BR-F5-07)
+      - TC-F5.1.1-08a `InvoiceExpiryIntegrationTest#paymentAndVietQrRespectPortalDeadline`
 - **UC-F5.2** Ghi nhận thanh toán tại quầy và kích hoạt dịch vụ
   - **US-F5.2.1** Ghi nhận thanh toán, kích hoạt gói (#141) ✅ mọi AC có TC
     - AC-F5.2.1-01 Thu tiền mặt kích hoạt gói mới đúng ngày và giữ thời hạn đã chốt (BR-F5-03, BR-F5-04, BR-F3-06)
@@ -444,6 +446,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F5.2.1-05 Dữ liệu thu tiền sai không làm thay đổi hóa đơn
       - TC-F5.2.1-05a `InvoicePaymentIntegrationTest#invalidMethodIs400`
       - TC-F5.2.1-05b `InvoicePaymentIntegrationTest#tooLongTransactionRefIs400`
+      - TC-F5.2.1-05c `InvoicePaymentIntegrationTest#invalidPaymentIdIs400`
     - AC-F5.2.1-06 Thu tiền hóa đơn không tồn tại hoặc ngoài chi nhánh
       - TC-F5.2.1-06a `InvoicePaymentIntegrationTest#unknownInvoiceIs404`
       - TC-F5.2.1-06b `InvoicePaymentIntegrationTest#otherBranchIs404`
@@ -460,6 +463,8 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F5.2.1-10a `InvoicePaymentIntegrationTest#ignoresClientSuppliedAmounts`
     - AC-F5.2.1-11 Gia hạn sau gói PT 0 buổi còn giữ trạng thái ACTIVE hoặc FROZEN (BR-F3-11)
       - TC-F5.2.1-11a `InvoicePaymentIntegrationTest#zeroSessionPtStillHeldSchedulesTomorrow`
+    - AC-F5.2.1-12 Không thu tiền hóa đơn cổng hội viên quá hạn (BR-F5-07)
+      - TC-F5.2.1-12a `InvoiceExpiryIntegrationTest#paymentAndVietQrRespectPortalDeadline`
 - **UC-F5.3** Tra cứu và quản lý hóa đơn tại quầy (và toàn chuỗi)
   - **US-F5.3.1** Tra cứu và hủy hóa đơn chờ (#142) ✅ mọi AC có TC
     - AC-F5.3.1-01 Danh sách hóa đơn theo chi nhánh của nhân viên (BR-F5-06)
@@ -490,6 +495,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F5.3.1-08f `InvoiceQueryIntegrationTest#unauthenticatedRequestsAre401`
     - AC-F5.3.1-09 Bộ lọc và phân trang không hợp lệ
       - TC-F5.3.1-09a `InvoiceQueryIntegrationTest#invalidQueryParamsAndIdReturn400`
+      - TC-F5.3.1-09b `InvoiceCancelIntegrationTest#invalidCancelIdIs400`
     - AC-F5.3.1-10 Nhân viên không có phân công chi nhánh hoạt động
       - TC-F5.3.1-10a `InvoiceQueryIntegrationTest#staffWithoutActiveBranchIs403`
 - **UC-F5.4** In và xuất hóa đơn PDF
@@ -754,39 +760,42 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.5.1-12e | AC-F3.5.1-12 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipServiceTest#neverBeforeToday` |
 | TC-F3.5.1-13a | AC-F3.5.1-13 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#invoiceCodesAreSequential` |
 | TC-F3.5.1-13b | AC-F3.5.1-13 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceCodeMigrationIntegrationTest#upgradesExistingDatabaseWithoutChangingInvoiceHistory` |
-| TC-F5.1.1-01a | AC-F5.1.1-01 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02 | `InvoiceDocumentIntegrationTest#vietQrForPendingInvoiceUsesServerTotalAndEncodesParams` |
-| TC-F5.1.1-02a | AC-F5.1.1-02 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02 | `InvoiceDocumentIntegrationTest#vietQrForNonPendingInvoiceIs422` |
-| TC-F5.1.1-03a | AC-F5.1.1-03 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02 | `InvoiceDocumentIntegrationTest#vietQrBranchBankConfigOverridesChainConfig` |
-| TC-F5.1.1-03b | AC-F5.1.1-03 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02 | `InvoiceDocumentIntegrationTest#vietQrFallsBackForEachMissingBranchKey` |
-| TC-F5.1.1-04a | AC-F5.1.1-04 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02 | `InvoiceDocumentIntegrationTest#vietQrSecurityAndScope` |
-| TC-F5.1.1-05a | AC-F5.1.1-05 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02 | `InvoiceDocumentIntegrationTest#vietQrSecurityAndScope` |
-| TC-F5.1.1-06a | AC-F5.1.1-06 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02 | `InvoiceDocumentIntegrationTest#vietQrMissingBankConfigIs422` |
-| TC-F5.1.1-06b | AC-F5.1.1-06 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02 | `InvoiceDocumentIntegrationTest#blankBranchBankConfigIs422` |
-| TC-F5.1.1-07a | AC-F5.1.1-07 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02 | `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId` |
-| TC-F5.1.1-07b | AC-F5.1.1-07 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02 | `InvoiceDocumentIntegrationTest#invalidDocumentIdsReturnFieldErrors` |
-| TC-F5.2.1-01a | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payActivatesWithDatesRecomputedAtPaymentTime` |
-| TC-F5.2.1-01b | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payPtWhileHoldingTimeActivatesPt` |
-| TC-F5.2.1-01c | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#paysPortalInvoiceAtCounter` |
-| TC-F5.2.1-02a | AC-F5.2.1-02 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#payRenewalAfterActiveTimePackageIsUpcoming` |
-| TC-F5.2.1-02b | AC-F5.2.1-02 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#payRenewalAfterFrozenPackageIsUpcoming` |
-| TC-F5.2.1-02c | AC-F5.2.1-02 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#payRenewalAfterEmptySessionPackageStartsTomorrow` |
-| TC-F5.2.1-03a | AC-F5.2.1-03 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F5-03, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#zeroTotalInvoiceActivatesWithZeroPaymentRow` |
-| TC-F5.2.1-03b | AC-F5.2.1-03 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F5-03, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `PaymentAmountMigrationIntegrationTest#upgradesExistingPaymentsWithoutChangingHistory` |
-| TC-F5.2.1-04a | AC-F5.2.1-04 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#branchManagerCanPay` |
-| TC-F5.2.1-04b | AC-F5.2.1-04 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#otherRolesAreForbidden` |
-| TC-F5.2.1-04c | AC-F5.2.1-04 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#noTokenIs401` |
-| TC-F5.2.1-05a | AC-F5.2.1-05 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#invalidMethodIs400` |
-| TC-F5.2.1-05b | AC-F5.2.1-05 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#tooLongTransactionRefIs400` |
-| TC-F5.2.1-06a | AC-F5.2.1-06 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#unknownInvoiceIs404` |
-| TC-F5.2.1-06b | AC-F5.2.1-06 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#otherBranchIs404` |
-| TC-F5.2.1-07a | AC-F5.2.1-07 | US-F5.2.1 | UC-F5.2 | BR-F5-05, BR-F5-03, BR-F5-04, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentConcurrencyIntegrationTest#twoReceptionistsPayingSameInvoice` |
-| TC-F5.2.1-08a | AC-F5.2.1-08 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payingTwiceIs422` |
-| TC-F5.2.1-08b | AC-F5.2.1-08 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payingCancelledInvoiceIs422` |
-| TC-F5.2.1-09a | AC-F5.2.1-09 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F3-06, BR-F3-12 | `InvoicePaymentConcurrencyIntegrationTest#twoRenewalsPaidAtOnceYieldOneUpcoming` |
-| TC-F5.2.1-09b | AC-F5.2.1-09 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#upcomingSameTypeBlocksActivation` |
-| TC-F5.2.1-09c | AC-F5.2.1-09 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#upcomingOfOtherTypeOrScopeDoesNotBlock` |
-| TC-F5.2.1-10a | AC-F5.2.1-10 | US-F5.2.1 | UC-F5.2 | BR-F5-01, BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#ignoresClientSuppliedAmounts` |
-| TC-F5.2.1-11a | AC-F5.2.1-11 | US-F5.2.1 | UC-F5.2 | BR-F3-11, BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#zeroSessionPtStillHeldSchedulesTomorrow` |
+| TC-F5.1.1-01a | AC-F5.1.1-01 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrForPendingInvoiceUsesServerTotalAndEncodesParams` |
+| TC-F5.1.1-02a | AC-F5.1.1-02 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrForNonPendingInvoiceIs422` |
+| TC-F5.1.1-03a | AC-F5.1.1-03 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrBranchBankConfigOverridesChainConfig` |
+| TC-F5.1.1-03b | AC-F5.1.1-03 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrFallsBackForEachMissingBranchKey` |
+| TC-F5.1.1-04a | AC-F5.1.1-04 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrSecurityAndScope` |
+| TC-F5.1.1-05a | AC-F5.1.1-05 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrSecurityAndScope` |
+| TC-F5.1.1-06a | AC-F5.1.1-06 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrMissingBankConfigIs422` |
+| TC-F5.1.1-06b | AC-F5.1.1-06 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#blankBranchBankConfigIs422` |
+| TC-F5.1.1-07a | AC-F5.1.1-07 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId` |
+| TC-F5.1.1-07b | AC-F5.1.1-07 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#invalidDocumentIdsReturnFieldErrors` |
+| TC-F5.1.1-08a | AC-F5.1.1-08 | US-F5.1.1 | UC-F5.1 | BR-F5-07, BR-F5-01, BR-F5-02 | `InvoiceExpiryIntegrationTest#paymentAndVietQrRespectPortalDeadline` |
+| TC-F5.2.1-01a | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F5-07, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payActivatesWithDatesRecomputedAtPaymentTime` |
+| TC-F5.2.1-01b | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F5-07, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payPtWhileHoldingTimeActivatesPt` |
+| TC-F5.2.1-01c | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F5-07, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#paysPortalInvoiceAtCounter` |
+| TC-F5.2.1-02a | AC-F5.2.1-02 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#payRenewalAfterActiveTimePackageIsUpcoming` |
+| TC-F5.2.1-02b | AC-F5.2.1-02 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#payRenewalAfterFrozenPackageIsUpcoming` |
+| TC-F5.2.1-02c | AC-F5.2.1-02 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#payRenewalAfterEmptySessionPackageStartsTomorrow` |
+| TC-F5.2.1-03a | AC-F5.2.1-03 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#zeroTotalInvoiceActivatesWithZeroPaymentRow` |
+| TC-F5.2.1-03b | AC-F5.2.1-03 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `PaymentAmountMigrationIntegrationTest#upgradesExistingPaymentsWithoutChangingHistory` |
+| TC-F5.2.1-04a | AC-F5.2.1-04 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#branchManagerCanPay` |
+| TC-F5.2.1-04b | AC-F5.2.1-04 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#otherRolesAreForbidden` |
+| TC-F5.2.1-04c | AC-F5.2.1-04 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#noTokenIs401` |
+| TC-F5.2.1-05a | AC-F5.2.1-05 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#invalidMethodIs400` |
+| TC-F5.2.1-05b | AC-F5.2.1-05 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#tooLongTransactionRefIs400` |
+| TC-F5.2.1-05c | AC-F5.2.1-05 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#invalidPaymentIdIs400` |
+| TC-F5.2.1-06a | AC-F5.2.1-06 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#unknownInvoiceIs404` |
+| TC-F5.2.1-06b | AC-F5.2.1-06 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#otherBranchIs404` |
+| TC-F5.2.1-07a | AC-F5.2.1-07 | US-F5.2.1 | UC-F5.2 | BR-F5-05, BR-F5-03, BR-F5-04, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentConcurrencyIntegrationTest#twoReceptionistsPayingSameInvoice` |
+| TC-F5.2.1-08a | AC-F5.2.1-08 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payingTwiceIs422` |
+| TC-F5.2.1-08b | AC-F5.2.1-08 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payingCancelledInvoiceIs422` |
+| TC-F5.2.1-09a | AC-F5.2.1-09 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentConcurrencyIntegrationTest#twoRenewalsPaidAtOnceYieldOneUpcoming` |
+| TC-F5.2.1-09b | AC-F5.2.1-09 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#upcomingSameTypeBlocksActivation` |
+| TC-F5.2.1-09c | AC-F5.2.1-09 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#upcomingOfOtherTypeOrScopeDoesNotBlock` |
+| TC-F5.2.1-10a | AC-F5.2.1-10 | US-F5.2.1 | UC-F5.2 | BR-F5-01, BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#ignoresClientSuppliedAmounts` |
+| TC-F5.2.1-11a | AC-F5.2.1-11 | US-F5.2.1 | UC-F5.2 | BR-F3-11, BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#zeroSessionPtStillHeldSchedulesTomorrow` |
+| TC-F5.2.1-12a | AC-F5.2.1-12 | US-F5.2.1 | UC-F5.2 | BR-F5-07, BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoiceExpiryIntegrationTest#paymentAndVietQrRespectPortalDeadline` |
 | TC-F5.3.1-01a | AC-F5.3.1-01 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#receptionistListsOwnBranchNewestFirstWithPaging` |
 | TC-F5.3.1-01b | AC-F5.3.1-01 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#staffCannotOverrideBranchFilter` |
 | TC-F5.3.1-02a | AC-F5.3.1-02 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#filterByStatusSourceAndKeyword` |
@@ -806,6 +815,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F5.3.1-08e | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#trainerAndMemberAreForbidden` |
 | TC-F5.3.1-08f | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#unauthenticatedRequestsAre401` |
 | TC-F5.3.1-09a | AC-F5.3.1-09 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#invalidQueryParamsAndIdReturn400` |
+| TC-F5.3.1-09b | AC-F5.3.1-09 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceCancelIntegrationTest#invalidCancelIdIs400` |
 | TC-F5.3.1-10a | AC-F5.3.1-10 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#staffWithoutActiveBranchIs403` |
 | TC-F5.4.1-01a | AC-F5.4.1-01 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#pdfForPaidAndRefundedInvoiceIsReadableWithVietnameseText` |
 | TC-F5.4.1-02a | AC-F5.4.1-02 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#pdfUsesSnapshotPriceAndDescriptionFromInvoiceItems` |

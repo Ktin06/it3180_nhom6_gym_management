@@ -413,6 +413,19 @@ class InvoicePaymentIntegrationTest {
         return invoiceService.createPackageInvoice(receptionist, f.cn01, member, packageId, InvoiceSource.COUNTER);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"0", "-1", "abc", "9223372036854775808"})
+    @DisplayName("TC-F5.2.1-05c: ID thu tiền không phải số nguyên dương hợp lệ trả 400, không đổi hóa đơn/gói")
+    void invalidPaymentIdIs400(String id) throws Exception {
+        PackageInvoiceDto sale = sellAtCounter(timePkg);
+        mvc.perform(post("/api/v1/invoices/{id}/payments", id)
+                .with(f.bearer(receptionist, UserRole.RECEPTIONIST))
+                .contentType(MediaType.APPLICATION_JSON).content("{\"method\":\"CASH\"}"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errors.id").isString());
+        assertUnpaid(sale);
+    }
+
     private ResultActions pay(Long userId, Long invoiceId, String body) throws Exception {
         return mvc.perform(post("/api/v1/invoices/{id}/payments", invoiceId)
             .with(f.bearer(userId, UserRole.RECEPTIONIST))

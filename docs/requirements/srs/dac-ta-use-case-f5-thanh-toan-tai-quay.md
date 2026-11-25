@@ -1,6 +1,6 @@
 # Đặc tả Use Case – F5: Thanh toán tại quầy
 
-- **Cập nhật:** 25/11/2026 — S2-09 (#184), đồng bộ SRS từ S2-50 (#186, PR #256) và bổ sung các lựa chọn triển khai đã thống nhất.
+- **Cập nhật:** 26/11/2026 — S2-09 (#184), đồng bộ SRS từ S2-50 (#186, PR #256); bổ sung quy tắc chặn hóa đơn cổng hội viên quá hạn theo [nhận xét PR #257](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/257#issuecomment-7157367483).
 - **Mã chức năng:** F5
 - **Version:** v1 (Bắt buộc)
 - **Người biên soạn:** Thái Hùng Lân
@@ -91,6 +91,9 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   - Trả `ProblemDetail` (422): *"Chi nhánh chưa cấu hình tài khoản nhận chuyển khoản"*; không sinh QR.
 - **E6 – ID không hợp lệ (400 Bad Request):**
   - ID không phải số nguyên hợp lệ hoặc nhỏ hơn hay bằng 0; trả `ProblemDetail` (400) có `errors.id`.
+- **E7 – Hóa đơn cổng hội viên quá hạn (422 Unprocessable Content):**
+  - Hóa đơn MEMBER_PORTAL còn PENDING nhưng now > created_at + PENDING_INVOICE_TTL_DAYS ngày; dù tác vụ F7 chưa hủy cũng không sinh VietQR.
+  - Trả `ProblemDetail` (422): *"Hóa đơn chờ đã quá hạn thanh toán, vui lòng lập hóa đơn mới tại quầy."*; hóa đơn COUNTER không áp dụng hạn này.
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
 - **BR-F5-01:** Số tiền nhúng trong mã VietQR bắt buộc lấy từ `invoices.total` được tính toán tại server (S7); client không được tự ý gửi số tiền lên để tạo QR.
@@ -133,7 +136,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 
 ##### US-F5.1.1: Mã VietQR cho hóa đơn
 - **User story:** Là **Lễ tân**, tôi muốn **hiện mã VietQR có sẵn số tiền và nội dung**, để **khách chuyển khoản đúng, không nhầm**.
-- **BR liên quan:** BR-F5-01, BR-F5-02; S2, S3, S7, NF1
+- **BR liên quan:** BR-F5-01, BR-F5-02, BR-F5-07; S2, S3, S7, NF1
 - **Version / Sprint:** v1 / Sprint 2
 - **Issue:** #140
 - **Tiêu chí chấp nhận:**
@@ -166,6 +169,11 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
     - **Given** Người gọi đúng quyền, ID không phải số nguyên hợp lệ hoặc nhỏ hơn hay bằng 0
     - **When** Gọi GET /api/v1/invoices/{id}/vietqr
     - **Then** 400 có errors.id; không sinh QR, không thay đổi dữ liệu
+
+  - **AC-F5.1.1-08: Không sinh VietQR cho hóa đơn cổng hội viên quá hạn** (BR-F5-07)
+    - **Given** Hóa đơn MEMBER_PORTAL còn PENDING đúng phạm vi nhưng now > created_at + PENDING_INVOICE_TTL_DAYS ngày, tác vụ tự hủy F7 chưa chạy
+    - **When** Lễ tân/Quản lý gọi API VietQR
+    - **Then** 422 “Hóa đơn chờ đã quá hạn thanh toán, vui lòng lập hóa đơn mới tại quầy.”; không sinh QR, không đổi hóa đơn/gói hoặc ghi phiếu thu. Đọc TTL của chi nhánh, thiếu thì dùng toàn chuỗi; trước hoặc đúng mốc hạn vẫn sinh được QR nếu đủ điều kiện khác. Hóa đơn COUNTER không áp dụng hạn này
 
 
 ---
@@ -230,10 +238,13 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   - Hệ thống trả `ProblemDetail` (404): *"Hóa đơn không tồn tại trên hệ thống."*
 - **E5 – Xung đột dữ liệu đồng thời (409 Conflict):**
   - Tại bước 5a/5c, hai lễ tân cùng mở màn hình và cùng bấm xác nhận thu tiền cho cùng một hóa đơn; phiên bản `invoices.version` bị xung đột (`@Version`).
-  - Trong Service, hệ thống gọi `invoiceRepository.saveAndFlush(invoice)`, bắt `OptimisticLockingFailureException` và ném `ConflictException` (409) với thông báo riêng: *"Hóa đơn này vừa được xác nhận thanh toán bởi một nhân viên khác."* (thay vì thông báo chung của GlobalExceptionHandler).
+  - Trong Service, hệ thống gọi `invoiceRepository.saveAndFlush(invoice)`, bắt `OptimisticLockingFailureException` và ném `ConflictException` (409) với thông báo riêng: *"Dữ liệu hóa đơn vừa được cập nhật bởi thao tác khác. Vui lòng tải lại hóa đơn."* (áp dụng cả khi thao tác đồng thời là thu tiền hoặc hủy).
 - **E6a – Hóa đơn không ở trạng thái chờ thanh toán (422 Unprocessable Content):**
   - Tại bước 4, hóa đơn không có `status = PENDING` (đã là `PAID`, `CANCELLED` hoặc `REFUNDED`).
   - Hệ thống trả `ProblemDetail` (422): *"Hóa đơn đã được thanh toán hoặc đã bị hủy trước đó."*
+- **E6c – Hóa đơn cổng hội viên quá hạn (422 Unprocessable Content):**
+  - Sau khi khóa hội viên và trước khi cập nhật hóa đơn, kiểm tra now > created_at + PENDING_INVOICE_TTL_DAYS ngày đối với MEMBER_PORTAL; đọc TTL theo chi nhánh rồi toàn chuỗi.
+  - Trả `ProblemDetail` (422): *"Hóa đơn chờ đã quá hạn thanh toán, vui lòng lập hóa đơn mới tại quầy."*; không ghi phiếu thu hay đổi hóa đơn/gói. Tác vụ hủy vẫn thuộc F7; hóa đơn COUNTER không áp dụng hạn này.
 - **E6b – Hội viên đã có gói cùng loại đang chờ kích hoạt (422 Unprocessable Content):**
   - Tại bước 5d, kiểm tra lại điều kiện kích hoạt: nếu hội viên đã có một gói khác cùng loại ở trạng thái `UPCOMING` (do một hóa đơn khác vừa được xác nhận thanh toán trước đó), hệ thống từ chối kích hoạt và trả `ProblemDetail` (422): *"Hội viên đã có gói cùng loại đang chờ kích hoạt (UPCOMING). Không thể kích hoạt thêm gói này. Vui lòng liên hệ quản lý để kiểm tra hoặc hoàn tiền hóa đơn."*
 
@@ -307,7 +318,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 
 ##### US-F5.2.1: Ghi nhận thanh toán, kích hoạt gói
 - **User story:** Là **Lễ tân**, tôi muốn **xác nhận đã thu tiền để hóa đơn chuyển PAID và gói tự kích hoạt**, để **không phải kích hoạt tay**.
-- **BR liên quan:** BR-F5-03, BR-F5-04, BR-F5-05; BR-F3-06, BR-F3-11, BR-F3-12; S2, S3, S5, S7, NF6
+- **BR liên quan:** BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07; BR-F3-06, BR-F3-11, BR-F3-12; S2, S3, S5, S7, NF6
 - **Version / Sprint:** v1 / Sprint 2
 - **Issue:** #141
 - **Tiêu chí chấp nhận:**
@@ -328,9 +339,9 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
     - **When** Gọi API xác nhận thu tiền
     - **Then** Quản lý cùng chi nhánh được xử lý 200 như Lễ tân; ba vai trò còn lại trả 403 “Bạn không có quyền thực hiện thao tác này.”; chưa đăng nhập trả 401. Trường hợp từ chối không ghi phiếu thu, không đổi hóa đơn/gói
   - **AC-F5.2.1-05: Dữ liệu thu tiền sai không làm thay đổi hóa đơn** (S5)
-    - **Given** Người gọi đúng quyền; method thiếu hoặc không phải CASH/BANK_TRANSFER; hoặc transactionRef vượt 100 ký tự theo ERD
+    - **Given** Người gọi đúng quyền; ID không phải số nguyên dương; method thiếu hoặc không phải CASH/BANK_TRANSFER; hoặc transactionRef vượt 100 ký tự theo ERD
     - **When** Gửi yêu cầu xác nhận thu tiền
-    - **Then** 400 Bad Request kèm errors theo trường method hoặc transactionRef; không ghi phiếu thu hoặc đổi hóa đơn/gói. transactionRef là tùy chọn với chuyển khoản
+    - **Then** 400 Bad Request kèm errors theo trường id, method hoặc transactionRef; không ghi phiếu thu hoặc đổi hóa đơn/gói. transactionRef là tùy chọn với chuyển khoản
   - **AC-F5.2.1-06: Thu tiền hóa đơn không tồn tại hoặc ngoài chi nhánh** (S3)
     - **Given** Lễ tân/Quản lý CN01 gọi hóa đơn CN02 hoặc ID không tồn tại
     - **When** Gửi yêu cầu xác nhận thu tiền hợp lệ
@@ -338,7 +349,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
   - **AC-F5.2.1-07: Hai nhân viên cùng thu một hóa đơn** (BR-F5-05, NF6)
     - **Given** Hai Lễ tân cùng mở một hóa đơn PENDING và gửi xác nhận gần như đồng thời
     - **When** Hệ thống xử lý hai yêu cầu thu tiền
-    - **Then** Đúng một bên 200; bên còn lại 409 “Hóa đơn này vừa được xác nhận thanh toán bởi một nhân viên khác.”; chỉ có một phiếu thu, gói chỉ kích hoạt một lần; giao diện bên lỗi tải lại hóa đơn
+    - **Then** Đúng một bên 200; bên còn lại 409 “Dữ liệu hóa đơn vừa được cập nhật bởi thao tác khác. Vui lòng tải lại hóa đơn.”; chỉ có một phiếu thu, gói chỉ kích hoạt một lần; giao diện bên lỗi tải lại hóa đơn
   - **AC-F5.2.1-08: Không thu lại hóa đơn đã xử lý**
     - **Given** Hóa đơn cùng chi nhánh đã PAID, CANCELLED hoặc REFUNDED
     - **When** Gửi yêu cầu xác nhận thu tiền lần nữa
@@ -357,6 +368,11 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
     - **When** Xác nhận thu tiền hóa đơn mới
     - **Then** Kế thừa plannedStartDate của S2-07: gói mới UPCOMING từ ngày mai theo giờ Việt Nam, giữ số ngày và số buổi đã chốt; gói cũ giữ nguyên. Đây là xử lý dữ liệu còn trạng thái đang giữ ở F5, không thay quy tắc F9 chuyển PT sang EXPIRED ngay khi dùng buổi cuối; nếu gói cũ đã EXPIRED và không còn gói đang giữ thì áp dụng quy tắc mua mới
 
+
+  - **AC-F5.2.1-12: Không thu tiền hóa đơn cổng hội viên quá hạn** (BR-F5-07)
+    - **Given** Hóa đơn MEMBER_PORTAL còn PENDING đúng phạm vi nhưng now > created_at + PENDING_INVOICE_TTL_DAYS ngày, tác vụ tự hủy F7 chưa chạy
+    - **When** Lễ tân/Quản lý xác nhận thu tiền
+    - **Then** 422 “Hóa đơn chờ đã quá hạn thanh toán, vui lòng lập hóa đơn mới tại quầy.”; hóa đơn/gói vẫn PENDING, không ghi phiếu thu, không kích hoạt gói. TTL đọc theo chi nhánh rồi toàn chuỗi; trước hoặc đúng mốc hạn vẫn được thu nếu đủ điều kiện khác. Hóa đơn COUNTER không áp dụng hạn này
 
 ---
 
@@ -406,7 +422,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 
 #### E. Quy tắc nghiệp vụ liên quan (Business Rules)
 - **BR-F5-06:** Lễ tân và Quản lý chi nhánh chỉ được xem và thao tác trên hóa đơn thuộc chi nhánh của mình; Chủ chuỗi xem được hóa đơn toàn hệ thống (S3).
-- **BR-F5-07:** Hóa đơn lập tại quầy (`source = COUNTER`) **không tự động hủy**; chỉ hóa đơn do hội viên tự tạo từ cổng web (`source = MEMBER_PORTAL` – F7) mới tự hủy sau `PENDING_INVOICE_TTL_DAYS` (3 ngày) ([ADR 0004](../../decisions/0004-thanh-toan-chi-tai-quay.md)).
+- **BR-F5-07:** Hóa đơn lập tại quầy (`source = COUNTER`) **không tự động hủy**; chỉ hóa đơn do hội viên tự tạo từ cổng web (`source = MEMBER_PORTAL` – F7) mới tự hủy sau `PENDING_INVOICE_TTL_DAYS` (mặc định 3 ngày) ([ADR 0004](../../decisions/0004-thanh-toan-chi-tai-quay.md)). Khi now > created_at + TTL ngày, F5 chặn cả thu tiền và sinh VietQR bằng 422 “Hóa đơn chờ đã quá hạn thanh toán, vui lòng lập hóa đơn mới tại quầy.” dù tác vụ F7 chưa hủy. TTL đọc từ cấu hình chi nhánh, thiếu thì dùng toàn chuỗi; COUNTER không áp dụng hạn này (chốt tại nhận xét PR #257 ngày 25/11/2026).
 - **BR-F5-08:** Hủy hóa đơn `PENDING` thì bắt buộc phải đồng thời hủy gói tập `memberships` ở trạng thái `PENDING` tương ứng để không để lại dữ liệu rác.
 - **NF1:** Tải danh sách hóa đơn và tìm kiếm phản hồi dưới 2 giây.
 
@@ -506,8 +522,8 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
     - **Then** Chưa đăng nhập trả 401; sai vai trò trả 403 “Bạn không có quyền thực hiện thao tác này.”; chi tiết/hủy ngoài chi nhánh hoặc không tồn tại trả 404 cùng câu “Hóa đơn không tồn tại trên hệ thống.”. Không thay đổi dữ liệu khi bị từ chối
 
   - **AC-F5.3.1-09: Bộ lọc và phân trang không hợp lệ** (S5)
-    - **Given** Người gọi đúng quyền; page<0, size ngoài 1..100, fromDate>toDate, ngày/enum sai hoặc ID chi tiết không phải số nguyên dương
-    - **When** Gọi danh sách hoặc chi tiết hóa đơn
+    - **Given** Người gọi đúng quyền; page<0, size ngoài 1..100, fromDate>toDate, ngày/enum sai hoặc ID chi tiết/hủy không phải số nguyên dương
+    - **When** Gọi danh sách, chi tiết hoặc hủy hóa đơn
     - **Then** 400 ProblemDetail, kèm errors theo trường khi xác định được; không truy cập dữ liệu ngoài phạm vi. Mặc định page=0,size=20; branchId nếu truyền phải là số nguyên dương
   - **AC-F5.3.1-10: Nhân viên không có phân công chi nhánh hoạt động** (S3)
     - **Given** Lễ tân/Quản lý không có dòng staff hoạt động hoặc chi nhánh được phân công ngừng hoạt động

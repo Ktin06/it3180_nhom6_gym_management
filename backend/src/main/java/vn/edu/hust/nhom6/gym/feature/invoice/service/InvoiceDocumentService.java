@@ -73,13 +73,15 @@ public class InvoiceDocumentService {
      * (UC-F5.1, BR-F5-01, BR-F5-02, G2). Không gọi mạng ra ngoài; chỉ ghép URL theo mẫu SRS.
      *
      * @throws NotFoundException (404) hóa đơn không tồn tại hoặc thuộc chi nhánh khác
-     * @throws BusinessRuleException (422) hóa đơn không ở trạng thái {@code PENDING} hoặc thiếu cấu hình {@code BANK_*}
+     * @throws BusinessRuleException (422) hóa đơn không ở trạng thái {@code PENDING}, MEMBER_PORTAL quá hạn
+     *     hoặc thiếu cấu hình {@code BANK_*}
      */
     public VietQrPaymentDto generateVietQr(CurrentUser me, Long invoiceId) {
         Invoice invoice = invoiceService.getInScope(invoiceId, me);
         if (!invoice.isPending()) {
             throw new BusinessRuleException("Hóa đơn này không ở trạng thái chờ thanh toán.");
         }
+        invoiceService.requireWithinPaymentDeadline(invoice);
 
         Long branchId = invoice.getBranchId();
         String bankId = requireBankConfig(branchId, BANK_ID_KEY);

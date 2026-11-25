@@ -49,6 +49,8 @@ import vn.edu.hust.nhom6.gym.feature.membership.service.MembershipService;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.SellablePackage;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.service.PackageCatalogService;
 import vn.edu.hust.nhom6.gym.feature.staff.service.StaffService;
+import vn.edu.hust.nhom6.gym.feature.systemconfig.service.SystemConfigKeys;
+import vn.edu.hust.nhom6.gym.feature.systemconfig.service.SystemConfigService;
 
 /**
  * Hóa đơn (F5). Lập hóa đơn bán gói ở đây vì hóa đơn là bản ghi gốc; gói hội viên do {@link MembershipService}
@@ -68,6 +70,7 @@ public class InvoiceService {
     private final MembershipService memberships;
     private final StaffService staff;
     private final VnTime time;
+    private final SystemConfigService configs;
 
     // ---------------------------------------------------------------------------------------------
     // S2-07.1: bán và gia hạn gói, tạo hóa đơn PENDING
@@ -134,7 +137,8 @@ public class InvoiceService {
      * </ol>
      *
      * @throws NotFoundException (404) hóa đơn không có hoặc thuộc chi nhánh khác (E4)
-     * @throws BusinessRuleException (422) hóa đơn không PENDING (E6a), đã có gói cùng loại UPCOMING (E6b)
+     * @throws BusinessRuleException (422) hóa đơn không PENDING (E6a), đã có gói cùng loại UPCOMING (E6b),
+     *     hóa đơn MEMBER_PORTAL quá hạn (E6c)
      * @throws ConflictException (409) người khác vừa xác nhận hoặc hủy hóa đơn này (E5)
      */
     @Transactional
@@ -146,12 +150,13 @@ public class InvoiceService {
         if (invoice.getMemberId() != null) {
             members.lockForUpdate(invoice.getMemberId());
         }
+        requireWithinPaymentDeadline(invoice);
 
         invoice.markPaid(time.now());
         try {
             invoices.saveAndFlush(invoice);
         } catch (OptimisticLockingFailureException ex) {
-            throw new ConflictException("Hóa đơn này vừa được xác nhận thanh toán bởi một nhân viên khác.");
+            throw new ConflictException("Dữ liệu hóa đơn vừa được cập nhật bởi thao tác khác. Vui lòng tải lại hóa đơn.");
         }
 
         List<ActivatedMembershipDto> activated = invoice.getItems().stream()
@@ -205,6 +210,17 @@ public class InvoiceService {
             throw invoiceNotFound();
         }
         return invoice;
+    }
+
+    /** BR-F5-07: chặn hóa đơn cổng hội viên quá hạn dù tác vụ tự hủy của F7 chưa chạy. */
+    public void requireWithinPaymentDeadline(Invoice invoice) {
+        if (invoice.getSource() == InvoiceSource.MEMBER_PORTAL) {
+            int ttlDays = configs.getInt(invoice.getBranchId(), SystemConfigKeys.PENDING_INVOICE_TTL_DAYS);
+            if (invoice.getCreatedAt().plusDays(ttlDays).isBefore(time.now())) {
+                throw new BusinessRuleException(
+                    "Hóa đơn chờ đã quá hạn thanh toán, vui lòng lập hóa đơn mới tại quầy.");
+            }
+        }
     }
 
     /** Câu 404 của SRS F5 (UC-F5.1 E3, UC-F5.2 E4, UC-F5.3 E3). */

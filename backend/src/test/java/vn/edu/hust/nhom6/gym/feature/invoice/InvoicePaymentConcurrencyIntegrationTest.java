@@ -50,7 +50,7 @@ import vn.edu.hust.nhom6.gym.feature.member.service.MemberService;
 @Import({TestcontainersConfiguration.class, MutableClockConfiguration.class})
 class InvoicePaymentConcurrencyIntegrationTest {
     static final int ROUNDS = 5;
-    static final String CONFLICT = "Hóa đơn này vừa được xác nhận thanh toán bởi một nhân viên khác.";
+    static final String CONFLICT = "Dữ liệu hóa đơn vừa được cập nhật bởi thao tác khác. Vui lòng tải lại hóa đơn.";
 
     @Autowired MockMvc mvc;
     @Autowired JdbcTemplate jdbc;

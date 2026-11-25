@@ -69,13 +69,14 @@ public class InvoiceController {
         description = "Số tiền là tổng hóa đơn do server tính, client không gửi. Ngày bắt đầu, kết thúc của gói tính "
             + "lại theo ngày thu tiền (giờ Việt Nam), giữ số ngày đã chốt lúc lập hóa đơn.")
     @ApiResponse(responseCode = "200", description = "Đã thu tiền và kích hoạt gói")
-    @ApiResponse(responseCode = "400", description = "method thiếu hoặc khác CASH, BANK_TRANSFER; transactionRef quá dài")
+    @ApiResponse(responseCode = "400", description = "ID hóa đơn không hợp lệ; method thiếu hoặc khác CASH, BANK_TRANSFER; transactionRef quá dài")
     @ApiResponse(responseCode = "401", description = "Chưa đăng nhập hoặc token không hợp lệ")
     @ApiResponse(responseCode = "403", description = "Không phải lễ tân hay quản lý chi nhánh")
     @ApiResponse(responseCode = "404", description = "Hóa đơn không tồn tại hoặc thuộc chi nhánh khác")
-    @ApiResponse(responseCode = "409", description = "Nhân viên khác vừa xác nhận hóa đơn này")
-    @ApiResponse(responseCode = "422", description = "Hóa đơn không còn chờ thanh toán, hoặc đã có gói cùng loại UPCOMING")
-    public PaymentConfirmationDto pay(Authentication auth, @PathVariable Long id,
+    @ApiResponse(responseCode = "409", description = "Dữ liệu hóa đơn vừa được cập nhật bởi thao tác khác")
+    @ApiResponse(responseCode = "422", description = "Hóa đơn không còn chờ thanh toán, hóa đơn MEMBER_PORTAL quá hạn, hoặc đã có gói cùng loại UPCOMING")
+    public PaymentConfirmationDto pay(Authentication auth,
+            @PathVariable @Positive(message = "ID hóa đơn phải lớn hơn 0.") Long id,
             @Valid @RequestBody PayInvoiceRequest request) {
         return invoices.pay(CurrentUser.from(auth), id, request);
     }
@@ -84,12 +85,14 @@ public class InvoiceController {
     @PreAuthorize("hasAnyRole('RECEPTIONIST', 'BRANCH_MANAGER', 'SUPER_ADMIN')")
     @Operation(summary = "Hủy hóa đơn chờ thanh toán, kèm gói PENDING của nó (UC-F5.3 luồng A1)")
     @ApiResponse(responseCode = "200", description = "Đã hủy")
+    @ApiResponse(responseCode = "400", description = "ID hóa đơn không hợp lệ")
     @ApiResponse(responseCode = "401", description = "Chưa đăng nhập hoặc token không hợp lệ")
     @ApiResponse(responseCode = "403", description = "Không phải nhân viên quầy, quản lý hay chủ chuỗi")
     @ApiResponse(responseCode = "404", description = "Hóa đơn không tồn tại hoặc thuộc chi nhánh khác")
     @ApiResponse(responseCode = "409", description = "Người khác vừa thu tiền hoặc hủy hóa đơn này")
     @ApiResponse(responseCode = "422", description = "Hóa đơn không ở trạng thái chờ thanh toán")
-    public CancelledInvoiceDto cancel(Authentication auth, @PathVariable Long id) {
+    public CancelledInvoiceDto cancel(Authentication auth,
+            @PathVariable @Positive(message = "ID hóa đơn phải lớn hơn 0.") Long id) {
         return invoices.cancel(CurrentUser.from(auth), id);
     }
 

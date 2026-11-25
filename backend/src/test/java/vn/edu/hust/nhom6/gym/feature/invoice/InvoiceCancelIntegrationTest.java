@@ -13,6 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -155,6 +156,22 @@ class InvoiceCancelIntegrationTest {
 
     private PackageInvoiceDto sell() {
         return invoiceService.createPackageInvoice(receptionist, f.cn01, member, timePkg, InvoiceSource.COUNTER);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"0", "-1", "abc", "9223372036854775808"})
+    @DisplayName("TC-F5.3.1-09b: ID hủy không phải số nguyên dương hợp lệ trả 400, không thay đổi dữ liệu")
+    void invalidCancelIdIs400(String id) throws Exception {
+        PackageInvoiceDto sale = sell();
+        mvc.perform(put("/api/v1/invoices/{id}/cancel", id)
+                .with(f.bearer(receptionist, UserRole.RECEPTIONIST)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errors.id").isString());
+        assertThat(jdbc.queryForObject("SELECT status FROM invoices WHERE id = ?", String.class,
+            sale.invoiceId())).isEqualTo("PENDING");
+        assertThat(jdbc.queryForObject("SELECT status FROM memberships WHERE id = ?", String.class,
+            sale.membershipId())).isEqualTo("PENDING");
+        assertThat(f.count("payments")).isZero();
     }
 
     private ResultActions cancel(Long userId, UserRole role, Long invoiceId) throws Exception {
