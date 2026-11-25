@@ -6,6 +6,7 @@ import java.util.concurrent.*;
 import java.util.stream.Stream;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -77,6 +78,7 @@ class MemberApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.1.1-01b: tạo hồ sơ chuẩn hóa SĐT, tự sinh mã HV, trả Location và ghi created_by")
     void createNormalizesAndReturnsLocationAndAudit() throws Exception {
         mvc.perform(post("/api/v1/members").with(identity(receptionist, UserRole.RECEPTIONIST))
                 .contentType(MediaType.APPLICATION_JSON).content(createBody("+84 912 345 678")))
@@ -90,6 +92,7 @@ class MemberApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.3.1-01b, TC-F2.3.1-02b: tìm kiếm lọc đúng chi nhánh, bỏ hồ sơ xóa mềm, chủ chuỗi xem toàn chuỗi")
     void searchScopesBothRowsAndCountAndIncludesUnlinkedProfiles() throws Exception {
         profile("HV000901", "0912345601", branch, memberUser, "Nguyễn An");
         profile("HV000902", "0912345602", branch, null, "Nguyễn Bình");
@@ -112,6 +115,7 @@ class MemberApiIntegrationTest {
     }
 
     @ParameterizedTest
+    @DisplayName("TC-F2.3.1-01c: tìm theo mã HV khớp chính xác không phân biệt hoa thường")
     @ValueSource(strings = {"HV000901", "hv000901", "Hv000901", " hv000901 "})
     void memberCodeSearchIsExactAndIgnoresCase(String keyword) throws Exception {
         profile("HV000901", "0912345601", branch, null, "Nguyễn An");
@@ -123,6 +127,7 @@ class MemberApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.3.1-01d: tìm theo phần đầu SĐT tôn trọng chi nhánh, trạng thái, xóa mềm và phân trang")
     void phonePrefixSearchRespectsBranchStatusSoftDeletionAndPagination() throws Exception {
         profile("HV000901", "0912345601", branch, memberUser, "An");
         profile("HV000902", "0912345602", branch, null, "Bình");
@@ -153,6 +158,7 @@ class MemberApiIntegrationTest {
     }
 
     @ParameterizedTest
+    @DisplayName("TC-F2.3.1-01e: chuỗi số ngắn không khớp đầu SĐT trả trang rỗng không lỗi")
     @ValueSource(strings = {"5678", "1234", "56 78", "84912", "+84 123", "+84 912", "8491234567", "+84 912 345 67"})
     void shortNumericKeywordsWithoutMatchingPrefixReturnAnEmptyPage(String keyword) throws Exception {
         profile("HV000901", "0912345678", branch, null, "5678 tên không được khớp");
@@ -165,6 +171,7 @@ class MemberApiIntegrationTest {
     }
 
     @ParameterizedTest
+    @DisplayName("TC-F2.3.1-01f: chuỗi số dài sai định dạng trả trang rỗng")
     @ValueSource(strings = {"1234567890", "09123456789", "+85912345678"})
     void longInvalidNumericKeywordsReturnAnEmptyPage(String keyword) throws Exception {
         profile("HV000901", "0912345678", branch, null, "An");
@@ -175,6 +182,7 @@ class MemberApiIntegrationTest {
     }
 
     @ParameterizedTest
+    @DisplayName("TC-F2.3.1-01g: tìm SĐT đầy đủ chuẩn hóa +84/dấu ngăn cách và khớp chính xác")
     @ValueSource(strings = {"0912345601", "+84 912 345 601", "84912345601", "0912.345-601"})
     void completePhoneSearchStillNormalizesAndMatchesExactly(String keyword) throws Exception {
         profile("HV000901", "0912345601", branch, null, "An");
@@ -186,6 +194,7 @@ class MemberApiIntegrationTest {
     }
 
     @ParameterizedTest
+    @DisplayName("TC-F2.1.1-01c, TC-F2.4.1-01a: tạo và cập nhật chấp nhận ngày sinh quá khứ hoặc bỏ trống")
     @MethodSource("validBirthDates")
     void createAndUpdateAcceptPastOrAbsentBirthDate(LocalDate dob) throws Exception {
         RequestPostProcessor auth = identity(receptionist, UserRole.RECEPTIONIST);
@@ -204,6 +213,7 @@ class MemberApiIntegrationTest {
     }
 
     @ParameterizedTest
+    @DisplayName("TC-F2.1.1-02a, TC-F2.4.1-02a: tạo và cập nhật từ chối ngày sinh hôm nay hoặc tương lai với 400")
     @MethodSource("invalidBirthDates")
     void createAndUpdateRejectTodayOrFutureBirthDateWithoutChanges(LocalDate dob) throws Exception {
         Long id = profile("HV000901", "0912345601", branch, memberUser, "An");
@@ -232,6 +242,7 @@ class MemberApiIntegrationTest {
     static Stream<LocalDate> invalidBirthDates() { return Stream.of(LocalDate.now(), LocalDate.now().plusDays(1)); }
 
     @Test
+    @DisplayName("TC-F2.1.1-03b, TC-F2.3.1-03b, TC-F2.3.1-04a: phân quyền endpoint và bản ghi theo vai trò, chi nhánh và chính chủ")
     void validatesEndpointAndRecordPermissions() throws Exception {
         Long id = profile("HV000901", "0912345601", branch, memberUser, "An");
         mvc.perform(get("/api/v1/members")).andExpect(status().isUnauthorized());
@@ -261,6 +272,7 @@ class MemberApiIntegrationTest {
     }
 
     @ParameterizedTest
+    @DisplayName("TC-F2.1.1-02b, TC-F2.4.1-02b: từ chối họ tên rỗng hoặc quá dài với 400 khi tạo và sửa")
     @MethodSource("invalidFullNames")
     void invalidNamesAreRejectedByRequestValidationOnCreateAndUpdate(String name) throws Exception {
         Long id = profile("HV000901", "0912345601", branch, null, "An");
@@ -276,6 +288,7 @@ class MemberApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.4.1-02c: cập nhật hồ sơ thiếu trường status trả 400")
     void missingUpdateStatusIsRejectedByRequestValidation() throws Exception {
         Long id = profile("HV000901", "0912345601", branch, null, "An");
         mvc.perform(put("/api/v1/members/{id}", id).with(identity(receptionist, UserRole.RECEPTIONIST))
@@ -286,6 +299,7 @@ class MemberApiIntegrationTest {
     }
 
     @ParameterizedTest
+    @DisplayName("S5: ID hội viên không dương trả 400 tại controller")
     @ValueSource(longs = {0, -1})
     void nonPositiveIdsAreRejectedAtController(Long id) throws Exception {
         RequestPostProcessor auth = identity(receptionist, UserRole.RECEPTIONIST);
@@ -299,6 +313,7 @@ class MemberApiIntegrationTest {
     }
 
     @ParameterizedTest
+    @DisplayName("TC-F1.1.1-04i: đăng ký qua cổng nội bộ áp dụng cùng ràng buộc dữ liệu")
     @MethodSource("invalidRegistrationInputs")
     void directRegistrationUsesTheSameDtoConstraints(String name, String phone, LocalDate dob, String field) {
         assertThatThrownBy(() -> registration.registerMemberProfile(memberUser, name, phone, dob, null))
@@ -309,6 +324,7 @@ class MemberApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.1.1-01d, TC-F2.4.1-01b: quản lý chi nhánh tạo, xem, cập nhật và tìm kiếm trong chi nhánh mình")
     void branchManagerCanCreateReadUpdateAndSearchWithinTheirBranch() throws Exception {
         Long manager = user("manager@example.com", "BRANCH_MANAGER");
         staff(manager, branch, "NV03");
@@ -339,6 +355,7 @@ class MemberApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.1.1-02c: SĐT sai định dạng và tham số phân trang sai trả 400, trùng SĐT trả 409")
     void invalidBodiesAndPaginationAre400AndDuplicateIs409() throws Exception {
         RequestPostProcessor auth = identity(receptionist, UserRole.RECEPTIONIST);
         for (String phone : List.of("123", "09123abc78", "")) {
@@ -357,6 +374,7 @@ class MemberApiIntegrationTest {
     }
 
     @ParameterizedTest
+    @DisplayName("TC-F2.1.1-02d, TC-F2.4.1-02d: SĐT chưa đủ 10 số không được lưu khi tạo hoặc cập nhật")
     @ValueSource(strings = {"123", "5678", "84912"})
     void incompletePhoneCannotBeSavedOnCreateOrUpdate(String phone) throws Exception {
         Long id = profile("HV000901", "0912345601", branch, null, "An");
@@ -373,6 +391,7 @@ class MemberApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.4.1-01c, TC-F2.4.1-03e, TC-F2.4.1-04e: giữ nguyên SĐT khi sửa, ngừng hoạt động khóa tài khoản và kích hoạt lại")
     void updateSamePhoneAndDisableRevokeAndActivate() throws Exception {
         Long id = profile("HV000901", "0912345601", branch, memberUser, "An");
         refreshToken(memberUser);
@@ -391,6 +410,7 @@ class MemberApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.4.1-03f: lỗi thao tác tài khoản rollback hồ sơ, tài khoản và token")
     void failedAccountOperationRollsBackMemberUserAndTokens() throws Exception {
         Long id = profile("HV000901", "0912345601", branch, memberUser, "An");
         refreshToken(memberUser);
@@ -407,6 +427,7 @@ class MemberApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.1.1-02b, TC-F1.1.1-03b, TC-F1.1.1-05c: tạo hồ sơ trong giao dịch chung và rollback khi trùng")
     void registrationPortJoinsCallerTransactionAndRollsBackOnDuplicate() {
         TransactionTemplate transaction = new TransactionTemplate(transactions);
         Long userId = transaction.execute(status -> {
@@ -424,6 +445,7 @@ class MemberApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.1.1-02e: hai yêu cầu tạo cùng SĐT đồng thời chỉ một thành công 201, một nhận 409")
     void concurrentRequestsCannotCreateDuplicatePhone() throws Exception {
         RequestPostProcessor auth = identity(admin, UserRole.SUPER_ADMIN);
         CountDownLatch start = new CountDownLatch(1);
@@ -444,6 +466,7 @@ class MemberApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.3.1-01h: thoát ký tự đại diện % _ khi tìm theo họ tên và lọc trạng thái")
     void escapesNameWildcardsAndFiltersStatus() throws Exception {
         Long id = profile("HV000901", "0912345601", branch, null, "An%_ Bình");
         profile("HV000902", "0912345602", branch, null, "An khác");
@@ -455,6 +478,7 @@ class MemberApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.4.1-02e: sửa trùng SĐT người khác trả 409 và nhân viên chưa gắn chi nhánh trả 403")
     void duplicateUpdateIs409AndUnassignedStaffCannotAccess() throws Exception {
         Long id = profile("HV000901", "0912345601", branch, null, "An");
         profile("HV000902", "0912345602", branch, null, "Bình");
@@ -467,6 +491,7 @@ class MemberApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.4.1-05a: cập nhật trạng thái đồng thời luôn giữ hồ sơ và tài khoản khớp nhau")
     void concurrentUpdatesKeepMemberAndAccountStatusesConsistent() throws Exception {
         Long id = profile("HV000901", "0912345601", branch, memberUser, "An");
         RequestPostProcessor auth = identity(admin, UserRole.SUPER_ADMIN);
@@ -495,6 +520,7 @@ class MemberApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.3.1-01i: tra cứu dưới 2 giây với 10.000 hồ sơ theo NF1")
     void measuresSearchOnTenThousandProfiles() throws Exception {
         jdbc.update("""
             INSERT INTO members(member_code,phone,home_branch_id,full_name)

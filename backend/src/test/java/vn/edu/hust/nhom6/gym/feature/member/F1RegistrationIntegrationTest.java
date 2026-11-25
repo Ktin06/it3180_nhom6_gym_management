@@ -6,6 +6,7 @@ import java.util.Set;
 import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -60,6 +61,7 @@ class F1RegistrationIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.1.1-01c, TC-F2.3.1-03a: đăng ký thật tạo user và hồ sơ hội viên, JWT đọc được hồ sơ chính mình")
     void realF1RegistrationCreatesProfileAndJwtCanReadOwnF2Profile() throws Exception {
         var response = mvc.perform(post("/api/v1/auth/register")
                 .contentType(MediaType.APPLICATION_JSON).content(body("an@example.com", "+84 912 345 678")))
@@ -85,6 +87,7 @@ class F1RegistrationIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.1.1-02a: trùng SĐT trong bảng members từ chối 409 và rollback tài khoản")
     void phoneAlreadyInRealMembersTableRejectsRegistrationAndRollsBackUser() throws Exception {
         Long branchId = jdbc.queryForObject("SELECT id FROM branches WHERE code = 'CN01'", Long.class);
         jdbc.update("""
@@ -102,6 +105,7 @@ class F1RegistrationIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.1.1-05a: lỗi sau khi lưu hồ sơ rollback cả tài khoản lẫn hồ sơ")
     void failureAfterPersistingProfileRollsBackBothUserAndMember() throws Exception {
         doAnswer(invocation -> {
             invocation.callRealMethod();
@@ -118,6 +122,7 @@ class F1RegistrationIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.3.1-01a, TC-F2.3.1-02a: danh sách hội viên lấy batch email từ F1 và gồm cả hồ sơ chưa có tài khoản")
     void listGetsBatchEmailsThroughRealF1AndIncludesUnlinkedProfile() throws Exception {
         Session first = register("an@example.com", "0912345601");
         Session second = register("binh@example.com", "0912345602");
@@ -138,6 +143,7 @@ class F1RegistrationIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-04b, TC-F2.4.1-03b, TC-F2.4.1-04b: ngừng hoạt động khóa tài khoản, thu hồi mọi phiên; kích hoạt lại không khôi phục token cũ")
     void disablingRevokesAllMemberSessionsAndReactivationDoesNotRestoreOldTokens() throws Exception {
         Session member = register("member@example.com", "0912345601");
         Session other = register("other@example.com", "0912345602");
@@ -173,6 +179,7 @@ class F1RegistrationIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.4.1-04c: kích hoạt lại hồ sơ không mở khóa tài khoản đang LOCKED")
     void activatingMemberDoesNotUnlockCurrentlyLockedAccount() throws Exception {
         Session member = register("locked@example.com", "0912345601");
         jdbc.update("UPDATE members SET status = 'INACTIVE' WHERE id = ?", member.memberId());
@@ -186,6 +193,7 @@ class F1RegistrationIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.4.1-03c: lỗi sau khi F1 vô hiệu hóa tài khoản rollback cả hồ sơ, tài khoản và thu hồi token")
     void failureAfterRealF1DisableRollsBackMemberAccountAndTokenRevocation() throws Exception {
         Session member = register("rollback-disable@example.com", "0912345601");
         doAnswer(invocation -> {
@@ -210,6 +218,7 @@ class F1RegistrationIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.4.1-04d: lỗi sau khi F1 kích hoạt tài khoản rollback cả hồ sơ và tài khoản")
     void failureAfterRealF1ActivationRollsBackMemberAndAccount() throws Exception {
         Session member = register("rollback-activate@example.com", "0912345601");
         String adminToken = adminToken();
@@ -227,6 +236,7 @@ class F1RegistrationIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F2.4.1-03d: lỗi sau khi lưu hồ sơ rollback trạng thái hồ sơ, tài khoản và thu hồi token")
     void failureAfterSavingMemberRollsBackProfileAccountAndTokenRevocation() throws Exception {
         Session member = register("rollback-after-save@example.com", "0912345601");
         String adminToken = adminToken();
@@ -249,12 +259,14 @@ class F1RegistrationIntegrationTest {
     }
 
     @Test
+    @DisplayName("BR-F2-08: thiếu tài khoản liên kết khi vô hiệu hóa trả NotFoundException")
     void adapterPropagatesRealF1NotFoundExceptionForMissingAccount() {
         assertThatThrownBy(() -> accounts.disableAccount(Long.MAX_VALUE))
             .isInstanceOf(NotFoundException.class).hasMessageContaining("Không tìm thấy tài khoản liên kết");
     }
 
     @Test
+    @DisplayName("TC-F2.1.1-01a: lễ tân có chi nhánh tạo và quản lý hồ sơ tại quầy trong chi nhánh mình")
     void realReceptionistJwtCreatesAndManagesCounterProfileInAssignedBranch() throws Exception {
         String token = receptionistToken(true);
         Long branchId = jdbc.queryForObject("SELECT id FROM branches WHERE code = 'CN01'", Long.class);
@@ -273,6 +285,7 @@ class F1RegistrationIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-03a, TC-F2.1.1-03a: lễ tân chưa được gắn chi nhánh bị chặn 403 khi tạo hoặc xem danh sách")
     void realReceptionistJwtWithoutStaffAssignmentCannotCreateOrListMembers() throws Exception {
         String token = receptionistToken(false);
         mvc.perform(get("/api/v1/members").header("Authorization", "Bearer " + token))
@@ -285,6 +298,7 @@ class F1RegistrationIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.1.1-05b: chi nhánh mặc định ngừng hoạt động từ chối đăng ký và rollback tài khoản")
     void inactiveDefaultBranchRejectsRealRegistrationAndRollsBackNewAccount() throws Exception {
         jdbc.update("UPDATE branches SET status = 'INACTIVE' WHERE code = 'CN01'");
 
