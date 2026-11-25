@@ -39,6 +39,7 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F2.1.1-01e: tạo hồ sơ lấy chi nhánh nhân viên và chuẩn hóa SĐT")
     void createsWithStaffBranchAndNormalizedPhone() {
         when(staff.requireBranchId(10L)).thenReturn(7L);
         when(repository.nextMemberCode()).thenReturn(123L);
@@ -53,6 +54,7 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F2.1.1-02f: trùng SĐT không tiêu tốn sequence mã hội viên")
     void duplicatePhoneDoesNotConsumeSequence() {
         when(staff.requireBranchId(10L)).thenReturn(7L);
         when(repository.existsByPhone("0912345678")).thenReturn(true);
@@ -63,6 +65,7 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.1.1-02c, TC-F2.1.1-02g: trùng SĐT đồng thời trả 409 kèm hướng dẫn liên hệ quầy")
     void concurrentDuplicatePhoneStillGetsFrontDeskGuidance() {
         when(staff.requireBranchId(10L)).thenReturn(7L);
         when(repository.nextMemberCode()).thenReturn(1L);
@@ -74,6 +77,7 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("BR-F2-06: vi phạm ràng buộc khác không báo nhầm thành trùng SĐT")
     void otherConstraintViolationsAreNotReportedAsDuplicatePhone() {
         when(staff.requireBranchId(10L)).thenReturn(7L);
         when(repository.nextMemberCode()).thenReturn(1L);
@@ -84,6 +88,7 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("BR-F2-05: hết dải 6 chữ số mã hội viên bị từ chối, không cắt mã")
     void exhaustedSequenceDoesNotTruncateCode() {
         when(staff.requireBranchId(10L)).thenReturn(7L);
         when(repository.nextMemberCode()).thenReturn(1000000L);
@@ -93,6 +98,7 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F2.4.1-02f: cập nhật hồ sơ chi nhánh khác trả 404 và không tác động tài khoản")
     void outsideBranchIsNotFoundAndDoesNotModifyAccount() {
         Member member = new Member();
         member.setHomeBranchId(8L);
@@ -105,6 +111,7 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F2.3.1-03c: hội viên xem hồ sơ người khác trả 404")
     void memberCannotReadSomeoneElse() {
         Member member = new Member();
         member.setUserId(99L);
@@ -115,6 +122,7 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F2.4.1-03g: lỗi chuyển trạng thái tài khoản không làm đổi dữ liệu hồ sơ")
     void failedAccountTransitionDoesNotMutateNamePhoneOrStatus() {
         Member member = linkedMember();
         when(repository.findForUpdate(1L)).thenReturn(Optional.of(member));
@@ -133,6 +141,7 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F2.4.1-01d: sửa thông tin không đổi trạng thái không gọi khóa hoặc mở tài khoản")
     void editingProfileWithoutStatusTransitionDoesNotDisableOrActivateAccount() {
         Member member = linkedMember();
         when(repository.findForUpdate(1L)).thenReturn(Optional.of(member));

@@ -12,7 +12,7 @@ describe('validation F1', () => {
     expect(isValidPhone('849123456789')).toBe(false)
   })
 
-  it('khớp quy tắc chữ ASCII và số của backend, vẫn cho Unicode cùng chữ ASCII', () => {
+  it('TC-F1.1.1-04k: khớp quy tắc chữ ASCII và số của backend, vẫn cho Unicode cùng chữ ASCII', () => {
     expect(isValidPassword('ĐườngGym123')).toBe(true)
     expect(isValidPassword('duonggym')).toBe(false)
     expect(isValidPassword('Gym123')).toBe(false)
@@ -22,7 +22,7 @@ describe('validation F1', () => {
     expect(isValidPassword('😀😀😀😀a1')).toBe(false)
   })
 
-  it('giới hạn đúng 72 byte UTF-8 thay vì đếm ký tự', () => {
+  it('TC-F1.1.1-04l: giới hạn đúng 72 byte UTF-8 thay vì đếm ký tự', () => {
     expect(isValidPassword(`${'a'.repeat(71)}1`)).toBe(true)
     expect(isValidPassword(`${'a'.repeat(72)}1`)).toBe(false)
     expect(isValidPassword(`${'ầ'.repeat(22)}abc123`)).toBe(true)

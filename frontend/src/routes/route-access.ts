@@ -28,6 +28,7 @@ export const ROUTE_ACCESS = {
   // Trang chức năng của nhân viên.
   '/members': { roles: MEMBER_MANAGEMENT_ROLES }, // F2
   '/packages': { roles: MEMBER_MANAGEMENT_ROLES }, // F3
+  '/ban-goi': { roles: ['RECEPTIONIST'] }, // F3
 } satisfies RouteAccessTable
 
 /** Đường dẫn đã khai báo quyền; viết sai tên thì TypeScript báo lỗi. */
