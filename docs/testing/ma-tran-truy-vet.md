@@ -8,7 +8,7 @@
 
 | Chức năng | UC | US | AC | AC đã có TC | AC chưa có TC | TC |
 | --- | --- | --- | --- | --- | --- | --- |
-| F1 | 6 | 6 | 29 | 18 | 11 | 91 |
+| F1 | 6 | 6 | 29 | 24 | 5 | 118 |
 | F2 | 5 | 6 | 31 | 12 | 19 | 57 |
 | F3 | 5 | 6 | 43 | 35 | 8 | 64 |
 | F4 | 5 | 5 | 37 | 0 | 37 | 0 |
@@ -18,7 +18,7 @@
 | F8 | 9 | 9 | 55 | 29 | 26 | 38 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **42** | **251** | **94** | **157** | **250** |
+| **Tổng** | **57** | **42** | **251** | **100** | **151** | **277** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -47,12 +47,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F1.4.1-02 | Từ chối khi mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ | US-F1.4.1 |
 | AC-F1.4.1-03 | Từ chối khi dữ liệu đầu vào sai định dạng hoặc mật khẩu mới không đạt chuẩn bảo mật | US-F1.4.1 |
 | AC-F1.4.1-04 | Chặn truy cập khi chưa đăng nhập và mở đúng khung giao diện cho mọi vai trò đã đăng nhập | US-F1.4.1 |
-| AC-F1.5.1-01 | Yêu cầu quên mật khẩu cho tài khoản ACTIVE tạo token băm SHA-256 hạn 30 phút, gửi email và trả 200 câu chung | US-F1.5.1 |
-| AC-F1.5.1-02 | Không lộ email khi email không tồn tại, tài khoản không ACTIVE hoặc gửi email gặp lỗi | US-F1.5.1 |
-| AC-F1.5.1-03 | Đặt lại mật khẩu với token hợp lệ cập nhật mật khẩu, ghi used_at, mở khóa tạm và thu hồi toàn bộ refresh token | US-F1.5.1 |
-| AC-F1.5.1-04 | Từ chối token sai, hết hạn sau 30 phút, đã dùng (kể cả gửi đồng thời) hoặc tài khoản không ACTIVE với 422 | US-F1.5.1 |
-| AC-F1.5.1-05 | Từ chối dữ liệu đầu vào sai định dạng, thiếu token trên URL hoặc mật khẩu mới không đạt chuẩn S1 | US-F1.5.1 |
-| AC-F1.5.1-06 | Gửi email qua API HTTPS của Brevo khi có cấu hình khóa API và chỉ ghi log ở môi trường phát triển khi khóa rỗng | US-F1.5.1 |
 | AC-F2.2.1-01 | Tạo tài khoản và gửi email đặt mật khẩu hạn 72 giờ | US-F2.2.1 |
 | AC-F2.2.1-02 | Hội viên đặt mật khẩu lần đầu rồi đăng nhập; quá 72 giờ liên kết hết hạn | US-F2.2.1 |
 | AC-F2.2.1-03 | Từ chối khi hồ sơ đã có tài khoản | US-F2.2.1 |
@@ -301,13 +295,40 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F1.4.1-03 Từ chối khi dữ liệu đầu vào sai định dạng hoặc mật khẩu mới không đạt chuẩn bảo mật (BR-F1-03) ❌ chưa có TC
     - AC-F1.4.1-04 Chặn truy cập khi chưa đăng nhập và mở đúng khung giao diện cho mọi vai trò đã đăng nhập (BR-F1-05) ❌ chưa có TC
 - **UC-F1.5** Quên mật khẩu và đặt lại mật khẩu (Sprint 2)
-  - **US-F1.5.1** Quên và đặt lại mật khẩu (#121)
-    - AC-F1.5.1-01 Yêu cầu quên mật khẩu cho tài khoản ACTIVE tạo token băm SHA-256 hạn 30 phút, gửi email và trả 200 câu chung (BR-F1-01, BR-F1-08) ❌ chưa có TC
-    - AC-F1.5.1-02 Không lộ email khi email không tồn tại, tài khoản không ACTIVE hoặc gửi email gặp lỗi (BR-F1-08) ❌ chưa có TC
-    - AC-F1.5.1-03 Đặt lại mật khẩu với token hợp lệ cập nhật mật khẩu, ghi used_at, mở khóa tạm và thu hồi toàn bộ refresh token (BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08) ❌ chưa có TC
-    - AC-F1.5.1-04 Từ chối token sai, hết hạn sau 30 phút, đã dùng (kể cả gửi đồng thời) hoặc tài khoản không ACTIVE với 422 (BR-F1-08) ❌ chưa có TC
-    - AC-F1.5.1-05 Từ chối dữ liệu đầu vào sai định dạng, thiếu token trên URL hoặc mật khẩu mới không đạt chuẩn S1 (BR-F1-01, BR-F1-03) ❌ chưa có TC
-    - AC-F1.5.1-06 Gửi email qua API HTTPS của Brevo khi có cấu hình khóa API và chỉ ghi log ở môi trường phát triển khi khóa rỗng (BR-F1-08) ❌ chưa có TC
+  - **US-F1.5.1** Quên và đặt lại mật khẩu (#121) ✅ mọi AC có TC
+    - AC-F1.5.1-01 Yêu cầu quên mật khẩu cho tài khoản ACTIVE tạo token băm SHA-256 hạn 30 phút, gửi email và trả 200 câu chung (BR-F1-01, BR-F1-08)
+      - TC-F1.5.1-01a `PasswordResetServiceTest#emailActiveTaoPasswordResetBamHan30PhutVaGuiEmail`
+      - TC-F1.5.1-01b `AuthControllerTest#quenMatKhauCongKhaiTra200CauChung`
+      - TC-F1.5.1-01c `features/auth/pages/ForgotPasswordPage.test.tsx › TC-F1.5.1-01c: nhập email ở /quen-mat-khau gửi email chuẩn h`
+      - TC-F1.5.1-01d `features/auth/pages/LoginPage.test.tsx › TC-F1.5.1-01d: LoginPage có liên kết Quên mật khẩu? tới /que`
+      - TC-F1.5.1-01e `features/auth/api/auth-api.test.ts › TC-F1.5.1-01e: forgotPassword và resetPassword gọi API công `
+      - TC-F1.5.1-01f `PasswordResetServiceTest#phatHanhTokenTheoUserIdVaThoiHan72GioChoS236`
+    - AC-F1.5.1-02 Không lộ email khi email không tồn tại, tài khoản không ACTIVE hoặc gửi email gặp lỗi (BR-F1-08)
+      - TC-F1.5.1-02a `PasswordResetServiceTest#khongLoEmailKhiKhongTonTaiHoacKhongActive`
+      - TC-F1.5.1-02b `PasswordResetServiceTest#guiEmailLoiVanKhongNemNgoaiLeVaKhongGhiTokenRaLog`
+    - AC-F1.5.1-03 Đặt lại mật khẩu với token hợp lệ cập nhật mật khẩu, ghi used_at, mở khóa tạm và thu hồi toàn bộ refresh token (BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08)
+      - TC-F1.5.1-03a `PasswordResetServiceTest#datLaiMatKhauDungTokenKhoaUserGhiUsedAtXoaKhoaTamVaThuHoiPhien`
+      - TC-F1.5.1-03b `AuthControllerTest#datLaiMatKhauHopLeCongKhaiTra204`
+      - TC-F1.5.1-03c `PasswordResetIntegrationTest#luongTronVenQuenVaDatLaiMatKhau`
+      - TC-F1.5.1-03d `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-03d: Trang Đặt mật khẩu gửi token và mật khẩu mới `
+      - TC-F1.5.1-03e `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-03e: /quen-mat-khau và /dat-lai-mat-khau là trang `
+      - TC-F1.5.1-03f `PasswordResetIntegrationTest#datLaiMatKhauVoHieuHoaTatCaLienKetQuenMatKhauKhacCuaCungUser`
+    - AC-F1.5.1-04 Từ chối token sai, hết hạn sau 30 phút, đã dùng (kể cả gửi đồng thời) hoặc tài khoản không ACTIVE với 422 (BR-F1-08)
+      - TC-F1.5.1-04a `PasswordResetServiceTest#tokenSaiDaDungHoacHetHanTra422`
+      - TC-F1.5.1-04b `AuthControllerTest#datLaiMatKhauTokenLoiTra422`
+      - TC-F1.5.1-04c `PasswordResetIntegrationTest#tokenHetHanSau30PhutTra422VaEmailKhongTonTaiTra200`
+      - TC-F1.5.1-04d `PasswordResetIntegrationTest#datLaiMatKhauDongThoiCungMotTokenChiMotLanThanhCong`
+      - TC-F1.5.1-04e `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-04e: lỗi 422 hết hạn hoặc đã dùng hiển thị đúng câ`
+    - AC-F1.5.1-05 Từ chối dữ liệu đầu vào sai định dạng, thiếu token trên URL hoặc mật khẩu mới không đạt chuẩn S1 (BR-F1-01, BR-F1-03)
+      - TC-F1.5.1-05a `AuthControllerTest#quenMatKhauEmailSaiDinhDangTra400`
+      - TC-F1.5.1-05b `AuthControllerTest#datLaiMatKhauSaiChuanS1Tra400`
+      - TC-F1.5.1-05c `features/auth/pages/ForgotPasswordPage.test.tsx › TC-F1.5.1-05c: email sai định dạng ở trình duyệt không gọi A`
+      - TC-F1.5.1-05d `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-05d: thiếu hoặc rỗng token trên URL báo lỗi ngay, `
+      - TC-F1.5.1-05e `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-05e: kiểm tra chuẩn S1, hai mật khẩu không khớp kh`
+    - AC-F1.5.1-06 Gửi email qua API HTTPS của Brevo khi có cấu hình khóa API và chỉ ghi log ở môi trường phát triển khi khóa rỗng (BR-F1-08)
+      - TC-F1.5.1-06a `BrevoEmailSenderTest#guiEmailQuaBrevoBangRestClientKhongGoiMangThat`
+      - TC-F1.5.1-06b `BrevoEmailSenderTest#khoaBrevoRongThiBeanLaLogEmailSender`
+      - TC-F1.5.1-06c `BrevoEmailSenderTest#coKhoaBrevoThiBeanLaBrevoEmailSender`
 - **UC-F1.6** Quản lý trạng thái tài khoản & Phân quyền truy cập API
   - **US-F1.6.1** Trạng thái tài khoản và phân quyền (#122) ✅ mọi AC có TC
     - AC-F1.6.1-01 Chưa đăng nhập hoặc token không hợp lệ bị từ chối 401 tiếng Việt (BR-F1-04, BR-F1-05)
@@ -881,6 +902,33 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F1.3.1-04d | AC-F1.3.1-04 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthSessionConcurrencyIntegrationTest#dangXuatBangJwtCuaTaiKhoanAKhongThuHoiHoacXoaCookieCuaTaiKhoanB` |
 | TC-F1.3.1-04e | AC-F1.3.1-04 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthSessionConcurrencyIntegrationTest#dangXuatBangJwtHetHanCuaTaiKhoanAVanGiuPhienCuaTaiKhoanB` |
 | TC-F1.3.1-04f | AC-F1.3.1-04 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `auth/account-change.test.tsx › TC-F1.3.1-04f: refresh khác tài khoản đóng trang bảo vệ và đ` |
+| TC-F1.5.1-01a | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#emailActiveTaoPasswordResetBamHan30PhutVaGuiEmail` |
+| TC-F1.5.1-01b | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `AuthControllerTest#quenMatKhauCongKhaiTra200CauChung` |
+| TC-F1.5.1-01c | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `features/auth/pages/ForgotPasswordPage.test.tsx › TC-F1.5.1-01c: nhập email ở /quen-mat-khau gửi email chuẩn h` |
+| TC-F1.5.1-01d | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `features/auth/pages/LoginPage.test.tsx › TC-F1.5.1-01d: LoginPage có liên kết Quên mật khẩu? tới /que` |
+| TC-F1.5.1-01e | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `features/auth/api/auth-api.test.ts › TC-F1.5.1-01e: forgotPassword và resetPassword gọi API công ` |
+| TC-F1.5.1-01f | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#phatHanhTokenTheoUserIdVaThoiHan72GioChoS236` |
+| TC-F1.5.1-02a | AC-F1.5.1-02 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#khongLoEmailKhiKhongTonTaiHoacKhongActive` |
+| TC-F1.5.1-02b | AC-F1.5.1-02 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#guiEmailLoiVanKhongNemNgoaiLeVaKhongGhiTokenRaLog` |
+| TC-F1.5.1-03a | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `PasswordResetServiceTest#datLaiMatKhauDungTokenKhoaUserGhiUsedAtXoaKhoaTamVaThuHoiPhien` |
+| TC-F1.5.1-03b | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `AuthControllerTest#datLaiMatKhauHopLeCongKhaiTra204` |
+| TC-F1.5.1-03c | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `PasswordResetIntegrationTest#luongTronVenQuenVaDatLaiMatKhau` |
+| TC-F1.5.1-03d | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-03d: Trang Đặt mật khẩu gửi token và mật khẩu mới ` |
+| TC-F1.5.1-03e | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-03e: /quen-mat-khau và /dat-lai-mat-khau là trang ` |
+| TC-F1.5.1-03f | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `PasswordResetIntegrationTest#datLaiMatKhauVoHieuHoaTatCaLienKetQuenMatKhauKhacCuaCungUser` |
+| TC-F1.5.1-04a | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#tokenSaiDaDungHoacHetHanTra422` |
+| TC-F1.5.1-04b | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `AuthControllerTest#datLaiMatKhauTokenLoiTra422` |
+| TC-F1.5.1-04c | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetIntegrationTest#tokenHetHanSau30PhutTra422VaEmailKhongTonTaiTra200` |
+| TC-F1.5.1-04d | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetIntegrationTest#datLaiMatKhauDongThoiCungMotTokenChiMotLanThanhCong` |
+| TC-F1.5.1-04e | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-04e: lỗi 422 hết hạn hoặc đã dùng hiển thị đúng câ` |
+| TC-F1.5.1-05a | AC-F1.5.1-05 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08 | `AuthControllerTest#quenMatKhauEmailSaiDinhDangTra400` |
+| TC-F1.5.1-05b | AC-F1.5.1-05 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08 | `AuthControllerTest#datLaiMatKhauSaiChuanS1Tra400` |
+| TC-F1.5.1-05c | AC-F1.5.1-05 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08 | `features/auth/pages/ForgotPasswordPage.test.tsx › TC-F1.5.1-05c: email sai định dạng ở trình duyệt không gọi A` |
+| TC-F1.5.1-05d | AC-F1.5.1-05 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-05d: thiếu hoặc rỗng token trên URL báo lỗi ngay, ` |
+| TC-F1.5.1-05e | AC-F1.5.1-05 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-05e: kiểm tra chuẩn S1, hai mật khẩu không khớp kh` |
+| TC-F1.5.1-06a | AC-F1.5.1-06 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `BrevoEmailSenderTest#guiEmailQuaBrevoBangRestClientKhongGoiMangThat` |
+| TC-F1.5.1-06b | AC-F1.5.1-06 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `BrevoEmailSenderTest#khoaBrevoRongThiBeanLaLogEmailSender` |
+| TC-F1.5.1-06c | AC-F1.5.1-06 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `BrevoEmailSenderTest#coKhoaBrevoThiBeanLaBrevoEmailSender` |
 | TC-F1.6.1-01a | AC-F1.6.1-01 | US-F1.6.1 | UC-F1.6 | BR-F1-04, BR-F1-05 | `AuthServiceTest#getCurrentUserDocThongTinTuJwtVaNem401KhiClaimKhongHopLe` |
 | TC-F1.6.1-01b | AC-F1.6.1-01 | US-F1.6.1 | UC-F1.6 | BR-F1-04, BR-F1-05 | `JwtSecurityIntegrationTest#chuaGuiTokenTra401ProblemDetailTiengViet` |
 | TC-F1.6.1-01c | AC-F1.6.1-01 | US-F1.6.1 | UC-F1.6 | BR-F1-04, BR-F1-05 | `JwtSecurityIntegrationTest#tokenSaiChuKyTra401ProblemDetailTiengViet` |
