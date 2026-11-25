@@ -1,4 +1,5 @@
 -- Nhan vien demo. Khong gan ID truc tiep.
+-- Luu y: file R__ chi chay lai khi noi dung thay doi, nen cac ngay tuong doi duoc chot tai thoi diem Flyway chay.
 INSERT INTO staff (user_id,branch_id,staff_code,full_name,phone,base_salary,hourly_rate,commission_rate,specialties)
 SELECT u.id,b.id,v.staff_code,v.full_name,v.phone,v.base_salary,v.hourly_rate,v.commission_rate,v.specialties
 FROM (VALUES
@@ -32,6 +33,43 @@ WHERE NOT EXISTS (SELECT 1 FROM class_schedules cs WHERE cs.branch_id=b.id AND c
 INSERT INTO trainer_availabilities (trainer_id,branch_id,day_of_week,start_time,end_time)
 SELECT s.id,b.id,v.dow,v.starts,v.ends
 FROM (VALUES ('PT999001',3,TIME '08:00',TIME '12:00'),('PT999002',5,TIME '13:00',TIME '17:00')) AS v(staff_code,dow,starts,ends)
+JOIN staff s ON s.staff_code=v.staff_code JOIN branches b ON b.code='CN01'
+WHERE NOT EXISTS (SELECT 1 FROM trainer_availabilities a WHERE a.trainer_id=s.id AND a.branch_id=b.id
+ AND a.day_of_week=v.dow AND a.start_time=v.starts AND a.end_time=v.ends);
+
+-- Bo sung S2-29.1: nhan vien CN02, 1 phong tap CN02, va lich ranh 08:00-20:00 moi ngay trong tuan cho trainer1@, trainer2@.
+INSERT INTO staff (user_id,branch_id,staff_code,full_name,phone,base_salary,hourly_rate,commission_rate,specialties)
+SELECT u.id,b.id,v.staff_code,v.full_name,v.phone,v.base_salary,NULL::integer,NULL::numeric,NULL::varchar
+FROM (VALUES
+ ('manager2@example.com','NV999003','Quản lý CN02','0912000001',15000000),
+ ('receptionist2@example.com','NV999004','Lễ tân CN02','0912000002',7000000)
+) AS v(email,staff_code,full_name,phone,base_salary)
+JOIN users u ON u.email=v.email CROSS JOIN branches b WHERE b.code='CN02'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO rooms (branch_id,name,type,capacity)
+SELECT b.id,'Khu Gym CN02','GYM_FLOOR',80 FROM branches b WHERE b.code='CN02'
+ON CONFLICT (branch_id,name) DO NOTHING;
+
+INSERT INTO trainer_availabilities (trainer_id,branch_id,day_of_week,start_time,end_time)
+SELECT s.id,b.id,v.dow,v.starts,v.ends
+FROM (VALUES
+ ('PT999001',1,TIME '08:00',TIME '20:00'),
+ ('PT999001',2,TIME '08:00',TIME '20:00'),
+ ('PT999001',3,TIME '12:00',TIME '20:00'),
+ ('PT999001',4,TIME '08:00',TIME '20:00'),
+ ('PT999001',5,TIME '08:00',TIME '20:00'),
+ ('PT999001',6,TIME '08:00',TIME '20:00'),
+ ('PT999001',7,TIME '08:00',TIME '20:00'),
+ ('PT999002',1,TIME '08:00',TIME '20:00'),
+ ('PT999002',2,TIME '08:00',TIME '20:00'),
+ ('PT999002',3,TIME '08:00',TIME '20:00'),
+ ('PT999002',4,TIME '08:00',TIME '20:00'),
+ ('PT999002',5,TIME '08:00',TIME '13:00'),
+ ('PT999002',5,TIME '17:00',TIME '20:00'),
+ ('PT999002',6,TIME '08:00',TIME '20:00'),
+ ('PT999002',7,TIME '08:00',TIME '20:00')
+) AS v(staff_code,dow,starts,ends)
 JOIN staff s ON s.staff_code=v.staff_code JOIN branches b ON b.code='CN01'
 WHERE NOT EXISTS (SELECT 1 FROM trainer_availabilities a WHERE a.trainer_id=s.id AND a.branch_id=b.id
  AND a.day_of_week=v.dow AND a.start_time=v.starts AND a.end_time=v.ends);

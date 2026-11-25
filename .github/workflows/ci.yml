@@ -107,3 +107,43 @@ jobs:
       - name: Build
         if: needs.changes.outputs.frontend == 'true'
         run: npm run build
+
+  auth-tabs:
+    name: Phiên nhiều tab
+    needs: [changes, backend, frontend]
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Cài thư viện và Chromium
+        working-directory: frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Chuẩn bị runner Python
+        run: |
+          python3 -m venv /tmp/gym-auth-tabs-python
+          /tmp/gym-auth-tabs-python/bin/pip install bcrypt
+
+      - name: Thử hai tab với backend và PostgreSQL riêng
+        run: /tmp/gym-auth-tabs-python/bin/python frontend/e2e/run-multi-tab-session.py
+
+      - name: Hiện log đã che bí mật nếu kiểm thử thất bại
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          for directory in sorted(Path('/tmp').glob('gym-auth-tabs-*')):
+              if directory.is_dir():
+                  for log in sorted(directory.glob('*.log')):
+                      print(f'\n{log.name}\n{log.read_text()[-30000:]}')
+          PY
