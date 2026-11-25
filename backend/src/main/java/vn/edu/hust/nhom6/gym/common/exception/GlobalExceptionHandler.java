@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -86,6 +87,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ProblemDetail handleOptimisticLock(OptimisticLockingFailureException ex) {
+        return lockConflict();
+    }
+
+    @ExceptionHandler(PessimisticLockingFailureException.class)
+    public ProblemDetail handlePessimisticLock(PessimisticLockingFailureException ex) {
+        return lockConflict();
+    }
+
+    private static ProblemDetail lockConflict() {
         return problem(HttpStatus.CONFLICT, "Xung đột dữ liệu",
             "Dữ liệu vừa được người khác cập nhật. Vui lòng tải lại và thử lại.");
     }
