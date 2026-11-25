@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -72,6 +73,7 @@ class JwtSecurityIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-01b: chưa gửi token trả 401 ProblemDetail tiếng Việt")
     void chuaGuiTokenTra401ProblemDetailTiengViet() throws Exception {
         mockMvc.perform(get("/api/v1/auth/me"))
             .andExpect(status().isUnauthorized())
@@ -82,6 +84,7 @@ class JwtSecurityIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-01c: token sai chữ ký trả 401 ProblemDetail tiếng Việt")
     void tokenSaiChuKyTra401ProblemDetailTiengViet() throws Exception {
         String wrongSignatureToken = JwtTestSupport.accessTokenWithSecret(
             1L, "member@example.com", UserRole.MEMBER,
@@ -96,6 +99,7 @@ class JwtSecurityIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-01d: token hết hạn trả 401 ProblemDetail tiếng Việt")
     void tokenHetHanTra401ProblemDetailTiengViet() throws Exception {
         String expiredToken = JwtTestSupport.expiredAccessToken(2L, "member@example.com", UserRole.MEMBER);
 
@@ -108,6 +112,7 @@ class JwtSecurityIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.2.1-04f, TC-F1.6.1-02b: token hợp lệ lấy thông tin tài khoản hiện tại đúng vai trò")
     void tokenHopLeLayThongTinTaiKhoanHienTaiThanhCong() throws Exception {
         String bearer = JwtTestSupport.bearerToken(15L, "reception@example.com", UserRole.RECEPTIONIST);
 
@@ -120,6 +125,7 @@ class JwtSecurityIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-02c: gọi API đủ vai trò trả 200")
     void goiApiKhiDuVaiTroTra200() throws Exception {
         mockMvc.perform(get("/api/v1/test-rbac/staff-only")
                 .header(HttpHeaders.AUTHORIZATION, JwtTestSupport.bearerToken(UserRole.RECEPTIONIST)))
@@ -128,6 +134,7 @@ class JwtSecurityIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-02d: hội viên gọi API nhân viên trả 403 ProblemDetail tiếng Việt")
     void goiApiKhiKhongDuVaiTroTra403ProblemDetailTiengViet() throws Exception {
         mockMvc.perform(get("/api/v1/test-rbac/staff-only")
                 .header(HttpHeaders.AUTHORIZATION, JwtTestSupport.bearerToken(UserRole.MEMBER)))
@@ -139,6 +146,7 @@ class JwtSecurityIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-02e: huấn luyện viên gọi API nhân viên quầy trả 403")
     void goiApiNhanVienBangVaiTroTrainerKhongDuQuyenTra403() throws Exception {
         mockMvc.perform(get("/api/v1/test-rbac/staff-only")
                 .header(HttpHeaders.AUTHORIZATION, JwtTestSupport.bearerToken(UserRole.TRAINER)))
@@ -148,6 +156,7 @@ class JwtSecurityIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-01e: token thiếu claim role bị chặn 401")
     void tokenThieuClaimRoleBiChanVoi401KhiGoiApi() throws Exception {
         String tokenWithoutRole = JwtTestSupport.accessTokenWithoutRole(99L, "norole@example.com");
 
@@ -165,6 +174,7 @@ class JwtSecurityIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-01f: token có role lạ hoặc sub không phải số trả 401 thay vì 500")
     void tokenCoRoleLaHoacSubKhongPhaiSoTra401ThayVi500() throws Exception {
         String unknownRoleToken = JwtTestSupport.accessTokenWithCustomClaims("15", "hacker@example.com", "HACKER");
         mockMvc.perform(get("/api/v1/auth/me")
