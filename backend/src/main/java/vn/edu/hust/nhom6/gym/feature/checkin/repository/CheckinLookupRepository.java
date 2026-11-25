@@ -44,7 +44,7 @@ public class CheckinLookupRepository {
     }
 
     public boolean hasAvatar(Long memberId) {
-        return !entities.createNativeQuery("SELECT id FROM member_avatars WHERE member_id = :id", Long.class)
+        return !entities.createNativeQuery("SELECT 1 FROM member_avatars WHERE member_id = :id")
             .setParameter("id", memberId).getResultList().isEmpty();
     }
 

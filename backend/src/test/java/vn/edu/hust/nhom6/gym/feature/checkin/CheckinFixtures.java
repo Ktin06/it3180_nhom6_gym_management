@@ -54,6 +54,7 @@ final class CheckinFixtures {
                 created_at timestamptz NOT NULL DEFAULT now(),
                 updated_at timestamptz NOT NULL DEFAULT now()
             )""");
+        jdbc.execute("ALTER TABLE member_avatars ADD COLUMN IF NOT EXISTS id bigint GENERATED ALWAYS AS IDENTITY");
         jdbc.execute("TRUNCATE TABLE member_avatars CASCADE");
         jdbc.update("UPDATE branches SET open_time = '06:00', close_time = '22:00' WHERE id IN (?, ?)", cn01, cn02);
         receptionist = b.receptionist;
