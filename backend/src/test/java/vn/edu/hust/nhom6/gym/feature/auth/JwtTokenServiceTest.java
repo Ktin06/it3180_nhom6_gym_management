@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -25,6 +26,7 @@ class JwtTokenServiceTest {
     private final SecurityConfig securityConfig = new SecurityConfig();
 
     @Test
+    @DisplayName("S2: tạo và giải mã JWT HS256 đủ sub, email, role và hạn 15 phút")
     void taoVaGiaiMaJwtHs256ChuaDuSubEmailRoleVaHan15Phut() {
         JwtEncoder encoder = securityConfig.jwtEncoder(JwtTestSupport.DEFAULT_TEST_SECRET);
         JwtDecoder decoder = securityConfig.jwtDecoder(JwtTestSupport.DEFAULT_TEST_SECRET);
@@ -41,6 +43,7 @@ class JwtTokenServiceTest {
     }
 
     @Test
+    @DisplayName("S3: chuyển claim role sang ROLE_<vai trò> cho đủ 5 vai trò")
     void chuyenClaimRoleThanhQuyenRolePrefixCho5VaiTro() {
         JwtDecoder decoder = securityConfig.jwtDecoder(JwtTestSupport.DEFAULT_TEST_SECRET);
         JwtAuthenticationConverter converter = securityConfig.jwtAuthenticationConverter();
@@ -59,6 +62,7 @@ class JwtTokenServiceTest {
     }
 
     @Test
+    @DisplayName("S2: token hết hạn bị JwtDecoder từ chối")
     void tokenHetHanBiJwtDecoderTuChoi() {
         JwtDecoder decoder = securityConfig.jwtDecoder(JwtTestSupport.DEFAULT_TEST_SECRET);
         String expiredToken = JwtTestSupport.expiredAccessToken(1L, "member@example.com", UserRole.MEMBER);
@@ -68,6 +72,7 @@ class JwtTokenServiceTest {
     }
 
     @Test
+    @DisplayName("S2: token thiếu role, role lạ hoặc sub không phải số bị JwtDecoder từ chối")
     void tokenThieuRoleHoacRoleLaHoacSubKhongPhaiSoBiJwtDecoderTuChoi() {
         JwtDecoder decoder = securityConfig.jwtDecoder(JwtTestSupport.DEFAULT_TEST_SECRET);
 
@@ -85,6 +90,7 @@ class JwtTokenServiceTest {
     }
 
     @Test
+    @DisplayName("S6: JWT secret ngắn hơn 32 byte bị từ chối khi khởi tạo")
     void jwtSecretNganHon32ByteBiTuChoiKhiKhoiTao() {
         assertThatThrownBy(() -> securityConfig.jwtDecoder("khoa-qua-ngan"))
             .isInstanceOf(IllegalStateException.class)
