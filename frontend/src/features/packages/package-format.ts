@@ -13,3 +13,9 @@ export const vndFormat = new Intl.NumberFormat('vi-VN', {
   currency: 'VND',
   maximumFractionDigits: 0,
 })
+
+/** Định dạng ngày ISO (YYYY-MM-DD) sang DD/MM/YYYY mà không lệch múi giờ. */
+export function formatVnDate(isoDate: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate)
+  return match ? `${match[3]}/${match[2]}/${match[1]}` : isoDate
+}
