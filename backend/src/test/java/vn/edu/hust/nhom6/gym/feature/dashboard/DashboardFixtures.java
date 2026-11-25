@@ -43,6 +43,17 @@ final class DashboardFixtures {
 
     void reset() {
         sale.reset();
+        jdbc.execute("""
+            CREATE TABLE IF NOT EXISTS member_avatars (
+                member_id BIGINT PRIMARY KEY REFERENCES members(id) ON DELETE CASCADE,
+                content BYTEA NOT NULL,
+                size_bytes INT NOT NULL,
+                uploaded_by BIGINT REFERENCES users(id),
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        """);
+        jdbc.execute("TRUNCATE TABLE member_avatars CASCADE");
         cn01 = sale.cn01;
         cn02 = sale.cn02;
         seq = 0;
