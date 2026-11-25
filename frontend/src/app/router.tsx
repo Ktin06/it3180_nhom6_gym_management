@@ -22,6 +22,7 @@ import {
 } from '../features/classes/ClassCalendarPages'
 import { TrainerAttendancePage } from '../features/classes/TrainerAttendancePage'
 import { PublicPricingPage } from '../features/packages/pages/PublicPricingPage'
+import { SellPackagePage } from '../features/packages/pages/SellPackagePage'
 
 /** Route cần đăng nhập; vai trò được vào đọc từ ROUTE_ACCESS (routes/route-access.ts). */
 function guarded(path: ProtectedPath, element: ReactNode): RouteObject {
@@ -61,6 +62,7 @@ export const routes: RouteObject[] = [
       guarded('/packages', <PackagesPage />),
       guarded('/trainer/classes', <TrainerClassCalendarPage />),
       guarded('/trainer/classes/:sessionId/attendance', <TrainerAttendancePage />),
+      guarded('/ban-goi', <SellPackagePage />),
       // Trang mới của nhân viên: thêm một dòng guarded(...) ở đây.
     ],
   },

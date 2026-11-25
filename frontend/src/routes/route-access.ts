@@ -31,6 +31,7 @@ export const ROUTE_ACCESS = {
   '/member/classes': { roles: ['MEMBER'] },
   '/trainer/classes': { roles: ['TRAINER'] },
   '/trainer/classes/:sessionId/attendance': { roles: ['TRAINER'] },
+  '/ban-goi': { roles: ['RECEPTIONIST'] }, // F3
 } satisfies RouteAccessTable
 
 /** Đường dẫn đã khai báo quyền; viết sai tên thì TypeScript báo lỗi. */

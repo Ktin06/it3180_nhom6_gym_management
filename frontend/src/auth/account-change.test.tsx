@@ -33,7 +33,7 @@ function AccountPage() {
   )
 }
 
-it('refresh khác tài khoản đóng trang bảo vệ và đưa về login, không gửi thao tác bằng B', async () => {
+it('TC-F1.3.1-04f: refresh khác tài khoản đóng trang bảo vệ và đưa về login, không gửi thao tác bằng B', async () => {
   beginSession()
   requestRefresh.mockReset().mockResolvedValueOnce({ accessToken: jwt('15') })
   const requests: { url: string | undefined; bearer: unknown }[] = []
