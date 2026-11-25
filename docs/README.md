@@ -22,7 +22,7 @@ Mục lục thư mục `docs/`. Khi các tài liệu mâu thuẫn nhau, thứ t�
 | [erd/xuat-ban-erd.md](design/erd/xuat-ban-erd.md) | Bản xuất dbdiagram.io PDF/PNG và hình theo nhóm; cách tái tạo và đưa vào báo cáo LaTeX |
 | [function/](design/function/) | Sơ đồ phân cấp chức năng ([ADR 0009](decisions/0009-bo-so-do-phan-tich-thiet-ke.md)): bản tổng quát (hệ thống → 5 version → F1–F20) và bốn bản chi tiết v1, v2, v3, v4–v5 tới từng use case |
 | [use-case/](design/use-case/) | Sơ đồ use case (sẽ bổ sung) |
-| [Sơ đồ lớp phân tích F1–F10](design/class/so-do-lop-phan-tich-f1-f10.drawio.svg) | Lớp nghiệp vụ và quan hệ chính toàn hệ thống |
+| [Sơ đồ lớp phân tích F1–F10](design/class/so-do-lop-phan-tich-f1-f10.drawio.svg) | Lớp nghiệp vụ và quan hệ chính trong phạm vi F1–F10 |
 | [activity/](design/activity/) | Sơ đồ hoạt động (sẽ bổ sung) |
 | [wireframe/](design/wireframe/) | Wireframe màn hình (sẽ bổ sung) |
 
