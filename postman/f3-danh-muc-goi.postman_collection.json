@@ -1076,8 +1076,8 @@
       ]
     },
     {
-      "name": "S2-07 ? B?n v? gia h?n t?i qu?y (#182)",
-      "description": "D?ng receptionistToken ri?ng. C?u h?nh ID s? h?p l? v? expectedSalePrice b?ng gi? th?t. Ch?y 201 tr??c 422 g?i ch?; ch?n h?i vi?n ch?a c? g?i ch?. C?c request n?y t?o d? li?u local, kh?ng t? x?a. baseUrl bao g?m /api/v1.",
+      "name": "S2-07 – Bán và gia hạn tại quầy (#182)",
+      "description": "Dùng receptionistToken riêng. Cấu hình ID số hợp lệ và expectedSalePrice bằng giá thật. Chạy 201 trước 422 gói chờ; chọn hội viên chưa có gói chờ. Các request này tạo dữ liệu local, không tự xóa. baseUrl bao gồm /api/v1.",
       "auth": {
         "type": "bearer",
         "bearer": [
@@ -1090,7 +1090,7 @@
       },
       "item": [
         {
-          "name": "TC-F3.5.1-12a 200 ? G?i ?ang gi? v? ng?y gia h?n",
+          "name": "TC-F3.5.1-12a 200 – Gói đang giữ và ngày gia hạn",
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/memberships?memberId={{memberId}}"
@@ -1102,14 +1102,14 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
-                  "pm.test('Danh s?ch tr?ng th?i ??ng',()=>{pm.expect(pm.response.json()).to.be.an('array'); pm.response.json().forEach(m=>pm.expect(['PENDING','UPCOMING','ACTIVE','FROZEN']).to.include(m.status));});"
+                  "pm.test('Danh sách trạng thái đúng',()=>{pm.expect(pm.response.json()).to.be.an('array'); pm.response.json().forEach(m=>pm.expect(['PENDING','UPCOMING','ACTIVE','FROZEN']).to.include(m.status));});"
                 ]
               }
             }
           ]
         },
         {
-          "name": "TC-F3.5.1-01a, TC-F3.5.1-13a 201 ? B?n/gia h?n, b? qua gi? client",
+          "name": "TC-F3.5.1-01a, TC-F3.5.1-13a 201 – Bán/gia hạn, bỏ qua giá client",
           "request": {
             "method": "POST",
             "url": "{{baseUrl}}/invoices",
@@ -1136,8 +1136,8 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
-                  "pm.test('H?a ??n v? g?i ch?', () => { const r=pm.response.json(); pm.expect(r.status).to.eql('PENDING'); pm.expect(r.membershipStatus).to.eql('PENDING'); pm.expect(r.invoiceCode).to.match(/^HD[0-9]{6}$/); pm.expect(r.discount).to.eql(0); pm.expect(r.total).to.eql(r.subtotal); });",
-                  "pm.test('Gi? server ??ng b?ng gi?', () => { const expected=pm.variables.get('expectedSalePrice'); pm.expect(String(expected || '')).to.match(/^[0-9]+$/); pm.expect(pm.response.json().total).to.eql(Number(expected)); });",
+                  "pm.test('Hóa đơn và gói chờ', () => { const r=pm.response.json(); pm.expect(r.status).to.eql('PENDING'); pm.expect(r.membershipStatus).to.eql('PENDING'); pm.expect(r.invoiceCode).to.match(/^HD[0-9]{6}$/); pm.expect(r.discount).to.eql(0); pm.expect(r.total).to.eql(r.subtotal); });",
+                  "pm.test('Giá server đúng bảng giá', () => { const expected=pm.variables.get('expectedSalePrice'); pm.expect(String(expected || '')).to.match(/^[0-9]+$/); pm.expect(pm.response.json().total).to.eql(Number(expected)); });",
                   "if(pm.response.code===201) { const r=pm.response.json(); pm.collectionVariables.set('invoiceId',String(r.invoiceId)); pm.collectionVariables.set('membershipId',String(r.membershipId)); }"
                 ]
               }
@@ -1145,7 +1145,7 @@
           ]
         },
         {
-          "name": "TC-F3.5.1-06a 422 ? G?i l?i khi ?? c? g?i ch?",
+          "name": "TC-F3.5.1-06a 422 – Gửi lại khi đã có gói chờ",
           "request": {
             "method": "POST",
             "url": "{{baseUrl}}/invoices",
@@ -1172,14 +1172,14 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('L?i ProblemDetail', () => { const r = pm.response.json(); pm.expect(r.status).to.eql(pm.response.code); pm.expect(r.detail).to.be.a('string'); });"
+                  "pm.test('Lỗi ProblemDetail', () => { const r = pm.response.json(); pm.expect(r.status).to.eql(pm.response.code); pm.expect(r.detail).to.be.a('string'); });"
                 ]
               }
             }
           ]
         },
         {
-          "name": "TC-F3.5.1-08b 422 ? G?i ng?ng b?n",
+          "name": "TC-F3.5.1-08b 422 – Gói ngừng bán",
           "request": {
             "method": "POST",
             "url": "{{baseUrl}}/invoices",
@@ -1206,14 +1206,14 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('L?i ProblemDetail', () => { const r = pm.response.json(); pm.expect(r.status).to.eql(pm.response.code); pm.expect(r.detail).to.be.a('string'); });"
+                  "pm.test('Lỗi ProblemDetail', () => { const r = pm.response.json(); pm.expect(r.status).to.eql(pm.response.code); pm.expect(r.detail).to.be.a('string'); });"
                 ]
               }
             }
           ]
         },
         {
-          "name": "TC-F3.5.1-08a 422 ? H?i vi?n ng?ng ho?t ??ng",
+          "name": "TC-F3.5.1-08a 422 – Hội viên ngừng hoạt động",
           "request": {
             "method": "POST",
             "url": "{{baseUrl}}/invoices",
@@ -1240,14 +1240,14 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('L?i ProblemDetail', () => { const r = pm.response.json(); pm.expect(r.status).to.eql(pm.response.code); pm.expect(r.detail).to.be.a('string'); });"
+                  "pm.test('Lỗi ProblemDetail', () => { const r = pm.response.json(); pm.expect(r.status).to.eql(pm.response.code); pm.expect(r.detail).to.be.a('string'); });"
                 ]
               }
             }
           ]
         },
         {
-          "name": "TC-F3.5.1-08d 404 ? G?i kh?ng t?n t?i",
+          "name": "TC-F3.5.1-08d 404 – Gói không tồn tại",
           "request": {
             "method": "POST",
             "url": "{{baseUrl}}/invoices",
@@ -1280,7 +1280,7 @@
           ]
         },
         {
-          "name": "TC-F3.5.1-08d 404 ? H?i vi?n kh?ng t?n t?i",
+          "name": "TC-F3.5.1-08d 404 – Hội viên không tồn tại",
           "request": {
             "method": "POST",
             "url": "{{baseUrl}}/invoices",
@@ -1313,7 +1313,7 @@
           ]
         },
         {
-          "name": "TC-F3.5.1-11a 400 ? Thi?u memberId v? items",
+          "name": "TC-F3.5.1-11a 400 – Thiếu memberId và items",
           "request": {
             "method": "POST",
             "url": "{{baseUrl}}/invoices",
@@ -1340,15 +1340,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
-                  "pm.test('C? errors theo tr??ng',()=>pm.expect(pm.response.json().errors).to.be.an('object'));",
-                  "pm.test('L?i ProblemDetail', () => { const r = pm.response.json(); pm.expect(r.status).to.eql(pm.response.code); pm.expect(r.detail).to.be.a('string'); });"
+                  "pm.test('Có errors theo trường',()=>pm.expect(pm.response.json().errors).to.be.an('object'));",
+                  "pm.test('Lỗi ProblemDetail', () => { const r = pm.response.json(); pm.expect(r.status).to.eql(pm.response.code); pm.expect(r.detail).to.be.a('string'); });"
                 ]
               }
             }
           ]
         },
         {
-          "name": "TC-F3.5.1-11b 403 ? Qu?n l? kh?ng ???c b?n",
+          "name": "TC-F3.5.1-11b 403 – Quản lý không được bán",
           "request": {
             "method": "POST",
             "url": "{{baseUrl}}/invoices",
@@ -1391,7 +1391,7 @@
           ]
         },
         {
-          "name": "TC-F3.5.1-11c 401 ? Kh?ng token",
+          "name": "TC-F3.5.1-11c 401 – Không token",
           "request": {
             "method": "POST",
             "url": "{{baseUrl}}/invoices",
