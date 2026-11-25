@@ -177,6 +177,61 @@ class MemberServiceTest {
         assertThatThrownBy(() -> service.requireByUserId(43L)).isInstanceOf(ForbiddenException.class);
     }
 
+    @Test
+    @DisplayName("TC-F2.2.1-01d: gắn tài khoản mới vào hồ sơ ACTIVE chưa có user_id trong cùng giao dịch")
+    void linkAccountAttachesNewUserToActiveUnlinkedMember() {
+        Member member = new Member();
+        org.springframework.test.util.ReflectionTestUtils.setField(member, "id", 5L);
+        member.setHomeBranchId(7L);
+        member.setStatus(MemberStatus.ACTIVE);
+        member.setUserId(null);
+
+        when(repository.findForUpdate(5L)).thenReturn(Optional.of(member));
+        when(staff.requireBranchId(10L)).thenReturn(7L);
+        when(accounts.createMemberAccount("member.new@example.com")).thenReturn(55L);
+        when(repository.saveAndFlush(member)).thenReturn(member);
+
+        CreateMemberAccountResponse res = service.linkAccount(receptionist, 5L, " Member.New@Example.com ");
+
+        assertThat(res.memberId()).isEqualTo(5L);
+        assertThat(res.userId()).isEqualTo(55L);
+        assertThat(res.email()).isEqualTo("member.new@example.com");
+        assertThat(member.getUserId()).isEqualTo(55L);
+        verify(repository).saveAndFlush(member);
+    }
+
+    @Test
+    @DisplayName("TC-F2.2.1-05c: hồ sơ INACTIVE bị từ chối 422 và không gọi tạo tài khoản")
+    void linkAccountRejectsInactiveMemberWith422() {
+        Member member = new Member();
+        member.setHomeBranchId(7L);
+        member.setStatus(MemberStatus.INACTIVE);
+        member.setUserId(null);
+
+        when(repository.findForUpdate(6L)).thenReturn(Optional.of(member));
+        when(staff.requireBranchId(10L)).thenReturn(7L);
+
+        assertThatThrownBy(() -> service.linkAccount(receptionist, 6L, "inactive@example.com"))
+            .isInstanceOf(BusinessRuleException.class)
+            .hasMessage(MemberService.INACTIVE_MEMBER_CANNOT_CREATE_ACCOUNT);
+        verify(accounts, never()).createMemberAccount(any());
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("TC-F2.2.1-03c: hồ sơ đã có user_id bị từ chối 409 và không gọi tạo tài khoản")
+    void linkAccountRejectsAlreadyLinkedMemberWith409() {
+        Member member = linkedMember();
+        when(repository.findForUpdate(7L)).thenReturn(Optional.of(member));
+        when(staff.requireBranchId(10L)).thenReturn(7L);
+
+        assertThatThrownBy(() -> service.linkAccount(receptionist, 7L, "another@example.com"))
+            .isInstanceOf(ConflictException.class)
+            .hasMessage(MemberService.MEMBER_ALREADY_HAS_ACCOUNT);
+        verify(accounts, never()).createMemberAccount(any());
+        verify(repository, never()).saveAndFlush(any());
+    }
+
     private Member linkedMember() {
         Member member = new Member();
         member.setUserId(42L);

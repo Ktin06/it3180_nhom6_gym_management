@@ -9,7 +9,7 @@
 | Chức năng | UC | US | AC | AC đã có TC | AC chưa có TC | TC |
 | --- | --- | --- | --- | --- | --- | --- |
 | F1 | 6 | 6 | 29 | 24 | 5 | 118 |
-| F2 | 5 | 6 | 31 | 20 | 11 | 78 |
+| F2 | 5 | 6 | 31 | 27 | 4 | 95 |
 | F3 | 5 | 6 | 45 | 43 | 2 | 113 |
 | F4 | 5 | 5 | 37 | 0 | 37 | 0 |
 | F5 | 5 | 5 | 41 | 0 | 41 | 0 |
@@ -18,7 +18,7 @@
 | F8 | 9 | 9 | 55 | 29 | 26 | 38 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **42** | **254** | **116** | **138** | **347** |
+| **Tổng** | **57** | **42** | **254** | **123** | **131** | **364** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -47,13 +47,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F1.4.1-02 | Từ chối khi mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ | US-F1.4.1 |
 | AC-F1.4.1-03 | Từ chối khi dữ liệu đầu vào sai định dạng hoặc mật khẩu mới không đạt chuẩn bảo mật | US-F1.4.1 |
 | AC-F1.4.1-04 | Chặn truy cập khi chưa đăng nhập và mở đúng khung giao diện cho mọi vai trò đã đăng nhập | US-F1.4.1 |
-| AC-F2.2.1-01 | Tạo tài khoản và gửi email đặt mật khẩu hạn 72 giờ | US-F2.2.1 |
-| AC-F2.2.1-02 | Hội viên đặt mật khẩu lần đầu rồi đăng nhập; quá 72 giờ liên kết hết hạn | US-F2.2.1 |
-| AC-F2.2.1-03 | Từ chối khi hồ sơ đã có tài khoản | US-F2.2.1 |
-| AC-F2.2.1-04 | Từ chối khi email đã được sử dụng (kể cả đồng thời) | US-F2.2.1 |
-| AC-F2.2.1-05 | Từ chối khi hồ sơ đang ngừng hoạt động | US-F2.2.1 |
-| AC-F2.2.1-06 | Gửi email gặp lỗi vẫn giữ tài khoản và ghi log không chứa token | US-F2.2.1 |
-| AC-F2.2.1-07 | Kiểm tra quyền theo vai trò, chi nhánh và dữ liệu đầu vào | US-F2.2.1 |
 | AC-F2.5.1-01 | Ghi chỉ số cơ thể thành công với ít nhất một chỉ số | US-F2.5.1 |
 | AC-F2.5.1-02 | Từ chối dữ liệu chỉ số cơ thể không hợp lệ | US-F2.5.1 |
 | AC-F2.5.1-03 | Xem lịch sử chỉ số cơ thể sắp xếp mới nhất trước | US-F2.5.1 |
@@ -369,14 +362,31 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F2.1.1-03a `F1RegistrationIntegrationTest#realReceptionistJwtWithoutStaffAssignmentCannotCreateOrListMembers`
       - TC-F2.1.1-03b `MemberApiIntegrationTest#validatesEndpointAndRecordPermissions`
 - **UC-F2.2** Tạo tài khoản đăng nhập cho hồ sơ hội viên có sẵn
-  - **US-F2.2.1** Tạo tài khoản cho hồ sơ có sẵn (#124)
-    - AC-F2.2.1-01 Tạo tài khoản và gửi email đặt mật khẩu hạn 72 giờ (BR-F2-06, BR-F2-11) ❌ chưa có TC
-    - AC-F2.2.1-02 Hội viên đặt mật khẩu lần đầu rồi đăng nhập; quá 72 giờ liên kết hết hạn (BR-F2-11) ❌ chưa có TC
-    - AC-F2.2.1-03 Từ chối khi hồ sơ đã có tài khoản (BR-F2-11) ❌ chưa có TC
-    - AC-F2.2.1-04 Từ chối khi email đã được sử dụng (kể cả đồng thời) (BR-F2-06, BR-F2-11) ❌ chưa có TC
-    - AC-F2.2.1-05 Từ chối khi hồ sơ đang ngừng hoạt động (BR-F2-11) ❌ chưa có TC
-    - AC-F2.2.1-06 Gửi email gặp lỗi vẫn giữ tài khoản và ghi log không chứa token (BR-F2-11) ❌ chưa có TC
-    - AC-F2.2.1-07 Kiểm tra quyền theo vai trò, chi nhánh và dữ liệu đầu vào (BR-F2-10, BR-F2-11) ❌ chưa có TC
+  - **US-F2.2.1** Tạo tài khoản cho hồ sơ có sẵn (#124) ✅ mọi AC có TC
+    - AC-F2.2.1-01 Tạo tài khoản và gửi email đặt mật khẩu hạn 72 giờ (BR-F2-06, BR-F2-11)
+      - TC-F2.2.1-01c `AccountServiceTest#createMemberAccountChuanHoaEmailVaBamMatKhauNgauNhien`
+      - TC-F2.2.1-01d `MemberServiceTest#linkAccountAttachesNewUserToActiveUnlinkedMember`
+      - TC-F2.2.1-01e `MemberAccountServiceTest#createAccountIssues72HourTokenAndSendsActivationEmail`
+      - TC-F2.2.1-01f `MemberAccountIntegrationTest#createAccountPersistsUserLinkTokenAndSendsActivationEmail`
+    - AC-F2.2.1-02 Hội viên đặt mật khẩu lần đầu rồi đăng nhập; quá 72 giờ liên kết hết hạn (BR-F2-11)
+      - TC-F2.2.1-02a `MemberAccountIntegrationTest#resetPasswordWithin72HoursAndLoginSucceedsWhileExpiredReturns422`
+    - AC-F2.2.1-03 Từ chối khi hồ sơ đã có tài khoản (BR-F2-11)
+      - TC-F2.2.1-03c `MemberServiceTest#linkAccountRejectsAlreadyLinkedMemberWith409`
+      - TC-F2.2.1-03d `MemberAccountIntegrationTest#memberAlreadyHasAccountReturns409`
+      - TC-F2.2.1-03e `MemberAccountIntegrationTest#concurrentCreateAccountForSameMemberCreatesSingleUser`
+    - AC-F2.2.1-04 Từ chối khi email đã được sử dụng (kể cả đồng thời) (BR-F2-06, BR-F2-11)
+      - TC-F2.2.1-04b `AccountServiceTest#createMemberAccountTrungEmailTra409`
+      - TC-F2.2.1-04c `MemberAccountIntegrationTest#emailAlreadyUsedByAnotherAccountReturns409`
+      - TC-F2.2.1-04d `MemberAccountIntegrationTest#concurrentCreateAccountWithSameEmailRejectsSecondWith409`
+    - AC-F2.2.1-05 Từ chối khi hồ sơ đang ngừng hoạt động (BR-F2-11)
+      - TC-F2.2.1-05c `MemberServiceTest#linkAccountRejectsInactiveMemberWith422`
+      - TC-F2.2.1-05d `MemberAccountIntegrationTest#inactiveMemberReturns422`
+    - AC-F2.2.1-06 Gửi email gặp lỗi vẫn giữ tài khoản và ghi log không chứa token (BR-F2-11)
+      - TC-F2.2.1-06a `MemberAccountServiceTest#emailFailureDoesNotFailAccountCreationAndDoesNotLogToken`
+      - TC-F2.2.1-06b `MemberAccountIntegrationTest#emailProviderFailureStillReturns200AndCommitsAccount`
+    - AC-F2.2.1-07 Kiểm tra quyền theo vai trò, chi nhánh và dữ liệu đầu vào (BR-F2-10, BR-F2-11)
+      - TC-F2.2.1-07d `MemberAccountIntegrationTest#enforcesRoleAndBranchPermissions`
+      - TC-F2.2.1-07e `MemberAccountIntegrationTest#invalidEmailOrNonPositiveMemberIdReturns400`
 - **UC-F2.3** Tra cứu, lọc và xem chi tiết hồ sơ hội viên
   - **US-F2.3.1** Tra cứu và xem hồ sơ hội viên (#125) ✅ mọi AC có TC
     - AC-F2.3.1-01 Tìm kiếm, lọc, phân trang trong chi nhánh mình đạt hiệu năng dưới 2 giây (BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10)
@@ -1027,6 +1037,23 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F2.1.1-02i | AC-F2.1.1-02 | US-F2.1.1 | UC-F2.1 | BR-F2-06, BR-F2-05, BR-F2-07, BR-F2-10 | `features/members/components/MemberFormModal.test.tsx › TC-F2.1.1-02i: giữ form và dữ liệu đã nhập khi server từ chố` |
 | TC-F2.1.1-03a | AC-F2.1.1-03 | US-F2.1.1 | UC-F2.1 | BR-F2-10, BR-F2-05, BR-F2-06, BR-F2-07 | `F1RegistrationIntegrationTest#realReceptionistJwtWithoutStaffAssignmentCannotCreateOrListMembers` |
 | TC-F2.1.1-03b | AC-F2.1.1-03 | US-F2.1.1 | UC-F2.1 | BR-F2-10, BR-F2-05, BR-F2-06, BR-F2-07 | `MemberApiIntegrationTest#validatesEndpointAndRecordPermissions` |
+| TC-F2.2.1-01c | AC-F2.2.1-01 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `AccountServiceTest#createMemberAccountChuanHoaEmailVaBamMatKhauNgauNhien` |
+| TC-F2.2.1-01d | AC-F2.2.1-01 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberServiceTest#linkAccountAttachesNewUserToActiveUnlinkedMember` |
+| TC-F2.2.1-01e | AC-F2.2.1-01 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountServiceTest#createAccountIssues72HourTokenAndSendsActivationEmail` |
+| TC-F2.2.1-01f | AC-F2.2.1-01 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#createAccountPersistsUserLinkTokenAndSendsActivationEmail` |
+| TC-F2.2.1-02a | AC-F2.2.1-02 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#resetPasswordWithin72HoursAndLoginSucceedsWhileExpiredReturns422` |
+| TC-F2.2.1-03c | AC-F2.2.1-03 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberServiceTest#linkAccountRejectsAlreadyLinkedMemberWith409` |
+| TC-F2.2.1-03d | AC-F2.2.1-03 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#memberAlreadyHasAccountReturns409` |
+| TC-F2.2.1-03e | AC-F2.2.1-03 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#concurrentCreateAccountForSameMemberCreatesSingleUser` |
+| TC-F2.2.1-04b | AC-F2.2.1-04 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `AccountServiceTest#createMemberAccountTrungEmailTra409` |
+| TC-F2.2.1-04c | AC-F2.2.1-04 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#emailAlreadyUsedByAnotherAccountReturns409` |
+| TC-F2.2.1-04d | AC-F2.2.1-04 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#concurrentCreateAccountWithSameEmailRejectsSecondWith409` |
+| TC-F2.2.1-05c | AC-F2.2.1-05 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberServiceTest#linkAccountRejectsInactiveMemberWith422` |
+| TC-F2.2.1-05d | AC-F2.2.1-05 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#inactiveMemberReturns422` |
+| TC-F2.2.1-06a | AC-F2.2.1-06 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountServiceTest#emailFailureDoesNotFailAccountCreationAndDoesNotLogToken` |
+| TC-F2.2.1-06b | AC-F2.2.1-06 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#emailProviderFailureStillReturns200AndCommitsAccount` |
+| TC-F2.2.1-07d | AC-F2.2.1-07 | US-F2.2.1 | UC-F2.2 | BR-F2-10, BR-F2-11, BR-F2-06, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#enforcesRoleAndBranchPermissions` |
+| TC-F2.2.1-07e | AC-F2.2.1-07 | US-F2.2.1 | UC-F2.2 | BR-F2-10, BR-F2-11, BR-F2-06, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#invalidEmailOrNonPositiveMemberIdReturns400` |
 | TC-F2.3.1-01a | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `F1RegistrationIntegrationTest#listGetsBatchEmailsThroughRealF1AndIncludesUnlinkedProfile` |
 | TC-F2.3.1-01b | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#searchScopesBothRowsAndCountAndIncludesUnlinkedProfiles` |
 | TC-F2.3.1-01c | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#memberCodeSearchIsExactAndIgnoresCase` |

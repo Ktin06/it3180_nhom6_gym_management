@@ -1153,6 +1153,56 @@
           }
         }
       ]
+    },
+    {
+      "name": "TC-F2.2.1-01f F2 – Tạo tài khoản cho hồ sơ có sẵn",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/members/{{memberId}}/account",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"hoivien.moi@example.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Trả về memberId, userId, email và không trả token\", () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.memberId).to.be.a(\"number\");",
+              "  pm.expect(body.userId).to.be.a(\"number\");",
+              "  pm.expect(body.email).to.eql(\"hoivien.moi@example.com\");",
+              "  pm.expect(body.token).to.be.undefined;",
+              "});"
+            ]
+          }
+        }
+      ]
     }
   ]
 }
