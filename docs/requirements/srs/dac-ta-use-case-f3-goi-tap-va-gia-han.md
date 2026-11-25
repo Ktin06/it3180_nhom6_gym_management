@@ -601,7 +601,7 @@ F3 quản lý **danh mục gói tập** và **vòng đời gói của hội viê
 - **A1 – Gia hạn gói khi gói cũ còn hạn (UPCOMING):**
   - Tại bước 4c, hội viên đã có gói cùng loại đang `ACTIVE` hoặc `FROZEN`. Nếu bán thêm gói mới cùng loại, hệ thống cho phép nhưng gói mới ở trạng thái `PENDING`:
     - Nếu gói cũ là gói `TIME` (hoặc `SESSION`/`PT` còn buổi `remaining_sessions > 0`): `start_date` dự kiến = `end_date_gói_cũ + 1 ngày`.
-    - Nếu gói cũ là gói `SESSION` (hoặc `PT`) đã về 0 buổi (`remaining_sessions = 0`, vẫn giữ `ACTIVE` đến hết ngày hôm nay): `start_date` dự kiến = ngày mai (`:today + 1 ngày`).
+    - Nếu gói cũ là gói `SESSION` đã về 0 buổi (`remaining_sessions = 0`, vẫn giữ `ACTIVE` đến hết ngày hôm nay): `start_date` dự kiến = ngày mai (`:today + 1 ngày`). Ngoại lệ này chỉ áp dụng cho `SESSION`; gói `PT` hết buổi chuyển `EXPIRED` ngay khi buổi cuối được xác nhận, theo bản chốt phạm vi.
     - `end_date` dự kiến = `start_date + packages.duration_days - 1`.
   - Khi thanh toán xong (F5), gói mới chuyển `UPCOMING` (chờ đến `start_date` để tự động kích hoạt `ACTIVE`).
   - Luồng tiếp tục từ bước 5.

@@ -102,7 +102,7 @@ public class MembershipService {
      * <ul>
      *   <li>Chưa có gói cùng loại đang giữ: hôm nay (mua mới).</li>
      *   <li>Gói đang giữ còn buổi hoặc là gói TIME: ngày sau {@code end_date} của gói đó.</li>
-     *   <li>Gói đang giữ đã về 0 buổi (vẫn ACTIVE tới hết hôm nay): ngày mai.</li>
+     *   <li>Gói SESSION đang giữ đã về 0 buổi (vẫn ACTIVE tới hết hôm nay): ngày mai.</li>
      * </ul>
      * Không bao giờ sớm hơn hôm nay (gói cũ quá hạn mà tác vụ nền chưa chuyển EXPIRED).
      *
@@ -112,7 +112,8 @@ public class MembershipService {
         if (held == null) {
             return today;
         }
-        LocalDate start = Integer.valueOf(0).equals(held.getRemainingSessions())
+        LocalDate start = held.getPackageType() == PackageType.SESSION
+                && Integer.valueOf(0).equals(held.getRemainingSessions())
             ? today.plusDays(1)
             : held.getEndDate().plusDays(1);
         return start.isBefore(today) ? today : start;
