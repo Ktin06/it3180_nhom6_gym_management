@@ -43,6 +43,18 @@ final class CheckinFixtures {
         cn01 = b.cn01;
         cn02 = b.cn02;
         seq = 0;
+        jdbc.execute("""
+            CREATE TABLE IF NOT EXISTS member_avatars (
+                id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                member_id bigint NOT NULL UNIQUE REFERENCES members(id),
+                content bytea NOT NULL,
+                content_type varchar(50) NOT NULL DEFAULT 'image/jpeg',
+                size_bytes integer NOT NULL,
+                uploaded_by bigint NOT NULL REFERENCES users(id),
+                created_at timestamptz NOT NULL DEFAULT now(),
+                updated_at timestamptz NOT NULL DEFAULT now()
+            )""");
+        jdbc.execute("TRUNCATE TABLE member_avatars CASCADE");
         jdbc.update("UPDATE branches SET open_time = '06:00', close_time = '22:00' WHERE id IN (?, ?)", cn01, cn02);
         receptionist = b.receptionist;
         receptionistCn02 = b.receptionistCn02;
