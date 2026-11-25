@@ -1,9 +1,11 @@
+import { AxiosError, AxiosHeaders } from 'axios'
 import type { MemberDetail, MemberInput, MembersGateway } from '../types/member'
 import { normalizePhone, normalizePhoneSearch } from '../phone'
 
 /** Dữ liệu hư cấu, trong bộ nhớ; không dùng làm xác thực hoặc thay backend. */
 export function createMockMembersApi(): MembersGateway {
   let sequence = 30
+  const avatars = new Map<number, Blob>()
   const names = ['Nguyễn Minh An', 'Trần Hoài Bình', 'Lê Phương Chi', 'Phạm Gia Duy', 'Vũ Ngọc Hà']
   const members: MemberDetail[] = Array.from({ length: 30 }, (_, index) => ({
     id: index + 1,
@@ -91,6 +93,26 @@ export function createMockMembersApi(): MembersGateway {
         updatedAt: new Date().toISOString(),
       })
       return structuredClone(member)
+    },
+    async getAvatar(id) {
+      find(id)
+      const blob = avatars.get(id)
+      if (!blob) {
+        const error = new AxiosError('Not Found')
+        error.response = {
+          status: 404,
+          data: { detail: 'Hội viên chưa có ảnh đại diện.' },
+          statusText: 'Not Found',
+          headers: {},
+          config: { headers: new AxiosHeaders() },
+        }
+        throw error
+      }
+      return blob
+    },
+    async uploadAvatar(id, file) {
+      find(id)
+      avatars.set(id, new Blob([file], { type: 'image/jpeg' }))
     },
   }
 }

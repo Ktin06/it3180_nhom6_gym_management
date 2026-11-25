@@ -42,4 +42,6 @@ export interface MembersGateway {
   detail(id: number): Promise<MemberDetail>
   create(input: MemberInput): Promise<MemberDetail>
   update(id: number, input: MemberUpdate): Promise<MemberDetail>
+  getAvatar(id: number): Promise<Blob>
+  uploadAvatar(id: number, file: File): Promise<void>
 }
