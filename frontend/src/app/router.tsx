@@ -17,6 +17,7 @@ import { MembersPage } from '../features/members/pages/MembersPage'
 import { PackagesPage } from '../features/packages/pages/PackagesPage'
 import { PublicPricingPage } from '../features/packages/pages/PublicPricingPage'
 import { CheckinPage } from '../features/checkins/pages/CheckinPage'
+import { SellPackagePage } from '../features/packages/pages/SellPackagePage'
 
 /** Route cần đăng nhập; vai trò được vào đọc từ ROUTE_ACCESS (routes/route-access.ts). */
 function guarded(path: ProtectedPath, element: ReactNode): RouteObject {
@@ -53,6 +54,7 @@ export const routes: RouteObject[] = [
       ...STAFF_ROLES.map((role) => guarded(HOME_PATH_BY_ROLE[role], <RoleHomePage role={role} />)),
       guarded('/members', <MembersPage />),
       guarded('/packages', <PackagesPage />),
+      guarded('/ban-goi', <SellPackagePage />),
       guarded('/checkins', <CheckinPage />),
       // Trang mới của nhân viên: thêm một dòng guarded(...) ở đây.
     ],

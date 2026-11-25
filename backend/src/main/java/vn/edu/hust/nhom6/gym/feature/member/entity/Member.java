@@ -21,6 +21,7 @@ public class Member extends BaseEntity {
     @Column(length = 10) private Gender gender;
     private LocalDate dob;
     @Column(nullable = false, length = 20) private String phone;
+    @Column(name = "avatar_url", length = 500) private String avatarUrl;
     @Column(name = "face_consent_at") private OffsetDateTime faceConsentAt;
     @Column(name = "booking_locked_until") private OffsetDateTime bookingLockedUntil;
     @Enumerated(EnumType.STRING)

@@ -29,6 +29,7 @@ export const ROUTE_ACCESS = {
   '/checkins': { roles: ['RECEPTIONIST', 'BRANCH_MANAGER'] }, // F4
   '/members': { roles: MEMBER_MANAGEMENT_ROLES }, // F2
   '/packages': { roles: MEMBER_MANAGEMENT_ROLES }, // F3
+  '/ban-goi': { roles: ['RECEPTIONIST'] }, // F3
 } satisfies RouteAccessTable
 
 /** Đường dẫn đã khai báo quyền; viết sai tên thì TypeScript báo lỗi. */

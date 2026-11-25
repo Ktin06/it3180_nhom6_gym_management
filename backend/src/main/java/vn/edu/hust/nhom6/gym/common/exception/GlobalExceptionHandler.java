@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import jakarta.validation.ConstraintViolationException;
@@ -197,14 +196,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             message = "Giá trị không đúng định dạng.";
         }
         return ResponseEntity.badRequest().body(invalidFields(Map.of(name == null ? "body" : name, message)));
-    }
-
-    /** File tải lên vượt quá giới hạn dung lượng cho phép: trả 400 kèm lỗi trường file thay vì 413 mặc định. */
-    @Override
-    protected ResponseEntity<Object> handleMaxUploadSizeExceededException(
-            MaxUploadSizeExceededException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        return ResponseEntity.badRequest().body(invalidFields(
-            Map.of("file", "Dung lượng file tải lên vượt quá giới hạn cho phép (tối đa 5 MB).")));
     }
 
     private static ProblemDetail invalidFields(Map<String, String> errors) {

@@ -34,9 +34,8 @@ public class ClassBookingService {
      * {@code [from, to]} (S2-11.1, UC-F4.3). Khung giờ do F4 truyền vào; F8 chỉ ghi cột này, không đổi {@code status}.
      * Chỗ đã NO_SHOW, ATTENDED, CANCELLED, hoặc đã có {@code arrived_at} không bị đụng (kể cả {@code updated_at}).
      *
-     * <p>Khóa từng chỗ theo id tăng dần rồi kiểm lại. Nơi gọi <b>phải đã khóa</b> {@code members}
-     * (và {@code memberships} nếu có) trước, đúng thứ tự members → memberships → class_bookings, khớp hủy chỗ và điểm
-     * danh (members → … → class_bookings). Gọi trong giao dịch của nơi gọi.
+     * <p>Nơi gọi giữ khóa {@code members} (và {@code memberships} nếu có) trước, đúng thứ tự members → memberships →
+     * class_bookings, và {@code UPDATE} khóa các dòng {@code class_bookings} khớp điều kiện. Gọi trong giao dịch của nơi gọi.
      *
      * @return id các chỗ vừa ghi, tăng dần; rỗng nếu không có
      */
