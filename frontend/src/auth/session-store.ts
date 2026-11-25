@@ -9,6 +9,10 @@ export function getAccessToken() {
   return accessToken
 }
 
+export function getSessionSubject() {
+  return sessionSubject
+}
+
 export function getSessionEpoch() {
   return sessionEpoch
 }
@@ -34,7 +38,7 @@ export function setAccessToken(token: string, expectedEpoch: number) {
 }
 
 /** Chỉ dùng sub để giữ nhất quán giao diện; backend vẫn xác minh chữ ký và phân quyền. */
-function tokenSubject(token: string): string | null {
+export function tokenSubject(token: string): string | null {
   try {
     const parts = token.split('.')
     if (parts.length !== 3) return null

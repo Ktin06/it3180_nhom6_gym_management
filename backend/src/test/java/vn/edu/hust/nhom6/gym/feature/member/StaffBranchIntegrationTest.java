@@ -2,6 +2,7 @@ package vn.edu.hust.nhom6.gym.feature.member;
 
 import java.util.Arrays;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +30,7 @@ class StaffBranchIntegrationTest {
     @Autowired JdbcTemplate jdbc;
 
     @Test
+    @DisplayName("BR-F1-09: tra chi nhánh mặc định theo mã CN01 thay vì ID cố định")
     void defaultBranchIsLookedUpByCodeRatherThanFixedId() {
         Long original = defaultBranchId();
         jdbc.update("UPDATE branches SET code = 'CN_OLD_TEST' WHERE id = ?", original);
@@ -39,6 +41,7 @@ class StaffBranchIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.1.1-05d: thiếu chi nhánh mặc định CN01 trả 404 thay vì tự tạo")
     void missingDefaultBranchIsNotFoundInsteadOfCreatingOne() {
         jdbc.update("UPDATE branches SET code = 'CN_OLD_TEST' WHERE code = 'CN01'");
 
@@ -49,6 +52,7 @@ class StaffBranchIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.1.1-05e: chi nhánh mặc định CN01 ngừng hoạt động trả 404")
     void inactiveDefaultBranchIsNotFound() {
         jdbc.update("UPDATE branches SET status = 'INACTIVE' WHERE code = 'CN01'");
 
@@ -56,6 +60,7 @@ class StaffBranchIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-03b: lấy đúng chi nhánh được phân công của từng nhân viên")
     void staffBranchComesFromThatUsersAssignmentRatherThanDefaultBranch() {
         Long firstUser = user("first-branch@example.com");
         Long secondUser = user("second-branch@example.com");
@@ -69,6 +74,7 @@ class StaffBranchIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-03c: nhân viên chưa có hồ sơ phân công bị từ chối, không tự gán CN01")
     void userWithoutStaffProfileIsDeniedRatherThanAssignedToCn01() {
         Long userId = user("unassigned-branch@example.com");
 
@@ -76,6 +82,7 @@ class StaffBranchIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-03d: nhân viên ngừng hoạt động bị từ chối truy cập theo chi nhánh")
     void inactiveStaffIsDenied() {
         Long userId = user("inactive-staff@example.com");
         staff(userId, defaultBranchId(), "NV_TEST_01");
@@ -85,6 +92,7 @@ class StaffBranchIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-03e: nhân viên thuộc chi nhánh ngừng hoạt động bị từ chối")
     void activeStaffInInactiveBranchIsDenied() {
         Long userId = user("inactive-branch@example.com");
         staff(userId, defaultBranchId(), "NV_TEST_01");
@@ -94,6 +102,7 @@ class StaffBranchIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-03f: mã người dùng không hợp lệ không bao giờ nhận chi nhánh mặc định")
     void invalidOrUnknownUserIdsNeverReceiveDefaultBranch() {
         for (Long userId : Arrays.asList(null, 0L, -1L, Long.MAX_VALUE)) {
             assertThatThrownBy(() -> staffService.requireBranchId(userId)).isInstanceOf(AccessDeniedException.class);

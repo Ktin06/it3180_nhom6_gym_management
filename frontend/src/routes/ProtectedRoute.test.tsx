@@ -51,7 +51,7 @@ function renderAt(
 }
 
 describe('ProtectedRoute', () => {
-  it('chuyển về /login khi chưa đăng nhập', () => {
+  it('TC-F1.6.1-01g: chuyển về /login khi chưa đăng nhập', () => {
     renderAt('/reception', null, ['RECEPTIONIST'])
 
     expect(screen.getByText('Trang đăng nhập')).toBeInTheDocument()
@@ -79,14 +79,14 @@ describe('ProtectedRoute', () => {
     expect(retrySession).toHaveBeenCalledOnce()
   })
 
-  it('chuyển về /403 khi sai vai trò', () => {
+  it('TC-F1.6.1-02f: chuyển về /403 khi sai vai trò', () => {
     renderAt('/reception', { email: 'hv@demo.local', role: 'MEMBER' }, ['RECEPTIONIST'])
 
     expect(screen.getByText('Không có quyền')).toBeInTheDocument()
     expect(screen.queryByText('Nội dung lễ tân')).not.toBeInTheDocument()
   })
 
-  it('hiển thị nội dung khi đúng vai trò', () => {
+  it('TC-F1.6.1-02g: hiển thị nội dung khi đúng vai trò', () => {
     renderAt('/reception', { email: 'lt@demo.local', role: 'RECEPTIONIST' }, ['RECEPTIONIST'])
 
     expect(screen.getByText('Nội dung lễ tân')).toBeInTheDocument()

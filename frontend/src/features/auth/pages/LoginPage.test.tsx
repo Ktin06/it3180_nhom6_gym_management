@@ -43,7 +43,7 @@ describe('LoginPage', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Tài khoản đã đổi ở tab khác')
   })
 
-  it('đăng nhập bằng email đã chuẩn hóa rồi mở trang theo role', async () => {
+  it('TC-F1.2.1-04g: đăng nhập bằng email đã chuẩn hóa rồi mở trang theo role', async () => {
     login.mockResolvedValue({ email: 'hv@example.com', role: 'MEMBER' })
     const user = userEvent.setup()
     renderLogin()
