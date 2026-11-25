@@ -1,0 +1,426 @@
+{
+  "info": {
+    "name": "F6 – Dashboard cơ bản chi nhánh",
+    "description": "Bộ API Dashboard chi nhánh (thẻ S2-12.1, #188, UC-F6.1–UC-F6.5). baseUrl gồm /api/v1. Nhập token tại máy (receptionToken, ownerToken, memberToken) và branchId (mặc định 1 cho CN01), không lưu token lên Git.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "branchId",
+      "value": "1"
+    },
+    {
+      "key": "otherBranchId",
+      "value": "2"
+    }
+  ],
+  "item": [
+    {
+      "name": "KPI Dashboard – US-F6.1.1 & US-F6.3.1",
+      "item": [
+        {
+          "name": "US-F6.1.1 KB 200 – Lễ tân xem KPI chi nhánh mình",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/dashboard/stats",
+            "description": "Lễ tân/quản lý tự động lấy chi nhánh từ staff.branch_id. Không có trường todayCheckinGrowthRate (G10).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('đủ trường KPI và không có todayCheckinGrowthRate', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.currentlyInGym).to.be.a('number');",
+                  "  pm.expect(b.todayCheckinCount).to.be.a('number');",
+                  "  pm.expect(b.todayRevenue).to.be.a('number');",
+                  "  pm.expect(b.cashRevenue).to.be.a('number');",
+                  "  pm.expect(b.transferRevenue).to.be.a('number');",
+                  "  pm.expect(b.expiringPackagesCount).to.be.a('number');",
+                  "  pm.expect(b.todayRevenue).to.eql(b.cashRevenue + b.transferRevenue);",
+                  "  pm.expect(b).to.not.have.property('todayCheckinGrowthRate');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F6.1.1 KB 200 – Lễ tân truyền branchId chi nhánh khác vẫn trả chi nhánh mình",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/dashboard/stats?branchId={{otherBranchId}}",
+            "description": "Tham số branchId bị bỏ qua đối với RECEPTIONIST và BRANCH_MANAGER.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F6.1.1 KB 200 – Chủ chuỗi xem KPI chi nhánh cụ thể",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/dashboard/stats?branchId={{branchId}}",
+            "description": "SUPER_ADMIN bắt buộc truyền branchId hợp lệ.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F6.1.1 KB 400 – Chủ chuỗi thiếu branchId",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/dashboard/stats",
+            "description": "Thiếu branchId với SUPER_ADMIN trả 400 Bad Request.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('thông báo tiếng Việt đúng SRS', () => pm.expect(pm.response.json().detail).to.eql('Chủ chuỗi cần chọn chi nhánh cụ thể để xem Dashboard.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F6.1.1 KB 404 – Chủ chuỗi truyền branchId không tồn tại",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/dashboard/stats?branchId=999999",
+            "description": "branchId không tồn tại trả 404 Not Found.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 Not Found', () => pm.response.to.have.status(404));",
+                  "pm.test('thông báo đúng SRS', () => pm.expect(pm.response.json().detail).to.eql('Không tìm thấy chi nhánh.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F6.1.1 S3 403 – Hội viên không được xem Dashboard",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/dashboard/stats",
+            "description": "MEMBER và TRAINER bị 403 Forbidden.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403 Forbidden', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Biểu đồ theo giờ – US-F6.2.1",
+      "item": [
+        {
+          "name": "US-F6.2.1 KB 200 – Lễ tân xem biểu đồ check-in theo giờ",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/dashboard/hourly-checkins",
+            "description": "Đủ khung giờ từ giờ mở cửa đến trước giờ đóng cửa của chi nhánh, khung trống = 0.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('mảng khung giờ HH:00 và count', () => {",
+                  "  const arr = pm.response.json();",
+                  "  pm.expect(arr).to.be.an('array').and.not.empty;",
+                  "  pm.expect(arr[0].hour).to.match(/^\\d{2}:00$/);",
+                  "  pm.expect(arr[0].count).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F6.2.1 KB 200 – Chủ chuỗi xem biểu đồ theo branchId",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/dashboard/hourly-checkins?branchId={{branchId}}",
+            "description": "Chủ chuỗi xem biểu đồ của chi nhánh được chọn.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cảnh báo gói sắp hết hạn – US-F6.4.1",
+      "item": [
+        {
+          "name": "US-F6.4.1 BR-F6.5 200 – Lễ tân xem 5 gói sắp hết hạn / hết buổi",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/dashboard/expiring-memberships?limit=5",
+            "description": "Lọc [today, today+7) hoặc SESSION <= SESSION_WARNING_THRESHOLD, loại bỏ gói đã có UPCOMING cùng loại.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('mảng tối đa 5 phần tử, không có avatarUrl', () => {",
+                  "  const arr = pm.response.json();",
+                  "  pm.expect(arr).to.be.an('array');",
+                  "  pm.expect(arr.length).to.be.at.most(5);",
+                  "  arr.forEach(item => {",
+                  "    pm.expect(item).to.have.property('hasAvatar');",
+                  "    pm.expect(item).to.not.have.property('avatarUrl');",
+                  "    pm.expect(['EXPIRING_DATE', 'LOW_SESSIONS']).to.include(item.warningReason);",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F6.4.1 S5 400 – limit ngoài biên",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/dashboard/expiring-memberships?limit=0",
+            "description": "limit phải từ 1 đến 100.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Check-in mới nhất – US-F6.5.1",
+      "item": [
+        {
+          "name": "US-F6.5.1 KB 200 – Lễ tân xem 10 lượt check-in mới nhất hôm nay",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/dashboard/latest-checkins",
+            "description": "Mặc định 10 lượt mới nhất hôm nay theo giờ Việt Nam, có hasAvatar (không có avatarUrl, ADR 0011).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('tối đa 10 lượt, có hasAvatar và không có avatarUrl', () => {",
+                  "  const arr = pm.response.json();",
+                  "  pm.expect(arr).to.be.an('array');",
+                  "  pm.expect(arr.length).to.be.at.most(10);",
+                  "  arr.forEach(item => {",
+                  "    pm.expect(item).to.have.property('hasAvatar');",
+                  "    pm.expect(item).to.not.have.property('avatarUrl');",
+                  "    pm.expect(['CHECKED_IN', 'CHECKED_OUT']).to.include(item.status);",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F6.5.1 KB 200 – Chủ chuỗi xem 5 lượt check-in mới nhất theo branchId",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/dashboard/latest-checkins?branchId={{branchId}}&limit=5",
+            "description": "Chủ chuỗi lọc theo chi nhánh và giới hạn 5 lượt.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
