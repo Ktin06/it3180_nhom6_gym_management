@@ -16,6 +16,8 @@ import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
+import javax.imageio.stream.MemoryCacheImageInputStream;
+import javax.imageio.stream.MemoryCacheImageOutputStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,7 +79,7 @@ public class MemberAvatarService {
     }
 
     private static BufferedImage readAndResize(byte[] input) {
-        try (ImageInputStream stream = ImageIO.createImageInputStream(new ByteArrayInputStream(input))) {
+        try (ImageInputStream stream = new MemoryCacheImageInputStream(new ByteArrayInputStream(input))) {
             Iterator<ImageReader> readers = ImageIO.getImageReaders(stream);
             if (!readers.hasNext()) {
                 throw invalidImage();
@@ -146,7 +148,7 @@ public class MemberAvatarService {
     private static byte[] encodeJpeg(BufferedImage image, float quality) {
         ImageWriter writer = ImageIO.getImageWritersByFormatName("JPEG").next();
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        try (ImageOutputStream output = ImageIO.createImageOutputStream(bytes)) {
+        try (ImageOutputStream output = new MemoryCacheImageOutputStream(bytes)) {
             writer.setOutput(output);
             ImageWriteParam param = writer.getDefaultWriteParam();
             param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);

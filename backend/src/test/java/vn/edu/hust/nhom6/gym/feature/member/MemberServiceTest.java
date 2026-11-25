@@ -17,6 +17,7 @@ import vn.edu.hust.nhom6.gym.feature.member.dto.*;
 import vn.edu.hust.nhom6.gym.feature.member.entity.*;
 import vn.edu.hust.nhom6.gym.feature.member.mapper.MemberMapper;
 import vn.edu.hust.nhom6.gym.feature.member.repository.MemberRepository;
+import vn.edu.hust.nhom6.gym.feature.member.repository.MemberAvatarRepository;
 import vn.edu.hust.nhom6.gym.feature.member.service.*;
 import vn.edu.hust.nhom6.gym.feature.auth.service.AccountService;
 import vn.edu.hust.nhom6.gym.feature.branch.service.BranchLookupService;
@@ -26,6 +27,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
     @Mock MemberRepository repository;
+    @Mock MemberAvatarRepository avatars;
     @Mock AccountService accounts;
     @Mock StaffService staff;
     @Mock BranchLookupService branches;
@@ -35,7 +37,7 @@ class MemberServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new MemberService(repository, accounts, staff, branches, new MemberMapper(), validator);
+        service = new MemberService(repository, avatars, accounts, staff, branches, new MemberMapper(), validator);
     }
 
     @Test

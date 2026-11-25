@@ -1,6 +1,7 @@
 package vn.edu.hust.nhom6.gym.feature.auth.service;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.ForbiddenException;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
+import vn.edu.hust.nhom6.gym.common.time.VnTime;
 import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.AuthMeResponse;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
@@ -33,6 +35,8 @@ public class AuthService {
 
     public static final int MAX_PASSWORD_BYTES = 72;
     public static final String PASSWORD_MAX_BYTES_MESSAGE = "Mật khẩu không được vượt quá 72 byte";
+    public static final int MAX_FAILED = 5;
+    public static final int LOCK_MINUTES = 15;
 
     /**
      * Mã băm BCrypt giả (cost 10) dùng để cân bằng thời gian phản hồi khi đăng nhập với email không tồn tại,
@@ -46,18 +50,21 @@ public class AuthService {
     private final JwtTokenService jwtTokenService;
     private final PasswordEncoder passwordEncoder;
     private final MemberService memberService;
+    private final VnTime vnTime;
 
     public AuthService(
             UserRepository userRepository,
             RefreshTokenRepository refreshTokenRepository,
             JwtTokenService jwtTokenService,
             PasswordEncoder passwordEncoder,
-            MemberService memberService) {
+            MemberService memberService,
+            VnTime vnTime) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtTokenService = jwtTokenService;
         this.passwordEncoder = passwordEncoder;
         this.memberService = memberService;
+        this.vnTime = vnTime;
     }
 
     /** Kết quả xác thực chứa JWT Access Token và Refresh Token thô (để đưa vào cookie). */
@@ -110,7 +117,7 @@ public class AuthService {
     /**
      * Đăng nhập bằng email và mật khẩu (UC-F1.2).
      */
-    @Transactional
+    @Transactional(noRollbackFor = UnauthorizedException.class)
     public AuthResult login(LoginRequest request) {
         String email = request.email().toLowerCase().trim();
         String rawPassword = request.password();
@@ -118,25 +125,48 @@ public class AuthService {
             || rawPassword.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES;
         String passwordToMatch = passwordTooLong ? "dummy-password-under-72-bytes" : rawPassword;
 
-        User user = userRepository.findByEmail(email).orElse(null);
+        // Bước 1: Tìm user và khóa dòng để nhiều request đồng thời tăng đúng bộ đếm
+        User user = userRepository.findByEmailForUpdate(email).orElse(null);
         if (user == null) {
             passwordEncoder.matches(passwordToMatch, DUMMY_PASSWORD_HASH);
             throw new UnauthorizedException("Email hoặc mật khẩu không chính xác.");
         }
 
+        OffsetDateTime now = vnTime.now();
+
+        // Bước 2: Đang khóa tạm thì trả 403 E2 kèm số phút còn lại, không tăng bộ đếm (G12)
+        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(now)) {
+            long remainingSeconds = Duration.between(now, user.getLockedUntil()).toSeconds();
+            long remainingMinutes = Math.max(1L, (long) Math.ceil(remainingSeconds / 60.0));
+            throw new ForbiddenException(
+                "Tài khoản đang bị khóa tạm thời do nhập sai mật khẩu nhiều lần. Vui lòng thử lại sau "
+                    + remainingMinutes + " phút.");
+        }
+
+        // Bước 3: So mật khẩu (luôn chạy passwordEncoder.matches); sai thì tăng bộ đếm rồi trả 401
         boolean passwordMatched = passwordEncoder.matches(passwordToMatch, user.getPasswordHash());
         if (passwordTooLong || !passwordMatched) {
+            boolean hadExpiredLock = user.getLockedUntil() != null && !user.getLockedUntil().isAfter(now);
+            int nextFailedCount = hadExpiredLock ? 1 : user.getFailedLoginCount() + 1;
+            user.setFailedLoginCount(nextFailedCount);
+            if (nextFailedCount >= MAX_FAILED) {
+                user.setLockedUntil(now.plusMinutes(LOCK_MINUTES));
+            } else if (hadExpiredLock) {
+                user.setLockedUntil(null);
+            }
+            userRepository.save(user);
             throw new UnauthorizedException("Email hoặc mật khẩu không chính xác.");
         }
 
-        if (user.getStatus() != UserStatus.ACTIVE
-                || (user.getLockedUntil() != null && user.getLockedUntil().isAfter(OffsetDateTime.now()))) {
+        // Bước 4: Mật khẩu đúng nhưng trạng thái tài khoản không ACTIVE thì trả 403 E3
+        if (user.getStatus() != UserStatus.ACTIVE) {
             throw new ForbiddenException("Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên.");
         }
 
+        // Bước 5: Thành công -> đặt lại bộ đếm và cập nhật last_login_at
         user.setFailedLoginCount(0);
         user.setLockedUntil(null);
-        user.setLastLoginAt(OffsetDateTime.now());
+        user.setLastLoginAt(now);
         userRepository.save(user);
 
         String accessToken = jwtTokenService.generateAccessToken(user.getId(), user.getEmail(), user.getRole());

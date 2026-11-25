@@ -89,7 +89,9 @@ Theo [SRS US-F2.4.2](docs/requirements/srs/dac-ta-use-case-f2-ho-so-hoi-vien.md)
 
 - `PUT /api/v1/members/{id}/avatar`: Bearer token nhân viên có quyền sửa hồ sơ; multipart trường `file`, JPEG/PNG thật ≤ 5 MiB, mỗi cạnh ≤ 8000 px; thành công trả `200` với body rỗng. Ảnh được giữ tỷ lệ, không phóng lớn, chuyển JPEG nền trắng, cạnh dài nhất ≤ 256 px và dung lượng ≤ 100 KiB.
 - `GET /api/v1/members/{id}/avatar`: cùng phạm vi quyền xem hồ sơ, trả `image/jpeg`; chưa có ảnh, hồ sơ xóa mềm/không tồn tại hoặc ngoài phạm vi trả `404`. MEMBER chỉ xem chính mình; không tự đổi ảnh. TRAINER hiện bị chặn như API hồ sơ trên main.
+- API tạo, xem, cập nhật và danh sách hồ sơ trả thêm boolean `hasAvatar`: hồ sơ mới/chưa có ảnh là `false`, có ảnh đã lưu là `true`. Giao diện không gọi GET ảnh khi `false` (phần backend hỗ trợ AC-F2.4.2-08); nội dung nhị phân chỉ trả qua endpoint ảnh. Danh sách kiểm tra ảnh theo cả trang, không nạp ảnh từng hồ sơ.
 - Flyway `V9_04__member_avatars.sql` tạo bảng ảnh và bỏ cột `members.avatar_url`. Không trỏ nhánh này vào database prototype đã chạy migration khác (ví dụ V9_06); dùng database local riêng và cấu hình profile `local` theo hướng dẫn cài đặt.
+- Thứ tự gộp/chạy Flyway: #250 (`V9_04`) → #251 (`V9_05`) → #257 (`V9_06`), ghi nhận tại [#110](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/110). F4 #242 dùng bảng ảnh của #250, cần cập nhật nhánh và kiểm thử tích hợp sau khi #250 gộp; không tạo thêm migration ảnh trong F4.
 
 Chạy toàn bộ backend hoặc riêng các kiểm thử ảnh và hồ sơ trong PowerShell (cần Docker; Testcontainers tự tạo database kiểm thử, không cần `.env`):
 

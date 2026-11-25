@@ -67,7 +67,8 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Tìm được đúng một hồ sơ\", () => { const rows = pm.response.json().content; pm.expect(rows).to.have.lengthOf(1); pm.environment.set(\"memberId\", rows[0].id); });"
+                  "pm.test(\"Tìm được đúng một hồ sơ\", () => { const rows = pm.response.json().content; pm.expect(rows).to.have.lengthOf(1); pm.environment.set(\"memberId\", rows[0].id); });",
+                  "pm.test(\"Danh sách trả hasAvatar dạng boolean\", () => pm.expect(pm.response.json().content[0].hasAvatar).to.be.a(\"boolean\"));"
                 ]
               }
             }
@@ -108,6 +109,36 @@
                 "exec": [
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Body rỗng\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F2.4.2-08b – Hồ sơ có hasAvatar sau khi tải ảnh",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/members/{{memberId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Chạy sau PUT ảnh thành công: hasAvatar=true. Với hồ sơ chưa tải ảnh, hasAvatar=false và giao diện không cần gọi GET ảnh (AC-F2.4.2-08)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Hồ sơ đã tải ảnh có hasAvatar=true\", () => pm.expect(pm.response.json().hasAvatar).to.eql(true));"
                 ]
               }
             }

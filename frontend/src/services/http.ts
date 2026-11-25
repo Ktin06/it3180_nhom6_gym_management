@@ -7,6 +7,12 @@ import {
   suspendSession,
 } from '../auth/session-store'
 import { queueCookieOperation } from '../auth/cookie-operation-queue'
+import {
+  captureCookieRevision,
+  currentTabCookieRevision,
+  publishRefresh,
+  reuseConcurrentRefresh,
+} from '../auth/session-coordination'
 import { requestRefresh } from './refresh-client'
 import { HTTP_BASE_URL, HTTP_TIMEOUT } from './http-config'
 import { isUnauthorized } from './http-errors'
@@ -31,28 +37,34 @@ export function refreshAccessToken(expectedEpoch = getSessionEpoch()): Promise<s
     return Promise.reject(new Error('Phiên đăng nhập đã thay đổi.'))
   if (refreshFlight?.epoch === expectedEpoch) return refreshFlight.promise
 
-  const operation = queueCookieOperation(async () => {
-    if (getSessionEpoch() !== expectedEpoch) throw new Error('Phiên đăng nhập đã thay đổi.')
-    try {
-      const response = await requestRefresh()
-      if (typeof response.accessToken !== 'string' || !response.accessToken) {
-        throw new Error('Máy chủ không trả access token hợp lệ.')
-      }
-      if (!setAccessToken(response.accessToken, expectedEpoch)) {
-        throw new Error('Phiên đăng nhập đã thay đổi.')
-      }
-      return response.accessToken
-    } catch (error) {
-      if (getSessionEpoch() === expectedEpoch) {
-        if (isUnauthorized(error)) {
-          expireSession(expectedEpoch)
-        } else {
-          suspendSession(expectedEpoch)
+  const operation = captureCookieRevision().then((before) =>
+    queueCookieOperation(async () => {
+      const revision = await currentTabCookieRevision(expectedEpoch)
+      if (!revision) throw new Error('Phiên đăng nhập đã thay đổi.')
+      try {
+        const reused = await reuseConcurrentRefresh(before, revision)
+        if (getSessionEpoch() !== expectedEpoch) throw new Error('Phiên đăng nhập đã thay đổi.')
+        const token = reused ?? (await requestRefresh()).accessToken
+        if (typeof token !== 'string' || !token) {
+          throw new Error('Máy chủ không trả access token hợp lệ.')
         }
+        if (!setAccessToken(token, expectedEpoch)) {
+          throw new Error('Phiên đăng nhập đã thay đổi.')
+        }
+        if (!reused) await publishRefresh(revision, token)
+        return token
+      } catch (error) {
+        if (getSessionEpoch() === expectedEpoch) {
+          if (isUnauthorized(error)) {
+            expireSession(expectedEpoch)
+          } else {
+            suspendSession(expectedEpoch)
+          }
+        }
+        throw error
       }
-      throw error
-    }
-  })
+    }),
+  )
   const promise = operation.finally(() => {
     if (refreshFlight?.promise === promise) refreshFlight = null
   })

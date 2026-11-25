@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.awt.Color;
@@ -341,6 +343,49 @@ class MemberAvatarIntegrationTest {
         mvc.perform(multipart(HttpMethod.PUT, path()).with(identity(receptionist, UserRole.RECEPTIONIST)))
             .andExpect(status().isBadRequest());
         assertThat(avatarCount()).isZero();
+    }
+
+    @Test
+    @DisplayName("TC-F2.4.2-08a: Hồ sơ vừa tạo trả hasAvatar=false để giao diện không gọi API ảnh")
+    void newProfileHasNoAvatar() throws Exception {
+        mvc.perform(post("/api/v1/members").with(identity(receptionist, UserRole.RECEPTIONIST))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"fullName":"Hội viên mới","phone":"0912345602"}
+                    """))
+            .andExpect(status().isCreated()).andExpect(jsonPath("$.hasAvatar").value(false));
+        assertThat(avatarCount()).isZero();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    @DisplayName("TC-F2.4.2-08b: Chi tiết, danh sách và cập nhật hồ sơ trả đúng hasAvatar của từng hội viên")
+    void profileResponsesReflectAvatarPresence(boolean hasAvatar) throws Exception {
+        if (hasAvatar) { seedAvatar(); }
+        jdbc.update("""
+            INSERT INTO members(member_code,phone,home_branch_id,full_name)
+            VALUES ('HV000902','0912345602',?,'Hội viên chưa có ảnh')
+            """, branch);
+        var actor = identity(receptionist, UserRole.RECEPTIONIST);
+        mvc.perform(get("/api/v1/members/" + memberId).with(actor))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.hasAvatar").value(hasAvatar))
+            .andExpect(jsonPath("$.content").doesNotExist());
+        mvc.perform(get("/api/v1/members").with(actor))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(2))
+            .andExpect(jsonPath("$.content[0].memberCode").value("HV000902"))
+            .andExpect(jsonPath("$.content[0].hasAvatar").value(false))
+            .andExpect(jsonPath("$.content[1].id").value(memberId))
+            .andExpect(jsonPath("$.content[1].hasAvatar").value(hasAvatar))
+            .andExpect(jsonPath("$.content[1].content").doesNotExist());
+        mvc.perform(put("/api/v1/members/" + memberId).with(actor)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"fullName":"Tên mới","phone":"0912345601","status":"ACTIVE"}
+                    """))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.hasAvatar").value(hasAvatar));
+        mvc.perform(get("/api/v1/members").param("page", "1").param("size", "2").with(actor))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.content").isEmpty());
+        assertThat(avatarCount()).isEqualTo(hasAvatar ? 1 : 0);
     }
 
     private String path() { return "/api/v1/members/" + memberId + "/avatar"; }
