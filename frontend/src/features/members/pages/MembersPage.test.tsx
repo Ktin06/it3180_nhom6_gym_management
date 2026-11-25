@@ -185,4 +185,40 @@ describe('danh sách hội viên', () => {
     expect(await screen.findByText('HV000030')).toBeInTheDocument()
     expect(screen.queryByText('Mất kết nối máy chủ')).not.toBeInTheDocument()
   })
+
+  it('TC-F2.2.1-01b: danh sách chỉ hiện nút Tạo tài khoản cho hồ sơ ACTIVE chưa có email và tải lại sau khi tạo', async () => {
+    const user = userEvent.setup()
+    const api = createMockMembersApi()
+    await api.createAccount(28, { email: 'da-co@example.com' })
+    const list = vi.spyOn(api, 'list')
+    const createAccount = vi.spyOn(api, 'createAccount')
+
+    render(
+      <App>
+        <MembersPage api={api} />
+      </App>,
+    )
+
+    expect(await screen.findByText('HV000030')).toBeInTheDocument()
+    expect(screen.getByText('da-co@example.com')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Tạo tài khoản HV000028' }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Tạo tài khoản HV000029' }),
+    ).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Tạo tài khoản HV000030' }))
+    const emailInput = await screen.findByLabelText('Email đăng nhập')
+    await user.type(emailInput, 'hv30@example.com')
+    await user.click(screen.getByRole('button', { name: 'Xác nhận tạo tài khoản' }))
+
+    await waitFor(() =>
+      expect(createAccount).toHaveBeenCalledWith(30, { email: 'hv30@example.com' }),
+    )
+    expect(
+      await screen.findByText('Đã gửi email đặt mật khẩu tới hv30@example.com.'),
+    ).toBeInTheDocument()
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(2))
+  })
 })

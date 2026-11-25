@@ -1,6 +1,7 @@
-import { EditOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons'
+import { EditOutlined, PlusOutlined, ReloadOutlined, UserAddOutlined } from '@ant-design/icons'
 import { Alert, App, Button, Input, Select, Space, Table, Tag } from 'antd'
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
+import { AuthContext } from '../../../auth/AuthContext'
 import type { Status } from '../../shared/types'
 import { errorMessage } from '../../shared/api-error'
 import { DemoNotice } from '../../shared/DemoNotice'
@@ -14,9 +15,16 @@ const initialQuery: MemberQuery = { page: 0, size: 20 }
 
 export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
   const { message } = App.useApp()
+  const auth = useContext(AuthContext)
+  const canManageAccount =
+    !auth?.user ||
+    auth.user.role === 'SUPER_ADMIN' ||
+    auth.user.role === 'BRANCH_MANAGER' ||
+    auth.user.role === 'RECEPTIONIST'
   const list = useRemoteQuery(api.list, initialQuery)
   const [keyword, setKeyword] = useState('')
   const [editing, setEditing] = useState<MemberDetail | null>()
+  const [openAccountForm, setOpenAccountForm] = useState(false)
   const [loadingId, setLoadingId] = useState<number>()
   const [editError, setEditError] = useState<{ id: number; message: string }>()
   const editRequest = useRef(0)
@@ -41,6 +49,7 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
   function closeEditor() {
     editRequest.current += 1
     setLoadingId(undefined)
+    setOpenAccountForm(false)
     setEditing(undefined)
   }
 
@@ -48,16 +57,20 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
     editRequest.current += 1
     setLoadingId(undefined)
     setEditError(undefined)
+    setOpenAccountForm(false)
     setEditing(null)
   }
 
-  async function edit(id: number) {
+  async function edit(id: number, withAccountForm = false) {
     const request = ++editRequest.current
     setLoadingId(id)
     setEditError(undefined)
     try {
       const member = await api.detail(id)
-      if (request === editRequest.current) setEditing(member)
+      if (request === editRequest.current) {
+        setOpenAccountForm(withAccountForm)
+        setEditing(member)
+      }
     } catch (cause) {
       if (request === editRequest.current) setEditError({ id, message: errorMessage(cause) })
     } finally {
@@ -151,7 +164,7 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
                   ? 'Chưa tải được dữ liệu.'
                   : 'Không có hội viên phù hợp.',
             }}
-            scroll={{ x: 850 }}
+            scroll={{ x: 970 }}
             columns={[
               { title: 'Mã hội viên', dataIndex: 'memberCode', width: 130 },
               { title: 'Họ và tên', dataIndex: 'fullName', width: 200 },
@@ -175,10 +188,9 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
               {
                 title: 'Thao tác',
                 key: 'actions',
-                width: 90,
-                fixed: 'right',
+                width: 210,
                 render: (_, member) => (
-                  <Space>
+                  <Space wrap size="small">
                     <Button
                       type="link"
                       icon={<EditOutlined />}
@@ -189,6 +201,17 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
                     >
                       Sửa
                     </Button>
+                    {canManageAccount && member.status === 'ACTIVE' && member.email === null && (
+                      <Button
+                        type="link"
+                        icon={<UserAddOutlined />}
+                        aria-label={`Tạo tài khoản ${member.memberCode}`}
+                        disabled={loadingId !== undefined}
+                        onClick={() => void edit(member.id, true)}
+                      >
+                        Tạo tài khoản
+                      </Button>
+                    )}
                   </Space>
                 ),
               },
@@ -214,7 +237,9 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
           key={editing?.id ?? 'new'}
           member={editing}
           api={api}
+          initialAccountFormOpen={openAccountForm}
           onClose={closeEditor}
+          onAccountCreated={list.reload}
           onSaved={() => {
             closeEditor()
             list.changeQuery({ ...list.query, page: 0 })

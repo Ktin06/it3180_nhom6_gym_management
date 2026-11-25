@@ -1,9 +1,39 @@
+import { UserAddOutlined } from '@ant-design/icons'
 import { Alert, Button, Form, Input, Modal, Select } from 'antd'
-import { useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import axios from 'axios'
+import { AuthContext } from '../../../auth/AuthContext'
 import { errorMessage } from '../../shared/api-error'
 import type { Gender, MemberDetail, MembersGateway } from '../types/member'
 import { normalizePhone } from '../phone'
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function validateAccountEmail(rawEmail: string): string | null {
+  const email = rawEmail.trim()
+  if (!email) {
+    return 'Vui lòng nhập email.'
+  }
+  if (email.length > 255) {
+    return 'Email không được vượt quá 255 ký tự.'
+  }
+  if (!EMAIL_PATTERN.test(email)) {
+    return 'Email không đúng định dạng.'
+  }
+  return null
+}
+
+function accountErrorMessage(cause: unknown): string {
+  if (axios.isAxiosError(cause) && cause.response?.status === 400) {
+    const data = cause.response.data as
+      | { detail?: unknown; errors?: Record<string, unknown> }
+      | undefined
+    const emailError = data?.errors?.email
+    if (typeof emailError === 'string' && emailError.trim()) {
+      return emailError
+    }
+  }
+  return errorMessage(cause)
+}
 
 interface Values {
   fullName: string
@@ -18,16 +48,97 @@ export function MemberFormModal({
   api,
   onClose,
   onSaved,
+  onAccountCreated,
+  initialAccountFormOpen = false,
 }: {
   member: MemberDetail | null
   api: MembersGateway
   onClose: () => void
   onSaved: () => void
+  onAccountCreated?: () => void
+  initialAccountFormOpen?: boolean
 }) {
+  const auth = useContext(AuthContext)
+  const canManageMember =
+    !auth?.user ||
+    auth.user.role === 'SUPER_ADMIN' ||
+    auth.user.role === 'BRANCH_MANAGER' ||
+    auth.user.role === 'RECEPTIONIST'
+
   const [form] = Form.useForm<Values>()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string>()
+  const [accountInfo, setAccountInfo] = useState<{ userId: number | null; email: string | null }>(
+    () => ({
+      userId: member?.userId ?? null,
+      email: member?.email ?? null,
+    }),
+  )
+  const [accountFormOpen, setAccountFormOpen] = useState(
+    () =>
+      initialAccountFormOpen &&
+      member !== null &&
+      member.status === 'ACTIVE' &&
+      member.userId === null &&
+      canManageMember,
+  )
+  const [accountEmail, setAccountEmail] = useState('')
+  const [creatingAccount, setCreatingAccount] = useState(false)
+  const [accountError, setAccountError] = useState<string>()
+  const [accountSuccess, setAccountSuccess] = useState<string>()
+  const mountedRef = useRef(true)
   const status = Form.useWatch('status', form) ?? member?.status
+  const busy = saving || creatingAccount
+  const canCreateAccount =
+    member !== null &&
+    canManageMember &&
+    member.status === 'ACTIVE' &&
+    status === 'ACTIVE' &&
+    accountInfo.userId === null
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
+
+  async function handleCreateAccount() {
+    if (!member) return
+    const validationError = validateAccountEmail(accountEmail)
+    if (validationError) {
+      setAccountSuccess(undefined)
+      setAccountError(validationError)
+      return
+    }
+
+    const trimmedEmail = accountEmail.trim()
+    setCreatingAccount(true)
+    setAccountError(undefined)
+    setAccountSuccess(undefined)
+    try {
+      const created = await api.createAccount(member.id, { email: trimmedEmail })
+      if (!mountedRef.current) return
+      setAccountInfo({ userId: created.userId, email: created.email })
+      setAccountSuccess(`Đã gửi email đặt mật khẩu tới ${created.email}.`)
+      setAccountFormOpen(false)
+      setAccountEmail('')
+      try {
+        const refreshed = await api.detail(member.id)
+        if (mountedRef.current) {
+          setAccountInfo({ userId: refreshed.userId, email: refreshed.email })
+        }
+      } catch {
+        // Giữ lại email và userId đã nhận từ phản hồi tạo tài khoản.
+      }
+      onAccountCreated?.()
+    } catch (cause) {
+      if (!mountedRef.current) return
+      setAccountError(accountErrorMessage(cause))
+    } finally {
+      if (mountedRef.current) setCreatingAccount(false)
+    }
+  }
 
   async function save(values: Values) {
     setSaving(true)
@@ -64,9 +175,9 @@ export function MemberFormModal({
     <Modal
       open
       title={member ? `Sửa hồ sơ ${member.memberCode}` : 'Thêm hội viên'}
-      onCancel={saving ? undefined : onClose}
-      closable={!saving}
-      mask={{ closable: !saving }}
+      onCancel={busy ? undefined : onClose}
+      closable={!busy}
+      mask={{ closable: !busy }}
       width={640}
       footer={null}
     >
@@ -82,6 +193,98 @@ export function MemberFormModal({
         }
       >
         {error && <Alert type="error" showIcon title={error} style={{ marginBottom: 16 }} />}
+        {member && (
+          <div
+            style={{
+              marginBottom: 16,
+              padding: 12,
+              border: '1px solid #e8ecf2',
+              borderRadius: 8,
+              background: '#fafbfc',
+            }}
+          >
+            <div style={{ fontWeight: 500, marginBottom: 6 }}>Tài khoản đăng nhập</div>
+            {accountInfo.userId !== null ? (
+              <div style={{ fontSize: 14, wordBreak: 'break-word' }}>
+                Email đăng nhập: <strong>{accountInfo.email}</strong>
+              </div>
+            ) : (
+              <>
+                <div style={{ fontSize: 13, color: '#667085', marginBottom: 8 }}>
+                  {member.status !== 'ACTIVE' || status !== 'ACTIVE'
+                    ? 'Chưa có tài khoản. Chỉ có thể tạo tài khoản khi hồ sơ đang hoạt động.'
+                    : 'Hồ sơ chưa có tài khoản đăng nhập cổng hội viên.'}
+                </div>
+                {canCreateAccount && !accountFormOpen && (
+                  <Button
+                    icon={<UserAddOutlined />}
+                    disabled={busy}
+                    style={{ minHeight: 40 }}
+                    onClick={() => {
+                      setAccountError(undefined)
+                      setAccountFormOpen(true)
+                    }}
+                  >
+                    Tạo tài khoản
+                  </Button>
+                )}
+                {canCreateAccount && accountFormOpen && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <label
+                      htmlFor="member-account-email"
+                      style={{ fontSize: 13, fontWeight: 500 }}
+                    >
+                      Email đăng nhập
+                    </label>
+                    <Input
+                      id="member-account-email"
+                      type="email"
+                      autoComplete="email"
+                      maxLength={255}
+                      placeholder="hoivien@example.com"
+                      value={accountEmail}
+                      disabled={busy}
+                      onChange={(event) => {
+                        setAccountEmail(event.target.value)
+                        if (accountError) setAccountError(undefined)
+                      }}
+                    />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                      <Button
+                        type="primary"
+                        htmlType="button"
+                        loading={creatingAccount}
+                        disabled={saving}
+                        style={{ minHeight: 40 }}
+                        onClick={() => void handleCreateAccount()}
+                      >
+                        Xác nhận tạo tài khoản
+                      </Button>
+                      <Button
+                        htmlType="button"
+                        disabled={busy}
+                        style={{ minHeight: 40 }}
+                        onClick={() => {
+                          setAccountFormOpen(false)
+                          setAccountEmail('')
+                          setAccountError(undefined)
+                        }}
+                      >
+                        Đóng
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+            {accountError && (
+              <Alert type="error" showIcon title={accountError} style={{ marginTop: 12 }} />
+            )}
+            {accountSuccess && (
+              <Alert type="success" showIcon title={accountSuccess} style={{ marginTop: 12 }} />
+            )}
+          </div>
+        )}
         <p>Họ tên và số điện thoại là thông tin bắt buộc. Mã hội viên được cấp tự động.</p>
         <Form.Item
           name="fullName"
@@ -146,10 +349,15 @@ export function MemberFormModal({
           />
         )}
         <div className="feature-form-actions">
-          <Button disabled={saving} onClick={onClose}>
+          <Button disabled={busy} onClick={onClose}>
             Hủy
           </Button>
-          <Button type="primary" htmlType="submit" loading={saving}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={saving}
+            disabled={creatingAccount}
+          >
             Lưu hồ sơ
           </Button>
         </div>
