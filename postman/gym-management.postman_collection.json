@@ -226,6 +226,47 @@
           "response": []
         },
         {
+          "name": "Đăng nhập sai mật khẩu / kiểm tra khóa tạm sau 5 lần sai (POST /api/v1/auth/login)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Trả 401 (lần sai 1-5) hoặc 403 (khi đã khóa tạm 15 phút)', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});",
+                  "pm.test('Trả ProblemDetail tiếng Việt', function () {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('detail');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"member.test@example.com\",\n  \"password\": \"WrongPassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Gửi mật khẩu sai liên tiếp 5 lần sẽ khóa tạm tài khoản 15 phút; các lần gửi tiếp theo (kể cả đúng mật khẩu) trong 15 phút trả 403 Forbidden kèm số phút còn lại (F1, UC-F1.2 E1/E2, S4)."
+          },
+          "response": []
+        },
+        {
           "name": "Đổi mật khẩu (POST /api/v1/auth/change-password)",
           "event": [
             {

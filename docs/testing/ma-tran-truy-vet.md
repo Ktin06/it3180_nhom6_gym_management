@@ -8,7 +8,7 @@
 
 | Chức năng | UC | US | AC | AC đã có TC | AC chưa có TC | TC |
 | --- | --- | --- | --- | --- | --- | --- |
-| F1 | 6 | 6 | 29 | 4 | 25 | 17 |
+| F1 | 6 | 6 | 29 | 8 | 21 | 26 |
 | F2 | 5 | 6 | 31 | 0 | 31 | 0 |
 | F3 | 5 | 6 | 43 | 31 | 12 | 59 |
 | F4 | 5 | 0 | 0 | 0 | 0 | 0 |
@@ -18,7 +18,7 @@
 | F8 | 9 | 9 | 55 | 29 | 26 | 38 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **27** | **158** | **64** | **94** | **114** |
+| **Tổng** | **57** | **27** | **158** | **68** | **90** | **123** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -47,10 +47,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F1.1.1-03 | Từ chối khi email đã được sử dụng | US-F1.1.1 |
 | AC-F1.1.1-04 | Từ chối dữ liệu đầu vào sai định dạng | US-F1.1.1 |
 | AC-F1.1.1-05 | Hoàn tác toàn bộ giao dịch khi xảy ra lỗi giữa chừng hoặc chi nhánh mặc định ngừng hoạt động | US-F1.1.1 |
-| AC-F1.2.1-01 | Nhập sai mật khẩu từ lần 1 đến lần 4 trả 401 thông báo chung, tăng bộ đếm và không lộ email tồn tại | US-F1.2.1 |
-| AC-F1.2.1-02 | Nhập sai mật khẩu lần thứ 5 liên tiếp (kể cả gửi đồng thời) đặt bộ đếm bằng 5 và khóa tạm 15 phút | US-F1.2.1 |
-| AC-F1.2.1-03 | Từ chối mọi yêu cầu đăng nhập trong thời gian đang bị khóa tạm 15 phút, kể cả nhập đúng mật khẩu | US-F1.2.1 |
-| AC-F1.2.1-04 | Đăng nhập thành công hoặc hết thời gian khóa tạm | US-F1.2.1 |
 | AC-F1.2.1-05 | Từ chối tài khoản bị khóa hoặc ngừng hoạt động khi nhập đúng mật khẩu | US-F1.2.1 |
 | AC-F1.2.1-06 | Từ chối dữ liệu đăng nhập sai định dạng (không hỗ trợ đăng nhập bằng số điện thoại) | US-F1.2.1 |
 | AC-F1.3.1-01 | Xoay vòng refresh token và chặn dùng lại token cũ | US-F1.3.1 |
@@ -150,10 +146,19 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F1.1.1-05 Hoàn tác toàn bộ giao dịch khi xảy ra lỗi giữa chừng hoặc chi nhánh mặc định ngừng hoạt động (BR-F1-09) ❌ chưa có TC
 - **UC-F1.2** Đăng nhập bằng email
   - **US-F1.2.1** Đăng nhập bằng email (#118)
-    - AC-F1.2.1-01 Nhập sai mật khẩu từ lần 1 đến lần 4 trả 401 thông báo chung, tăng bộ đếm và không lộ email tồn tại (BR-F1-01, BR-F1-03, BR-F1-06) ❌ chưa có TC
-    - AC-F1.2.1-02 Nhập sai mật khẩu lần thứ 5 liên tiếp (kể cả gửi đồng thời) đặt bộ đếm bằng 5 và khóa tạm 15 phút (BR-F1-06) ❌ chưa có TC
-    - AC-F1.2.1-03 Từ chối mọi yêu cầu đăng nhập trong thời gian đang bị khóa tạm 15 phút, kể cả nhập đúng mật khẩu (BR-F1-06) ❌ chưa có TC
-    - AC-F1.2.1-04 Đăng nhập thành công hoặc hết thời gian khóa tạm (BR-F1-01, BR-F1-04, BR-F1-06) ❌ chưa có TC
+    - AC-F1.2.1-01 Nhập sai mật khẩu từ lần 1 đến lần 4 trả 401 thông báo chung, tăng bộ đếm và không lộ email tồn tại (BR-F1-01, BR-F1-03, BR-F1-06)
+      - TC-F1.2.1-01a `AuthServiceTest#saiMatKhauLan1Den4Tra401CauChungVaTangBoDem`
+      - TC-F1.2.1-01b `AuthServiceTest#khongLoEmailKhiEmailKhongTonTai`
+      - TC-F1.2.1-01c `AuthServiceTest#taiKhoanDisabledNhapSaiMatKhauTra401KhongPhai403`
+    - AC-F1.2.1-02 Nhập sai mật khẩu lần thứ 5 liên tiếp (kể cả gửi đồng thời) đặt bộ đếm bằng 5 và khóa tạm 15 phút (BR-F1-06)
+      - TC-F1.2.1-02a `AuthServiceTest#lanSaiThu5Khoa15Phut`
+      - TC-F1.2.1-02b `AuthSessionConcurrencyIntegrationTest#namRequestDangNhapSaiDongThoiTangBoDemDung5VaKhoaTaiKhoan`
+    - AC-F1.2.1-03 Từ chối mọi yêu cầu đăng nhập trong thời gian đang bị khóa tạm 15 phút, kể cả nhập đúng mật khẩu (BR-F1-06)
+      - TC-F1.2.1-03a `AuthServiceTest#dangKhoaNhapDungMatKhauVanTra403KemThoiGianConLai`
+    - AC-F1.2.1-04 Đăng nhập thành công hoặc hết thời gian khóa tạm (BR-F1-01, BR-F1-04, BR-F1-06)
+      - TC-F1.2.1-04a `AuthServiceTest#hetKhoaThiDangNhapLaiDuoc`
+      - TC-F1.2.1-04b `AuthServiceTest#dangNhapDungDatLaiBoDemVe0VaXoaLockedUntil`
+      - TC-F1.2.1-04c `AuthServiceTest#hetKhoaRoiNhapSaiThiBoDemTinhLaiTu1`
     - AC-F1.2.1-05 Từ chối tài khoản bị khóa hoặc ngừng hoạt động khi nhập đúng mật khẩu (BR-F1-05) ❌ chưa có TC
     - AC-F1.2.1-06 Từ chối dữ liệu đăng nhập sai định dạng (không hỗ trợ đăng nhập bằng số điện thoại) (BR-F1-01) ❌ chưa có TC
 - **UC-F1.3** Làm mới phiên đăng nhập (Refresh Token) & Đăng xuất
@@ -481,6 +486,15 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 
 | TC | AC | US | UC | BR | Kiểm thử |
 | --- | --- | --- | --- | --- | --- |
+| TC-F1.2.1-01a | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthServiceTest#saiMatKhauLan1Den4Tra401CauChungVaTangBoDem` |
+| TC-F1.2.1-01b | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthServiceTest#khongLoEmailKhiEmailKhongTonTai` |
+| TC-F1.2.1-01c | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthServiceTest#taiKhoanDisabledNhapSaiMatKhauTra401KhongPhai403` |
+| TC-F1.2.1-02a | AC-F1.2.1-02 | US-F1.2.1 | UC-F1.2 | BR-F1-06, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-05 | `AuthServiceTest#lanSaiThu5Khoa15Phut` |
+| TC-F1.2.1-02b | AC-F1.2.1-02 | US-F1.2.1 | UC-F1.2 | BR-F1-06, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-05 | `AuthSessionConcurrencyIntegrationTest#namRequestDangNhapSaiDongThoiTangBoDemDung5VaKhoaTaiKhoan` |
+| TC-F1.2.1-03a | AC-F1.2.1-03 | US-F1.2.1 | UC-F1.2 | BR-F1-06, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-05 | `AuthServiceTest#dangKhoaNhapDungMatKhauVanTra403KemThoiGianConLai` |
+| TC-F1.2.1-04a | AC-F1.2.1-04 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05 | `AuthServiceTest#hetKhoaThiDangNhapLaiDuoc` |
+| TC-F1.2.1-04b | AC-F1.2.1-04 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05 | `AuthServiceTest#dangNhapDungDatLaiBoDemVe0VaXoaLockedUntil` |
+| TC-F1.2.1-04c | AC-F1.2.1-04 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05 | `AuthServiceTest#hetKhoaRoiNhapSaiThiBoDemTinhLaiTu1` |
 | TC-F1.4.1-01a | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `ChangePasswordIntegrationTest#doiMatKhauThanhCongMatKhauMoiDangNhapDuocMatKhauCuKhong` |
 | TC-F1.4.1-01b | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `ChangePasswordIntegrationTest#doiMatKhauThuHoiMoiRefreshTokenCuaNguoiDung` |
 | TC-F1.4.1-01c | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `AuthServiceTest#doiMatKhauThanhCongCapNhatPasswordHash` |
