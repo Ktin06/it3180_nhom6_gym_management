@@ -27,6 +27,7 @@ import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.ForbiddenException;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
+import vn.edu.hust.nhom6.gym.common.time.VnTime;
 import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.AuthMeResponse;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
@@ -60,6 +61,9 @@ class AuthServiceTest {
     @Mock
     private MemberService memberService;
 
+    @Mock
+    private VnTime vnTime;
+
     private AuthService authService;
 
     @BeforeEach
@@ -69,7 +73,8 @@ class AuthServiceTest {
             refreshTokenRepository,
             jwtTokenService,
             passwordEncoder,
-            memberService
+            memberService,
+            vnTime
         );
     }
 
@@ -150,6 +155,7 @@ class AuthServiceTest {
     @DisplayName("TC-F1.2.1-04e: đăng nhập đúng cấp token và cập nhật last_login_at")
     void dangNhapThanhCongCapTokenVaCapNhatLastLoginAt() {
         LoginRequest request = new LoginRequest("member@example.com", "Password123");
+        OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-20T03:00:00Z");
         User user = User.builder()
             .email("member@example.com")
             .passwordHash("hashed-pwd")
@@ -157,7 +163,8 @@ class AuthServiceTest {
             .status(UserStatus.ACTIVE)
             .build();
 
-        when(userRepository.findByEmail("member@example.com")).thenReturn(Optional.of(user));
+        when(vnTime.now()).thenReturn(fixedNow);
+        when(userRepository.findByEmailForUpdate("member@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("Password123", "hashed-pwd")).thenReturn(true);
         when(jwtTokenService.generateAccessToken(any(), eq("member@example.com"), eq(UserRole.MEMBER)))
             .thenReturn("mock-access-token");
@@ -166,7 +173,7 @@ class AuthServiceTest {
 
         assertThat(result.accessToken()).isEqualTo("mock-access-token");
         assertThat(result.rawRefreshToken()).isNotBlank();
-        assertThat(user.getLastLoginAt()).isNotNull();
+        assertThat(user.getLastLoginAt()).isEqualTo(fixedNow);
         verify(userRepository).save(user);
         verify(refreshTokenRepository).save(any(RefreshToken.class));
     }
@@ -175,6 +182,7 @@ class AuthServiceTest {
     @DisplayName("TC-F1.2.1-01e: đăng nhập sai mật khẩu trả 401 câu chung")
     void dangNhapSaiMatKhauNemUnauthorizedException() {
         LoginRequest request = new LoginRequest("member@example.com", "WrongPassword");
+        OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-20T03:00:00Z");
         User user = User.builder()
             .email("member@example.com")
             .passwordHash("hashed-pwd")
@@ -182,7 +190,8 @@ class AuthServiceTest {
             .status(UserStatus.ACTIVE)
             .build();
 
-        when(userRepository.findByEmail("member@example.com")).thenReturn(Optional.of(user));
+        when(vnTime.now()).thenReturn(fixedNow);
+        when(userRepository.findByEmailForUpdate("member@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("WrongPassword", "hashed-pwd")).thenReturn(false);
 
         assertThatThrownBy(() -> authService.login(request))
@@ -195,6 +204,7 @@ class AuthServiceTest {
     void dangNhapMatKhauVuotQua72ByteNemUnauthorizedExceptionKhongNem500() {
         String longPassword = "ă".repeat(30) + "Pass1234567890123456";
         LoginRequest request = new LoginRequest("member@example.com", longPassword);
+        OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-20T03:00:00Z");
         User user = User.builder()
             .email("member@example.com")
             .passwordHash("hashed-pwd")
@@ -202,7 +212,8 @@ class AuthServiceTest {
             .status(UserStatus.ACTIVE)
             .build();
 
-        when(userRepository.findByEmail("member@example.com")).thenReturn(Optional.of(user));
+        when(vnTime.now()).thenReturn(fixedNow);
+        when(userRepository.findByEmailForUpdate("member@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), eq("hashed-pwd"))).thenAnswer(invocation -> {
             String raw = invocation.getArgument(0);
             if (raw.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > AuthService.MAX_PASSWORD_BYTES) {
@@ -215,7 +226,8 @@ class AuthServiceTest {
             .isInstanceOf(UnauthorizedException.class)
             .hasMessageContaining("Email hoặc mật khẩu không chính xác");
 
-        verify(userRepository, never()).save(any());
+        assertThat(user.getFailedLoginCount()).isEqualTo(1);
+        verify(userRepository).save(user);
         verify(refreshTokenRepository, never()).save(any());
     }
 
@@ -224,7 +236,7 @@ class AuthServiceTest {
     void dangNhapEmailKhongTonTaiVanChayPasswordEncoderMatchesDeChongDoanEmailQuaThoiGian() {
         LoginRequest request = new LoginRequest("unknown@example.com", "Password123");
 
-        when(userRepository.findByEmail("unknown@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmailForUpdate("unknown@example.com")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.login(request))
             .isInstanceOf(UnauthorizedException.class)
@@ -237,6 +249,7 @@ class AuthServiceTest {
     @DisplayName("TC-F1.2.1-05b: tài khoản bị khóa nhập đúng mật khẩu bị từ chối 403")
     void dangNhapTaiKhoanBiKhoaNemForbiddenException() {
         LoginRequest request = new LoginRequest("member@example.com", "Password123");
+        OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-20T03:00:00Z");
         User user = User.builder()
             .email("member@example.com")
             .passwordHash("hashed-pwd")
@@ -244,7 +257,8 @@ class AuthServiceTest {
             .status(UserStatus.LOCKED)
             .build();
 
-        when(userRepository.findByEmail("member@example.com")).thenReturn(Optional.of(user));
+        when(vnTime.now()).thenReturn(fixedNow);
+        when(userRepository.findByEmailForUpdate("member@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("Password123", "hashed-pwd")).thenReturn(true);
 
         assertThatThrownBy(() -> authService.login(request))
@@ -454,5 +468,211 @@ class AuthServiceTest {
         assertThat(PhoneUtils.normalizePhone("84912345678")).isEqualTo("0912345678");
         assertThat(PhoneUtils.normalizePhone("0912.345.678")).isEqualTo("0912345678");
         assertThat(PhoneUtils.normalizePhone("0912-345-678")).isEqualTo("0912345678");
+    }
+
+    @Test
+    @DisplayName("TC-F1.2.1-01a: sai mật khẩu lần 1 đến 4 trả 401 câu chung và tăng bộ đếm")
+    void saiMatKhauLan1Den4Tra401CauChungVaTangBoDem() {
+        LoginRequest request = new LoginRequest("member@example.com", "WrongPass123");
+        User user = User.builder()
+            .email("member@example.com")
+            .passwordHash("hashed-pwd")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .failedLoginCount(0)
+            .build();
+        OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-20T03:00:00Z");
+
+        when(vnTime.now()).thenReturn(fixedNow);
+        when(userRepository.findByEmailForUpdate("member@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("WrongPass123", "hashed-pwd")).thenReturn(false);
+
+        for (int attempt = 1; attempt <= 4; attempt++) {
+            assertThatThrownBy(() -> authService.login(request))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("Email hoặc mật khẩu không chính xác.");
+
+            assertThat(user.getFailedLoginCount()).isEqualTo(attempt);
+            assertThat(user.getLockedUntil()).isNull();
+        }
+    }
+
+    @Test
+    @DisplayName("TC-F1.2.1-02a: lần sai thứ 5 khóa 15 phút")
+    void lanSaiThu5Khoa15Phut() {
+        LoginRequest request = new LoginRequest("member@example.com", "WrongPass123");
+        User user = User.builder()
+            .email("member@example.com")
+            .passwordHash("hashed-pwd")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .failedLoginCount(4)
+            .build();
+        OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-20T03:00:00Z");
+
+        when(vnTime.now()).thenReturn(fixedNow);
+        when(userRepository.findByEmailForUpdate("member@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("WrongPass123", "hashed-pwd")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.login(request))
+            .isInstanceOf(UnauthorizedException.class)
+            .hasMessage("Email hoặc mật khẩu không chính xác.");
+
+        assertThat(user.getFailedLoginCount()).isEqualTo(5);
+        assertThat(user.getLockedUntil()).isEqualTo(fixedNow.plusMinutes(15));
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("TC-F1.2.1-03a: đang khóa nhập đúng mật khẩu vẫn trả 403 kèm thời gian còn lại")
+    void dangKhoaNhapDungMatKhauVanTra403KemThoiGianConLai() {
+        LoginRequest request = new LoginRequest("member@example.com", "Password123");
+        OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-20T03:00:00Z");
+        User user = User.builder()
+            .email("member@example.com")
+            .passwordHash("hashed-pwd")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .failedLoginCount(5)
+            .lockedUntil(fixedNow.plusMinutes(14).plusSeconds(10))
+            .build();
+
+        when(vnTime.now()).thenReturn(fixedNow);
+        when(userRepository.findByEmailForUpdate("member@example.com")).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> authService.login(request))
+            .isInstanceOf(ForbiddenException.class)
+            .hasMessage("Tài khoản đang bị khóa tạm thời do nhập sai mật khẩu nhiều lần. Vui lòng thử lại sau 15 phút.");
+
+        assertThat(user.getFailedLoginCount()).isEqualTo(5);
+        verify(userRepository, never()).save(any());
+        verify(refreshTokenRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("TC-F1.2.1-04a: hết khóa thì đăng nhập lại được")
+    void hetKhoaThiDangNhapLaiDuoc() {
+        LoginRequest request = new LoginRequest("member@example.com", "Password123");
+        OffsetDateTime lockTime = OffsetDateTime.parse("2026-11-20T03:00:00Z");
+        OffsetDateTime afterLock = lockTime.plusMinutes(15).plusSeconds(1);
+        User user = User.builder()
+            .email("member@example.com")
+            .passwordHash("hashed-pwd")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .failedLoginCount(5)
+            .lockedUntil(lockTime.plusMinutes(15))
+            .build();
+
+        when(vnTime.now()).thenReturn(afterLock);
+        when(userRepository.findByEmailForUpdate("member@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("Password123", "hashed-pwd")).thenReturn(true);
+        when(jwtTokenService.generateAccessToken(any(), eq("member@example.com"), eq(UserRole.MEMBER)))
+            .thenReturn("access-token-after-unlock");
+
+        AuthService.AuthResult result = authService.login(request);
+
+        assertThat(result.accessToken()).isEqualTo("access-token-after-unlock");
+        assertThat(user.getFailedLoginCount()).isZero();
+        assertThat(user.getLockedUntil()).isNull();
+        assertThat(user.getLastLoginAt()).isEqualTo(afterLock);
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("TC-F1.2.1-04b: đăng nhập đúng đặt lại bộ đếm về 0 và xóa locked_until")
+    void dangNhapDungDatLaiBoDemVe0VaXoaLockedUntil() {
+        LoginRequest request = new LoginRequest("member@example.com", "Password123");
+        OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-20T03:00:00Z");
+        User user = User.builder()
+            .email("member@example.com")
+            .passwordHash("hashed-pwd")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .failedLoginCount(3)
+            .lockedUntil(null)
+            .build();
+
+        when(vnTime.now()).thenReturn(fixedNow);
+        when(userRepository.findByEmailForUpdate("member@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("Password123", "hashed-pwd")).thenReturn(true);
+        when(jwtTokenService.generateAccessToken(any(), eq("member@example.com"), eq(UserRole.MEMBER)))
+            .thenReturn("mock-access-token");
+
+        AuthService.AuthResult result = authService.login(request);
+
+        assertThat(result.accessToken()).isEqualTo("mock-access-token");
+        assertThat(user.getFailedLoginCount()).isZero();
+        assertThat(user.getLockedUntil()).isNull();
+        assertThat(user.getLastLoginAt()).isEqualTo(fixedNow);
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("TC-F1.2.1-01b: không lộ email khi email không tồn tại")
+    void khongLoEmailKhiEmailKhongTonTai() {
+        LoginRequest request = new LoginRequest("nonexistent@example.com", "Password123");
+
+        when(userRepository.findByEmailForUpdate("nonexistent@example.com")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.login(request))
+            .isInstanceOf(UnauthorizedException.class)
+            .hasMessage("Email hoặc mật khẩu không chính xác.");
+
+        verify(passwordEncoder).matches(eq("Password123"), anyString());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("TC-F1.2.1-01c: tài khoản DISABLED nhập sai mật khẩu trả 401, không phải 403")
+    void taiKhoanDisabledNhapSaiMatKhauTra401KhongPhai403() {
+        LoginRequest request = new LoginRequest("disabled@example.com", "WrongPass123");
+        OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-20T03:00:00Z");
+        User user = User.builder()
+            .email("disabled@example.com")
+            .passwordHash("hashed-pwd")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.DISABLED)
+            .failedLoginCount(0)
+            .build();
+
+        when(vnTime.now()).thenReturn(fixedNow);
+        when(userRepository.findByEmailForUpdate("disabled@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("WrongPass123", "hashed-pwd")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.login(request))
+            .isInstanceOf(UnauthorizedException.class)
+            .hasMessage("Email hoặc mật khẩu không chính xác.");
+
+        assertThat(user.getFailedLoginCount()).isEqualTo(1);
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("TC-F1.2.1-04c: hết khóa rồi nhập sai thì bộ đếm tính lại từ 1 và không khóa lại ngay")
+    void hetKhoaRoiNhapSaiThiBoDemTinhLaiTu1() {
+        LoginRequest request = new LoginRequest("member@example.com", "WrongPass123");
+        OffsetDateTime lockTime = OffsetDateTime.parse("2026-11-20T03:00:00Z");
+        OffsetDateTime afterLock = lockTime.plusMinutes(15).plusSeconds(1);
+        User user = User.builder()
+            .email("member@example.com")
+            .passwordHash("hashed-pwd")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .failedLoginCount(5)
+            .lockedUntil(lockTime.plusMinutes(15))
+            .build();
+
+        when(vnTime.now()).thenReturn(afterLock);
+        when(userRepository.findByEmailForUpdate("member@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("WrongPass123", "hashed-pwd")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.login(request))
+            .isInstanceOf(UnauthorizedException.class)
+            .hasMessage("Email hoặc mật khẩu không chính xác.");
+
+        assertThat(user.getFailedLoginCount()).isEqualTo(1);
+        assertThat(user.getLockedUntil()).isNull();
+        verify(userRepository).save(user);
     }
 }

@@ -8,7 +8,7 @@
 
 | Chức năng | UC | US | AC | AC đã có TC | AC chưa có TC | TC |
 | --- | --- | --- | --- | --- | --- | --- |
-| F1 | 6 | 6 | 29 | 16 | 13 | 82 |
+| F1 | 6 | 6 | 29 | 18 | 11 | 91 |
 | F2 | 5 | 6 | 31 | 12 | 19 | 57 |
 | F3 | 5 | 6 | 43 | 31 | 12 | 59 |
 | F4 | 5 | 0 | 0 | 0 | 0 | 0 |
@@ -18,7 +18,7 @@
 | F8 | 9 | 9 | 55 | 29 | 26 | 38 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **27** | **158** | **88** | **70** | **236** |
+| **Tổng** | **57** | **27** | **158** | **90** | **68** | **245** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -42,8 +42,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 
 | AC | Tên | US |
 | --- | --- | --- |
-| AC-F1.2.1-02 | Nhập sai mật khẩu lần thứ 5 liên tiếp (kể cả gửi đồng thời) đặt bộ đếm bằng 5 và khóa tạm 15 phút | US-F1.2.1 |
-| AC-F1.2.1-03 | Từ chối mọi yêu cầu đăng nhập trong thời gian đang bị khóa tạm 15 phút, kể cả nhập đúng mật khẩu | US-F1.2.1 |
 | AC-F1.2.1-06 | Từ chối dữ liệu đăng nhập sai định dạng (không hỗ trợ đăng nhập bằng số điện thoại) | US-F1.2.1 |
 | AC-F1.4.1-01 | Đổi mật khẩu thành công, thu hồi toàn bộ phiên và yêu cầu đăng nhập lại | US-F1.4.1 |
 | AC-F1.4.1-02 | Từ chối khi mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ | US-F1.4.1 |
@@ -155,13 +153,22 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 - **UC-F1.2** Đăng nhập bằng email
   - **US-F1.2.1** Đăng nhập bằng email (#118)
     - AC-F1.2.1-01 Nhập sai mật khẩu từ lần 1 đến lần 4 trả 401 thông báo chung, tăng bộ đếm và không lộ email tồn tại (BR-F1-01, BR-F1-03, BR-F1-06)
+      - TC-F1.2.1-01a `AuthServiceTest#saiMatKhauLan1Den4Tra401CauChungVaTangBoDem`
+      - TC-F1.2.1-01b `AuthServiceTest#khongLoEmailKhiEmailKhongTonTai`
+      - TC-F1.2.1-01c `AuthServiceTest#taiKhoanDisabledNhapSaiMatKhauTra401KhongPhai403`
       - TC-F1.2.1-01d `AuthControllerTest#dangNhapSaiMatKhauTra401ProblemDetailTiengViet`
       - TC-F1.2.1-01e `AuthServiceTest#dangNhapSaiMatKhauNemUnauthorizedException`
       - TC-F1.2.1-01f `AuthServiceTest#dangNhapMatKhauVuotQua72ByteNemUnauthorizedExceptionKhongNem500`
       - TC-F1.2.1-01g `AuthServiceTest#dangNhapEmailKhongTonTaiVanChayPasswordEncoderMatchesDeChongDoanEmailQuaThoiGian`
-    - AC-F1.2.1-02 Nhập sai mật khẩu lần thứ 5 liên tiếp (kể cả gửi đồng thời) đặt bộ đếm bằng 5 và khóa tạm 15 phút (BR-F1-06) ❌ chưa có TC
-    - AC-F1.2.1-03 Từ chối mọi yêu cầu đăng nhập trong thời gian đang bị khóa tạm 15 phút, kể cả nhập đúng mật khẩu (BR-F1-06) ❌ chưa có TC
+    - AC-F1.2.1-02 Nhập sai mật khẩu lần thứ 5 liên tiếp (kể cả gửi đồng thời) đặt bộ đếm bằng 5 và khóa tạm 15 phút (BR-F1-06)
+      - TC-F1.2.1-02a `AuthServiceTest#lanSaiThu5Khoa15Phut`
+      - TC-F1.2.1-02b `AuthSessionConcurrencyIntegrationTest#namRequestDangNhapSaiDongThoiTangBoDemDung5VaKhoaTaiKhoan`
+    - AC-F1.2.1-03 Từ chối mọi yêu cầu đăng nhập trong thời gian đang bị khóa tạm 15 phút, kể cả nhập đúng mật khẩu (BR-F1-06)
+      - TC-F1.2.1-03a `AuthServiceTest#dangKhoaNhapDungMatKhauVanTra403KemThoiGianConLai`
     - AC-F1.2.1-04 Đăng nhập thành công hoặc hết thời gian khóa tạm (BR-F1-01, BR-F1-04, BR-F1-06)
+      - TC-F1.2.1-04a `AuthServiceTest#hetKhoaThiDangNhapLaiDuoc`
+      - TC-F1.2.1-04b `AuthServiceTest#dangNhapDungDatLaiBoDemVe0VaXoaLockedUntil`
+      - TC-F1.2.1-04c `AuthServiceTest#hetKhoaRoiNhapSaiThiBoDemTinhLaiTu1`
       - TC-F1.2.1-04d `AuthControllerTest#dangNhapThanhCongTra200KemCookieVaAccessToken`
       - TC-F1.2.1-04e `AuthServiceTest#dangNhapThanhCongCapTokenVaCapNhatLastLoginAt`
       - TC-F1.2.1-04f `JwtSecurityIntegrationTest#tokenHopLeLayThongTinTaiKhoanHienTaiThanhCong`
@@ -607,10 +614,19 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F1.1.1-05c | AC-F1.1.1-05 | US-F1.1.1 | UC-F1.1 | BR-F1-09, BR-F1-01, BR-F1-02, BR-F1-03, BR-F1-04 | `MemberApiIntegrationTest#registrationPortJoinsCallerTransactionAndRollsBackOnDuplicate` |
 | TC-F1.1.1-05d | AC-F1.1.1-05 | US-F1.1.1 | UC-F1.1 | BR-F1-09, BR-F1-01, BR-F1-02, BR-F1-03, BR-F1-04 | `StaffBranchIntegrationTest#missingDefaultBranchIsNotFoundInsteadOfCreatingOne` |
 | TC-F1.1.1-05e | AC-F1.1.1-05 | US-F1.1.1 | UC-F1.1 | BR-F1-09, BR-F1-01, BR-F1-02, BR-F1-03, BR-F1-04 | `StaffBranchIntegrationTest#inactiveDefaultBranchIsNotFound` |
+| TC-F1.2.1-01a | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthServiceTest#saiMatKhauLan1Den4Tra401CauChungVaTangBoDem` |
+| TC-F1.2.1-01b | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthServiceTest#khongLoEmailKhiEmailKhongTonTai` |
+| TC-F1.2.1-01c | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthServiceTest#taiKhoanDisabledNhapSaiMatKhauTra401KhongPhai403` |
 | TC-F1.2.1-01d | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthControllerTest#dangNhapSaiMatKhauTra401ProblemDetailTiengViet` |
 | TC-F1.2.1-01e | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthServiceTest#dangNhapSaiMatKhauNemUnauthorizedException` |
 | TC-F1.2.1-01f | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthServiceTest#dangNhapMatKhauVuotQua72ByteNemUnauthorizedExceptionKhongNem500` |
 | TC-F1.2.1-01g | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthServiceTest#dangNhapEmailKhongTonTaiVanChayPasswordEncoderMatchesDeChongDoanEmailQuaThoiGian` |
+| TC-F1.2.1-02a | AC-F1.2.1-02 | US-F1.2.1 | UC-F1.2 | BR-F1-06, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-05 | `AuthServiceTest#lanSaiThu5Khoa15Phut` |
+| TC-F1.2.1-02b | AC-F1.2.1-02 | US-F1.2.1 | UC-F1.2 | BR-F1-06, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-05 | `AuthSessionConcurrencyIntegrationTest#namRequestDangNhapSaiDongThoiTangBoDemDung5VaKhoaTaiKhoan` |
+| TC-F1.2.1-03a | AC-F1.2.1-03 | US-F1.2.1 | UC-F1.2 | BR-F1-06, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-05 | `AuthServiceTest#dangKhoaNhapDungMatKhauVanTra403KemThoiGianConLai` |
+| TC-F1.2.1-04a | AC-F1.2.1-04 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05 | `AuthServiceTest#hetKhoaThiDangNhapLaiDuoc` |
+| TC-F1.2.1-04b | AC-F1.2.1-04 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05 | `AuthServiceTest#dangNhapDungDatLaiBoDemVe0VaXoaLockedUntil` |
+| TC-F1.2.1-04c | AC-F1.2.1-04 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05 | `AuthServiceTest#hetKhoaRoiNhapSaiThiBoDemTinhLaiTu1` |
 | TC-F1.2.1-04d | AC-F1.2.1-04 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05 | `AuthControllerTest#dangNhapThanhCongTra200KemCookieVaAccessToken` |
 | TC-F1.2.1-04e | AC-F1.2.1-04 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05 | `AuthServiceTest#dangNhapThanhCongCapTokenVaCapNhatLastLoginAt` |
 | TC-F1.2.1-04f | AC-F1.2.1-04 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05 | `JwtSecurityIntegrationTest#tokenHopLeLayThongTinTaiKhoanHienTaiThanhCong` |
