@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { AxiosError, AxiosHeaders } from 'axios'
@@ -151,6 +151,57 @@ describe('form hồ sơ hội viên', () => {
     expect(screen.queryByRole('button', { name: /Tạo tài khoản/ })).not.toBeInTheDocument()
   })
 
+  it('Enter chỉ tạo tài khoản một lần và vẫn cho lưu hồ sơ sau khi tạo xong', async () => {
+    const user = userEvent.setup()
+    const api = createMockMembersApi()
+    const member = await api.detail(2)
+    const create = api.createAccount
+    let finishAccount!: () => void
+    const createAccount = vi
+      .spyOn(api, 'createAccount')
+      .mockImplementationOnce(async (id, input) => {
+        await new Promise<void>((resolve) => {
+          finishAccount = resolve
+        })
+        return create(id, input)
+      })
+    const update = vi.spyOn(api, 'update')
+    const onSaved = vi.fn()
+    const onClose = vi.fn()
+
+    render(
+      <AuthContext.Provider value={authValue('RECEPTIONIST')}>
+        <MemberFormModal
+          member={member}
+          api={api}
+          onClose={onClose}
+          onSaved={onSaved}
+          initialAccountFormOpen
+        />
+      </AuthContext.Provider>,
+    )
+
+    const email = screen.getByLabelText('Email đăng nhập')
+    await user.type(email, 'hoivien@example.com{Enter}{Enter}')
+    expect(createAccount).toHaveBeenCalledExactlyOnceWith(member.id, {
+      email: 'hoivien@example.com',
+    })
+    expect(screen.getByRole('button', { name: 'Lưu hồ sơ' })).toBeDisabled()
+    expect(update).not.toHaveBeenCalled()
+    expect(onSaved).not.toHaveBeenCalled()
+
+    await act(async () => finishAccount())
+    expect(await screen.findByText('hoivien@example.com')).toBeInTheDocument()
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(onClose).not.toHaveBeenCalled()
+    expect(update).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: 'Lưu hồ sơ' }))
+    await waitFor(() => expect(onSaved).toHaveBeenCalledOnce())
+    expect(update).toHaveBeenCalledOnce()
+    expect(createAccount).toHaveBeenCalledOnce()
+  })
+
   it('TC-F2.2.1-03a, TC-F2.2.1-05a: hồ sơ đã có tài khoản hiện email và không có nút tạo tài khoản; hồ sơ ngừng hoạt động không có nút', async () => {
     const api = createMockMembersApi()
     const linkedMember = {
@@ -184,18 +235,21 @@ describe('form hồ sơ hội viên', () => {
     expect(screen.queryByRole('button', { name: /Tạo tài khoản/ })).not.toBeInTheDocument()
   })
 
-  it('TC-F2.2.1-07a: hội viên không thấy nút tạo tài khoản', async () => {
-    const api = createMockMembersApi()
-    const member = await api.detail(2)
+  it.each(['MEMBER', null] as const)(
+    'TC-F2.2.1-07a: vai trò %s không thấy nút tạo tài khoản',
+    async (role) => {
+      const api = createMockMembersApi()
+      const member = await api.detail(2)
 
-    render(
-      <AuthContext.Provider value={authValue('MEMBER')}>
-        <MemberFormModal member={member} api={api} onClose={vi.fn()} onSaved={vi.fn()} />
-      </AuthContext.Provider>,
-    )
+      render(
+        <AuthContext.Provider value={role ? authValue(role) : null}>
+          <MemberFormModal member={member} api={api} onClose={vi.fn()} onSaved={vi.fn()} />
+        </AuthContext.Provider>,
+      )
 
-    expect(screen.queryByRole('button', { name: /Tạo tài khoản/ })).not.toBeInTheDocument()
-  })
+      expect(screen.queryByRole('button', { name: /Tạo tài khoản/ })).not.toBeInTheDocument()
+    },
+  )
 
   it('TC-F2.2.1-07b: kiểm tra định dạng email ở trình duyệt trước khi gọi API và hiển thị lỗi 400', async () => {
     const user = userEvent.setup()

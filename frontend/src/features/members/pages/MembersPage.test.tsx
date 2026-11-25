@@ -2,6 +2,7 @@ import { App } from 'antd'
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import { AuthContext } from '../../../auth/AuthContext'
 import { createMockMembersApi } from '../api/mock-members'
 import { MembersPage } from './MembersPage'
 import type { MemberDetail } from '../types/member'
@@ -186,17 +187,30 @@ describe('danh sách hội viên', () => {
     expect(screen.queryByText('Mất kết nối máy chủ')).not.toBeInTheDocument()
   })
 
-  it('TC-F2.2.1-01b: danh sách chỉ hiện nút Tạo tài khoản cho hồ sơ ACTIVE chưa có email và tải lại sau khi tạo', async () => {
+  it('TC-F2.2.1-01b: chỉ tạo tài khoản cho hồ sơ ACTIVE chưa có email và giữ đúng thao tác khi thử lại', async () => {
     const user = userEvent.setup()
     const api = createMockMembersApi()
     await api.createAccount(28, { email: 'da-co@example.com' })
     const list = vi.spyOn(api, 'list')
     const createAccount = vi.spyOn(api, 'createAccount')
+    const detail = vi.spyOn(api, 'detail').mockRejectedValueOnce(new Error('Không tải được hồ sơ'))
 
     render(
-      <App>
-        <MembersPage api={api} />
-      </App>,
+      <AuthContext.Provider
+        value={{
+          status: 'authenticated',
+          user: { role: 'RECEPTIONIST', email: 'receptionist@example.com' },
+          sessionError: null,
+          login: vi.fn(),
+          register: vi.fn(),
+          logout: vi.fn(),
+          retrySession: vi.fn(),
+        }}
+      >
+        <App>
+          <MembersPage api={api} />
+        </App>
+      </AuthContext.Provider>,
     )
 
     expect(await screen.findByText('HV000030')).toBeInTheDocument()
@@ -209,7 +223,11 @@ describe('danh sách hội viên', () => {
     ).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Tạo tài khoản HV000030' }))
+    await screen.findByText('Không tải được hồ sơ')
+    await user.click(screen.getByRole('button', { name: 'Thử lại' }))
     const emailInput = await screen.findByLabelText('Email đăng nhập')
+    expect(detail).toHaveBeenNthCalledWith(1, 30)
+    expect(detail).toHaveBeenNthCalledWith(2, 30)
     await user.type(emailInput, 'hv30@example.com')
     await user.click(screen.getByRole('button', { name: 'Xác nhận tạo tài khoản' }))
 

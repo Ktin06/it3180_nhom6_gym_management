@@ -3,6 +3,7 @@ import { Alert, Button, Form, Input, Modal, Select } from 'antd'
 import { useContext, useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import { AuthContext } from '../../../auth/AuthContext'
+import { canManageMembers } from '../../../auth/roles'
 import { errorMessage } from '../../shared/api-error'
 import type { Gender, MemberDetail, MembersGateway } from '../types/member'
 import { normalizePhone } from '../phone'
@@ -58,12 +59,7 @@ export function MemberFormModal({
   onAccountCreated?: () => void
   initialAccountFormOpen?: boolean
 }) {
-  const auth = useContext(AuthContext)
-  const canManageMember =
-    !auth?.user ||
-    auth.user.role === 'SUPER_ADMIN' ||
-    auth.user.role === 'BRANCH_MANAGER' ||
-    auth.user.role === 'RECEPTIONIST'
+  const canManageMember = canManageMembers(useContext(AuthContext)?.user?.role)
 
   const [form] = Form.useForm<Values>()
   const [saving, setSaving] = useState(false)
@@ -104,7 +100,7 @@ export function MemberFormModal({
   }, [])
 
   async function handleCreateAccount() {
-    if (!member) return
+    if (!canCreateAccount || busy) return
     const validationError = validateAccountEmail(accountEmail)
     if (validationError) {
       setAccountSuccess(undefined)
@@ -247,6 +243,11 @@ export function MemberFormModal({
                       onChange={(event) => {
                         setAccountEmail(event.target.value)
                         if (accountError) setAccountError(undefined)
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key !== 'Enter' || event.nativeEvent.isComposing) return
+                        event.preventDefault()
+                        if (!event.repeat) void handleCreateAccount()
                       }}
                     />
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>

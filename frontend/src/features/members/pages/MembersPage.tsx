@@ -2,6 +2,7 @@ import { EditOutlined, PlusOutlined, ReloadOutlined, UserAddOutlined } from '@an
 import { Alert, App, Button, Input, Select, Space, Table, Tag } from 'antd'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { AuthContext } from '../../../auth/AuthContext'
+import { canManageMembers } from '../../../auth/roles'
 import type { Status } from '../../shared/types'
 import { errorMessage } from '../../shared/api-error'
 import { DemoNotice } from '../../shared/DemoNotice'
@@ -15,18 +16,17 @@ const initialQuery: MemberQuery = { page: 0, size: 20 }
 
 export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
   const { message } = App.useApp()
-  const auth = useContext(AuthContext)
-  const canManageAccount =
-    !auth?.user ||
-    auth.user.role === 'SUPER_ADMIN' ||
-    auth.user.role === 'BRANCH_MANAGER' ||
-    auth.user.role === 'RECEPTIONIST'
+  const canManageAccount = canManageMembers(useContext(AuthContext)?.user?.role)
   const list = useRemoteQuery(api.list, initialQuery)
   const [keyword, setKeyword] = useState('')
   const [editing, setEditing] = useState<MemberDetail | null>()
   const [openAccountForm, setOpenAccountForm] = useState(false)
   const [loadingId, setLoadingId] = useState<number>()
-  const [editError, setEditError] = useState<{ id: number; message: string }>()
+  const [editError, setEditError] = useState<{
+    id: number
+    withAccountForm: boolean
+    message: string
+  }>()
   const editRequest = useRef(0)
 
   function applyQuery(update: Partial<MemberQuery>, search = keyword) {
@@ -72,7 +72,9 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
         setEditing(member)
       }
     } catch (cause) {
-      if (request === editRequest.current) setEditError({ id, message: errorMessage(cause) })
+      if (request === editRequest.current) {
+        setEditError({ id, withAccountForm, message: errorMessage(cause) })
+      }
     } finally {
       if (request === editRequest.current) setLoadingId(undefined)
     }
@@ -146,7 +148,10 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
             title={editError.message}
             style={{ marginBottom: 16 }}
             action={
-              <Button size="small" onClick={() => void edit(editError.id)}>
+              <Button
+                size="small"
+                onClick={() => void edit(editError.id, editError.withAccountForm)}
+              >
                 Thử lại
               </Button>
             }
@@ -164,7 +169,7 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
                   ? 'Chưa tải được dữ liệu.'
                   : 'Không có hội viên phù hợp.',
             }}
-            scroll={{ x: 970 }}
+            scroll={{ x: 910 }}
             columns={[
               { title: 'Mã hội viên', dataIndex: 'memberCode', width: 130 },
               { title: 'Họ và tên', dataIndex: 'fullName', width: 200 },
@@ -188,13 +193,15 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
               {
                 title: 'Thao tác',
                 key: 'actions',
-                width: 210,
+                width: 150,
+                fixed: 'right',
                 render: (_, member) => (
                   <Space wrap size="small">
                     <Button
                       type="link"
                       icon={<EditOutlined />}
                       aria-label={`Sửa ${member.memberCode}`}
+                      style={{ paddingInline: 4 }}
                       disabled={loadingId !== undefined}
                       loading={loadingId === member.id}
                       onClick={() => void edit(member.id)}
@@ -206,6 +213,7 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
                         type="link"
                         icon={<UserAddOutlined />}
                         aria-label={`Tạo tài khoản ${member.memberCode}`}
+                        style={{ paddingInline: 4 }}
                         disabled={loadingId !== undefined}
                         onClick={() => void edit(member.id, true)}
                       >
