@@ -1,18 +1,60 @@
-import { ReloadOutlined } from '@ant-design/icons'
-import { Alert, Button, Select, Table, Tag } from 'antd'
+import { EditOutlined, PlusOutlined, ReloadOutlined, StopOutlined } from '@ant-design/icons'
+import { Alert, App, Button, Modal, Select, Space, Table, Tag, Typography } from 'antd'
+import { useContext, useState } from 'react'
+import { AuthContext } from '../../../auth/AuthContext'
 import type { Status } from '../../shared/types'
 import { errorMessage } from '../../shared/api-error'
 import { DemoNotice } from '../../shared/DemoNotice'
 import { useRemoteQuery } from '../../shared/use-remote-query'
 import { packagesApi } from '../api/packages'
+import { PackageFormModal } from '../components/PackageFormModal'
 import { packageTypeLabels as typeLabels, vndFormat as money } from '../package-format'
-import type { PackageQuery, PackagesGateway, PackageType } from '../types/package'
+import type { GymPackage, PackageQuery, PackagesGateway, PackageType } from '../types/package'
 import '../../shared/feature-pages.css'
 
 const initialQuery: PackageQuery = { page: 0, size: 20, status: 'ACTIVE' }
 
 export function PackagesPage({ api = packagesApi }: { api?: PackagesGateway }) {
+  const { message } = App.useApp()
+  const auth = useContext(AuthContext)
+  const isManager = auth?.user?.role === 'BRANCH_MANAGER'
   const list = useRemoteQuery(api.list, initialQuery)
+  const [editing, setEditing] = useState<GymPackage | null>()
+  const [deactivating, setDeactivating] = useState<GymPackage>()
+  const [deactivatingPending, setDeactivatingPending] = useState(false)
+  const [actionError, setActionError] = useState<string>()
+
+  function openCreate() {
+    setActionError(undefined)
+    setEditing(null)
+  }
+
+  function openEdit(item: GymPackage) {
+    setActionError(undefined)
+    setEditing(item)
+  }
+
+  function openDeactivate(item: GymPackage) {
+    setActionError(undefined)
+    setDeactivating(item)
+  }
+
+  async function confirmDeactivate(target: GymPackage) {
+    setDeactivatingPending(true)
+    setActionError(undefined)
+    try {
+      await api.deactivate(target.id)
+      setDeactivating(undefined)
+      list.reload()
+      void message?.success?.(`Đã ngừng bán gói ${target.code}.`)
+    } catch (cause) {
+      setDeactivating(undefined)
+      setActionError(errorMessage(cause))
+    } finally {
+      setDeactivatingPending(false)
+    }
+  }
+
   return (
     <section className="feature-page" aria-labelledby="packages-heading">
       <div className="feature-heading">
@@ -20,6 +62,16 @@ export function PackagesPage({ api = packagesApi }: { api?: PackagesGateway }) {
           <h2 id="packages-heading">Danh mục gói tập</h2>
           <p>Tra cứu loại gói, thời hạn, số buổi và giá bán.</p>
         </div>
+        {isManager && (
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={openCreate}
+            style={{ minHeight: 40 }}
+          >
+            Thêm gói
+          </Button>
+        )}
       </div>
       <DemoNotice />
       <div className="feature-content">
@@ -77,12 +129,25 @@ export function PackagesPage({ api = packagesApi }: { api?: PackagesGateway }) {
             style={{ marginBottom: 16 }}
           />
         )}
+        {actionError && (
+          <Alert
+            type="error"
+            showIcon
+            title={actionError}
+            action={
+              <Button size="small" onClick={() => setActionError(undefined)}>
+                Đóng
+              </Button>
+            }
+            style={{ marginBottom: 16 }}
+          />
+        )}
         <div aria-busy={list.loading}>
           <Table
             rowKey="id"
             loading={list.loading}
             dataSource={list.data?.content ?? []}
-            scroll={{ x: 900 }}
+            scroll={{ x: isManager ? 1090 : 900 }}
             locale={{
               emptyText: list.error ? 'Chưa tải được dữ liệu.' : 'Không có gói tập phù hợp.',
             }}
@@ -127,6 +192,44 @@ export function PackagesPage({ api = packagesApi }: { api?: PackagesGateway }) {
                   </Tag>
                 ),
               },
+              ...(isManager
+                ? [
+                    {
+                      title: 'Thao tác',
+                      key: 'actions',
+                      width: 200,
+                      fixed: 'right' as const,
+                      render: (_: unknown, item: GymPackage) =>
+                        item.branchId === null ? (
+                          <Typography.Text type="secondary">Toàn chuỗi</Typography.Text>
+                        ) : (
+                          <Space size={0}>
+                            <Button
+                              type="link"
+                              icon={<EditOutlined />}
+                              aria-label={`Sửa ${item.code}`}
+                              style={{ minHeight: 40 }}
+                              onClick={() => openEdit(item)}
+                            >
+                              Sửa
+                            </Button>
+                            {item.status === 'ACTIVE' && (
+                              <Button
+                                type="link"
+                                danger
+                                icon={<StopOutlined />}
+                                aria-label={`Ngừng bán ${item.code}`}
+                                style={{ minHeight: 40 }}
+                                onClick={() => openDeactivate(item)}
+                              >
+                                Ngừng bán
+                              </Button>
+                            )}
+                          </Space>
+                        ),
+                    },
+                  ]
+                : []),
             ]}
             expandable={{
               rowExpandable: (item) => Boolean(item.description),
@@ -150,6 +253,58 @@ export function PackagesPage({ api = packagesApi }: { api?: PackagesGateway }) {
           />
         </div>
       </div>
+      {editing !== undefined && (
+        <PackageFormModal
+          key={editing?.id ?? 'new'}
+          pkg={editing}
+          api={api}
+          onClose={() => setEditing(undefined)}
+          onSaved={() => {
+            const wasEditing = Boolean(editing)
+            setEditing(undefined)
+            if (wasEditing) {
+              list.reload()
+            } else {
+              list.changeQuery({ ...list.query, status: 'ACTIVE', page: 0 })
+            }
+            void message?.success?.(wasEditing ? 'Đã cập nhật gói tập.' : 'Đã thêm gói tập mới.')
+          }}
+        />
+      )}
+      {deactivating && (
+        <Modal
+          open
+          title="Ngừng bán gói này?"
+          onCancel={deactivatingPending ? undefined : () => setDeactivating(undefined)}
+          closable={!deactivatingPending}
+          mask={{ closable: !deactivatingPending }}
+          footer={
+            <div className="feature-form-actions" style={{ marginTop: 0 }}>
+              <Button
+                disabled={deactivatingPending}
+                onClick={() => setDeactivating(undefined)}
+                style={{ minHeight: 40 }}
+              >
+                Hủy
+              </Button>
+              <Button
+                type="primary"
+                danger
+                loading={deactivatingPending}
+                onClick={() => void confirmDeactivate(deactivating)}
+                style={{ minHeight: 40 }}
+              >
+                Ngừng bán
+              </Button>
+            </div>
+          }
+        >
+          <p style={{ margin: 0 }}>
+            Gói <strong>{deactivating.name}</strong> ({deactivating.code}) sẽ chuyển sang trạng thái
+            ngừng bán. Các gói hội viên đã mua trước đó vẫn sử dụng bình thường.
+          </p>
+        </Modal>
+      )}
     </section>
   )
 }
