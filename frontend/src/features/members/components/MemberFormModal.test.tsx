@@ -1,6 +1,6 @@
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { AxiosError, AxiosHeaders } from 'axios'
 import { AuthContext, type AuthContextValue } from '../../../auth/AuthContext'
 import type { Role } from '../../../auth/roles'
@@ -19,7 +19,7 @@ function authValue(role: Role): AuthContextValue {
   }
 }
 
-function makeAccountError(status: number, data: Record<string, unknown>) {
+function makeFormError(status: number, data: Record<string, unknown>) {
   const error = new AxiosError('Bad Request')
   error.response = {
     status,
@@ -30,6 +30,10 @@ function makeAccountError(status: number, data: Record<string, unknown>) {
   }
   return error
 }
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
 
 describe('form hồ sơ hội viên', () => {
   it('TC-F2.1.1-02h: hiển thị lỗi validation do backend trả về ngay dưới trường tương ứng', async () => {
@@ -256,7 +260,7 @@ describe('form hồ sơ hội viên', () => {
     const api = createMockMembersApi()
     const member = await api.detail(2)
     const createAccount = vi.spyOn(api, 'createAccount').mockRejectedValueOnce(
-      makeAccountError(400, {
+      makeFormError(400, {
         detail: 'Vui lòng kiểm tra lại các trường dữ liệu.',
         errors: { email: 'Email không đúng định dạng' },
       }),
@@ -292,17 +296,17 @@ describe('form hồ sơ hội viên', () => {
     const createAccount = vi
       .spyOn(api, 'createAccount')
       .mockRejectedValueOnce(
-        makeAccountError(409, { detail: 'Hội viên này đã có tài khoản đăng nhập.' }),
+        makeFormError(409, { detail: 'Hội viên này đã có tài khoản đăng nhập.' }),
       )
       .mockRejectedValueOnce(
-        makeAccountError(409, { detail: 'Email này đã được sử dụng bởi một tài khoản khác.' }),
+        makeFormError(409, { detail: 'Email này đã được sử dụng bởi một tài khoản khác.' }),
       )
       .mockRejectedValueOnce(
-        makeAccountError(422, {
+        makeFormError(422, {
           detail: 'Chỉ có thể tạo tài khoản cho hồ sơ hội viên đang hoạt động.',
         }),
       )
-      .mockRejectedValueOnce(makeAccountError(404, { detail: 'Không tìm thấy hội viên.' }))
+      .mockRejectedValueOnce(makeFormError(404, { detail: 'Không tìm thấy hội viên.' }))
 
     render(
       <AuthContext.Provider value={authValue('RECEPTIONIST')}>
@@ -329,5 +333,132 @@ describe('form hồ sơ hội viên', () => {
     await user.click(screen.getByRole('button', { name: /Xác nhận tạo tài khoản/ }))
     expect(await screen.findByText('Không tìm thấy hội viên.')).toBeInTheDocument()
     expect(createAccount).toHaveBeenCalledTimes(4)
+  })
+
+  it('TC-F2.4.2-08b: mở hồ sơ chưa có ảnh thì hiện chữ cái đầu và không gọi API ảnh', async () => {
+    const api = createMockMembersApi()
+    const member = { ...(await api.detail(1)), hasAvatar: false }
+    const getAvatar = vi.spyOn(api, 'getAvatar')
+
+    render(<MemberFormModal member={member} api={api} onClose={vi.fn()} onSaved={vi.fn()} />)
+
+    expect(screen.getByText('A')).toBeInTheDocument()
+    expect(getAvatar).not.toHaveBeenCalled()
+  })
+
+  it('TC-F2.4.2-01e: chọn ảnh JPEG/PNG hợp lệ gọi API tải lên và tải lại hiển thị ảnh mới', async () => {
+    const user = userEvent.setup()
+    const api = createMockMembersApi()
+    const member = await api.detail(1)
+    const uploadAvatar = vi.spyOn(api, 'uploadAvatar')
+    const getAvatar = vi.spyOn(api, 'getAvatar')
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:uploaded-avatar')
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+
+    render(
+      <AuthContext.Provider value={authValue('RECEPTIONIST')}>
+        <MemberFormModal member={member} api={api} onClose={vi.fn()} onSaved={vi.fn()} />
+      </AuthContext.Provider>,
+    )
+
+    expect(screen.getByText('A')).toBeInTheDocument()
+    expect(getAvatar).not.toHaveBeenCalled()
+    const file = new File(['valid-png'], 'chan-dung.png', { type: 'image/png' })
+    const input = screen.getByLabelText('Chọn file ảnh đại diện')
+    await user.upload(input, file)
+
+    await waitFor(() => expect(uploadAvatar).toHaveBeenCalledWith(member.id, file))
+    const img = await screen.findByRole('img', { name: `Ảnh đại diện ${member.fullName}` })
+    expect(img).toHaveAttribute('src', 'blob:uploaded-avatar')
+    expect(getAvatar).toHaveBeenCalledExactlyOnceWith(member.id)
+    expect((await api.detail(member.id)).hasAvatar).toBe(true)
+    expect(screen.getByLabelText('Họ và tên')).toHaveValue(member.fullName)
+  })
+
+  it('TC-F2.4.2-03c: báo lỗi sớm với file sai định dạng hoặc vượt quá 5 MB mà không gọi API', async () => {
+    const user = userEvent.setup({ applyAccept: false })
+    const api = createMockMembersApi()
+    const member = await api.detail(1)
+    const uploadAvatar = vi.spyOn(api, 'uploadAvatar')
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:exact-5mb')
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+
+    render(
+      <AuthContext.Provider value={authValue('RECEPTIONIST')}>
+        <MemberFormModal member={member} api={api} onClose={vi.fn()} onSaved={vi.fn()} />
+      </AuthContext.Provider>,
+    )
+
+    const input = screen.getByLabelText('Chọn file ảnh đại diện')
+
+    const pdfFile = new File(['%PDF-1.4'], 'ho-so.pdf', { type: 'application/pdf' })
+    await user.upload(input, pdfFile)
+    expect(
+      await screen.findByText('Chỉ chấp nhận ảnh định dạng JPEG hoặc PNG.'),
+    ).toBeInTheDocument()
+    expect(uploadAvatar).not.toHaveBeenCalled()
+
+    const oversizedFile = new File(['x'], 'anh-lon.jpg', { type: 'image/jpeg' })
+    Object.defineProperty(oversizedFile, 'size', { value: 5 * 1024 * 1024 + 1 })
+    await user.upload(input, oversizedFile)
+    expect(await screen.findByText('Dung lượng ảnh không được vượt quá 5 MB.')).toBeInTheDocument()
+    expect(uploadAvatar).not.toHaveBeenCalled()
+
+    const boundaryFile = new File(['x'], 'anh-5mb.jpg', { type: 'image/jpeg' })
+    Object.defineProperty(boundaryFile, 'size', { value: 5 * 1024 * 1024 })
+    await user.upload(input, boundaryFile)
+    await waitFor(() => expect(uploadAvatar).toHaveBeenCalledWith(member.id, boundaryFile))
+  })
+
+  it('TC-F2.4.2-03d: lỗi 400 từ API hiển thị đúng câu errors.file hoặc detail', async () => {
+    const user = userEvent.setup()
+    const api = createMockMembersApi()
+    const member = await api.detail(1)
+    const uploadAvatar = vi
+      .spyOn(api, 'uploadAvatar')
+      .mockRejectedValueOnce(
+        makeFormError(400, {
+          detail: 'Vui lòng kiểm tra lại các trường dữ liệu.',
+          errors: { file: 'Dung lượng file tải lên vượt quá giới hạn cho phép (tối đa 5 MB).' },
+        }),
+      )
+      .mockRejectedValueOnce(
+        makeFormError(400, {
+          detail: 'Kích thước ảnh không được vượt quá 8000x8000 điểm ảnh.',
+        }),
+      )
+
+    render(
+      <AuthContext.Provider value={authValue('RECEPTIONIST')}>
+        <MemberFormModal member={member} api={api} onClose={vi.fn()} onSaved={vi.fn()} />
+      </AuthContext.Provider>,
+    )
+
+    const input = screen.getByLabelText('Chọn file ảnh đại diện')
+    await user.upload(input, new File(['a'], 'a.jpg', { type: 'image/jpeg' }))
+    expect(
+      await screen.findByText('Dung lượng file tải lên vượt quá giới hạn cho phép (tối đa 5 MB).'),
+    ).toBeInTheDocument()
+
+    await user.upload(input, new File(['b'], 'b.png', { type: 'image/png' }))
+    expect(
+      await screen.findByText('Kích thước ảnh không được vượt quá 8000x8000 điểm ảnh.'),
+    ).toBeInTheDocument()
+    expect(uploadAvatar).toHaveBeenCalledTimes(2)
+  })
+
+  it('TC-F2.4.2-05d: hội viên không thấy nút đổi ảnh', async () => {
+    const api = createMockMembersApi()
+    const member = await api.detail(1)
+
+    render(
+      <AuthContext.Provider value={authValue('MEMBER')}>
+        <MemberFormModal member={member} api={api} onClose={vi.fn()} onSaved={vi.fn()} />
+      </AuthContext.Provider>,
+    )
+
+    expect(screen.getByText('A')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /ảnh đại diện/i })).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Chọn file ảnh đại diện')).not.toBeInTheDocument()
   })
 })

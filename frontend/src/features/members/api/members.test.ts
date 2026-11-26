@@ -23,6 +23,25 @@ describe('kết nối API F2', () => {
     await expect(membersApi.list({ page: 0, size: 20 })).rejects.toThrow('Backend chưa sẵn sàng')
   })
 
+  it('US-F2.4.2 API: liveMembersApi gọi đúng GET (responseType blob) và PUT multipart trường file', async () => {
+    const blob = new Blob(['jpeg-bytes'], { type: 'image/jpeg' })
+    const get = vi.spyOn(http, 'get').mockResolvedValue({ data: blob })
+    const put = vi.spyOn(http, 'put').mockResolvedValue({ data: '' })
+
+    const avatar = await liveMembersApi.getAvatar(42)
+    expect(avatar).toBe(blob)
+    expect(get).toHaveBeenCalledWith('/members/42/avatar', { responseType: 'blob' })
+
+    const file = new File(['png-bytes'], 'avatar.png', { type: 'image/png' })
+    await liveMembersApi.uploadAvatar(42, file)
+    expect(put).toHaveBeenCalledOnce()
+    const [url, body, config] = put.mock.calls[0]
+    expect(url).toBe('/members/42/avatar')
+    expect(body).toBeInstanceOf(FormData)
+    expect((body as FormData).get('file')).toBe(file)
+    expect(config).toEqual({ headers: { 'Content-Type': undefined } })
+  })
+
   it('US-F2.2.1 API: liveMembersApi.createAccount gọi POST /members/{id}/account qua client HTTP', async () => {
     const response = { memberId: 12, userId: 45, email: 'hoivien@example.com' }
     const post = vi.spyOn(http, 'post').mockResolvedValue({ data: response })
