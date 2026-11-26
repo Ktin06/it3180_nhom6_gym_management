@@ -15,10 +15,10 @@
 | F5 | 5 | 5 | 49 | 37 | 12 | 65 |
 | F6 | 5 | 5 | 16 | 0 | 16 | 0 |
 | F7 | 5 | 0 | 0 | 0 | 0 | 0 |
-| F8 | 9 | 9 | 55 | 29 | 26 | 38 |
+| F8 | 9 | 9 | 55 | 45 | 10 | 58 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **42** | **262** | **153** | **109** | **416** |
+| **Tổng** | **57** | **42** | **262** | **169** | **93** | **436** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -129,28 +129,12 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F8.0.1-02 | Lịch rỗng | US-F8.0.1 |
 | AC-F8.0.1-03 | Bộ lọc không hợp lệ | US-F8.0.1 |
 | AC-F8.0.1-04 | Khách muốn đặt | US-F8.0.1 |
-| AC-F8.3.1-09 | Hủy buổi từ phía quản lý | US-F8.3.1 |
 | AC-F8.5.1-01 | Lịch của người được phân công | US-F8.5.1 |
 | AC-F8.5.1-02 | Buổi có người dạy thay | US-F8.5.1 |
 | AC-F8.5.1-03 | Không có lớp | US-F8.5.1 |
 | AC-F8.5.1-04 | Sai vai trò hoặc yêu cầu lịch người khác | US-F8.5.1 |
-| AC-F8.6.1-01 | Điểm danh lần đầu từ BOOKED | US-F8.6.1 |
-| AC-F8.6.1-02 | Vắng mặt lần đầu đạt ngưỡng | US-F8.6.1 |
-| AC-F8.6.1-03 | Check-in không thay điểm danh | US-F8.6.1 |
-| AC-F8.6.1-04 | Sai phân công hoặc chi nhánh | US-F8.6.1 |
-| AC-F8.6.1-05 | Biên thời gian của huấn luyện viên | US-F8.6.1 |
-| AC-F8.6.1-06 | Quản lý sửa sau hạn | US-F8.6.1 |
-| AC-F8.6.1-07 | Sửa NO_SHOW không gỡ khóa | US-F8.6.1 |
-| AC-F8.6.1-08 | Sửa ATTENDED không tạo hoặc kéo dài khóa | US-F8.6.1 |
-| AC-F8.6.1-09 | Trạng thái không đủ điều kiện | US-F8.6.1 |
-| AC-F8.6.1-10 | Gỡ khóa thủ công có audit | US-F8.6.1 |
-| AC-F8.6.1-11 | Gỡ khóa sai quyền | US-F8.6.1 |
 | AC-F8.7.1-06 | Giảm sức chứa đúng biên | US-F8.7.1 |
 | AC-F8.7.1-07 | Buổi không cho sửa sức chứa | US-F8.7.1 |
-| AC-F8.7.1-09 | Đổi phòng giữ chỗ | US-F8.7.1 |
-| AC-F8.7.1-10 | Đổi giờ giữ chỗ | US-F8.7.1 |
-| AC-F8.7.1-11 | Hủy buổi không phạt | US-F8.7.1 |
-| AC-F8.7.1-12 | Lỗi xử lý thông báo không đảo ngược thay đổi | US-F8.7.1 |
 
 ## 4. Cây xuôi: chức năng → UC → US → AC → TC
 
@@ -859,7 +843,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 - **UC-F8.2** Đã bỏ (ADR 0014)
   - **US-F8.2.1** Đã bỏ (ADR 0014) (#157)
 - **UC-F8.3** Hủy chỗ lớp nhóm
-  - **US-F8.3.1** Hủy chỗ lớp nhóm (#158)
+  - **US-F8.3.1** Hủy chỗ lớp nhóm (#158) ✅ mọi AC có TC
     - AC-F8.3.1-01 Hủy sớm hoặc đúng biên (BR-F8.3-01, BR-F8.3-04)
       - TC-F8.3.1-01a `ClassApiIntegrationTest#lateCancellationBoundary`
       - TC-F8.3.1-01b `ClassApiIntegrationTest#receptionistIsRecordedWhenBookingForMember`
@@ -877,7 +861,8 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F8.3.1-07a `ClassApiIntegrationTest#doubleCancellationOnlyRecordsOneViolation`
     - AC-F8.3.1-08 Phạm vi và trạng thái hủy (BR-F8.3-04)
       - TC-F8.3.1-08a `ClassApiIntegrationTest#staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings`
-    - AC-F8.3.1-09 Hủy buổi từ phía quản lý (BR-F8.7-05) ❌ chưa có TC
+    - AC-F8.3.1-09 Hủy buổi từ phía quản lý (BR-F8.7-05)
+      - TC-F8.3.1-09a `ClassApiIntegrationTest#changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot`
 - **UC-F8.4** Đã bỏ (ADR 0014)
   - **US-F8.4.1** Đã bỏ (ADR 0014) (#159)
 - **UC-F8.5** Xem lịch dạy lớp nhóm
@@ -887,18 +872,30 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F8.5.1-03 Không có lớp (BR-F8.5-01) ❌ chưa có TC
     - AC-F8.5.1-04 Sai vai trò hoặc yêu cầu lịch người khác (BR-F8.5-02) ❌ chưa có TC
 - **UC-F8.6** Điểm danh học viên lớp học nhóm
-  - **US-F8.6.1** Điểm danh học viên lớp học nhóm (#161)
-    - AC-F8.6.1-01 Điểm danh lần đầu từ BOOKED (BR-F8.6-01, BR-F8.6-04, BR-F8.6-05) ❌ chưa có TC
-    - AC-F8.6.1-02 Vắng mặt lần đầu đạt ngưỡng (BR-F8.6-03, BR-F8.3-02) ❌ chưa có TC
-    - AC-F8.6.1-03 Check-in không thay điểm danh (BR-F8.6-02) ❌ chưa có TC
-    - AC-F8.6.1-04 Sai phân công hoặc chi nhánh (BR-F8.6-01) ❌ chưa có TC
-    - AC-F8.6.1-05 Biên thời gian của huấn luyện viên (BR-F8.6-01, BR-F8.6-05) ❌ chưa có TC
-    - AC-F8.6.1-06 Quản lý sửa sau hạn (BR-F8.6-01, BR-F8.6-05) ❌ chưa có TC
-    - AC-F8.6.1-07 Sửa NO_SHOW không gỡ khóa (BR-F8.6-01, BR-F8.6-03) ❌ chưa có TC
-    - AC-F8.6.1-08 Sửa ATTENDED không tạo hoặc kéo dài khóa (BR-F8.6-01, BR-F8.6-03) ❌ chưa có TC
-    - AC-F8.6.1-09 Trạng thái không đủ điều kiện (BR-F8.6-05, BR-F8.6-06) ❌ chưa có TC
-    - AC-F8.6.1-10 Gỡ khóa thủ công có audit (BR-F8-02) ❌ chưa có TC
-    - AC-F8.6.1-11 Gỡ khóa sai quyền (BR-F8-02) ❌ chưa có TC
+  - **US-F8.6.1** Điểm danh học viên lớp học nhóm (#161) ✅ mọi AC có TC
+    - AC-F8.6.1-01 Điểm danh lần đầu từ BOOKED (BR-F8.6-01, BR-F8.6-04, BR-F8.6-05)
+      - TC-F8.6.1-01a `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay`
+      - TC-F8.6.1-01c `ClassApiIntegrationTest#noShowOfSoftDeletedMemberIsRecordedWithoutPenalty`
+    - AC-F8.6.1-02 Vắng mặt lần đầu đạt ngưỡng (BR-F8.6-03, BR-F8.3-02)
+      - TC-F8.6.1-02a `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock`
+    - AC-F8.6.1-03 Check-in không thay điểm danh (BR-F8.6-02)
+      - TC-F8.6.1-03a `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay`
+    - AC-F8.6.1-04 Sai phân công hoặc chi nhánh (BR-F8.6-01)
+      - TC-F8.6.1-04a `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay`
+    - AC-F8.6.1-05 Biên thời gian của huấn luyện viên (BR-F8.6-01, BR-F8.6-05)
+      - TC-F8.6.1-05a `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay`
+    - AC-F8.6.1-06 Quản lý sửa sau hạn (BR-F8.6-01, BR-F8.6-05)
+      - TC-F8.6.1-06a `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay`
+    - AC-F8.6.1-07 Sửa NO_SHOW không gỡ khóa (BR-F8.6-01, BR-F8.6-03)
+      - TC-F8.6.1-07a `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock`
+    - AC-F8.6.1-08 Sửa ATTENDED không tạo hoặc kéo dài khóa (BR-F8.6-01, BR-F8.6-03)
+      - TC-F8.6.1-08a `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock`
+    - AC-F8.6.1-09 Trạng thái không đủ điều kiện (BR-F8.6-05, BR-F8.6-06)
+      - TC-F8.6.1-09a `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock`
+    - AC-F8.6.1-10 Gỡ khóa thủ công có audit (BR-F8-02)
+      - TC-F8.6.1-10a `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock`
+    - AC-F8.6.1-11 Gỡ khóa sai quyền (BR-F8-02)
+      - TC-F8.6.1-11a `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock`
 - **UC-F8.7** Quản lý lịch lặp lớp học và phân công huấn luyện viên
   - **US-F8.7.1** Quản lý lịch lặp và buổi riêng lẻ (#162)
     - AC-F8.7.1-01 Tạo lịch lặp hợp lệ (BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04)
@@ -918,10 +915,17 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F8.7.1-08 Quyền lịch lặp và buổi riêng lẻ (BR-F8-04)
       - TC-F8.7.1-08a `ClassApiIntegrationTest#staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings`
       - TC-F8.7.1-08b `ClassApiIntegrationTest#scheduleApiDistinguishesMissingOutOfScopeAndIneligibleResources`
-    - AC-F8.7.1-09 Đổi phòng giữ chỗ (BR-F8.4-03, BR-F8.7-02, BR-F8.7-06) ❌ chưa có TC
-    - AC-F8.7.1-10 Đổi giờ giữ chỗ (BR-F8-03, BR-F8.8-02) ❌ chưa có TC
-    - AC-F8.7.1-11 Hủy buổi không phạt (BR-F8.7-05) ❌ chưa có TC
-    - AC-F8.7.1-12 Lỗi xử lý thông báo không đảo ngược thay đổi (BR-F8.4-03, BR-F8-03, BR-F8.7-05) ❌ chưa có TC
+      - TC-F8.7.1-08c `ClassApiIntegrationTest#changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot`
+    - AC-F8.7.1-09 Đổi phòng giữ chỗ (BR-F8.4-03, BR-F8.7-02, BR-F8.7-06)
+      - TC-F8.7.1-09a `ClassApiIntegrationTest#changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot`
+      - TC-F8.7.1-09b `ClassApiIntegrationTest#rejectsRoomCapacityAndActualTimeConflict`
+    - AC-F8.7.1-10 Đổi giờ giữ chỗ (BR-F8-03, BR-F8.8-02)
+      - TC-F8.7.1-10a `ClassApiIntegrationTest#changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot`
+      - TC-F8.7.1-10b `ClassApiIntegrationTest#rejectsRoomCapacityAndActualTimeConflict`
+    - AC-F8.7.1-11 Hủy buổi không phạt (BR-F8.7-05)
+      - TC-F8.7.1-11a `ClassApiIntegrationTest#changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot`
+    - AC-F8.7.1-12 Lỗi xử lý thông báo không đảo ngược thay đổi (BR-F8.4-03, BR-F8-03, BR-F8.7-05)
+      - TC-F8.7.1-12a `ClassApiIntegrationTest#notificationFailureIsIsolatedAndRollbackDoesNotPublish`
 - **UC-F8.8** Sinh buổi học từ lịch lặp
   - **US-F8.8.1** Sinh buổi học từ lịch lặp (#163) ✅ mọi AC có TC
     - AC-F8.8.1-01 Sinh đúng thứ, dữ liệu và múi giờ (BR-F8.8-01, BR-F8.8-03)
@@ -1343,6 +1347,19 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F8.3.1-06a | AC-F8.3.1-06 | US-F8.3.1 | UC-F8.3 | BR-F8.3-02, BR-F8.3-01, BR-F8.3-04, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#violationsLockOnceAndExpiredLockDoesNotReuseOldViolations` |
 | TC-F8.3.1-07a | AC-F8.3.1-07 | US-F8.3.1 | UC-F8.3 | BR-F8.3-02, BR-F8.3-04, BR-F8.3-01, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#doubleCancellationOnlyRecordsOneViolation` |
 | TC-F8.3.1-08a | AC-F8.3.1-08 | US-F8.3.1 | UC-F8.3 | BR-F8.3-04, BR-F8.3-01, BR-F8.3-02, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings` |
+| TC-F8.3.1-09a | AC-F8.3.1-09 | US-F8.3.1 | UC-F8.3 | BR-F8.7-05, BR-F8.3-01, BR-F8.3-04, BR-F8.3-02, BR-F8-03, BR-F8.1-03 | `ClassApiIntegrationTest#changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot` |
+| TC-F8.6.1-01a | AC-F8.6.1-01 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
+| TC-F8.6.1-01c | AC-F8.6.1-01 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#noShowOfSoftDeletedMemberIsRecordedWithoutPenalty` |
+| TC-F8.6.1-02a | AC-F8.6.1-02 | US-F8.6.1 | UC-F8.6 | BR-F8.6-03, BR-F8.3-02, BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock` |
+| TC-F8.6.1-03a | AC-F8.6.1-03 | US-F8.6.1 | UC-F8.6 | BR-F8.6-02, BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
+| TC-F8.6.1-04a | AC-F8.6.1-04 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
+| TC-F8.6.1-05a | AC-F8.6.1-05 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-05, BR-F8.6-04, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
+| TC-F8.6.1-06a | AC-F8.6.1-06 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-05, BR-F8.6-04, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
+| TC-F8.6.1-07a | AC-F8.6.1-07 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-03, BR-F8.6-04, BR-F8.6-05, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock` |
+| TC-F8.6.1-08a | AC-F8.6.1-08 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-03, BR-F8.6-04, BR-F8.6-05, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock` |
+| TC-F8.6.1-09a | AC-F8.6.1-09 | US-F8.6.1 | UC-F8.6 | BR-F8.6-05, BR-F8.6-06, BR-F8.6-01, BR-F8.6-04, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8-02 | `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock` |
+| TC-F8.6.1-10a | AC-F8.6.1-10 | US-F8.6.1 | UC-F8.6 | BR-F8-02, BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06 | `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock` |
+| TC-F8.6.1-11a | AC-F8.6.1-11 | US-F8.6.1 | UC-F8.6 | BR-F8-02, BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06 | `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock` |
 | TC-F8.7.1-01a | AC-F8.7.1-01 | US-F8.7.1 | UC-F8.7 | BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#scheduleApiCreatesReadsUpdatesDeactivatesAndChecksNumericFields` |
 | TC-F8.7.1-02a | AC-F8.7.1-02 | US-F8.7.1 | UC-F8.7 | BR-F8.7-02, BR-F8.7-01, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#validatesResourcesDatesCapacityAndRole` |
 | TC-F8.7.1-03a | AC-F8.7.1-03 | US-F8.7.1 | UC-F8.7 | BR-F8.7-06, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#recurringOverlapUsesActualWeekdaysNotJustIntersectingDateRanges` |
@@ -1352,6 +1369,13 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F8.7.1-05a | AC-F8.7.1-05 | US-F8.7.1 | UC-F8.7 | BR-F8.7-02, BR-F8.7-04, BR-F8.7-01, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#scheduleGenerationIsIdempotentSnapshotsAndDeactivationPreserveSessions` |
 | TC-F8.7.1-08a | AC-F8.7.1-08 | US-F8.7.1 | UC-F8.7 | BR-F8-04, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings` |
 | TC-F8.7.1-08b | AC-F8.7.1-08 | US-F8.7.1 | UC-F8.7 | BR-F8-04, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#scheduleApiDistinguishesMissingOutOfScopeAndIneligibleResources` |
+| TC-F8.7.1-08c | AC-F8.7.1-08 | US-F8.7.1 | UC-F8.7 | BR-F8-04, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot` |
+| TC-F8.7.1-09a | AC-F8.7.1-09 | US-F8.7.1 | UC-F8.7 | BR-F8.4-03, BR-F8.7-02, BR-F8.7-06, BR-F8.7-01, BR-F8.7-03, BR-F8-04, BR-F8.7-04, BR-F8.1-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot` |
+| TC-F8.7.1-09b | AC-F8.7.1-09 | US-F8.7.1 | UC-F8.7 | BR-F8.4-03, BR-F8.7-02, BR-F8.7-06, BR-F8.7-01, BR-F8.7-03, BR-F8-04, BR-F8.7-04, BR-F8.1-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#rejectsRoomCapacityAndActualTimeConflict` |
+| TC-F8.7.1-10a | AC-F8.7.1-10 | US-F8.7.1 | UC-F8.7 | BR-F8-03, BR-F8.8-02, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8.7-05 | `ClassApiIntegrationTest#changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot` |
+| TC-F8.7.1-10b | AC-F8.7.1-10 | US-F8.7.1 | UC-F8.7 | BR-F8-03, BR-F8.8-02, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8.7-05 | `ClassApiIntegrationTest#rejectsRoomCapacityAndActualTimeConflict` |
+| TC-F8.7.1-11a | AC-F8.7.1-11 | US-F8.7.1 | UC-F8.7 | BR-F8.7-05, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02 | `ClassApiIntegrationTest#changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot` |
+| TC-F8.7.1-12a | AC-F8.7.1-12 | US-F8.7.1 | UC-F8.7 | BR-F8.4-03, BR-F8-03, BR-F8.7-05, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.8-02 | `ClassApiIntegrationTest#notificationFailureIsIsolatedAndRollbackDoesNotPublish` |
 | TC-F8.8.1-01a | AC-F8.8.1-01 | US-F8.8.1 | UC-F8.8 | BR-F8.8-01, BR-F8.8-03, BR-F8.8-02, BR-F8.7-06 | `ClassApiIntegrationTest#scheduleGenerationIsIdempotentSnapshotsAndDeactivationPreserveSessions` |
 | TC-F8.8.1-02a | AC-F8.8.1-02 | US-F8.8.1 | UC-F8.8 | BR-F8.8-02, BR-F8.8-01, BR-F8.8-03, BR-F8.7-06 | `ClassApiIntegrationTest#concurrentGenerationAndChangedSessionDoNotCreateDuplicates` |
 | TC-F8.8.1-03a | AC-F8.8.1-03 | US-F8.8.1 | UC-F8.8 | BR-F8.8-01, BR-F8.8-03, BR-F8.8-02, BR-F8.7-06 | `ClassApiIntegrationTest#generationSkipsInactiveAndOutOfValidityDates` |
