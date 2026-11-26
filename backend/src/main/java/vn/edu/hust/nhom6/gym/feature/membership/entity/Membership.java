@@ -219,31 +219,6 @@ public class Membership extends BaseEntity {
     // ---------------------------------------------------------------------------------------------
 
     /** Tác vụ nền: gói hết hạn (hoặc gói SESSION 0 buổi hôm nay chưa trừ) ACTIVE → EXPIRED. Ngày, số buổi giữ nguyên. */
-     * Check-in trừ một buổi (UC-F4.2 bước 5, S2-11.1). Về 0 vẫn giữ ACTIVE đến hết ngày; tác vụ nền đổi EXPIRED.
-     *
-     * @throws IllegalStateException gói không ACTIVE, không theo buổi, hoặc đã hết buổi (nơi gọi đã kiểm tra trước)
-     */
-    public void deductOneSession() {
-        requireStatus(MembershipStatus.ACTIVE);
-        if (remainingSessions == null || remainingSessions <= 0) {
-            throw new IllegalStateException("Gói " + getId() + " không còn buổi để trừ");
-        }
-        remainingSessions = remainingSessions - 1;
-    }
-
-    /**
-     * Dời gói UPCOMING sớm lên {@code days} ngày, giữ nguyên số ngày hiệu lực (BR-F4.7: gói SESSION trước hết buổi
-     * sớm thì gói nối tiếp bắt đầu từ ngày mai).
-     */
-    public void moveEarlier(long days) {
-        requireStatus(MembershipStatus.UPCOMING);
-        if (days <= 0) {
-            throw new IllegalArgumentException("Số ngày dời phải dương");
-        }
-        startDate = startDate.minusDays(days);
-        endDate = endDate.minusDays(days);
-    }
-
     public void expire() {
         requireStatus(MembershipStatus.ACTIVE);
         status = MembershipStatus.EXPIRED;
@@ -262,11 +237,5 @@ public class Membership extends BaseEntity {
     public void expireUnstarted() {
         requireStatus(MembershipStatus.UPCOMING);
         status = MembershipStatus.EXPIRED;
-    }
-
-    private void requireStatus(MembershipStatus expected) {
-        if (status != expected) {
-            throw new IllegalStateException("Trạng thái gói không hợp lệ: " + status);
-        }
     }
 }
