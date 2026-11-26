@@ -107,7 +107,10 @@ public class ClassBookingService {
     }
 
     void applyPenalty(long memberId, long branch, long actor, OffsetDateTime now) {
-        var member = classes.member(memberId);
+        var found = classes.findMember(memberId);
+        // Hội viên đã xóa mềm không đặt lớp được nữa: bỏ qua phạt để kết quả vắng vẫn được ghi.
+        if (found.isEmpty()) { return; }
+        var member = found.get();
         if (member.bookingLockedUntil() != null && member.bookingLockedUntil().isAfter(now)) { return; }
         var month = time.dayStart(time.toVnDate(now).withDayOfMonth(1));
         var last = classes.latestLock(memberId);

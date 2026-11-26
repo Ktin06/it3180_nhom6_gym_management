@@ -43,9 +43,14 @@ public class ClassRepository {
             .orElseThrow(() -> new NotFoundException("Không tìm thấy buổi học."));
     }
 
-    public MemberRow member(long id) {
+    /** Rỗng khi hội viên không tồn tại hoặc đã xóa mềm. */
+    public Optional<MemberRow> findMember(long id) {
         return rows("SELECT * FROM members WHERE id=:id AND deleted_at IS NULL", Map.of("id", id), MemberRow.class)
-            .stream().findFirst().orElseThrow(() -> new NotFoundException("Không tìm thấy hội viên."));
+            .stream().findFirst();
+    }
+
+    public MemberRow member(long id) {
+        return findMember(id).orElseThrow(() -> new NotFoundException("Không tìm thấy hội viên."));
     }
 
     public void lockMember(long id) {

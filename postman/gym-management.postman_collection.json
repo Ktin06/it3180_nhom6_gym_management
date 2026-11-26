@@ -265,6 +265,84 @@
             "description": "Gửi mật khẩu sai liên tiếp 5 lần sẽ khóa tạm tài khoản 15 phút; các lần gửi tiếp theo (kể cả đúng mật khẩu) trong 15 phút trả 403 Forbidden kèm số phút còn lại (F1, UC-F1.2 E1/E2, S4)."
           },
           "response": []
+        },
+        {
+          "name": "Quên mật khẩu – yêu cầu gửi liên kết (POST /api/v1/auth/forgot-password)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Luôn trả mã 200 OK với câu thông báo chung (không lộ email)', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Thông báo khớp câu chuẩn', function () {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json.message).to.eql('Nếu email có trong hệ thống, bạn sẽ nhận được liên kết đặt lại mật khẩu.');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"member.test@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "forgot-password"]
+            },
+            "description": "Gửi yêu cầu đặt lại mật khẩu (F1, UC-F1.5). Ở môi trường local không cấu hình BREVO_API_KEY, mở log backend để lấy token trong liên kết."
+          },
+          "response": []
+        },
+        {
+          "name": "Đặt lại mật khẩu bằng token (POST /api/v1/auth/reset-password)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Trả mã 204 No Content khi đặt lại mật khẩu thành công', function () {",
+                  "  pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"newPassword\": \"ResetPassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "reset-password"]
+            },
+            "description": "Đặt lại mật khẩu bằng token dùng một lần (hạn 30 phút), thu hồi mọi refresh token và mở khóa tạm 15 phút nếu có (F1, UC-F1.5). Điền biến resetToken lấy từ log backend (local) hoặc email (staging)."
+          },
+          "response": []
         }
       ]
     }

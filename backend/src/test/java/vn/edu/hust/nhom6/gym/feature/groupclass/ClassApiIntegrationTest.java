@@ -905,6 +905,29 @@ class ClassApiIntegrationTest {
             .header("Authorization", bearer(trainerUser, "TRAINER"))).andExpect(status().isForbidden());
     }
 
+    @Test
+    @DisplayName("TC-F8.6.1-01c: Hội viên đã xóa mềm sau khi đặt vẫn ghi được vắng, không áp khóa")
+    void noShowOfSoftDeletedMemberIsRecordedWithoutPenalty() {
+        var trainerActor = new CurrentUser(trainerUser, UserRole.TRAINER);
+        jdbc.update("INSERT INTO system_configs(branch_id,config_key,config_value) VALUES (?,'PENALTY_LIMIT_PER_MONTH','1')", branch);
+        long id = session(NOW.plusHours(2), 2);
+        long booking = bookings.book(actor(), id, member).id();
+        jdbc.update("UPDATE members SET deleted_at=? WHERE id=?", NOW, member);
+        at(NOW.plusHours(2));
+        var row = attendance.roster(trainerActor, id).bookings().getFirst();
+
+        var marked = attendance.mark(trainerActor, id,
+            new AttendanceRequest(booking, AttendanceStatus.NO_SHOW, row.updatedAt()));
+
+        assertThat(marked.status()).isEqualTo("NO_SHOW");
+        assertThat(jdbc.queryForObject("SELECT status FROM class_bookings WHERE id=?", String.class, booking))
+            .isEqualTo("NO_SHOW");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM members WHERE id=? AND booking_locked_until IS NOT NULL",
+            Long.class, member)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE entity='members' AND entity_id=? AND action='CLASS_BOOKING_LOCK'",
+            Long.class, member)).isZero();
+    }
+
     @TestConfiguration(proxyBeanMethods = false)
     static class EventTestConfiguration {
         @Bean
