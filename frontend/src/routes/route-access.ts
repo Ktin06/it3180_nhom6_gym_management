@@ -26,8 +26,12 @@ export const ROUTE_ACCESS = {
   '/trainer': { roles: ['TRAINER'], includeChildren: true },
   '/member': { roles: ['MEMBER'], includeChildren: true },
   // Trang chức năng của nhân viên.
+  '/checkins': { roles: ['RECEPTIONIST', 'BRANCH_MANAGER'] }, // F4
   '/members': { roles: MEMBER_MANAGEMENT_ROLES }, // F2
   '/packages': { roles: MEMBER_MANAGEMENT_ROLES }, // F3
+  '/member/classes': { roles: ['MEMBER'] },
+  '/trainer/classes': { roles: ['TRAINER'] },
+  '/trainer/classes/:sessionId/attendance': { roles: ['TRAINER'] },
   '/ban-goi': { roles: ['RECEPTIONIST'] }, // F3
   '/checkins': { roles: ['RECEPTIONIST', 'BRANCH_MANAGER'] }, // F4
   '/hoa-don': { roles: MEMBER_MANAGEMENT_ROLES }, // F5

@@ -1,5 +1,7 @@
 package vn.edu.hust.nhom6.gym.feature.staff.service;
 
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,11 @@ public class StaffService {
             throw new AccessDeniedException("Chi nhánh làm việc không tồn tại hoặc đã ngừng hoạt động.");
         }
         return branchId;
+    }
+
+    /** Họ tên nhân viên theo {@code users.id}, ví dụ người thu tiền trên phiếu thu; rỗng nếu không có dòng staff. */
+    public Optional<String> findFullName(Long userId) {
+        return staff.findFullNameByUserId(userId);
     }
 
     private static AccessDeniedException missingAssignment() {

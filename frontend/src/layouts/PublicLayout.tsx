@@ -3,7 +3,7 @@ import { Link, Outlet } from 'react-router-dom'
 
 const { Header, Content, Footer } = Layout
 
-/** Giao diện cho khách chưa đăng nhập: bảng giá, lịch lớp (sẽ bổ sung), đăng ký, đăng nhập. */
+/** Giao diện cho khách chưa đăng nhập: bảng giá, lịch lớp, đăng ký, đăng nhập. */
 export function PublicLayout() {
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -30,6 +30,9 @@ export function PublicLayout() {
         <Space size={4} wrap>
           <Link to="/bang-gia">
             <Button type="text">Bảng giá</Button>
+          </Link>
+          <Link to="/lich-lop">
+            <Button type="text">Lịch lớp</Button>
           </Link>
           <Link to="/register">
             <Button>Đăng ký</Button>

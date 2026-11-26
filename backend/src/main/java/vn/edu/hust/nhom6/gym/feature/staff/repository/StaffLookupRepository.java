@@ -19,4 +19,12 @@ public class StaffLookupRepository {
             """, Long.class).setParameter("userId", userId).getResultList();
         return rows.isEmpty() ? Optional.empty() : Optional.of((Long) rows.getFirst());
     }
+
+    /** Họ tên trên dòng {@code staff} của tài khoản (kể cả nhân viên đã nghỉ, để hiện tên trên chứng từ cũ). */
+    public Optional<String> findFullNameByUserId(Long userId) {
+        List<?> rows = entities.createNativeQuery("""
+            SELECT full_name FROM staff WHERE user_id = :userId
+            """, String.class).setParameter("userId", userId).getResultList();
+        return rows.isEmpty() ? Optional.empty() : Optional.of((String) rows.getFirst());
+    }
 }

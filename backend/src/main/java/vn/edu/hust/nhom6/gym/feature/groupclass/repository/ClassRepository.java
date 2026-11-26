@@ -160,10 +160,11 @@ public class ClassRepository {
 
     public int insertSession(Schedule s, LocalDate date, OffsetDateTime start, OffsetDateTime end) {
         return jdbc.update("""
-            INSERT INTO class_sessions(class_schedule_id,branch_id,trainer_id,room_id,occurrence_date,start_at,end_at,capacity)
-            VALUES (:id,:branch,:trainer,:room,:date,:start,:end,:capacity)
+            INSERT INTO class_sessions(class_schedule_id,class_type_id,branch_id,trainer_id,room_id,occurrence_date,
+                                       start_at,end_at,capacity)
+            VALUES (:id,:type,:branch,:trainer,:room,:date,:start,:end,:capacity)
             ON CONFLICT (class_schedule_id,occurrence_date) DO NOTHING
-            """, Map.of("id", s.id(), "branch", s.branchId(), "trainer", s.trainerId(), "room", s.roomId(),
+            """, Map.of("id", s.id(), "type", s.classTypeId(), "branch", s.branchId(), "trainer", s.trainerId(), "room", s.roomId(),
                 "date", date, "start", start, "end", end, "capacity", s.capacity()));
     }
 
@@ -330,5 +331,29 @@ public class ClassRepository {
             VALUES (:actor,:branch,'CLASS_BOOKING_LOCK','members',:member,
                 jsonb_build_object('lockedUntil',:until::text),:now,:now)
             """, Map.of("actor", actor, "branch", branch, "member", member, "until", until, "now", now));
+    }
+
+    /**
+     * Ghi {@code arrived_at = now} cho các chỗ BOOKED chưa có arrived_at của hội viên ở buổi chưa hủy thuộc chi nhánh
+     * {@code branchId}, bắt đầu trong {@code [from, to]} (S2-11.1, UC-F4.3).
+     *
+     * @return danh sách id các chỗ vừa ghi, tăng dần
+     */
+    public List<Long> markArrived(long memberId, long branchId, OffsetDateTime from, OffsetDateTime to, OffsetDateTime now) {
+        return jdbc.queryForList("""
+            UPDATE class_bookings b
+            SET arrived_at = :now
+            FROM class_sessions s
+            WHERE b.class_session_id = s.id
+              AND b.member_id = :memberId
+              AND s.branch_id = :branchId
+              AND b.status = 'BOOKED'
+              AND b.arrived_at IS NULL
+              AND s.status <> 'CANCELLED'
+              AND s.start_at >= :from
+              AND s.start_at <= :to
+            RETURNING b.id
+            """, Map.of("memberId", memberId, "branchId", branchId, "from", from, "to", to, "now", now), Long.class)
+            .stream().sorted().toList();
     }
 }

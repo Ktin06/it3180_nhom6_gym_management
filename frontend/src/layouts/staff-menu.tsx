@@ -78,6 +78,14 @@ export const STAFF_MENU: StaffMenuItem[] = [
     label: 'Lớp học (F8)',
     icon: <CalendarOutlined />,
     ready: true,
+    roles: ['BRANCH_MANAGER', 'RECEPTIONIST'],
+    ready: false,
+  },
+  {
+    path: '/trainer/classes',
+    label: 'Lịch dạy lớp nhóm',
+    icon: <CalendarOutlined />,
+    ready: true,
   },
   {
     path: '/branches',
