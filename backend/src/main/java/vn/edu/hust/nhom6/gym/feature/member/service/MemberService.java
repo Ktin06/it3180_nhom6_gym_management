@@ -113,6 +113,20 @@ public class MemberService {
             "Tài khoản chưa gắn hồ sơ hội viên. Vui lòng liên hệ quầy lễ tân."));
     }
 
+    /** Khóa hội viên đến hết giao dịch bán, trước khi kiểm tra gói đang chờ (NF6). */
+    @Transactional
+    public Member lockForUpdate(Long memberId) {
+        return members.findForUpdate(memberId).orElseThrow(() ->
+            new NotFoundException("Hội viên không tồn tại trên hệ thống."));
+    }
+
+    /** Chức năng khác đọc hồ sơ theo cùng phạm vi chi nhánh với F2. */
+    public Member requireInStaffScope(CurrentUser actor, Long memberId) {
+        Member member = findMember(memberId);
+        requireBranch(actor, member);
+        return member;
+    }
+
     /** Quyền đọc dùng chung cho hồ sơ và ảnh: ngoài phạm vi trả 404 (S3, ADR 0011). */
     public Member requireReadable(CurrentUser actor, Long id) {
         Member member = findMember(id);
