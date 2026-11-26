@@ -96,6 +96,33 @@ public class Membership extends BaseEntity {
         return m;
     }
 
+    /**
+     * Hóa đơn PAID, chưa có gói cùng loại đang giữ: PENDING → ACTIVE từ {@code start} (BR-F5-04).
+     * Giữ nguyên số ngày đã chốt lúc tạo hóa đơn.
+     */
+    public void activate(LocalDate start) {
+        moveFromPending(MembershipStatus.ACTIVE, start);
+    }
+
+    /** Hóa đơn PAID khi đã có gói cùng loại đang giữ: PENDING → UPCOMING từ {@code start} (BR-F3-11). */
+    public void scheduleFrom(LocalDate start) {
+        moveFromPending(MembershipStatus.UPCOMING, start);
+    }
+
+    /** Hóa đơn chờ bị hủy: PENDING → CANCELLED (BR-F5-08). Ngày giữ nguyên để tra cứu. */
+    public void cancelPending() {
+        requireStatus(MembershipStatus.PENDING);
+        this.status = MembershipStatus.CANCELLED;
+    }
+
+    private void moveFromPending(MembershipStatus target, LocalDate start) {
+        requireStatus(MembershipStatus.PENDING);
+        long days = durationDays();
+        this.startDate = start;
+        this.endDate = start.plusDays(days - 1);
+        this.status = target;
+    }
+
     /** Số ngày hiệu lực đã chốt lúc tạo hóa đơn (SRS F3 bước 8: không đọc lại {@code packages.duration_days}). */
     public long durationDays() {
         return endDate.toEpochDay() - startDate.toEpochDay() + 1;
