@@ -103,13 +103,13 @@ describe('auth-api', () => {
     post.mockResolvedValueOnce({ data: undefined })
 
     await expect(
-      changePassword({ currentPassword: 'OldPassword1', newPassword: 'NewPassword2' }),
+      changePassword({ currentPassword: 'OldPassword1', newPassword: 'NewPassword2' }, 7),
     ).resolves.toBeUndefined()
 
     expect(post).toHaveBeenCalledWith('/auth/change-password', {
       currentPassword: 'OldPassword1',
       newPassword: 'NewPassword2',
-    })
+    }, { authEpoch: 7 })
   })
 
   it('TC-F1.5.1-01e: forgotPassword và resetPassword gọi API công khai với publicRequest', async () => {

@@ -187,13 +187,13 @@ public class AuthService {
         }
 
         String tokenHash = TokenHashUtil.sha256Hex(rawRefreshToken);
+        User user = userRepository.findByRefreshTokenHashForUpdate(tokenHash)
+            .orElseThrow(() -> new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ."));
         RefreshToken refreshToken = refreshTokenRepository.findByTokenHashForUpdate(tokenHash)
             .orElseThrow(() -> new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ."));
 
         if (refreshToken.getRevokedAt() != null) {
-            if (refreshToken.getUser() != null) {
-                refreshTokenRepository.revokeAllByUserId(refreshToken.getUser().getId(), OffsetDateTime.now());
-            }
+            refreshTokenRepository.revokeAllByUserId(user.getId(), OffsetDateTime.now());
             throw new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ.");
         }
 
@@ -201,7 +201,6 @@ public class AuthService {
             throw new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ.");
         }
 
-        User user = refreshToken.getUser();
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ.");
         }
@@ -282,7 +281,7 @@ public class AuthService {
      */
     @Transactional
     public void changePassword(CurrentUser me, ChangePasswordRequest request) {
-        User user = userRepository.findById(me.userId())
+        User user = userRepository.findByIdForUpdate(me.userId())
             .orElseThrow(() -> new UnauthorizedException("Token không hợp lệ."));
 
         if (user.getStatus() != UserStatus.ACTIVE) {

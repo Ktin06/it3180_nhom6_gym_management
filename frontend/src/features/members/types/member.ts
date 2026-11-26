@@ -11,6 +11,7 @@ export interface MemberSummary {
   email: string | null
   status: Status
   homeBranchId: number
+  hasAvatar: boolean
 }
 
 export interface MemberDetail extends MemberSummary {
@@ -37,9 +38,22 @@ export interface MemberQuery extends PageQuery {
   status?: Status
 }
 
+export interface CreateMemberAccountInput {
+  email: string
+}
+
+export interface CreateMemberAccountResult {
+  memberId: number
+  userId: number
+  email: string
+}
+
 export interface MembersGateway {
   list(query: MemberQuery): Promise<PageResponse<MemberSummary>>
   detail(id: number): Promise<MemberDetail>
   create(input: MemberInput): Promise<MemberDetail>
   update(id: number, input: MemberUpdate): Promise<MemberDetail>
+  getAvatar(id: number): Promise<Blob>
+  uploadAvatar(id: number, file: File): Promise<void>
+  createAccount(id: number, input: CreateMemberAccountInput): Promise<CreateMemberAccountResult>
 }

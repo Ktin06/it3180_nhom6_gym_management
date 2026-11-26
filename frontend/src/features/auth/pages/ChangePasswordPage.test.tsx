@@ -11,7 +11,9 @@ vi.mock('../../../services/refresh-client', () => ({ requestRefresh }))
 import { routes } from '../../../app/router'
 import { AuthProvider } from '../../../auth/AuthProvider'
 import type { Role } from '../../../auth/roles'
+import { publishSessionChange } from '../../../auth/session-coordination'
 import { beginSession, getAccessToken } from '../../../auth/session-store'
+import { readCookieRevision, writeCookieRevision } from '../../../auth/session-revision'
 import { ProtectedRoute } from '../../../routes/ProtectedRoute'
 import { rolesFor } from '../../../routes/route-access'
 import { http } from '../../../services/http'
@@ -108,8 +110,9 @@ function renderChangePasswordFlow(
 }
 
 describe('ChangePasswordPage', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     beginSession()
+    await publishSessionChange(null)
   })
 
   afterEach(() => {
@@ -157,6 +160,26 @@ describe('ChangePasswordPage', () => {
       },
       authorization: `Bearer ${jwt('15')}`,
     })
+  })
+
+  it('TC-F1.4.1-01j: Phản hồi đổi mật khẩu đến muộn giữ phiên mới của tab khác', async () => {
+    let finish!: (response: { status: number }) => void
+    const onChange = vi.fn(() => new Promise<{ status: number }>((resolve) => { finish = resolve }))
+    renderChangePasswordFlow('MEMBER', onChange)
+    const user = userEvent.setup()
+    fireEvent.change(await screen.findByLabelText('Mật khẩu hiện tại'), { target: { value: 'OldPassword1' } })
+    fireEvent.change(screen.getByLabelText('Mật khẩu mới'), { target: { value: 'NewPassword2' } })
+    fireEvent.change(screen.getByLabelText('Nhập lại mật khẩu mới'), { target: { value: 'NewPassword2' } })
+    await user.click(screen.getByRole('button', { name: 'Đổi mật khẩu' }))
+    await waitFor(() => expect(onChange).toHaveBeenCalledOnce())
+
+    const newSession = { session: 'tab-khac-vua-dang-nhap', refresh: null }
+    await writeCookieRevision(newSession)
+    finish({ status: 204 })
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: 'Đổi mật khẩu', busy: true })).not.toBeInTheDocument()
+    })
+    expect(await readCookieRevision()).toEqual(newSession)
   })
 
   it('TC-F1.4.1-03b: Kiểm tra quy tắc mật khẩu S1, khớp mật khẩu nhập lại và hiển thị lỗi 400 theo trường', async () => {

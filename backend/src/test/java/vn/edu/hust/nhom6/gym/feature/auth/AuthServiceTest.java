@@ -288,6 +288,7 @@ class AuthServiceTest {
             .build();
 
         when(refreshTokenRepository.findByTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(existingToken));
+        when(userRepository.findByRefreshTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(user));
         when(jwtTokenService.generateAccessToken(any(), eq("member@example.com"), eq(UserRole.MEMBER)))
             .thenReturn("new-access-token");
 
@@ -321,6 +322,7 @@ class AuthServiceTest {
             .build();
 
         when(refreshTokenRepository.findByTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(existingToken));
+        when(userRepository.findByRefreshTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(user));
 
         assertThatThrownBy(() -> authService.refresh(rawToken))
             .isInstanceOf(UnauthorizedException.class)
@@ -350,6 +352,7 @@ class AuthServiceTest {
             .build();
 
         when(refreshTokenRepository.findByTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(existingToken));
+        when(userRepository.findByRefreshTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(user));
 
         assertThatThrownBy(() -> authService.refresh(rawToken))
             .isInstanceOf(UnauthorizedException.class)
@@ -691,7 +694,7 @@ class AuthServiceTest {
             .build();
         OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-19T16:45:00Z");
 
-        when(userRepository.findById(10L)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("OldPass123", "old-hash")).thenReturn(true);
         when(passwordEncoder.encode("NewPass456")).thenReturn("new-hash");
         when(vnTime.now()).thenReturn(fixedNow);
@@ -715,7 +718,7 @@ class AuthServiceTest {
             .build();
         OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-19T16:45:00Z");
 
-        when(userRepository.findById(10L)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("OldPass123", "old-hash")).thenReturn(true);
         when(passwordEncoder.encode("NewPass456")).thenReturn("new-hash");
         when(vnTime.now()).thenReturn(fixedNow);
@@ -736,7 +739,7 @@ class AuthServiceTest {
             .status(UserStatus.ACTIVE)
             .build();
 
-        when(userRepository.findById(10L)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("WrongPass123", "old-hash")).thenReturn(false);
 
         assertThatThrownBy(() -> authService.changePassword(
@@ -775,7 +778,7 @@ class AuthServiceTest {
                 .role(UserRole.MEMBER)
                 .status(nonActive)
                 .build();
-            when(userRepository.findById(10L)).thenReturn(Optional.of(user));
+            when(userRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(user));
 
             assertThatThrownBy(() -> authService.changePassword(me, request))
                 .isInstanceOf(ForbiddenException.class)

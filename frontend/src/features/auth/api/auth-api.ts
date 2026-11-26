@@ -99,8 +99,8 @@ export function getProblemDetail(error: unknown) {
   return { detail, errors, status: typeof response?.status === 'number' ? response.status : null }
 }
 
-export async function changePassword(request: ChangePasswordRequest): Promise<void> {
-  await http.post('/auth/change-password', request)
+export async function changePassword(request: ChangePasswordRequest, authEpoch: number): Promise<void> {
+  await http.post('/auth/change-password', request, { authEpoch })
 }
 
 function isRole(value: unknown): value is Role {

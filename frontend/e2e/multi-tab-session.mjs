@@ -234,10 +234,61 @@ test(
       (await context.cookies()).some((entry) => entry.name === 'refresh_token'),
       false,
     )
+
+    async function signIn(page, currentPassword) {
+      await page.goto(`${baseURL}/login`)
+      await page.getByLabel('Email', { exact: true }).fill(email)
+      await page.getByLabel('Mật khẩu', { exact: true }).fill(currentPassword)
+      await page.getByRole('button', { name: 'Đăng nhập', exact: true }).click()
+      await page.waitForURL(protectedURL)
+      await ready(page)
+    }
+
+    async function changePassword(page, currentPassword, nextPassword) {
+      await page.goto(`${baseURL}/doi-mat-khau`)
+      await page.getByLabel('Mật khẩu hiện tại', { exact: true }).fill(currentPassword)
+      await page.getByLabel('Mật khẩu mới', { exact: true }).fill(nextPassword)
+      await page.getByLabel('Nhập lại mật khẩu mới', { exact: true }).fill(nextPassword)
+      await page.getByRole('button', { name: 'Đổi mật khẩu', exact: true }).click()
+    }
+
+    const newPassword = `A1${password}`
+    await signIn(first, password)
+    await second.unroute('**/api/v1/auth/login')
+    const changedOnServer = deferred()
+    const releaseChangeResponse = deferred()
+    const changePath = '**/api/v1/auth/change-password'
+    await first.route(changePath, async (route) => {
+      const response = await route.fetch()
+      changedOnServer.resolve(response.status())
+      await releaseChangeResponse.promise
+      await route.fulfill({ response })
+    })
+    try {
+      await changePassword(first, password, newPassword)
+      assert.equal(await changedOnServer.promise, 204)
+      await signIn(second, newPassword)
+    } finally {
+      releaseChangeResponse.resolve()
+    }
+    await first.getByRole('button', { name: 'Đổi mật khẩu', exact: true }).waitFor()
+    await first.waitForFunction(() =>
+      !document.querySelector('button[type="submit"][aria-busy="true"]'),
+    )
+    assert.equal(await identity(second), userA)
+    assert.equal(await refresh(second), null, 'Phản hồi đổi mật khẩu cũ phải giữ phiên đăng nhập mới.')
+    await first.unroute(changePath)
+
+    await first.goto(protectedURL)
+    await ready(first)
+    const normalChange = first.waitForResponse(changePath)
+    await changePassword(first, newPassword, `B2${password}`)
+    assert.equal((await normalChange).status(), 204)
+    await Promise.all([first.waitForURL('**/login'), second.waitForURL('**/login')])
     assert.equal(
       pageErrors.length,
       0,
-      'Không có lỗi JavaScript khi đổi tài khoản hoặc đăng xuất các tab.',
+      'Không có lỗi JavaScript khi đổi tài khoản, đăng xuất các tab hoặc đổi mật khẩu.',
     )
   },
 )

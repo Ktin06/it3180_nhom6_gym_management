@@ -1,10 +1,9 @@
 import { LockOutlined } from '@ant-design/icons'
 import { Alert, Button, Card, Form, Input, Typography } from 'antd'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../auth/useAuth'
 import { errorMessage } from '../../shared/api-error'
-import { changePassword, getProblemDetail } from '../api/auth-api'
+import { getProblemDetail } from '../api/auth-api'
 import { isValidPassword } from '../api/validation'
 
 interface ChangePasswordForm {
@@ -21,19 +20,17 @@ export function ChangePasswordPage() {
   const [pending, setPending] = useState(false)
   const [errorDetail, setErrorDetail] = useState<string | null>(null)
   const { completePasswordChange } = useAuth()
-  const navigate = useNavigate()
 
   const handleFinish = (values: ChangePasswordForm) => {
     setPending(true)
     setErrorDetail(null)
     void (async () => {
       try {
-        await changePassword({
+        await completePasswordChange({
           currentPassword: values.currentPassword,
           newPassword: values.newPassword,
         })
-        await completePasswordChange()
-        navigate('/login', { replace: true })
+        form.resetFields()
       } catch (error) {
         const problem = getProblemDetail(error)
         const fieldErrors = Object.entries(problem.errors).flatMap(([name, message]) => {

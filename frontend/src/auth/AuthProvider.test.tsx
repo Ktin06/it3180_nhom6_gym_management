@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const authApi = vi.hoisted(() => ({
+  changePassword: vi.fn(),
   getCurrentUser: vi.fn(),
   login: vi.fn(),
   logout: vi.fn(),
@@ -11,10 +12,12 @@ const authApi = vi.hoisted(() => ({
 }))
 const refresh = vi.hoisted(() => vi.fn())
 const publishSessionChange = vi.hoisted(() => vi.fn())
+const captureCookieRevision = vi.hoisted(() => vi.fn())
+const currentTabCookieRevision = vi.hoisted(() => vi.fn())
 
 vi.mock('../features/auth/api/auth-api', () => authApi)
 vi.mock('../services/http', () => ({ refreshAccessToken: refresh }))
-vi.mock('./session-coordination', () => ({ publishSessionChange }))
+vi.mock('./session-coordination', () => ({ captureCookieRevision, currentTabCookieRevision, publishSessionChange }))
 
 import { AuthProvider } from './AuthProvider'
 import { useAuth } from './useAuth'
@@ -60,7 +63,9 @@ function AuthProbe() {
       <button onClick={() => void auth.logout().catch(() => setLastError('logout failed'))}>
         Đăng xuất thử
       </button>
-      <button onClick={() => void auth.completePasswordChange()}>Hoàn tất đổi mật khẩu</button>
+      <button onClick={() => void auth.completePasswordChange({
+        currentPassword: 'OldPassword1', newPassword: 'NewPassword2',
+      })}>Hoàn tất đổi mật khẩu</button>
     </>
   )
 }
@@ -94,6 +99,9 @@ describe('AuthProvider', () => {
     authApi.register.mockReset()
     refresh.mockReset().mockRejectedValue(unauthorizedError())
     publishSessionChange.mockReset().mockResolvedValue(undefined)
+    captureCookieRevision.mockReset().mockResolvedValue({ session: 'session-old', refresh: null })
+    currentTabCookieRevision.mockReset().mockResolvedValue({ session: 'session-old', refresh: null })
+    authApi.changePassword.mockReset().mockResolvedValue(undefined)
   })
 
   it('TC-F1.3.1-01e: bootstrap làm mới cookie rồi lấy user từ /me', async () => {
@@ -284,5 +292,28 @@ describe('AuthProvider', () => {
     expect(publishSessionChange).toHaveBeenCalledWith(null)
     expect(getAccessToken()).toBeNull()
     expect(screen.getByText('Đã đổi mật khẩu, vui lòng đăng nhập lại')).toBeInTheDocument()
+  })
+
+  it('TC-F1.4.1-01k: giữ lượt đăng nhập mới cùng tài khoản khi tab đã nhận revision mới', async () => {
+    refresh.mockImplementation(async (epoch: number) => {
+      setAccessToken('bootstrap-jwt', epoch)
+      return 'bootstrap-jwt'
+    })
+    authApi.getCurrentUser.mockResolvedValue({ email: 'hv@example.com', role: 'MEMBER' })
+    const pending = deferred<void>()
+    authApi.changePassword.mockReturnValue(pending.promise)
+    const user = userEvent.setup()
+    renderProvider()
+    await screen.findByText('authenticated')
+    await user.click(screen.getByRole('button', { name: 'Hoàn tất đổi mật khẩu' }))
+    await waitFor(() => expect(authApi.changePassword).toHaveBeenCalledOnce())
+
+    currentTabCookieRevision.mockResolvedValue({ session: 'session-new', refresh: null })
+    await act(async () => pending.resolve(undefined))
+
+    expect(currentTabCookieRevision).toHaveBeenCalledTimes(2)
+    expect(publishSessionChange).not.toHaveBeenCalled()
+    expect(screen.getByText('authenticated')).toBeInTheDocument()
+    expect(getAccessToken()).toBe('bootstrap-jwt')
   })
 })

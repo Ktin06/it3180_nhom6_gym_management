@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { AuthCompletionError, AuthContext, type AuthStatus, type AuthUser } from './AuthContext'
 import { queueCookieOperation } from './cookie-operation-queue'
-import { publishSessionChange } from './session-coordination'
+import { captureCookieRevision, currentTabCookieRevision, publishSessionChange } from './session-coordination'
 import {
   beginSession,
   expireSession,
@@ -12,6 +12,7 @@ import {
   subscribeToSessionRecovery,
 } from './session-store'
 import {
+  changePassword as changePasswordRequest,
   getCurrentUser,
   login as loginRequest,
   logout as logoutRequest,
@@ -21,6 +22,7 @@ import { refreshAccessToken } from '../services/http'
 import { isUnauthorized } from '../services/http-errors'
 import type {
   AccessTokenResponse,
+  ChangePasswordRequest,
   LoginRequest,
   RegisterRequest,
 } from '../features/auth/types/auth'
@@ -193,14 +195,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (getSessionEpoch() === epoch) expireSession(epoch)
   }, [])
 
-  const completePasswordChange = useCallback(async () => {
+  const completePasswordChange = useCallback(async (request: ChangePasswordRequest) => {
     const epoch = getSessionEpoch()
+    const before = await queueCookieOperation(async () => {
+      await captureCookieRevision()
+      return currentTabCookieRevision(epoch)
+    })
+    if (!before) throw new Error('Phiên đăng nhập đã thay đổi.')
+
+    // HTTP có thể cần refresh, nên không giữ Web Lock trong lúc chờ phản hồi.
+    await changePasswordRequest(request, epoch)
     try {
-      await queueCookieOperation(() => publishSessionChange(null))
+      await queueCookieOperation(async () => {
+        const current = await currentTabCookieRevision(epoch)
+        if (!current || current.session !== before.session) return
+        await publishSessionChange(null)
+        expireSession(epoch, PASSWORD_CHANGED_MESSAGE)
+      })
     } catch {
-      // Không chặn việc xóa phiên cục bộ nếu đồng bộ liên tab gặp lỗi.
-    }
-    if (getSessionEpoch() === epoch) {
       expireSession(epoch, PASSWORD_CHANGED_MESSAGE)
     }
   }, [])
