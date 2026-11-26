@@ -160,10 +160,11 @@ public class ClassRepository {
 
     public int insertSession(Schedule s, LocalDate date, OffsetDateTime start, OffsetDateTime end) {
         return jdbc.update("""
-            INSERT INTO class_sessions(class_schedule_id,branch_id,trainer_id,room_id,occurrence_date,start_at,end_at,capacity)
-            VALUES (:id,:branch,:trainer,:room,:date,:start,:end,:capacity)
+            INSERT INTO class_sessions(class_schedule_id,class_type_id,branch_id,trainer_id,room_id,occurrence_date,
+                                       start_at,end_at,capacity)
+            VALUES (:id,:type,:branch,:trainer,:room,:date,:start,:end,:capacity)
             ON CONFLICT (class_schedule_id,occurrence_date) DO NOTHING
-            """, Map.of("id", s.id(), "branch", s.branchId(), "trainer", s.trainerId(), "room", s.roomId(),
+            """, Map.of("id", s.id(), "type", s.classTypeId(), "branch", s.branchId(), "trainer", s.trainerId(), "room", s.roomId(),
                 "date", date, "start", start, "end", end, "capacity", s.capacity()));
     }
 

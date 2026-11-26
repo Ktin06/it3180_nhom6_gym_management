@@ -123,7 +123,9 @@ Có thể cấu hình bằng Spring properties:
 
 Mỗi lịch xử lý trong một giao dịch; lỗi được ghi log kèm ID lịch, không ngăn các lịch khác,
 và được thử lại lượt tiếp theo. Unique `(class_schedule_id, occurrence_date)` chống sinh trùng;
-không ghi đè buổi đã có, kể cả đã đổi giờ hoặc hủy. Ngày phát sinh theo Việt Nam,
+không ghi đè buổi đã có, kể cả đã đổi giờ hoặc hủy. Khi sinh, buổi lưu `class_type_id` từ lịch lặp.
+Sửa loại lớp của lịch chỉ đổi loại của các buổi sinh sau. Buổi có trước migration được điền theo loại
+hiện có của lịch tại lúc nâng cấp vì schema cũ không lưu loại lúc sinh. Ngày phát sinh theo Việt Nam,
 `start_at`/`end_at` lưu bằng `timestamptz`. Job chỉ sinh buổi; không tự điểm danh hoặc gửi email.
 
 ### Khóa giao dịch và tích hợp

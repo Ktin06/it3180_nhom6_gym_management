@@ -15,7 +15,7 @@ Mọi bảng tuân theo cùng một quy ước, để mã do 8 người (và AI)
 - **Tiền:** số nguyên đơn vị VND, không dùng số thực để tránh sai số làm tròn.
 - **Trạng thái:** giá trị viết hoa (`ACTIVE`, `EXPIRED`). Trong migration lưu kiểu `varchar` kèm ràng buộc `CHECK`; entity Java dùng `@Enumerated(EnumType.STRING)`. Các `Enum` trong file DBML chỉ để vẽ sơ đồ.
 - **Mỗi thông tin chỉ lưu ở một nơi:** vai trò ở `users.role`; email ở `users.email`; chi nhánh làm việc của nhân viên ở `staff.branch_id`; số điện thoại ở `members.phone` hoặc `staff.phone`.
-- **Cột chép có chủ đích:** một số cột được chép lại như ảnh chụp tại một thời điểm và không đổi về sau, ví dụ giá lúc bán (`invoice_items.unit_price`), loại gói lúc mua (`memberships.package_type`), huấn luyện viên và phòng của từng buổi (`class_sessions`). Trong file DBML các cột này có ghi chú "chép từ".
+- **Cột chép có chủ đích:** một số cột được chép lại theo giá trị lúc tạo, ví dụ giá lúc bán (`invoice_items.unit_price`), loại gói lúc mua (`memberships.package_type`), loại lớp, huấn luyện viên và phòng của từng buổi (`class_sessions`). Trong file DBML các cột này có ghi chú "chép từ".
 - **Không xóa cứng** dữ liệu nghiệp vụ (hội viên, hóa đơn, gói tập): dùng trạng thái hoặc cột `deleted_at`. Ngoại lệ duy nhất là `face_embeddings`: hội viên rút lại đồng ý thì xóa thật (S8).
 - **Chi nhánh từ ngày đầu:** các bảng nghiệp vụ gốc có `branch_id` ngay từ v1 (dùng một chi nhánh mặc định), dù đa chi nhánh (F18) làm ở v4, để v4 không phải sửa lại cơ sở dữ liệu. Bảng con lấy chi nhánh qua bảng cha (ví dụ `class_bookings` qua `class_sessions`, `payments` qua `invoices`), không chép lại; riêng `payrolls.branch_id` được chép lúc tính lương, vì nhân viên có thể chuyển chi nhánh.
 - **Dữ liệu chuẩn hóa:** email lưu chữ thường (`CHECK email = lower(email)`); số điện thoại lưu 10 chữ số bắt đầu bằng 0 (`CHECK phone ~ '^0[0-9]{9}$'`). Mã nguồn chuẩn hóa trước khi lưu và trước khi tìm kiếm.
@@ -67,7 +67,7 @@ Trạng thái gói (`memberships.status`): PENDING (đã có hóa đơn, chưa t
 | `checkins` | Mỗi lượt vào phòng tập | `member_id`, `membership_id` (gói TIME hoặc SESSION), `branch_id`, `created_by`, `method` (MANUAL, FACE), `match_score`, `checkin_date`, `session_deducted`, `checked_in_at`, `checked_out_at` | F4, F6, F20 |
 | `class_types` | Loại lớp: Yoga, Zumba, Boxing… | `name`, `status` | F8 |
 | `class_schedules` | Lịch lặp hằng tuần | `branch_id`, `class_type_id`, `trainer_id`, `room_id`, `day_of_week` (1 = thứ Hai … 7 = Chủ nhật), `start_time`, `end_time`, `capacity`, `valid_from`, `valid_to` | F8 |
-| `class_sessions` | Từng buổi cụ thể sinh ra từ lịch lặp; hội viên đặt chỗ vào buổi | `class_schedule_id`, `branch_id`, `trainer_id`, `room_id`, `occurrence_date` (ngày theo lịch lặp, không đổi khi đổi giờ), `start_at`, `end_at`, `original_start_at`, `capacity`, `status` | F8 |
+| `class_sessions` | Từng buổi cụ thể sinh ra từ lịch lặp; hội viên đặt chỗ vào buổi | `class_schedule_id`, `class_type_id` (loại lớp lúc sinh), `branch_id`, `trainer_id`, `room_id`, `occurrence_date` (ngày theo lịch lặp, không đổi khi đổi giờ), `start_at`, `end_at`, `original_start_at`, `capacity`, `status` | F8 |
 | `class_bookings` | Đặt chỗ lớp nhóm (không có danh sách chờ, ADR 0014) | `class_session_id`, `member_id`, `created_by`, `status`, `booked_at`, `arrived_at`, `cancel_reason`, `is_late_cancel`, `attendance_marked_by` | F8, F10 |
 
 ### 5. Huấn luyện viên (4 bảng)

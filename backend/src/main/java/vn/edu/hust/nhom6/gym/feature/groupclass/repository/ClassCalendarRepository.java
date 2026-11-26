@@ -22,7 +22,7 @@ public class ClassCalendarRepository {
 
     private static final String SESSION_TABLES = """
         FROM class_sessions s JOIN branches b ON b.id=s.branch_id
-        JOIN class_schedules sc ON sc.id=s.class_schedule_id JOIN class_types t ON t.id=sc.class_type_id
+        JOIN class_types t ON t.id=s.class_type_id
         JOIN rooms r ON r.id=s.room_id JOIN staff st ON st.id=s.trainer_id
         """;
 

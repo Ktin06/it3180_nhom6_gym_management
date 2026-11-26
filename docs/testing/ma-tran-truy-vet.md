@@ -9,16 +9,16 @@
 | Chức năng | UC | US | AC | AC đã có TC | AC chưa có TC | TC |
 | --- | --- | --- | --- | --- | --- | --- |
 | F1 | 6 | 6 | 29 | 24 | 5 | 118 |
-| F2 | 5 | 6 | 31 | 20 | 11 | 78 |
-| F3 | 5 | 6 | 45 | 43 | 2 | 113 |
+| F2 | 5 | 6 | 31 | 25 | 6 | 93 |
+| F3 | 5 | 6 | 45 | 44 | 1 | 132 |
 | F4 | 5 | 5 | 37 | 0 | 37 | 0 |
 | F5 | 5 | 5 | 41 | 0 | 41 | 0 |
 | F6 | 5 | 5 | 16 | 0 | 16 | 0 |
 | F7 | 5 | 0 | 0 | 0 | 0 | 0 |
-| F8 | 9 | 9 | 55 | 53 | 2 | 79 |
+| F8 | 9 | 9 | 55 | 53 | 2 | 81 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **42** | **254** | **140** | **114** | **388** |
+| **Tổng** | **57** | **42** | **254** | **146** | **108** | **424** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -47,18 +47,12 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F1.4.1-02 | Từ chối khi mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ | US-F1.4.1 |
 | AC-F1.4.1-03 | Từ chối khi dữ liệu đầu vào sai định dạng hoặc mật khẩu mới không đạt chuẩn bảo mật | US-F1.4.1 |
 | AC-F1.4.1-04 | Chặn truy cập khi chưa đăng nhập và mở đúng khung giao diện cho mọi vai trò đã đăng nhập | US-F1.4.1 |
-| AC-F2.2.1-01 | Tạo tài khoản và gửi email đặt mật khẩu hạn 72 giờ | US-F2.2.1 |
 | AC-F2.2.1-02 | Hội viên đặt mật khẩu lần đầu rồi đăng nhập; quá 72 giờ liên kết hết hạn | US-F2.2.1 |
-| AC-F2.2.1-03 | Từ chối khi hồ sơ đã có tài khoản | US-F2.2.1 |
-| AC-F2.2.1-04 | Từ chối khi email đã được sử dụng (kể cả đồng thời) | US-F2.2.1 |
-| AC-F2.2.1-05 | Từ chối khi hồ sơ đang ngừng hoạt động | US-F2.2.1 |
 | AC-F2.2.1-06 | Gửi email gặp lỗi vẫn giữ tài khoản và ghi log không chứa token | US-F2.2.1 |
-| AC-F2.2.1-07 | Kiểm tra quyền theo vai trò, chi nhánh và dữ liệu đầu vào | US-F2.2.1 |
 | AC-F2.5.1-01 | Ghi chỉ số cơ thể thành công với ít nhất một chỉ số | US-F2.5.1 |
 | AC-F2.5.1-02 | Từ chối dữ liệu chỉ số cơ thể không hợp lệ | US-F2.5.1 |
 | AC-F2.5.1-03 | Xem lịch sử chỉ số cơ thể sắp xếp mới nhất trước | US-F2.5.1 |
 | AC-F2.5.1-04 | Phân quyền ghi và xem chỉ số cơ thể theo vai trò, chi nhánh và quan hệ PT | US-F2.5.1 |
-| AC-F3.1.1-03 | Lễ tân chỉ xem, không có thao tác quản lý trên giao diện | US-F3.1.1 |
 | AC-F3.5.1-09 | Hóa đơn tại quầy không tự hủy | US-F3.5.1 |
 | AC-F4.1.1-01 | Tìm theo mã hội viên hoặc số điện thoại | US-F4.1.1 |
 | AC-F4.1.1-02 | Hiển thị ảnh đại diện và thông tin lớp học sắp diễn ra | US-F4.1.1 |
@@ -346,13 +340,22 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F2.1.1-03b `MemberApiIntegrationTest#validatesEndpointAndRecordPermissions`
 - **UC-F2.2** Tạo tài khoản đăng nhập cho hồ sơ hội viên có sẵn
   - **US-F2.2.1** Tạo tài khoản cho hồ sơ có sẵn (#124)
-    - AC-F2.2.1-01 Tạo tài khoản và gửi email đặt mật khẩu hạn 72 giờ (BR-F2-06, BR-F2-11) ❌ chưa có TC
+    - AC-F2.2.1-01 Tạo tài khoản và gửi email đặt mật khẩu hạn 72 giờ (BR-F2-06, BR-F2-11)
+      - TC-F2.2.1-01a `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-01a: tạo tài khoản thành công báo đã gửi email, tả`
+      - TC-F2.2.1-01b `features/members/pages/MembersPage.test.tsx › TC-F2.2.1-01b: chỉ tạo tài khoản cho hồ sơ ACTIVE chưa có em`
     - AC-F2.2.1-02 Hội viên đặt mật khẩu lần đầu rồi đăng nhập; quá 72 giờ liên kết hết hạn (BR-F2-11) ❌ chưa có TC
-    - AC-F2.2.1-03 Từ chối khi hồ sơ đã có tài khoản (BR-F2-11) ❌ chưa có TC
-    - AC-F2.2.1-04 Từ chối khi email đã được sử dụng (kể cả đồng thời) (BR-F2-06, BR-F2-11) ❌ chưa có TC
-    - AC-F2.2.1-05 Từ chối khi hồ sơ đang ngừng hoạt động (BR-F2-11) ❌ chưa có TC
+    - AC-F2.2.1-03 Từ chối khi hồ sơ đã có tài khoản (BR-F2-11)
+      - TC-F2.2.1-03a `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03a, TC-F2.2.1-05a: hồ sơ đã có tài khoản hiện ema`
+      - TC-F2.2.1-03b `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03b, TC-F2.2.1-04a, TC-F2.2.1-05b, TC-F2.2.1-07c: `
+    - AC-F2.2.1-04 Từ chối khi email đã được sử dụng (kể cả đồng thời) (BR-F2-06, BR-F2-11)
+      - TC-F2.2.1-04a `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03b, TC-F2.2.1-04a, TC-F2.2.1-05b, TC-F2.2.1-07c: `
+    - AC-F2.2.1-05 Từ chối khi hồ sơ đang ngừng hoạt động (BR-F2-11)
+      - TC-F2.2.1-05a `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03a, TC-F2.2.1-05a: hồ sơ đã có tài khoản hiện ema`
+      - TC-F2.2.1-05b `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03b, TC-F2.2.1-04a, TC-F2.2.1-05b, TC-F2.2.1-07c: `
     - AC-F2.2.1-06 Gửi email gặp lỗi vẫn giữ tài khoản và ghi log không chứa token (BR-F2-11) ❌ chưa có TC
-    - AC-F2.2.1-07 Kiểm tra quyền theo vai trò, chi nhánh và dữ liệu đầu vào (BR-F2-10, BR-F2-11) ❌ chưa có TC
+    - AC-F2.2.1-07 Kiểm tra quyền theo vai trò, chi nhánh và dữ liệu đầu vào (BR-F2-10, BR-F2-11)
+      - TC-F2.2.1-07b `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-07b: kiểm tra định dạng email ở trình duyệt trước `
+      - TC-F2.2.1-07c `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03b, TC-F2.2.1-04a, TC-F2.2.1-05b, TC-F2.2.1-07c: `
 - **UC-F2.3** Tra cứu, lọc và xem chi tiết hồ sơ hội viên
   - **US-F2.3.1** Tra cứu và xem hồ sơ hội viên (#125) ✅ mọi AC có TC
     - AC-F2.3.1-01 Tìm kiếm, lọc, phân trang trong chi nhánh mình đạt hiệu năng dưới 2 giây (BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10)
@@ -413,6 +416,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F2.4.2-01b `MemberAvatarIntegrationTest#smallTransparentImagesKeepDimensions`
       - TC-F2.4.2-01c `MemberAvatarIntegrationTest#acceptsDimensionBoundary`
       - TC-F2.4.2-01d `MemberAvatarIntegrationTest#acceptsUploadSizeBoundary`
+      - TC-F2.4.2-01e `features/members/components/MemberFormModal.test.tsx › TC-F2.4.2-01e: chọn ảnh JPEG/PNG hợp lệ gọi API tải lên và t`
     - AC-F2.4.2-02 Thay ảnh trên cùng bản ghi (BR-F2-03)
       - TC-F2.4.2-02a `MemberAvatarIntegrationTest#overwritesSameRow`
       - TC-F2.4.2-02b `MemberAvatarIntegrationTest#concurrentInitialUploadsAreSerialized`
@@ -420,6 +424,8 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F2.4.2-03 Từ chối file không hợp lệ (BR-F2-01)
       - TC-F2.4.2-03a `MemberAvatarIntegrationTest#invalidFilesDoNotReplaceExistingAvatar`
       - TC-F2.4.2-03b `MemberAvatarIntegrationTest#servletRejectsOversizedMultipart`
+      - TC-F2.4.2-03c `features/members/components/MemberFormModal.test.tsx › TC-F2.4.2-03c: báo lỗi sớm với file sai định dạng hoặc vượt `
+      - TC-F2.4.2-03d `features/members/components/MemberFormModal.test.tsx › TC-F2.4.2-03d: lỗi 400 từ API hiển thị đúng câu errors.file `
     - AC-F2.4.2-04 Xem ảnh theo quyền hồ sơ (BR-F2-04)
       - TC-F2.4.2-04a `MemberAvatarIntegrationTest#authorizedReadersReceiveStoredJpeg`
       - TC-F2.4.2-04b `MemberAvatarIntegrationTest#otherReadersCannotSeeAvatar`
@@ -427,6 +433,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F2.4.2-05a `MemberAvatarIntegrationTest#ownerMayUploadAcrossBranches`
       - TC-F2.4.2-05b `MemberAvatarIntegrationTest#deniedWritersDoNotMutateAvatar`
       - TC-F2.4.2-05c `MemberAvatarIntegrationTest#inactiveAssignmentsAreDenied`
+      - TC-F2.4.2-05d `features/members/components/MemberFormModal.test.tsx › TC-F2.4.2-05d: hội viên không thấy nút đổi ảnh`
     - AC-F2.4.2-06 Chưa có ảnh hoặc không có hồ sơ (BR-F2-04)
       - TC-F2.4.2-06a `MemberAvatarIntegrationTest#missingAvatarIsNotFound`
       - TC-F2.4.2-06b `MemberAvatarIntegrationTest#missingOrDeletedProfilesAreNotFound`
@@ -436,7 +443,9 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F2.4.2-07c `MemberAvatarIntegrationTest#missingMultipartFileIsRejected`
     - AC-F2.4.2-08 Chưa có ảnh hoặc tải ảnh lỗi thì hiện chữ cái đầu của tên trên giao diện (BR-F2-04)
       - TC-F2.4.2-08a `MemberAvatarIntegrationTest#newProfileHasNoAvatar`
+      - TC-F2.4.2-08a `features/members/components/MemberAvatar.test.tsx › TC-F2.4.2-08a: hiện chữ cái đầu của tên khi hasAvatar là fal`
       - TC-F2.4.2-08b `MemberAvatarIntegrationTest#profileResponsesReflectAvatarPresence`
+      - TC-F2.4.2-08b `features/members/components/MemberFormModal.test.tsx › TC-F2.4.2-08b: mở hồ sơ chưa có ảnh thì hiện chữ cái đầu và `
 - **UC-F2.5** Ghi nhận và xem lịch sử chỉ số cơ thể (`body_metrics`)
   - **US-F2.5.1** Chỉ số cơ thể (#128)
     - AC-F2.5.1-01 Ghi chỉ số cơ thể thành công với ít nhất một chỉ số (BR-F2-12) ❌ chưa có TC
@@ -447,7 +456,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 ### F3
 
 - **UC-F3.1** Xem danh mục gói tập
-  - **US-F3.1.1** Xem danh mục gói (nội bộ) (#129)
+  - **US-F3.1.1** Xem danh mục gói (nội bộ) (#129) ✅ mọi AC có TC
     - AC-F3.1.1-01 Nhân viên chi nhánh chỉ thấy gói của chi nhánh mình và gói toàn chuỗi (BR-F3-01)
       - TC-F3.1.1-01a `PackageCatalogIntegrationTest#scopesRowsAndCountAndIgnoresClientBranch`
     - AC-F3.1.1-02 Lọc, sắp xếp và phân trang
@@ -457,7 +466,8 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F3.1.1-02d `PackageControllerTest#defaultContract`
       - TC-F3.1.1-02e `features/packages/pages/PackagesPage.test.tsx › TC-F3.1.1-02e: mặc định lấy gói đang bán; chọn loại PT giữ n`
       - TC-F3.1.1-02f `features/packages/api/packages.test.ts › TC-F3.1.1-02f: gửi bộ lọc và phân trang đúng endpoint đã đặc`
-    - AC-F3.1.1-03 Lễ tân chỉ xem, không có thao tác quản lý trên giao diện ❌ chưa có TC
+    - AC-F3.1.1-03 Lễ tân chỉ xem, không có thao tác quản lý trên giao diện
+      - TC-F3.1.1-03a `features/packages/pages/PackagesPage.test.tsx › TC-F3.1.1-03a: Chỉ quản lý chi nhánh thấy nút thêm, sửa, ngừ`
     - AC-F3.1.1-04 Chủ chuỗi xem gói mọi chi nhánh
       - TC-F3.1.1-04a `PackageCatalogIntegrationTest#ownerSeesOtherBranchesWithoutStaff`
       - TC-F3.1.1-04b `PackageCatalogServiceTest#ownerDoesNotRequireStaffAssignment`
@@ -489,40 +499,54 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
   - **US-F3.2.1** Thêm gói tập (#131) ✅ mọi AC có TC
     - AC-F3.2.1-01 Thêm gói hợp lệ của từng loại (BR-F3-02, BR-F3-03)
       - TC-F3.2.1-01a `PackageCreateIntegrationTest#createsAllTypesWithServerBranchAuditAndReadVisibility`
+      - TC-F3.2.1-01b `features/packages/components/PackageFormModal.test.tsx › TC-F3.2.1-01b: Thêm gói TIME hợp lệ gửi đúng DTO không chứa `
+      - TC-F3.2.1-01c `features/packages/pages/PackagesPage.test.tsx › TC-F3.2.1-01c: Tạo gói mới từ trang danh mục đóng hộp thoại `
+      - TC-F3.2.1-01d `features/packages/components/PackageFormModal.test.tsx › TC-F3.2.1-01d: Thêm gói SESSION hợp lệ gửi đúng DTO có số bu`
+      - TC-F3.2.1-01e `features/packages/components/PackageFormModal.test.tsx › TC-F3.2.1-01e: Thêm gói PT hợp lệ gửi đúng DTO có số buổi và`
     - AC-F3.2.1-02 Số buổi đúng theo loại gói (BR-F3-02)
       - TC-F3.2.1-02a `PackageCreateIntegrationTest#sessionsAreRequiredAndPositive`
+      - TC-F3.2.1-02b `features/packages/components/PackageFormModal.test.tsx › TC-F3.2.1-02b: Gói TIME ẩn ô số buổi và không gửi sessionCou`
     - AC-F3.2.1-03 Dữ liệu sai bị từ chối, giá trị biên được nhận
       - TC-F3.2.1-03a `PackageCreateIntegrationTest#invalidInputsReturnFieldErrorsWithoutWrites`
       - TC-F3.2.1-03b `PackageCreateIntegrationTest#missingFieldsMalformedJsonAndLengthLimitsAreRejected`
       - TC-F3.2.1-03c `PackageCreateIntegrationTest#acceptsZeroPriceAndMaximumLengthsAndIntegers`
+      - TC-F3.2.1-03d `features/packages/components/PackageFormModal.test.tsx › TC-F3.2.1-03d: Kiểm tra đầu vào, cho phép giá 0 đồng và gán `
     - AC-F3.2.1-04 Không nhận trường do server quản lý
       - TC-F3.2.1-04a `PackageCreateIntegrationTest#rejectsServerManagedAndUnknownFields`
     - AC-F3.2.1-05 Mã gói không trùng
       - TC-F3.2.1-05a `PackageCreateIntegrationTest#duplicateInactiveGlobalCodeIsConflict`
       - TC-F3.2.1-05b `PackageCreateIntegrationTest#concurrentDuplicateCodeCreatesOneAndRollsBackOther`
+      - TC-F3.2.1-05c `features/packages/components/PackageFormModal.test.tsx › TC-F3.2.1-05c: Lỗi 409 trùng mã gói hiển thị thông báo tiếng`
     - AC-F3.2.1-06 Chỉ Quản lý chi nhánh được thêm gói
       - TC-F3.2.1-06a `PackageCreateIntegrationTest#onlyManagerCanCreate`
       - TC-F3.2.1-06b `PackageCreateIntegrationTest#missingTokenOrInactiveStaffCannotCreate`
+      - TC-F3.2.1-06d `features/packages/components/PackageFormModal.test.tsx › TC-F3.2.1-06d: Lỗi 403 khi tạo gói hiển thị thông báo tiếng `
 - **UC-F3.3** Sửa thông tin gói tập
   - **US-F3.3.1** Sửa thông tin gói tập (#132) ✅ mọi AC có TC
     - AC-F3.3.1-01 Sửa giá; gói đã bán không đổi (BR-F3-06)
       - TC-F3.3.1-01a `PackageUpdateIntegrationTest#priceOnlyKeepsOmittedFieldsAndAudit`
       - TC-F3.3.1-01b `PackageUpdateIntegrationTest#historyIncludingPendingPurchaseRemainsIdentical`
+      - TC-F3.3.1-01c `features/packages/components/PackageFormModal.test.tsx › TC-F3.3.1-01c, TC-F3.3.1-04c: Sửa gói giữ nguyên và không gử`
     - AC-F3.3.1-02 Sửa gói chi nhánh khác hoặc gói toàn chuỗi bị từ chối 403 (BR-F3-07)
       - TC-F3.3.1-02a `PackageUpdateIntegrationTest#outsideBranchAndGlobalAre403WithoutMutation`
     - AC-F3.3.1-03 Xóa mô tả và gửi body rỗng
       - TC-F3.3.1-03a `PackageUpdateIntegrationTest#explicitNullClearsDescriptionAndEmptyBodyDoesNotChangeAudit`
+      - TC-F3.3.1-03b `features/packages/components/PackageFormModal.test.tsx › TC-F3.3.1-03b: Xóa trống mô tả khi sửa gửi description là nu`
     - AC-F3.3.1-04 Không đổi mã, loại và không xóa trường bắt buộc (BR-F3-05, BR-F3-02)
       - TC-F3.3.1-04a `PackageUpdateIntegrationTest#refusesImmutableAndUnknownFields`
       - TC-F3.3.1-04b `PackageUpdateIntegrationTest#sessionsMergeWithExistingTypeAndCannotBeCleared`
+      - TC-F3.3.1-04c `features/packages/components/PackageFormModal.test.tsx › TC-F3.3.1-01c, TC-F3.3.1-04c: Sửa gói giữ nguyên và không gử`
     - AC-F3.3.1-05 Dữ liệu sai thì không đổi gì
       - TC-F3.3.1-05a `PackageUpdateIntegrationTest#invalidUpdateIsAtomicAndReturnsFieldError`
       - TC-F3.3.1-05b `PackageUpdateIntegrationTest#invalidIdIsBadRequest`
       - TC-F3.3.1-05c `PackageUpdateIntegrationTest#malformedBodyIsRejected`
+      - TC-F3.3.1-05d `features/packages/components/PackageFormModal.test.tsx › TC-F3.3.1-05d, TC-F3.3.1-07b: Lỗi 400 theo trường hoặc 404 k`
     - AC-F3.3.1-06 Sửa gói đã ngừng bán không làm gói bán lại
       - TC-F3.3.1-06a `PackageUpdateIntegrationTest#acceptsBoundariesAndCanEditInactiveWithoutReactivation`
+      - TC-F3.3.1-06b `features/packages/pages/PackagesPage.test.tsx › TC-F3.3.1-06b: Gói ngừng bán vẫn hiện nút Sửa cho quản lý ch`
     - AC-F3.3.1-07 Gói không tồn tại
       - TC-F3.3.1-07a `PackageUpdateIntegrationTest#missingPackageIs404WithoutMutation`
+      - TC-F3.3.1-07b `features/packages/components/PackageFormModal.test.tsx › TC-F3.3.1-05d, TC-F3.3.1-07b: Lỗi 400 theo trường hoặc 404 k`
     - AC-F3.3.1-08 Chỉ Quản lý chi nhánh được sửa
       - TC-F3.3.1-08a `PackageUpdateIntegrationTest#deniedRolesCannotUpdate`
       - TC-F3.3.1-08b `PackageUpdateIntegrationTest#noTokenOrInactiveMissingStaffCannotUpdate`
@@ -530,13 +554,16 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
   - **US-F3.4.1** Ngừng bán gói tập (#133) ✅ mọi AC có TC
     - AC-F3.4.1-01 Ngừng bán gói đang bán (BR-F3-08)
       - TC-F3.4.1-01a `PackageDeactivateIntegrationTest#deactivatesWithNoBodyOrEmptyJsonWithoutChangingOtherFields`
+      - TC-F3.4.1-01b `features/packages/pages/PackagesPage.test.tsx › TC-F3.4.1-01b, TC-F3.4.1-03b: Xác nhận ngừng bán gói ACTIVE `
     - AC-F3.4.1-02 Gói đã bán vẫn dùng được (BR-F3-08)
       - TC-F3.4.1-02a `PackageDeactivateIntegrationTest#preservesAllHistoricalRows`
     - AC-F3.4.1-03 Gói ngừng bán không bán mới được nhưng vẫn tra cứu được (BR-F3-09)
       - TC-F3.4.1-03a `PackageCatalogIntegrationTest#inactiveFilterAndEmptyResults`
+      - TC-F3.4.1-03b `features/packages/pages/PackagesPage.test.tsx › TC-F3.4.1-01b, TC-F3.4.1-03b: Xác nhận ngừng bán gói ACTIVE `
     - AC-F3.4.1-04 Ngừng bán lần nữa bị từ chối
       - TC-F3.4.1-04a `PackageDeactivateIntegrationTest#repeatIs422WithoutFurtherAuditChange`
       - TC-F3.4.1-04b `PackageDeactivateIntegrationTest#simultaneousDeactivationHasOneSuccessAndOne422`
+      - TC-F3.4.1-04c `features/packages/pages/PackagesPage.test.tsx › TC-F3.4.1-04c, TC-F3.4.1-06h: Lỗi 422, 403, 404 khi ngừng bá`
     - AC-F3.4.1-05 Sửa cùng lúc không làm gói bán lại
       - TC-F3.4.1-05a `PackageDeactivateIntegrationTest#concurrentEditCannotReactivatePackage`
     - AC-F3.4.1-06 Từ chối gói ngoài chi nhánh, gói không tồn tại và vai trò khác (BR-F3-07)
@@ -546,6 +573,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F3.4.1-06d `PackageDeactivateIntegrationTest#missingAndBadTokenAre401`
       - TC-F3.4.1-06e `PackageDeactivateIntegrationTest#inactiveAndMissingStaffAre403`
       - TC-F3.4.1-06f `PackageDeactivateIntegrationTest#missingPackageIs404WithEmptyJsonBodyWithoutMutation`
+      - TC-F3.4.1-06h `features/packages/pages/PackagesPage.test.tsx › TC-F3.4.1-04c, TC-F3.4.1-06h: Lỗi 422, 403, 404 khi ngừng bá`
 - **UC-F3.5** Bán gói tập tại quầy (đăng ký mới / gia hạn)
   - **US-F3.5.1** Bán và gia hạn gói tại quầy (#134)
     - AC-F3.5.1-01 Bán gói tạo hóa đơn chờ và gói chờ, giá lấy ở server (BR-F3-04, BR-F3-13)
@@ -875,6 +903,8 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F8.7.1-04a `ClassApiIntegrationTest#recurringOverlapUsesActualWeekdaysNotJustIntersectingDateRanges`
     - AC-F8.7.1-05 Sửa hoặc ngừng lịch không đổi buổi đã sinh (BR-F8.7-02, BR-F8.7-04)
       - TC-F8.7.1-05a `ClassApiIntegrationTest#scheduleGenerationIsIdempotentSnapshotsAndDeactivationPreserveSessions`
+      - TC-F8.7.1-05b `ClassApiIntegrationTest#calendarsPreserveGeneratedClassTypeAfterScheduleEdit`
+      - TC-F8.7.1-05c `ClassSessionTypeMigrationIntegrationTest#migrationBackfillsExistingSessionsAndAcceptsInsertsFromPreviousBackend`
     - AC-F8.7.1-06 Giảm sức chứa đúng biên (BR-F8.7-02, BR-F8.1-03) ❌ chưa có TC
     - AC-F8.7.1-07 Buổi không cho sửa sức chứa (BR-F8.7-02) ❌ chưa có TC
     - AC-F8.7.1-08 Quyền lịch lặp và buổi riêng lẻ (BR-F8-04)
@@ -1044,6 +1074,15 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F2.1.1-02i | AC-F2.1.1-02 | US-F2.1.1 | UC-F2.1 | BR-F2-06, BR-F2-05, BR-F2-07, BR-F2-10 | `features/members/components/MemberFormModal.test.tsx › TC-F2.1.1-02i: giữ form và dữ liệu đã nhập khi server từ chố` |
 | TC-F2.1.1-03a | AC-F2.1.1-03 | US-F2.1.1 | UC-F2.1 | BR-F2-10, BR-F2-05, BR-F2-06, BR-F2-07 | `F1RegistrationIntegrationTest#realReceptionistJwtWithoutStaffAssignmentCannotCreateOrListMembers` |
 | TC-F2.1.1-03b | AC-F2.1.1-03 | US-F2.1.1 | UC-F2.1 | BR-F2-10, BR-F2-05, BR-F2-06, BR-F2-07 | `MemberApiIntegrationTest#validatesEndpointAndRecordPermissions` |
+| TC-F2.2.1-01a | AC-F2.2.1-01 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-01a: tạo tài khoản thành công báo đã gửi email, tả` |
+| TC-F2.2.1-01b | AC-F2.2.1-01 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/pages/MembersPage.test.tsx › TC-F2.2.1-01b: chỉ tạo tài khoản cho hồ sơ ACTIVE chưa có em` |
+| TC-F2.2.1-03a | AC-F2.2.1-03 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03a, TC-F2.2.1-05a: hồ sơ đã có tài khoản hiện ema` |
+| TC-F2.2.1-03b | AC-F2.2.1-03 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03b, TC-F2.2.1-04a, TC-F2.2.1-05b, TC-F2.2.1-07c: ` |
+| TC-F2.2.1-04a | AC-F2.2.1-04 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03b, TC-F2.2.1-04a, TC-F2.2.1-05b, TC-F2.2.1-07c: ` |
+| TC-F2.2.1-05a | AC-F2.2.1-05 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03a, TC-F2.2.1-05a: hồ sơ đã có tài khoản hiện ema` |
+| TC-F2.2.1-05b | AC-F2.2.1-05 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03b, TC-F2.2.1-04a, TC-F2.2.1-05b, TC-F2.2.1-07c: ` |
+| TC-F2.2.1-07b | AC-F2.2.1-07 | US-F2.2.1 | UC-F2.2 | BR-F2-10, BR-F2-11, BR-F2-06, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-07b: kiểm tra định dạng email ở trình duyệt trước ` |
+| TC-F2.2.1-07c | AC-F2.2.1-07 | US-F2.2.1 | UC-F2.2 | BR-F2-10, BR-F2-11, BR-F2-06, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03b, TC-F2.2.1-04a, TC-F2.2.1-05b, TC-F2.2.1-07c: ` |
 | TC-F2.3.1-01a | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `F1RegistrationIntegrationTest#listGetsBatchEmailsThroughRealF1AndIncludesUnlinkedProfile` |
 | TC-F2.3.1-01b | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#searchScopesBothRowsAndCountAndIncludesUnlinkedProfiles` |
 | TC-F2.3.1-01c | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#memberCodeSearchIsExactAndIgnoresCase` |
@@ -1089,23 +1128,29 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F2.4.2-01b | AC-F2.4.2-01 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#smallTransparentImagesKeepDimensions` |
 | TC-F2.4.2-01c | AC-F2.4.2-01 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#acceptsDimensionBoundary` |
 | TC-F2.4.2-01d | AC-F2.4.2-01 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#acceptsUploadSizeBoundary` |
+| TC-F2.4.2-01e | AC-F2.4.2-01 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `features/members/components/MemberFormModal.test.tsx › TC-F2.4.2-01e: chọn ảnh JPEG/PNG hợp lệ gọi API tải lên và t` |
 | TC-F2.4.2-02a | AC-F2.4.2-02 | US-F2.4.2 | UC-F2.4 | BR-F2-03, BR-F2-01, BR-F2-02, BR-F2-04 | `MemberAvatarIntegrationTest#overwritesSameRow` |
 | TC-F2.4.2-02b | AC-F2.4.2-02 | US-F2.4.2 | UC-F2.4 | BR-F2-03, BR-F2-01, BR-F2-02, BR-F2-04 | `MemberAvatarIntegrationTest#concurrentInitialUploadsAreSerialized` |
 | TC-F2.4.2-02c | AC-F2.4.2-02 | US-F2.4.2 | UC-F2.4 | BR-F2-03, BR-F2-01, BR-F2-02, BR-F2-04 | `MemberAvatarIntegrationTest#invalidFilesDoNotReplaceExistingAvatar` |
 | TC-F2.4.2-03a | AC-F2.4.2-03 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#invalidFilesDoNotReplaceExistingAvatar` |
 | TC-F2.4.2-03b | AC-F2.4.2-03 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#servletRejectsOversizedMultipart` |
+| TC-F2.4.2-03c | AC-F2.4.2-03 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `features/members/components/MemberFormModal.test.tsx › TC-F2.4.2-03c: báo lỗi sớm với file sai định dạng hoặc vượt ` |
+| TC-F2.4.2-03d | AC-F2.4.2-03 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `features/members/components/MemberFormModal.test.tsx › TC-F2.4.2-03d: lỗi 400 từ API hiển thị đúng câu errors.file ` |
 | TC-F2.4.2-04a | AC-F2.4.2-04 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#authorizedReadersReceiveStoredJpeg` |
 | TC-F2.4.2-04b | AC-F2.4.2-04 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#otherReadersCannotSeeAvatar` |
 | TC-F2.4.2-05a | AC-F2.4.2-05 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#ownerMayUploadAcrossBranches` |
 | TC-F2.4.2-05b | AC-F2.4.2-05 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#deniedWritersDoNotMutateAvatar` |
 | TC-F2.4.2-05c | AC-F2.4.2-05 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#inactiveAssignmentsAreDenied` |
+| TC-F2.4.2-05d | AC-F2.4.2-05 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `features/members/components/MemberFormModal.test.tsx › TC-F2.4.2-05d: hội viên không thấy nút đổi ảnh` |
 | TC-F2.4.2-06a | AC-F2.4.2-06 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#missingAvatarIsNotFound` |
 | TC-F2.4.2-06b | AC-F2.4.2-06 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#missingOrDeletedProfilesAreNotFound` |
 | TC-F2.4.2-07a | AC-F2.4.2-07 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#unauthenticatedRequestsAreDenied` |
 | TC-F2.4.2-07b | AC-F2.4.2-07 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#invalidIdsAreRejected` |
 | TC-F2.4.2-07c | AC-F2.4.2-07 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#missingMultipartFileIsRejected` |
 | TC-F2.4.2-08a | AC-F2.4.2-08 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#newProfileHasNoAvatar` |
+| TC-F2.4.2-08a | AC-F2.4.2-08 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `features/members/components/MemberAvatar.test.tsx › TC-F2.4.2-08a: hiện chữ cái đầu của tên khi hasAvatar là fal` |
 | TC-F2.4.2-08b | AC-F2.4.2-08 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#profileResponsesReflectAvatarPresence` |
+| TC-F2.4.2-08b | AC-F2.4.2-08 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `features/members/components/MemberFormModal.test.tsx › TC-F2.4.2-08b: mở hồ sơ chưa có ảnh thì hiện chữ cái đầu và ` |
 | TC-F3.1.1-01a | AC-F3.1.1-01 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#scopesRowsAndCountAndIgnoresClientBranch` |
 | TC-F3.1.1-02a | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#defaultActiveAndOrderingMatchContract` |
 | TC-F3.1.1-02b | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#inactiveFilterAndEmptyResults` |
@@ -1113,6 +1158,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.1.1-02d | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageControllerTest#defaultContract` |
 | TC-F3.1.1-02e | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `features/packages/pages/PackagesPage.test.tsx › TC-F3.1.1-02e: mặc định lấy gói đang bán; chọn loại PT giữ n` |
 | TC-F3.1.1-02f | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `features/packages/api/packages.test.ts › TC-F3.1.1-02f: gửi bộ lọc và phân trang đúng endpoint đã đặc` |
+| TC-F3.1.1-03a | AC-F3.1.1-03 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `features/packages/pages/PackagesPage.test.tsx › TC-F3.1.1-03a: Chỉ quản lý chi nhánh thấy nút thêm, sửa, ngừ` |
 | TC-F3.1.1-04a | AC-F3.1.1-04 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#ownerSeesOtherBranchesWithoutStaff` |
 | TC-F3.1.1-04b | AC-F3.1.1-04 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogServiceTest#ownerDoesNotRequireStaffAssignment` |
 | TC-F3.1.1-05a | AC-F3.1.1-05 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#inactiveOrMissingStaffIsForbidden` |
@@ -1131,33 +1177,50 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.1.2-05a | AC-F3.1.2-05 | US-F3.1.2 | UC-F3.1 | BR-F3-01 | `features/packages/pages/PublicPricingPage.test.tsx › TC-F3.1.2-05a: lỗi tải thì báo lỗi, không hiện giá; bấm Thử ` |
 | TC-F3.1.2-06a | AC-F3.1.2-06 | US-F3.1.2 | UC-F3.1 | BR-F3-01 | `PublicPackageIntegrationTest#inactiveDefaultBranchReturnsEmptyList` |
 | TC-F3.2.1-01a | AC-F3.2.1-01 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCreateIntegrationTest#createsAllTypesWithServerBranchAuditAndReadVisibility` |
+| TC-F3.2.1-01b | AC-F3.2.1-01 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `features/packages/components/PackageFormModal.test.tsx › TC-F3.2.1-01b: Thêm gói TIME hợp lệ gửi đúng DTO không chứa ` |
+| TC-F3.2.1-01c | AC-F3.2.1-01 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `features/packages/pages/PackagesPage.test.tsx › TC-F3.2.1-01c: Tạo gói mới từ trang danh mục đóng hộp thoại ` |
+| TC-F3.2.1-01d | AC-F3.2.1-01 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `features/packages/components/PackageFormModal.test.tsx › TC-F3.2.1-01d: Thêm gói SESSION hợp lệ gửi đúng DTO có số bu` |
+| TC-F3.2.1-01e | AC-F3.2.1-01 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `features/packages/components/PackageFormModal.test.tsx › TC-F3.2.1-01e: Thêm gói PT hợp lệ gửi đúng DTO có số buổi và` |
 | TC-F3.2.1-02a | AC-F3.2.1-02 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCreateIntegrationTest#sessionsAreRequiredAndPositive` |
+| TC-F3.2.1-02b | AC-F3.2.1-02 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `features/packages/components/PackageFormModal.test.tsx › TC-F3.2.1-02b: Gói TIME ẩn ô số buổi và không gửi sessionCou` |
 | TC-F3.2.1-03a | AC-F3.2.1-03 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCreateIntegrationTest#invalidInputsReturnFieldErrorsWithoutWrites` |
 | TC-F3.2.1-03b | AC-F3.2.1-03 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCreateIntegrationTest#missingFieldsMalformedJsonAndLengthLimitsAreRejected` |
 | TC-F3.2.1-03c | AC-F3.2.1-03 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCreateIntegrationTest#acceptsZeroPriceAndMaximumLengthsAndIntegers` |
+| TC-F3.2.1-03d | AC-F3.2.1-03 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `features/packages/components/PackageFormModal.test.tsx › TC-F3.2.1-03d: Kiểm tra đầu vào, cho phép giá 0 đồng và gán ` |
 | TC-F3.2.1-04a | AC-F3.2.1-04 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCreateIntegrationTest#rejectsServerManagedAndUnknownFields` |
 | TC-F3.2.1-05a | AC-F3.2.1-05 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCreateIntegrationTest#duplicateInactiveGlobalCodeIsConflict` |
 | TC-F3.2.1-05b | AC-F3.2.1-05 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCreateIntegrationTest#concurrentDuplicateCodeCreatesOneAndRollsBackOther` |
+| TC-F3.2.1-05c | AC-F3.2.1-05 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `features/packages/components/PackageFormModal.test.tsx › TC-F3.2.1-05c: Lỗi 409 trùng mã gói hiển thị thông báo tiếng` |
 | TC-F3.2.1-06a | AC-F3.2.1-06 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCreateIntegrationTest#onlyManagerCanCreate` |
 | TC-F3.2.1-06b | AC-F3.2.1-06 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `PackageCreateIntegrationTest#missingTokenOrInactiveStaffCannotCreate` |
+| TC-F3.2.1-06d | AC-F3.2.1-06 | US-F3.2.1 | UC-F3.2 | BR-F3-02, BR-F3-03, BR-F3-04 | `features/packages/components/PackageFormModal.test.tsx › TC-F3.2.1-06d: Lỗi 403 khi tạo gói hiển thị thông báo tiếng ` |
 | TC-F3.3.1-01a | AC-F3.3.1-01 | US-F3.3.1 | UC-F3.3 | BR-F3-06, BR-F3-05, BR-F3-07 | `PackageUpdateIntegrationTest#priceOnlyKeepsOmittedFieldsAndAudit` |
 | TC-F3.3.1-01b | AC-F3.3.1-01 | US-F3.3.1 | UC-F3.3 | BR-F3-06, BR-F3-05, BR-F3-07 | `PackageUpdateIntegrationTest#historyIncludingPendingPurchaseRemainsIdentical` |
+| TC-F3.3.1-01c | AC-F3.3.1-01 | US-F3.3.1 | UC-F3.3 | BR-F3-06, BR-F3-05, BR-F3-07 | `features/packages/components/PackageFormModal.test.tsx › TC-F3.3.1-01c, TC-F3.3.1-04c: Sửa gói giữ nguyên và không gử` |
 | TC-F3.3.1-02a | AC-F3.3.1-02 | US-F3.3.1 | UC-F3.3 | BR-F3-07, BR-F3-05, BR-F3-06 | `PackageUpdateIntegrationTest#outsideBranchAndGlobalAre403WithoutMutation` |
 | TC-F3.3.1-03a | AC-F3.3.1-03 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `PackageUpdateIntegrationTest#explicitNullClearsDescriptionAndEmptyBodyDoesNotChangeAudit` |
+| TC-F3.3.1-03b | AC-F3.3.1-03 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `features/packages/components/PackageFormModal.test.tsx › TC-F3.3.1-03b: Xóa trống mô tả khi sửa gửi description là nu` |
 | TC-F3.3.1-04a | AC-F3.3.1-04 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-02, BR-F3-06, BR-F3-07 | `PackageUpdateIntegrationTest#refusesImmutableAndUnknownFields` |
 | TC-F3.3.1-04b | AC-F3.3.1-04 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-02, BR-F3-06, BR-F3-07 | `PackageUpdateIntegrationTest#sessionsMergeWithExistingTypeAndCannotBeCleared` |
+| TC-F3.3.1-04c | AC-F3.3.1-04 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-02, BR-F3-06, BR-F3-07 | `features/packages/components/PackageFormModal.test.tsx › TC-F3.3.1-01c, TC-F3.3.1-04c: Sửa gói giữ nguyên và không gử` |
 | TC-F3.3.1-05a | AC-F3.3.1-05 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `PackageUpdateIntegrationTest#invalidUpdateIsAtomicAndReturnsFieldError` |
 | TC-F3.3.1-05b | AC-F3.3.1-05 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `PackageUpdateIntegrationTest#invalidIdIsBadRequest` |
 | TC-F3.3.1-05c | AC-F3.3.1-05 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `PackageUpdateIntegrationTest#malformedBodyIsRejected` |
+| TC-F3.3.1-05d | AC-F3.3.1-05 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `features/packages/components/PackageFormModal.test.tsx › TC-F3.3.1-05d, TC-F3.3.1-07b: Lỗi 400 theo trường hoặc 404 k` |
 | TC-F3.3.1-06a | AC-F3.3.1-06 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `PackageUpdateIntegrationTest#acceptsBoundariesAndCanEditInactiveWithoutReactivation` |
+| TC-F3.3.1-06b | AC-F3.3.1-06 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `features/packages/pages/PackagesPage.test.tsx › TC-F3.3.1-06b: Gói ngừng bán vẫn hiện nút Sửa cho quản lý ch` |
 | TC-F3.3.1-07a | AC-F3.3.1-07 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `PackageUpdateIntegrationTest#missingPackageIs404WithoutMutation` |
+| TC-F3.3.1-07b | AC-F3.3.1-07 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `features/packages/components/PackageFormModal.test.tsx › TC-F3.3.1-05d, TC-F3.3.1-07b: Lỗi 400 theo trường hoặc 404 k` |
 | TC-F3.3.1-08a | AC-F3.3.1-08 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `PackageUpdateIntegrationTest#deniedRolesCannotUpdate` |
 | TC-F3.3.1-08b | AC-F3.3.1-08 | US-F3.3.1 | UC-F3.3 | BR-F3-05, BR-F3-06, BR-F3-07 | `PackageUpdateIntegrationTest#noTokenOrInactiveMissingStaffCannotUpdate` |
 | TC-F3.4.1-01a | AC-F3.4.1-01 | US-F3.4.1 | UC-F3.4 | BR-F3-08, BR-F3-07, BR-F3-09 | `PackageDeactivateIntegrationTest#deactivatesWithNoBodyOrEmptyJsonWithoutChangingOtherFields` |
+| TC-F3.4.1-01b | AC-F3.4.1-01 | US-F3.4.1 | UC-F3.4 | BR-F3-08, BR-F3-07, BR-F3-09 | `features/packages/pages/PackagesPage.test.tsx › TC-F3.4.1-01b, TC-F3.4.1-03b: Xác nhận ngừng bán gói ACTIVE ` |
 | TC-F3.4.1-02a | AC-F3.4.1-02 | US-F3.4.1 | UC-F3.4 | BR-F3-08, BR-F3-07, BR-F3-09 | `PackageDeactivateIntegrationTest#preservesAllHistoricalRows` |
 | TC-F3.4.1-03a | AC-F3.4.1-03 | US-F3.4.1 | UC-F3.4 | BR-F3-09, BR-F3-07, BR-F3-08 | `PackageCatalogIntegrationTest#inactiveFilterAndEmptyResults` |
+| TC-F3.4.1-03b | AC-F3.4.1-03 | US-F3.4.1 | UC-F3.4 | BR-F3-09, BR-F3-07, BR-F3-08 | `features/packages/pages/PackagesPage.test.tsx › TC-F3.4.1-01b, TC-F3.4.1-03b: Xác nhận ngừng bán gói ACTIVE ` |
 | TC-F3.4.1-04a | AC-F3.4.1-04 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#repeatIs422WithoutFurtherAuditChange` |
 | TC-F3.4.1-04b | AC-F3.4.1-04 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#simultaneousDeactivationHasOneSuccessAndOne422` |
+| TC-F3.4.1-04c | AC-F3.4.1-04 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `features/packages/pages/PackagesPage.test.tsx › TC-F3.4.1-04c, TC-F3.4.1-06h: Lỗi 422, 403, 404 khi ngừng bá` |
 | TC-F3.4.1-05a | AC-F3.4.1-05 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#concurrentEditCannotReactivatePackage` |
 | TC-F3.4.1-06a | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#outsideBranchAndGlobalAre403EvenIfAlreadyInactive` |
 | TC-F3.4.1-06b | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#deniedRolesCannotDeactivate` |
@@ -1165,6 +1228,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.4.1-06d | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#missingAndBadTokenAre401` |
 | TC-F3.4.1-06e | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#inactiveAndMissingStaffAre403` |
 | TC-F3.4.1-06f | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `PackageDeactivateIntegrationTest#missingPackageIs404WithEmptyJsonBodyWithoutMutation` |
+| TC-F3.4.1-06h | AC-F3.4.1-06 | US-F3.4.1 | UC-F3.4 | BR-F3-07, BR-F3-08, BR-F3-09 | `features/packages/pages/PackagesPage.test.tsx › TC-F3.4.1-04c, TC-F3.4.1-06h: Lỗi 422, 403, 404 khi ngừng bá` |
 | TC-F3.5.1-01a | AC-F3.5.1-01 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-13, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-14 | `InvoiceSaleIntegrationTest#sellCreatesPendingInvoiceAndMembershipWithServerPrice` |
 | TC-F3.5.1-01b | AC-F3.5.1-01 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-13, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-14 | `InvoiceSaleIntegrationTest#sessionPackageCopiesSessionCount` |
 | TC-F3.5.1-01c | AC-F3.5.1-01 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-13, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-14 | `InvoiceSaleIntegrationTest#membershipFailureRollsBackEntireSale` |
@@ -1284,6 +1348,8 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F8.7.1-03c | AC-F8.7.1-03 | US-F8.7.1 | UC-F8.7 | BR-F8.7-06, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#scheduleRejectsConcreteRoomTrainerAndPtConflicts` |
 | TC-F8.7.1-04a | AC-F8.7.1-04 | US-F8.7.1 | UC-F8.7 | BR-F8.7-06, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#recurringOverlapUsesActualWeekdaysNotJustIntersectingDateRanges` |
 | TC-F8.7.1-05a | AC-F8.7.1-05 | US-F8.7.1 | UC-F8.7 | BR-F8.7-02, BR-F8.7-04, BR-F8.7-01, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#scheduleGenerationIsIdempotentSnapshotsAndDeactivationPreserveSessions` |
+| TC-F8.7.1-05b | AC-F8.7.1-05 | US-F8.7.1 | UC-F8.7 | BR-F8.7-02, BR-F8.7-04, BR-F8.7-01, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#calendarsPreserveGeneratedClassTypeAfterScheduleEdit` |
+| TC-F8.7.1-05c | AC-F8.7.1-05 | US-F8.7.1 | UC-F8.7 | BR-F8.7-02, BR-F8.7-04, BR-F8.7-01, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassSessionTypeMigrationIntegrationTest#migrationBackfillsExistingSessionsAndAcceptsInsertsFromPreviousBackend` |
 | TC-F8.7.1-08a | AC-F8.7.1-08 | US-F8.7.1 | UC-F8.7 | BR-F8-04, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings` |
 | TC-F8.7.1-08b | AC-F8.7.1-08 | US-F8.7.1 | UC-F8.7 | BR-F8-04, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#scheduleApiDistinguishesMissingOutOfScopeAndIneligibleResources` |
 | TC-F8.7.1-08c | AC-F8.7.1-08 | US-F8.7.1 | UC-F8.7 | BR-F8-04, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot` |
@@ -1301,7 +1367,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 
 ## 6. Kiểm thử chưa mang mã TC
 
-Có 170 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
+Có 176 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
 
 | File | Số kiểm thử |
 | --- | --- |
@@ -1340,9 +1406,11 @@ Có 170 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `frontend/src/features/auth/api/validation.test.ts` | 1 |
 | `frontend/src/features/auth/pages/LoginPage.test.tsx` | 5 |
 | `frontend/src/features/auth/pages/RegisterPage.test.tsx` | 1 |
-| `frontend/src/features/members/api/members.test.ts` | 4 |
+| `frontend/src/features/members/api/members.test.ts` | 6 |
+| `frontend/src/features/members/components/MemberAvatar.test.tsx` | 2 |
+| `frontend/src/features/members/components/MemberFormModal.test.tsx` | 1 |
 | `frontend/src/features/members/pages/MembersPage.test.tsx` | 4 |
-| `frontend/src/features/packages/api/packages.test.ts` | 1 |
+| `frontend/src/features/packages/api/packages.test.ts` | 2 |
 | `frontend/src/features/packages/pages/SellPackagePage.test.tsx` | 3 |
 | `frontend/src/features/shared/use-remote-query.test.ts` | 2 |
 | `frontend/src/layouts/member-menu.test.ts` | 2 |

@@ -374,6 +374,47 @@ class ClassApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F8.7.1-05b: Ba lịch giữ loại lớp và chỗ đặt của buổi đã sinh")
+    void calendarsPreserveGeneratedClassTypeAfterScheduleEdit() throws Exception {
+        LocalDate firstDay = NOW.toLocalDate().plusDays(6);
+        LocalDate nextDay = firstDay.plusWeeks(1);
+        var schedule = schedules.save(manager(), null, request(2, firstDay, nextDay));
+        assertThat(schedules.generate(schedule.id(), firstDay, firstDay)).isEqualTo(1);
+        long firstId = jdbc.queryForObject("SELECT id FROM class_sessions WHERE class_schedule_id=? AND occurrence_date=?",
+            Long.class, schedule.id(), firstDay);
+        long bookingId = bookings.book(actor(), firstId, member).id();
+
+        long zumba = jdbc.queryForObject("INSERT INTO class_types(name) VALUES ('Zumba') RETURNING id", Long.class);
+        schedules.save(manager(), schedule.id(), new ScheduleRequest(zumba, trainer, room, 2,
+            LocalTime.of(13, 0), LocalTime.of(14, 0), 5, firstDay, nextDay));
+        assertThat(schedules.generate(schedule.id(), firstDay, nextDay)).isEqualTo(1);
+        long nextId = jdbc.queryForObject("SELECT id FROM class_sessions WHERE class_schedule_id=? AND occurrence_date=?",
+            Long.class, schedule.id(), nextDay);
+
+        mvc.perform(get("/api/v1/public/class-sessions").param("branchId", String.valueOf(branch))
+            .param("from", firstDay.toString()).param("to", nextDay.toString()))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2))
+            .andExpect(jsonPath("$[0].id").value(firstId)).andExpect(jsonPath("$[0].className").value("Yoga"))
+            .andExpect(jsonPath("$[1].id").value(nextId)).andExpect(jsonPath("$[1].className").value("Zumba"));
+        mvc.perform(get("/api/v1/members/me/class-sessions").header("Authorization", bearer(user, "MEMBER"))
+            .param("from", firstDay.toString()).param("to", nextDay.toString()))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.sessions.length()").value(2))
+            .andExpect(jsonPath("$.sessions[0].id").value(firstId))
+            .andExpect(jsonPath("$.sessions[0].className").value("Yoga"))
+            .andExpect(jsonPath("$.sessions[0].bookingId").value(bookingId))
+            .andExpect(jsonPath("$.sessions[0].bookingStatus").value("BOOKED"))
+            .andExpect(jsonPath("$.sessions[0].remaining").value(9))
+            .andExpect(jsonPath("$.sessions[1].id").value(nextId))
+            .andExpect(jsonPath("$.sessions[1].className").value("Zumba"))
+            .andExpect(jsonPath("$.sessions[1].remaining").value(5));
+        mvc.perform(get("/api/v1/trainers/me/class-sessions").header("Authorization", bearer(trainerUser, "TRAINER"))
+            .param("from", firstDay.toString()).param("to", nextDay.toString()))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2))
+            .andExpect(jsonPath("$[0].id").value(firstId)).andExpect(jsonPath("$[0].className").value("Yoga"))
+            .andExpect(jsonPath("$[1].id").value(nextId)).andExpect(jsonPath("$[1].className").value("Zumba"));
+    }
+
+    @Test
     @DisplayName("TC-F8.8.1-03a: Không sinh trước ngày hiệu lực, sau hạn hoặc khi lịch ngừng")
     void generationSkipsInactiveAndOutOfValidityDates() {
         LocalDate validDay = NOW.toLocalDate().plusWeeks(1);
