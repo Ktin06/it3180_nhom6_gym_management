@@ -52,8 +52,7 @@ export const STAFF_MENU: StaffMenuItem[] = [
     path: '/checkins',
     label: 'Check-in (F4)',
     icon: <LoginOutlined />,
-    roles: ['RECEPTIONIST'],
-    ready: false,
+    ready: true,
   },
   {
     path: '/invoices',
@@ -62,12 +61,12 @@ export const STAFF_MENU: StaffMenuItem[] = [
     roles: ['BRANCH_MANAGER', 'RECEPTIONIST'],
     ready: false,
   },
+  // S2-12.2: giao diện dashboard cơ bản (F6)
   {
     path: '/dashboard',
     label: 'Dashboard (F6)',
     icon: <BarChartOutlined />,
-    roles: ['SUPER_ADMIN', 'BRANCH_MANAGER'],
-    ready: false,
+    ready: true,
   },
   {
     path: '/classes',

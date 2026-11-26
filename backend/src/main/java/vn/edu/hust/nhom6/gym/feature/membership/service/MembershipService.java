@@ -10,8 +10,11 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
+import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.common.time.VnTime;
 import vn.edu.hust.nhom6.gym.feature.member.service.MemberService;
@@ -34,6 +37,12 @@ import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.PackageType;
 public class MembershipService {
     static final String WAITING_EXISTS =
         "Hội viên đã có gói cùng loại đang chờ thanh toán hoặc chờ kích hoạt. Không thể tạo thêm gói mới.";
+    /** SRS F4 UC-F4.2 E6. */
+    public static final String CHECKIN_CONFLICT =
+        "Dữ liệu lượt check-in đang được xử lý đồng thời bởi một thao tác khác. Vui lòng thử lại.";
+    /** SRS F4 UC-F4.2 E4. */
+    public static final String SESSIONS_USED_UP =
+        "Gói tập theo buổi của hội viên đã hết lượt sử dụng. Vui lòng gia hạn thêm gói mới.";
     /** SRS F5 UC-F5.2 E6b. */
     static final String UPCOMING_EXISTS = "Hội viên đã có gói cùng loại đang chờ kích hoạt (UPCOMING). Không thể "
         + "kích hoạt thêm gói này. Vui lòng liên hệ quản lý để kiểm tra hoặc hoàn tiền hóa đơn.";
@@ -49,6 +58,7 @@ public class MembershipService {
     private final MembershipRepository memberships;
     private final MemberService members;
     private final VnTime time;
+    private final EntityManager entities;
 
     // ---------------------------------------------------------------------------------------------
     // S2-07.1: tạo gói PENDING khi lập hóa đơn bán gói
@@ -170,6 +180,63 @@ public class MembershipService {
             m.cancelPending();
             memberships.saveAndFlush(m);
         });
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // S2-11.1: trừ buổi khi check-in tại quầy (UC-F4.2 bước 5, BR-F4.3, BR-F4.7)
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Trừ một buổi của gói SESSION khi check-in lần đầu trong ngày. Khóa dòng gói ({@code FOR UPDATE}) và nạp lại số
+     * buổi, trạng thái. Về 0 thì gói vẫn ACTIVE đến hết ngày, và các gói UPCOMING cùng hội viên, cùng loại, cùng
+     * phạm vi chi nhánh được dời sớm {@code D} ngày để gói sớm nhất bắt đầu từ ngày mai (BR-F4.7; {@code D <= 0} thì giữ nguyên).
+     *
+     * <p>Nơi gọi <b>phải đã khóa</b> {@code members} (thứ tự members → memberships → class_bookings) và tự kiểm tra
+     * "hôm nay đã trừ chưa" (bảng {@code checkins} thuộc F4). Ghi bằng {@code saveAndFlush}, nên lỗi {@code @Version}
+     * lộ ra ngay tại đây; nơi gọi đổi thành 409 (E6).
+     *
+     * @param today ngày Việt Nam của lượt check-in
+     * @return gói sau khi trừ
+     * @throws BusinessRuleException (422) gói đã hết buổi (E4)
+     * @throws ConflictException (409) gói vừa bị thao tác khác đổi khỏi ACTIVE (E6), lễ tân bấm lại để chọn lại gói
+     */
+    @Transactional
+    public Membership deductSessionForCheckin(Long membershipId, LocalDate today) {
+        Membership membership = memberships.findById(membershipId)
+            .orElseThrow(() -> new IllegalStateException("Không có gói " + membershipId));
+        // Nơi gọi thường đã nạp gói này (findUsable) trong cùng giao dịch; truy vấn khóa sẽ trả lại bản đã nạp mà không
+        // đọc lại cột. refresh kèm khóa vừa SELECT ... FOR UPDATE vừa nạp lại số buổi, trạng thái mới nhất.
+        entities.refresh(membership, LockModeType.PESSIMISTIC_WRITE);
+        if (membership.getPackageType() != PackageType.SESSION || membership.getStatus() != MembershipStatus.ACTIVE) {
+            throw new ConflictException(CHECKIN_CONFLICT);
+        }
+        if (membership.getRemainingSessions() == null || membership.getRemainingSessions() <= 0) {
+            throw new BusinessRuleException(SESSIONS_USED_UP);
+        }
+        membership.deductOneSession();
+        memberships.saveAndFlush(membership);
+        if (membership.getRemainingSessions() == 0) {
+            pullUpcomingToTomorrow(membership, today);
+        }
+        return membership;
+    }
+
+    /** BR-F4.7: dời mọi gói UPCOMING cùng nhóm sớm {@code D} ngày, giữ thứ tự nối tiếp và số ngày hiệu lực. */
+    private void pullUpcomingToTomorrow(Membership finished, LocalDate today) {
+        List<Membership> upcoming = memberships.findSameType(finished.getMemberId(), finished.getPackageType(),
+            finished.getBranchId(), EnumSet.of(MembershipStatus.UPCOMING));
+        LocalDate earliest = upcoming.stream().map(Membership::getStartDate).min(LocalDate::compareTo).orElse(null);
+        if (earliest == null) {
+            return;
+        }
+        long days = earliest.toEpochDay() - today.plusDays(1).toEpochDay();
+        if (days <= 0) {
+            return;
+        }
+        for (Membership next : upcoming) {
+            next.moveEarlier(days);
+            memberships.saveAndFlush(next);
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
