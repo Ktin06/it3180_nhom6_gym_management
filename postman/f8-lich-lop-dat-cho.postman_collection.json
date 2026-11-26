@@ -52,6 +52,42 @@
     {
       "key": "validTo",
       "value": ""
+    },
+    {
+      "key": "trainerAccessToken",
+      "value": ""
+    },
+    {
+      "key": "newRoomId",
+      "value": ""
+    },
+    {
+      "key": "newStartAt",
+      "value": ""
+    },
+    {
+      "key": "newEndAt",
+      "value": ""
+    },
+    {
+      "key": "attendanceSessionId",
+      "value": ""
+    },
+    {
+      "key": "attendanceBookingId",
+      "value": ""
+    },
+    {
+      "key": "attendanceUpdatedAt",
+      "value": ""
+    },
+    {
+      "key": "sessionToCancelId",
+      "value": ""
+    },
+    {
+      "key": "lockedMemberId",
+      "value": ""
     }
   ],
   "item": [
@@ -330,6 +366,200 @@
               "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
             ]
           }
+        }
+      ]
+    },
+    {
+      "name": "Đổi buổi, điểm danh và gỡ khóa",
+      "description": "Dùng ba buổi thử riêng. Buổi đổi giờ/phòng và buổi hủy phải chưa bắt đầu. Buổi điểm danh phải đã bắt đầu và trong ngày Việt Nam, với JWT của huấn luyện viên được phân công. Chạy GET điểm danh trước PUT để nạp bookingId và updatedAt.",
+      "item": [
+        {
+          "name": "Đổi giờ buổi tương lai",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/class-sessions/{{sessionId}}/time",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"startAt\":\"{{newStartAt}}\",\"endAt\":\"{{newEndAt}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Đổi phòng buổi tương lai",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/class-sessions/{{sessionId}}/room",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"roomId\":{{newRoomId}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hủy buổi riêng và trả chỗ",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerAccessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/class-sessions/{{sessionToCancelId}}/cancel"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Xem danh sách điểm danh",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{trainerAccessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/class-sessions/{{attendanceSessionId}}/attendance"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const row = pm.response.json().bookings.find(row => row.status === \"BOOKED\");",
+                  "if (row) {",
+                  "  pm.collectionVariables.set(\"attendanceBookingId\", String(row.bookingId));",
+                  "  pm.collectionVariables.set(\"attendanceUpdatedAt\", row.updatedAt);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Điểm danh có mặt",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{trainerAccessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/class-sessions/{{attendanceSessionId}}/attendance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingId\":{{attendanceBookingId}},\"status\":\"ATTENDED\",\"expectedUpdatedAt\":\"{{attendanceUpdatedAt}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Gỡ khóa đặt lớp",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerAccessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/members/{{lockedMemberId}}/class-booking-lock"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
         }
       ]
     }
