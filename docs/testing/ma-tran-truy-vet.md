@@ -8,17 +8,17 @@
 
 | Chức năng | UC | US | AC | AC đã có TC | AC chưa có TC | TC |
 | --- | --- | --- | --- | --- | --- | --- |
-| F1 | 6 | 6 | 29 | 0 | 29 | 0 |
-| F2 | 5 | 6 | 31 | 0 | 31 | 0 |
-| F3 | 5 | 6 | 45 | 43 | 2 | 112 |
-| F4 | 5 | 0 | 0 | 0 | 0 | 0 |
+| F1 | 6 | 6 | 29 | 24 | 5 | 118 |
+| F2 | 5 | 6 | 31 | 20 | 11 | 78 |
+| F3 | 5 | 6 | 45 | 43 | 2 | 117 |
+| F4 | 5 | 5 | 37 | 0 | 37 | 0 |
 | F5 | 5 | 5 | 49 | 37 | 12 | 65 |
-| F6 | 5 | 0 | 0 | 0 | 0 | 0 |
+| F6 | 5 | 5 | 16 | 0 | 16 | 0 |
 | F7 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F8 | 9 | 9 | 55 | 29 | 26 | 38 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **32** | **209** | **109** | **100** | **215** |
+| **Tổng** | **57** | **42** | **262** | **153** | **109** | **416** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -42,38 +42,11 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 
 | AC | Tên | US |
 | --- | --- | --- |
-| AC-F1.1.1-01 | Đăng ký thành công tạo đồng thời tài khoản và hồ sơ hội viên | US-F1.1.1 |
-| AC-F1.1.1-02 | Từ chối khi số điện thoại đã thuộc hồ sơ hội viên có sẵn | US-F1.1.1 |
-| AC-F1.1.1-03 | Từ chối khi email đã được sử dụng | US-F1.1.1 |
-| AC-F1.1.1-04 | Từ chối dữ liệu đầu vào sai định dạng | US-F1.1.1 |
-| AC-F1.1.1-05 | Hoàn tác toàn bộ giao dịch khi xảy ra lỗi giữa chừng hoặc chi nhánh mặc định ngừng hoạt động | US-F1.1.1 |
-| AC-F1.2.1-01 | Nhập sai mật khẩu từ lần 1 đến lần 4 trả 401 thông báo chung, tăng bộ đếm và không lộ email tồn tại | US-F1.2.1 |
-| AC-F1.2.1-02 | Nhập sai mật khẩu lần thứ 5 liên tiếp (kể cả gửi đồng thời) đặt bộ đếm bằng 5 và khóa tạm 15 phút | US-F1.2.1 |
-| AC-F1.2.1-03 | Từ chối mọi yêu cầu đăng nhập trong thời gian đang bị khóa tạm 15 phút, kể cả nhập đúng mật khẩu | US-F1.2.1 |
-| AC-F1.2.1-04 | Đăng nhập thành công hoặc hết thời gian khóa tạm | US-F1.2.1 |
-| AC-F1.2.1-05 | Từ chối tài khoản bị khóa hoặc ngừng hoạt động khi nhập đúng mật khẩu | US-F1.2.1 |
 | AC-F1.2.1-06 | Từ chối dữ liệu đăng nhập sai định dạng (không hỗ trợ đăng nhập bằng số điện thoại) | US-F1.2.1 |
-| AC-F1.3.1-01 | Xoay vòng refresh token và chặn dùng lại token cũ | US-F1.3.1 |
-| AC-F1.3.1-02 | Đăng xuất thu hồi refresh token và xóa cookie | US-F1.3.1 |
-| AC-F1.3.1-03 | Từ chối khi phiên không hợp lệ và xóa cookie | US-F1.3.1 |
-| AC-F1.3.1-04 | Đồng bộ làm mới phiên và đăng xuất giữa nhiều tab trình duyệt | US-F1.3.1 |
 | AC-F1.4.1-01 | Đổi mật khẩu thành công, thu hồi toàn bộ phiên và yêu cầu đăng nhập lại | US-F1.4.1 |
 | AC-F1.4.1-02 | Từ chối khi mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ | US-F1.4.1 |
 | AC-F1.4.1-03 | Từ chối khi dữ liệu đầu vào sai định dạng hoặc mật khẩu mới không đạt chuẩn bảo mật | US-F1.4.1 |
 | AC-F1.4.1-04 | Chặn truy cập khi chưa đăng nhập và mở đúng khung giao diện cho mọi vai trò đã đăng nhập | US-F1.4.1 |
-| AC-F1.5.1-01 | Yêu cầu quên mật khẩu cho tài khoản ACTIVE tạo token băm SHA-256 hạn 30 phút, gửi email và trả 200 câu chung | US-F1.5.1 |
-| AC-F1.5.1-02 | Không lộ email khi email không tồn tại, tài khoản không ACTIVE hoặc gửi email gặp lỗi | US-F1.5.1 |
-| AC-F1.5.1-03 | Đặt lại mật khẩu với token hợp lệ cập nhật mật khẩu, ghi used_at, mở khóa tạm và thu hồi toàn bộ refresh token | US-F1.5.1 |
-| AC-F1.5.1-04 | Từ chối token sai, hết hạn sau 30 phút, đã dùng (kể cả gửi đồng thời) hoặc tài khoản không ACTIVE với 422 | US-F1.5.1 |
-| AC-F1.5.1-05 | Từ chối dữ liệu đầu vào sai định dạng, thiếu token trên URL hoặc mật khẩu mới không đạt chuẩn S1 | US-F1.5.1 |
-| AC-F1.5.1-06 | Gửi email qua API HTTPS của Brevo khi có cấu hình khóa API và chỉ ghi log ở môi trường phát triển khi khóa rỗng | US-F1.5.1 |
-| AC-F1.6.1-01 | Chưa đăng nhập hoặc token không hợp lệ bị từ chối 401 tiếng Việt | US-F1.6.1 |
-| AC-F1.6.1-02 | Chặn API khi sai vai trò và cho phép khi đúng vai trò | US-F1.6.1 |
-| AC-F1.6.1-03 | Nhân viên chi nhánh phải gắn với chi nhánh đang hoạt động | US-F1.6.1 |
-| AC-F1.6.1-04 | Tài khoản ngừng hoạt động mất quyền và bị thu hồi phiên ngay | US-F1.6.1 |
-| AC-F2.1.1-01 | Tạo hồ sơ mới thành công, chuẩn hóa SĐT và tự sinh mã HV | US-F2.1.1 |
-| AC-F2.1.1-02 | Từ chối khi số điện thoại sai định dạng hoặc đã tồn tại (kể cả tạo đồng thời) | US-F2.1.1 |
-| AC-F2.1.1-03 | Chỉ lễ tân, quản lý chi nhánh (đã gắn chi nhánh) và chủ chuỗi được tạo hồ sơ | US-F2.1.1 |
 | AC-F2.2.1-01 | Tạo tài khoản và gửi email đặt mật khẩu hạn 72 giờ | US-F2.2.1 |
 | AC-F2.2.1-02 | Hội viên đặt mật khẩu lần đầu rồi đăng nhập; quá 72 giờ liên kết hết hạn | US-F2.2.1 |
 | AC-F2.2.1-03 | Từ chối khi hồ sơ đã có tài khoản | US-F2.2.1 |
@@ -81,29 +54,49 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F2.2.1-05 | Từ chối khi hồ sơ đang ngừng hoạt động | US-F2.2.1 |
 | AC-F2.2.1-06 | Gửi email gặp lỗi vẫn giữ tài khoản và ghi log không chứa token | US-F2.2.1 |
 | AC-F2.2.1-07 | Kiểm tra quyền theo vai trò, chi nhánh và dữ liệu đầu vào | US-F2.2.1 |
-| AC-F2.3.1-01 | Tìm kiếm, lọc, phân trang trong chi nhánh mình đạt hiệu năng dưới 2 giây | US-F2.3.1 |
-| AC-F2.3.1-02 | Chủ chuỗi tra cứu và xem chi tiết hồ sơ mọi chi nhánh | US-F2.3.1 |
-| AC-F2.3.1-03 | Xem chi tiết đúng phạm vi; ngoài phạm vi hoặc đã xóa mềm trả 404 | US-F2.3.1 |
-| AC-F2.3.1-04 | Huấn luyện viên chỉ xem chi tiết học viên PT của mình và không được gọi danh sách | US-F2.3.1 |
-| AC-F2.4.1-01 | Cập nhật thông tin hồ sơ trong chi nhánh và chuẩn hóa số điện thoại | US-F2.4.1 |
-| AC-F2.4.1-02 | Từ chối trùng số điện thoại, thiếu trạng thái hoặc hồ sơ ngoài phạm vi | US-F2.4.1 |
-| AC-F2.4.1-03 | Ngừng hoạt động hồ sơ đồng thời khóa tài khoản và thu hồi mọi phiên trong cùng giao dịch | US-F2.4.1 |
-| AC-F2.4.1-04 | Kích hoạt lại hồ sơ khôi phục tài khoản nhưng không khôi phục token cũ và không gỡ khóa tạm | US-F2.4.1 |
-| AC-F2.4.1-05 | Cập nhật trạng thái đồng thời luôn giữ hồ sơ và tài khoản khớp nhau | US-F2.4.1 |
-| AC-F2.4.2-01 | Tải và chuẩn hóa ảnh hợp lệ | US-F2.4.2 |
-| AC-F2.4.2-02 | Thay ảnh trên cùng bản ghi | US-F2.4.2 |
-| AC-F2.4.2-03 | Từ chối file không hợp lệ | US-F2.4.2 |
-| AC-F2.4.2-04 | Xem ảnh theo quyền hồ sơ | US-F2.4.2 |
-| AC-F2.4.2-05 | Chỉ nhân viên có quyền sửa mới đổi ảnh | US-F2.4.2 |
-| AC-F2.4.2-06 | Chưa có ảnh hoặc không có hồ sơ | US-F2.4.2 |
-| AC-F2.4.2-07 | Xác thực và kiểm tra request ảnh | US-F2.4.2 |
-| AC-F2.4.2-08 | Chưa có ảnh hoặc tải ảnh lỗi thì hiện chữ cái đầu của tên trên giao diện | US-F2.4.2 |
 | AC-F2.5.1-01 | Ghi chỉ số cơ thể thành công với ít nhất một chỉ số | US-F2.5.1 |
 | AC-F2.5.1-02 | Từ chối dữ liệu chỉ số cơ thể không hợp lệ | US-F2.5.1 |
 | AC-F2.5.1-03 | Xem lịch sử chỉ số cơ thể sắp xếp mới nhất trước | US-F2.5.1 |
 | AC-F2.5.1-04 | Phân quyền ghi và xem chỉ số cơ thể theo vai trò, chi nhánh và quan hệ PT | US-F2.5.1 |
 | AC-F3.1.1-03 | Lễ tân chỉ xem, không có thao tác quản lý trên giao diện | US-F3.1.1 |
 | AC-F3.5.1-09 | Hóa đơn tại quầy không tự hủy | US-F3.5.1 |
+| AC-F4.1.1-01 | Tìm theo mã hội viên hoặc số điện thoại | US-F4.1.1 |
+| AC-F4.1.1-02 | Hiển thị ảnh đại diện và thông tin lớp học sắp diễn ra | US-F4.1.1 |
+| AC-F4.1.1-03 | Từ khóa tìm kiếm sai định dạng | US-F4.1.1 |
+| AC-F4.1.1-04 | Không tìm thấy hội viên hoặc hội viên thuộc chi nhánh khác | US-F4.1.1 |
+| AC-F4.1.1-05 | Hồ sơ hội viên ngừng hoạt động | US-F4.1.1 |
+| AC-F4.1.1-06 | Phân quyền truy cập chức năng tra cứu | US-F4.1.1 |
+| AC-F4.2.1-01 | Check-in thành công với gói TIME | US-F4.2.1 |
+| AC-F4.2.1-02 | Xác định ngày check-in theo múi giờ Việt Nam | US-F4.2.1 |
+| AC-F4.2.1-03 | Gói SESSION trừ đúng một buổi mỗi ngày dương lịch | US-F4.2.1 |
+| AC-F4.2.1-04 | Ưu tiên gói TIME khi hội viên có cả TIME và SESSION | US-F4.2.1 |
+| AC-F4.2.1-05 | Buổi tập cuối của gói SESSION vẫn được tập không giới hạn hết ngày | US-F4.2.1 |
+| AC-F4.2.1-06 | Trừ buổi cuối kéo gói gia hạn UPCOMING về ngày mai | US-F4.2.1 |
+| AC-F4.2.1-07 | Check-in bằng gói PT đúng ngày có buổi tập hẹn trước | US-F4.2.1 |
+| AC-F4.2.1-08 | Ràng buộc biên của quy tắc check-in gói PT | US-F4.2.1 |
+| AC-F4.2.1-09 | Phạm vi hiệu lực của gói toàn chuỗi và gói riêng chi nhánh | US-F4.2.1 |
+| AC-F4.2.1-10 | Từ chối khi không có gói tập nào hợp lệ | US-F4.2.1 |
+| AC-F4.2.1-11 | Từ chối khi gói SESSION hết buổi và hôm nay chưa trừ buổi | US-F4.2.1 |
+| AC-F4.2.1-12 | Từ chối khi gói tập đang bảo lưu | US-F4.2.1 |
+| AC-F4.2.1-13 | Thứ tự ưu tiên thông báo lỗi khi có nhiều lý do vi phạm | US-F4.2.1 |
+| AC-F4.2.1-14 | Xử lý khi hội viên có nhiều gói SESSION cùng dùng được | US-F4.2.1 |
+| AC-F4.2.1-15 | Từ chối khi hồ sơ hội viên INACTIVE hoặc ngoài phạm vi | US-F4.2.1 |
+| AC-F4.2.1-16 | Kiểm tra giờ mở cửa phòng tập | US-F4.2.1 |
+| AC-F4.2.1-17 | Xử lý cạnh tranh khi hai lễ tân cùng check-in một hội viên | US-F4.2.1 |
+| AC-F4.2.1-18 | Kiểm tra tính hợp lệ của dữ liệu đầu vào và nhân viên thao tác | US-F4.2.1 |
+| AC-F4.3.1-01 | Ghi nhận thời điểm đến lớp trong khung giờ quy định | US-F4.3.1 |
+| AC-F4.3.1-02 | Không ghi nhận thời điểm đến khi ngoài khung giờ hoặc sai chi nhánh | US-F4.3.1 |
+| AC-F4.3.1-03 | Chỗ đặt lớp đã điểm danh hoặc kết thúc giữ nguyên trạng thái | US-F4.3.1 |
+| AC-F4.3.1-04 | Không ghi đè và không ghi nhận khi lượt check-in thất bại | US-F4.3.1 |
+| AC-F4.4.1-01 | Check-out thành công cho lượt tập đang diễn ra | US-F4.4.1 |
+| AC-F4.4.1-02 | Xử lý trường hợp hội viên có nhiều lượt check-in mở trong ngày | US-F4.4.1 |
+| AC-F4.4.1-03 | Từ chối khi không tìm thấy lượt tập đang mở hoặc khác chi nhánh | US-F4.4.1 |
+| AC-F4.4.1-04 | Xử lý xung đột đồng thời khi hai nhân viên cùng check-out một lượt | US-F4.4.1 |
+| AC-F4.4.1-05 | Phân quyền truy cập chức năng check-out | US-F4.4.1 |
+| AC-F4.5.1-01 | Mặc định hiển thị danh sách trong ngày hiện tại theo giờ Việt Nam | US-F4.5.1 |
+| AC-F4.5.1-02 | Đầy đủ thông tin chi tiết của từng lượt check-in | US-F4.5.1 |
+| AC-F4.5.1-03 | Lọc trạng thái, phương thức và tìm kiếm theo tên hoặc mã hội viên | US-F4.5.1 |
+| AC-F4.5.1-04 | Phân quyền và phạm vi dữ liệu theo chi nhánh | US-F4.5.1 |
 | AC-F5.5.1-01 | Hoàn toàn bộ hóa đơn có gói chưa dùng | US-F5.5.1 |
 | AC-F5.5.1-02 | Không làm thay đổi gói nối tiếp mua bằng hóa đơn khác | US-F5.5.1 |
 | AC-F5.5.1-03 | Chỉ Quản lý chi nhánh được hoàn tiền | US-F5.5.1 |
@@ -116,6 +109,22 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F5.5.1-10 | Gói PT có buổi đặt kể cả đã hủy không được hoàn | US-F5.5.1 |
 | AC-F5.5.1-11 | Chỗ lớp BOOKED chưa kết thúc chặn hoàn gói TIME | US-F5.5.1 |
 | AC-F5.5.1-12 | Lượt dùng gắn với gói khác không chặn hoàn gói chưa dùng | US-F5.5.1 |
+| AC-F6.1.1-01 | Đếm chính xác số hội viên duy nhất đang tập và tổng lượt check-in | US-F6.1.1 |
+| AC-F6.1.1-02 | Chủ chuỗi bắt buộc phải chọn chi nhánh cụ thể | US-F6.1.1 |
+| AC-F6.1.1-03 | Nhân viên chi nhánh chỉ xem số liệu chi nhánh mình | US-F6.1.1 |
+| AC-F6.1.1-04 | Phân quyền truy cập các chỉ số Dashboard | US-F6.1.1 |
+| AC-F6.1.1-05 | Chủ chuỗi xem số liệu của chi nhánh đã ngừng hoạt động | US-F6.1.1 |
+| AC-F6.2.1-01 | Biểu đồ thể hiện đầy đủ các khung giờ trong giờ mở cửa | US-F6.2.1 |
+| AC-F6.2.1-02 | Xử lý khung giờ với chi nhánh có giờ mở cửa lẻ | US-F6.2.1 |
+| AC-F6.3.1-01 | Doanh thu bao gồm cả khách lẻ và phân loại theo hình thức thanh toán | US-F6.3.1 |
+| AC-F6.4.1-01 | Lọc chính xác các gói hết hạn trong vòng 7 ngày tới | US-F6.4.1 |
+| AC-F6.4.1-02 | Cảnh báo gói SESSION sắp hết buổi theo cấu hình ngưỡng | US-F6.4.1 |
+| AC-F6.4.1-03 | Loại trừ hội viên đã mua gói gia hạn UPCOMING | US-F6.4.1 |
+| AC-F6.4.1-04 | Gói toàn chuỗi chỉ hiển thị cảnh báo tại chi nhánh gốc | US-F6.4.1 |
+| AC-F6.4.1-05 | Quy tắc sắp xếp, lý do cảnh báo, giới hạn phân trang và loại trừ hội viên xóa mềm | US-F6.4.1 |
+| AC-F6.4.1-06 | Thao tác Gia hạn nhanh trên giao diện | US-F6.4.1 |
+| AC-F6.5.1-01 | Danh sách các lượt check-in mới nhất trong ngày | US-F6.5.1 |
+| AC-F6.5.1-02 | Thao tác Check-out nhanh từ danh sách Live Feed | US-F6.5.1 |
 | AC-F8.0.1-01 | Xem lịch không cần đăng nhập | US-F8.0.1 |
 | AC-F8.0.1-02 | Lịch rỗng | US-F8.0.1 |
 | AC-F8.0.1-03 | Bộ lọc không hợp lệ | US-F8.0.1 |
@@ -148,26 +157,95 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 ### F1
 
 - **UC-F1.1** Khách tự đăng ký tài khoản hội viên
-  - **US-F1.1.1** Tự đăng ký tài khoản hội viên (#117)
-    - AC-F1.1.1-01 Đăng ký thành công tạo đồng thời tài khoản và hồ sơ hội viên (BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-09) ❌ chưa có TC
-    - AC-F1.1.1-02 Từ chối khi số điện thoại đã thuộc hồ sơ hội viên có sẵn (BR-F1-02) ❌ chưa có TC
-    - AC-F1.1.1-03 Từ chối khi email đã được sử dụng (BR-F1-01) ❌ chưa có TC
-    - AC-F1.1.1-04 Từ chối dữ liệu đầu vào sai định dạng (BR-F1-01, BR-F1-03) ❌ chưa có TC
-    - AC-F1.1.1-05 Hoàn tác toàn bộ giao dịch khi xảy ra lỗi giữa chừng hoặc chi nhánh mặc định ngừng hoạt động (BR-F1-09) ❌ chưa có TC
+  - **US-F1.1.1** Tự đăng ký tài khoản hội viên (#117) ✅ mọi AC có TC
+    - AC-F1.1.1-01 Đăng ký thành công tạo đồng thời tài khoản và hồ sơ hội viên (BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-09)
+      - TC-F1.1.1-01a `AuthControllerTest#dangKyThanhCongTra201KemCookieVaAccessToken`
+      - TC-F1.1.1-01b `AuthServiceTest#dangKyThanhCongTaoUserVaGoiMemberService`
+      - TC-F1.1.1-01c `F1RegistrationIntegrationTest#realF1RegistrationCreatesProfileAndJwtCanReadOwnF2Profile`
+      - TC-F1.1.1-01d `features/auth/pages/RegisterPage.test.tsx › TC-F1.1.1-01d: chuẩn hóa dữ liệu, giữ họ tên tiếng Việt và t`
+    - AC-F1.1.1-02 Từ chối khi số điện thoại đã thuộc hồ sơ hội viên có sẵn (BR-F1-02)
+      - TC-F1.1.1-02a `F1RegistrationIntegrationTest#phoneAlreadyInRealMembersTableRejectsRegistrationAndRollsBackUser`
+      - TC-F1.1.1-02b `MemberApiIntegrationTest#registrationPortJoinsCallerTransactionAndRollsBackOnDuplicate`
+      - TC-F1.1.1-02c `MemberServiceTest#concurrentDuplicatePhoneStillGetsFrontDeskGuidance`
+      - TC-F1.1.1-02d `features/auth/pages/RegisterPage.test.tsx › TC-F1.1.1-02d: lỗi 409 không có errors hiện chung, không suy`
+    - AC-F1.1.1-03 Từ chối khi email đã được sử dụng (BR-F1-01)
+      - TC-F1.1.1-03a `AuthServiceTest#dangKyEmailDaTonTaiNemConflictException`
+      - TC-F1.1.1-03b `MemberApiIntegrationTest#registrationPortJoinsCallerTransactionAndRollsBackOnDuplicate`
+      - TC-F1.1.1-03c `features/auth/pages/RegisterPage.test.tsx › TC-F1.1.1-03c: dùng tên trường lỗi thay vì suy từ câu báo lỗ`
+    - AC-F1.1.1-04 Từ chối dữ liệu đầu vào sai định dạng (BR-F1-01, BR-F1-03)
+      - TC-F1.1.1-04a `AuthControllerTest#dangKyThieuEmailTra400KemProblemDetailErrors`
+      - TC-F1.1.1-04b `AuthControllerTest#dangKyMatKhauThieuChuSoTra400TheoS1`
+      - TC-F1.1.1-04c `AuthControllerTest#dangKyMatKhauDaiHon72KyTuTra400ThayVi500`
+      - TC-F1.1.1-04d `AuthControllerTest#dangKyMatKhauCoDau50KyTuVuot72ByteTra400ThayVi422`
+      - TC-F1.1.1-04e `AuthControllerTest#dangKySoDienThoaiSaiDinhDangTra400`
+      - TC-F1.1.1-04f `AuthControllerTest#dangKyNgaySinhTuongLaiTra400`
+      - TC-F1.1.1-04g `AuthServiceTest#dangKySoDienThoaiSaiDinhDangNemBusinessRuleException`
+      - TC-F1.1.1-04h `AuthServiceTest#dangKyMatKhauVuotQua72ByteUtf8NemBusinessRuleException`
+      - TC-F1.1.1-04i `MemberApiIntegrationTest#directRegistrationUsesTheSameDtoConstraints`
+      - TC-F1.1.1-04j `features/auth/pages/RegisterPage.test.tsx › TC-F1.1.1-04j: không gửi dữ liệu khi số điện thoại hoặc mật `
+      - TC-F1.1.1-04k `features/auth/api/validation.test.ts › TC-F1.1.1-04k: khớp quy tắc chữ ASCII và số của backend, vẫn`
+      - TC-F1.1.1-04l `features/auth/api/validation.test.ts › TC-F1.1.1-04l: giới hạn đúng 72 byte UTF-8 thay vì đếm ký tự`
+    - AC-F1.1.1-05 Hoàn tác toàn bộ giao dịch khi xảy ra lỗi giữa chừng hoặc chi nhánh mặc định ngừng hoạt động (BR-F1-09)
+      - TC-F1.1.1-05a `F1RegistrationIntegrationTest#failureAfterPersistingProfileRollsBackBothUserAndMember`
+      - TC-F1.1.1-05b `F1RegistrationIntegrationTest#inactiveDefaultBranchRejectsRealRegistrationAndRollsBackNewAccount`
+      - TC-F1.1.1-05c `MemberApiIntegrationTest#registrationPortJoinsCallerTransactionAndRollsBackOnDuplicate`
+      - TC-F1.1.1-05d `StaffBranchIntegrationTest#missingDefaultBranchIsNotFoundInsteadOfCreatingOne`
+      - TC-F1.1.1-05e `StaffBranchIntegrationTest#inactiveDefaultBranchIsNotFound`
 - **UC-F1.2** Đăng nhập bằng email
   - **US-F1.2.1** Đăng nhập bằng email (#118)
-    - AC-F1.2.1-01 Nhập sai mật khẩu từ lần 1 đến lần 4 trả 401 thông báo chung, tăng bộ đếm và không lộ email tồn tại (BR-F1-01, BR-F1-03, BR-F1-06) ❌ chưa có TC
-    - AC-F1.2.1-02 Nhập sai mật khẩu lần thứ 5 liên tiếp (kể cả gửi đồng thời) đặt bộ đếm bằng 5 và khóa tạm 15 phút (BR-F1-06) ❌ chưa có TC
-    - AC-F1.2.1-03 Từ chối mọi yêu cầu đăng nhập trong thời gian đang bị khóa tạm 15 phút, kể cả nhập đúng mật khẩu (BR-F1-06) ❌ chưa có TC
-    - AC-F1.2.1-04 Đăng nhập thành công hoặc hết thời gian khóa tạm (BR-F1-01, BR-F1-04, BR-F1-06) ❌ chưa có TC
-    - AC-F1.2.1-05 Từ chối tài khoản bị khóa hoặc ngừng hoạt động khi nhập đúng mật khẩu (BR-F1-05) ❌ chưa có TC
+    - AC-F1.2.1-01 Nhập sai mật khẩu từ lần 1 đến lần 4 trả 401 thông báo chung, tăng bộ đếm và không lộ email tồn tại (BR-F1-01, BR-F1-03, BR-F1-06)
+      - TC-F1.2.1-01a `AuthServiceTest#saiMatKhauLan1Den4Tra401CauChungVaTangBoDem`
+      - TC-F1.2.1-01b `AuthServiceTest#khongLoEmailKhiEmailKhongTonTai`
+      - TC-F1.2.1-01c `AuthServiceTest#taiKhoanDisabledNhapSaiMatKhauTra401KhongPhai403`
+      - TC-F1.2.1-01d `AuthControllerTest#dangNhapSaiMatKhauTra401ProblemDetailTiengViet`
+      - TC-F1.2.1-01e `AuthServiceTest#dangNhapSaiMatKhauNemUnauthorizedException`
+      - TC-F1.2.1-01f `AuthServiceTest#dangNhapMatKhauVuotQua72ByteNemUnauthorizedExceptionKhongNem500`
+      - TC-F1.2.1-01g `AuthServiceTest#dangNhapEmailKhongTonTaiVanChayPasswordEncoderMatchesDeChongDoanEmailQuaThoiGian`
+    - AC-F1.2.1-02 Nhập sai mật khẩu lần thứ 5 liên tiếp (kể cả gửi đồng thời) đặt bộ đếm bằng 5 và khóa tạm 15 phút (BR-F1-06)
+      - TC-F1.2.1-02a `AuthServiceTest#lanSaiThu5Khoa15Phut`
+      - TC-F1.2.1-02b `AuthSessionConcurrencyIntegrationTest#namRequestDangNhapSaiDongThoiTangBoDemDung5VaKhoaTaiKhoan`
+    - AC-F1.2.1-03 Từ chối mọi yêu cầu đăng nhập trong thời gian đang bị khóa tạm 15 phút, kể cả nhập đúng mật khẩu (BR-F1-06)
+      - TC-F1.2.1-03a `AuthServiceTest#dangKhoaNhapDungMatKhauVanTra403KemThoiGianConLai`
+    - AC-F1.2.1-04 Đăng nhập thành công hoặc hết thời gian khóa tạm (BR-F1-01, BR-F1-04, BR-F1-06)
+      - TC-F1.2.1-04a `AuthServiceTest#hetKhoaThiDangNhapLaiDuoc`
+      - TC-F1.2.1-04b `AuthServiceTest#dangNhapDungDatLaiBoDemVe0VaXoaLockedUntil`
+      - TC-F1.2.1-04c `AuthServiceTest#hetKhoaRoiNhapSaiThiBoDemTinhLaiTu1`
+      - TC-F1.2.1-04d `AuthControllerTest#dangNhapThanhCongTra200KemCookieVaAccessToken`
+      - TC-F1.2.1-04e `AuthServiceTest#dangNhapThanhCongCapTokenVaCapNhatLastLoginAt`
+      - TC-F1.2.1-04f `JwtSecurityIntegrationTest#tokenHopLeLayThongTinTaiKhoanHienTaiThanhCong`
+      - TC-F1.2.1-04g `features/auth/pages/LoginPage.test.tsx › TC-F1.2.1-04g: đăng nhập bằng email đã chuẩn hóa rồi mở tran`
+    - AC-F1.2.1-05 Từ chối tài khoản bị khóa hoặc ngừng hoạt động khi nhập đúng mật khẩu (BR-F1-05)
+      - TC-F1.2.1-05a `AuthControllerTest#dangNhapTaiKhoanBiKhoaTra403ProblemDetailTiengViet`
+      - TC-F1.2.1-05b `AuthServiceTest#dangNhapTaiKhoanBiKhoaNemForbiddenException`
     - AC-F1.2.1-06 Từ chối dữ liệu đăng nhập sai định dạng (không hỗ trợ đăng nhập bằng số điện thoại) (BR-F1-01) ❌ chưa có TC
 - **UC-F1.3** Làm mới phiên đăng nhập (Refresh Token) & Đăng xuất
-  - **US-F1.3.1** Làm mới phiên và đăng xuất (#119)
-    - AC-F1.3.1-01 Xoay vòng refresh token và chặn dùng lại token cũ (BR-F1-04) ❌ chưa có TC
-    - AC-F1.3.1-02 Đăng xuất thu hồi refresh token và xóa cookie (BR-F1-04) ❌ chưa có TC
-    - AC-F1.3.1-03 Từ chối khi phiên không hợp lệ và xóa cookie (BR-F1-04) ❌ chưa có TC
-    - AC-F1.3.1-04 Đồng bộ làm mới phiên và đăng xuất giữa nhiều tab trình duyệt (BR-F1-04) ❌ chưa có TC
+  - **US-F1.3.1** Làm mới phiên và đăng xuất (#119) ✅ mọi AC có TC
+    - AC-F1.3.1-01 Xoay vòng refresh token và chặn dùng lại token cũ (BR-F1-04)
+      - TC-F1.3.1-01a `AuthControllerTest#lamMoiPhienThanhCongTra200KemCookieMoi`
+      - TC-F1.3.1-01b `AuthServiceTest#lamMoiThanhCongXoayVongRefreshToken`
+      - TC-F1.3.1-01c `AuthServiceTest#lamMoiTokenDaBiThuHoiThuHoiToanBoPhienVaNemUnauthorizedException`
+      - TC-F1.3.1-01d `AuthSessionConcurrencyIntegrationTest#haiYeuCauRefreshDongThoiChiMotThanhCongVaMotNhan401`
+      - TC-F1.3.1-01e `auth/AuthProvider.test.tsx › TC-F1.3.1-01e: bootstrap làm mới cookie rồi lấy user từ /me`
+    - AC-F1.3.1-02 Đăng xuất thu hồi refresh token và xóa cookie (BR-F1-04)
+      - TC-F1.3.1-02a `AuthControllerTest#dangXuatThanhCongTra204VaXoaCookie`
+      - TC-F1.3.1-02b `AuthControllerTest#dangXuatCoJwtCungNguoiDungThuHoiVaXoaCookie`
+      - TC-F1.3.1-02c `AuthControllerTest#dangXuatCoJwtHetHanVanDoiChieuChuSoHuuCookie`
+      - TC-F1.3.1-02d `AuthServiceTest#dangXuatThuHoiRefreshToken`
+      - TC-F1.3.1-02e `AuthServiceTest#dangXuatVoiJwtThuHoiCookieKhiCungChuSoHuu`
+      - TC-F1.3.1-02f `AuthSessionConcurrencyIntegrationTest#dangXuatBangJwtHetHanCuaTaiKhoanAVanGiuPhienCuaTaiKhoanB`
+      - TC-F1.3.1-02g `auth/AuthProvider.test.tsx › TC-F1.3.1-02g: logout chỉ xóa phiên sau khi server xác nhận;`
+    - AC-F1.3.1-03 Từ chối khi phiên không hợp lệ và xóa cookie (BR-F1-04)
+      - TC-F1.3.1-03a `AuthControllerTest#lamMoiThieuCookieTra401ProblemDetailVaXoaCookie`
+      - TC-F1.3.1-03b `AuthServiceTest#lamMoiTokenDaBiThuHoiThuHoiToanBoPhienVaNemUnauthorizedException`
+      - TC-F1.3.1-03c `AuthServiceTest#lamMoiTokenHetHanNemUnauthorizedException`
+      - TC-F1.3.1-03d `auth/AuthProvider.test.tsx › TC-F1.3.1-03d: bootstrap không có cookie kết thúc anonymous`
+    - AC-F1.3.1-04 Đồng bộ làm mới phiên và đăng xuất giữa nhiều tab trình duyệt (BR-F1-04)
+      - TC-F1.3.1-04a `AuthControllerTest#dangXuatCoJwtKhacChuCookieKhongXoaCookieChung`
+      - TC-F1.3.1-04b `AuthControllerTest#dangXuatCoJwtHetHanVanDoiChieuChuSoHuuCookie`
+      - TC-F1.3.1-04c `AuthServiceTest#dangXuatVoiJwtKhongThuHoiCookieCuaTaiKhoanKhac`
+      - TC-F1.3.1-04d `AuthSessionConcurrencyIntegrationTest#dangXuatBangJwtCuaTaiKhoanAKhongThuHoiHoacXoaCookieCuaTaiKhoanB`
+      - TC-F1.3.1-04e `AuthSessionConcurrencyIntegrationTest#dangXuatBangJwtHetHanCuaTaiKhoanAVanGiuPhienCuaTaiKhoanB`
+      - TC-F1.3.1-04f `auth/account-change.test.tsx › TC-F1.3.1-04f: refresh khác tài khoản đóng trang bảo vệ và đ`
 - **UC-F1.4** Đổi mật khẩu
   - **US-F1.4.1** Đổi mật khẩu (#120)
     - AC-F1.4.1-01 Đổi mật khẩu thành công, thu hồi toàn bộ phiên và yêu cầu đăng nhập lại (BR-F1-03, BR-F1-04) ❌ chưa có TC
@@ -175,27 +253,92 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F1.4.1-03 Từ chối khi dữ liệu đầu vào sai định dạng hoặc mật khẩu mới không đạt chuẩn bảo mật (BR-F1-03) ❌ chưa có TC
     - AC-F1.4.1-04 Chặn truy cập khi chưa đăng nhập và mở đúng khung giao diện cho mọi vai trò đã đăng nhập (BR-F1-05) ❌ chưa có TC
 - **UC-F1.5** Quên mật khẩu và đặt lại mật khẩu (Sprint 2)
-  - **US-F1.5.1** Quên và đặt lại mật khẩu (#121)
-    - AC-F1.5.1-01 Yêu cầu quên mật khẩu cho tài khoản ACTIVE tạo token băm SHA-256 hạn 30 phút, gửi email và trả 200 câu chung (BR-F1-01, BR-F1-08) ❌ chưa có TC
-    - AC-F1.5.1-02 Không lộ email khi email không tồn tại, tài khoản không ACTIVE hoặc gửi email gặp lỗi (BR-F1-08) ❌ chưa có TC
-    - AC-F1.5.1-03 Đặt lại mật khẩu với token hợp lệ cập nhật mật khẩu, ghi used_at, mở khóa tạm và thu hồi toàn bộ refresh token (BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08) ❌ chưa có TC
-    - AC-F1.5.1-04 Từ chối token sai, hết hạn sau 30 phút, đã dùng (kể cả gửi đồng thời) hoặc tài khoản không ACTIVE với 422 (BR-F1-08) ❌ chưa có TC
-    - AC-F1.5.1-05 Từ chối dữ liệu đầu vào sai định dạng, thiếu token trên URL hoặc mật khẩu mới không đạt chuẩn S1 (BR-F1-01, BR-F1-03) ❌ chưa có TC
-    - AC-F1.5.1-06 Gửi email qua API HTTPS của Brevo khi có cấu hình khóa API và chỉ ghi log ở môi trường phát triển khi khóa rỗng (BR-F1-08) ❌ chưa có TC
+  - **US-F1.5.1** Quên và đặt lại mật khẩu (#121) ✅ mọi AC có TC
+    - AC-F1.5.1-01 Yêu cầu quên mật khẩu cho tài khoản ACTIVE tạo token băm SHA-256 hạn 30 phút, gửi email và trả 200 câu chung (BR-F1-01, BR-F1-08)
+      - TC-F1.5.1-01a `PasswordResetServiceTest#emailActiveTaoPasswordResetBamHan30PhutVaGuiEmail`
+      - TC-F1.5.1-01b `AuthControllerTest#quenMatKhauCongKhaiTra200CauChung`
+      - TC-F1.5.1-01c `features/auth/pages/ForgotPasswordPage.test.tsx › TC-F1.5.1-01c: nhập email ở /quen-mat-khau gửi email chuẩn h`
+      - TC-F1.5.1-01d `features/auth/pages/LoginPage.test.tsx › TC-F1.5.1-01d: LoginPage có liên kết Quên mật khẩu? tới /que`
+      - TC-F1.5.1-01e `features/auth/api/auth-api.test.ts › TC-F1.5.1-01e: forgotPassword và resetPassword gọi API công `
+      - TC-F1.5.1-01f `PasswordResetServiceTest#phatHanhTokenTheoUserIdVaThoiHan72GioChoS236`
+    - AC-F1.5.1-02 Không lộ email khi email không tồn tại, tài khoản không ACTIVE hoặc gửi email gặp lỗi (BR-F1-08)
+      - TC-F1.5.1-02a `PasswordResetServiceTest#khongLoEmailKhiKhongTonTaiHoacKhongActive`
+      - TC-F1.5.1-02b `PasswordResetServiceTest#guiEmailLoiVanKhongNemNgoaiLeVaKhongGhiTokenRaLog`
+    - AC-F1.5.1-03 Đặt lại mật khẩu với token hợp lệ cập nhật mật khẩu, ghi used_at, mở khóa tạm và thu hồi toàn bộ refresh token (BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08)
+      - TC-F1.5.1-03a `PasswordResetServiceTest#datLaiMatKhauDungTokenKhoaUserGhiUsedAtXoaKhoaTamVaThuHoiPhien`
+      - TC-F1.5.1-03b `AuthControllerTest#datLaiMatKhauHopLeCongKhaiTra204`
+      - TC-F1.5.1-03c `PasswordResetIntegrationTest#luongTronVenQuenVaDatLaiMatKhau`
+      - TC-F1.5.1-03d `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-03d: Trang Đặt mật khẩu gửi token và mật khẩu mới `
+      - TC-F1.5.1-03e `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-03e: /quen-mat-khau và /dat-lai-mat-khau là trang `
+      - TC-F1.5.1-03f `PasswordResetIntegrationTest#datLaiMatKhauVoHieuHoaTatCaLienKetQuenMatKhauKhacCuaCungUser`
+    - AC-F1.5.1-04 Từ chối token sai, hết hạn sau 30 phút, đã dùng (kể cả gửi đồng thời) hoặc tài khoản không ACTIVE với 422 (BR-F1-08)
+      - TC-F1.5.1-04a `PasswordResetServiceTest#tokenSaiDaDungHoacHetHanTra422`
+      - TC-F1.5.1-04b `AuthControllerTest#datLaiMatKhauTokenLoiTra422`
+      - TC-F1.5.1-04c `PasswordResetIntegrationTest#tokenHetHanSau30PhutTra422VaEmailKhongTonTaiTra200`
+      - TC-F1.5.1-04d `PasswordResetIntegrationTest#datLaiMatKhauDongThoiCungMotTokenChiMotLanThanhCong`
+      - TC-F1.5.1-04e `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-04e: lỗi 422 hết hạn hoặc đã dùng hiển thị đúng câ`
+    - AC-F1.5.1-05 Từ chối dữ liệu đầu vào sai định dạng, thiếu token trên URL hoặc mật khẩu mới không đạt chuẩn S1 (BR-F1-01, BR-F1-03)
+      - TC-F1.5.1-05a `AuthControllerTest#quenMatKhauEmailSaiDinhDangTra400`
+      - TC-F1.5.1-05b `AuthControllerTest#datLaiMatKhauSaiChuanS1Tra400`
+      - TC-F1.5.1-05c `features/auth/pages/ForgotPasswordPage.test.tsx › TC-F1.5.1-05c: email sai định dạng ở trình duyệt không gọi A`
+      - TC-F1.5.1-05d `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-05d: thiếu hoặc rỗng token trên URL báo lỗi ngay, `
+      - TC-F1.5.1-05e `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-05e: kiểm tra chuẩn S1, hai mật khẩu không khớp kh`
+    - AC-F1.5.1-06 Gửi email qua API HTTPS của Brevo khi có cấu hình khóa API và chỉ ghi log ở môi trường phát triển khi khóa rỗng (BR-F1-08)
+      - TC-F1.5.1-06a `BrevoEmailSenderTest#guiEmailQuaBrevoBangRestClientKhongGoiMangThat`
+      - TC-F1.5.1-06b `BrevoEmailSenderTest#khoaBrevoRongThiBeanLaLogEmailSender`
+      - TC-F1.5.1-06c `BrevoEmailSenderTest#coKhoaBrevoThiBeanLaBrevoEmailSender`
 - **UC-F1.6** Quản lý trạng thái tài khoản & Phân quyền truy cập API
-  - **US-F1.6.1** Trạng thái tài khoản và phân quyền (#122)
-    - AC-F1.6.1-01 Chưa đăng nhập hoặc token không hợp lệ bị từ chối 401 tiếng Việt (BR-F1-04, BR-F1-05) ❌ chưa có TC
-    - AC-F1.6.1-02 Chặn API khi sai vai trò và cho phép khi đúng vai trò (BR-F1-05) ❌ chưa có TC
-    - AC-F1.6.1-03 Nhân viên chi nhánh phải gắn với chi nhánh đang hoạt động (BR-F1-05) ❌ chưa có TC
-    - AC-F1.6.1-04 Tài khoản ngừng hoạt động mất quyền và bị thu hồi phiên ngay (BR-F1-04, BR-F1-05) ❌ chưa có TC
+  - **US-F1.6.1** Trạng thái tài khoản và phân quyền (#122) ✅ mọi AC có TC
+    - AC-F1.6.1-01 Chưa đăng nhập hoặc token không hợp lệ bị từ chối 401 tiếng Việt (BR-F1-04, BR-F1-05)
+      - TC-F1.6.1-01a `AuthServiceTest#getCurrentUserDocThongTinTuJwtVaNem401KhiClaimKhongHopLe`
+      - TC-F1.6.1-01b `JwtSecurityIntegrationTest#chuaGuiTokenTra401ProblemDetailTiengViet`
+      - TC-F1.6.1-01c `JwtSecurityIntegrationTest#tokenSaiChuKyTra401ProblemDetailTiengViet`
+      - TC-F1.6.1-01d `JwtSecurityIntegrationTest#tokenHetHanTra401ProblemDetailTiengViet`
+      - TC-F1.6.1-01e `JwtSecurityIntegrationTest#tokenThieuClaimRoleBiChanVoi401KhiGoiApi`
+      - TC-F1.6.1-01f `JwtSecurityIntegrationTest#tokenCoRoleLaHoacSubKhongPhaiSoTra401ThayVi500`
+      - TC-F1.6.1-01g `routes/ProtectedRoute.test.tsx › TC-F1.6.1-01g: chuyển về /login khi chưa đăng nhập`
+    - AC-F1.6.1-02 Chặn API khi sai vai trò và cho phép khi đúng vai trò (BR-F1-05)
+      - TC-F1.6.1-02a `AuthControllerTest#layThongTinTaiKhoanHienTaiUyQuyenChoAuthService`
+      - TC-F1.6.1-02b `JwtSecurityIntegrationTest#tokenHopLeLayThongTinTaiKhoanHienTaiThanhCong`
+      - TC-F1.6.1-02c `JwtSecurityIntegrationTest#goiApiKhiDuVaiTroTra200`
+      - TC-F1.6.1-02d `JwtSecurityIntegrationTest#goiApiKhiKhongDuVaiTroTra403ProblemDetailTiengViet`
+      - TC-F1.6.1-02e `JwtSecurityIntegrationTest#goiApiNhanVienBangVaiTroTrainerKhongDuQuyenTra403`
+      - TC-F1.6.1-02f `routes/ProtectedRoute.test.tsx › TC-F1.6.1-02f: chuyển về /403 khi sai vai trò`
+      - TC-F1.6.1-02g `routes/ProtectedRoute.test.tsx › TC-F1.6.1-02g: hiển thị nội dung khi đúng vai trò`
+    - AC-F1.6.1-03 Nhân viên chi nhánh phải gắn với chi nhánh đang hoạt động (BR-F1-05)
+      - TC-F1.6.1-03a `F1RegistrationIntegrationTest#realReceptionistJwtWithoutStaffAssignmentCannotCreateOrListMembers`
+      - TC-F1.6.1-03b `StaffBranchIntegrationTest#staffBranchComesFromThatUsersAssignmentRatherThanDefaultBranch`
+      - TC-F1.6.1-03c `StaffBranchIntegrationTest#userWithoutStaffProfileIsDeniedRatherThanAssignedToCn01`
+      - TC-F1.6.1-03d `StaffBranchIntegrationTest#inactiveStaffIsDenied`
+      - TC-F1.6.1-03e `StaffBranchIntegrationTest#activeStaffInInactiveBranchIsDenied`
+      - TC-F1.6.1-03f `StaffBranchIntegrationTest#invalidOrUnknownUserIdsNeverReceiveDefaultBranch`
+    - AC-F1.6.1-04 Tài khoản ngừng hoạt động mất quyền và bị thu hồi phiên ngay (BR-F1-04, BR-F1-05)
+      - TC-F1.6.1-04a `AccountServiceTest#disableAccountCapNhatDisabledVaThuHoiRefreshToken`
+      - TC-F1.6.1-04b `F1RegistrationIntegrationTest#disablingRevokesAllMemberSessionsAndReactivationDoesNotRestoreOldTokens`
 
 ### F2
 
 - **UC-F2.1** Tạo hồ sơ hội viên tại quầy
-  - **US-F2.1.1** Tạo hồ sơ hội viên tại quầy (#123)
-    - AC-F2.1.1-01 Tạo hồ sơ mới thành công, chuẩn hóa SĐT và tự sinh mã HV (BR-F2-05, BR-F2-06, BR-F2-07) ❌ chưa có TC
-    - AC-F2.1.1-02 Từ chối khi số điện thoại sai định dạng hoặc đã tồn tại (kể cả tạo đồng thời) (BR-F2-06) ❌ chưa có TC
-    - AC-F2.1.1-03 Chỉ lễ tân, quản lý chi nhánh (đã gắn chi nhánh) và chủ chuỗi được tạo hồ sơ (BR-F2-10) ❌ chưa có TC
+  - **US-F2.1.1** Tạo hồ sơ hội viên tại quầy (#123) ✅ mọi AC có TC
+    - AC-F2.1.1-01 Tạo hồ sơ mới thành công, chuẩn hóa SĐT và tự sinh mã HV (BR-F2-05, BR-F2-06, BR-F2-07)
+      - TC-F2.1.1-01a `F1RegistrationIntegrationTest#realReceptionistJwtCreatesAndManagesCounterProfileInAssignedBranch`
+      - TC-F2.1.1-01b `MemberApiIntegrationTest#createNormalizesAndReturnsLocationAndAudit`
+      - TC-F2.1.1-01c `MemberApiIntegrationTest#createAndUpdateAcceptPastOrAbsentBirthDate`
+      - TC-F2.1.1-01d `MemberApiIntegrationTest#branchManagerCanCreateReadUpdateAndSearchWithinTheirBranch`
+      - TC-F2.1.1-01e `MemberServiceTest#createsWithStaffBranchAndNormalizedPhone`
+    - AC-F2.1.1-02 Từ chối khi số điện thoại sai định dạng hoặc đã tồn tại (kể cả tạo đồng thời) (BR-F2-06)
+      - TC-F2.1.1-02a `MemberApiIntegrationTest#createAndUpdateRejectTodayOrFutureBirthDateWithoutChanges`
+      - TC-F2.1.1-02b `MemberApiIntegrationTest#invalidNamesAreRejectedByRequestValidationOnCreateAndUpdate`
+      - TC-F2.1.1-02c `MemberApiIntegrationTest#invalidBodiesAndPaginationAre400AndDuplicateIs409`
+      - TC-F2.1.1-02d `MemberApiIntegrationTest#incompletePhoneCannotBeSavedOnCreateOrUpdate`
+      - TC-F2.1.1-02e `MemberApiIntegrationTest#concurrentRequestsCannotCreateDuplicatePhone`
+      - TC-F2.1.1-02f `MemberServiceTest#duplicatePhoneDoesNotConsumeSequence`
+      - TC-F2.1.1-02g `MemberServiceTest#concurrentDuplicatePhoneStillGetsFrontDeskGuidance`
+      - TC-F2.1.1-02h `features/members/components/MemberFormModal.test.tsx › TC-F2.1.1-02h: hiển thị lỗi validation do backend trả về nga`
+      - TC-F2.1.1-02i `features/members/components/MemberFormModal.test.tsx › TC-F2.1.1-02i: giữ form và dữ liệu đã nhập khi server từ chố`
+    - AC-F2.1.1-03 Chỉ lễ tân, quản lý chi nhánh (đã gắn chi nhánh) và chủ chuỗi được tạo hồ sơ (BR-F2-10)
+      - TC-F2.1.1-03a `F1RegistrationIntegrationTest#realReceptionistJwtWithoutStaffAssignmentCannotCreateOrListMembers`
+      - TC-F2.1.1-03b `MemberApiIntegrationTest#validatesEndpointAndRecordPermissions`
 - **UC-F2.2** Tạo tài khoản đăng nhập cho hồ sơ hội viên có sẵn
   - **US-F2.2.1** Tạo tài khoản cho hồ sơ có sẵn (#124)
     - AC-F2.2.1-01 Tạo tài khoản và gửi email đặt mật khẩu hạn 72 giờ (BR-F2-06, BR-F2-11) ❌ chưa có TC
@@ -206,27 +349,89 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F2.2.1-06 Gửi email gặp lỗi vẫn giữ tài khoản và ghi log không chứa token (BR-F2-11) ❌ chưa có TC
     - AC-F2.2.1-07 Kiểm tra quyền theo vai trò, chi nhánh và dữ liệu đầu vào (BR-F2-10, BR-F2-11) ❌ chưa có TC
 - **UC-F2.3** Tra cứu, lọc và xem chi tiết hồ sơ hội viên
-  - **US-F2.3.1** Tra cứu và xem hồ sơ hội viên (#125)
-    - AC-F2.3.1-01 Tìm kiếm, lọc, phân trang trong chi nhánh mình đạt hiệu năng dưới 2 giây (BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10) ❌ chưa có TC
-    - AC-F2.3.1-02 Chủ chuỗi tra cứu và xem chi tiết hồ sơ mọi chi nhánh (BR-F2-10) ❌ chưa có TC
-    - AC-F2.3.1-03 Xem chi tiết đúng phạm vi; ngoài phạm vi hoặc đã xóa mềm trả 404 (BR-F2-09, BR-F2-10) ❌ chưa có TC
-    - AC-F2.3.1-04 Huấn luyện viên chỉ xem chi tiết học viên PT của mình và không được gọi danh sách (BR-F2-10) ❌ chưa có TC
+  - **US-F2.3.1** Tra cứu và xem hồ sơ hội viên (#125) ✅ mọi AC có TC
+    - AC-F2.3.1-01 Tìm kiếm, lọc, phân trang trong chi nhánh mình đạt hiệu năng dưới 2 giây (BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10)
+      - TC-F2.3.1-01a `F1RegistrationIntegrationTest#listGetsBatchEmailsThroughRealF1AndIncludesUnlinkedProfile`
+      - TC-F2.3.1-01b `MemberApiIntegrationTest#searchScopesBothRowsAndCountAndIncludesUnlinkedProfiles`
+      - TC-F2.3.1-01c `MemberApiIntegrationTest#memberCodeSearchIsExactAndIgnoresCase`
+      - TC-F2.3.1-01d `MemberApiIntegrationTest#phonePrefixSearchRespectsBranchStatusSoftDeletionAndPagination`
+      - TC-F2.3.1-01e `MemberApiIntegrationTest#shortNumericKeywordsWithoutMatchingPrefixReturnAnEmptyPage`
+      - TC-F2.3.1-01f `MemberApiIntegrationTest#longInvalidNumericKeywordsReturnAnEmptyPage`
+      - TC-F2.3.1-01g `MemberApiIntegrationTest#completePhoneSearchStillNormalizesAndMatchesExactly`
+      - TC-F2.3.1-01h `MemberApiIntegrationTest#escapesNameWildcardsAndFiltersStatus`
+      - TC-F2.3.1-01i `MemberApiIntegrationTest#measuresSearchOnTenThousandProfiles`
+      - TC-F2.3.1-01j `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01j: đổi trang gọi API từ 0, tìm kiếm mới trở về t`
+      - TC-F2.3.1-01k `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01k: áp dụng từ khóa đang nhập khi đổi trạng thái `
+    - AC-F2.3.1-02 Chủ chuỗi tra cứu và xem chi tiết hồ sơ mọi chi nhánh (BR-F2-10)
+      - TC-F2.3.1-02a `F1RegistrationIntegrationTest#listGetsBatchEmailsThroughRealF1AndIncludesUnlinkedProfile`
+      - TC-F2.3.1-02b `MemberApiIntegrationTest#searchScopesBothRowsAndCountAndIncludesUnlinkedProfiles`
+    - AC-F2.3.1-03 Xem chi tiết đúng phạm vi; ngoài phạm vi hoặc đã xóa mềm trả 404 (BR-F2-09, BR-F2-10)
+      - TC-F2.3.1-03a `F1RegistrationIntegrationTest#realF1RegistrationCreatesProfileAndJwtCanReadOwnF2Profile`
+      - TC-F2.3.1-03b `MemberApiIntegrationTest#validatesEndpointAndRecordPermissions`
+      - TC-F2.3.1-03c `MemberServiceTest#memberCannotReadSomeoneElse`
+    - AC-F2.3.1-04 Huấn luyện viên chỉ xem chi tiết học viên PT của mình và không được gọi danh sách (BR-F2-10)
+      - TC-F2.3.1-04a `MemberApiIntegrationTest#validatesEndpointAndRecordPermissions`
 - **UC-F2.4** Cập nhật hồ sơ, Ảnh đại diện & Ngừng hoạt động hội viên
-  - **US-F2.4.1** Cập nhật và ngừng hoạt động hồ sơ (#126)
-    - AC-F2.4.1-01 Cập nhật thông tin hồ sơ trong chi nhánh và chuẩn hóa số điện thoại (BR-F2-06, BR-F2-10) ❌ chưa có TC
-    - AC-F2.4.1-02 Từ chối trùng số điện thoại, thiếu trạng thái hoặc hồ sơ ngoài phạm vi (BR-F2-06, BR-F2-10) ❌ chưa có TC
-    - AC-F2.4.1-03 Ngừng hoạt động hồ sơ đồng thời khóa tài khoản và thu hồi mọi phiên trong cùng giao dịch (BR-F2-08, BR-F2-09) ❌ chưa có TC
-    - AC-F2.4.1-04 Kích hoạt lại hồ sơ khôi phục tài khoản nhưng không khôi phục token cũ và không gỡ khóa tạm (BR-F2-08) ❌ chưa có TC
-    - AC-F2.4.1-05 Cập nhật trạng thái đồng thời luôn giữ hồ sơ và tài khoản khớp nhau (BR-F2-08) ❌ chưa có TC
-  - **US-F2.4.2** Ảnh đại diện hội viên (#127)
-    - AC-F2.4.2-01 Tải và chuẩn hóa ảnh hợp lệ (BR-F2-01, BR-F2-02) ❌ chưa có TC
-    - AC-F2.4.2-02 Thay ảnh trên cùng bản ghi (BR-F2-03) ❌ chưa có TC
-    - AC-F2.4.2-03 Từ chối file không hợp lệ (BR-F2-01) ❌ chưa có TC
-    - AC-F2.4.2-04 Xem ảnh theo quyền hồ sơ (BR-F2-04) ❌ chưa có TC
-    - AC-F2.4.2-05 Chỉ nhân viên có quyền sửa mới đổi ảnh (BR-F2-04) ❌ chưa có TC
-    - AC-F2.4.2-06 Chưa có ảnh hoặc không có hồ sơ (BR-F2-04) ❌ chưa có TC
-    - AC-F2.4.2-07 Xác thực và kiểm tra request ảnh ❌ chưa có TC
-    - AC-F2.4.2-08 Chưa có ảnh hoặc tải ảnh lỗi thì hiện chữ cái đầu của tên trên giao diện (BR-F2-04) ❌ chưa có TC
+  - **US-F2.4.1** Cập nhật và ngừng hoạt động hồ sơ (#126) ✅ mọi AC có TC
+    - AC-F2.4.1-01 Cập nhật thông tin hồ sơ trong chi nhánh và chuẩn hóa số điện thoại (BR-F2-06, BR-F2-10)
+      - TC-F2.4.1-01a `MemberApiIntegrationTest#createAndUpdateAcceptPastOrAbsentBirthDate`
+      - TC-F2.4.1-01b `MemberApiIntegrationTest#branchManagerCanCreateReadUpdateAndSearchWithinTheirBranch`
+      - TC-F2.4.1-01c `MemberApiIntegrationTest#updateSamePhoneAndDisableRevokeAndActivate`
+      - TC-F2.4.1-01d `MemberServiceTest#editingProfileWithoutStatusTransitionDoesNotDisableOrActivateAccount`
+      - TC-F2.4.1-01e `features/members/components/MemberFormModal.test.tsx › TC-F2.4.1-01e: sửa hồ sơ gửi đầy đủ trạng thái và giữ giá tr`
+    - AC-F2.4.1-02 Từ chối trùng số điện thoại, thiếu trạng thái hoặc hồ sơ ngoài phạm vi (BR-F2-06, BR-F2-10)
+      - TC-F2.4.1-02a `MemberApiIntegrationTest#createAndUpdateRejectTodayOrFutureBirthDateWithoutChanges`
+      - TC-F2.4.1-02b `MemberApiIntegrationTest#invalidNamesAreRejectedByRequestValidationOnCreateAndUpdate`
+      - TC-F2.4.1-02c `MemberApiIntegrationTest#missingUpdateStatusIsRejectedByRequestValidation`
+      - TC-F2.4.1-02d `MemberApiIntegrationTest#incompletePhoneCannotBeSavedOnCreateOrUpdate`
+      - TC-F2.4.1-02e `MemberApiIntegrationTest#duplicateUpdateIs409AndUnassignedStaffCannotAccess`
+      - TC-F2.4.1-02f `MemberServiceTest#outsideBranchIsNotFoundAndDoesNotModifyAccount`
+    - AC-F2.4.1-03 Ngừng hoạt động hồ sơ đồng thời khóa tài khoản và thu hồi mọi phiên trong cùng giao dịch (BR-F2-08, BR-F2-09)
+      - TC-F2.4.1-03a `AccountServiceTest#disableAccountCapNhatDisabledVaThuHoiRefreshToken`
+      - TC-F2.4.1-03b `F1RegistrationIntegrationTest#disablingRevokesAllMemberSessionsAndReactivationDoesNotRestoreOldTokens`
+      - TC-F2.4.1-03c `F1RegistrationIntegrationTest#failureAfterRealF1DisableRollsBackMemberAccountAndTokenRevocation`
+      - TC-F2.4.1-03d `F1RegistrationIntegrationTest#failureAfterSavingMemberRollsBackProfileAccountAndTokenRevocation`
+      - TC-F2.4.1-03e `MemberApiIntegrationTest#updateSamePhoneAndDisableRevokeAndActivate`
+      - TC-F2.4.1-03f `MemberApiIntegrationTest#failedAccountOperationRollsBackMemberUserAndTokens`
+      - TC-F2.4.1-03g `MemberServiceTest#failedAccountTransitionDoesNotMutateNamePhoneOrStatus`
+    - AC-F2.4.1-04 Kích hoạt lại hồ sơ khôi phục tài khoản nhưng không khôi phục token cũ và không gỡ khóa tạm (BR-F2-08)
+      - TC-F2.4.1-04a `AccountServiceTest#activateAccountIfDisabledChiMoTaiKhoanDisabledKhongMoLocked`
+      - TC-F2.4.1-04b `F1RegistrationIntegrationTest#disablingRevokesAllMemberSessionsAndReactivationDoesNotRestoreOldTokens`
+      - TC-F2.4.1-04c `F1RegistrationIntegrationTest#activatingMemberDoesNotUnlockCurrentlyLockedAccount`
+      - TC-F2.4.1-04d `F1RegistrationIntegrationTest#failureAfterRealF1ActivationRollsBackMemberAndAccount`
+      - TC-F2.4.1-04e `MemberApiIntegrationTest#updateSamePhoneAndDisableRevokeAndActivate`
+    - AC-F2.4.1-05 Cập nhật trạng thái đồng thời luôn giữ hồ sơ và tài khoản khớp nhau (BR-F2-08)
+      - TC-F2.4.1-05a `MemberApiIntegrationTest#concurrentUpdatesKeepMemberAndAccountStatusesConsistent`
+  - **US-F2.4.2** Ảnh đại diện hội viên (#127) ✅ mọi AC có TC
+    - AC-F2.4.2-01 Tải và chuẩn hóa ảnh hợp lệ (BR-F2-01, BR-F2-02)
+      - TC-F2.4.2-01a `MemberAvatarIntegrationTest#validImagesAreResizedAndStored`
+      - TC-F2.4.2-01b `MemberAvatarIntegrationTest#smallTransparentImagesKeepDimensions`
+      - TC-F2.4.2-01c `MemberAvatarIntegrationTest#acceptsDimensionBoundary`
+      - TC-F2.4.2-01d `MemberAvatarIntegrationTest#acceptsUploadSizeBoundary`
+    - AC-F2.4.2-02 Thay ảnh trên cùng bản ghi (BR-F2-03)
+      - TC-F2.4.2-02a `MemberAvatarIntegrationTest#overwritesSameRow`
+      - TC-F2.4.2-02b `MemberAvatarIntegrationTest#concurrentInitialUploadsAreSerialized`
+      - TC-F2.4.2-02c `MemberAvatarIntegrationTest#invalidFilesDoNotReplaceExistingAvatar`
+    - AC-F2.4.2-03 Từ chối file không hợp lệ (BR-F2-01)
+      - TC-F2.4.2-03a `MemberAvatarIntegrationTest#invalidFilesDoNotReplaceExistingAvatar`
+      - TC-F2.4.2-03b `MemberAvatarIntegrationTest#servletRejectsOversizedMultipart`
+    - AC-F2.4.2-04 Xem ảnh theo quyền hồ sơ (BR-F2-04)
+      - TC-F2.4.2-04a `MemberAvatarIntegrationTest#authorizedReadersReceiveStoredJpeg`
+      - TC-F2.4.2-04b `MemberAvatarIntegrationTest#otherReadersCannotSeeAvatar`
+    - AC-F2.4.2-05 Chỉ nhân viên có quyền sửa mới đổi ảnh (BR-F2-04)
+      - TC-F2.4.2-05a `MemberAvatarIntegrationTest#ownerMayUploadAcrossBranches`
+      - TC-F2.4.2-05b `MemberAvatarIntegrationTest#deniedWritersDoNotMutateAvatar`
+      - TC-F2.4.2-05c `MemberAvatarIntegrationTest#inactiveAssignmentsAreDenied`
+    - AC-F2.4.2-06 Chưa có ảnh hoặc không có hồ sơ (BR-F2-04)
+      - TC-F2.4.2-06a `MemberAvatarIntegrationTest#missingAvatarIsNotFound`
+      - TC-F2.4.2-06b `MemberAvatarIntegrationTest#missingOrDeletedProfilesAreNotFound`
+    - AC-F2.4.2-07 Xác thực và kiểm tra request ảnh
+      - TC-F2.4.2-07a `MemberAvatarIntegrationTest#unauthenticatedRequestsAreDenied`
+      - TC-F2.4.2-07b `MemberAvatarIntegrationTest#invalidIdsAreRejected`
+      - TC-F2.4.2-07c `MemberAvatarIntegrationTest#missingMultipartFileIsRejected`
+    - AC-F2.4.2-08 Chưa có ảnh hoặc tải ảnh lỗi thì hiện chữ cái đầu của tên trên giao diện (BR-F2-04)
+      - TC-F2.4.2-08a `MemberAvatarIntegrationTest#newProfileHasNoAvatar`
+      - TC-F2.4.2-08b `MemberAvatarIntegrationTest#profileResponsesReflectAvatarPresence`
 - **UC-F2.5** Ghi nhận và xem lịch sử chỉ số cơ thể (`body_metrics`)
   - **US-F2.5.1** Chỉ số cơ thể (#128)
     - AC-F2.5.1-01 Ghi chỉ số cơ thể thành công với ít nhất một chỉ số (BR-F2-12) ❌ chưa có TC
@@ -342,6 +547,8 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F3.5.1-01a `InvoiceSaleIntegrationTest#sellCreatesPendingInvoiceAndMembershipWithServerPrice`
       - TC-F3.5.1-01b `InvoiceSaleIntegrationTest#sessionPackageCopiesSessionCount`
       - TC-F3.5.1-01c `InvoiceSaleIntegrationTest#membershipFailureRollsBackEntireSale`
+      - TC-F3.5.1-01d `features/packages/api/package-sales.test.ts › TC-F3.5.1-01d: livePackageSalesApi gọi đúng GET /memberships`
+      - TC-F3.5.1-01e `features/packages/pages/SellPackagePage.test.tsx › TC-F3.5.1-01e: Chọn hội viên và gói, chỉ gửi memberId và ite`
     - AC-F3.5.1-02 Gói chỉ hiệu lực sau khi hóa đơn PAID; ngày hết hạn tính đúng (BR-F3-12)
       - TC-F3.5.1-02a `MembershipListIntegrationTest#pendingSaleIsNotUsableBeforePayment`
       - TC-F3.5.1-02b `InvoicePaymentIntegrationTest#payActivatesWithDatesRecomputedAtPaymentTime`
@@ -350,12 +557,14 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F3.5.1-03b `MembershipServiceTest#newOrTimeRenewal`
       - TC-F3.5.1-03c `InvoicePaymentIntegrationTest#payRenewalAfterActiveTimePackageIsUpcoming`
       - TC-F3.5.1-03c `MembershipServiceTest#ptRenewalWithSessionsLeft`
+      - TC-F3.5.1-03d `features/packages/pages/SellPackagePage.test.tsx › TC-F3.5.1-03d: Hội viên có gói TIME ACTIVE cùng phạm vi thì `
     - AC-F3.5.1-04 Gia hạn khi gói SESSION cũ đã hết buổi (BR-F3-11)
       - TC-F3.5.1-04a `InvoiceSaleIntegrationTest#renewalAfterEmptySessionPackageStartsTomorrow`
       - TC-F3.5.1-04b `InvoiceSaleIntegrationTest#renewalAfterSessionPackageWithSessionsLeftStartsAfterEndDate`
       - TC-F3.5.1-04c `MembershipServiceTest#sessionRenewal`
       - TC-F3.5.1-04d `InvoicePaymentIntegrationTest#payRenewalAfterEmptySessionPackageStartsTomorrow`
       - TC-F3.5.1-04d `MembershipServiceTest#emptyPtDoesNotUseSessionTomorrowRule`
+      - TC-F3.5.1-04e `features/packages/pages/SellPackagePage.test.tsx › TC-F3.5.1-04e: Hội viên có gói SESSION đã hết buổi hiển thị `
     - AC-F3.5.1-05 Giữ đồng thời nhiều loại gói (BR-F3-10)
       - TC-F3.5.1-05a `InvoiceSaleIntegrationTest#differentPackageTypesKeepExistingMembershipIntact`
       - TC-F3.5.1-05b `InvoicePaymentIntegrationTest#payPtWhileHoldingTimeActivatesPt`
@@ -372,6 +581,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F3.5.1-08d `InvoiceSaleIntegrationTest#unknownMemberOrPackageIsNotFound`
       - TC-F3.5.1-08e `InvoiceSaleIntegrationTest#memberOfOtherBranchIsHidden`
       - TC-F3.5.1-08f `InvoiceSaleConcurrencyIntegrationTest#saleWaitsForCatalogChangeAndReadsCommittedValues`
+      - TC-F3.5.1-08g `features/packages/pages/SellPackagePage.test.tsx › TC-F3.5.1-08g: Lỗi 422 hoặc 404 khi hội viên ngừng hoạt động`
     - AC-F3.5.1-09 Hóa đơn tại quầy không tự hủy (BR-F3-14) ❌ chưa có TC
     - AC-F3.5.1-10 Tự kích hoạt gói nối tiếp đúng ngày (BR-F3-11)
       - TC-F3.5.1-10a `MembershipLifecycleIntegrationTest#expiresOldBeforeActivatingNext`
@@ -404,6 +614,56 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F3.5.1-13 Mã hóa đơn tự sinh và duy nhất
       - TC-F3.5.1-13a `InvoiceSaleIntegrationTest#invoiceCodesAreSequential`
       - TC-F3.5.1-13b `InvoiceCodeMigrationIntegrationTest#upgradesExistingDatabaseWithoutChangingInvoiceHistory`
+
+### F4
+
+- **UC-F4.1** Tra cứu hội viên và đối chiếu thông tin/ảnh tại quầy
+  - **US-F4.1.1** Tra cứu và đối chiếu ảnh tại quầy (#135)
+    - AC-F4.1.1-01 Tìm theo mã hội viên hoặc số điện thoại ❌ chưa có TC
+    - AC-F4.1.1-02 Hiển thị ảnh đại diện và thông tin lớp học sắp diễn ra ❌ chưa có TC
+    - AC-F4.1.1-03 Từ khóa tìm kiếm sai định dạng ❌ chưa có TC
+    - AC-F4.1.1-04 Không tìm thấy hội viên hoặc hội viên thuộc chi nhánh khác ❌ chưa có TC
+    - AC-F4.1.1-05 Hồ sơ hội viên ngừng hoạt động ❌ chưa có TC
+    - AC-F4.1.1-06 Phân quyền truy cập chức năng tra cứu ❌ chưa có TC
+- **UC-F4.2** Thực hiện check-in thủ công tại quầy
+  - **US-F4.2.1** Check-in thủ công tại quầy (#136)
+    - AC-F4.2.1-01 Check-in thành công với gói TIME ❌ chưa có TC
+    - AC-F4.2.1-02 Xác định ngày check-in theo múi giờ Việt Nam ❌ chưa có TC
+    - AC-F4.2.1-03 Gói SESSION trừ đúng một buổi mỗi ngày dương lịch ❌ chưa có TC
+    - AC-F4.2.1-04 Ưu tiên gói TIME khi hội viên có cả TIME và SESSION ❌ chưa có TC
+    - AC-F4.2.1-05 Buổi tập cuối của gói SESSION vẫn được tập không giới hạn hết ngày ❌ chưa có TC
+    - AC-F4.2.1-06 Trừ buổi cuối kéo gói gia hạn UPCOMING về ngày mai ❌ chưa có TC
+    - AC-F4.2.1-07 Check-in bằng gói PT đúng ngày có buổi tập hẹn trước ❌ chưa có TC
+    - AC-F4.2.1-08 Ràng buộc biên của quy tắc check-in gói PT ❌ chưa có TC
+    - AC-F4.2.1-09 Phạm vi hiệu lực của gói toàn chuỗi và gói riêng chi nhánh ❌ chưa có TC
+    - AC-F4.2.1-10 Từ chối khi không có gói tập nào hợp lệ ❌ chưa có TC
+    - AC-F4.2.1-11 Từ chối khi gói SESSION hết buổi và hôm nay chưa trừ buổi ❌ chưa có TC
+    - AC-F4.2.1-12 Từ chối khi gói tập đang bảo lưu ❌ chưa có TC
+    - AC-F4.2.1-13 Thứ tự ưu tiên thông báo lỗi khi có nhiều lý do vi phạm ❌ chưa có TC
+    - AC-F4.2.1-14 Xử lý khi hội viên có nhiều gói SESSION cùng dùng được ❌ chưa có TC
+    - AC-F4.2.1-15 Từ chối khi hồ sơ hội viên INACTIVE hoặc ngoài phạm vi ❌ chưa có TC
+    - AC-F4.2.1-16 Kiểm tra giờ mở cửa phòng tập ❌ chưa có TC
+    - AC-F4.2.1-17 Xử lý cạnh tranh khi hai lễ tân cùng check-in một hội viên ❌ chưa có TC
+    - AC-F4.2.1-18 Kiểm tra tính hợp lệ của dữ liệu đầu vào và nhân viên thao tác ❌ chưa có TC
+- **UC-F4.3** Tự động đánh dấu có mặt lớp học nhóm khi check-in
+  - **US-F4.3.1** Tự đánh dấu đến lớp khi check-in (#137)
+    - AC-F4.3.1-01 Ghi nhận thời điểm đến lớp trong khung giờ quy định ❌ chưa có TC
+    - AC-F4.3.1-02 Không ghi nhận thời điểm đến khi ngoài khung giờ hoặc sai chi nhánh ❌ chưa có TC
+    - AC-F4.3.1-03 Chỗ đặt lớp đã điểm danh hoặc kết thúc giữ nguyên trạng thái ❌ chưa có TC
+    - AC-F4.3.1-04 Không ghi đè và không ghi nhận khi lượt check-in thất bại ❌ chưa có TC
+- **UC-F4.4** Ghi nhận check-out cho hội viên
+  - **US-F4.4.1** Check-out cho hội viên (#138)
+    - AC-F4.4.1-01 Check-out thành công cho lượt tập đang diễn ra ❌ chưa có TC
+    - AC-F4.4.1-02 Xử lý trường hợp hội viên có nhiều lượt check-in mở trong ngày ❌ chưa có TC
+    - AC-F4.4.1-03 Từ chối khi không tìm thấy lượt tập đang mở hoặc khác chi nhánh ❌ chưa có TC
+    - AC-F4.4.1-04 Xử lý xung đột đồng thời khi hai nhân viên cùng check-out một lượt ❌ chưa có TC
+    - AC-F4.4.1-05 Phân quyền truy cập chức năng check-out ❌ chưa có TC
+- **UC-F4.5** Xem lịch sử lượt check-in theo ngày tại quầy
+  - **US-F4.5.1** Xem lịch sử check-in trong ngày (#139)
+    - AC-F4.5.1-01 Mặc định hiển thị danh sách trong ngày hiện tại theo giờ Việt Nam ❌ chưa có TC
+    - AC-F4.5.1-02 Đầy đủ thông tin chi tiết của từng lượt check-in ❌ chưa có TC
+    - AC-F4.5.1-03 Lọc trạng thái, phương thức và tìm kiếm theo tên hoặc mã hội viên ❌ chưa có TC
+    - AC-F4.5.1-04 Phân quyền và phạm vi dữ liệu theo chi nhánh ❌ chưa có TC
 
 ### F5
 
@@ -532,6 +792,35 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F5.5.1-11 Chỗ lớp BOOKED chưa kết thúc chặn hoàn gói TIME (BR-F5-14) ❌ chưa có TC
     - AC-F5.5.1-12 Lượt dùng gắn với gói khác không chặn hoàn gói chưa dùng (BR-F5-14) ❌ chưa có TC
 
+### F6
+
+- **UC-F6.1** Xem số lượng hội viên đang có mặt tại phòng tập
+  - **US-F6.1.1** Xem số người đang có mặt tại phòng tập (#145)
+    - AC-F6.1.1-01 Đếm chính xác số hội viên duy nhất đang tập và tổng lượt check-in ❌ chưa có TC
+    - AC-F6.1.1-02 Chủ chuỗi bắt buộc phải chọn chi nhánh cụ thể ❌ chưa có TC
+    - AC-F6.1.1-03 Nhân viên chi nhánh chỉ xem số liệu chi nhánh mình ❌ chưa có TC
+    - AC-F6.1.1-04 Phân quyền truy cập các chỉ số Dashboard ❌ chưa có TC
+    - AC-F6.1.1-05 Chủ chuỗi xem số liệu của chi nhánh đã ngừng hoạt động ❌ chưa có TC
+- **UC-F6.2** Xem tổng lượt check-in và biểu đồ phân bổ theo giờ
+  - **US-F6.2.1** Lượt check-in theo giờ (#146)
+    - AC-F6.2.1-01 Biểu đồ thể hiện đầy đủ các khung giờ trong giờ mở cửa ❌ chưa có TC
+    - AC-F6.2.1-02 Xử lý khung giờ với chi nhánh có giờ mở cửa lẻ ❌ chưa có TC
+- **UC-F6.3** Xem tổng doanh thu trong ngày tại quầy
+  - **US-F6.3.1** Doanh thu trong ngày (#147)
+    - AC-F6.3.1-01 Doanh thu bao gồm cả khách lẻ và phân loại theo hình thức thanh toán ❌ chưa có TC
+- **UC-F6.4** Xem danh sách cảnh báo gói tập sắp hết hạn
+  - **US-F6.4.1** Gói sắp hết hạn (#148)
+    - AC-F6.4.1-01 Lọc chính xác các gói hết hạn trong vòng 7 ngày tới ❌ chưa có TC
+    - AC-F6.4.1-02 Cảnh báo gói SESSION sắp hết buổi theo cấu hình ngưỡng ❌ chưa có TC
+    - AC-F6.4.1-03 Loại trừ hội viên đã mua gói gia hạn UPCOMING ❌ chưa có TC
+    - AC-F6.4.1-04 Gói toàn chuỗi chỉ hiển thị cảnh báo tại chi nhánh gốc ❌ chưa có TC
+    - AC-F6.4.1-05 Quy tắc sắp xếp, lý do cảnh báo, giới hạn phân trang và loại trừ hội viên xóa mềm ❌ chưa có TC
+    - AC-F6.4.1-06 Thao tác Gia hạn nhanh trên giao diện ❌ chưa có TC
+- **UC-F6.5** Xem danh sách lượt check-in mới nhất (Live Feed)
+  - **US-F6.5.1** Lượt check-in mới nhất (Live Feed) (#149)
+    - AC-F6.5.1-01 Danh sách các lượt check-in mới nhất trong ngày ❌ chưa có TC
+    - AC-F6.5.1-02 Thao tác Check-out nhanh từ danh sách Live Feed ❌ chưa có TC
+
 ### F8
 
 - **UC-F8.0** Xem lịch lớp học nhóm công khai
@@ -652,6 +941,202 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 
 | TC | AC | US | UC | BR | Kiểm thử |
 | --- | --- | --- | --- | --- | --- |
+| TC-F1.1.1-01a | AC-F1.1.1-01 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-09, BR-F1-02 | `AuthControllerTest#dangKyThanhCongTra201KemCookieVaAccessToken` |
+| TC-F1.1.1-01b | AC-F1.1.1-01 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-09, BR-F1-02 | `AuthServiceTest#dangKyThanhCongTaoUserVaGoiMemberService` |
+| TC-F1.1.1-01c | AC-F1.1.1-01 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-09, BR-F1-02 | `F1RegistrationIntegrationTest#realF1RegistrationCreatesProfileAndJwtCanReadOwnF2Profile` |
+| TC-F1.1.1-01d | AC-F1.1.1-01 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-09, BR-F1-02 | `features/auth/pages/RegisterPage.test.tsx › TC-F1.1.1-01d: chuẩn hóa dữ liệu, giữ họ tên tiếng Việt và t` |
+| TC-F1.1.1-02a | AC-F1.1.1-02 | US-F1.1.1 | UC-F1.1 | BR-F1-02, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-09 | `F1RegistrationIntegrationTest#phoneAlreadyInRealMembersTableRejectsRegistrationAndRollsBackUser` |
+| TC-F1.1.1-02b | AC-F1.1.1-02 | US-F1.1.1 | UC-F1.1 | BR-F1-02, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-09 | `MemberApiIntegrationTest#registrationPortJoinsCallerTransactionAndRollsBackOnDuplicate` |
+| TC-F1.1.1-02c | AC-F1.1.1-02 | US-F1.1.1 | UC-F1.1 | BR-F1-02, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-09 | `MemberServiceTest#concurrentDuplicatePhoneStillGetsFrontDeskGuidance` |
+| TC-F1.1.1-02d | AC-F1.1.1-02 | US-F1.1.1 | UC-F1.1 | BR-F1-02, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-09 | `features/auth/pages/RegisterPage.test.tsx › TC-F1.1.1-02d: lỗi 409 không có errors hiện chung, không suy` |
+| TC-F1.1.1-03a | AC-F1.1.1-03 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-02, BR-F1-03, BR-F1-04, BR-F1-09 | `AuthServiceTest#dangKyEmailDaTonTaiNemConflictException` |
+| TC-F1.1.1-03b | AC-F1.1.1-03 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-02, BR-F1-03, BR-F1-04, BR-F1-09 | `MemberApiIntegrationTest#registrationPortJoinsCallerTransactionAndRollsBackOnDuplicate` |
+| TC-F1.1.1-03c | AC-F1.1.1-03 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-02, BR-F1-03, BR-F1-04, BR-F1-09 | `features/auth/pages/RegisterPage.test.tsx › TC-F1.1.1-03c: dùng tên trường lỗi thay vì suy từ câu báo lỗ` |
+| TC-F1.1.1-04a | AC-F1.1.1-04 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-03, BR-F1-02, BR-F1-04, BR-F1-09 | `AuthControllerTest#dangKyThieuEmailTra400KemProblemDetailErrors` |
+| TC-F1.1.1-04b | AC-F1.1.1-04 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-03, BR-F1-02, BR-F1-04, BR-F1-09 | `AuthControllerTest#dangKyMatKhauThieuChuSoTra400TheoS1` |
+| TC-F1.1.1-04c | AC-F1.1.1-04 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-03, BR-F1-02, BR-F1-04, BR-F1-09 | `AuthControllerTest#dangKyMatKhauDaiHon72KyTuTra400ThayVi500` |
+| TC-F1.1.1-04d | AC-F1.1.1-04 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-03, BR-F1-02, BR-F1-04, BR-F1-09 | `AuthControllerTest#dangKyMatKhauCoDau50KyTuVuot72ByteTra400ThayVi422` |
+| TC-F1.1.1-04e | AC-F1.1.1-04 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-03, BR-F1-02, BR-F1-04, BR-F1-09 | `AuthControllerTest#dangKySoDienThoaiSaiDinhDangTra400` |
+| TC-F1.1.1-04f | AC-F1.1.1-04 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-03, BR-F1-02, BR-F1-04, BR-F1-09 | `AuthControllerTest#dangKyNgaySinhTuongLaiTra400` |
+| TC-F1.1.1-04g | AC-F1.1.1-04 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-03, BR-F1-02, BR-F1-04, BR-F1-09 | `AuthServiceTest#dangKySoDienThoaiSaiDinhDangNemBusinessRuleException` |
+| TC-F1.1.1-04h | AC-F1.1.1-04 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-03, BR-F1-02, BR-F1-04, BR-F1-09 | `AuthServiceTest#dangKyMatKhauVuotQua72ByteUtf8NemBusinessRuleException` |
+| TC-F1.1.1-04i | AC-F1.1.1-04 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-03, BR-F1-02, BR-F1-04, BR-F1-09 | `MemberApiIntegrationTest#directRegistrationUsesTheSameDtoConstraints` |
+| TC-F1.1.1-04j | AC-F1.1.1-04 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-03, BR-F1-02, BR-F1-04, BR-F1-09 | `features/auth/pages/RegisterPage.test.tsx › TC-F1.1.1-04j: không gửi dữ liệu khi số điện thoại hoặc mật ` |
+| TC-F1.1.1-04k | AC-F1.1.1-04 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-03, BR-F1-02, BR-F1-04, BR-F1-09 | `features/auth/api/validation.test.ts › TC-F1.1.1-04k: khớp quy tắc chữ ASCII và số của backend, vẫn` |
+| TC-F1.1.1-04l | AC-F1.1.1-04 | US-F1.1.1 | UC-F1.1 | BR-F1-01, BR-F1-03, BR-F1-02, BR-F1-04, BR-F1-09 | `features/auth/api/validation.test.ts › TC-F1.1.1-04l: giới hạn đúng 72 byte UTF-8 thay vì đếm ký tự` |
+| TC-F1.1.1-05a | AC-F1.1.1-05 | US-F1.1.1 | UC-F1.1 | BR-F1-09, BR-F1-01, BR-F1-02, BR-F1-03, BR-F1-04 | `F1RegistrationIntegrationTest#failureAfterPersistingProfileRollsBackBothUserAndMember` |
+| TC-F1.1.1-05b | AC-F1.1.1-05 | US-F1.1.1 | UC-F1.1 | BR-F1-09, BR-F1-01, BR-F1-02, BR-F1-03, BR-F1-04 | `F1RegistrationIntegrationTest#inactiveDefaultBranchRejectsRealRegistrationAndRollsBackNewAccount` |
+| TC-F1.1.1-05c | AC-F1.1.1-05 | US-F1.1.1 | UC-F1.1 | BR-F1-09, BR-F1-01, BR-F1-02, BR-F1-03, BR-F1-04 | `MemberApiIntegrationTest#registrationPortJoinsCallerTransactionAndRollsBackOnDuplicate` |
+| TC-F1.1.1-05d | AC-F1.1.1-05 | US-F1.1.1 | UC-F1.1 | BR-F1-09, BR-F1-01, BR-F1-02, BR-F1-03, BR-F1-04 | `StaffBranchIntegrationTest#missingDefaultBranchIsNotFoundInsteadOfCreatingOne` |
+| TC-F1.1.1-05e | AC-F1.1.1-05 | US-F1.1.1 | UC-F1.1 | BR-F1-09, BR-F1-01, BR-F1-02, BR-F1-03, BR-F1-04 | `StaffBranchIntegrationTest#inactiveDefaultBranchIsNotFound` |
+| TC-F1.2.1-01a | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthServiceTest#saiMatKhauLan1Den4Tra401CauChungVaTangBoDem` |
+| TC-F1.2.1-01b | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthServiceTest#khongLoEmailKhiEmailKhongTonTai` |
+| TC-F1.2.1-01c | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthServiceTest#taiKhoanDisabledNhapSaiMatKhauTra401KhongPhai403` |
+| TC-F1.2.1-01d | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthControllerTest#dangNhapSaiMatKhauTra401ProblemDetailTiengViet` |
+| TC-F1.2.1-01e | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthServiceTest#dangNhapSaiMatKhauNemUnauthorizedException` |
+| TC-F1.2.1-01f | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthServiceTest#dangNhapMatKhauVuotQua72ByteNemUnauthorizedExceptionKhongNem500` |
+| TC-F1.2.1-01g | AC-F1.2.1-01 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-03, BR-F1-06, BR-F1-04, BR-F1-05 | `AuthServiceTest#dangNhapEmailKhongTonTaiVanChayPasswordEncoderMatchesDeChongDoanEmailQuaThoiGian` |
+| TC-F1.2.1-02a | AC-F1.2.1-02 | US-F1.2.1 | UC-F1.2 | BR-F1-06, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-05 | `AuthServiceTest#lanSaiThu5Khoa15Phut` |
+| TC-F1.2.1-02b | AC-F1.2.1-02 | US-F1.2.1 | UC-F1.2 | BR-F1-06, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-05 | `AuthSessionConcurrencyIntegrationTest#namRequestDangNhapSaiDongThoiTangBoDemDung5VaKhoaTaiKhoan` |
+| TC-F1.2.1-03a | AC-F1.2.1-03 | US-F1.2.1 | UC-F1.2 | BR-F1-06, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-05 | `AuthServiceTest#dangKhoaNhapDungMatKhauVanTra403KemThoiGianConLai` |
+| TC-F1.2.1-04a | AC-F1.2.1-04 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05 | `AuthServiceTest#hetKhoaThiDangNhapLaiDuoc` |
+| TC-F1.2.1-04b | AC-F1.2.1-04 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05 | `AuthServiceTest#dangNhapDungDatLaiBoDemVe0VaXoaLockedUntil` |
+| TC-F1.2.1-04c | AC-F1.2.1-04 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05 | `AuthServiceTest#hetKhoaRoiNhapSaiThiBoDemTinhLaiTu1` |
+| TC-F1.2.1-04d | AC-F1.2.1-04 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05 | `AuthControllerTest#dangNhapThanhCongTra200KemCookieVaAccessToken` |
+| TC-F1.2.1-04e | AC-F1.2.1-04 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05 | `AuthServiceTest#dangNhapThanhCongCapTokenVaCapNhatLastLoginAt` |
+| TC-F1.2.1-04f | AC-F1.2.1-04 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05 | `JwtSecurityIntegrationTest#tokenHopLeLayThongTinTaiKhoanHienTaiThanhCong` |
+| TC-F1.2.1-04g | AC-F1.2.1-04 | US-F1.2.1 | UC-F1.2 | BR-F1-01, BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05 | `features/auth/pages/LoginPage.test.tsx › TC-F1.2.1-04g: đăng nhập bằng email đã chuẩn hóa rồi mở tran` |
+| TC-F1.2.1-05a | AC-F1.2.1-05 | US-F1.2.1 | UC-F1.2 | BR-F1-05, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `AuthControllerTest#dangNhapTaiKhoanBiKhoaTra403ProblemDetailTiengViet` |
+| TC-F1.2.1-05b | AC-F1.2.1-05 | US-F1.2.1 | UC-F1.2 | BR-F1-05, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `AuthServiceTest#dangNhapTaiKhoanBiKhoaNemForbiddenException` |
+| TC-F1.3.1-01a | AC-F1.3.1-01 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthControllerTest#lamMoiPhienThanhCongTra200KemCookieMoi` |
+| TC-F1.3.1-01b | AC-F1.3.1-01 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthServiceTest#lamMoiThanhCongXoayVongRefreshToken` |
+| TC-F1.3.1-01c | AC-F1.3.1-01 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthServiceTest#lamMoiTokenDaBiThuHoiThuHoiToanBoPhienVaNemUnauthorizedException` |
+| TC-F1.3.1-01d | AC-F1.3.1-01 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthSessionConcurrencyIntegrationTest#haiYeuCauRefreshDongThoiChiMotThanhCongVaMotNhan401` |
+| TC-F1.3.1-01e | AC-F1.3.1-01 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `auth/AuthProvider.test.tsx › TC-F1.3.1-01e: bootstrap làm mới cookie rồi lấy user từ /me` |
+| TC-F1.3.1-02a | AC-F1.3.1-02 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthControllerTest#dangXuatThanhCongTra204VaXoaCookie` |
+| TC-F1.3.1-02b | AC-F1.3.1-02 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthControllerTest#dangXuatCoJwtCungNguoiDungThuHoiVaXoaCookie` |
+| TC-F1.3.1-02c | AC-F1.3.1-02 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthControllerTest#dangXuatCoJwtHetHanVanDoiChieuChuSoHuuCookie` |
+| TC-F1.3.1-02d | AC-F1.3.1-02 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthServiceTest#dangXuatThuHoiRefreshToken` |
+| TC-F1.3.1-02e | AC-F1.3.1-02 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthServiceTest#dangXuatVoiJwtThuHoiCookieKhiCungChuSoHuu` |
+| TC-F1.3.1-02f | AC-F1.3.1-02 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthSessionConcurrencyIntegrationTest#dangXuatBangJwtHetHanCuaTaiKhoanAVanGiuPhienCuaTaiKhoanB` |
+| TC-F1.3.1-02g | AC-F1.3.1-02 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `auth/AuthProvider.test.tsx › TC-F1.3.1-02g: logout chỉ xóa phiên sau khi server xác nhận;` |
+| TC-F1.3.1-03a | AC-F1.3.1-03 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthControllerTest#lamMoiThieuCookieTra401ProblemDetailVaXoaCookie` |
+| TC-F1.3.1-03b | AC-F1.3.1-03 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthServiceTest#lamMoiTokenDaBiThuHoiThuHoiToanBoPhienVaNemUnauthorizedException` |
+| TC-F1.3.1-03c | AC-F1.3.1-03 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthServiceTest#lamMoiTokenHetHanNemUnauthorizedException` |
+| TC-F1.3.1-03d | AC-F1.3.1-03 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `auth/AuthProvider.test.tsx › TC-F1.3.1-03d: bootstrap không có cookie kết thúc anonymous` |
+| TC-F1.3.1-04a | AC-F1.3.1-04 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthControllerTest#dangXuatCoJwtKhacChuCookieKhongXoaCookieChung` |
+| TC-F1.3.1-04b | AC-F1.3.1-04 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthControllerTest#dangXuatCoJwtHetHanVanDoiChieuChuSoHuuCookie` |
+| TC-F1.3.1-04c | AC-F1.3.1-04 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthServiceTest#dangXuatVoiJwtKhongThuHoiCookieCuaTaiKhoanKhac` |
+| TC-F1.3.1-04d | AC-F1.3.1-04 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthSessionConcurrencyIntegrationTest#dangXuatBangJwtCuaTaiKhoanAKhongThuHoiHoacXoaCookieCuaTaiKhoanB` |
+| TC-F1.3.1-04e | AC-F1.3.1-04 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthSessionConcurrencyIntegrationTest#dangXuatBangJwtHetHanCuaTaiKhoanAVanGiuPhienCuaTaiKhoanB` |
+| TC-F1.3.1-04f | AC-F1.3.1-04 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `auth/account-change.test.tsx › TC-F1.3.1-04f: refresh khác tài khoản đóng trang bảo vệ và đ` |
+| TC-F1.5.1-01a | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#emailActiveTaoPasswordResetBamHan30PhutVaGuiEmail` |
+| TC-F1.5.1-01b | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `AuthControllerTest#quenMatKhauCongKhaiTra200CauChung` |
+| TC-F1.5.1-01c | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `features/auth/pages/ForgotPasswordPage.test.tsx › TC-F1.5.1-01c: nhập email ở /quen-mat-khau gửi email chuẩn h` |
+| TC-F1.5.1-01d | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `features/auth/pages/LoginPage.test.tsx › TC-F1.5.1-01d: LoginPage có liên kết Quên mật khẩu? tới /que` |
+| TC-F1.5.1-01e | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `features/auth/api/auth-api.test.ts › TC-F1.5.1-01e: forgotPassword và resetPassword gọi API công ` |
+| TC-F1.5.1-01f | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#phatHanhTokenTheoUserIdVaThoiHan72GioChoS236` |
+| TC-F1.5.1-02a | AC-F1.5.1-02 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#khongLoEmailKhiKhongTonTaiHoacKhongActive` |
+| TC-F1.5.1-02b | AC-F1.5.1-02 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#guiEmailLoiVanKhongNemNgoaiLeVaKhongGhiTokenRaLog` |
+| TC-F1.5.1-03a | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `PasswordResetServiceTest#datLaiMatKhauDungTokenKhoaUserGhiUsedAtXoaKhoaTamVaThuHoiPhien` |
+| TC-F1.5.1-03b | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `AuthControllerTest#datLaiMatKhauHopLeCongKhaiTra204` |
+| TC-F1.5.1-03c | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `PasswordResetIntegrationTest#luongTronVenQuenVaDatLaiMatKhau` |
+| TC-F1.5.1-03d | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-03d: Trang Đặt mật khẩu gửi token và mật khẩu mới ` |
+| TC-F1.5.1-03e | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-03e: /quen-mat-khau và /dat-lai-mat-khau là trang ` |
+| TC-F1.5.1-03f | AC-F1.5.1-03 | US-F1.5.1 | UC-F1.5 | BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08, BR-F1-01 | `PasswordResetIntegrationTest#datLaiMatKhauVoHieuHoaTatCaLienKetQuenMatKhauKhacCuaCungUser` |
+| TC-F1.5.1-04a | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#tokenSaiDaDungHoacHetHanTra422` |
+| TC-F1.5.1-04b | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `AuthControllerTest#datLaiMatKhauTokenLoiTra422` |
+| TC-F1.5.1-04c | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetIntegrationTest#tokenHetHanSau30PhutTra422VaEmailKhongTonTaiTra200` |
+| TC-F1.5.1-04d | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetIntegrationTest#datLaiMatKhauDongThoiCungMotTokenChiMotLanThanhCong` |
+| TC-F1.5.1-04e | AC-F1.5.1-04 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-04e: lỗi 422 hết hạn hoặc đã dùng hiển thị đúng câ` |
+| TC-F1.5.1-05a | AC-F1.5.1-05 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08 | `AuthControllerTest#quenMatKhauEmailSaiDinhDangTra400` |
+| TC-F1.5.1-05b | AC-F1.5.1-05 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08 | `AuthControllerTest#datLaiMatKhauSaiChuanS1Tra400` |
+| TC-F1.5.1-05c | AC-F1.5.1-05 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08 | `features/auth/pages/ForgotPasswordPage.test.tsx › TC-F1.5.1-05c: email sai định dạng ở trình duyệt không gọi A` |
+| TC-F1.5.1-05d | AC-F1.5.1-05 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-05d: thiếu hoặc rỗng token trên URL báo lỗi ngay, ` |
+| TC-F1.5.1-05e | AC-F1.5.1-05 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-08 | `features/auth/pages/ResetPasswordPage.test.tsx › TC-F1.5.1-05e: kiểm tra chuẩn S1, hai mật khẩu không khớp kh` |
+| TC-F1.5.1-06a | AC-F1.5.1-06 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `BrevoEmailSenderTest#guiEmailQuaBrevoBangRestClientKhongGoiMangThat` |
+| TC-F1.5.1-06b | AC-F1.5.1-06 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `BrevoEmailSenderTest#khoaBrevoRongThiBeanLaLogEmailSender` |
+| TC-F1.5.1-06c | AC-F1.5.1-06 | US-F1.5.1 | UC-F1.5 | BR-F1-08, BR-F1-01, BR-F1-03, BR-F1-04, BR-F1-06 | `BrevoEmailSenderTest#coKhoaBrevoThiBeanLaBrevoEmailSender` |
+| TC-F1.6.1-01a | AC-F1.6.1-01 | US-F1.6.1 | UC-F1.6 | BR-F1-04, BR-F1-05 | `AuthServiceTest#getCurrentUserDocThongTinTuJwtVaNem401KhiClaimKhongHopLe` |
+| TC-F1.6.1-01b | AC-F1.6.1-01 | US-F1.6.1 | UC-F1.6 | BR-F1-04, BR-F1-05 | `JwtSecurityIntegrationTest#chuaGuiTokenTra401ProblemDetailTiengViet` |
+| TC-F1.6.1-01c | AC-F1.6.1-01 | US-F1.6.1 | UC-F1.6 | BR-F1-04, BR-F1-05 | `JwtSecurityIntegrationTest#tokenSaiChuKyTra401ProblemDetailTiengViet` |
+| TC-F1.6.1-01d | AC-F1.6.1-01 | US-F1.6.1 | UC-F1.6 | BR-F1-04, BR-F1-05 | `JwtSecurityIntegrationTest#tokenHetHanTra401ProblemDetailTiengViet` |
+| TC-F1.6.1-01e | AC-F1.6.1-01 | US-F1.6.1 | UC-F1.6 | BR-F1-04, BR-F1-05 | `JwtSecurityIntegrationTest#tokenThieuClaimRoleBiChanVoi401KhiGoiApi` |
+| TC-F1.6.1-01f | AC-F1.6.1-01 | US-F1.6.1 | UC-F1.6 | BR-F1-04, BR-F1-05 | `JwtSecurityIntegrationTest#tokenCoRoleLaHoacSubKhongPhaiSoTra401ThayVi500` |
+| TC-F1.6.1-01g | AC-F1.6.1-01 | US-F1.6.1 | UC-F1.6 | BR-F1-04, BR-F1-05 | `routes/ProtectedRoute.test.tsx › TC-F1.6.1-01g: chuyển về /login khi chưa đăng nhập` |
+| TC-F1.6.1-02a | AC-F1.6.1-02 | US-F1.6.1 | UC-F1.6 | BR-F1-05, BR-F1-04 | `AuthControllerTest#layThongTinTaiKhoanHienTaiUyQuyenChoAuthService` |
+| TC-F1.6.1-02b | AC-F1.6.1-02 | US-F1.6.1 | UC-F1.6 | BR-F1-05, BR-F1-04 | `JwtSecurityIntegrationTest#tokenHopLeLayThongTinTaiKhoanHienTaiThanhCong` |
+| TC-F1.6.1-02c | AC-F1.6.1-02 | US-F1.6.1 | UC-F1.6 | BR-F1-05, BR-F1-04 | `JwtSecurityIntegrationTest#goiApiKhiDuVaiTroTra200` |
+| TC-F1.6.1-02d | AC-F1.6.1-02 | US-F1.6.1 | UC-F1.6 | BR-F1-05, BR-F1-04 | `JwtSecurityIntegrationTest#goiApiKhiKhongDuVaiTroTra403ProblemDetailTiengViet` |
+| TC-F1.6.1-02e | AC-F1.6.1-02 | US-F1.6.1 | UC-F1.6 | BR-F1-05, BR-F1-04 | `JwtSecurityIntegrationTest#goiApiNhanVienBangVaiTroTrainerKhongDuQuyenTra403` |
+| TC-F1.6.1-02f | AC-F1.6.1-02 | US-F1.6.1 | UC-F1.6 | BR-F1-05, BR-F1-04 | `routes/ProtectedRoute.test.tsx › TC-F1.6.1-02f: chuyển về /403 khi sai vai trò` |
+| TC-F1.6.1-02g | AC-F1.6.1-02 | US-F1.6.1 | UC-F1.6 | BR-F1-05, BR-F1-04 | `routes/ProtectedRoute.test.tsx › TC-F1.6.1-02g: hiển thị nội dung khi đúng vai trò` |
+| TC-F1.6.1-03a | AC-F1.6.1-03 | US-F1.6.1 | UC-F1.6 | BR-F1-05, BR-F1-04 | `F1RegistrationIntegrationTest#realReceptionistJwtWithoutStaffAssignmentCannotCreateOrListMembers` |
+| TC-F1.6.1-03b | AC-F1.6.1-03 | US-F1.6.1 | UC-F1.6 | BR-F1-05, BR-F1-04 | `StaffBranchIntegrationTest#staffBranchComesFromThatUsersAssignmentRatherThanDefaultBranch` |
+| TC-F1.6.1-03c | AC-F1.6.1-03 | US-F1.6.1 | UC-F1.6 | BR-F1-05, BR-F1-04 | `StaffBranchIntegrationTest#userWithoutStaffProfileIsDeniedRatherThanAssignedToCn01` |
+| TC-F1.6.1-03d | AC-F1.6.1-03 | US-F1.6.1 | UC-F1.6 | BR-F1-05, BR-F1-04 | `StaffBranchIntegrationTest#inactiveStaffIsDenied` |
+| TC-F1.6.1-03e | AC-F1.6.1-03 | US-F1.6.1 | UC-F1.6 | BR-F1-05, BR-F1-04 | `StaffBranchIntegrationTest#activeStaffInInactiveBranchIsDenied` |
+| TC-F1.6.1-03f | AC-F1.6.1-03 | US-F1.6.1 | UC-F1.6 | BR-F1-05, BR-F1-04 | `StaffBranchIntegrationTest#invalidOrUnknownUserIdsNeverReceiveDefaultBranch` |
+| TC-F1.6.1-04a | AC-F1.6.1-04 | US-F1.6.1 | UC-F1.6 | BR-F1-04, BR-F1-05 | `AccountServiceTest#disableAccountCapNhatDisabledVaThuHoiRefreshToken` |
+| TC-F1.6.1-04b | AC-F1.6.1-04 | US-F1.6.1 | UC-F1.6 | BR-F1-04, BR-F1-05 | `F1RegistrationIntegrationTest#disablingRevokesAllMemberSessionsAndReactivationDoesNotRestoreOldTokens` |
+| TC-F2.1.1-01a | AC-F2.1.1-01 | US-F2.1.1 | UC-F2.1 | BR-F2-05, BR-F2-06, BR-F2-07, BR-F2-10 | `F1RegistrationIntegrationTest#realReceptionistJwtCreatesAndManagesCounterProfileInAssignedBranch` |
+| TC-F2.1.1-01b | AC-F2.1.1-01 | US-F2.1.1 | UC-F2.1 | BR-F2-05, BR-F2-06, BR-F2-07, BR-F2-10 | `MemberApiIntegrationTest#createNormalizesAndReturnsLocationAndAudit` |
+| TC-F2.1.1-01c | AC-F2.1.1-01 | US-F2.1.1 | UC-F2.1 | BR-F2-05, BR-F2-06, BR-F2-07, BR-F2-10 | `MemberApiIntegrationTest#createAndUpdateAcceptPastOrAbsentBirthDate` |
+| TC-F2.1.1-01d | AC-F2.1.1-01 | US-F2.1.1 | UC-F2.1 | BR-F2-05, BR-F2-06, BR-F2-07, BR-F2-10 | `MemberApiIntegrationTest#branchManagerCanCreateReadUpdateAndSearchWithinTheirBranch` |
+| TC-F2.1.1-01e | AC-F2.1.1-01 | US-F2.1.1 | UC-F2.1 | BR-F2-05, BR-F2-06, BR-F2-07, BR-F2-10 | `MemberServiceTest#createsWithStaffBranchAndNormalizedPhone` |
+| TC-F2.1.1-02a | AC-F2.1.1-02 | US-F2.1.1 | UC-F2.1 | BR-F2-06, BR-F2-05, BR-F2-07, BR-F2-10 | `MemberApiIntegrationTest#createAndUpdateRejectTodayOrFutureBirthDateWithoutChanges` |
+| TC-F2.1.1-02b | AC-F2.1.1-02 | US-F2.1.1 | UC-F2.1 | BR-F2-06, BR-F2-05, BR-F2-07, BR-F2-10 | `MemberApiIntegrationTest#invalidNamesAreRejectedByRequestValidationOnCreateAndUpdate` |
+| TC-F2.1.1-02c | AC-F2.1.1-02 | US-F2.1.1 | UC-F2.1 | BR-F2-06, BR-F2-05, BR-F2-07, BR-F2-10 | `MemberApiIntegrationTest#invalidBodiesAndPaginationAre400AndDuplicateIs409` |
+| TC-F2.1.1-02d | AC-F2.1.1-02 | US-F2.1.1 | UC-F2.1 | BR-F2-06, BR-F2-05, BR-F2-07, BR-F2-10 | `MemberApiIntegrationTest#incompletePhoneCannotBeSavedOnCreateOrUpdate` |
+| TC-F2.1.1-02e | AC-F2.1.1-02 | US-F2.1.1 | UC-F2.1 | BR-F2-06, BR-F2-05, BR-F2-07, BR-F2-10 | `MemberApiIntegrationTest#concurrentRequestsCannotCreateDuplicatePhone` |
+| TC-F2.1.1-02f | AC-F2.1.1-02 | US-F2.1.1 | UC-F2.1 | BR-F2-06, BR-F2-05, BR-F2-07, BR-F2-10 | `MemberServiceTest#duplicatePhoneDoesNotConsumeSequence` |
+| TC-F2.1.1-02g | AC-F2.1.1-02 | US-F2.1.1 | UC-F2.1 | BR-F2-06, BR-F2-05, BR-F2-07, BR-F2-10 | `MemberServiceTest#concurrentDuplicatePhoneStillGetsFrontDeskGuidance` |
+| TC-F2.1.1-02h | AC-F2.1.1-02 | US-F2.1.1 | UC-F2.1 | BR-F2-06, BR-F2-05, BR-F2-07, BR-F2-10 | `features/members/components/MemberFormModal.test.tsx › TC-F2.1.1-02h: hiển thị lỗi validation do backend trả về nga` |
+| TC-F2.1.1-02i | AC-F2.1.1-02 | US-F2.1.1 | UC-F2.1 | BR-F2-06, BR-F2-05, BR-F2-07, BR-F2-10 | `features/members/components/MemberFormModal.test.tsx › TC-F2.1.1-02i: giữ form và dữ liệu đã nhập khi server từ chố` |
+| TC-F2.1.1-03a | AC-F2.1.1-03 | US-F2.1.1 | UC-F2.1 | BR-F2-10, BR-F2-05, BR-F2-06, BR-F2-07 | `F1RegistrationIntegrationTest#realReceptionistJwtWithoutStaffAssignmentCannotCreateOrListMembers` |
+| TC-F2.1.1-03b | AC-F2.1.1-03 | US-F2.1.1 | UC-F2.1 | BR-F2-10, BR-F2-05, BR-F2-06, BR-F2-07 | `MemberApiIntegrationTest#validatesEndpointAndRecordPermissions` |
+| TC-F2.3.1-01a | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `F1RegistrationIntegrationTest#listGetsBatchEmailsThroughRealF1AndIncludesUnlinkedProfile` |
+| TC-F2.3.1-01b | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#searchScopesBothRowsAndCountAndIncludesUnlinkedProfiles` |
+| TC-F2.3.1-01c | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#memberCodeSearchIsExactAndIgnoresCase` |
+| TC-F2.3.1-01d | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#phonePrefixSearchRespectsBranchStatusSoftDeletionAndPagination` |
+| TC-F2.3.1-01e | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#shortNumericKeywordsWithoutMatchingPrefixReturnAnEmptyPage` |
+| TC-F2.3.1-01f | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#longInvalidNumericKeywordsReturnAnEmptyPage` |
+| TC-F2.3.1-01g | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#completePhoneSearchStillNormalizesAndMatchesExactly` |
+| TC-F2.3.1-01h | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#escapesNameWildcardsAndFiltersStatus` |
+| TC-F2.3.1-01i | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#measuresSearchOnTenThousandProfiles` |
+| TC-F2.3.1-01j | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01j: đổi trang gọi API từ 0, tìm kiếm mới trở về t` |
+| TC-F2.3.1-01k | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01k: áp dụng từ khóa đang nhập khi đổi trạng thái ` |
+| TC-F2.3.1-02a | AC-F2.3.1-02 | US-F2.3.1 | UC-F2.3 | BR-F2-10, BR-F2-05, BR-F2-06, BR-F2-09 | `F1RegistrationIntegrationTest#listGetsBatchEmailsThroughRealF1AndIncludesUnlinkedProfile` |
+| TC-F2.3.1-02b | AC-F2.3.1-02 | US-F2.3.1 | UC-F2.3 | BR-F2-10, BR-F2-05, BR-F2-06, BR-F2-09 | `MemberApiIntegrationTest#searchScopesBothRowsAndCountAndIncludesUnlinkedProfiles` |
+| TC-F2.3.1-03a | AC-F2.3.1-03 | US-F2.3.1 | UC-F2.3 | BR-F2-09, BR-F2-10, BR-F2-05, BR-F2-06 | `F1RegistrationIntegrationTest#realF1RegistrationCreatesProfileAndJwtCanReadOwnF2Profile` |
+| TC-F2.3.1-03b | AC-F2.3.1-03 | US-F2.3.1 | UC-F2.3 | BR-F2-09, BR-F2-10, BR-F2-05, BR-F2-06 | `MemberApiIntegrationTest#validatesEndpointAndRecordPermissions` |
+| TC-F2.3.1-03c | AC-F2.3.1-03 | US-F2.3.1 | UC-F2.3 | BR-F2-09, BR-F2-10, BR-F2-05, BR-F2-06 | `MemberServiceTest#memberCannotReadSomeoneElse` |
+| TC-F2.3.1-04a | AC-F2.3.1-04 | US-F2.3.1 | UC-F2.3 | BR-F2-10, BR-F2-05, BR-F2-06, BR-F2-09 | `MemberApiIntegrationTest#validatesEndpointAndRecordPermissions` |
+| TC-F2.4.1-01a | AC-F2.4.1-01 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberApiIntegrationTest#createAndUpdateAcceptPastOrAbsentBirthDate` |
+| TC-F2.4.1-01b | AC-F2.4.1-01 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberApiIntegrationTest#branchManagerCanCreateReadUpdateAndSearchWithinTheirBranch` |
+| TC-F2.4.1-01c | AC-F2.4.1-01 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberApiIntegrationTest#updateSamePhoneAndDisableRevokeAndActivate` |
+| TC-F2.4.1-01d | AC-F2.4.1-01 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberServiceTest#editingProfileWithoutStatusTransitionDoesNotDisableOrActivateAccount` |
+| TC-F2.4.1-01e | AC-F2.4.1-01 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `features/members/components/MemberFormModal.test.tsx › TC-F2.4.1-01e: sửa hồ sơ gửi đầy đủ trạng thái và giữ giá tr` |
+| TC-F2.4.1-02a | AC-F2.4.1-02 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberApiIntegrationTest#createAndUpdateRejectTodayOrFutureBirthDateWithoutChanges` |
+| TC-F2.4.1-02b | AC-F2.4.1-02 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberApiIntegrationTest#invalidNamesAreRejectedByRequestValidationOnCreateAndUpdate` |
+| TC-F2.4.1-02c | AC-F2.4.1-02 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberApiIntegrationTest#missingUpdateStatusIsRejectedByRequestValidation` |
+| TC-F2.4.1-02d | AC-F2.4.1-02 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberApiIntegrationTest#incompletePhoneCannotBeSavedOnCreateOrUpdate` |
+| TC-F2.4.1-02e | AC-F2.4.1-02 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberApiIntegrationTest#duplicateUpdateIs409AndUnassignedStaffCannotAccess` |
+| TC-F2.4.1-02f | AC-F2.4.1-02 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberServiceTest#outsideBranchIsNotFoundAndDoesNotModifyAccount` |
+| TC-F2.4.1-03a | AC-F2.4.1-03 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-09, BR-F2-06, BR-F2-10 | `AccountServiceTest#disableAccountCapNhatDisabledVaThuHoiRefreshToken` |
+| TC-F2.4.1-03b | AC-F2.4.1-03 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-09, BR-F2-06, BR-F2-10 | `F1RegistrationIntegrationTest#disablingRevokesAllMemberSessionsAndReactivationDoesNotRestoreOldTokens` |
+| TC-F2.4.1-03c | AC-F2.4.1-03 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-09, BR-F2-06, BR-F2-10 | `F1RegistrationIntegrationTest#failureAfterRealF1DisableRollsBackMemberAccountAndTokenRevocation` |
+| TC-F2.4.1-03d | AC-F2.4.1-03 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-09, BR-F2-06, BR-F2-10 | `F1RegistrationIntegrationTest#failureAfterSavingMemberRollsBackProfileAccountAndTokenRevocation` |
+| TC-F2.4.1-03e | AC-F2.4.1-03 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-09, BR-F2-06, BR-F2-10 | `MemberApiIntegrationTest#updateSamePhoneAndDisableRevokeAndActivate` |
+| TC-F2.4.1-03f | AC-F2.4.1-03 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-09, BR-F2-06, BR-F2-10 | `MemberApiIntegrationTest#failedAccountOperationRollsBackMemberUserAndTokens` |
+| TC-F2.4.1-03g | AC-F2.4.1-03 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-09, BR-F2-06, BR-F2-10 | `MemberServiceTest#failedAccountTransitionDoesNotMutateNamePhoneOrStatus` |
+| TC-F2.4.1-04a | AC-F2.4.1-04 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-06, BR-F2-09, BR-F2-10 | `AccountServiceTest#activateAccountIfDisabledChiMoTaiKhoanDisabledKhongMoLocked` |
+| TC-F2.4.1-04b | AC-F2.4.1-04 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-06, BR-F2-09, BR-F2-10 | `F1RegistrationIntegrationTest#disablingRevokesAllMemberSessionsAndReactivationDoesNotRestoreOldTokens` |
+| TC-F2.4.1-04c | AC-F2.4.1-04 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-06, BR-F2-09, BR-F2-10 | `F1RegistrationIntegrationTest#activatingMemberDoesNotUnlockCurrentlyLockedAccount` |
+| TC-F2.4.1-04d | AC-F2.4.1-04 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-06, BR-F2-09, BR-F2-10 | `F1RegistrationIntegrationTest#failureAfterRealF1ActivationRollsBackMemberAndAccount` |
+| TC-F2.4.1-04e | AC-F2.4.1-04 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#updateSamePhoneAndDisableRevokeAndActivate` |
+| TC-F2.4.1-05a | AC-F2.4.1-05 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#concurrentUpdatesKeepMemberAndAccountStatusesConsistent` |
+| TC-F2.4.2-01a | AC-F2.4.2-01 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#validImagesAreResizedAndStored` |
+| TC-F2.4.2-01b | AC-F2.4.2-01 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#smallTransparentImagesKeepDimensions` |
+| TC-F2.4.2-01c | AC-F2.4.2-01 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#acceptsDimensionBoundary` |
+| TC-F2.4.2-01d | AC-F2.4.2-01 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#acceptsUploadSizeBoundary` |
+| TC-F2.4.2-02a | AC-F2.4.2-02 | US-F2.4.2 | UC-F2.4 | BR-F2-03, BR-F2-01, BR-F2-02, BR-F2-04 | `MemberAvatarIntegrationTest#overwritesSameRow` |
+| TC-F2.4.2-02b | AC-F2.4.2-02 | US-F2.4.2 | UC-F2.4 | BR-F2-03, BR-F2-01, BR-F2-02, BR-F2-04 | `MemberAvatarIntegrationTest#concurrentInitialUploadsAreSerialized` |
+| TC-F2.4.2-02c | AC-F2.4.2-02 | US-F2.4.2 | UC-F2.4 | BR-F2-03, BR-F2-01, BR-F2-02, BR-F2-04 | `MemberAvatarIntegrationTest#invalidFilesDoNotReplaceExistingAvatar` |
+| TC-F2.4.2-03a | AC-F2.4.2-03 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#invalidFilesDoNotReplaceExistingAvatar` |
+| TC-F2.4.2-03b | AC-F2.4.2-03 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#servletRejectsOversizedMultipart` |
+| TC-F2.4.2-04a | AC-F2.4.2-04 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#authorizedReadersReceiveStoredJpeg` |
+| TC-F2.4.2-04b | AC-F2.4.2-04 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#otherReadersCannotSeeAvatar` |
+| TC-F2.4.2-05a | AC-F2.4.2-05 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#ownerMayUploadAcrossBranches` |
+| TC-F2.4.2-05b | AC-F2.4.2-05 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#deniedWritersDoNotMutateAvatar` |
+| TC-F2.4.2-05c | AC-F2.4.2-05 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#inactiveAssignmentsAreDenied` |
+| TC-F2.4.2-06a | AC-F2.4.2-06 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#missingAvatarIsNotFound` |
+| TC-F2.4.2-06b | AC-F2.4.2-06 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#missingOrDeletedProfilesAreNotFound` |
+| TC-F2.4.2-07a | AC-F2.4.2-07 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#unauthenticatedRequestsAreDenied` |
+| TC-F2.4.2-07b | AC-F2.4.2-07 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#invalidIdsAreRejected` |
+| TC-F2.4.2-07c | AC-F2.4.2-07 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#missingMultipartFileIsRejected` |
+| TC-F2.4.2-08a | AC-F2.4.2-08 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#newProfileHasNoAvatar` |
+| TC-F2.4.2-08b | AC-F2.4.2-08 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#profileResponsesReflectAvatarPresence` |
 | TC-F3.1.1-01a | AC-F3.1.1-01 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#scopesRowsAndCountAndIgnoresClientBranch` |
 | TC-F3.1.1-02a | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#defaultActiveAndOrderingMatchContract` |
 | TC-F3.1.1-02b | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#inactiveFilterAndEmptyResults` |
@@ -714,17 +1199,21 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.5.1-01a | AC-F3.5.1-01 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-13, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-14 | `InvoiceSaleIntegrationTest#sellCreatesPendingInvoiceAndMembershipWithServerPrice` |
 | TC-F3.5.1-01b | AC-F3.5.1-01 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-13, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-14 | `InvoiceSaleIntegrationTest#sessionPackageCopiesSessionCount` |
 | TC-F3.5.1-01c | AC-F3.5.1-01 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-13, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-14 | `InvoiceSaleIntegrationTest#membershipFailureRollsBackEntireSale` |
+| TC-F3.5.1-01d | AC-F3.5.1-01 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-13, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-14 | `features/packages/api/package-sales.test.ts › TC-F3.5.1-01d: livePackageSalesApi gọi đúng GET /memberships` |
+| TC-F3.5.1-01e | AC-F3.5.1-01 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-13, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-14 | `features/packages/pages/SellPackagePage.test.tsx › TC-F3.5.1-01e: Chọn hội viên và gói, chỉ gửi memberId và ite` |
 | TC-F3.5.1-02a | AC-F3.5.1-02 | US-F3.5.1 | UC-F3.5 | BR-F3-12, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-13, BR-F3-14 | `MembershipListIntegrationTest#pendingSaleIsNotUsableBeforePayment` |
 | TC-F3.5.1-02b | AC-F3.5.1-02 | US-F3.5.1 | UC-F3.5 | BR-F3-12, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-13, BR-F3-14 | `InvoicePaymentIntegrationTest#payActivatesWithDatesRecomputedAtPaymentTime` |
 | TC-F3.5.1-03a | AC-F3.5.1-03 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#renewalStartsDayAfterOldTimePackage` |
 | TC-F3.5.1-03b | AC-F3.5.1-03 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipServiceTest#newOrTimeRenewal` |
 | TC-F3.5.1-03c | AC-F3.5.1-03 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoicePaymentIntegrationTest#payRenewalAfterActiveTimePackageIsUpcoming` |
 | TC-F3.5.1-03c | AC-F3.5.1-03 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipServiceTest#ptRenewalWithSessionsLeft` |
+| TC-F3.5.1-03d | AC-F3.5.1-03 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `features/packages/pages/SellPackagePage.test.tsx › TC-F3.5.1-03d: Hội viên có gói TIME ACTIVE cùng phạm vi thì ` |
 | TC-F3.5.1-04a | AC-F3.5.1-04 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#renewalAfterEmptySessionPackageStartsTomorrow` |
 | TC-F3.5.1-04b | AC-F3.5.1-04 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#renewalAfterSessionPackageWithSessionsLeftStartsAfterEndDate` |
 | TC-F3.5.1-04c | AC-F3.5.1-04 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipServiceTest#sessionRenewal` |
 | TC-F3.5.1-04d | AC-F3.5.1-04 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoicePaymentIntegrationTest#payRenewalAfterEmptySessionPackageStartsTomorrow` |
 | TC-F3.5.1-04d | AC-F3.5.1-04 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipServiceTest#emptyPtDoesNotUseSessionTomorrowRule` |
+| TC-F3.5.1-04e | AC-F3.5.1-04 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `features/packages/pages/SellPackagePage.test.tsx › TC-F3.5.1-04e: Hội viên có gói SESSION đã hết buổi hiển thị ` |
 | TC-F3.5.1-05a | AC-F3.5.1-05 | US-F3.5.1 | UC-F3.5 | BR-F3-10, BR-F3-04, BR-F3-09, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#differentPackageTypesKeepExistingMembershipIntact` |
 | TC-F3.5.1-05b | AC-F3.5.1-05 | US-F3.5.1 | UC-F3.5 | BR-F3-10, BR-F3-04, BR-F3-09, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoicePaymentIntegrationTest#payPtWhileHoldingTimeActivatesPt` |
 | TC-F3.5.1-06a | AC-F3.5.1-06 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#secondWaitingPackageOfSameTypeIsRejected` |
@@ -737,6 +1226,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.5.1-08d | AC-F3.5.1-08 | US-F3.5.1 | UC-F3.5 | BR-F3-09, BR-F3-04, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#unknownMemberOrPackageIsNotFound` |
 | TC-F3.5.1-08e | AC-F3.5.1-08 | US-F3.5.1 | UC-F3.5 | BR-F3-09, BR-F3-04, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#memberOfOtherBranchIsHidden` |
 | TC-F3.5.1-08f | AC-F3.5.1-08 | US-F3.5.1 | UC-F3.5 | BR-F3-09, BR-F3-04, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleConcurrencyIntegrationTest#saleWaitsForCatalogChangeAndReadsCommittedValues` |
+| TC-F3.5.1-08g | AC-F3.5.1-08 | US-F3.5.1 | UC-F3.5 | BR-F3-09, BR-F3-04, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `features/packages/pages/SellPackagePage.test.tsx › TC-F3.5.1-08g: Lỗi 422 hoặc 404 khi hội viên ngừng hoạt động` |
 | TC-F3.5.1-10a | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#expiresOldBeforeActivatingNext` |
 | TC-F3.5.1-10b | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#lastDeductionTodayRetainsAccess` |
 | TC-F3.5.1-10c | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#zeroSessionsFromYesterdayExpire` |
@@ -870,7 +1360,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 
 ## 6. Kiểm thử chưa mang mã TC
 
-Có 283 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
+Có 170 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
 
 | File | Số kiểm thử |
 | --- | --- |
@@ -882,19 +1372,16 @@ Có 283 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/common/util/PhoneUtilsTest.java` | 2 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/DatabaseCleanerTest.java` | 3 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/DatabaseConstraintsTest.java` | 21 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AccountServiceTest.java` | 2 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthControllerTest.java` | 18 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthServiceTest.java` | 17 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthSessionConcurrencyIntegrationTest.java` | 3 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/JwtSecurityIntegrationTest.java` | 9 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthControllerTest.java` | 1 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthServiceTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/JwtTokenServiceTest.java` | 5 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/groupclass/ClassApiIntegrationTest.java` | 2 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/invoice/InvoiceSaleIntegrationTest.java` | 2 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/F1RegistrationIntegrationTest.java` | 13 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberApiIntegrationTest.java` | 25 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/F1RegistrationIntegrationTest.java` | 1 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberApiIntegrationTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberPhoneSupportTest.java` | 6 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberServiceTest.java` | 11 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/StaffBranchIntegrationTest.java` | 8 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberServiceTest.java` | 4 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/StaffBranchIntegrationTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/membership/MembershipListIntegrationTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PackageCatalogServiceTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PackageMapperTest.java` | 1 |
@@ -903,24 +1390,23 @@ Có 283 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/systemconfig/SystemConfigServiceTest.java` | 4 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/SeedDataMigrationIntegrationTest.java` | 1 |
 | `frontend/src/app/router.test.ts` | 3 |
-| `frontend/src/auth/account-change.test.tsx` | 1 |
-| `frontend/src/auth/AuthProvider.test.tsx` | 9 |
+| `frontend/src/auth/AuthProvider.test.tsx` | 6 |
 | `frontend/src/auth/cookie-operation-queue.test.ts` | 5 |
 | `frontend/src/auth/redirect.test.ts` | 7 |
 | `frontend/src/auth/session-coordination.test.ts` | 5 |
 | `frontend/src/auth/session-store.test.ts` | 3 |
 | `frontend/src/features/auth/api/auth-api.test.ts` | 5 |
-| `frontend/src/features/auth/api/validation.test.ts` | 3 |
-| `frontend/src/features/auth/pages/LoginPage.test.tsx` | 6 |
-| `frontend/src/features/auth/pages/RegisterPage.test.tsx` | 5 |
+| `frontend/src/features/auth/api/validation.test.ts` | 1 |
+| `frontend/src/features/auth/pages/LoginPage.test.tsx` | 5 |
+| `frontend/src/features/auth/pages/RegisterPage.test.tsx` | 1 |
 | `frontend/src/features/members/api/members.test.ts` | 4 |
-| `frontend/src/features/members/components/MemberFormModal.test.tsx` | 3 |
-| `frontend/src/features/members/pages/MembersPage.test.tsx` | 6 |
+| `frontend/src/features/members/pages/MembersPage.test.tsx` | 4 |
 | `frontend/src/features/packages/api/packages.test.ts` | 1 |
+| `frontend/src/features/packages/pages/SellPackagePage.test.tsx` | 3 |
 | `frontend/src/features/shared/use-remote-query.test.ts` | 2 |
 | `frontend/src/layouts/member-menu.test.ts` | 2 |
 | `frontend/src/layouts/staff-menu.test.ts` | 2 |
 | `frontend/src/layouts/UserMenu.test.tsx` | 1 |
-| `frontend/src/routes/ProtectedRoute.test.tsx` | 5 |
+| `frontend/src/routes/ProtectedRoute.test.tsx` | 2 |
 | `frontend/src/routes/route-access.test.ts` | 5 |
 | `frontend/src/services/http.test.ts` | 12 |

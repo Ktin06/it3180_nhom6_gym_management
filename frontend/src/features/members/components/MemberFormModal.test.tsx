@@ -6,7 +6,7 @@ import { createMockMembersApi } from '../api/mock-members'
 import { MemberFormModal } from './MemberFormModal'
 
 describe('form hồ sơ hội viên', () => {
-  it('hiển thị lỗi validation do backend trả về ngay dưới trường tương ứng', async () => {
+  it('TC-F2.1.1-02h: hiển thị lỗi validation do backend trả về ngay dưới trường tương ứng', async () => {
     const user = userEvent.setup()
     const api = createMockMembersApi()
     const error = new AxiosError('Bad request')
@@ -51,7 +51,7 @@ describe('form hồ sơ hội viên', () => {
     },
   )
 
-  it('giữ form và dữ liệu đã nhập khi server từ chối số điện thoại trùng', async () => {
+  it('TC-F2.1.1-02i: giữ form và dữ liệu đã nhập khi server từ chối số điện thoại trùng', async () => {
     const user = userEvent.setup()
     const onSaved = vi.fn()
     render(
@@ -70,7 +70,7 @@ describe('form hồ sơ hội viên', () => {
     expect(onSaved).not.toHaveBeenCalled()
   })
 
-  it('sửa hồ sơ gửi đầy đủ trạng thái và giữ giá trị tùy chọn đang có', async () => {
+  it('TC-F2.4.1-01e: sửa hồ sơ gửi đầy đủ trạng thái và giữ giá trị tùy chọn đang có', async () => {
     const user = userEvent.setup()
     const api = createMockMembersApi()
     const update = vi.spyOn(api, 'update')

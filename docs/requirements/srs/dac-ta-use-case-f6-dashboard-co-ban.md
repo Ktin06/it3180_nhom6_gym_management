@@ -17,8 +17,8 @@
 
 Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu tiên mà nhân viên lễ tân (`RECEPTIONIST`) và quản lý chi nhánh (`BRANCH_MANAGER`) nhìn thấy khi đăng nhập vào hệ thống; chủ chuỗi (`SUPER_ADMIN`) xem được dashboard của từng chi nhánh bằng cách chọn chi nhánh:
 - Cung cấp cái nhìn toàn diện, tức thời về tình hình vận hành phòng tập gym tại chi nhánh trong ngày.
-- **Thống kê theo thời gian thực số lượng hội viên đang có mặt:** Đếm số lượt check-in trong ngày mà chưa có mốc thời gian check-out (`checked_out_at IS NULL`).
-- **Tổng số lượt check-in trong ngày:** Đếm tổng số lượt khách đến tập từ đầu ngày đến thời điểm hiện tại, kèm biểu đồ cột thể hiện mật độ check-in theo từng khung giờ (trong giờ mở cửa của chi nhánh, `branches.open_time` – `branches.close_time`) nhằm nhận biết giờ cao điểm.
+- **Thống kê theo thời gian thực số lượng hội viên đang có mặt:** Đếm số hội viên duy nhất (`COUNT(DISTINCT member_id)`) có lượt check-in trong ngày mà chưa có mốc thời gian check-out (`checked_out_at IS NULL`), tránh trường hợp một hội viên check-in nhiều lần bị đếm trùng (VD-25).
+- **Tổng số lượt check-in trong ngày:** Đếm tổng số lượt khách đến tập từ đầu ngày đến thời điểm hiện tại (`COUNT(*)`), kèm biểu đồ cột thể hiện mật độ check-in theo từng khung giờ (trong giờ mở cửa của chi nhánh, `branches.open_time` – `branches.close_time`) nhằm nhận biết giờ cao điểm.
 - **Tổng doanh thu trong ngày tại quầy:** Tính tổng số tiền thu được từ các hóa đơn có trạng thái `PAID` phát sinh trong ngày tại chi nhánh. **Bắt buộc sử dụng `LEFT JOIN` với bảng `members`** vì các hóa đơn bán lẻ hàng hóa/nước uống tại quầy cho khách vãng lai (`POS` - F12) có thể có `member_id` để trống (`NULL`). Doanh thu được phân loại chi tiết theo phương thức thanh toán: Tiền mặt (`CASH`) và Chuyển khoản ngân hàng (`BANK_TRANSFER` qua VietQR).
 - **Cảnh báo gói tập sắp hết hạn:** Tự động lọc và hiển thị danh sách các gói tập của hội viên sẽ hết hạn trong vòng **7 ngày tới**, hoặc gói theo buổi (`SESSION`) chỉ còn không quá `SESSION_WARNING_THRESHOLD` buổi (mặc định 2), để nhân viên chủ động nhắc nhở, tư vấn gia hạn kịp thời trước khi hội viên gián đoạn việc tập luyện.
 - **Dòng dữ liệu check-in gần nhất (Live Feed):** Bảng hiển thị danh sách 5–10 lượt check-in mới nhất kèm trạng thái, ảnh đại diện và thời gian vào.
@@ -61,13 +61,42 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
    - **Với `SUPER_ADMIN`:** Bắt buộc phải truyền tham số query `?branchId={id}` trên URL để chỉ định chi nhánh muốn xem (`id` là số nguyên, khóa `branches.id` kiểu `bigint`). Nếu thiếu tham số `branchId`, hệ thống trả về mã lỗi `400 Bad Request` với thông báo: *"Chủ chuỗi cần chọn chi nhánh cụ thể để xem Dashboard."* Nếu `branchId` không tồn tại trong `branches`, hệ thống trả về `404 Not Found` (`NotFoundException`) với thông báo: *"Không tìm thấy chi nhánh."*, không trả các chỉ số bằng 0.
 3. Hệ thống thực hiện truy vấn đếm:
    ```sql
-   SELECT count(*) 
+   SELECT count(DISTINCT member_id)
    FROM checkins 
    WHERE branch_id = :branchId 
      AND checked_in_at >= :dayStart AND checked_in_at < :dayEnd
      AND checked_out_at IS NULL;
    ```
 4. Hệ thống trả về con số đếm và hiển thị trên thẻ Stat Card "Hội viên đang tập" kèm chỉ báo trạng thái hoạt động (chấm xanh nhấp nháy).
+
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F6.1.1: Xem số người đang có mặt tại phòng tập
+- **User story:** Là **Lễ tân, Quản lý chi nhánh hoặc Chủ chuỗi**, tôi muốn **xem số lượng hội viên đang có mặt tại phòng tập theo thời gian thực và tổng lượt check-in hôm nay**, để **nắm bắt mật độ phòng tập và tình hình vận hành cơ sở**.
+- **BR liên quan:** BR-F6.1, BR-F6.4; S3; VD-25 (đếm số hội viên duy nhất).
+- **Version / Sprint:** v1 / Sprint 2
+- **Issue:** #145
+- **Tiêu chí chấp nhận:**
+  - **AC-F6.1.1-01: Đếm chính xác số hội viên duy nhất đang tập và tổng lượt check-in** (BR-F6.1, VD-25)
+    - **Given** Trong ngày hôm nay tại chi nhánh: hội viên A có 2 lượt check-in chưa check-out; hội viên B có 1 lượt check-in chưa check-out; hội viên C có 1 lượt check-in đã check-out; ngoài ra có 1 lượt check-in lúc 23:30 hôm qua chưa check-out.
+    - **When** Lễ tân mở màn hình Dashboard.
+    - **Then** Chỉ số "Số người đang tập" hiển thị là **2** (đếm số hội viên duy nhất A và B, không đếm trùng lượt của A theo VD-25). Chỉ số "Lượt check-in hôm nay" hiển thị là **4** (đếm tổng số sự kiện check-in của A, B, C phát sinh hôm nay). Lượt check-in lúc 23:30 hôm qua không được tính vào cả hai chỉ số.
+  - **AC-F6.1.1-02: Chủ chuỗi bắt buộc phải chọn chi nhánh cụ thể** (S3)
+    - **Given** Người dùng đăng nhập với vai trò Chủ chuỗi (`SUPER_ADMIN`).
+    - **When** Gọi API `GET /api/v1/dashboard/stats` không truyền tham số `branchId`; hoặc truyền `?branchId=1` (chi nhánh tồn tại); hoặc truyền `?branchId=999` (chi nhánh không tồn tại).
+    - **Then** Khi không truyền `branchId`: hệ thống trả về `400 Bad Request` yêu cầu chọn chi nhánh; giao diện hiển thị câu nhắc chọn chi nhánh và không gửi API. Khi truyền `branchId=1`: hệ thống trả về đúng số liệu của chi nhánh 1. Khi truyền mã chi nhánh không tồn tại: hệ thống trả về `404 Not Found` *"Không tìm thấy chi nhánh."*, không trả số liệu bằng 0.
+  - **AC-F6.1.1-03: Nhân viên chi nhánh chỉ xem số liệu chi nhánh mình** (S3)
+    - **Given** Nhân viên lễ tân hoặc quản lý của chi nhánh `CN01` gửi request kèm tham số `?branchId=2` (chi nhánh `CN02`).
+    - **When** Gọi API Dashboard.
+    - **Then** Hệ thống tự động ghi đè và chỉ trả về số liệu của chi nhánh `CN01`; tham số `branchId=2` bị bỏ qua; trên giao diện nhân viên không hiển thị dropdown chọn chi nhánh.
+  - **AC-F6.1.1-04: Phân quyền truy cập các chỉ số Dashboard** (S3)
+    - **Given** Người dùng với vai trò Hội viên (`MEMBER`), Huấn luyện viên (`TRAINER`), hoặc chưa đăng nhập; hoặc tham số sai định dạng.
+    - **When** Gọi bất kỳ API nào của Dashboard.
+    - **Then** Hội viên và HLV nhận `403 Forbidden` *"Bạn không có quyền thực hiện thao tác này."*; chưa đăng nhập nhận `401 Unauthorized`; tham số sai nhận `400 Bad Request`. Menu Dashboard trên giao diện chỉ hiển thị cho Lễ tân, Quản lý chi nhánh và Chủ chuỗi.
+  - **AC-F6.1.1-05: Chủ chuỗi xem số liệu của chi nhánh đã ngừng hoạt động** (VD-25, GĐ-4)
+    - **Given** Chi nhánh có trạng thái `INACTIVE` (đã ngừng hoạt động) nhưng vẫn còn lưu dữ liệu lịch sử trong hệ thống.
+    - **When** Chủ chuỗi chọn xem chi nhánh đó trên Dashboard.
+    - **Then** Hệ thống vẫn hiển thị đầy đủ số liệu thống kê lịch sử của chi nhánh đó; chỉ khi chi nhánh không tồn tại mới trả về `404 Not Found`.
 
 ---
 
@@ -105,6 +134,23 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 3. Hệ thống chuẩn bị đủ các khung giờ từ giờ của `branches.open_time` đến giờ của (`branches.close_time` trừ 1 phút), vì đúng giờ đóng cửa là ngoài giờ (F4). Ví dụ chi nhánh mở 06:00, đóng 22:00 thì có 16 khung 06h–21h; chi nhánh mở 05:30 thì khung đầu là 05h (lượt check-in 05:30–05:59). Khung giờ nào không có lượt check-in thì gán giá trị 0. Tổng các khung luôn bằng tổng lượt check-in ở bước 1, vì F4 chỉ nhận check-in trong giờ mở cửa.
 4. Hệ thống hiển thị biểu đồ cột (Bar Chart) giúp lễ tân nhận diện các khung giờ cao điểm (thường từ 17:00 – 20:00).
 
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F6.2.1: Lượt check-in theo giờ
+- **User story:** Là **Lễ tân, Quản lý chi nhánh hoặc Chủ chuỗi**, tôi muốn **xem biểu đồ phân bổ lượt check-in theo từng khung giờ trong ngày**, để **nhận biết giờ cao điểm và điều phối nhân sự/dịch vụ hợp lý**.
+- **BR liên quan:** BR-F6.4 (múi giờ Việt Nam, dải giờ mở cửa).
+- **Version / Sprint:** v1 / Sprint 2
+- **Issue:** #146
+- **Tiêu chí chấp nhận:**
+  - **AC-F6.2.1-01: Biểu đồ thể hiện đầy đủ các khung giờ trong giờ mở cửa** (BR-F6.4)
+    - **Given** Chi nhánh có giờ mở cửa 06:00 – 22:00; có các lượt check-in phân bổ ở một số khung giờ, và có 1 lượt check-in lúc 23:30 hôm qua.
+    - **When** Người dùng xem biểu đồ phân bổ theo giờ trên Dashboard.
+    - **Then** Biểu đồ hiển thị đủ tất cả các khung giờ từ giờ mở cửa đến trước giờ đóng cửa (từ 06:00 đến 21:00, gồm 16 khung); các khung không có lượt check-in hiển thị giá trị 0; tổng số lượt của tất cả các khung bằng đúng tổng lượt check-in hôm nay; không bao gồm lượt check-in của ngày hôm qua.
+  - **AC-F6.2.1-02: Xử lý khung giờ với chi nhánh có giờ mở cửa lẻ** (BR-F6.4)
+    - **Given** Chi nhánh có cấu hình giờ mở cửa lẻ, ví dụ mở cửa lúc 05:30.
+    - **When** Người dùng xem biểu đồ phân bổ theo giờ.
+    - **Then** Khung giờ đầu tiên trên biểu đồ là 05:00, gom toàn bộ các lượt check-in phát sinh từ 05:30 đến 05:59.
+
 ---
 
 ### 3.3. UC-F6.3: Xem tổng doanh thu trong ngày tại quầy
@@ -137,6 +183,19 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 2. **Quy tắc bắt buộc:** Truy vấn sử dụng `LEFT JOIN members m ON i.member_id = m.id` vì đối với các hóa đơn khách lẻ mua nước, khăn, phụ kiện tại quầy, trường `member_id` có giá trị `NULL`. Nếu dùng `INNER JOIN` sẽ làm thất thoát số liệu doanh thu bán lẻ (Quy tắc nghiệp vụ dễ làm sai số 8).
 3. Hệ thống định dạng tiền tệ theo tiêu chuẩn Việt Nam (ví dụ: `15.450.000 đ`) và hiển thị trên thẻ Stat Card "Doanh thu hôm nay".
 
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F6.3.1: Doanh thu trong ngày
+- **User story:** Là **Lễ tân, Quản lý chi nhánh hoặc Chủ chuỗi**, tôi muốn **xem tổng doanh thu và chi tiết tiền mặt, chuyển khoản phát sinh trong ngày**, để **theo dõi doanh thu tại quầy và đối soát dòng tiền**.
+- **BR liên quan:** BR-F6.2, BR-F6.3, BR-F6.4.
+- **Version / Sprint:** v1 / Sprint 2
+- **Issue:** #147
+- **Tiêu chí chấp nhận:**
+  - **AC-F6.3.1-01: Doanh thu bao gồm cả khách lẻ và phân loại theo hình thức thanh toán** (BR-F6.2, BR-F6.3)
+    - **Given** Trong ngày hôm nay tại chi nhánh có: 01 hóa đơn mua gói tập trị giá 2.000.000 đ thanh toán chuyển khoản (`BANK_TRANSFER`, PAID, payment CONFIRMED); 01 hóa đơn mua nước của khách lẻ không có tài khoản hội viên (`member_id IS NULL`) trị giá 50.000 đ thanh toán tiền mặt (`CASH`, PAID, payment CONFIRMED); 01 khoản thanh toán bị hủy/hoàn tiền (`REFUNDED`); và 01 hóa đơn đang chờ thanh toán (`PENDING`).
+    - **When** Người dùng xem Dashboard doanh thu.
+    - **Then** Tổng doanh thu hôm nay hiển thị chính xác là **2.050.000 đ**, trong đó tiền mặt là **50.000 đ** và chuyển khoản là **2.000.000 đ**. Hệ thống chỉ tính các khoản thanh toán `CONFIRMED` thuộc hóa đơn `PAID` phát sinh hôm nay theo giờ Việt Nam; không bị thất thoát tiền của khách lẻ và không tính các hóa đơn đã hoàn tiền hoặc đang chờ thanh toán.
+
 ---
 
 ### 3.4. UC-F6.4: Xem danh sách cảnh báo gói tập sắp hết hạn
@@ -166,6 +225,39 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 3. Sắp xếp: gói `SESSION` đã về 0 buổi (ngày mai hết dùng) xếp lên đầu; còn lại theo ngày hết hạn tăng dần. Mỗi dòng ghi lý do cảnh báo: "Sắp hết hạn" (theo ngày) hoặc "Sắp hết buổi" (theo ngưỡng buổi); gói `SESSION` đã về 0 buổi luôn ghi "Sắp hết buổi"; các gói khác thỏa cả hai thì ghi "Sắp hết hạn".
 4. Hệ thống hiển thị bảng cảnh báo trên giao diện Dashboard.
 5. Khi lễ tân bấm nút **"Gia hạn"** tại một dòng hội viên, hệ thống điều hướng sang màn hình bán/gia hạn gói tập (F3) với thông tin hội viên đã được điền sẵn.
+
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F6.4.1: Gói sắp hết hạn
+- **User story:** Là **Lễ tân hoặc Quản lý chi nhánh**, tôi muốn **xem danh sách hội viên có gói tập sắp hết hạn hoặc sắp hết buổi**, để **chủ động liên hệ tư vấn gia hạn kịp thời**.
+- **BR liên quan:** BR-F6.5; VD-25 (loại trừ xóa mềm, phân trang, ưu tiên gói 0 buổi).
+- **Version / Sprint:** v1 / Sprint 2
+- **Issue:** #148
+- **Tiêu chí chấp nhận:**
+  - **AC-F6.4.1-01: Lọc chính xác các gói hết hạn trong vòng 7 ngày tới** (BR-F6.5)
+    - **Given** Hôm nay là ngày 02/11/2026; gói A hết hạn ngày 05/11/2026; gói B hết hạn ngày 20/11/2026; gói C hết hạn đúng ngày 09/11/2026.
+    - **When** Lễ tân xem danh sách cảnh báo gói hết hạn.
+    - **Then** Gói A xuất hiện trong danh sách; gói B và gói C không xuất hiện (khoảng lọc nửa mở `[hôm nay, hôm nay + 7)` tức từ 02/11 đến trước 09/11).
+  - **AC-F6.4.1-02: Cảnh báo gói SESSION sắp hết buổi theo cấu hình ngưỡng** (BR-F6.5)
+    - **Given** Hệ thống có cấu hình `SESSION_WARNING_THRESHOLD = 2` (chi nhánh có thể cấu hình riêng); gói SESSION C còn 2 buổi, gói SESSION D còn 3 buổi, cả hai cùng hết hạn 30/11/2026.
+    - **When** Lễ tân xem bảng cảnh báo.
+    - **Then** Gói C xuất hiện kèm số buổi còn lại là 2; gói D không xuất hiện. Ngưỡng cảnh báo được đọc động từ cấu hình chi nhánh hoặc toàn chuỗi.
+  - **AC-F6.4.1-03: Loại trừ hội viên đã mua gói gia hạn UPCOMING** (BR-F6.5)
+    - **Given** Hội viên có gói `TIME` sắp hết hạn sau 3 ngày; hội viên đã mua trước một gói tập cùng loại, cùng phạm vi chi nhánh ở trạng thái `UPCOMING`.
+    - **When** Lễ tân xem bảng cảnh báo.
+    - **Then** Gói sắp hết hạn này không hiển thị trong danh sách cảnh báo. Nếu gói mới mua vẫn đang ở trạng thái `PENDING` (chưa thanh toán), hoặc là gói `UPCOMING` khác loại, thì gói cũ vẫn được hiển thị cảnh báo bình thường.
+  - **AC-F6.4.1-04: Gói toàn chuỗi chỉ hiển thị cảnh báo tại chi nhánh gốc** (BR-F6.5)
+    - **Given** Hội viên sở hữu gói toàn chuỗi (`memberships.branch_id IS NULL`), hồ sơ hội viên đăng ký tại chi nhánh Cầu Giấy (`members.home_branch_id = Cầu Giấy`), gói sắp hết hạn.
+    - **When** Lễ tân chi nhánh Đống Đa và lễ tân chi nhánh Cầu Giấy xem bảng cảnh báo trên Dashboard.
+    - **Then** Cảnh báo chỉ xuất hiện trên Dashboard của chi nhánh Cầu Giấy, không xuất hiện tại Đống Đa (tránh việc nhiều chi nhánh cùng gọi điện trùng lặp cho khách).
+  - **AC-F6.4.1-05: Quy tắc sắp xếp, lý do cảnh báo, giới hạn phân trang và loại trừ hội viên xóa mềm** (VD-25, GĐ-2, GĐ-3, GĐ-5)
+    - **Given** Danh sách gồm nhiều gói tập cần cảnh báo, trong đó có gói `SESSION` 0 buổi (vừa trừ buổi cuối hôm nay), và có hội viên đã bị xóa mềm (`deleted_at IS NOT NULL`).
+    - **When** Gọi API `GET /api/v1/dashboard/expiring-memberships` (mặc định hoặc kèm tham số `limit`).
+    - **Then** Gói `SESSION` 0 buổi được ưu tiên sắp xếp lên đầu danh sách, sau đó sắp xếp theo ngày hết hạn tăng dần; mỗi phần tử trả về đầy đủ lý do cảnh báo (`EXPIRING_DATE` hoặc `LOW_SESSIONS`); số buổi còn lại chỉ hiển thị đối với gói `SESSION`; số lượng phần tử trả về mặc định là 10 dòng (cho phép tham số `limit` từ 1 đến 100); tổng số gói cần cảnh báo trên KPI khớp với dữ liệu; và hoàn toàn loại trừ các hội viên đã bị xóa mềm.
+  - **AC-F6.4.1-06: Thao tác Gia hạn nhanh trên giao diện**
+    - **Given** Lễ tân xem danh sách cảnh báo trên Dashboard.
+    - **When** Bấm nút "Gia hạn" tại một dòng hội viên.
+    - **Then** Hệ thống điều hướng sang màn hình Bán gói tập (F3), tự động điền sẵn thông tin hội viên và tải danh mục gói phù hợp. Chủ chuỗi xem Dashboard thì không hiển thị nút Gia hạn này.
 
 ---
 
@@ -201,6 +293,23 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
    - Nếu `checked_out_at IS NULL`: Tag xanh lá "Đang tập" kèm nút bấm "Check-out nhanh".
    - Nếu `checked_out_at IS NOT NULL`: Tag xám "Đã về" kèm thời lượng tập.
 
+#### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
+
+##### US-F6.5.1: Lượt check-in mới nhất (Live Feed)
+- **User story:** Là **Lễ tân hoặc Quản lý chi nhánh**, tôi muốn **xem dòng danh sách các lượt check-in mới nhất hôm nay**, để **theo dõi hội viên vừa ra vào và hỗ trợ check-out nhanh**.
+- **BR liên quan:** BR-F6.1, BR-F6.4; VD-25 (GĐ-2).
+- **Version / Sprint:** v1 / Sprint 2
+- **Issue:** #149
+- **Tiêu chí chấp nhận:**
+  - **AC-F6.5.1-01: Danh sách các lượt check-in mới nhất trong ngày** (VD-25, GĐ-2)
+    - **Given** Hôm nay có nhiều lượt check-in phát sinh tại chi nhánh, và có 1 lượt check-in lúc 23:30 hôm qua.
+    - **When** Người dùng xem Dashboard.
+    - **Then** Hệ thống hiển thị 10 lượt check-in mới nhất trong ngày (cho phép tùy chỉnh `limit` từ 1 đến 50); mỗi dòng hiển thị giờ check-in (theo giờ Việt Nam), cờ `hasAvatar`, trạng thái ("Đang tập" hoặc "Đã về"), thời lượng tập luyện; không bao gồm lượt check-in lúc 23:30 của ngày hôm qua.
+  - **AC-F6.5.1-02: Thao tác Check-out nhanh từ danh sách Live Feed**
+    - **Given** Lễ tân thấy một dòng hội viên có trạng thái "Đang tập" trên bảng Live Feed.
+    - **When** Lễ tân bấm nút "Check-out nhanh".
+    - **Then** Hệ thống gọi API check-out của F4 (`POST /api/v1/checkins/{id}/checkout`), sau đó tự động làm mới lại dữ liệu Dashboard; nếu xảy ra lỗi thì hiển thị đúng thông báo lỗi của API. Chủ chuỗi xem Dashboard thì không hiển thị nút này.
+
 ---
 
 ## 4. Quy tắc nghiệp vụ liên quan (Business Rules)
@@ -235,7 +344,6 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
   {
     "currentlyInGym": 42,
     "todayCheckinCount": 158,
-    "todayCheckinGrowthRate": 12.5,
     "todayRevenue": 15450000,
     "cashRevenue": 4200000,
     "transferRevenue": 11250000,
@@ -286,43 +394,11 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 
 ## 7. Tiêu chí chấp nhận (Acceptance Criteria)
 
-- **Scenario 1: Hiển thị đúng số hội viên đang có mặt**
-  - **Given** Chi nhánh hôm nay có 10 lượt check-in, trong đó 3 lượt đã check-out và 7 lượt chưa check-out.
-  - **When** Lễ tân truy cập Dashboard.
-  - **Then** Thẻ KPI "Hội viên đang tập" hiển thị chính xác con số 7.
+Tiêu chí chấp nhận chi tiết cho từng chức năng đã được chuyển vào mục **H. User story và tiêu chí chấp nhận (Acceptance Criteria)** trong từng Use Case tương ứng ở Mục 3 theo chuẩn cây truy vết US – UC – AC – TC:
+- **UC-F6.1 (US-F6.1.1):** Số người đang có mặt tại phòng tập (`AC-F6.1.1-01` đến `AC-F6.1.1-05`, Issue #145).
+- **UC-F6.2 (US-F6.2.1):** Lượt check-in theo giờ (`AC-F6.2.1-01` đến `AC-F6.2.1-02`, Issue #146).
+- **UC-F6.3 (US-F6.3.1):** Doanh thu trong ngày (`AC-F6.3.1-01`, Issue #147).
+- **UC-F6.4 (US-F6.4.1):** Gói sắp hết hạn (`AC-F6.4.1-01` đến `AC-F6.4.1-06`, Issue #148).
+- **UC-F6.5 (US-F6.5.1):** Lượt check-in mới nhất (Live Feed) (`AC-F6.5.1-01` đến `AC-F6.5.1-02`, Issue #149).
 
-- **Scenario 2: Tính toán chính xác doanh thu bao gồm cả khách lẻ**
-  - **Given** Hôm nay chi nhánh có:
-    - 01 hóa đơn bán gói cho hội viên `HV000001` trị giá 2.000.000 đ (Chuyển khoản VietQR, PAID).
-    - 01 hóa đơn bán nước cho khách lẻ không có hồ sơ hội viên (`member_id IS NULL`) trị giá 50.000 đ (Tiền mặt, PAID).
-  - **When** Người dùng xem Dashboard doanh thu.
-  - **Then** Tổng doanh thu hiển thị là 2.050.000 đ, trong đó Tiền mặt là 50.000 đ và Chuyển khoản là 2.000.000 đ. Không bị mất 50.000 đ của khách lẻ.
-
-- **Scenario 3: Lọc chính xác các gói hết hạn trong vòng 7 ngày**
-  - **Given** Hôm nay là ngày 02/11/2026. Có gói A hết hạn ngày 05/11/2026 (còn 3 ngày, `end_date < 09/11/2026`) và gói B hết hạn ngày 20/11/2026 (còn 18 ngày).
-  - **When** Lễ tân xem danh sách cảnh báo gói hết hạn.
-  - **Then** Gói A xuất hiện trong danh sách cảnh báo; gói B không xuất hiện.
-
-- **Scenario 3b: Cảnh báo gói SESSION sắp hết buổi dù còn xa hạn**
-  - **Given** `SESSION_WARNING_THRESHOLD = 2`. Hôm nay là 02/11/2026. Gói SESSION C còn 2 buổi, hết hạn ngày 30/11/2026; gói SESSION D còn 3 buổi, hết hạn ngày 30/11/2026.
-  - **When** Lễ tân xem danh sách cảnh báo gói hết hạn.
-  - **Then** Gói C xuất hiện kèm số buổi còn lại là 2; gói D không xuất hiện.
-
-- **Scenario 4: Loại trừ hội viên đã có gói gia hạn UPCOMING khỏi bảng cảnh báo**
-  - **Given** Hội viên Nam có gói `TIME` (Gói 1 tháng) sẽ hết hạn sau 3 ngày nữa. Nam đã mua trước gói gia hạn mới và gói mới đang ở trạng thái `UPCOMING`.
-  - **When** Lễ tân truy cập Dashboard xem danh sách gói sắp hết hạn.
-  - **Then** Hệ thống không hiển thị gói của Nam trong danh sách cảnh báo, giúp lễ tân không gọi điện tư vấn trùng lặp cho khách hàng đã gia hạn.
-
-- **Scenario 5: Gói toàn chuỗi chỉ hiển thị cảnh báo tại chi nhánh gốc (home branch)**
-  - **Given** Hội viên Mai mua gói tập toàn chuỗi (`memberships.branch_id IS NULL`), Mai đăng ký hồ sơ tại cơ sở Cầu Giấy (`members.home_branch_id = Cầu Giấy`), gói sẽ hết hạn sau 2 ngày nữa.
-  - **When** Lễ tân cơ sở Đống Đa truy cập Dashboard.
-  - **Then** Gói của Mai không xuất hiện trong bảng cảnh báo tại cơ sở Đống Đa. Gói chỉ xuất hiện trên Dashboard của cơ sở Cầu Giấy.
-
-- **Scenario 6: Phân quyền xem Dashboard theo chi nhánh**
-  - **Given** Chủ chuỗi (`SUPER_ADMIN`) đăng nhập vào hệ thống.
-  - **When** Gửi request `GET /api/v1/dashboard/stats` không kèm tham số `branchId`.
-  - **Then** Hệ thống trả về lỗi 400 Bad Request yêu cầu chọn chi nhánh.
-  - **And When** Gửi request `GET /api/v1/dashboard/stats?branchId={chi_nhánh_1}`.
-  - **Then** Hệ thống trả về các chỉ số KPI đúng của chi nhánh 1.
-  - **And When** Gửi request `GET /api/v1/dashboard/stats?branchId=999` (chi nhánh không tồn tại).
-  - **Then** Hệ thống trả về lỗi 404 Not Found, không trả các chỉ số bằng 0.
+Các kịch bản kiểm thử nguyên bản trước đây (Scenario 1 đến 6) đã được chuẩn hóa và ánh xạ đầy đủ vào các mã AC chính thức nói trên.
