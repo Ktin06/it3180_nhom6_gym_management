@@ -4,7 +4,7 @@
 - **Cập nhật:** 12/11/2026.
 - **Nguồn chuẩn:** [erd-v2.dbml](erd-v2.dbml); mục đích bảng theo [thiết kế dữ liệu](thiet-ke-du-lieu.md).
 - **Phạm vi:** 40 bảng, 426 cột, 92 quan hệ, 45 khai báo chỉ mục và 25 tập giá trị Enum.
-- **SHA-256 DBML (chuẩn hóa xuống dòng LF):** `35af4dd59f31179cc94b87b325798cecb77c23cc4dbdceefb221bfbc561f00d6`.
+- **SHA-256 DBML (chuẩn hóa xuống dòng LF):** `7ed7fac4c7520127af1724f66ad8ca2f2dcf1aaf36daa07b469800f9d803fa4c`.
 
 ## 1. Cách đọc và cập nhật
 
@@ -902,7 +902,7 @@ Mỗi lần thu tiền. [Khai báo nguồn](erd-v2.dbml#L725).
 | `id` | `bigint` | Không | PK; IDENTITY | Khóa chính của bản ghi |
 | `invoice_id` | `bigint` | Không | FK → `invoices.id` | Tham chiếu invoices.id |
 | `method` | `payment_method` | Không | [Tập giá trị](#enum-payment_method) | Phương thức thực hiện |
-| `amount` | `int` | Không | — | Số tiền (VND)<br>DBML: CHECK amount &gt; 0 |
+| `amount` | `int` | Không | — | Số tiền (VND)<br>DBML: CHECK amount &gt;= 0 (V9_06: hóa đơn 0 đồng, ví dụ gói tập thử, vẫn có phiếu thu) |
 | `status` | `payment_status` | Không | DEFAULT `'CONFIRMED'`; [Tập giá trị](#enum-payment_status) | Trạng thái bản ghi |
 | `transaction_ref` | `varchar(100)` | Có | — | Thông tin tham chiếu chuyển khoản<br>DBML: nội dung chuyển khoản VietQR, nếu có |
 | `received_by` | `bigint` | Không | FK → `users.id` | Tham chiếu users.id<br>DBML: lễ tân hoặc quản lý xác nhận đã nhận tiền (S7) |
