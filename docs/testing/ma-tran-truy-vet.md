@@ -12,13 +12,13 @@
 | F2 | 5 | 6 | 31 | 20 | 11 | 78 |
 | F3 | 5 | 6 | 43 | 35 | 8 | 64 |
 | F4 | 5 | 5 | 37 | 0 | 37 | 0 |
-| F5 | 5 | 0 | 0 | 0 | 0 | 0 |
+| F5 | 5 | 5 | 41 | 0 | 41 | 0 |
 | F6 | 5 | 5 | 16 | 0 | 16 | 0 |
 | F7 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F8 | 9 | 9 | 55 | 29 | 26 | 38 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **37** | **211** | **108** | **103** | **298** |
+| **Tổng** | **57** | **42** | **252** | **108** | **144** | **298** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -103,6 +103,47 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F4.5.1-02 | Đầy đủ thông tin chi tiết của từng lượt check-in | US-F4.5.1 |
 | AC-F4.5.1-03 | Lọc trạng thái, phương thức và tìm kiếm theo tên hoặc mã hội viên | US-F4.5.1 |
 | AC-F4.5.1-04 | Phân quyền và phạm vi dữ liệu theo chi nhánh | US-F4.5.1 |
+| AC-F5.1.1-01 | Sinh VietQR cho hóa đơn chờ bằng số tiền server | US-F5.1.1 |
+| AC-F5.1.1-02 | Chỉ sinh VietQR khi hóa đơn PENDING | US-F5.1.1 |
+| AC-F5.1.1-03 | Cấu hình ngân hàng ưu tiên theo chi nhánh | US-F5.1.1 |
+| AC-F5.1.1-04 | Từ chối chưa đăng nhập và sai vai trò | US-F5.1.1 |
+| AC-F5.1.1-05 | Hóa đơn ngoài chi nhánh được giấu như không tồn tại | US-F5.1.1 |
+| AC-F5.2.1-01 | Thu tiền mặt kích hoạt gói mới đúng ngày và giữ thời hạn đã chốt | US-F5.2.1 |
+| AC-F5.2.1-02 | Thu chuyển khoản cho gia hạn nối tiếp | US-F5.2.1 |
+| AC-F5.2.1-03 | Hóa đơn 0 đồng vẫn ghi phiếu thu và kích hoạt gói | US-F5.2.1 |
+| AC-F5.2.1-04 | Chỉ Lễ tân và Quản lý chi nhánh được xác nhận thu | US-F5.2.1 |
+| AC-F5.2.1-05 | Dữ liệu thu tiền sai không làm thay đổi hóa đơn | US-F5.2.1 |
+| AC-F5.2.1-06 | Thu tiền hóa đơn không tồn tại hoặc ngoài chi nhánh | US-F5.2.1 |
+| AC-F5.2.1-07 | Hai nhân viên cùng thu một hóa đơn | US-F5.2.1 |
+| AC-F5.2.1-08 | Không thu lại hóa đơn đã xử lý | US-F5.2.1 |
+| AC-F5.2.1-09 | Kiểm tra lại gói UPCOMING ở thời điểm thu tiền | US-F5.2.1 |
+| AC-F5.2.1-10 | Không sử dụng số tiền giả từ trình duyệt | US-F5.2.1 |
+| AC-F5.2.1-11 | Gia hạn sau gói PT 0 buổi còn giữ trạng thái ACTIVE hoặc FROZEN | US-F5.2.1 |
+| AC-F5.3.1-01 | Danh sách hóa đơn theo chi nhánh của nhân viên | US-F5.3.1 |
+| AC-F5.3.1-02 | Lọc và tìm hóa đơn theo ngày Việt Nam | US-F5.3.1 |
+| AC-F5.3.1-03 | Hóa đơn có member_id rỗng vẫn tra cứu được | US-F5.3.1 |
+| AC-F5.3.1-04 | Chủ chuỗi xem toàn chuỗi hoặc lọc chi nhánh | US-F5.3.1 |
+| AC-F5.3.1-05 | Chi tiết hóa đơn gồm dòng hóa đơn và lịch sử thu | US-F5.3.1 |
+| AC-F5.3.1-06 | Hủy hóa đơn chờ đồng thời hủy gói chờ | US-F5.3.1 |
+| AC-F5.3.1-07 | Không hủy hóa đơn ngoài trạng thái PENDING | US-F5.3.1 |
+| AC-F5.3.1-08 | Phân biệt sai vai trò với hóa đơn ngoài phạm vi | US-F5.3.1 |
+| AC-F5.4.1-01 | Xuất PDF hóa đơn PAID hoặc REFUNDED | US-F5.4.1 |
+| AC-F5.4.1-02 | PDF giữ tên và giá ở thời điểm bán | US-F5.4.1 |
+| AC-F5.4.1-03 | Không xuất PDF hóa đơn chưa thanh toán | US-F5.4.1 |
+| AC-F5.4.1-04 | Hội viên chỉ tải hóa đơn của mình; nhân viên đúng chi nhánh | US-F5.4.1 |
+| AC-F5.4.1-05 | Vai trò không được tải PDF và chưa đăng nhập | US-F5.4.1 |
+| AC-F5.5.1-01 | Hoàn toàn bộ hóa đơn có gói chưa dùng | US-F5.5.1 |
+| AC-F5.5.1-02 | Không làm thay đổi gói nối tiếp mua bằng hóa đơn khác | US-F5.5.1 |
+| AC-F5.5.1-03 | Chỉ Quản lý chi nhánh được hoàn tiền | US-F5.5.1 |
+| AC-F5.5.1-04 | Bắt buộc lý do hoàn tiền có nội dung | US-F5.5.1 |
+| AC-F5.5.1-05 | Hóa đơn không tồn tại, ngoài chi nhánh và chưa đăng nhập | US-F5.5.1 |
+| AC-F5.5.1-06 | Hai quản lý cùng hoàn một hóa đơn | US-F5.5.1 |
+| AC-F5.5.1-07 | Chỉ hoàn hóa đơn đang PAID | US-F5.5.1 |
+| AC-F5.5.1-08 | Gói ngoài ACTIVE hoặc UPCOMING không đủ điều kiện | US-F5.5.1 |
+| AC-F5.5.1-09 | Gói đã có check-in không được hoàn | US-F5.5.1 |
+| AC-F5.5.1-10 | Gói PT có buổi đặt kể cả đã hủy không được hoàn | US-F5.5.1 |
+| AC-F5.5.1-11 | Chỗ lớp BOOKED chưa kết thúc chặn hoàn gói TIME | US-F5.5.1 |
+| AC-F5.5.1-12 | Lượt dùng gắn với gói khác không chặn hoàn gói chưa dùng | US-F5.5.1 |
 | AC-F6.1.1-01 | Đếm chính xác số hội viên duy nhất đang tập và tổng lượt check-in | US-F6.1.1 |
 | AC-F6.1.1-02 | Chủ chuỗi bắt buộc phải chọn chi nhánh cụ thể | US-F6.1.1 |
 | AC-F6.1.1-03 | Nhân viên chi nhánh chỉ xem số liệu chi nhánh mình | US-F6.1.1 |
@@ -603,6 +644,60 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F4.5.1-02 Đầy đủ thông tin chi tiết của từng lượt check-in ❌ chưa có TC
     - AC-F4.5.1-03 Lọc trạng thái, phương thức và tìm kiếm theo tên hoặc mã hội viên ❌ chưa có TC
     - AC-F4.5.1-04 Phân quyền và phạm vi dữ liệu theo chi nhánh ❌ chưa có TC
+
+### F5
+
+- **UC-F5.1** Sinh mã VietQR và xem chi tiết thanh toán hóa đơn
+  - **US-F5.1.1** Mã VietQR cho hóa đơn (#140)
+    - AC-F5.1.1-01 Sinh VietQR cho hóa đơn chờ bằng số tiền server (BR-F5-01, BR-F5-02) ❌ chưa có TC
+    - AC-F5.1.1-02 Chỉ sinh VietQR khi hóa đơn PENDING ❌ chưa có TC
+    - AC-F5.1.1-03 Cấu hình ngân hàng ưu tiên theo chi nhánh ❌ chưa có TC
+    - AC-F5.1.1-04 Từ chối chưa đăng nhập và sai vai trò ❌ chưa có TC
+    - AC-F5.1.1-05 Hóa đơn ngoài chi nhánh được giấu như không tồn tại ❌ chưa có TC
+- **UC-F5.2** Ghi nhận thanh toán tại quầy và kích hoạt dịch vụ
+  - **US-F5.2.1** Ghi nhận thanh toán, kích hoạt gói (#141)
+    - AC-F5.2.1-01 Thu tiền mặt kích hoạt gói mới đúng ngày và giữ thời hạn đã chốt (BR-F5-03, BR-F5-04, BR-F3-06) ❌ chưa có TC
+    - AC-F5.2.1-02 Thu chuyển khoản cho gia hạn nối tiếp (BR-F5-04, BR-F3-11) ❌ chưa có TC
+    - AC-F5.2.1-03 Hóa đơn 0 đồng vẫn ghi phiếu thu và kích hoạt gói (BR-F5-04) ❌ chưa có TC
+    - AC-F5.2.1-04 Chỉ Lễ tân và Quản lý chi nhánh được xác nhận thu (BR-F5-03) ❌ chưa có TC
+    - AC-F5.2.1-05 Dữ liệu thu tiền sai không làm thay đổi hóa đơn ❌ chưa có TC
+    - AC-F5.2.1-06 Thu tiền hóa đơn không tồn tại hoặc ngoài chi nhánh ❌ chưa có TC
+    - AC-F5.2.1-07 Hai nhân viên cùng thu một hóa đơn (BR-F5-05) ❌ chưa có TC
+    - AC-F5.2.1-08 Không thu lại hóa đơn đã xử lý ❌ chưa có TC
+    - AC-F5.2.1-09 Kiểm tra lại gói UPCOMING ở thời điểm thu tiền (BR-F5-04, BR-F3-11) ❌ chưa có TC
+    - AC-F5.2.1-10 Không sử dụng số tiền giả từ trình duyệt (BR-F5-01) ❌ chưa có TC
+    - AC-F5.2.1-11 Gia hạn sau gói PT 0 buổi còn giữ trạng thái ACTIVE hoặc FROZEN (BR-F3-11) ❌ chưa có TC
+- **UC-F5.3** Tra cứu và quản lý hóa đơn tại quầy (và toàn chuỗi)
+  - **US-F5.3.1** Tra cứu và hủy hóa đơn chờ (#142)
+    - AC-F5.3.1-01 Danh sách hóa đơn theo chi nhánh của nhân viên (BR-F5-06) ❌ chưa có TC
+    - AC-F5.3.1-02 Lọc và tìm hóa đơn theo ngày Việt Nam (BR-F5-06) ❌ chưa có TC
+    - AC-F5.3.1-03 Hóa đơn có member_id rỗng vẫn tra cứu được (BR-F5-06) ❌ chưa có TC
+    - AC-F5.3.1-04 Chủ chuỗi xem toàn chuỗi hoặc lọc chi nhánh (BR-F5-06) ❌ chưa có TC
+    - AC-F5.3.1-05 Chi tiết hóa đơn gồm dòng hóa đơn và lịch sử thu (BR-F5-06) ❌ chưa có TC
+    - AC-F5.3.1-06 Hủy hóa đơn chờ đồng thời hủy gói chờ (BR-F5-06, BR-F5-08) ❌ chưa có TC
+    - AC-F5.3.1-07 Không hủy hóa đơn ngoài trạng thái PENDING ❌ chưa có TC
+    - AC-F5.3.1-08 Phân biệt sai vai trò với hóa đơn ngoài phạm vi (BR-F5-06) ❌ chưa có TC
+- **UC-F5.4** In và xuất hóa đơn PDF
+  - **US-F5.4.1** Hóa đơn PDF (#143)
+    - AC-F5.4.1-01 Xuất PDF hóa đơn PAID hoặc REFUNDED ❌ chưa có TC
+    - AC-F5.4.1-02 PDF giữ tên và giá ở thời điểm bán (BR-F5-09) ❌ chưa có TC
+    - AC-F5.4.1-03 Không xuất PDF hóa đơn chưa thanh toán ❌ chưa có TC
+    - AC-F5.4.1-04 Hội viên chỉ tải hóa đơn của mình; nhân viên đúng chi nhánh ❌ chưa có TC
+    - AC-F5.4.1-05 Vai trò không được tải PDF và chưa đăng nhập ❌ chưa có TC
+- **UC-F5.5** Hoàn tiền hóa đơn (Refund)
+  - **US-F5.5.1** Hoàn tiền có kiểm soát (#144)
+    - AC-F5.5.1-01 Hoàn toàn bộ hóa đơn có gói chưa dùng (BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14) ❌ chưa có TC
+    - AC-F5.5.1-02 Không làm thay đổi gói nối tiếp mua bằng hóa đơn khác (BR-F5-13) ❌ chưa có TC
+    - AC-F5.5.1-03 Chỉ Quản lý chi nhánh được hoàn tiền (BR-F5-11) ❌ chưa có TC
+    - AC-F5.5.1-04 Bắt buộc lý do hoàn tiền có nội dung ❌ chưa có TC
+    - AC-F5.5.1-05 Hóa đơn không tồn tại, ngoài chi nhánh và chưa đăng nhập (BR-F5-11) ❌ chưa có TC
+    - AC-F5.5.1-06 Hai quản lý cùng hoàn một hóa đơn (BR-F5-12) ❌ chưa có TC
+    - AC-F5.5.1-07 Chỉ hoàn hóa đơn đang PAID ❌ chưa có TC
+    - AC-F5.5.1-08 Gói ngoài ACTIVE hoặc UPCOMING không đủ điều kiện (BR-F5-14) ❌ chưa có TC
+    - AC-F5.5.1-09 Gói đã có check-in không được hoàn (BR-F5-14) ❌ chưa có TC
+    - AC-F5.5.1-10 Gói PT có buổi đặt kể cả đã hủy không được hoàn (BR-F5-14) ❌ chưa có TC
+    - AC-F5.5.1-11 Chỗ lớp BOOKED chưa kết thúc chặn hoàn gói TIME (BR-F5-14) ❌ chưa có TC
+    - AC-F5.5.1-12 Lượt dùng gắn với gói khác không chặn hoàn gói chưa dùng (BR-F5-14) ❌ chưa có TC
 
 ### F6
 
