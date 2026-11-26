@@ -10,6 +10,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -40,6 +41,7 @@ class AccountServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-04a, TC-F2.4.1-03a: disableAccount chuyển DISABLED và thu hồi mọi refresh token")
     void disableAccountCapNhatDisabledVaThuHoiRefreshToken() {
         User user = User.builder()
             .email("member@example.com")
@@ -56,6 +58,7 @@ class AccountServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F2.4.1-04a: activateAccountIfDisabled chỉ mở tài khoản DISABLED, không mở LOCKED")
     void activateAccountIfDisabledChiMoTaiKhoanDisabledKhongMoLocked() {
         User disabledUser = User.builder()
             .email("disabled@example.com")

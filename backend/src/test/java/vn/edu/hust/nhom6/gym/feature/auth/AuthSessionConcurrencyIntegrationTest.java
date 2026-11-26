@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -59,6 +61,7 @@ class AuthSessionConcurrencyIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.3.1-01d: hai yêu cầu refresh đồng thời chỉ một thành công 200 và một nhận 401")
     void haiYeuCauRefreshDongThoiChiMotThanhCongVaMotNhan401() throws Exception {
         SessionTokens session = registerMember("Người dùng Test", "concurrent@example.com", "0912345678");
 
@@ -99,6 +102,7 @@ class AuthSessionConcurrencyIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.3.1-04d: đăng xuất bằng JWT tài khoản A không thu hồi hay xóa cookie tài khoản B")
     void dangXuatBangJwtCuaTaiKhoanAKhongThuHoiHoacXoaCookieCuaTaiKhoanB() throws Exception {
         SessionTokens sessionA = registerMember("Thành viên A", "user.a@example.com", "0911111111");
         SessionTokens sessionB = registerMember("Thành viên B", "user.b@example.com", "0922222222");
@@ -135,6 +139,7 @@ class AuthSessionConcurrencyIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F1.3.1-02f, TC-F1.3.1-04e: đăng xuất bằng JWT hết hạn của tài khoản A vẫn giữ phiên tài khoản B")
     void dangXuatBangJwtHetHanCuaTaiKhoanAVanGiuPhienCuaTaiKhoanB() throws Exception {
         registerMember("Thành viên A", "user.a@example.com", "0911111111");
         SessionTokens sessionB = registerMember("Thành viên B", "user.b@example.com", "0922222222");
@@ -152,6 +157,67 @@ class AuthSessionConcurrencyIntegrationTest {
         mockMvc.perform(post("/api/v1/auth/refresh")
                 .cookie(new Cookie("refresh_token", sessionB.refreshToken())))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("TC-F1.2.1-02b: 5 request đăng nhập sai đồng thời tăng bộ đếm đúng 5 và khóa tài khoản")
+    void namRequestDangNhapSaiDongThoiTangBoDemDung5VaKhoaTaiKhoan() throws Exception {
+        registerMember("Người dùng Khóa Tạm", "lockout.concurrent@example.com", "0933333333");
+
+        int threadCount = 5;
+        ExecutorService pool = Executors.newFixedThreadPool(threadCount);
+        try {
+            CountDownLatch ready = new CountDownLatch(threadCount);
+            CountDownLatch start = new CountDownLatch(1);
+            List<Future<MvcResult>> futures = new ArrayList<>();
+
+            String body = jsonMapper.writeValueAsString(Map.of(
+                "email", "lockout.concurrent@example.com",
+                "password", "WrongPass999"
+            ));
+
+            for (int i = 0; i < threadCount; i++) {
+                futures.add(pool.submit(() -> {
+                    ready.countDown();
+                    assertThat(start.await(5, TimeUnit.SECONDS)).isTrue();
+                    return mockMvc.perform(post("/api/v1/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                        .andReturn();
+                }));
+            }
+
+            assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue();
+            start.countDown();
+
+            for (Future<MvcResult> future : futures) {
+                int httpStatus = future.get(15, TimeUnit.SECONDS).getResponse().getStatus();
+                assertThat(httpStatus).isEqualTo(401);
+            }
+
+            Integer failedCount = jdbcTemplate.queryForObject(
+                "SELECT failed_login_count FROM users WHERE email = ?",
+                Integer.class, "lockout.concurrent@example.com");
+            OffsetDateTime lockedUntil = jdbcTemplate.queryForObject(
+                "SELECT locked_until FROM users WHERE email = ?",
+                OffsetDateTime.class, "lockout.concurrent@example.com");
+
+            assertThat(failedCount).isEqualTo(5);
+            assertThat(lockedUntil).isNotNull().isAfter(OffsetDateTime.now().plusMinutes(10));
+
+            // Lần thử tiếp theo dù đúng mật khẩu vẫn bị từ chối 403 do đang khóa tạm
+            mockMvc.perform(post("/api/v1/auth/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(Map.of(
+                        "email", "lockout.concurrent@example.com",
+                        "password", "Password123"
+                    ))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString(
+                    "Tài khoản đang bị khóa tạm thời do nhập sai mật khẩu nhiều lần.")));
+        } finally {
+            pool.shutdownNow();
+        }
     }
 
     private SessionTokens registerMember(String fullName, String email, String phone) throws Exception {
