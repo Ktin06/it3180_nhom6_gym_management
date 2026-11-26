@@ -61,7 +61,7 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
    - **Với `SUPER_ADMIN`:** Bắt buộc phải truyền tham số query `?branchId={id}` trên URL để chỉ định chi nhánh muốn xem (`id` là số nguyên, khóa `branches.id` kiểu `bigint`). Nếu thiếu tham số `branchId`, hệ thống trả về mã lỗi `400 Bad Request` với thông báo: *"Chủ chuỗi cần chọn chi nhánh cụ thể để xem Dashboard."* Nếu `branchId` không tồn tại trong `branches`, hệ thống trả về `404 Not Found` (`NotFoundException`) với thông báo: *"Không tìm thấy chi nhánh."*, không trả các chỉ số bằng 0.
 3. Hệ thống thực hiện truy vấn đếm:
    ```sql
-   SELECT count(DISTINCT member_id) 
+   SELECT count(DISTINCT member_id)
    FROM checkins 
    WHERE branch_id = :branchId 
      AND checked_in_at >= :dayStart AND checked_in_at < :dayEnd
