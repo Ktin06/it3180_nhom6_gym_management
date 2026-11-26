@@ -1243,7 +1243,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 
 ## 6. Kiểm thử chưa mang mã TC
 
-Có 170 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
+Có 193 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
 
 | File | Số kiểm thử |
 | --- | --- |
@@ -1266,6 +1266,12 @@ Có 170 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberServiceTest.java` | 4 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/StaffBranchIntegrationTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/membership/MembershipListIntegrationTest.java` | 1 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/notification/BranchWindowSchedulerTest.java` | 3 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/notification/ClassSessionEventListenerTest.java` | 4 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/notification/NotificationControllerTest.java` | 5 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/notification/NotificationIntegrationTest.java` | 3 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/notification/NotificationReminderServiceTest.java` | 3 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/notification/NotificationServiceTest.java` | 5 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PackageCatalogServiceTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PackageMapperTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PublicPackageIntegrationTest.java` | 1 |

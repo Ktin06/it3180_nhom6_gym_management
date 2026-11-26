@@ -1,0 +1,125 @@
+{
+  "info": {
+    "name": "F10 – Thông báo (IT3180 Nhóm 6)",
+    "description": "Các API thông báo trong web cho hội viên (UC-F10.5, S2-22). Kênh thời gian thực dùng WebSocket STOMP tại ws://.../ws với header Authorization: Bearer <accessToken> và subscribe /user/queue/notifications.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Xem danh sách thông báo trong web (GET /api/v1/me/notifications)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Trả mã 200 OK', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Có danh sách content và thông tin phân trang', function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json).to.have.property('content');",
+              "  if (json.content.length > 0) {",
+              "    pm.environment.set('notificationId', json.content[0].id);",
+              "  }",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/me/notifications?page=0&size=20",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "me", "notifications"],
+          "query": [
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "20" }
+          ]
+        },
+        "description": "Lấy danh sách thông báo kênh IN_APP của hội viên hiện tại, mới nhất trước (UC-F10.5)."
+      },
+      "response": []
+    },
+    {
+      "name": "Đếm số thông báo chưa đọc (GET /api/v1/me/notifications/unread-count)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Trả mã 200 OK', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Trả unreadCount dạng số', function () {",
+              "  pm.expect(pm.response.json()).to.have.property('unreadCount');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/me/notifications/unread-count",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "me", "notifications", "unread-count"]
+        },
+        "description": "Đếm số thông báo kênh IN_APP chưa đọc (read_at IS NULL) của hội viên hiện tại."
+      },
+      "response": []
+    },
+    {
+      "name": "Đánh dấu thông báo đã đọc (PATCH /api/v1/me/notifications/{{notificationId}}/read)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Trả mã 200 OK', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Đã ghi thời điểm readAt', function () {",
+              "  pm.expect(pm.response.json().readAt).to.not.be.null;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/me/notifications/{{notificationId}}/read",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "me", "notifications", "{{notificationId}}", "read"]
+        },
+        "description": "Đánh dấu một thông báo trong web là đã đọc. Chỉ chủ thông báo được phép (người khác trả 403, không tồn tại trả 404)."
+      },
+      "response": []
+    }
+  ]
+}

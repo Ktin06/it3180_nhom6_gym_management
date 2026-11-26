@@ -61,3 +61,6 @@ app:
   scheduling:
     # Bật tác vụ nền (cron theo giờ Việt Nam, chạy bù khi khởi động). Kiểm thử đặt false.
     enabled: true
+  notification:
+    # Số giờ nhắc trước giờ học lớp nhóm (F10, UC-F10.2).
+    class-reminder-hours: ${CLASS_REMINDER_HOURS:2}
