@@ -679,7 +679,7 @@ Table promotions {
 
 Table invoices {
   id bigint [pk, increment]
-  code varchar(30) [unique, not null]
+  code varchar(30) [unique, not null, note: 'Mã mới HD + 6 chữ số, sequence invoice_code_seq; mã lịch sử giữ nguyên (S2-07, V9_05)']
   branch_id bigint [not null, ref: > branches.id]
   member_id bigint [ref: > members.id, note: 'rỗng nếu khách lẻ mua tại quầy; bắt buộc có khi hóa đơn chứa dòng PACKAGE hoặc TRANSFER_FEE (kiểm tra trong code); báo cáo doanh thu phải dùng LEFT JOIN với members']
   created_by bigint [not null, ref: > users.id, note: 'lễ tân lập tại quầy, hoặc tài khoản hội viên khi tự gửi yêu cầu mua/gia hạn trên web (F7, hóa đơn PENDING, chốt 01/11)']
