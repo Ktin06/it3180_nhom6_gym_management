@@ -81,6 +81,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.1.1-01b: đăng ký thành công tạo user, chuẩn hóa SĐT và gọi tạo hồ sơ hội viên")
     void dangKyThanhCongTaoUserVaGoiMemberService() {
         RegisterRequest request = new RegisterRequest(
             "Nguyễn Văn A", "member@example.com", "+84 912 345 678", "Password123",
@@ -107,6 +108,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.1.1-03a: đăng ký email đã tồn tại ném 409 Conflict")
     void dangKyEmailDaTonTaiNemConflictException() {
         RegisterRequest request = new RegisterRequest(
             "Nguyễn Văn A", "duplicate@example.com", "0912345678", "Password123", null, null);
@@ -122,6 +124,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.1.1-04g: đăng ký SĐT sai định dạng bị từ chối ở tầng dịch vụ")
     void dangKySoDienThoaiSaiDinhDangNemBusinessRuleException() {
         RegisterRequest request = new RegisterRequest(
             "Nguyễn Văn A", "member@example.com", "12345", "Password123", null, null);
@@ -134,6 +137,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.1.1-04h: đăng ký mật khẩu vượt 72 byte UTF-8 bị từ chối")
     void dangKyMatKhauVuotQua72ByteUtf8NemBusinessRuleException() {
         // 30 ký tự 'ă' (mỗi ký tự 2 byte) + 20 ký tự ASCII = 50 ký tự (<= 72 ký tự) nhưng dài 80 byte (> 72 byte)
         String multiBytePassword = "ă".repeat(30) + "Pass1234567890123456";
@@ -150,6 +154,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.2.1-04e: đăng nhập đúng cấp token và cập nhật last_login_at")
     void dangNhapThanhCongCapTokenVaCapNhatLastLoginAt() {
         LoginRequest request = new LoginRequest("member@example.com", "Password123");
         OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-20T03:00:00Z");
@@ -176,6 +181,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.2.1-01e: đăng nhập sai mật khẩu trả 401 câu chung")
     void dangNhapSaiMatKhauNemUnauthorizedException() {
         LoginRequest request = new LoginRequest("member@example.com", "WrongPassword");
         OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-20T03:00:00Z");
@@ -196,6 +202,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.2.1-01f: đăng nhập mật khẩu vượt 72 byte trả 401 không ném 500")
     void dangNhapMatKhauVuotQua72ByteNemUnauthorizedExceptionKhongNem500() {
         String longPassword = "ă".repeat(30) + "Pass1234567890123456";
         LoginRequest request = new LoginRequest("member@example.com", longPassword);
@@ -227,6 +234,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.2.1-01g: email không tồn tại vẫn chạy BCrypt và trả 401 câu chung")
     void dangNhapEmailKhongTonTaiVanChayPasswordEncoderMatchesDeChongDoanEmailQuaThoiGian() {
         LoginRequest request = new LoginRequest("unknown@example.com", "Password123");
 
@@ -240,6 +248,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.2.1-05b: tài khoản bị khóa nhập đúng mật khẩu bị từ chối 403")
     void dangNhapTaiKhoanBiKhoaNemForbiddenException() {
         LoginRequest request = new LoginRequest("member@example.com", "Password123");
         OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-20T03:00:00Z");
@@ -260,6 +269,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.3.1-01b: làm mới phiên xoay vòng refresh token và thu hồi token cũ")
     void lamMoiThanhCongXoayVongRefreshToken() {
         String rawToken = "raw-refresh-token";
         String tokenHash = TokenHashUtil.sha256Hex(rawToken);
@@ -291,6 +301,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.3.1-01c, TC-F1.3.1-03b: dùng lại token đã thu hồi thu hồi toàn bộ phiên và trả 401")
     void lamMoiTokenDaBiThuHoiThuHoiToanBoPhienVaNemUnauthorizedException() {
         String rawToken = "revoked-token";
         String tokenHash = TokenHashUtil.sha256Hex(rawToken);
@@ -319,6 +330,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.3.1-03c: làm mới bằng refresh token hết hạn trả 401")
     void lamMoiTokenHetHanNemUnauthorizedException() {
         String rawToken = "expired-token";
         String tokenHash = TokenHashUtil.sha256Hex(rawToken);
@@ -347,6 +359,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.3.1-02d: đăng xuất đánh dấu thu hồi refresh token")
     void dangXuatThuHoiRefreshToken() {
         String rawToken = "valid-token-to-logout";
         String tokenHash = TokenHashUtil.sha256Hex(rawToken);
@@ -366,6 +379,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.3.1-04c: đăng xuất với JWT không thu hồi cookie của tài khoản khác")
     void dangXuatVoiJwtKhongThuHoiCookieCuaTaiKhoanKhac() {
         String rawToken = "user-b-refresh-token";
         String tokenHash = TokenHashUtil.sha256Hex(rawToken);
@@ -394,6 +408,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.3.1-02e: đăng xuất với JWT thu hồi cookie khi cùng chủ sở hữu")
     void dangXuatVoiJwtThuHoiCookieKhiCungChuSoHuu() {
         String rawToken = "user-a-refresh-token";
         String tokenHash = TokenHashUtil.sha256Hex(rawToken);
@@ -422,6 +437,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("TC-F1.6.1-01a: getCurrentUser đọc JWT hợp lệ và ném 401 khi claim không hợp lệ")
     void getCurrentUserDocThongTinTuJwtVaNem401KhiClaimKhongHopLe() {
         org.springframework.security.oauth2.jwt.Jwt validJwt = org.springframework.security.oauth2.jwt.Jwt.withTokenValue("tok")
             .header("alg", "HS256")
@@ -447,6 +463,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("BR-F2-06: chuẩn hóa số điện thoại Việt Nam về 10 chữ số bắt đầu bằng 0")
     void chuanHoaSoDienThoaiCacDangPhoBien() {
         assertThat(PhoneUtils.normalizePhone("0912345678")).isEqualTo("0912345678");
         assertThat(PhoneUtils.normalizePhone("+84 912 345 678")).isEqualTo("0912345678");

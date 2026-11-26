@@ -6,11 +6,13 @@ vi.mock('../../../services/http', () => ({ http: { get, post } }))
 
 import {
   changePassword,
+  forgotPassword,
   getCurrentUser,
   getProblemDetail,
   login,
   logout,
   register,
+  resetPassword,
 } from './auth-api'
 import { ROLES } from '../../../auth/roles'
 import type { RegisterRequest } from '../types/auth'
@@ -108,5 +110,32 @@ describe('auth-api', () => {
       currentPassword: 'OldPassword1',
       newPassword: 'NewPassword2',
     })
+  })
+
+  it('TC-F1.5.1-01e: forgotPassword và resetPassword gọi API công khai với publicRequest', async () => {
+    const genericMessage =
+      'Nếu email có trong hệ thống, bạn sẽ nhận được liên kết đặt lại mật khẩu.'
+    post.mockResolvedValueOnce({ data: { message: genericMessage } })
+    post.mockResolvedValueOnce({ data: undefined })
+
+    await expect(forgotPassword({ email: 'hv@example.com' })).resolves.toEqual({
+      message: genericMessage,
+    })
+    expect(post).toHaveBeenNthCalledWith(
+      1,
+      '/auth/forgot-password',
+      { email: 'hv@example.com' },
+      { skipBearer: true, skipAuthRefresh: true },
+    )
+
+    await expect(
+      resetPassword({ token: 'raw-token-123', newPassword: 'NewPassword2' }),
+    ).resolves.toBeUndefined()
+    expect(post).toHaveBeenNthCalledWith(
+      2,
+      '/auth/reset-password',
+      { token: 'raw-token-123', newPassword: 'NewPassword2' },
+      { skipBearer: true, skipAuthRefresh: true },
+    )
   })
 })

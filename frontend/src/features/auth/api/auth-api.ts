@@ -13,8 +13,11 @@ import type {
   AccessTokenResponse,
   AuthMeResponse,
   ChangePasswordRequest,
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
   LoginRequest,
   RegisterRequest,
+  ResetPasswordRequest,
 } from '../types/auth'
 
 const publicAuthRequest = publicRequest
@@ -65,6 +68,21 @@ export async function logout() {
     // Bearer cho backend đối chiếu chủ cookie; không refresh sang tài khoản ở tab khác.
     await http.post('/auth/logout', undefined, { skipAuthRefresh: true, authEpoch })
     await publishSessionChange(null)
+  })
+}
+
+export async function forgotPassword(
+  request: ForgotPasswordRequest,
+): Promise<ForgotPasswordResponse> {
+  const response = await http.post<ForgotPasswordResponse>('/auth/forgot-password', request, {
+    ...publicAuthRequest,
+  })
+  return response.data
+}
+
+export async function resetPassword(request: ResetPasswordRequest): Promise<void> {
+  await http.post('/auth/reset-password', request, {
+    ...publicAuthRequest,
   })
 }
 

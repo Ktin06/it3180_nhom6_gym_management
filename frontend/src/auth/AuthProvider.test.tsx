@@ -96,7 +96,7 @@ describe('AuthProvider', () => {
     publishSessionChange.mockReset().mockResolvedValue(undefined)
   })
 
-  it('bootstrap làm mới cookie rồi lấy user từ /me', async () => {
+  it('TC-F1.3.1-01e: bootstrap làm mới cookie rồi lấy user từ /me', async () => {
     refresh.mockImplementation(async (epoch: number) => {
       setAccessToken('bootstrap-jwt', epoch)
       return 'bootstrap-jwt'
@@ -111,7 +111,7 @@ describe('AuthProvider', () => {
     expect(authApi.getCurrentUser).toHaveBeenCalledTimes(1)
   })
 
-  it('bootstrap không có cookie kết thúc anonymous', async () => {
+  it('TC-F1.3.1-03d: bootstrap không có cookie kết thúc anonymous', async () => {
     renderProvider()
 
     expect(await screen.findByText('anonymous')).toBeInTheDocument()
@@ -198,7 +198,7 @@ describe('AuthProvider', () => {
     expect(authApi.register).toHaveBeenCalledTimes(1)
   })
 
-  it('logout chỉ xóa phiên sau khi server xác nhận; reload sau retry kiểm tra cookie lại', async () => {
+  it('TC-F1.3.1-02g: logout chỉ xóa phiên sau khi server xác nhận; reload sau retry kiểm tra cookie lại', async () => {
     refresh.mockImplementation(async (epoch: number) => {
       setAccessToken('bootstrap-jwt', epoch)
       return 'bootstrap-jwt'

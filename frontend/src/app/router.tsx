@@ -10,14 +10,17 @@ import { ForbiddenPage } from '../pages/ForbiddenPage'
 import { GuestHomePage } from '../pages/home/GuestHomePage'
 import { RoleHomePage } from '../pages/home/RoleHomePage'
 import { ChangePasswordPage } from '../features/auth/pages/ChangePasswordPage'
+import { ForgotPasswordPage } from '../features/auth/pages/ForgotPasswordPage'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
+import { ResetPasswordPage } from '../features/auth/pages/ResetPasswordPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { ProtectedRoute } from '../routes/ProtectedRoute'
 import { rolesFor, type ProtectedPath } from '../routes/route-access'
 import { MembersPage } from '../features/members/pages/MembersPage'
 import { PackagesPage } from '../features/packages/pages/PackagesPage'
 import { PublicPricingPage } from '../features/packages/pages/PublicPricingPage'
+import { SellPackagePage } from '../features/packages/pages/SellPackagePage'
 
 /** Route cần đăng nhập; vai trò được vào đọc từ ROUTE_ACCESS (routes/route-access.ts). */
 function guarded(path: ProtectedPath, element: ReactNode): RouteObject {
@@ -42,6 +45,8 @@ export const routes: RouteObject[] = [
     children: [
       { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },
+      { path: '/quen-mat-khau', element: <ForgotPasswordPage /> },
+      { path: '/dat-lai-mat-khau', element: <ResetPasswordPage /> },
     ],
   },
   {
@@ -54,6 +59,7 @@ export const routes: RouteObject[] = [
       ...STAFF_ROLES.map((role) => guarded(HOME_PATH_BY_ROLE[role], <RoleHomePage role={role} />)),
       guarded('/members', <MembersPage />),
       guarded('/packages', <PackagesPage />),
+      guarded('/ban-goi', <SellPackagePage />),
       // Trang mới của nhân viên: thêm một dòng guarded(...) ở đây.
     ],
   },

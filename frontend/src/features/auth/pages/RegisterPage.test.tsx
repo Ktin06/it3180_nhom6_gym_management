@@ -38,7 +38,7 @@ describe('RegisterPage', () => {
     retrySession.mockReset()
   })
 
-  it('chuẩn hóa dữ liệu, giữ họ tên tiếng Việt và tự đăng nhập hội viên', async () => {
+  it('TC-F1.1.1-01d: chuẩn hóa dữ liệu, giữ họ tên tiếng Việt và tự đăng nhập hội viên', async () => {
     register.mockResolvedValue({ email: 'anh@example.com', role: 'MEMBER' })
     const user = userEvent.setup()
     renderRegister()
@@ -59,7 +59,7 @@ describe('RegisterPage', () => {
     })
   })
 
-  it('không gửi dữ liệu khi số điện thoại hoặc mật khẩu không đạt quy tắc', async () => {
+  it('TC-F1.1.1-04j: không gửi dữ liệu khi số điện thoại hoặc mật khẩu không đạt quy tắc', async () => {
     const user = userEvent.setup()
     renderRegister()
 
@@ -103,7 +103,7 @@ describe('RegisterPage', () => {
     expect(register).toHaveBeenCalledTimes(1)
   })
 
-  it('dùng tên trường lỗi thay vì suy từ câu báo lỗi xung đột', async () => {
+  it('TC-F1.1.1-03c: dùng tên trường lỗi thay vì suy từ câu báo lỗi xung đột', async () => {
     register.mockRejectedValue({
       response: {
         status: 409,
@@ -129,7 +129,7 @@ describe('RegisterPage', () => {
     expect(register).toHaveBeenCalledWith(expect.objectContaining({ phone: '0912345678' }))
   })
 
-  it('lỗi 409 không có errors hiện chung, không suy tên trường từ detail', async () => {
+  it('TC-F1.1.1-02d: lỗi 409 không có errors hiện chung, không suy tên trường từ detail', async () => {
     register.mockRejectedValue({ response: { status: 409, data: { detail: 'Email đã tồn tại.' } } })
     const user = userEvent.setup()
     renderRegister()
