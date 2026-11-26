@@ -1,5 +1,5 @@
 import { matchPath } from 'react-router-dom'
-import { MEMBER_MANAGEMENT_ROLES, type Role } from '../auth/roles'
+import { MEMBER_MANAGEMENT_ROLES, ROLES, type Role } from '../auth/roles'
 
 export interface RouteAccessRule {
   /** Vai trò được mở trang. */
@@ -29,6 +29,20 @@ export const ROUTE_ACCESS = {
   '/members': { roles: MEMBER_MANAGEMENT_ROLES }, // F2
   '/packages': { roles: MEMBER_MANAGEMENT_ROLES }, // F3
   '/ban-goi': { roles: ['RECEPTIONIST'] }, // F3
+  '/checkins': { roles: ['RECEPTIONIST', 'BRANCH_MANAGER'] }, // F4
+  '/hoa-don': { roles: MEMBER_MANAGEMENT_ROLES }, // F5
+  '/hoa-don/:id': { roles: MEMBER_MANAGEMENT_ROLES }, // F5
+  '/dat-cho-lop': { roles: ['RECEPTIONIST'] }, // F8
+  '/classes': { roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'TRAINER'] }, // F8
+  '/member/classes': { roles: ['MEMBER'] }, // F8
+  '/doi-mat-khau': { roles: ROLES }, // F1
+  // S2-20.2: giao diện huấn luyện viên (F9)
+  '/pt/lich': { roles: ['TRAINER'] }, // F9
+  '/pt/hoc-vien': { roles: ['TRAINER'] }, // F9
+  // S2-15.1: giao diện cổng hội viên (F7)
+  '/member/memberships': { roles: ['MEMBER'] }, // F7
+  // S2-12.2: giao diện dashboard cơ bản (F6)
+  '/dashboard': { roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'RECEPTIONIST'] }, // F6
 } satisfies RouteAccessTable
 
 /** Đường dẫn đã khai báo quyền; viết sai tên thì TypeScript báo lỗi. */
