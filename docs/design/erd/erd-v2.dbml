@@ -505,6 +505,7 @@ Table class_schedules {
 Table class_sessions {
   id bigint [pk, increment]
   class_schedule_id bigint [not null, ref: > class_schedules.id]
+  class_type_id bigint [not null, ref: > class_types.id, note: 'chép từ lịch lặp khi sinh buổi']
   branch_id bigint [not null, ref: > branches.id]
   trainer_id bigint [not null, ref: > staff.id, note: 'chép từ lịch lặp; đổi được khi có PT dạy thay']
   room_id bigint [not null, ref: > rooms.id]

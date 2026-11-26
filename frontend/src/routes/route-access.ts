@@ -28,6 +28,9 @@ export const ROUTE_ACCESS = {
   // Trang chức năng của nhân viên.
   '/members': { roles: MEMBER_MANAGEMENT_ROLES }, // F2
   '/packages': { roles: MEMBER_MANAGEMENT_ROLES }, // F3
+  '/member/classes': { roles: ['MEMBER'] },
+  '/trainer/classes': { roles: ['TRAINER'] },
+  '/trainer/classes/:sessionId/attendance': { roles: ['TRAINER'] },
   '/ban-goi': { roles: ['RECEPTIONIST'] }, // F3
 } satisfies RouteAccessTable
 
