@@ -73,4 +73,20 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
             @org.springframework.data.repository.query.Param("hasKeyword") boolean hasKeyword,
             @org.springframework.data.repository.query.Param("keywordPattern") String keywordPattern,
             org.springframework.data.domain.Pageable pageable);
+    @Query("""
+        SELECT count(i) > 0 FROM Invoice i JOIN i.items it
+        WHERE i.memberId = :memberId AND i.status = 'PENDING'
+          AND it.packageId = :packageId""")
+    boolean existsPendingWithPackage(
+            @org.springframework.data.repository.query.Param("memberId") Long memberId,
+            @org.springframework.data.repository.query.Param("packageId") Long packageId);
+
+    @Query("""
+        SELECT i FROM Invoice i
+        WHERE i.status = 'PENDING'
+          AND i.source = 'MEMBER_PORTAL'
+          AND i.createdAt < :createdBefore
+        ORDER BY i.createdAt, i.id""")
+    java.util.List<Invoice> findPendingPortalCreatedBefore(
+            @org.springframework.data.repository.query.Param("createdBefore") java.time.OffsetDateTime createdBefore);
 }
