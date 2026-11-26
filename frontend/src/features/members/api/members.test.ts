@@ -22,6 +22,15 @@ describe('kết nối API F2', () => {
     vi.spyOn(http, 'get').mockRejectedValue(new Error('Backend chưa sẵn sàng'))
     await expect(membersApi.list({ page: 0, size: 20 })).rejects.toThrow('Backend chưa sẵn sàng')
   })
+
+  it('US-F2.2.1 API: liveMembersApi.createAccount gọi POST /members/{id}/account qua client HTTP', async () => {
+    const response = { memberId: 12, userId: 45, email: 'hoivien@example.com' }
+    const post = vi.spyOn(http, 'post').mockResolvedValue({ data: response })
+
+    const created = await liveMembersApi.createAccount(12, { email: 'hoivien@example.com' })
+    expect(created).toEqual(response)
+    expect(post).toHaveBeenCalledWith('/members/12/account', { email: 'hoivien@example.com' })
+  })
 })
 
 describe('dữ liệu minh họa hội viên', () => {

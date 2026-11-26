@@ -37,9 +37,20 @@ export interface MemberQuery extends PageQuery {
   status?: Status
 }
 
+export interface CreateMemberAccountInput {
+  email: string
+}
+
+export interface CreateMemberAccountResult {
+  memberId: number
+  userId: number
+  email: string
+}
+
 export interface MembersGateway {
   list(query: MemberQuery): Promise<PageResponse<MemberSummary>>
   detail(id: number): Promise<MemberDetail>
   create(input: MemberInput): Promise<MemberDetail>
   update(id: number, input: MemberUpdate): Promise<MemberDetail>
+  createAccount(id: number, input: CreateMemberAccountInput): Promise<CreateMemberAccountResult>
 }
