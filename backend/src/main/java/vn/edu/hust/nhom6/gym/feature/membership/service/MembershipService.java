@@ -48,8 +48,6 @@ public class MembershipService {
     public static final String SESSIONS_USED_UP =
         "Gói tập theo buổi của hội viên đã hết lượt sử dụng. Vui lòng gia hạn thêm gói mới.";
     /** SRS F5 UC-F5.2 E6b. */
-    static final String UPCOMING_EXISTS = "Hội viên đã có gói cùng loại đang chờ kích hoạt (UPCOMING). Không thể "
-        + "kích hoạt thêm gói này. Vui lòng liên hệ quản lý để kiểm tra hoặc hoàn tiền hóa đơn.";
 
     /** Gói đang giữ quyền lợi; chỉ mục {@code uq_one_active_per_type} bảo đảm tối đa một gói mỗi loại. */
     private static final Set<MembershipStatus> HELD = EnumSet.of(MembershipStatus.ACTIVE, MembershipStatus.FROZEN);
