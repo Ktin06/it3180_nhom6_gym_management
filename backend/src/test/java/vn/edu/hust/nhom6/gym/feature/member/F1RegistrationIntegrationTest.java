@@ -241,7 +241,7 @@ class F1RegistrationIntegrationTest {
         Session member = register("rollback-after-save@example.com", "0912345601");
         String adminToken = adminToken();
         doThrow(new IllegalStateException("Kiểm thử lỗi sau khi lưu hồ sơ"))
-            .when(mapper).detail(any(Member.class), anyString());
+            .when(mapper).detail(any(Member.class), anyString(), anyBoolean());
 
         mvc.perform(put("/api/v1/members/{id}", member.memberId())
                 .header("Authorization", "Bearer " + adminToken).contentType(MediaType.APPLICATION_JSON)

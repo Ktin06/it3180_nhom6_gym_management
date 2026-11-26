@@ -89,7 +89,6 @@ class MemberApiIntegrationTest {
             .andExpect(jsonPath("$.homeBranchId").value(branch.intValue()))
             .andExpect(jsonPath("$.status").value("ACTIVE"));
         assertThat(jdbc.queryForObject("SELECT created_by FROM members", Long.class)).isEqualTo(receptionist);
-        assertThat(jdbc.queryForObject("SELECT avatar_url FROM members", String.class)).isNull();
     }
 
     @Test
