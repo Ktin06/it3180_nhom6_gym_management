@@ -15,7 +15,7 @@ Mọi bảng tuân theo cùng một quy ước, để mã do 8 người (và AI)
 - **Tiền:** số nguyên đơn vị VND, không dùng số thực để tránh sai số làm tròn.
 - **Trạng thái:** giá trị viết hoa (`ACTIVE`, `EXPIRED`). Trong migration lưu kiểu `varchar` kèm ràng buộc `CHECK`; entity Java dùng `@Enumerated(EnumType.STRING)`. Các `Enum` trong file DBML chỉ để vẽ sơ đồ.
 - **Mỗi thông tin chỉ lưu ở một nơi:** vai trò ở `users.role`; email ở `users.email`; chi nhánh làm việc của nhân viên ở `staff.branch_id`; số điện thoại ở `members.phone` hoặc `staff.phone`.
-- **Cột chép có chủ đích:** một số cột được chép lại như ảnh chụp tại một thời điểm và không đổi về sau, ví dụ giá lúc bán (`invoice_items.unit_price`), loại gói lúc mua (`memberships.package_type`), huấn luyện viên và phòng của từng buổi (`class_sessions`). Trong file DBML các cột này có ghi chú "chép từ".
+- **Cột chép có chủ đích:** một số cột được chép lại theo giá trị lúc tạo, ví dụ giá lúc bán (`invoice_items.unit_price`), loại gói lúc mua (`memberships.package_type`), loại lớp, huấn luyện viên và phòng của từng buổi (`class_sessions`). Trong file DBML các cột này có ghi chú "chép từ".
 - **Không xóa cứng** dữ liệu nghiệp vụ (hội viên, hóa đơn, gói tập): dùng trạng thái hoặc cột `deleted_at`. Ngoại lệ duy nhất là `face_embeddings`: hội viên rút lại đồng ý thì xóa thật (S8).
 - **Chi nhánh từ ngày đầu:** các bảng nghiệp vụ gốc có `branch_id` ngay từ v1 (dùng một chi nhánh mặc định), dù đa chi nhánh (F18) làm ở v4, để v4 không phải sửa lại cơ sở dữ liệu. Bảng con lấy chi nhánh qua bảng cha (ví dụ `class_bookings` qua `class_sessions`, `payments` qua `invoices`), không chép lại; riêng `payrolls.branch_id` được chép lúc tính lương, vì nhân viên có thể chuyển chi nhánh.
 - **Dữ liệu chuẩn hóa:** email lưu chữ thường (`CHECK email = lower(email)`); số điện thoại lưu 10 chữ số bắt đầu bằng 0 (`CHECK phone ~ '^0[0-9]{9}$'`). Mã nguồn chuẩn hóa trước khi lưu và trước khi tìm kiếm.
@@ -67,7 +67,7 @@ Trạng thái gói (`memberships.status`): PENDING (đã có hóa đơn, chưa t
 | `checkins` | Mỗi lượt vào phòng tập | `member_id`, `membership_id` (gói TIME hoặc SESSION), `branch_id`, `created_by`, `method` (MANUAL, FACE), `match_score`, `checkin_date`, `session_deducted`, `checked_in_at`, `checked_out_at` | F4, F6, F20 |
 | `class_types` | Loại lớp: Yoga, Zumba, Boxing… | `name`, `status` | F8 |
 | `class_schedules` | Lịch lặp hằng tuần | `branch_id`, `class_type_id`, `trainer_id`, `room_id`, `day_of_week` (1 = thứ Hai … 7 = Chủ nhật), `start_time`, `end_time`, `capacity`, `valid_from`, `valid_to` | F8 |
-| `class_sessions` | Từng buổi cụ thể sinh ra từ lịch lặp; hội viên đặt chỗ vào buổi | `class_schedule_id`, `branch_id`, `trainer_id`, `room_id`, `occurrence_date` (ngày theo lịch lặp, không đổi khi đổi giờ), `start_at`, `end_at`, `original_start_at`, `capacity`, `status` | F8 |
+| `class_sessions` | Từng buổi cụ thể sinh ra từ lịch lặp; hội viên đặt chỗ vào buổi | `class_schedule_id`, `class_type_id` (loại lớp lúc sinh), `branch_id`, `trainer_id`, `room_id`, `occurrence_date` (ngày theo lịch lặp, không đổi khi đổi giờ), `start_at`, `end_at`, `original_start_at`, `capacity`, `status` | F8 |
 | `class_bookings` | Đặt chỗ lớp nhóm (không có danh sách chờ, ADR 0014) | `class_session_id`, `member_id`, `created_by`, `status`, `booked_at`, `arrived_at`, `cancel_reason`, `is_late_cancel`, `attendance_marked_by` | F8, F10 |
 
 ### 5. Huấn luyện viên (4 bảng)
@@ -89,7 +89,7 @@ Trạng thái gói (`memberships.status`): PENDING (đã có hóa đơn, chưa t
 | `promotions` | Mã giảm giá | `branch_id`, `code`, `type` (PERCENT, FIXED), `value`, `max_discount`, `min_amount`, `start_at`, `end_at`, `usage_limit`, `used_count`, `version` | F14 |
 | `invoices` | Hóa đơn | `branch_id`, `member_id` (rỗng nếu khách lẻ), `created_by` (lễ tân, hoặc hội viên với hóa đơn chờ từ F7), `source` (COUNTER, MEMBER_PORTAL), `promotion_id`, `subtotal`, `discount`, `total`, `status`, `paid_at`, thông tin hoàn tiền, `version` | F5, F7, F12, F14 |
 | `invoice_items` | Dòng hóa đơn | `invoice_id`, `item_type` (PACKAGE, PRODUCT, TRANSFER_FEE), `package_id`, `product_id`, `description`, `quantity`, `unit_price`, `amount`, `discount_amount` (phần giảm giá phân bổ cho dòng) | F5, F12, F15, F16 |
-| `payments` | Mỗi lần thu tiền | `invoice_id`, `method` (CASH, BANK_TRANSFER), `amount`, `status`, `transaction_ref`, `received_by`, `paid_at` | F5 |
+| `payments` | Mỗi lần thu tiền | `invoice_id`, `method` (CASH, BANK_TRANSFER), `amount` (≥ 0: hóa đơn 0 đồng vẫn có phiếu thu 0 đồng), `status`, `transaction_ref`, `received_by`, `paid_at` | F5 |
 
 ### 7. Nhân sự (4 bảng)
 
@@ -170,6 +170,7 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 - [x] Hoa hồng PT: phần trăm giá mỗi buổi, chụp vào `pt_sessions.commission_amount` lúc DONE (01/11).
 - [x] Gói TIME tính theo số ngày (`duration_days`); "1 tháng" = 30 ngày (01/11).
 - [x] Mã hội viên dạng `HV` + 6 chữ số (`HV000123`), sinh từ sequence `member_code_seq` dùng chung cả chuỗi (01/11).
+- [ ] S2-07 đề xuất mã hóa đơn mới dạng `HD` + 6 chữ số, sequence `invoice_code_seq` (migration `V9_05`); giữ mã lịch sử, không yêu cầu số liên tục khi rollback. Cần người duyệt xác nhận AC-F3.5.1-13.
 - [ ] Tác vụ chuyển EXPIRED lúc 00:00 bị lỗi trong khi máy chủ vẫn chạy (không có lần chạy bù): gói SESSION 0 buổi còn ACTIVE, gói nối tiếp chưa kích hoạt, hội viên bị từ chối check-in cả ngày. Trường hợp ngoại vi, để xử lý sau (hướng đã bàn: cho tác vụ chạy lại mỗi giờ, chạy lặp không gây sai) (03/11).
 - [x] Ảnh đại diện hội viên lưu trong PostgreSQL, bảng `member_avatars`, server thu nhỏ và nén; bỏ `members.avatar_url` (14/11, [ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md)).
 
@@ -186,5 +187,5 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 | 02/11/2026 | Cả nhóm duyệt ERD bản 2 tại buổi kick-off; `TRANSFER_FEE` mặc định 200.000 đ |
 | 03/11/2026 | Theo [ADR 0005](../../decisions/0005-erd-v2.md) mục 25–32: tham số `SESSION_WARNING_THRESHOLD`; công thức `end_date`; gói SESSION, PT hết buổi kéo gói nối tiếp; tác vụ nền chuyển EXPIRED (00:00, chạy bù khi khởi động) trước khi kích hoạt UPCOMING; chặn bảo lưu, chuyển nhượng gói hết buổi; giới hạn số buổi PT đặt trước; để mở trường hợp tác vụ 00:00 bị lỗi |
 | 12/11/2026 | Theo quyết định F8 ([ADR 0010](../../decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md)): `class_bookings.created_by` thành NOT NULL (migration `V9_01`); `grace_until` tính từ `promoted_at`, không từ lúc gửi email; thứ tự chờ phụ theo `id`; ghi chú `attendance_marked_by` gồm cả người sửa điểm danh |
-| 14/11/2026 | Theo [ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md): thêm bảng `member_avatars` (ảnh đại diện lưu trong PostgreSQL), bỏ `members.avatar_url`; 40 bảng. Migration `V9_02` làm ở việc S2-06 |
+| 14/11/2026 | Theo [ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md): thêm bảng `member_avatars` (ảnh đại diện lưu trong PostgreSQL), bỏ `members.avatar_url`; 40 bảng. Migration S2-06 lấy số tiếp theo trên main; ngày 24/11/2026 nhánh #183 dùng `V9_04` sau `V9_03` |
 | 19/11/2026 | Theo [ADR 0014](../../decisions/0014-bo-danh-sach-cho-lop-hoc-nhom.md) (thay ADR 0010), migration `V9_03`: `class_bookings` bỏ trạng thái `WAITLIST`, `PENDING_RECONFIRM`, lý do hủy `NOT_RECONFIRMED`, các cột `waitlisted_at`, `promoted_at`, `grace_until`, `reconfirm_expires_at` và chỉ mục danh sách chờ; `system_configs` bỏ `PROMOTION_GRACE_MIN`, `RECONFIRM_TTL_MIN`, đổi `PROMOTION_CUTOFF_MIN` thành `BOOKING_CUTOFF_MIN`; buổi đã đổi giờ hủy không phạt |

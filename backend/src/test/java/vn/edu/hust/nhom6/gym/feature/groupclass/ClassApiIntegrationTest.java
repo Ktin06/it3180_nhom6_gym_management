@@ -10,6 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.event.EventListener;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,6 +27,8 @@ import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 import vn.edu.hust.nhom6.gym.feature.auth.service.JwtTokenService;
 import vn.edu.hust.nhom6.gym.feature.groupclass.dto.ClassDtos.*;
+import vn.edu.hust.nhom6.gym.feature.groupclass.event.ClassSessionChanged;
+import vn.edu.hust.nhom6.gym.feature.groupclass.event.ClassSessionChanged.Kind;
 import vn.edu.hust.nhom6.gym.feature.groupclass.service.*;
 import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import static org.assertj.core.api.Assertions.*;
@@ -31,7 +40,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /** PostgreSQL/Flyway thật; chỉ điều khiển đồng hồ, không mock nghiệp vụ hoặc khóa DB. */
 @SpringBootTest(properties = "app.classes.generation.enabled=false")
 @AutoConfigureMockMvc
-@Import(TestcontainersConfiguration.class)
+@Import({TestcontainersConfiguration.class, ClassApiIntegrationTest.EventTestConfiguration.class})
+@RecordApplicationEvents
 class ClassApiIntegrationTest {
     @Autowired JdbcTemplate jdbc;
     @Autowired MockMvc mvc;
@@ -39,9 +49,14 @@ class ClassApiIntegrationTest {
     @Autowired JwtTokenService tokens;
     @Autowired ClassBookingService bookings;
     @Autowired ClassScheduleService schedules;
+    @Autowired ClassSessionService sessions;
+    @Autowired ClassAttendanceService attendance;
+    @Autowired ApplicationEvents events;
+    @Autowired PlatformTransactionManager transactions;
+    @Autowired FailingNotificationListener notifications;
     @MockitoBean(name = "clock") Clock clock;
     static final OffsetDateTime NOW = OffsetDateTime.parse("2026-11-18T10:00:00+07:00");
-    long branch, otherBranch, manager, receptionist, trainer, room, type, member, user;
+    long branch, otherBranch, manager, receptionist, trainer, trainerUser, room, type, member, user;
 
     @BeforeEach
     void fixture() {
@@ -58,7 +73,7 @@ class ClassApiIntegrationTest {
         otherBranch = jdbc.queryForObject("SELECT id FROM branches WHERE code='F8TEST'", Long.class);
         manager = user("manager", "BRANCH_MANAGER");
         receptionist = user("reception", "RECEPTIONIST");
-        long trainerUser = user("trainer", "TRAINER");
+        trainerUser = user("trainer", "TRAINER");
         trainer = staff(trainerUser, "PT");
         staff(manager, "QL"); staff(receptionist, "LT");
         room = jdbc.queryForObject("INSERT INTO rooms(branch_id,name,capacity) VALUES (?,'Studio',20) RETURNING id", Long.class, branch);
@@ -359,6 +374,47 @@ class ClassApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F8.7.1-05b: Ba lịch giữ loại lớp và chỗ đặt của buổi đã sinh")
+    void calendarsPreserveGeneratedClassTypeAfterScheduleEdit() throws Exception {
+        LocalDate firstDay = NOW.toLocalDate().plusDays(6);
+        LocalDate nextDay = firstDay.plusWeeks(1);
+        var schedule = schedules.save(manager(), null, request(2, firstDay, nextDay));
+        assertThat(schedules.generate(schedule.id(), firstDay, firstDay)).isEqualTo(1);
+        long firstId = jdbc.queryForObject("SELECT id FROM class_sessions WHERE class_schedule_id=? AND occurrence_date=?",
+            Long.class, schedule.id(), firstDay);
+        long bookingId = bookings.book(actor(), firstId, member).id();
+
+        long zumba = jdbc.queryForObject("INSERT INTO class_types(name) VALUES ('Zumba') RETURNING id", Long.class);
+        schedules.save(manager(), schedule.id(), new ScheduleRequest(zumba, trainer, room, 2,
+            LocalTime.of(13, 0), LocalTime.of(14, 0), 5, firstDay, nextDay));
+        assertThat(schedules.generate(schedule.id(), firstDay, nextDay)).isEqualTo(1);
+        long nextId = jdbc.queryForObject("SELECT id FROM class_sessions WHERE class_schedule_id=? AND occurrence_date=?",
+            Long.class, schedule.id(), nextDay);
+
+        mvc.perform(get("/api/v1/public/class-sessions").param("branchId", String.valueOf(branch))
+            .param("from", firstDay.toString()).param("to", nextDay.toString()))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2))
+            .andExpect(jsonPath("$[0].id").value(firstId)).andExpect(jsonPath("$[0].className").value("Yoga"))
+            .andExpect(jsonPath("$[1].id").value(nextId)).andExpect(jsonPath("$[1].className").value("Zumba"));
+        mvc.perform(get("/api/v1/members/me/class-sessions").header("Authorization", bearer(user, "MEMBER"))
+            .param("from", firstDay.toString()).param("to", nextDay.toString()))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.sessions.length()").value(2))
+            .andExpect(jsonPath("$.sessions[0].id").value(firstId))
+            .andExpect(jsonPath("$.sessions[0].className").value("Yoga"))
+            .andExpect(jsonPath("$.sessions[0].bookingId").value(bookingId))
+            .andExpect(jsonPath("$.sessions[0].bookingStatus").value("BOOKED"))
+            .andExpect(jsonPath("$.sessions[0].remaining").value(9))
+            .andExpect(jsonPath("$.sessions[1].id").value(nextId))
+            .andExpect(jsonPath("$.sessions[1].className").value("Zumba"))
+            .andExpect(jsonPath("$.sessions[1].remaining").value(5));
+        mvc.perform(get("/api/v1/trainers/me/class-sessions").header("Authorization", bearer(trainerUser, "TRAINER"))
+            .param("from", firstDay.toString()).param("to", nextDay.toString()))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2))
+            .andExpect(jsonPath("$[0].id").value(firstId)).andExpect(jsonPath("$[0].className").value("Yoga"))
+            .andExpect(jsonPath("$[1].id").value(nextId)).andExpect(jsonPath("$[1].className").value("Zumba"));
+    }
+
+    @Test
     @DisplayName("TC-F8.8.1-03a: Không sinh trước ngày hiệu lực, sau hạn hoặc khi lịch ngừng")
     void generationSkipsInactiveAndOutOfValidityDates() {
         LocalDate validDay = NOW.toLocalDate().plusWeeks(1);
@@ -636,5 +692,306 @@ class ClassApiIntegrationTest {
         mvc.perform(post("/api/v1/class-schedules").header("Authorization",bearer(manager,"BRANCH_MANAGER"))
             .contentType(APPLICATION_JSON).content(body.replace("\"capacity\":10","\"capacity\":10.5")))
             .andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors.capacity").exists());
+    }
+
+    @Test
+    @DisplayName("TC-F8.7.1-08c, TC-F8.7.1-09a, TC-F8.7.1-10a, TC-F8.7.1-11a, TC-F8.3.1-09a: Đổi phòng, đổi giờ nhiều lần và hủy buổi với dữ liệu F10")
+    void changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot() throws Exception {
+        long id = session(NOW.plusHours(2), 2);
+        long booking = bookings.book(actor(), id, member).id();
+        long otherRoom = jdbc.queryForObject("INSERT INTO rooms(branch_id,name,capacity) VALUES (?,'Phòng mới',20) RETURNING id",
+            Long.class, branch);
+        long owner = user("owner", "SUPER_ADMIN");
+        var roomUrl = "/api/v1/class-sessions/" + id + "/room";
+        mvc.perform(put(roomUrl).header("Authorization", bearer(receptionist, "RECEPTIONIST"))
+            .contentType(APPLICATION_JSON).content(json.writeValueAsString(new SessionRoomRequest(otherRoom))))
+            .andExpect(status().isForbidden());
+        mvc.perform(put(roomUrl).header("Authorization", bearer(owner, "SUPER_ADMIN"))
+            .contentType(APPLICATION_JSON).content(json.writeValueAsString(new SessionRoomRequest(otherRoom))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.roomId").value(otherRoom));
+
+        var firstStart = NOW.plusDays(1);
+        var secondStart = firstStart.plusHours(2);
+        sessions.changeTime(manager(), id, new SessionTimeRequest(firstStart, firstStart.plusHours(1)));
+        var changed = sessions.changeTime(manager(), id, new SessionTimeRequest(secondStart, secondStart.plusHours(1)));
+        assertThat(changed.originalStartAt().toInstant()).isEqualTo(NOW.plusHours(2).toInstant());
+        assertThat(changed.occurrenceDate()).isEqualTo(NOW.toLocalDate());
+        assertThat(bookings.detail(actor(), booking).status()).isEqualTo("BOOKED");
+
+        at(secondStart.minusMinutes(20));
+        assertThat(bookings.cancel(actor(), booking).isLateCancel()).isFalse();
+        long nextId = session(secondStart.plusDays(1), 2);
+        long nextBooking = bookings.book(actor(), nextId, member).id();
+        long secondUser = user("second-recipient", "MEMBER");
+        long secondMember = member(secondUser);
+        timePackage(secondMember);
+        var secondActor = new CurrentUser(secondUser, UserRole.MEMBER);
+        long secondBooking = bookings.book(secondActor, nextId, secondMember).id();
+
+        sessions.cancel(manager(), nextId);
+        sessions.cancel(manager(), nextId);
+        assertThat(List.of(bookings.detail(actor(), nextBooking), bookings.detail(secondActor, secondBooking)))
+            .allSatisfy(cancelled -> {
+                assertThat(cancelled.status()).isEqualTo("CANCELLED");
+                assertThat(cancelled.cancelReason()).isEqualTo("SESSION_CANCELLED");
+                assertThat(cancelled.isLateCancel()).isFalse();
+            });
+
+        var published = events.stream(ClassSessionChanged.class).toList();
+        assertThat(published).extracting(ClassSessionChanged::kind)
+            .containsExactly(Kind.ROOM_CHANGED, Kind.TIME_CHANGED, Kind.TIME_CHANGED, Kind.CANCELLED);
+        assertThat(published.subList(0, 3)).allSatisfy(event -> assertThat(event.affectedMemberIds()).containsExactly(member));
+        assertThat(published.get(3).affectedMemberIds()).containsExactlyInAnyOrder(member, secondMember);
+        assertThat(published.get(0).before().roomId()).isEqualTo(room);
+        assertThat(published.get(2).before().startAt().toInstant()).isEqualTo(firstStart.toInstant());
+        assertThat(published.get(2).after().startAt().toInstant()).isEqualTo(secondStart.toInstant());
+    }
+
+    @Test
+    @DisplayName("TC-F8.7.1-09b, TC-F8.7.1-10b: Giữ nguyên buổi khi xung đột hoặc phòng không hợp lệ")
+    void rejectsRoomCapacityAndActualTimeConflict() {
+        long id = session(NOW.plusHours(2), 2);
+        session(NOW.plusHours(4), 2);
+        long smallRoom = jdbc.queryForObject("INSERT INTO rooms(branch_id,name,capacity) VALUES (?,'Phòng nhỏ',1) RETURNING id",
+            Long.class, branch);
+        long foreignRoom = jdbc.queryForObject("INSERT INTO rooms(branch_id,name,capacity) VALUES (?,'Ngoài chi nhánh',20) RETURNING id",
+            Long.class, otherBranch);
+        assertThatThrownBy(() -> sessions.changeRoom(manager(), id, smallRoom)).isInstanceOf(BusinessRuleException.class);
+        assertThatThrownBy(() -> sessions.changeRoom(manager(), id, foreignRoom))
+            .isInstanceOf(vn.edu.hust.nhom6.gym.common.exception.ForbiddenException.class);
+        assertThatThrownBy(() -> sessions.changeTime(manager(), id,
+            new SessionTimeRequest(NOW.plusHours(4), NOW.plusHours(5)))).isInstanceOf(ConflictException.class);
+        assertThat(events.stream(ClassSessionChanged.class)).isEmpty();
+        assertThat(jdbc.queryForObject("SELECT room_id FROM class_sessions WHERE id=?", Long.class, id)).isEqualTo(room);
+    }
+
+    @Test
+    @DisplayName("TC-F8.7.1-12a: Rollback không phát sự kiện, lỗi thông báo không đảo ngược F8")
+    void notificationFailureIsIsolatedAndRollbackDoesNotPublish() {
+        long id = session(NOW.plusHours(2), 2);
+        long booking = bookings.book(actor(), id, member).id();
+        new TransactionTemplate(transactions).executeWithoutResult(tx -> {
+            sessions.cancel(manager(), id);
+            tx.setRollbackOnly();
+        });
+        assertThat(events.stream(ClassSessionChanged.class)).isEmpty();
+        assertThat(bookings.detail(actor(), booking).status()).isEqualTo("BOOKED");
+
+        notifications.fail = true;
+        try {
+            assertThat(sessions.cancel(manager(), id).status()).isEqualTo("CANCELLED");
+        } finally {
+            notifications.fail = false;
+        }
+        assertThat(notifications.observedStatus).isEqualTo("CANCELLED");
+        assertThat(bookings.detail(actor(), booking).status()).isEqualTo("CANCELLED");
+    }
+
+    @Test
+    @DisplayName("TC-F8.6.1-01a, TC-F8.6.1-03a, TC-F8.6.1-04a, TC-F8.6.1-05a, TC-F8.6.1-06a: Check-in, phân công, biên giờ Việt Nam và audit khi sửa")
+    void attendanceHonorsAssignmentAndVietnameseDay() throws Exception {
+        long id = session(NOW.plusHours(2), 2);
+        long booking = bookings.book(actor(), id, member).id();
+        jdbc.update("UPDATE class_bookings SET arrived_at=? WHERE id=?", NOW, booking);
+        String path = "/api/v1/class-sessions/" + id + "/attendance";
+        long otherTrainer = user("other-trainer", "TRAINER");
+        staff(otherTrainer, "PT2");
+        String trainerJwt = bearer(trainerUser, "TRAINER");
+        mvc.perform(get(path).header("Authorization", bearer(otherTrainer, "TRAINER")))
+            .andExpect(status().isForbidden());
+        mvc.perform(get(path).header("Authorization", trainerJwt)).andExpect(status().isOk())
+            .andExpect(jsonPath("$.bookings[0].status").value("BOOKED"))
+            .andExpect(jsonPath("$.bookings[0].arrivedAt").exists());
+
+        var trainerActor = new CurrentUser(trainerUser, UserRole.TRAINER);
+        var original = attendance.roster(trainerActor, id).bookings().getFirst();
+        var mark = new AttendanceRequest(booking, AttendanceStatus.ATTENDED, original.updatedAt());
+        assertThatThrownBy(() -> attendance.mark(trainerActor, id, mark)).isInstanceOf(BusinessRuleException.class);
+        at(NOW.plusHours(2));
+        mvc.perform(put(path).header("Authorization", trainerJwt).contentType(APPLICATION_JSON)
+            .content(json.writeValueAsString(mark))).andExpect(status().isOk())
+            .andExpect(jsonPath("$.attendanceMarkedBy").value(trainerUser));
+        assertThatThrownBy(() -> attendance.mark(trainerActor, id, mark)).isInstanceOf(ConflictException.class);
+        assertThat(jdbc.queryForObject("SELECT status FROM class_bookings WHERE id=?", String.class, booking))
+            .isEqualTo("ATTENDED");
+
+        at(NOW.withHour(23).withMinute(59));
+        var marked = attendance.roster(trainerActor, id).bookings().getFirst();
+        var corrected = attendance.mark(trainerActor, id, new AttendanceRequest(booking, AttendanceStatus.NO_SHOW, marked.updatedAt()));
+        assertThat(corrected.status()).isEqualTo("NO_SHOW");
+        var correct = new AttendanceRequest(booking, AttendanceStatus.ATTENDED, corrected.updatedAt());
+        assertThatThrownBy(() -> attendance.mark(manager(), id, correct)).isInstanceOf(BusinessRuleException.class);
+        at(NOW.plusDays(1).withHour(0));
+        assertThatThrownBy(() -> attendance.mark(trainerActor, id, correct)).isInstanceOf(BusinessRuleException.class);
+        assertThat(attendance.mark(manager(), id, correct).attendanceMarkedBy()).isEqualTo(manager);
+        assertThat(jdbc.queryForObject("""
+            SELECT (old_value->>'status') || ':' || (new_value->>'status')
+            FROM audit_logs WHERE action='CLASS_ATTENDANCE_CORRECT' AND user_id=? AND entity_id=?
+            """, String.class, manager, booking)).isEqualTo("NO_SHOW:ATTENDED");
+    }
+
+    @Test
+    @DisplayName("TC-F8.6.1-02a, TC-F8.6.1-07a, TC-F8.6.1-08a, TC-F8.6.1-09a, TC-F8.6.1-10a, TC-F8.6.1-11a: Chỉ NO_SHOW lần đầu áp khóa, gỡ khóa riêng có audit")
+    void firstNoShowLocksAndCorrectionDoesNotReevaluateLock() throws Exception {
+        var trainerActor = new CurrentUser(trainerUser, UserRole.TRAINER);
+        jdbc.update("INSERT INTO system_configs(branch_id,config_key,config_value) VALUES (?,'PENALTY_LIMIT_PER_MONTH','1')", branch);
+        long id = session(NOW.plusHours(2), 2);
+        long booking = bookings.book(actor(), id, member).id();
+        at(NOW.plusHours(2));
+        var row = attendance.roster(trainerActor, id).bookings().getFirst();
+        var marked = attendance.mark(trainerActor, id, new AttendanceRequest(booking, AttendanceStatus.NO_SHOW, row.updatedAt()));
+        var lockedUntil = bookings.detail(actor(), booking).bookingLockedUntil();
+        assertThat(lockedUntil).isNotNull();
+        var corrected = attendance.mark(trainerActor, id,
+            new AttendanceRequest(booking, AttendanceStatus.ATTENDED, marked.updatedAt()));
+        assertThat(bookings.detail(actor(), booking).bookingLockedUntil()).isEqualTo(lockedUntil);
+        attendance.mark(trainerActor, id, new AttendanceRequest(booking, AttendanceStatus.NO_SHOW, corrected.updatedAt()));
+        assertThat(bookings.detail(actor(), booking).bookingLockedUntil()).isEqualTo(lockedUntil);
+
+        String path = "/api/v1/members/" + member + "/class-booking-lock";
+        long foreignManager = user("foreign-manager", "BRANCH_MANAGER");
+        jdbc.update("INSERT INTO staff(user_id,branch_id,staff_code,full_name) VALUES (?,?,'Q2','QL2')", foreignManager, otherBranch);
+        mvc.perform(delete(path).header("Authorization", bearer(foreignManager, "BRANCH_MANAGER")))
+            .andExpect(status().isForbidden());
+        mvc.perform(delete(path).header("Authorization", bearer(trainerUser, "TRAINER"))).andExpect(status().isForbidden());
+        mvc.perform(delete(path).header("Authorization", bearer(manager, "BRANCH_MANAGER"))).andExpect(status().isNoContent());
+        assertThat(bookings.detail(actor(), booking).bookingLockedUntil()).isNull();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE entity='members' AND entity_id=? AND user_id=? AND action='CLASS_BOOKING_UNLOCK'",
+            Long.class, member, manager)).isEqualTo(1L);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE entity='members' AND entity_id=? AND action='CLASS_BOOKING_LOCK'",
+            Long.class, member)).isEqualTo(1L);
+
+        long next = session(NOW.plusDays(1), 2);
+        long cancelled = bookings.book(actor(), next, member).id();
+        var open = attendance.roster(trainerActor, next).bookings().getFirst();
+        bookings.cancel(actor(), cancelled);
+        at(NOW.plusDays(1));
+        assertThatThrownBy(() -> attendance.mark(trainerActor, next,
+            new AttendanceRequest(cancelled, AttendanceStatus.NO_SHOW, open.updatedAt())))
+            .isInstanceOf(BusinessRuleException.class);
+        assertThat(bookings.detail(actor(), cancelled).bookingLockedUntil()).isNull();
+    }
+
+
+    @Test
+    @DisplayName("TC-F8.0.1-01a, TC-F8.0.1-02a, TC-F8.0.1-03a, TC-F8.0.1-04a: Lịch công khai lọc ngày Việt Nam, không lộ chỗ đặt")
+    void publicCalendarShowsOnlyPublicInformationWithVietnameseDates() throws Exception {
+        long id = session(NOW.plusHours(2), 2);
+        bookings.book(actor(), id, member);
+        var nextMidnight = NOW.plusDays(1).withHour(0);
+        session(nextMidnight, 2);
+
+        String path = "/api/v1/public/class-sessions";
+        mvc.perform(get(path).param("branchId", String.valueOf(branch))
+            .param("from", NOW.toLocalDate().toString()).param("to", NOW.toLocalDate().toString()))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1))
+            .andExpect(jsonPath("$[0].id").value(id)).andExpect(jsonPath("$[0].className").value("Yoga"))
+            .andExpect(jsonPath("$[0].roomName").value("Studio")).andExpect(jsonPath("$[0].trainerName").value("PT"))
+            .andExpect(jsonPath("$[0].bookingId").doesNotExist()).andExpect(jsonPath("$[0].memberId").doesNotExist())
+            .andExpect(jsonPath("$[0].remaining").doesNotExist());
+        mvc.perform(get(path).param("branchId", String.valueOf(otherBranch)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(0));
+        mvc.perform(get(path).param("from", "not-a-date")).andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errors.from").exists());
+        mvc.perform(get(path).param("branchId", "999999")).andExpect(status().isNotFound());
+        mvc.perform(get(path).param("from", "2026-11-24").param("to", "2026-11-20"))
+            .andExpect(status().isBadRequest());
+        mvc.perform(post("/api/v1/class-sessions/" + id + "/bookings").contentType(APPLICATION_JSON)
+            .content(json.writeValueAsString(new BookingRequest(member)))).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/v1/public/class-branches")).andExpect(status().isOk())
+            .andExpect(jsonPath("$[?(@.id == " + branch + ")]").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("TC-F8.1.1-01c, TC-F8.1.1-03c: Lịch hội viên trả chỗ của chính mình và số suất còn lại")
+    void memberCalendarReturnsOwnBookingAndAvailability() throws Exception {
+        long id = session(NOW.plusHours(2), 2);
+        long bookedId = bookings.book(actor(), id, member).id();
+        long otherUser = user("member-2", "MEMBER");
+        long otherMember = member(otherUser);
+        timePackage(otherMember);
+        String path = "/api/v1/members/me/class-sessions";
+        mvc.perform(get(path).header("Authorization", bearer(user, "MEMBER")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.memberId").value(member))
+            .andExpect(jsonPath("$.sessions[0].id").value(id)).andExpect(jsonPath("$.sessions[0].remaining").value(1))
+            .andExpect(jsonPath("$.sessions[0].bookingId").value(bookedId))
+            .andExpect(jsonPath("$.sessions[0].bookingStatus").value("BOOKED"));
+        mvc.perform(get(path).header("Authorization", bearer(otherUser, "MEMBER")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.memberId").value(otherMember))
+            .andExpect(jsonPath("$.sessions[0].bookingId").doesNotExist());
+        mvc.perform(get(path).header("Authorization", bearer(manager, "BRANCH_MANAGER")))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("TC-F8.5.1-01a, TC-F8.5.1-02a, TC-F8.5.1-03a, TC-F8.5.1-04a: Lịch dạy xem phân công của buổi, không trả người khác")
+    void trainerCalendarUsesActualSessionAssignment() throws Exception {
+        long own = session(NOW.plusHours(2), 2);
+        long substitute = session(NOW.plusHours(4), 2);
+        long trainerTwo = user("trainer-2", "TRAINER");
+        long staffTwo = staff(trainerTwo, "PT2");
+        jdbc.update("UPDATE class_sessions SET trainer_id=? WHERE id=?", staffTwo, substitute);
+        var path = "/api/v1/trainers/me/class-sessions";
+        mvc.perform(get(path).header("Authorization", bearer(trainerUser, "TRAINER")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1))
+            .andExpect(jsonPath("$[0].id").value(own));
+        mvc.perform(get(path).header("Authorization", bearer(trainerTwo, "TRAINER")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1))
+            .andExpect(jsonPath("$[0].id").value(substitute));
+        mvc.perform(get(path).header("Authorization", bearer(trainerTwo, "TRAINER"))
+            .param("from", "2026-11-25").param("to", "2026-11-27"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(0));
+        mvc.perform(get(path).header("Authorization", bearer(user, "MEMBER"))).andExpect(status().isForbidden());
+        mvc.perform(get("/api/v1/class-sessions/" + substitute + "/attendance")
+            .header("Authorization", bearer(trainerUser, "TRAINER"))).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("TC-F8.6.1-01c: Hội viên đã xóa mềm sau khi đặt vẫn ghi được vắng, không áp khóa")
+    void noShowOfSoftDeletedMemberIsRecordedWithoutPenalty() {
+        var trainerActor = new CurrentUser(trainerUser, UserRole.TRAINER);
+        jdbc.update("INSERT INTO system_configs(branch_id,config_key,config_value) VALUES (?,'PENALTY_LIMIT_PER_MONTH','1')", branch);
+        long id = session(NOW.plusHours(2), 2);
+        long booking = bookings.book(actor(), id, member).id();
+        jdbc.update("UPDATE members SET deleted_at=? WHERE id=?", NOW, member);
+        at(NOW.plusHours(2));
+        var row = attendance.roster(trainerActor, id).bookings().getFirst();
+
+        var marked = attendance.mark(trainerActor, id,
+            new AttendanceRequest(booking, AttendanceStatus.NO_SHOW, row.updatedAt()));
+
+        assertThat(marked.status()).isEqualTo("NO_SHOW");
+        assertThat(jdbc.queryForObject("SELECT status FROM class_bookings WHERE id=?", String.class, booking))
+            .isEqualTo("NO_SHOW");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM members WHERE id=? AND booking_locked_until IS NOT NULL",
+            Long.class, member)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE entity='members' AND entity_id=? AND action='CLASS_BOOKING_LOCK'",
+            Long.class, member)).isZero();
+    }
+
+    @TestConfiguration(proxyBeanMethods = false)
+    static class EventTestConfiguration {
+        @Bean
+        FailingNotificationListener failingNotificationListener(JdbcTemplate jdbc) {
+            return new FailingNotificationListener(jdbc);
+        }
+    }
+
+    static class FailingNotificationListener {
+        private final JdbcTemplate jdbc;
+        boolean fail;
+        String observedStatus;
+
+        FailingNotificationListener(JdbcTemplate jdbc) {
+            this.jdbc = jdbc;
+        }
+
+        @EventListener
+        void receive(ClassSessionChanged event) {
+            if (fail) {
+                observedStatus = jdbc.queryForObject("SELECT status FROM class_sessions WHERE id=?", String.class, event.sessionId());
+                throw new IllegalStateException("Giả lập lỗi xử lý thông báo");
+            }
+        }
     }
 }

@@ -47,6 +47,9 @@ public class MembershipService {
     /** SRS F4 UC-F4.2 E4. */
     public static final String SESSIONS_USED_UP =
         "Gói tập theo buổi của hội viên đã hết lượt sử dụng. Vui lòng gia hạn thêm gói mới.";
+    /** SRS F5 UC-F5.2 E6b. */
+    static final String UPCOMING_EXISTS = "Hội viên đã có gói cùng loại đang chờ kích hoạt (UPCOMING). Không thể "
+        + "kích hoạt thêm gói này. Vui lòng liên hệ quản lý để kiểm tra hoặc hoàn tiền hóa đơn.";
 
     /** Gói đang giữ quyền lợi; chỉ mục {@code uq_one_active_per_type} bảo đảm tối đa một gói mỗi loại. */
     private static final Set<MembershipStatus> HELD = EnumSet.of(MembershipStatus.ACTIVE, MembershipStatus.FROZEN);
@@ -114,6 +117,7 @@ public class MembershipService {
      *   <li>Chưa có gói cùng loại đang giữ: hôm nay (mua mới).</li>
      *   <li>Gói đang giữ còn buổi hoặc là gói TIME: ngày sau {@code end_date} của gói đó.</li>
      *   <li>Gói đang giữ đã về 0 buổi (vẫn ACTIVE tới hết hôm nay): ngày mai.</li>
+     *   <li>Gói SESSION đang giữ đã về 0 buổi (vẫn ACTIVE tới hết hôm nay): ngày mai.</li>
      * </ul>
      * Không bao giờ sớm hơn hôm nay (gói cũ quá hạn mà tác vụ nền chưa chuyển EXPIRED).
      *
@@ -124,6 +128,8 @@ public class MembershipService {
             return today;
         }
         LocalDate start = Integer.valueOf(0).equals(held.getRemainingSessions())
+        LocalDate start = held.getPackageType() == PackageType.SESSION
+                && Integer.valueOf(0).equals(held.getRemainingSessions())
             ? today.plusDays(1)
             : held.getEndDate().plusDays(1);
         return start.isBefore(today) ? today : start;
@@ -141,6 +147,7 @@ public class MembershipService {
      *   <li>Đã có gói cùng loại, cùng phạm vi chi nhánh đang UPCOMING: 422 E6b.</li>
      *   <li>Chưa có gói cùng loại ACTIVE/FROZEN: ACTIVE từ hôm nay (giờ Việt Nam).</li>
      *   <li>Có: UPCOMING từ {@link #plannedStartDate} (sau {@code end_date} gói cũ, hoặc ngày mai nếu gói cũ 0 buổi).</li>
+     *   <li>Có: UPCOMING từ {@link #plannedStartDate} (sau {@code end_date} gói cũ; chỉ SESSION 0 buổi bắt đầu ngày mai).</li>
      * </ul>
      * Số ngày hiệu lực giữ đúng số đã chốt lúc lập hóa đơn ({@link Membership#durationDays()}). Không đổi gói cũ.
      *
@@ -440,6 +447,7 @@ public class MembershipService {
      *
      * @return id các gói vừa EXPIRED
      */
+    /** Bước một của tác vụ: ghi EXPIRED trước khi kích hoạt gói cùng nhóm. */
     @Transactional
     public List<Long> expireOverdue(LocalDate today) {
         List<Membership> due = memberships.findDueToExpire(today);
@@ -467,6 +475,11 @@ public class MembershipService {
      *   <li>Còn lại: ACTIVE, flush ngay để gói sau trong cùng nhóm thấy chỉ mục đã có chủ.</li>
      * </ul>
      * Gọi <b>sau</b> {@link #expireOverdue} trong cùng giao dịch.
+    public record UpcomingActivation(List<Long> activated, List<Long> expiredUnstarted, List<Long> skipped) { }
+
+    /**
+     * Bước hai: giữ nguyên ngày đã chốt. Gói chờ sau ACTIVE/FROZEN giữ nguyên;
+     * gói đã trôi hết hạn khi tắt máy chuyển EXPIRED, không kích hoạt ngược về quá khứ.
      */
     @Transactional
     public UpcomingActivation activateDueUpcoming(LocalDate today) {
@@ -477,11 +490,16 @@ public class MembershipService {
             // Kiểm tra nhóm trước: gói chờ sau gói FROZEN (bảo lưu) không được EXPIRED dù đã quá end_date.
             if (!memberships.findSameType(next.getMemberId(), next.getPackageType(), next.getBranchId(),
                     HELD).isEmpty()) {
+        List<Long> expired = new java.util.ArrayList<>();
+        List<Long> skipped = new java.util.ArrayList<>();
+        for (Membership next : memberships.findDueUpcoming(today)) {
+            if (!memberships.findSameType(next.getMemberId(), next.getPackageType(), next.getBranchId(), HELD).isEmpty()) {
                 skipped.add(next.getId());
             } else if (next.getEndDate().isBefore(today)) {
                 next.expireUnstarted();
                 memberships.saveAndFlush(next);
                 expiredUnstarted.add(next.getId());
+                expired.add(next.getId());
             } else {
                 next.activateOnSchedule();
                 memberships.saveAndFlush(next);
@@ -489,5 +507,13 @@ public class MembershipService {
             }
         }
         return new UpcomingActivation(activated, expiredUnstarted, skipped);
+        return new UpcomingActivation(List.copyOf(activated), List.copyOf(expired), List.copyOf(skipped));
+    }
+
+    /** Loại gói + phạm vi chi nhánh (rỗng = toàn chuỗi); hai gói cùng khóa thì tính là "cùng loại". */
+    private record ScopeKey(PackageType type, Long branchId) {
+        static ScopeKey of(Membership m) {
+            return new ScopeKey(m.getPackageType(), m.getBranchId());
+        }
     }
 }

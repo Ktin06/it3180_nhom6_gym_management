@@ -123,7 +123,9 @@ Có thể cấu hình bằng Spring properties:
 
 Mỗi lịch xử lý trong một giao dịch; lỗi được ghi log kèm ID lịch, không ngăn các lịch khác,
 và được thử lại lượt tiếp theo. Unique `(class_schedule_id, occurrence_date)` chống sinh trùng;
-không ghi đè buổi đã có, kể cả đã đổi giờ hoặc hủy. Ngày phát sinh theo Việt Nam,
+không ghi đè buổi đã có, kể cả đã đổi giờ hoặc hủy. Khi sinh, buổi lưu `class_type_id` từ lịch lặp.
+Sửa loại lớp của lịch chỉ đổi loại của các buổi sinh sau. Buổi có trước migration được điền theo loại
+hiện có của lịch tại lúc nâng cấp vì schema cũ không lưu loại lúc sinh. Ngày phát sinh theo Việt Nam,
 `start_at`/`end_at` lưu bằng `timestamptz`. Job chỉ sinh buổi; không tự điểm danh hoặc gửi email.
 
 ### Khóa giao dịch và tích hợp
@@ -138,7 +140,6 @@ không ghi đè buổi đã có, kể cả đã đổi giờ hoặc hủy. Ngày
 - Mỗi lần khóa tạo `audit_logs.action='CLASS_BOOKING_LOCK'`, `entity='members'` và `entity_id`
   là hội viên. `created_at` là mốc khóa, `new_value.lockedUntil` là hạn khóa. Đếm hủy muộn theo
   `cancelled_at`, NO_SHOW theo giờ bắt đầu buổi, trong tháng Việt Nam và sau lần khóa gần nhất.
-  Sửa điểm danh và gỡ khóa thủ công thuộc #199 và tuân theo ADR 0014.
 - Tạo/sửa/ngừng lịch và sinh buổi khóa dòng `branches` trước khi kiểm tra trùng. Khi triển khai
   các luồng F9/đổi buổi khác có thay đổi lịch phòng/huấn luyện viên, cần dùng cùng khóa chi nhánh
   và kiểm tra lại lịch trong giao dịch; chỉ truy vấn trước khi ghi không đủ để chống cạnh tranh.
@@ -163,3 +164,42 @@ ngày hiệu lực và access token đúng vai trò. Có request cho từng API 
 Đợi job sinh buổi rồi chọn `sessionId` đã tồn tại. Không lưu token trong file collection.
 Các thao tác cập nhật buổi/điểm danh/giao diện và dịch vụ gửi email có phần việc riêng;
 Nghiệm thu staging theo từng AC sau khi triển khai.
+
+### Đổi buổi, điểm danh và gỡ khóa đặt lớp
+
+| Phương thức và đường dẫn dưới `/api/v1` | Yêu cầu |
+| --- | --- |
+| `PUT /class-sessions/{id}/time` | `startAt`, `endAt` theo ISO 8601 có múi giờ |
+| `PUT /class-sessions/{id}/room` | `roomId` thuộc chi nhánh và đủ sức chứa |
+| `PUT /class-sessions/{id}/cancel` | Hủy buổi và các chỗ BOOKED |
+| `GET /class-sessions/{id}/attendance` | Danh sách điểm danh gồm `bookingId`, tình trạng `arrivedAt`, `status` và `updatedAt` |
+| `PUT /class-sessions/{id}/attendance` | `bookingId`, `status` là ATTENDED hoặc NO_SHOW, `expectedUpdatedAt` lấy từ danh sách |
+| `DELETE /members/{id}/class-booking-lock` | Trả 204. Gỡ khóa đang hiệu lực của hội viên thuộc chi nhánh quản lý |
+
+Quản lý đúng chi nhánh hoặc chủ chuỗi được thay đổi buổi chưa bắt đầu. Đổi giờ giữ `occurrence_date`
+và lần bắt đầu đầu tiên trong `original_start_at`. Mỗi lần đổi phát sự kiện với giờ ngay trước và sau
+lần đổi đó. Hủy buổi ghi `SESSION_CANCELLED` và không phát sinh vi phạm.
+
+Huấn luyện viên được phân công điểm danh từ giờ bắt đầu đến hết ngày Việt Nam. Quản lý sửa kết quả
+sau ngày học. Nếu `expectedUpdatedAt` đã cũ, server trả 409 và client cần tải lại danh sách.
+Sửa điểm danh ghi audit `CLASS_ATTENDANCE_CORRECT` và giữ khóa đang áp dụng. Gỡ khóa ghi audit
+`CLASS_BOOKING_UNLOCK` và giữ lịch sử vi phạm cũng như mốc dùng để tính lần khóa tiếp theo.
+
+F8 phát `ClassSessionChanged` sau khi commit. Payload gồm loại thay đổi (`TIME_CHANGED`,
+`ROOM_CHANGED`, `CANCELLED`), mã buổi/chi nhánh/huấn luyện viên, người thao tác, giờ thay đổi,
+phòng và giờ trước/sau, cùng mã hội viên có chỗ BOOKED lúc thay đổi. F10 nhận bằng Spring
+`@EventListener` và lưu thông báo trong giao dịch riêng (`REQUIRES_NEW`). Hợp đồng nhận sự kiện
+cần được đối chiếu khi triển khai [#180](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/180).
+
+### Lịch công khai, lịch hội viên và lịch dạy
+
+- `GET /api/v1/public/class-branches` trả mã và tên chi nhánh đang hoạt động.
+- `GET /api/v1/public/class-sessions` trả loại lớp, giờ, chi nhánh, phòng, người dạy và trạng thái buổi.
+  Khách có thể truyền `branchId` và không cần JWT. Phản hồi không có danh tính, chỗ đặt hoặc số suất của hội viên.
+- `GET /api/v1/members/me/class-sessions` dùng cùng bộ lọc, trả thêm số suất trống và thông tin chỗ đặt
+  của hội viên đang đăng nhập. API đặt chỗ luôn kiểm tra lại điều kiện, cửa sổ và sĩ số.
+- `GET /api/v1/trainers/me/class-sessions` trả lớp nhóm theo người được phân công ở từng buổi.
+  Dùng `GET /api/v1/class-sessions/{id}/attendance` để mở danh sách điểm danh.
+
+Ba API lịch dùng `from` và `to` theo `yyyy-MM-dd`. Hai mốc đều được tính trong khoảng ngày Việt Nam.
+Mặc định trả hôm nay và sáu ngày kế tiếp. Khoảng dài hơn 31 ngày hoặc đảo thứ tự trả 400.

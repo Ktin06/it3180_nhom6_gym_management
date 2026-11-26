@@ -161,4 +161,45 @@ describe('LoginPage', () => {
     expect(await screen.findByText('Trang lễ tân')).toBeInTheDocument()
     expect(screen.queryByText('Trang hội viên')).not.toBeInTheDocument()
   })
+
+  it('TC-F1.5.1-01d: LoginPage có liên kết Quên mật khẩu? tới /quen-mat-khau và hiện thông báo đặt mật khẩu thành công', async () => {
+    const user = userEvent.setup()
+    render(
+      <AuthContext.Provider
+        value={{
+          status: 'anonymous',
+          user: null,
+          sessionError: null,
+          login,
+          register: vi.fn(),
+          logout: vi.fn(),
+          retrySession: vi.fn(),
+        }}
+      >
+        <MemoryRouter
+          initialEntries={[
+            {
+              pathname: '/login',
+              state: { notice: 'Đặt mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.' },
+            },
+          ]}
+        >
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/quen-mat-khau" element={<p>Trang quên mật khẩu</p>} />
+          </Routes>
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Đặt mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.',
+    )
+
+    const forgotLink = screen.getByRole('link', { name: 'Quên mật khẩu?' })
+    expect(forgotLink).toHaveAttribute('href', '/quen-mat-khau')
+
+    await user.click(forgotLink)
+    expect(await screen.findByText('Trang quên mật khẩu')).toBeInTheDocument()
+  })
 })

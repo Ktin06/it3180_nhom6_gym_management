@@ -1,6 +1,8 @@
 package vn.edu.hust.nhom6.gym.feature.auth;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -28,17 +30,21 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import jakarta.servlet.http.Cookie;
 import tools.jackson.databind.json.JsonMapper;
+import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ForbiddenException;
 import vn.edu.hust.nhom6.gym.common.exception.GlobalExceptionHandler;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
 import vn.edu.hust.nhom6.gym.config.SecurityConfig;
 import vn.edu.hust.nhom6.gym.feature.auth.controller.AuthController;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.AuthMeResponse;
+import vn.edu.hust.nhom6.gym.feature.auth.dto.ForgotPasswordRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.RegisterRequest;
+import vn.edu.hust.nhom6.gym.feature.auth.dto.ResetPasswordRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 import vn.edu.hust.nhom6.gym.feature.auth.service.AuthCookieHelper;
 import vn.edu.hust.nhom6.gym.feature.auth.service.AuthService;
+import vn.edu.hust.nhom6.gym.feature.auth.service.PasswordResetService;
 
 @WebMvcTest(controllers = AuthController.class)
 @ContextConfiguration(classes = {
@@ -56,6 +62,9 @@ class AuthControllerTest {
 
     @MockitoBean
     private AuthService authService;
+
+    @MockitoBean
+    private PasswordResetService passwordResetService;
 
     @MockitoBean
     private AuthCookieHelper cookieHelper;
@@ -347,5 +356,95 @@ class AuthControllerTest {
             .andExpect(jsonPath("$.role").value("MEMBER"));
 
         verify(authService).getCurrentUser(any(Jwt.class));
+    }
+
+    @Test
+    @DisplayName("TC-F1.5.1-01b: yêu cầu quên mật khẩu công khai trả 200 với câu thông báo chung")
+    void quenMatKhauCongKhaiTra200CauChung() throws Exception {
+        ForgotPasswordRequest request = new ForgotPasswordRequest("member@example.com");
+
+        mockMvc.perform(post("/api/v1/auth/forgot-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.message").value(
+                "Nếu email có trong hệ thống, bạn sẽ nhận được liên kết đặt lại mật khẩu."));
+
+        verify(passwordResetService).forgotPassword(request);
+    }
+
+    @Test
+    @DisplayName("TC-F1.5.1-05a: yêu cầu quên mật khẩu sai định dạng email trả 400 kèm errors")
+    void quenMatKhauEmailSaiDinhDangTra400() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/forgot-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(new ForgotPasswordRequest("khong-phai-email"))))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.errors.email").exists());
+
+        verify(passwordResetService, never()).forgotPassword(any());
+    }
+
+    @Test
+    @DisplayName("TC-F1.5.1-03b: đặt lại mật khẩu hợp lệ công khai trả 204 No Content")
+    void datLaiMatKhauHopLeCongKhaiTra204() throws Exception {
+        ResetPasswordRequest request = new ResetPasswordRequest("valid-reset-token", "NewPass123");
+
+        mockMvc.perform(post("/api/v1/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(request)))
+            .andExpect(status().isNoContent());
+
+        verify(passwordResetService).resetPassword(request);
+    }
+
+    @Test
+    @DisplayName("TC-F1.5.1-05b: mật khẩu mới sai chuẩn S1 hoặc thiếu token trả 400 kèm errors")
+    void datLaiMatKhauSaiChuanS1Tra400() throws Exception {
+        // Thiếu token và mật khẩu dưới 8 ký tự
+        mockMvc.perform(post("/api/v1/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(new ResetPasswordRequest("", "short1"))))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.errors.token").exists())
+            .andExpect(jsonPath("$.errors.newPassword").exists());
+
+        // Mật khẩu mới thiếu chữ số
+        mockMvc.perform(post("/api/v1/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(new ResetPasswordRequest("some-token", "OnlyLettersPass"))))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.errors.newPassword").exists());
+
+        // Mật khẩu mới thiếu chữ cái
+        mockMvc.perform(post("/api/v1/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(new ResetPasswordRequest("some-token", "123456789"))))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.errors.newPassword").exists());
+
+        verify(passwordResetService, never()).resetPassword(any());
+    }
+
+    @Test
+    @DisplayName("TC-F1.5.1-04b: đặt lại mật khẩu với token hết hạn hoặc đã dùng trả 422")
+    void datLaiMatKhauTokenLoiTra422() throws Exception {
+        ResetPasswordRequest request = new ResetPasswordRequest("expired-token", "NewPass123");
+        doThrow(new BusinessRuleException(PasswordResetService.INVALID_OR_EXPIRED_TOKEN_MESSAGE))
+            .when(passwordResetService).resetPassword(request);
+
+        mockMvc.perform(post("/api/v1/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(request)))
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+            .andExpect(jsonPath("$.status").value(422))
+            .andExpect(jsonPath("$.detail").value("Liên kết đã hết hạn hoặc đã được dùng."));
     }
 }

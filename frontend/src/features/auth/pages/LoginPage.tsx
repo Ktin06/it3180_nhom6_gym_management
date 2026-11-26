@@ -22,6 +22,10 @@ export function LoginPage() {
   const { login, retrySession, sessionError } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
+  const notice =
+    typeof (location.state as { notice?: unknown } | null)?.notice === 'string'
+      ? (location.state as { notice: string }).notice
+      : null
 
   const handleFinish = (values: LoginForm) => {
     setPending(true)
@@ -72,6 +76,9 @@ export function LoginPage() {
       <Typography.Title level={3} style={{ marginTop: 0 }}>
         Đăng nhập
       </Typography.Title>
+      {notice && !errorDetail && (
+        <Alert type="success" showIcon title={notice} style={{ marginBottom: 16 }} />
+      )}
       {sessionError && (
         <Alert type="warning" showIcon title={sessionError} style={{ marginBottom: 16 }} />
       )}
@@ -113,6 +120,9 @@ export function LoginPage() {
         >
           <Input.Password prefix={<LockOutlined />} autoComplete="current-password" />
         </Form.Item>
+        <div style={{ marginBottom: 16, textAlign: 'right' }}>
+          <Link to="/quen-mat-khau">Quên mật khẩu?</Link>
+        </div>
         <Button
           type="primary"
           htmlType="submit"

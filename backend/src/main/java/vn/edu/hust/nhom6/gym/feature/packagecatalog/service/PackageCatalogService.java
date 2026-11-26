@@ -24,6 +24,7 @@ import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.CreatePackageRequest;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.PackageDetailDto;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.GymPackage;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.PackageSummaryDto;
+import vn.edu.hust.nhom6.gym.feature.packagecatalog.dto.SellablePackage;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.PackageStatus;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.PackageType;
 import vn.edu.hust.nhom6.gym.feature.packagecatalog.mapper.PackageMapper;
@@ -99,6 +100,21 @@ public class PackageCatalogService {
             }
             throw ex;
         }
+    }
+
+    /** Chụp thông số bán dưới khóa đọc, dùng trong giao dịch tạo hóa đơn. */
+    @Transactional
+    public SellablePackage requireSellable(Long packageId, Long branchId) {
+        var item = packages.findForShare(packageId)
+            .orElseThrow(() -> new NotFoundException("Gói tập không tồn tại trên hệ thống."));
+        if (item.getStatus() != PackageStatus.ACTIVE) {
+            throw new BusinessRuleException("Gói tập này đã ngừng bán.");
+        }
+        if (item.getBranchId() != null && !item.getBranchId().equals(branchId)) {
+            throw new BusinessRuleException("Gói tập này không áp dụng tại chi nhánh của bạn.");
+        }
+        return new SellablePackage(item.getId(), item.getName(), item.getType(), item.getBranchId(),
+            item.getDurationDays(), item.getSessionCount(), item.getPrice());
     }
 
     private GymPackage findOwnedPackageForUpdate(Long id, Long branchId) {
