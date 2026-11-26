@@ -1,6 +1,8 @@
 package vn.edu.hust.nhom6.gym.feature.membership.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +49,6 @@ public class MembershipService {
     /** SRS F4 UC-F4.2 E4. */
     public static final String SESSIONS_USED_UP =
         "Gói tập theo buổi của hội viên đã hết lượt sử dụng. Vui lòng gia hạn thêm gói mới.";
-    /** SRS F5 UC-F5.2 E6b. */
 
     /** Gói đang giữ quyền lợi; chỉ mục {@code uq_one_active_per_type} bảo đảm tối đa một gói mỗi loại. */
     private static final Set<MembershipStatus> HELD = EnumSet.of(MembershipStatus.ACTIVE, MembershipStatus.FROZEN);
@@ -142,7 +143,6 @@ public class MembershipService {
      *   <li>Đã có gói cùng loại, cùng phạm vi chi nhánh đang UPCOMING: 422 E6b.</li>
      *   <li>Chưa có gói cùng loại ACTIVE/FROZEN: ACTIVE từ hôm nay (giờ Việt Nam).</li>
      *   <li>Có: UPCOMING từ {@link #plannedStartDate} (sau {@code end_date} gói cũ, hoặc ngày mai nếu gói cũ 0 buổi).</li>
-     *   <li>Có: UPCOMING từ {@link #plannedStartDate} (sau {@code end_date} gói cũ; chỉ SESSION 0 buổi bắt đầu ngày mai).</li>
      * </ul>
      * Số ngày hiệu lực giữ đúng số đã chốt lúc lập hóa đơn ({@link Membership#durationDays()}). Không đổi gói cũ.
      *
@@ -206,8 +206,6 @@ public class MembershipService {
     public Membership deductSessionForCheckin(Long membershipId, LocalDate today) {
         Membership membership = memberships.findById(membershipId)
             .orElseThrow(() -> new IllegalStateException("Không có gói " + membershipId));
-        // Nơi gọi thường đã nạp gói này (findUsable) trong cùng giao dịch; truy vấn khóa sẽ trả lại bản đã nạp mà không
-        // đọc lại cột. refresh kèm khóa vừa SELECT ... FOR UPDATE vừa nạp lại số buổi, trạng thái mới nhất.
         entities.refresh(membership, LockModeType.PESSIMISTIC_WRITE);
         if (membership.getPackageType() != PackageType.SESSION || membership.getStatus() != MembershipStatus.ACTIVE) {
             throw new ConflictException(CHECKIN_CONFLICT);
@@ -263,7 +261,7 @@ public class MembershipService {
      * bán thêm gói cùng loại, cùng phạm vi chi nhánh. Rỗng khi bán sẽ bị 422 (đã có gói chờ cùng loại), và rỗng
      * trên chính dòng PENDING/UPCOMING.
      *
-     * @throws vn.edu.hust.nhom6.gym.common.exception.NotFoundException (404) hội viên không có hoặc ngoài chi nhánh
+     * @throws NotFoundException (404) hội viên không có hoặc ngoài chi nhánh
      */
     public List<HeldMembershipDto> listForStaff(CurrentUser actor, Long memberId) {
         members.requireInStaffScope(actor, memberId);
@@ -369,7 +367,6 @@ public class MembershipService {
     public PtDeduction deductPtSession(Long membershipId, LocalDate sessionDate, LocalDate today) {
         Membership membership = memberships.findById(membershipId)
             .orElseThrow(() -> new IllegalStateException("Không có gói " + membershipId));
-        // Như deductSessionForCheckin: refresh kèm khóa để vừa SELECT ... FOR UPDATE vừa nạp lại số buổi, trạng thái.
         entities.refresh(membership, LockModeType.PESSIMISTIC_WRITE);
         if (membership.getPackageType() != PackageType.PT) {
             throw new IllegalStateException("Gói " + membershipId + " không phải gói PT");
@@ -398,7 +395,6 @@ public class MembershipService {
             return new PtDeduction(membership, false, null);
         }
         membership.expireAfterLastPtSession();
-        // Flush trước để gói nối tiếp lên ACTIVE không vướng chỉ mục uq_one_active_per_type (BR-F9.7).
         memberships.saveAndFlush(membership);
         return new PtDeduction(membership, true, activateNextPtMembership(membership, today));
     }
@@ -411,13 +407,12 @@ public class MembershipService {
         List<Membership> upcoming = memberships.findSameType(finished.getMemberId(), finished.getPackageType(),
             finished.getBranchId(), EnumSet.of(MembershipStatus.UPCOMING));
         Membership next = upcoming.stream()
-            .min(java.util.Comparator.comparing(Membership::getStartDate).thenComparing(Membership::getId))
+            .min(Comparator.comparing(Membership::getStartDate).thenComparing(Membership::getId))
             .orElse(null);
         if (next == null) {
             return null;
         }
         long shift = next.getStartDate().toEpochDay() - today.toEpochDay();
-        // Gói đã tới ngày bắt đầu mà tác vụ nền chưa kích hoạt: giữ nguyên ngày, không dời muộn hơn (không kéo dài hạn).
         next.activateEarly(shift > 0 ? today : next.getStartDate());
         memberships.saveAndFlush(next);
         if (shift > 0) {
@@ -472,11 +467,10 @@ public class MembershipService {
      */
     @Transactional
     public UpcomingActivation activateDueUpcoming(LocalDate today) {
-        List<Long> activated = new java.util.ArrayList<>();
-        List<Long> expiredUnstarted = new java.util.ArrayList<>();
-        List<Long> skipped = new java.util.ArrayList<>();
+        List<Long> activated = new ArrayList<>();
+        List<Long> expiredUnstarted = new ArrayList<>();
+        List<Long> skipped = new ArrayList<>();
         for (Membership next : memberships.findDueUpcoming(today)) {
-            // Kiểm tra nhóm trước: gói chờ sau gói FROZEN (bảo lưu) không được EXPIRED dù đã quá end_date.
             if (!memberships.findSameType(next.getMemberId(), next.getPackageType(), next.getBranchId(),
                     HELD).isEmpty()) {
                 skipped.add(next.getId());
@@ -490,6 +484,6 @@ public class MembershipService {
                 activated.add(next.getId());
             }
         }
-        return new UpcomingActivation(activated, expiredUnstarted, skipped);
+        return new UpcomingActivation(List.copyOf(activated), List.copyOf(expiredUnstarted), List.copyOf(skipped));
     }
 }
