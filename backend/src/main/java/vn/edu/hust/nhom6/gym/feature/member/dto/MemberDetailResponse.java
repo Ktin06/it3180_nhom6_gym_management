@@ -7,4 +7,4 @@ import vn.edu.hust.nhom6.gym.feature.member.entity.MemberStatus;
 
 public record MemberDetailResponse(Long id, String memberCode, String fullName, String phone,
     String email, MemberStatus status, Long homeBranchId, Long userId, Gender gender,
-    LocalDate dob, OffsetDateTime createdAt, OffsetDateTime updatedAt) { }
+    LocalDate dob, OffsetDateTime createdAt, OffsetDateTime updatedAt, boolean hasAvatar) { }

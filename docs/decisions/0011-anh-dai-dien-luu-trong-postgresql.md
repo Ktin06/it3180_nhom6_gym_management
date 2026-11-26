@@ -24,7 +24,7 @@ Ràng buộc:
    - `GET /api/v1/members/{id}/avatar`: ai xem được `GET /api/v1/members/{id}` thì xem được ảnh (chủ chuỗi, quản lý chi nhánh, lễ tân; hội viên chỉ xem ảnh của chính mình). Trả `image/jpeg`; chưa có ảnh thì 404.
    - `PUT /api/v1/members/{id}/avatar` (multipart): ai sửa được hồ sơ thì đổi được ảnh (chủ chuỗi, quản lý chi nhánh, lễ tân). Hội viên **không** tự đổi ảnh: ảnh dùng để lễ tân đối chiếu, để hội viên tự đổi thì mất tác dụng chống mượn thẻ.
    - Đổi ảnh là ghi đè dòng cũ, ghi `uploaded_by` là người tải lên. Không có API xóa ảnh.
-5. **Migration `V9_02`** (đã giữ số ở issue #110) tạo bảng và bỏ cột, làm cùng API ở việc S2-06 (Thái Hùng Lân).
+5. **Migration lấy số tiếp theo sau bản lớn nhất trên `main`**, tạo bảng và bỏ cột cùng API ở việc S2-06 (Thái Hùng Lân). Ban đầu giữ `V9_02` ở issue #110; đến 24/11/2026 `main` đã có `V9_03`, nên nhánh #183 dùng `V9_04__member_avatars.sql`. Kiểm tra lại số trước khi gộp nếu có migration khác được gộp trước.
 
 Bảng `member_avatars` (bản chuẩn trong [erd-v2.dbml](../design/erd/erd-v2.dbml)):
 
@@ -54,5 +54,5 @@ Bảng `member_avatars` (bản chuẩn trong [erd-v2.dbml](../design/erd/erd-v2.
 - **Cần theo dõi:** dung lượng Neon sau mỗi đợt dữ liệu mẫu; nếu vượt hạn mức thì viết ADR mới, không sửa ADR này.
 - **Cần cập nhật theo:**
   - `erd-v2.dbml`, `thiet-ke-du-lieu.md`: thêm `member_avatars`, bỏ `members.avatar_url`, đóng câu hỏi còn mở (cùng PR với ADR này).
-  - S2-06 (Thái Hùng Lân): migration `V9_02`; bỏ trường `avatarUrl` trong entity `Member` và kiểm thử `MemberApiIntegrationTest` đang đọc cột `avatar_url`; tăng `spring.servlet.multipart.max-file-size` lên 5 MB (mặc định của Spring là 1 MB); kiểm thử JUnit cho quyền xem, quyền đổi, file sai loại, file quá lớn; request Postman.
+  - S2-06 (Thái Hùng Lân): migration số tiếp theo (`V9_04` trên nhánh #183); bỏ trường `avatarUrl` trong entity `Member` và kiểm thử `MemberApiIntegrationTest` đang đọc cột `avatar_url`; tăng `spring.servlet.multipart.max-file-size` lên 5 MB (mặc định của Spring là 1 MB); kiểm thử JUnit cho quyền xem, quyền đổi, file sai loại, file quá lớn; request Postman.
   - S2-06g (Nguyễn Anh Tú): ô tải ảnh trong form hồ sơ. S2-11 (Lê Phước Minh Quân): hiện ảnh ở màn hình check-in.

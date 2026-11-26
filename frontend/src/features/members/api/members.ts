@@ -1,5 +1,5 @@
 import { http } from '../../../services/http'
-import type { MembersGateway } from '../types/member'
+import type { CreateMemberAccountResult, MembersGateway } from '../types/member'
 
 export const liveMembersApi: MembersGateway = {
   list: async (params) => (await http.get('/members', { params })).data,
@@ -15,6 +15,8 @@ export const liveMembersApi: MembersGateway = {
       headers: { 'Content-Type': undefined },
     })
   },
+  createAccount: async (id, input) =>
+    (await http.post<CreateMemberAccountResult>(`/members/${id}/account`, input)).data,
 }
 
 async function gateway() {
@@ -31,4 +33,5 @@ export const membersApi: MembersGateway = {
   update: async (id, input) => (await gateway()).update(id, input),
   getAvatar: async (id) => (await gateway()).getAvatar(id),
   uploadAvatar: async (id, file) => (await gateway()).uploadAvatar(id, file),
+  createAccount: async (id, input) => (await gateway()).createAccount(id, input),
 }

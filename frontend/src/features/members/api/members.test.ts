@@ -41,6 +41,15 @@ describe('kết nối API F2', () => {
     expect((body as FormData).get('file')).toBe(file)
     expect(config).toEqual({ headers: { 'Content-Type': undefined } })
   })
+
+  it('US-F2.2.1 API: liveMembersApi.createAccount gọi POST /members/{id}/account qua client HTTP', async () => {
+    const response = { memberId: 12, userId: 45, email: 'hoivien@example.com' }
+    const post = vi.spyOn(http, 'post').mockResolvedValue({ data: response })
+
+    const created = await liveMembersApi.createAccount(12, { email: 'hoivien@example.com' })
+    expect(created).toEqual(response)
+    expect(post).toHaveBeenCalledWith('/members/12/account', { email: 'hoivien@example.com' })
+  })
 })
 
 describe('dữ liệu minh họa hội viên', () => {

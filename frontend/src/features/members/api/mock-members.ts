@@ -5,7 +5,20 @@ import { normalizePhone, normalizePhoneSearch } from '../phone'
 /** Dữ liệu hư cấu, trong bộ nhớ; không dùng làm xác thực hoặc thay backend. */
 export function createMockMembersApi(): MembersGateway {
   let sequence = 30
+  let userSequence = 100
   const avatars = new Map<number, Blob>()
+
+  function mockHttpError(status: number, data: Record<string, unknown>) {
+    const error = new AxiosError(String(status))
+    error.response = {
+      status,
+      data,
+      statusText: String(status),
+      headers: {},
+      config: { headers: new AxiosHeaders() },
+    }
+    return error
+  }
   const names = ['Nguyễn Minh An', 'Trần Hoài Bình', 'Lê Phương Chi', 'Phạm Gia Duy', 'Vũ Ngọc Hà']
   const members: MemberDetail[] = Array.from({ length: 30 }, (_, index) => ({
     id: index + 1,
@@ -15,6 +28,7 @@ export function createMockMembersApi(): MembersGateway {
     email: null,
     status: index % 7 === 0 ? 'INACTIVE' : 'ACTIVE',
     homeBranchId: 1,
+    hasAvatar: false,
     userId: null,
     gender: null,
     dob: null,
@@ -77,6 +91,7 @@ export function createMockMembersApi(): MembersGateway {
         status: 'ACTIVE',
         email: null,
         homeBranchId: 1,
+        hasAvatar: false,
         userId: null,
         createdAt: now,
         updatedAt: now,
@@ -98,21 +113,45 @@ export function createMockMembersApi(): MembersGateway {
       find(id)
       const blob = avatars.get(id)
       if (!blob) {
-        const error = new AxiosError('Not Found')
-        error.response = {
-          status: 404,
-          data: { detail: 'Hội viên chưa có ảnh đại diện.' },
-          statusText: 'Not Found',
-          headers: {},
-          config: { headers: new AxiosHeaders() },
-        }
-        throw error
+        throw mockHttpError(404, { detail: 'Hội viên chưa có ảnh đại diện.' })
       }
       return blob
     },
     async uploadAvatar(id, file) {
-      find(id)
+      const member = find(id)
       avatars.set(id, new Blob([file], { type: 'image/jpeg' }))
+      member.hasAvatar = true
+    },
+    async createAccount(id, input) {
+      const member = members.find((item) => item.id === id)
+      if (!member) {
+        throw mockHttpError(404, { detail: 'Không tìm thấy hội viên.' })
+      }
+      if (member.status !== 'ACTIVE') {
+        throw mockHttpError(422, {
+          detail: 'Chỉ có thể tạo tài khoản cho hồ sơ hội viên đang hoạt động.',
+        })
+      }
+      if (member.userId !== null) {
+        throw mockHttpError(409, { detail: 'Hội viên này đã có tài khoản đăng nhập.' })
+      }
+      const normalizedEmail = input.email.trim().toLowerCase()
+      if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+        throw mockHttpError(400, {
+          detail: 'Vui lòng kiểm tra lại các trường dữ liệu.',
+          errors: { email: 'Email không đúng định dạng' },
+        })
+      }
+      if (members.some((item) => item.email === normalizedEmail)) {
+        throw mockHttpError(409, {
+          detail: 'Email này đã được sử dụng bởi một tài khoản khác.',
+        })
+      }
+      const userId = ++userSequence
+      member.userId = userId
+      member.email = normalizedEmail
+      member.updatedAt = new Date().toISOString()
+      return { memberId: member.id, userId, email: normalizedEmail }
     },
   }
 }
