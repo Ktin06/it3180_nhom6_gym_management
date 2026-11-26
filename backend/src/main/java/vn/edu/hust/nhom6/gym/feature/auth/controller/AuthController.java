@@ -23,10 +23,14 @@ import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
 import vn.edu.hust.nhom6.gym.config.LogoutTokenDecoder;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.AccessTokenResponse;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.AuthMeResponse;
+import vn.edu.hust.nhom6.gym.feature.auth.dto.ForgotPasswordRequest;
+import vn.edu.hust.nhom6.gym.feature.auth.dto.ForgotPasswordResponse;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.RegisterRequest;
+import vn.edu.hust.nhom6.gym.feature.auth.dto.ResetPasswordRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.service.AuthCookieHelper;
 import vn.edu.hust.nhom6.gym.feature.auth.service.AuthService;
+import vn.edu.hust.nhom6.gym.feature.auth.service.PasswordResetService;
 
 /** API xác thực và phiên đăng nhập người dùng (F1). */
 @Tag(name = "F1 – Tài khoản và phân quyền")
@@ -35,12 +39,14 @@ import vn.edu.hust.nhom6.gym.feature.auth.service.AuthService;
 public class AuthController {
 
     private final AuthService authService;
+    private final PasswordResetService passwordResetService;
     private final AuthCookieHelper cookieHelper;
     private final LogoutTokenDecoder logoutTokenDecoder;
 
-    public AuthController(AuthService authService, AuthCookieHelper cookieHelper,
-            LogoutTokenDecoder logoutTokenDecoder) {
+    public AuthController(AuthService authService, PasswordResetService passwordResetService,
+            AuthCookieHelper cookieHelper, LogoutTokenDecoder logoutTokenDecoder) {
         this.authService = authService;
+        this.passwordResetService = passwordResetService;
         this.cookieHelper = cookieHelper;
         this.logoutTokenDecoder = logoutTokenDecoder;
     }
@@ -115,5 +121,20 @@ public class AuthController {
     @GetMapping("/me")
     public AuthMeResponse getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
         return authService.getCurrentUser(jwt);
+    }
+
+    @Operation(summary = "Yêu cầu gửi liên kết đặt lại mật khẩu qua email")
+    @PostMapping("/forgot-password")
+    public ForgotPasswordResponse forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        passwordResetService.forgotPassword(request);
+        return new ForgotPasswordResponse(PasswordResetService.FORGOT_PASSWORD_MESSAGE);
+    }
+
+    @Operation(summary = "Đặt lại mật khẩu bằng token dùng một lần")
+    @PostMapping("/reset-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request);
+        return ResponseEntity.noContent().build();
     }
 }
