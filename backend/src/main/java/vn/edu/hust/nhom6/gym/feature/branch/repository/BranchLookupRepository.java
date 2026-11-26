@@ -30,6 +30,21 @@ public class BranchLookupRepository {
     /** Giờ mở và đóng cửa của chi nhánh (cột {@code time}, giờ Việt Nam). */
     public record OpeningHours(LocalTime open, LocalTime close) { }
 
+    /** Thông tin tối thiểu của chi nhánh để chủ chuỗi chọn xem Dashboard. */
+    public record BranchOptionRow(Long id, String code, String name, String status) { }
+
+    /** Danh sách toàn bộ chi nhánh (gồm cả {@code INACTIVE} để xem số liệu lịch sử) theo thứ tự id tăng dần. */
+    public List<BranchOptionRow> findAllOrdered() {
+        List<?> rows = entities.createNativeQuery("""
+            SELECT id, code, name, status FROM branches ORDER BY id
+            """).getResultList();
+        return rows.stream().map(raw -> {
+            Object[] cols = (Object[]) raw;
+            return new BranchOptionRow(((Number) cols[0]).longValue(), (String) cols[1], (String) cols[2],
+                (String) cols[3]);
+        }).toList();
+    }
+
     /**
      * Đọc {@code open_time}, {@code close_time} dạng chữ {@code HH24:MI:SS} rồi đổi sang {@link LocalTime}. Không đọc qua
      * kiểu {@code time} của JDBC vì cấu hình {@code hibernate.jdbc.time_zone: UTC} làm Hibernate quy đổi giờ theo múi giờ

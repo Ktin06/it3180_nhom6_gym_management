@@ -56,12 +56,20 @@ export interface DashboardListParams {
   limit?: number
 }
 
+export interface DashboardBranch {
+  id: number
+  code: string
+  name: string
+  status: 'ACTIVE' | 'INACTIVE'
+}
+
 export interface BranchOption {
   id: number
   label: string
 }
 
 export interface DashboardGateway {
+  branches(): Promise<DashboardBranch[]>
   stats(branchId?: number): Promise<DashboardStats>
   hourlyCheckins(branchId?: number): Promise<HourlyCheckin[]>
   expiringMemberships(params?: DashboardListParams): Promise<ExpiringMembership[]>

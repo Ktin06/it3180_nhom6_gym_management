@@ -1,5 +1,6 @@
 import { http } from '../../../services/http'
 import type {
+  DashboardBranch,
   DashboardGateway,
   DashboardListParams,
   DashboardStats,
@@ -15,8 +16,13 @@ function buildParams(branchId?: number, limit?: number): Record<string, number> 
   return params
 }
 
-/** Gọi 4 API chỉ đọc của F6 (Dashboard cơ bản) qua services/http.ts. */
+/** Gọi API đọc dữ liệu F6 (Dashboard cơ bản) qua services/http.ts. */
 export const dashboardApi: DashboardGateway = {
+  async branches(): Promise<DashboardBranch[]> {
+    const { data } = await http.get<DashboardBranch[]>('/dashboard/branches')
+    return data
+  },
+
   async stats(branchId?: number): Promise<DashboardStats> {
     const { data } = await http.get<DashboardStats>('/dashboard/stats', {
       params: buildParams(branchId),

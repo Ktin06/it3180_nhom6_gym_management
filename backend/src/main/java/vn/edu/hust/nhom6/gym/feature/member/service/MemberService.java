@@ -20,6 +20,7 @@ import vn.edu.hust.nhom6.gym.feature.member.dto.*;
 import vn.edu.hust.nhom6.gym.feature.member.entity.*;
 import vn.edu.hust.nhom6.gym.feature.member.mapper.MemberMapper;
 import vn.edu.hust.nhom6.gym.feature.member.repository.MemberRepository;
+import vn.edu.hust.nhom6.gym.feature.member.repository.MemberAvatarRepository;
 import vn.edu.hust.nhom6.gym.feature.auth.service.AccountService;
 import vn.edu.hust.nhom6.gym.feature.branch.service.BranchLookupService;
 import vn.edu.hust.nhom6.gym.feature.staff.service.StaffService;
@@ -42,6 +43,7 @@ public class MemberService {
     private static final String PHONE_TAKEN_BY_OTHER = "Số điện thoại đã được đăng ký cho hội viên khác.";
 
     private final MemberRepository members;
+    private final MemberAvatarRepository avatars;
     private final AccountService accounts;
     private final StaffService staff;
     private final BranchLookupService branches;
@@ -53,7 +55,7 @@ public class MemberService {
         Long branch = actor.isOwner() ? branches.defaultBranchId() : staff.requireBranchId(actor.userId());
         Member member = newProfile(null, actor.userId(), branch, request.fullName(), request.phone(),
             request.dob(), request.gender());
-        return mapper.detail(save(member, PHONE_HAS_PROFILE), null);
+        return mapper.detail(save(member, PHONE_HAS_PROFILE), null, false);
     }
 
     /**
@@ -111,15 +113,11 @@ public class MemberService {
             "Tài khoản chưa gắn hồ sơ hội viên. Vui lòng liên hệ quầy lễ tân."));
     }
 
-    /**
-     * Khóa dòng hội viên ({@code SELECT ... FOR UPDATE}) đến hết giao dịch của nơi gọi (NF6, ADR 0005 mục 21).
-     *
-     * @throws NotFoundException (404) khi không có hồ sơ hoặc hồ sơ đã xóa mềm
-     */
+    /** Khóa hội viên đến hết giao dịch bán, trước khi kiểm tra gói đang chờ (NF6). */
     @Transactional
     public Member lockForUpdate(Long memberId) {
-        return members.findForUpdate(memberId)
-            .orElseThrow(() -> new NotFoundException("Hội viên không tồn tại trên hệ thống."));
+        return members.findForUpdate(memberId).orElseThrow(() ->
+            new NotFoundException("Hội viên không tồn tại trên hệ thống."));
     }
 
     /**
@@ -132,64 +130,44 @@ public class MemberService {
      */
     @Transactional
     public Member lockForUpdateNoWait(Long memberId) {
-        return members.findForUpdateNoWait(memberId)
-            .orElseThrow(() -> new NotFoundException("Hội viên không tồn tại trên hệ thống."));
+        return members.findForUpdateNoWait(memberId).orElseThrow(() ->
+            new NotFoundException("Hội viên không tồn tại trên hệ thống."));
     }
 
-    /**
-     * Hồ sơ hội viên trong phạm vi nhân viên đang gọi: chủ chuỗi thấy mọi chi nhánh, quản lý và lễ tân chỉ thấy
-     * hội viên có chi nhánh gốc là chi nhánh của mình. Chức năng khác dùng khi nhân viên xem dữ liệu con của một
-     * hội viên (ví dụ danh sách gói). Nơi gọi chỉ được đọc entity trả về.
-     *
-     * @throws NotFoundException (404) không có hồ sơ, hoặc hồ sơ ngoài chi nhánh (giấu như F2)
-     */
+    /** Chức năng khác đọc hồ sơ theo cùng phạm vi chi nhánh với F2. */
     public Member requireInStaffScope(CurrentUser actor, Long memberId) {
         Member member = findMember(memberId);
         requireBranch(actor, member);
         return member;
     }
 
-    /**
-     * Kiểm tra quyền đọc hồ sơ và ảnh đại diện hội viên:
-     * hội viên chỉ xem được hồ sơ của chính mình; nhân viên chỉ xem được hội viên trong chi nhánh mình;
-     * chủ chuỗi xem mọi chi nhánh. Ngoài phạm vi hoặc không tồn tại trả 404.
-     */
-    public Member requireReadable(CurrentUser actor, Long memberId) {
-        Member member = findMember(memberId);
-        if (actor.role() == UserRole.MEMBER) {
-            if (!actor.userId().equals(member.getUserId())) { throw notFound(); }
-        } else {
-            requireBranch(actor, member);
-        }
-        return member;
-    }
-
-    /**
-     * Khóa dòng hội viên (SELECT ... FOR UPDATE) và kiểm tra phạm vi chi nhánh của nhân viên
-     * đang thao tác. Ngoài phạm vi hoặc không tồn tại trả 404.
-     */
-    @Transactional
-    public Member requireEditableForUpdate(CurrentUser actor, Long memberId) {
-        Member member = members.findForUpdate(memberId).orElseThrow(MemberService::notFound);
-        requireBranch(actor, member);
-        return member;
-    }
-
-    public MemberDetailResponse detail(CurrentUser actor, Long id) {
+    /** Quyền đọc dùng chung cho hồ sơ và ảnh: ngoài phạm vi trả 404 (S3, ADR 0011). */
+    public Member requireReadable(CurrentUser actor, Long id) {
         Member member = findMember(id);
         if (actor.role() == UserRole.MEMBER) {
             if (!actor.userId().equals(member.getUserId())) { throw notFound(); }
         } else {
             requireBranch(actor, member);
         }
-        return response(member);
+        return member;
+    }
+
+    /** Khóa dòng cha trước khi thay hồ sơ hoặc ảnh, kể cả khi ảnh chưa tồn tại (NF6). */
+    @Transactional
+    public Member requireEditableForUpdate(CurrentUser actor, Long id) {
+        Member member = members.findForUpdate(id).orElseThrow(MemberService::notFound);
+        requireBranch(actor, member);
+        return member;
+    }
+
+    public MemberDetailResponse detail(CurrentUser actor, Long id) {
+        return response(requireReadable(actor, id));
     }
 
     @Transactional
     public MemberDetailResponse update(CurrentUser actor, Long id, UpdateMemberRequest request) {
         // Tuần tự hóa cập nhật cùng hồ sơ để trạng thái member và user không lệch khi hai người cùng sửa.
-        Member member = members.findForUpdate(id).orElseThrow(MemberService::notFound);
-        requireBranch(actor, member);
+        Member member = requireEditableForUpdate(actor, id);
         String phone = MemberPhoneSupport.normalize(request.phone());
         if (members.existsByPhoneAndIdNot(phone, id)) {
             throw new ConflictException(PHONE_TAKEN_BY_OTHER);
@@ -239,15 +217,21 @@ public class MemberService {
         };
         var result = members.findAll(spec, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
         Set<Long> userIds = new HashSet<>();
-        result.forEach(m -> { if (m.getUserId() != null) { userIds.add(m.getUserId()); } });
+        Set<Long> memberIds = new HashSet<>();
+        result.forEach(m -> {
+            memberIds.add(m.getId());
+            if (m.getUserId() != null) { userIds.add(m.getUserId()); }
+        });
         Map<Long, String> emails = userIds.isEmpty() ? Map.of() : accounts.getEmailsByUserIds(userIds);
-        return PageResponse.of(result, m -> mapper.summary(m, m.getUserId() == null ? null : emails.get(m.getUserId())));
+        Set<Long> withAvatar = memberIds.isEmpty() ? Set.of() : avatars.findMemberIdsWithAvatar(memberIds);
+        return PageResponse.of(result, m -> mapper.summary(m,
+            m.getUserId() == null ? null : emails.get(m.getUserId()), withAvatar.contains(m.getId())));
     }
 
     private MemberDetailResponse response(Member member) {
         String email = member.getUserId() == null ? null
             : accounts.getEmailsByUserIds(Set.of(member.getUserId())).get(member.getUserId());
-        return mapper.detail(member, email);
+        return mapper.detail(member, email, avatars.existsByMemberId(member.getId()));
     }
 
     /**

@@ -1,5 +1,5 @@
 import { LogoutOutlined, ReloadOutlined } from '@ant-design/icons'
-import { Alert, Button, Card, Empty, Input, Spin, Tag, Typography } from 'antd'
+import { Alert, Button, Card, Empty, Input, Pagination, Spin, Tag, Typography } from 'antd'
 import { useState } from 'react'
 import { MemberAvatar } from '../../members/components/MemberAvatar'
 import { errorMessage } from '../../shared/api-error'
@@ -15,6 +15,7 @@ export interface ActiveCheckinsPanelProps {
   checkoutSuccess: CheckoutResult | null
   checkoutError: unknown
   onSearchKeyword: (keyword: string) => void
+  onPageChange?: (page: number, size: number) => void
   onReload: () => void
   onCheckout: (checkinId: number) => void
   loadAvatar?: (memberId: number) => Promise<Blob>
@@ -31,6 +32,7 @@ export function ActiveCheckinsPanel({
   checkoutSuccess,
   checkoutError,
   onSearchKeyword,
+  onPageChange,
   onReload,
   onCheckout,
   loadAvatar,
@@ -112,39 +114,54 @@ export function ActiveCheckinsPanel({
           description="Hiện chưa có hội viên nào đang tập."
         />
       ) : (
-        <div className="checkin-active-list">
-          {items.map((item) => (
-            <div key={item.checkinId} className="checkin-active-item">
-              <div className="checkin-active-info">
-                <MemberAvatar
-                  memberId={item.memberId}
-                  fullName={item.fullName}
-                  hasAvatar={item.hasAvatar}
-                  size={40}
-                  loadAvatar={loadAvatar}
-                />
-                <div className="checkin-active-text">
-                  <div className="checkin-active-name">
-                    <Typography.Text strong>{item.fullName}</Typography.Text>{' '}
-                    <Tag>{item.memberCode}</Tag>
+        <>
+          <div className="checkin-active-list">
+            {items.map((item) => (
+              <div key={item.checkinId} className="checkin-active-item">
+                <div className="checkin-active-info">
+                  <MemberAvatar
+                    memberId={item.memberId}
+                    fullName={item.fullName}
+                    hasAvatar={item.hasAvatar}
+                    size={40}
+                    loadAvatar={loadAvatar}
+                  />
+                  <div className="checkin-active-text">
+                    <div className="checkin-active-name">
+                      <Typography.Text strong>{item.fullName}</Typography.Text>{' '}
+                      <Tag>{item.memberCode}</Tag>
+                    </div>
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                      Vào lúc {formatVnTime(item.checkedInAt)} · {item.packageName}
+                    </Typography.Text>
                   </div>
-                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    Vào lúc {formatVnTime(item.checkedInAt)} · {item.packageName}
-                  </Typography.Text>
                 </div>
+                <Button
+                  size="middle"
+                  icon={<LogoutOutlined />}
+                  loading={checkoutBusyId === item.checkinId}
+                  onClick={() => onCheckout(item.checkinId)}
+                  style={{ minHeight: 36 }}
+                >
+                  Check-out
+                </Button>
               </div>
-              <Button
-                size="middle"
-                icon={<LogoutOutlined />}
-                loading={checkoutBusyId === item.checkinId}
-                onClick={() => onCheckout(item.checkinId)}
-                style={{ minHeight: 36 }}
-              >
-                Check-out
-              </Button>
+            ))}
+          </div>
+
+          {total > 0 && (
+            <div className="checkin-active-pagination">
+              <Pagination
+                size="small"
+                current={(data?.page ?? 0) + 1}
+                pageSize={data?.size ?? 20}
+                total={total}
+                showSizeChanger
+                onChange={(page, pageSize) => onPageChange?.(page - 1, pageSize)}
+              />
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
     </Card>
   )

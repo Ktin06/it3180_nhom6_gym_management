@@ -19,6 +19,42 @@
       "name": "KPI Dashboard – US-F6.1.1 & US-F6.3.1",
       "item": [
         {
+          "name": "US-F6.1.1 KB 200 – Chủ chuỗi lấy danh sách chi nhánh",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/dashboard/branches",
+            "description": "Chỉ SUPER_ADMIN (403 với các vai trò khác). Trả cả chi nhánh INACTIVE để xem lịch sử.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('mảng chi nhánh có id, code, name, status', () => {",
+                  "  const arr = pm.response.json();",
+                  "  pm.expect(arr).to.be.an('array');",
+                  "  if (arr.length > 0) {",
+                  "    pm.expect(arr[0]).to.have.all.keys('id', 'code', 'name', 'status');",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "US-F6.1.1 KB 200 – Lễ tân xem KPI chi nhánh mình",
           "request": {
             "method": "GET",

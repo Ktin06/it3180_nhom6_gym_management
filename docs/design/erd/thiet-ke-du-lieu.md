@@ -170,6 +170,7 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 - [x] Hoa hồng PT: phần trăm giá mỗi buổi, chụp vào `pt_sessions.commission_amount` lúc DONE (01/11).
 - [x] Gói TIME tính theo số ngày (`duration_days`); "1 tháng" = 30 ngày (01/11).
 - [x] Mã hội viên dạng `HV` + 6 chữ số (`HV000123`), sinh từ sequence `member_code_seq` dùng chung cả chuỗi (01/11).
+- [ ] S2-07 đề xuất mã hóa đơn mới dạng `HD` + 6 chữ số, sequence `invoice_code_seq` (migration `V9_05`); giữ mã lịch sử, không yêu cầu số liên tục khi rollback. Cần người duyệt xác nhận AC-F3.5.1-13.
 - [ ] Tác vụ chuyển EXPIRED lúc 00:00 bị lỗi trong khi máy chủ vẫn chạy (không có lần chạy bù): gói SESSION 0 buổi còn ACTIVE, gói nối tiếp chưa kích hoạt, hội viên bị từ chối check-in cả ngày. Trường hợp ngoại vi, để xử lý sau (hướng đã bàn: cho tác vụ chạy lại mỗi giờ, chạy lặp không gây sai) (03/11).
 - [x] Ảnh đại diện hội viên lưu trong PostgreSQL, bảng `member_avatars`, server thu nhỏ và nén; bỏ `members.avatar_url` (14/11, [ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md)).
 
@@ -186,5 +187,5 @@ Mỗi ràng buộc dưới đây cần ít nhất một ca kiểm thử. Cột "
 | 02/11/2026 | Cả nhóm duyệt ERD bản 2 tại buổi kick-off; `TRANSFER_FEE` mặc định 200.000 đ |
 | 03/11/2026 | Theo [ADR 0005](../../decisions/0005-erd-v2.md) mục 25–32: tham số `SESSION_WARNING_THRESHOLD`; công thức `end_date`; gói SESSION, PT hết buổi kéo gói nối tiếp; tác vụ nền chuyển EXPIRED (00:00, chạy bù khi khởi động) trước khi kích hoạt UPCOMING; chặn bảo lưu, chuyển nhượng gói hết buổi; giới hạn số buổi PT đặt trước; để mở trường hợp tác vụ 00:00 bị lỗi |
 | 12/11/2026 | Theo quyết định F8 ([ADR 0010](../../decisions/0010-danh-sach-cho-tu-dong-dua-vao-lop-ban-2.md)): `class_bookings.created_by` thành NOT NULL (migration `V9_01`); `grace_until` tính từ `promoted_at`, không từ lúc gửi email; thứ tự chờ phụ theo `id`; ghi chú `attendance_marked_by` gồm cả người sửa điểm danh |
-| 14/11/2026 | Theo [ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md): thêm bảng `member_avatars` (ảnh đại diện lưu trong PostgreSQL), bỏ `members.avatar_url`; 40 bảng. Migration `V9_02` làm ở việc S2-06 |
+| 14/11/2026 | Theo [ADR 0011](../../decisions/0011-anh-dai-dien-luu-trong-postgresql.md): thêm bảng `member_avatars` (ảnh đại diện lưu trong PostgreSQL), bỏ `members.avatar_url`; 40 bảng. Migration S2-06 lấy số tiếp theo trên main; ngày 24/11/2026 nhánh #183 dùng `V9_04` sau `V9_03` |
 | 19/11/2026 | Theo [ADR 0014](../../decisions/0014-bo-danh-sach-cho-lop-hoc-nhom.md) (thay ADR 0010), migration `V9_03`: `class_bookings` bỏ trạng thái `WAITLIST`, `PENDING_RECONFIRM`, lý do hủy `NOT_RECONFIRMED`, các cột `waitlisted_at`, `promoted_at`, `grace_until`, `reconfirm_expires_at` và chỉ mục danh sách chờ; `system_configs` bỏ `PROMOTION_GRACE_MIN`, `RECONFIRM_TTL_MIN`, đổi `PROMOTION_CUTOFF_MIN` thành `BOOKING_CUTOFF_MIN`; buổi đã đổi giờ hủy không phạt |

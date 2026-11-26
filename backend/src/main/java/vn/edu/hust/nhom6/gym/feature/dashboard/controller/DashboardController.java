@@ -18,6 +18,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
+import vn.edu.hust.nhom6.gym.feature.dashboard.dto.DashboardBranchDto;
 import vn.edu.hust.nhom6.gym.feature.dashboard.dto.DashboardStatsDto;
 import vn.edu.hust.nhom6.gym.feature.dashboard.dto.ExpiringMembershipDto;
 import vn.edu.hust.nhom6.gym.feature.dashboard.dto.HourlyCheckinDto;
@@ -36,6 +37,17 @@ import vn.edu.hust.nhom6.gym.feature.dashboard.service.DashboardService;
 @RequiredArgsConstructor
 public class DashboardController {
     private final DashboardService dashboard;
+
+    @GetMapping("/branches")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @Operation(summary = "Danh sách chi nhánh để chủ chuỗi chọn trên Dashboard (UC-F6.1)",
+        description = "Chỉ chủ chuỗi được xem toàn bộ chi nhánh (gồm cả INACTIVE để xem số liệu lịch sử).")
+    @ApiResponse(responseCode = "200", description = "Danh sách chi nhánh theo thứ tự id")
+    @ApiResponse(responseCode = "401", description = "Chưa xác thực hoặc JWT sai")
+    @ApiResponse(responseCode = "403", description = "Không phải chủ chuỗi")
+    public List<DashboardBranchDto> branches() {
+        return dashboard.branches();
+    }
 
     @GetMapping("/stats")
     @Operation(summary = "Tổng hợp chỉ số KPI trong ngày của chi nhánh (UC-F6.1, UC-F6.2, UC-F6.3, UC-F6.4)",

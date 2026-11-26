@@ -10,6 +10,7 @@ import { menuForRole } from '../../../layouts/staff-menu'
 import { canOpen } from '../../../routes/route-access'
 import { checkinsApi } from '../../checkins/api/checkins'
 import type {
+  DashboardBranch,
   DashboardGateway,
   DashboardStats,
   ExpiringMembership,
@@ -17,6 +18,11 @@ import type {
   LatestCheckin,
 } from '../types/dashboard'
 import { DashboardPage } from './DashboardPage'
+
+const sampleBranches: DashboardBranch[] = [
+  { id: 1, code: 'CN01', name: 'Chi nhánh Bách Khoa', status: 'ACTIVE' },
+  { id: 2, code: 'CN02', name: 'Chi nhánh Cầu Giấy', status: 'ACTIVE' },
+]
 
 function axiosProblem(status: number, detail: string) {
   const error = new AxiosError('Request failed')
@@ -122,6 +128,7 @@ const sampleLatestCheckins: LatestCheckin[] = [
 
 function createDashboardStub(overrides: Partial<DashboardGateway> = {}): DashboardGateway {
   return {
+    branches: vi.fn().mockResolvedValue(sampleBranches),
     stats: vi.fn().mockResolvedValue(sampleStats),
     hourlyCheckins: vi.fn().mockResolvedValue(sampleHourly),
     expiringMemberships: vi.fn().mockResolvedValue(sampleExpiring),
@@ -180,6 +187,7 @@ describe('DashboardPage (F6 – S2-12.2)', () => {
     renderDashboard({ role: 'RECEPTIONIST', api })
 
     await waitFor(() => expect(api.stats).toHaveBeenCalledWith(undefined))
+    expect(api.branches).not.toHaveBeenCalled()
     expect(api.hourlyCheckins).toHaveBeenCalledWith(undefined)
     expect(api.expiringMemberships).toHaveBeenCalledWith({ branchId: undefined, limit: 10 })
     expect(api.latestCheckins).toHaveBeenCalledWith({ branchId: undefined, limit: 10 })
@@ -203,14 +211,19 @@ describe('DashboardPage (F6 – S2-12.2)', () => {
     expect(within(expiringCard).getByText('4')).toBeInTheDocument()
   })
 
-  it('US-F6.1.1 KB2: chủ chuỗi chưa chọn chi nhánh thì không gọi API nào và hiện câu nhắc; sau khi chọn chi nhánh mới gọi đủ 4 API kèm branchId', async () => {
+  it('US-F6.1.1 KB2: chủ chuỗi tải chi nhánh từ API (gồm chi nhánh thứ 3 / INACTIVE), chưa chọn thì không gọi 4 API số liệu; sau khi chọn mới gọi đủ 4 API kèm branchId', async () => {
     const user = userEvent.setup()
-    const api = createDashboardStub()
+    const branchesMock = vi.fn().mockResolvedValue([
+      ...sampleBranches,
+      { id: 5, code: 'CN05', name: 'Chi nhánh Đống Đa', status: 'INACTIVE' },
+    ])
+    const api = createDashboardStub({ branches: branchesMock })
     renderDashboard({ role: 'SUPER_ADMIN', api })
 
     expect(
       await screen.findByText(/chọn chi nhánh để xem Dashboard/i),
     ).toBeInTheDocument()
+    await waitFor(() => expect(branchesMock).toHaveBeenCalledOnce())
     expect(api.stats).not.toHaveBeenCalled()
     expect(api.hourlyCheckins).not.toHaveBeenCalled()
     expect(api.expiringMemberships).not.toHaveBeenCalled()
@@ -218,13 +231,14 @@ describe('DashboardPage (F6 – S2-12.2)', () => {
 
     const branchSelect = screen.getByRole('combobox', { name: /Chọn chi nhánh/i })
     await user.click(branchSelect)
-    const option = await screen.findByText(/Chi nhánh Bách Khoa/i)
-    await user.click(option)
+    expect(await screen.findByText(/Chi nhánh Cầu Giấy \(CN02\)/i)).toBeInTheDocument()
+    const inactiveOption = await screen.findByText(/Chi nhánh Đống Đa \(CN05\) – Ngừng hoạt động/i)
+    await user.click(inactiveOption)
 
-    await waitFor(() => expect(api.stats).toHaveBeenCalledWith(1))
-    expect(api.hourlyCheckins).toHaveBeenCalledWith(1)
-    expect(api.expiringMemberships).toHaveBeenCalledWith({ branchId: 1, limit: 10 })
-    expect(api.latestCheckins).toHaveBeenCalledWith({ branchId: 1, limit: 10 })
+    await waitFor(() => expect(api.stats).toHaveBeenCalledWith(5))
+    expect(api.hourlyCheckins).toHaveBeenCalledWith(5)
+    expect(api.expiringMemberships).toHaveBeenCalledWith({ branchId: 5, limit: 10 })
+    expect(api.latestCheckins).toHaveBeenCalledWith({ branchId: 5, limit: 10 })
   })
 
   it('US-F6.2.1 KB1: biểu đồ cột theo giờ bằng div/CSS hiển thị đủ mọi khung API trả kể cả khung 0 lượt', async () => {
@@ -345,6 +359,25 @@ describe('DashboardPage (F6 – S2-12.2)', () => {
 
     await waitFor(() => expect(statsMock).toHaveBeenCalledTimes(2))
     expect(await screen.findByTestId('kpi-currently-in-gym')).toHaveTextContent('7')
+  })
+
+  it('US-F6.1.1 E2: lỗi tải danh sách chi nhánh cho chủ chuỗi hiện thông báo và nút thử lại', async () => {
+    const user = userEvent.setup()
+    const branchesMock = vi
+      .fn()
+      .mockRejectedValueOnce(axiosProblem(500, 'Không tải được danh sách chi nhánh.'))
+      .mockResolvedValueOnce(sampleBranches)
+    const api = createDashboardStub({ branches: branchesMock })
+
+    renderDashboard({ role: 'SUPER_ADMIN', api })
+
+    expect(await screen.findByText('Không tải được danh sách chi nhánh.')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Thử lại/i }))
+
+    await waitFor(() => expect(branchesMock).toHaveBeenCalledTimes(2))
+    const branchSelect = screen.getByRole('combobox', { name: /Chọn chi nhánh/i })
+    await user.click(branchSelect)
+    expect(await screen.findByText(/Chi nhánh Bách Khoa \(CN01\)/i)).toBeInTheDocument()
   })
 
   it('US-F6.1.1 S3: route /dashboard và menu Dashboard (F6) mở đúng cho RECEPTIONIST, BRANCH_MANAGER, SUPER_ADMIN', () => {

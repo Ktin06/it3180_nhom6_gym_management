@@ -119,6 +119,13 @@
   gap: 10px;
 }
 
+.checkin-active-pagination {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  overflow-x: auto;
+}
+
 .checkin-active-item {
   display: flex;
   justify-content: space-between;

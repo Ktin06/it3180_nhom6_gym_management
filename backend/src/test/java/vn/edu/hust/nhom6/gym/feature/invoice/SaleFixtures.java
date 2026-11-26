@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import vn.edu.hust.nhom6.gym.DatabaseCleaner;
 
 import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 import vn.edu.hust.nhom6.gym.feature.auth.service.JwtTokenService;
@@ -24,8 +25,7 @@ public final class SaleFixtures {
     }
 
     public void reset() {
-        jdbc.execute("TRUNCATE TABLE users, staff, members, packages, memberships, invoices, invoice_items "
-            + "RESTART IDENTITY CASCADE");
+        DatabaseCleaner.truncate(jdbc, "users", "staff", "members", "packages", "memberships", "invoices", "invoice_items");
         jdbc.update("UPDATE branches SET status = 'ACTIVE' WHERE code = 'CN01'");
         jdbc.update("""
             INSERT INTO branches (code, name, open_time, close_time) VALUES ('CN02', 'Chi nhánh 2', '06:00', '22:00')

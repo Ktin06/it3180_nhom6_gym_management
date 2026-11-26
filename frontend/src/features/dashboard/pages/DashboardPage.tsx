@@ -14,6 +14,7 @@ import { LatestCheckinsTable } from '../components/LatestCheckinsTable'
 import { vndFormat } from '../dashboard-format'
 import type {
   BranchOption,
+  DashboardBranch,
   DashboardGateway,
   DashboardStats,
   ExpiringMembership,
@@ -22,11 +23,6 @@ import type {
 } from '../types/dashboard'
 import '../../shared/feature-pages.css'
 import './DashboardPage.css'
-
-const DEFAULT_BRANCH_OPTIONS: BranchOption[] = [
-  { id: 1, label: 'Chi nhánh Bách Khoa (CN01)' },
-  { id: 2, label: 'Chi nhánh số 2 (CN02)' },
-]
 
 interface DashboardSnapshot {
   stats: DashboardStats
@@ -40,6 +36,14 @@ interface DashboardRequest {
   nonce: number
 }
 
+function toBranchOption(branch: DashboardBranch): BranchOption {
+  const base = `${branch.name} (${branch.code})`
+  return {
+    id: branch.id,
+    label: branch.status === 'INACTIVE' ? `${base} – Ngừng hoạt động` : base,
+  }
+}
+
 export interface DashboardPageProps {
   api?: DashboardGateway
   loadAvatar?: (memberId: number) => Promise<Blob>
@@ -50,13 +54,14 @@ export interface DashboardPageProps {
 /**
  * Màn hình Dashboard cơ bản theo chi nhánh (F6 – S2-12.2):
  * - Lễ tân và quản lý chi nhánh: tự tải dữ liệu chi nhánh mình, không có ô chọn chi nhánh.
- * - Chủ chuỗi (SUPER_ADMIN): có ô chọn chi nhánh; chưa chọn thì không gọi API nào.
+ * - Chủ chuỗi (SUPER_ADMIN): tải danh sách chi nhánh từ GET /api/v1/dashboard/branches để chọn;
+ *   chưa chọn chi nhánh thì chưa gọi 4 API số liệu.
  * - Check-out nhanh dùng lại checkinsApi.checkout trong features/checkins/api/checkins.ts.
  */
 export function DashboardPage({
   api = dashboardApi,
   loadAvatar,
-  branchOptions = DEFAULT_BRANCH_OPTIONS,
+  branchOptions,
   role: roleProp,
 }: DashboardPageProps) {
   const { message } = App.useApp()
@@ -67,6 +72,13 @@ export function DashboardPage({
   const isSuperAdmin = role === 'SUPER_ADMIN'
   const canCheckout = role === 'RECEPTIONIST' || role === 'BRANCH_MANAGER'
   const canRenew = canOpen(role, '/ban-goi')
+
+  const [branchesNonce, setBranchesNonce] = useState(0)
+  const [branchLoadState, setBranchLoadState] = useState<{
+    nonce: number
+    options?: BranchOption[]
+    error?: unknown
+  }>()
 
   const [request, setRequest] = useState<DashboardRequest>({
     branchId: undefined,
@@ -83,6 +95,37 @@ export function DashboardPage({
     type: 'success' | 'error'
     text: string
   } | null>(null)
+
+  const shouldLoadBranches = isSuperAdmin && branchOptions === undefined
+
+  useEffect(() => {
+    if (!shouldLoadBranches) {
+      return
+    }
+    let active = true
+    api.branches().then(
+      (rows) => {
+        if (!active) return
+        setBranchLoadState({
+          nonce: branchesNonce,
+          options: rows.map(toBranchOption),
+        })
+      },
+      (error: unknown) => {
+        if (!active) return
+        setBranchLoadState({ nonce: branchesNonce, error })
+      },
+    )
+    return () => {
+      active = false
+    }
+  }, [api, branchesNonce, shouldLoadBranches])
+
+  const currentBranches =
+    shouldLoadBranches && branchLoadState?.nonce === branchesNonce ? branchLoadState : undefined
+  const resolvedBranchOptions = branchOptions ?? currentBranches?.options ?? []
+  const loadingBranches = shouldLoadBranches && !currentBranches
+  const branchesError = shouldLoadBranches ? currentBranches?.error : undefined
 
   const waitingForBranch = isSuperAdmin && request.branchId === undefined
 
@@ -181,10 +224,12 @@ export function DashboardPage({
               <Select<number>
                 id="dashboard-branch-select"
                 aria-label="Chọn chi nhánh"
-                placeholder="Chọn chi nhánh"
+                placeholder={loadingBranches ? 'Đang tải chi nhánh...' : 'Chọn chi nhánh'}
+                loading={loadingBranches}
+                disabled={loadingBranches && resolvedBranchOptions.length === 0}
                 allowClear
                 value={request.branchId}
-                options={branchOptions.map((option) => ({
+                options={resolvedBranchOptions.map((option) => ({
                   value: option.id,
                   label: option.label,
                 }))}
@@ -207,6 +252,20 @@ export function DashboardPage({
           </Button>
         </div>
       </div>
+
+      {Boolean(branchesError) && (
+        <Alert
+          type="error"
+          showIcon
+          title={errorMessage(branchesError)}
+          action={
+            <Button size="small" onClick={() => setBranchesNonce((n) => n + 1)}>
+              Thử lại
+            </Button>
+          }
+          style={{ marginBottom: 16 }}
+        />
+      )}
 
       {waitingForBranch ? (
         <Alert

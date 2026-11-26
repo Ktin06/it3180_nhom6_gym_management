@@ -40,6 +40,38 @@
     {
       "key": "emptyBodyPackageId",
       "value": ""
+    },
+    {
+      "key": "receptionistToken",
+      "value": ""
+    },
+    {
+      "key": "memberId",
+      "value": ""
+    },
+    {
+      "key": "salePackageId",
+      "value": ""
+    },
+    {
+      "key": "expectedSalePrice",
+      "value": ""
+    },
+    {
+      "key": "inactiveSalePackageId",
+      "value": ""
+    },
+    {
+      "key": "inactiveSaleMemberId",
+      "value": ""
+    },
+    {
+      "key": "invoiceId",
+      "value": ""
+    },
+    {
+      "key": "membershipId",
+      "value": ""
     }
   ],
   "auth": {
@@ -1036,6 +1068,359 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Kiểm tra phản hồi',()=>pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "S2-07 – Bán và gia hạn tại quầy (#182)",
+      "description": "Dùng receptionistToken riêng. Cấu hình ID số hợp lệ và expectedSalePrice bằng giá thật. Chạy 201 trước 422 gói chờ; chọn hội viên chưa có gói chờ. Các request này tạo dữ liệu local, không tự xóa. baseUrl bao gồm /api/v1.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{receptionistToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "TC-F3.5.1-12a 200 – Gói đang giữ và ngày gia hạn",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/memberships?memberId={{memberId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Danh sách trạng thái đúng',()=>{pm.expect(pm.response.json()).to.be.an('array'); pm.response.json().forEach(m=>pm.expect(['PENDING','UPCOMING','ACTIVE','FROZEN']).to.include(m.status));});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-01a, TC-F3.5.1-13a 201 – Bán/gia hạn, bỏ qua giá client",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{memberId}},\n  \"items\": [\n    {\n      \"itemType\": \"PACKAGE\",\n      \"packageId\": {{salePackageId}},\n      \"price\": 1\n    }\n  ],\n  \"total\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Hóa đơn và gói chờ', () => { const r=pm.response.json(); pm.expect(r.status).to.eql('PENDING'); pm.expect(r.membershipStatus).to.eql('PENDING'); pm.expect(r.invoiceCode).to.match(/^HD[0-9]{6}$/); pm.expect(r.discount).to.eql(0); pm.expect(r.total).to.eql(r.subtotal); });",
+                  "pm.test('Giá server đúng bảng giá', () => { const expected=pm.variables.get('expectedSalePrice'); pm.expect(String(expected || '')).to.match(/^[0-9]+$/); pm.expect(pm.response.json().total).to.eql(Number(expected)); });",
+                  "if(pm.response.code===201) { const r=pm.response.json(); pm.collectionVariables.set('invoiceId',String(r.invoiceId)); pm.collectionVariables.set('membershipId',String(r.membershipId)); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-06a 422 – Gửi lại khi đã có gói chờ",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{memberId}},\n  \"items\": [\n    {\n      \"itemType\": \"PACKAGE\",\n      \"packageId\": {{salePackageId}},\n      \"price\": 1\n    }\n  ],\n  \"total\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Lỗi ProblemDetail', () => { const r = pm.response.json(); pm.expect(r.status).to.eql(pm.response.code); pm.expect(r.detail).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-08b 422 – Gói ngừng bán",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{memberId}},\n  \"items\": [\n    {\n      \"itemType\": \"PACKAGE\",\n      \"packageId\": {{inactiveSalePackageId}},\n      \"price\": 1\n    }\n  ],\n  \"total\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Lỗi ProblemDetail', () => { const r = pm.response.json(); pm.expect(r.status).to.eql(pm.response.code); pm.expect(r.detail).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-08a 422 – Hội viên ngừng hoạt động",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{inactiveSaleMemberId}},\n  \"items\": [\n    {\n      \"itemType\": \"PACKAGE\",\n      \"packageId\": {{salePackageId}},\n      \"price\": 1\n    }\n  ],\n  \"total\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Lỗi ProblemDetail', () => { const r = pm.response.json(); pm.expect(r.status).to.eql(pm.response.code); pm.expect(r.detail).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-08d 404 – Gói không tồn tại",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{memberId}},\n  \"items\": [\n    {\n      \"itemType\": \"PACKAGE\",\n      \"packageId\": 9223372036854775807,\n      \"price\": 1\n    }\n  ],\n  \"total\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-08d 404 – Hội viên không tồn tại",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": 9223372036854775807,\n  \"items\": [\n    {\n      \"itemType\": \"PACKAGE\",\n      \"packageId\": {{salePackageId}},\n      \"price\": 1\n    }\n  ],\n  \"total\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-11a 400 – Thiếu memberId và items",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Có errors theo trường',()=>pm.expect(pm.response.json().errors).to.be.an('object'));",
+                  "pm.test('Lỗi ProblemDetail', () => { const r = pm.response.json(); pm.expect(r.status).to.eql(pm.response.code); pm.expect(r.detail).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-11b 403 – Quản lý không được bán",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{memberId}},\n  \"items\": [\n    {\n      \"itemType\": \"PACKAGE\",\n      \"packageId\": {{salePackageId}},\n      \"price\": 1\n    }\n  ],\n  \"total\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{managerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F3.5.1-11c 401 – Không token",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{memberId}},\n  \"items\": [\n    {\n      \"itemType\": \"PACKAGE\",\n      \"packageId\": {{salePackageId}},\n      \"price\": 1\n    }\n  ],\n  \"total\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
                 ]
               }
             }

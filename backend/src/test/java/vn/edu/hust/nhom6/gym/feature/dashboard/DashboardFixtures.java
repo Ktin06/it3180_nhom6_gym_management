@@ -43,19 +43,6 @@ final class DashboardFixtures {
 
     void reset() {
         sale.reset();
-        jdbc.execute("""
-            CREATE TABLE IF NOT EXISTS member_avatars (
-                id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                member_id bigint NOT NULL UNIQUE REFERENCES members(id),
-                content bytea NOT NULL,
-                content_type varchar(50) NOT NULL DEFAULT 'image/jpeg',
-                size_bytes integer NOT NULL,
-                uploaded_by bigint NOT NULL REFERENCES users(id),
-                created_at timestamptz NOT NULL DEFAULT now(),
-                updated_at timestamptz NOT NULL DEFAULT now()
-            )""");
-        jdbc.execute("ALTER TABLE member_avatars ADD COLUMN IF NOT EXISTS id bigint GENERATED ALWAYS AS IDENTITY");
-        jdbc.execute("TRUNCATE TABLE member_avatars CASCADE");
         cn01 = sale.cn01;
         cn02 = sale.cn02;
         seq = 0;

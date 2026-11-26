@@ -244,6 +244,35 @@ class DashboardApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("US-F6.1.1 KB & S3: GET /api/v1/dashboard/branches trả toàn bộ chi nhánh (gồm cả INACTIVE) cho chủ chuỗi, vai trò khác 403")
+    void branchesEndpointForOwnerOnlyIncludesInactive() throws Exception {
+        Long cn03 = jdbc.queryForObject("""
+            INSERT INTO branches (code, name, open_time, close_time, status)
+            VALUES ('CN03', 'Chi nhánh đã đóng', '06:00', '22:00', 'INACTIVE') RETURNING id""", Long.class);
+
+        mvc.perform(get("/api/v1/dashboard/branches")).andExpect(status().isUnauthorized());
+        for (RequestPostProcessor denied : new RequestPostProcessor[] {
+                f.receptionCn01(), f.managerCn01(),
+                f.as(f.memberUser, UserRole.MEMBER), f.as(f.trainerUser, UserRole.TRAINER)
+        }) {
+            mvc.perform(get("/api/v1/dashboard/branches").with(denied)).andExpect(status().isForbidden());
+        }
+
+        mvc.perform(get("/api/v1/dashboard/branches").with(f.owner()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[0].id").value(f.cn01))
+            .andExpect(jsonPath("$[0].code").value("CN01"))
+            .andExpect(jsonPath("$[0].status").value("ACTIVE"))
+            .andExpect(jsonPath("$[1].id").value(f.cn02))
+            .andExpect(jsonPath("$[1].code").value("CN02"))
+            .andExpect(jsonPath("$[2].id").value(cn03))
+            .andExpect(jsonPath("$[2].code").value("CN03"))
+            .andExpect(jsonPath("$[2].name").value("Chi nhánh đã đóng"))
+            .andExpect(jsonPath("$[2].status").value("INACTIVE"));
+    }
+
+    @Test
     @DisplayName("US-F6.2.1 KB: biểu đồ đủ khung giờ từ mở đến trước đóng, khung trống bằng 0, tổng khung bằng tổng lượt, không tính lượt 23:30 hôm qua")
     void hourlyCheckinsDefaultHoursZeroFillAndSumMatchesTotal() throws Exception {
         Long m = f.member(f.cn01, "Hội viên biểu đồ");

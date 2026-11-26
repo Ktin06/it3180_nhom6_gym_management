@@ -455,6 +455,43 @@ describe('CheckinPage (F4 – S2-11.3)', () => {
     ).toBeInTheDocument()
   })
 
+  it('US-F4.4.1 KB2: khung Đang tập hôm nay hỗ trợ chuyển trang khi có hơn 20 hội viên', async () => {
+    const user = userEvent.setup()
+    const page1Item: CheckinHistoryItem = {
+      ...activeCheckinRow,
+      checkinId: 501,
+      memberCode: 'HV000101',
+      fullName: 'Hội viên trang 1',
+    }
+    const page2Item: CheckinHistoryItem = {
+      ...activeCheckinRow,
+      checkinId: 521,
+      memberCode: 'HV000121',
+      fullName: 'Hội viên trang 2',
+    }
+    const history = vi.fn().mockImplementation(async (query) => ({
+      content: query.page === 0 ? [page1Item] : [page2Item],
+      page: query.page,
+      size: query.size,
+      totalElements: 25,
+      totalPages: 2,
+    }))
+
+    renderPage(createGateway({ history }))
+
+    expect(await screen.findByText('Hội viên trang 1')).toBeInTheDocument()
+    expect(screen.getByText('Đang tập hôm nay (25)')).toBeInTheDocument()
+
+    await user.click(screen.getByTitle('2'))
+
+    await waitFor(() =>
+      expect(history).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'CHECKED_IN', page: 1, size: 20 }),
+      ),
+    )
+    expect(await screen.findByText('Hội viên trang 2')).toBeInTheDocument()
+  })
+
   it('US-F4.5.1 KB1: tab lịch sử lọc theo ngày, trạng thái, phương thức, từ khóa và phân trang', async () => {
     const user = userEvent.setup()
     const historyRow: CheckinHistoryItem = {

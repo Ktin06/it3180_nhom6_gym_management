@@ -60,32 +60,22 @@ public interface MembershipRepository extends JpaRepository<Membership, Long> {
 
     Optional<Membership> findByInvoiceItemId(Long invoiceItemId);
 
-    // ---------------------------------------------------------------------------------------------
-    // S2-07.2: tác vụ nền 00:00 (AC-F3.5.1-10, BR-F4.7). "Hôm nay" do ứng dụng truyền vào, không dùng CURRENT_DATE.
-    // ---------------------------------------------------------------------------------------------
-
     /**
-     * Gói ACTIVE phải chuyển EXPIRED vào ngày {@code today}:
-     * <ul>
-     *   <li>{@code end_date < today} (nửa mở: {@code end_date} là ngày cuối còn dùng được);</li>
-     *   <li>gói SESSION {@code remaining_sessions = 0} mà hôm nay chưa có lượt check-in trừ buổi (BR-F4.7). Đọc bảng
-     *       {@code checkins} của F4 chỉ để kiểm tra (G4).</li>
-     * </ul>
-     * Gói PT 0 buổi đã EXPIRED ngay lúc trừ (BR-F9.7) nên không có ở đây.
+     * Đọc bảng checkins đã có từ Sprint 1, không phụ thuộc entity/API F4 chưa gộp.
+     * Ngày nghiệp vụ do VnTime truyền vào; SESSION hết buổi hôm nay vẫn dùng được trong ngày.
      */
-    @Query("""
-        SELECT m FROM Membership m
+    @Query(value = """
+        SELECT m.* FROM memberships m
         WHERE m.status = 'ACTIVE'
-          AND (m.endDate < :today
-               OR (m.packageType = 'SESSION' AND m.remainingSessions = 0
-                   AND NOT EXISTS (SELECT 1 FROM Checkin c
-                                   WHERE c.membershipId = m.id AND c.checkinDate = :today
-                                     AND c.sessionDeducted = true)))
+          AND (m.end_date < :today
+               OR (m.package_type = 'SESSION' AND m.remaining_sessions = 0
+                   AND NOT EXISTS (SELECT 1 FROM checkins c
+                                   WHERE c.membership_id = m.id AND c.checkin_date = :today
+                                     AND c.session_deducted = true)))
         ORDER BY m.id
-        """)
+        """, nativeQuery = true)
     List<Membership> findDueToExpire(@Param("today") LocalDate today);
 
-    /** Gói UPCOMING đã tới ngày bắt đầu ({@code start_date <= today}; chỉ mục {@code ix_memberships_upcoming}). */
     @Query("""
         SELECT m FROM Membership m
         WHERE m.status = 'UPCOMING' AND m.startDate <= :today

@@ -1,5 +1,6 @@
 package vn.edu.hust.nhom6.gym.feature.branch.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import vn.edu.hust.nhom6.gym.common.exception.NotFoundException;
 import vn.edu.hust.nhom6.gym.feature.branch.repository.BranchLookupRepository;
+import vn.edu.hust.nhom6.gym.feature.branch.repository.BranchLookupRepository.BranchOptionRow;
 import vn.edu.hust.nhom6.gym.feature.branch.repository.BranchLookupRepository.OpeningHours;
 
 /** Tra cứu tối thiểu phục vụ các chức năng khác trong giai đoạn một chi nhánh. */
@@ -41,5 +43,10 @@ public class BranchLookupService {
     public OpeningHours openingHours(Long branchId) {
         return branches.findOpeningHours(branchId)
             .orElseThrow(() -> new NotFoundException("Không tìm thấy chi nhánh."));
+    }
+
+    /** Toàn bộ chi nhánh trong hệ thống (gồm cả {@code INACTIVE}) cho bộ lọc Dashboard của chủ chuỗi. */
+    public List<BranchOptionRow> listAll() {
+        return branches.findAllOrdered();
     }
 }

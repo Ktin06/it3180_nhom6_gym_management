@@ -15,8 +15,11 @@ describe('dashboardApi (F6)', () => {
     vi.clearAllMocks()
   })
 
-  it('US-F6 API: gọi đúng 4 endpoint /dashboard/* qua http.ts, kèm branchId và limit khi có', async () => {
+  it('US-F6 API: gọi đúng /dashboard/branches và 4 endpoint /dashboard/* qua http.ts, kèm branchId và limit khi có', async () => {
     mockedGet
+      .mockResolvedValueOnce({
+        data: [{ id: 1, code: 'CN01', name: 'Chi nhánh Bách Khoa', status: 'ACTIVE' }],
+      })
       .mockResolvedValueOnce({
         data: {
           currentlyInGym: 3,
@@ -37,19 +40,21 @@ describe('dashboardApi (F6)', () => {
         data: [],
       })
 
+    await dashboardApi.branches()
     await dashboardApi.stats()
     await dashboardApi.hourlyCheckins(2)
     await dashboardApi.expiringMemberships({ branchId: 2, limit: 15 })
     await dashboardApi.latestCheckins({ limit: 8 })
 
-    expect(mockedGet).toHaveBeenNthCalledWith(1, '/dashboard/stats', { params: {} })
-    expect(mockedGet).toHaveBeenNthCalledWith(2, '/dashboard/hourly-checkins', {
+    expect(mockedGet).toHaveBeenNthCalledWith(1, '/dashboard/branches')
+    expect(mockedGet).toHaveBeenNthCalledWith(2, '/dashboard/stats', { params: {} })
+    expect(mockedGet).toHaveBeenNthCalledWith(3, '/dashboard/hourly-checkins', {
       params: { branchId: 2 },
     })
-    expect(mockedGet).toHaveBeenNthCalledWith(3, '/dashboard/expiring-memberships', {
+    expect(mockedGet).toHaveBeenNthCalledWith(4, '/dashboard/expiring-memberships', {
       params: { branchId: 2, limit: 15 },
     })
-    expect(mockedGet).toHaveBeenNthCalledWith(4, '/dashboard/latest-checkins', {
+    expect(mockedGet).toHaveBeenNthCalledWith(5, '/dashboard/latest-checkins', {
       params: { limit: 8 },
     })
   })

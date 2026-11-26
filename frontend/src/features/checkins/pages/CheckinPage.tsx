@@ -99,6 +99,21 @@ export function CheckinPage({ api = checkinsApi, loadAvatar }: CheckinPageProps)
     }
   }
 
+  function refreshActiveListAfterCheckout() {
+    if (
+      activeList.query.page > 0 &&
+      activeList.data &&
+      activeList.data.content.length <= 1
+    ) {
+      activeList.changeQuery({
+        ...activeList.query,
+        page: activeList.query.page - 1,
+      })
+      return
+    }
+    activeList.reload()
+  }
+
   async function handleCheckout(checkinId: number) {
     setCheckoutBusyId(checkinId)
     setCheckoutError(undefined)
@@ -106,13 +121,13 @@ export function CheckinPage({ api = checkinsApi, loadAvatar }: CheckinPageProps)
     try {
       const res = await api.checkout(checkinId)
       setCheckoutSuccess(res)
-      activeList.reload()
+      refreshActiveListAfterCheckout()
       setHistoryRefreshKey((k) => k + 1)
     } catch (cause) {
       setCheckoutError(cause)
       // 404: lượt đã được check-out ở tab hay quầy khác (UC-F4.4 E1). Tải lại để bỏ dòng cũ khỏi danh sách.
       if (isAxiosError(cause) && cause.response?.status === 404) {
-        activeList.reload()
+        refreshActiveListAfterCheckout()
         setHistoryRefreshKey((k) => k + 1)
       }
     } finally {
@@ -202,6 +217,13 @@ export function CheckinPage({ api = checkinsApi, loadAvatar }: CheckinPageProps)
                         ...activeList.query,
                         keyword: kw.trim() || undefined,
                         page: 0,
+                      })
+                    }
+                    onPageChange={(page, size) =>
+                      activeList.changeQuery({
+                        ...activeList.query,
+                        page,
+                        size,
                       })
                     }
                     onReload={activeList.reload}

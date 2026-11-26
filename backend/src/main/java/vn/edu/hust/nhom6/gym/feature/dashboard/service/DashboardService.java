@@ -18,6 +18,7 @@ import vn.edu.hust.nhom6.gym.common.time.VnTime;
 import vn.edu.hust.nhom6.gym.feature.branch.repository.BranchLookupRepository.OpeningHours;
 import vn.edu.hust.nhom6.gym.feature.branch.service.BranchLookupService;
 import vn.edu.hust.nhom6.gym.feature.checkin.dto.CheckinStatus;
+import vn.edu.hust.nhom6.gym.feature.dashboard.dto.DashboardBranchDto;
 import vn.edu.hust.nhom6.gym.feature.dashboard.dto.DashboardStatsDto;
 import vn.edu.hust.nhom6.gym.feature.dashboard.dto.ExpiringMembershipDto;
 import vn.edu.hust.nhom6.gym.feature.dashboard.dto.ExpiringWarningReason;
@@ -50,6 +51,13 @@ public class DashboardService {
     private final BranchLookupService branches;
     private final SystemConfigService configs;
     private final VnTime time;
+
+    /** Danh sách chi nhánh (gồm cả {@code INACTIVE} để xem số liệu lịch sử) cho chủ chuỗi chọn trên Dashboard. */
+    public List<DashboardBranchDto> branches() {
+        return branches.listAll().stream()
+            .map(row -> new DashboardBranchDto(row.id(), row.code(), row.name(), row.status()))
+            .toList();
+    }
 
     /** Tổng hợp chỉ số KPI trong ngày của chi nhánh (UC-F6.1, UC-F6.2, UC-F6.3, UC-F6.4). */
     public DashboardStatsDto stats(CurrentUser me, Long requestedBranchId) {
