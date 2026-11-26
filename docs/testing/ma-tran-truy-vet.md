@@ -9,7 +9,7 @@
 | Chức năng | UC | US | AC | AC đã có TC | AC chưa có TC | TC |
 | --- | --- | --- | --- | --- | --- | --- |
 | F1 | 6 | 6 | 29 | 24 | 5 | 118 |
-| F2 | 5 | 6 | 31 | 12 | 19 | 57 |
+| F2 | 5 | 6 | 31 | 20 | 11 | 78 |
 | F3 | 5 | 6 | 43 | 35 | 8 | 64 |
 | F4 | 5 | 5 | 37 | 0 | 37 | 0 |
 | F5 | 5 | 0 | 0 | 0 | 0 | 0 |
@@ -18,7 +18,7 @@
 | F8 | 9 | 9 | 55 | 29 | 26 | 38 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **37** | **211** | **100** | **111** | **277** |
+| **Tổng** | **57** | **37** | **211** | **108** | **103** | **298** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -54,14 +54,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F2.2.1-05 | Từ chối khi hồ sơ đang ngừng hoạt động | US-F2.2.1 |
 | AC-F2.2.1-06 | Gửi email gặp lỗi vẫn giữ tài khoản và ghi log không chứa token | US-F2.2.1 |
 | AC-F2.2.1-07 | Kiểm tra quyền theo vai trò, chi nhánh và dữ liệu đầu vào | US-F2.2.1 |
-| AC-F2.4.2-01 | Tải và chuẩn hóa ảnh hợp lệ | US-F2.4.2 |
-| AC-F2.4.2-02 | Thay ảnh trên cùng bản ghi | US-F2.4.2 |
-| AC-F2.4.2-03 | Từ chối file không hợp lệ | US-F2.4.2 |
-| AC-F2.4.2-04 | Xem ảnh theo quyền hồ sơ | US-F2.4.2 |
-| AC-F2.4.2-05 | Chỉ nhân viên có quyền sửa mới đổi ảnh | US-F2.4.2 |
-| AC-F2.4.2-06 | Chưa có ảnh hoặc không có hồ sơ | US-F2.4.2 |
-| AC-F2.4.2-07 | Xác thực và kiểm tra request ảnh | US-F2.4.2 |
-| AC-F2.4.2-08 | Chưa có ảnh hoặc tải ảnh lỗi thì hiện chữ cái đầu của tên trên giao diện | US-F2.4.2 |
 | AC-F2.5.1-01 | Ghi chỉ số cơ thể thành công với ít nhất một chỉ số | US-F2.5.1 |
 | AC-F2.5.1-02 | Từ chối dữ liệu chỉ số cơ thể không hợp lệ | US-F2.5.1 |
 | AC-F2.5.1-03 | Xem lịch sử chỉ số cơ thể sắp xếp mới nhất trước | US-F2.5.1 |
@@ -404,15 +396,36 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F2.4.1-04e `MemberApiIntegrationTest#updateSamePhoneAndDisableRevokeAndActivate`
     - AC-F2.4.1-05 Cập nhật trạng thái đồng thời luôn giữ hồ sơ và tài khoản khớp nhau (BR-F2-08)
       - TC-F2.4.1-05a `MemberApiIntegrationTest#concurrentUpdatesKeepMemberAndAccountStatusesConsistent`
-  - **US-F2.4.2** Ảnh đại diện hội viên (#127)
-    - AC-F2.4.2-01 Tải và chuẩn hóa ảnh hợp lệ (BR-F2-01, BR-F2-02) ❌ chưa có TC
-    - AC-F2.4.2-02 Thay ảnh trên cùng bản ghi (BR-F2-03) ❌ chưa có TC
-    - AC-F2.4.2-03 Từ chối file không hợp lệ (BR-F2-01) ❌ chưa có TC
-    - AC-F2.4.2-04 Xem ảnh theo quyền hồ sơ (BR-F2-04) ❌ chưa có TC
-    - AC-F2.4.2-05 Chỉ nhân viên có quyền sửa mới đổi ảnh (BR-F2-04) ❌ chưa có TC
-    - AC-F2.4.2-06 Chưa có ảnh hoặc không có hồ sơ (BR-F2-04) ❌ chưa có TC
-    - AC-F2.4.2-07 Xác thực và kiểm tra request ảnh ❌ chưa có TC
-    - AC-F2.4.2-08 Chưa có ảnh hoặc tải ảnh lỗi thì hiện chữ cái đầu của tên trên giao diện (BR-F2-04) ❌ chưa có TC
+  - **US-F2.4.2** Ảnh đại diện hội viên (#127) ✅ mọi AC có TC
+    - AC-F2.4.2-01 Tải và chuẩn hóa ảnh hợp lệ (BR-F2-01, BR-F2-02)
+      - TC-F2.4.2-01a `MemberAvatarIntegrationTest#validImagesAreResizedAndStored`
+      - TC-F2.4.2-01b `MemberAvatarIntegrationTest#smallTransparentImagesKeepDimensions`
+      - TC-F2.4.2-01c `MemberAvatarIntegrationTest#acceptsDimensionBoundary`
+      - TC-F2.4.2-01d `MemberAvatarIntegrationTest#acceptsUploadSizeBoundary`
+    - AC-F2.4.2-02 Thay ảnh trên cùng bản ghi (BR-F2-03)
+      - TC-F2.4.2-02a `MemberAvatarIntegrationTest#overwritesSameRow`
+      - TC-F2.4.2-02b `MemberAvatarIntegrationTest#concurrentInitialUploadsAreSerialized`
+      - TC-F2.4.2-02c `MemberAvatarIntegrationTest#invalidFilesDoNotReplaceExistingAvatar`
+    - AC-F2.4.2-03 Từ chối file không hợp lệ (BR-F2-01)
+      - TC-F2.4.2-03a `MemberAvatarIntegrationTest#invalidFilesDoNotReplaceExistingAvatar`
+      - TC-F2.4.2-03b `MemberAvatarIntegrationTest#servletRejectsOversizedMultipart`
+    - AC-F2.4.2-04 Xem ảnh theo quyền hồ sơ (BR-F2-04)
+      - TC-F2.4.2-04a `MemberAvatarIntegrationTest#authorizedReadersReceiveStoredJpeg`
+      - TC-F2.4.2-04b `MemberAvatarIntegrationTest#otherReadersCannotSeeAvatar`
+    - AC-F2.4.2-05 Chỉ nhân viên có quyền sửa mới đổi ảnh (BR-F2-04)
+      - TC-F2.4.2-05a `MemberAvatarIntegrationTest#ownerMayUploadAcrossBranches`
+      - TC-F2.4.2-05b `MemberAvatarIntegrationTest#deniedWritersDoNotMutateAvatar`
+      - TC-F2.4.2-05c `MemberAvatarIntegrationTest#inactiveAssignmentsAreDenied`
+    - AC-F2.4.2-06 Chưa có ảnh hoặc không có hồ sơ (BR-F2-04)
+      - TC-F2.4.2-06a `MemberAvatarIntegrationTest#missingAvatarIsNotFound`
+      - TC-F2.4.2-06b `MemberAvatarIntegrationTest#missingOrDeletedProfilesAreNotFound`
+    - AC-F2.4.2-07 Xác thực và kiểm tra request ảnh
+      - TC-F2.4.2-07a `MemberAvatarIntegrationTest#unauthenticatedRequestsAreDenied`
+      - TC-F2.4.2-07b `MemberAvatarIntegrationTest#invalidIdsAreRejected`
+      - TC-F2.4.2-07c `MemberAvatarIntegrationTest#missingMultipartFileIsRejected`
+    - AC-F2.4.2-08 Chưa có ảnh hoặc tải ảnh lỗi thì hiện chữ cái đầu của tên trên giao diện (BR-F2-04)
+      - TC-F2.4.2-08a `MemberAvatarIntegrationTest#newProfileHasNoAvatar`
+      - TC-F2.4.2-08b `MemberAvatarIntegrationTest#profileResponsesReflectAvatarPresence`
 - **UC-F2.5** Ghi nhận và xem lịch sử chỉ số cơ thể (`body_metrics`)
   - **US-F2.5.1** Chỉ số cơ thể (#128)
     - AC-F2.5.1-01 Ghi chỉ số cơ thể thành công với ít nhất một chỉ số (BR-F2-12) ❌ chưa có TC
@@ -915,6 +928,27 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F2.4.1-04d | AC-F2.4.1-04 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-06, BR-F2-09, BR-F2-10 | `F1RegistrationIntegrationTest#failureAfterRealF1ActivationRollsBackMemberAndAccount` |
 | TC-F2.4.1-04e | AC-F2.4.1-04 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#updateSamePhoneAndDisableRevokeAndActivate` |
 | TC-F2.4.1-05a | AC-F2.4.1-05 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#concurrentUpdatesKeepMemberAndAccountStatusesConsistent` |
+| TC-F2.4.2-01a | AC-F2.4.2-01 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#validImagesAreResizedAndStored` |
+| TC-F2.4.2-01b | AC-F2.4.2-01 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#smallTransparentImagesKeepDimensions` |
+| TC-F2.4.2-01c | AC-F2.4.2-01 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#acceptsDimensionBoundary` |
+| TC-F2.4.2-01d | AC-F2.4.2-01 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#acceptsUploadSizeBoundary` |
+| TC-F2.4.2-02a | AC-F2.4.2-02 | US-F2.4.2 | UC-F2.4 | BR-F2-03, BR-F2-01, BR-F2-02, BR-F2-04 | `MemberAvatarIntegrationTest#overwritesSameRow` |
+| TC-F2.4.2-02b | AC-F2.4.2-02 | US-F2.4.2 | UC-F2.4 | BR-F2-03, BR-F2-01, BR-F2-02, BR-F2-04 | `MemberAvatarIntegrationTest#concurrentInitialUploadsAreSerialized` |
+| TC-F2.4.2-02c | AC-F2.4.2-02 | US-F2.4.2 | UC-F2.4 | BR-F2-03, BR-F2-01, BR-F2-02, BR-F2-04 | `MemberAvatarIntegrationTest#invalidFilesDoNotReplaceExistingAvatar` |
+| TC-F2.4.2-03a | AC-F2.4.2-03 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#invalidFilesDoNotReplaceExistingAvatar` |
+| TC-F2.4.2-03b | AC-F2.4.2-03 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#servletRejectsOversizedMultipart` |
+| TC-F2.4.2-04a | AC-F2.4.2-04 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#authorizedReadersReceiveStoredJpeg` |
+| TC-F2.4.2-04b | AC-F2.4.2-04 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#otherReadersCannotSeeAvatar` |
+| TC-F2.4.2-05a | AC-F2.4.2-05 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#ownerMayUploadAcrossBranches` |
+| TC-F2.4.2-05b | AC-F2.4.2-05 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#deniedWritersDoNotMutateAvatar` |
+| TC-F2.4.2-05c | AC-F2.4.2-05 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#inactiveAssignmentsAreDenied` |
+| TC-F2.4.2-06a | AC-F2.4.2-06 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#missingAvatarIsNotFound` |
+| TC-F2.4.2-06b | AC-F2.4.2-06 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#missingOrDeletedProfilesAreNotFound` |
+| TC-F2.4.2-07a | AC-F2.4.2-07 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#unauthenticatedRequestsAreDenied` |
+| TC-F2.4.2-07b | AC-F2.4.2-07 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#invalidIdsAreRejected` |
+| TC-F2.4.2-07c | AC-F2.4.2-07 | US-F2.4.2 | UC-F2.4 | BR-F2-01, BR-F2-02, BR-F2-03, BR-F2-04 | `MemberAvatarIntegrationTest#missingMultipartFileIsRejected` |
+| TC-F2.4.2-08a | AC-F2.4.2-08 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#newProfileHasNoAvatar` |
+| TC-F2.4.2-08b | AC-F2.4.2-08 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#profileResponsesReflectAvatarPresence` |
 | TC-F3.1.1-01a | AC-F3.1.1-01 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#scopesRowsAndCountAndIgnoresClientBranch` |
 | TC-F3.1.1-02a | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#defaultActiveAndOrderingMatchContract` |
 | TC-F3.1.1-02b | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#inactiveFilterAndEmptyResults` |
