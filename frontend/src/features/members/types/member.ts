@@ -11,6 +11,7 @@ export interface MemberSummary {
   email: string | null
   status: Status
   homeBranchId: number
+  hasAvatar: boolean
 }
 
 export interface MemberDetail extends MemberSummary {

@@ -28,6 +28,7 @@ export function createMockMembersApi(): MembersGateway {
     email: null,
     status: index % 7 === 0 ? 'INACTIVE' : 'ACTIVE',
     homeBranchId: 1,
+    hasAvatar: false,
     userId: null,
     gender: null,
     dob: null,
@@ -90,6 +91,7 @@ export function createMockMembersApi(): MembersGateway {
         status: 'ACTIVE',
         email: null,
         homeBranchId: 1,
+        hasAvatar: false,
         userId: null,
         createdAt: now,
         updatedAt: now,
@@ -111,21 +113,14 @@ export function createMockMembersApi(): MembersGateway {
       find(id)
       const blob = avatars.get(id)
       if (!blob) {
-        const error = new AxiosError('Not Found')
-        error.response = {
-          status: 404,
-          data: { detail: 'Hội viên chưa có ảnh đại diện.' },
-          statusText: 'Not Found',
-          headers: {},
-          config: { headers: new AxiosHeaders() },
-        }
-        throw error
+        throw mockHttpError(404, { detail: 'Hội viên chưa có ảnh đại diện.' })
       }
       return blob
     },
     async uploadAvatar(id, file) {
-      find(id)
+      const member = find(id)
       avatars.set(id, new Blob([file], { type: 'image/jpeg' }))
+      member.hasAvatar = true
     },
     async createAccount(id, input) {
       const member = members.find((item) => item.id === id)

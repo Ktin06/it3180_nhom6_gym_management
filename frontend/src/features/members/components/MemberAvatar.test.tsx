@@ -93,7 +93,7 @@ describe('MemberAvatar', () => {
     expect(createObjectURL).toHaveBeenCalledTimes(1)
   })
 
-  it('US-F2.4.2 KB2: hiện chữ cái đầu của tên khi hasAvatar là false (không gọi API), API trả 404 hoặc lỗi mạng', async () => {
+  it('TC-F2.4.2-08a: hiện chữ cái đầu của tên khi hasAvatar là false (không gọi API), API trả 404 hoặc lỗi mạng', async () => {
     vi.stubEnv('VITE_F2_F3_MOCK', 'false')
     const get = vi
       .spyOn(http, 'get')
