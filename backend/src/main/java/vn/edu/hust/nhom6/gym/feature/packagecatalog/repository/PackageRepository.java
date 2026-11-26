@@ -19,6 +19,11 @@ public interface PackageRepository extends JpaRepository<GymPackage, Long> {
     @Query("select p from GymPackage p where p.id = :id")
     Optional<GymPackage> findForUpdate(@Param("id") Long id);
 
+    /** Bán đồng thời được; sửa/ngừng bán phải chờ giao dịch bán hoàn tất. */
+    @Lock(LockModeType.PESSIMISTIC_READ)
+    @Query("select p from GymPackage p where p.id = :id")
+    Optional<GymPackage> findForShare(@Param("id") Long id);
+
     boolean existsByCode(String code);
 
     /** Cùng predicate cho dữ liệu và count; branchId chỉ do service xác định. */

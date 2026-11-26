@@ -83,6 +83,31 @@ docker compose up -d                         # PostgreSQL
 
 Swagger UI: <http://localhost:8080/swagger-ui/index.html>.
 
+## API ảnh đại diện – S2-06 (#183)
+
+Theo [SRS US-F2.4.2](docs/requirements/srs/dac-ta-use-case-f2-ho-so-hoi-vien.md) (AC-F2.4.2-01 đến 07) và [ADR 0011](docs/decisions/0011-anh-dai-dien-luu-trong-postgresql.md):
+
+- `PUT /api/v1/members/{id}/avatar`: Bearer token nhân viên có quyền sửa hồ sơ; multipart trường `file`, JPEG/PNG thật ≤ 5 MiB, mỗi cạnh ≤ 8000 px; thành công trả `200` với body rỗng. Ảnh được giữ tỷ lệ, không phóng lớn, chuyển JPEG nền trắng, cạnh dài nhất ≤ 256 px và dung lượng ≤ 100 KiB.
+- `GET /api/v1/members/{id}/avatar`: cùng phạm vi quyền xem hồ sơ, trả `image/jpeg`; chưa có ảnh, hồ sơ xóa mềm/không tồn tại hoặc ngoài phạm vi trả `404`. MEMBER chỉ xem chính mình; không tự đổi ảnh. TRAINER hiện bị chặn như API hồ sơ trên main.
+- API tạo, xem, cập nhật và danh sách hồ sơ trả thêm boolean `hasAvatar`: hồ sơ mới/chưa có ảnh là `false`, có ảnh đã lưu là `true`. Giao diện không gọi GET ảnh khi `false` (phần backend hỗ trợ AC-F2.4.2-08); nội dung nhị phân chỉ trả qua endpoint ảnh. Danh sách kiểm tra ảnh theo cả trang, không nạp ảnh từng hồ sơ.
+- Flyway `V9_04__member_avatars.sql` tạo bảng ảnh và bỏ cột `members.avatar_url`. Không trỏ nhánh này vào database prototype đã chạy migration khác (ví dụ V9_06); dùng database local riêng và cấu hình profile `local` theo hướng dẫn cài đặt.
+- Thứ tự gộp/chạy Flyway: #250 (`V9_04`) → #251 (`V9_05`) → #257 (`V9_06`), ghi nhận tại [#110](https://github.com/Ktin06/it3180_nhom6_gym_management/issues/110). F4 #242 dùng bảng ảnh của #250, cần cập nhật nhánh và kiểm thử tích hợp sau khi #250 gộp; không tạo thêm migration ảnh trong F4.
+
+Chạy toàn bộ backend hoặc riêng các kiểm thử ảnh và hồ sơ trong PowerShell (cần Docker; Testcontainers tự tạo database kiểm thử, không cần `.env`):
+
+```powershell
+Set-Location backend
+.\mvnw.cmd -B verify "-DargLine=-Duser.timezone=UTC"
+# Hoặc khi chỉ kiểm tra F2:
+.\mvnw.cmd test "-DargLine=-Duser.timezone=UTC" "-Dtest=MemberAvatarIntegrationTest,MemberApiIntegrationTest"
+```
+
+`MemberAvatarIntegrationTest` kiểm tra cả upload đồng thời, giá trị biên và multipart qua HTTP thật; mã TC trỏ về các AC trong SRS. JVM UTC tránh lỗi kết nối PostgreSQL với tên múi giờ `Asia/Saigon` trên một số máy Windows.
+
+Thử thủ công: import `postman/local.postman_environment.json` và collection F2, chọn thư mục **S2-06 – Ảnh đại diện**. Lấy token qua API đăng nhập F1; request chuẩn bị tìm `HV999001` trong dữ liệu seed và tự lưu `memberId`. Chọn file ở từng PUT, để Postman tự tạo `Content-Type`. Lưu token MEMBER trong `memberAccessToken`, hội viên khác trong `otherMemberAccessToken`, nhân viên khác chi nhánh trong `otherBranchAccessToken`; không xuất các giá trị thật vào Git. Dữ liệu seed trên main chưa có sẵn nhân viên CN02, cần chuẩn bị tài khoản kiểm thử riêng cho ca khác chi nhánh. Không chạy các request thay trạng thái hồ sơ của bộ F2 cũ trước khi thử ảnh.
+
+Đối chiếu #183: số migration cũ `V9_02` đã được cập nhật theo thứ tự hiện có trên main; mã AC được bổ sung từ ADR 0011 trong cùng thay đổi vì #127/SRS chưa có cây truy vết ảnh. Quyền TRAINER theo học viên trong SRS tổng quát chưa có trên API hồ sơ main; task này giữ cùng phạm vi hiện hành và không triển khai quyền PT của F9. Phần giao diện thuộc #203. Kết quả chạy prototype trước đây không thay thế kiểm thử và nghiệm thu nhánh này trên staging.
+
 ## Tài liệu
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) – nhánh, commit, pull request, định nghĩa hoàn thành

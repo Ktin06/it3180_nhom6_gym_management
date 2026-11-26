@@ -8,8 +8,10 @@ import { StaffLayout } from '../layouts/StaffLayout'
 import { ForbiddenPage } from '../pages/ForbiddenPage'
 import { GuestHomePage } from '../pages/home/GuestHomePage'
 import { RoleHomePage } from '../pages/home/RoleHomePage'
+import { ForgotPasswordPage } from '../features/auth/pages/ForgotPasswordPage'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
+import { ResetPasswordPage } from '../features/auth/pages/ResetPasswordPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { ProtectedRoute } from '../routes/ProtectedRoute'
 import { rolesFor, type ProtectedPath } from '../routes/route-access'
@@ -41,6 +43,8 @@ export const routes: RouteObject[] = [
     children: [
       { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },
+      { path: '/quen-mat-khau', element: <ForgotPasswordPage /> },
+      { path: '/dat-lai-mat-khau', element: <ResetPasswordPage /> },
     ],
   },
   {
