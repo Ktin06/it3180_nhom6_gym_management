@@ -34,6 +34,9 @@ import vn.edu.hust.nhom6.gym.feature.packagecatalog.entity.PackageType;
 public class MembershipService {
     static final String WAITING_EXISTS =
         "Hội viên đã có gói cùng loại đang chờ thanh toán hoặc chờ kích hoạt. Không thể tạo thêm gói mới.";
+    /** SRS F5 UC-F5.2 E6b. */
+    static final String UPCOMING_EXISTS = "Hội viên đã có gói cùng loại đang chờ kích hoạt (UPCOMING). Không thể "
+        + "kích hoạt thêm gói này. Vui lòng liên hệ quản lý để kiểm tra hoặc hoàn tiền hóa đơn.";
 
     /** Gói đang giữ quyền lợi; chỉ mục {@code uq_one_active_per_type} bảo đảm tối đa một gói mỗi loại. */
     private static final Set<MembershipStatus> HELD = EnumSet.of(MembershipStatus.ACTIVE, MembershipStatus.FROZEN);
@@ -114,6 +117,59 @@ public class MembershipService {
             ? today.plusDays(1)
             : held.getEndDate().plusDays(1);
         return start.isBefore(today) ? today : start;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // S2-09.1: kích hoạt gói khi hóa đơn PAID, hủy gói khi hủy hóa đơn chờ
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Kích hoạt gói PENDING của một dòng hóa đơn vừa thu tiền (UC-F5.2 bước 5d, BR-F5-04, BR-F3-11, BR-F3-12).
+     * Nơi gọi <b>phải đã khóa dòng hội viên</b> ({@code MemberService.lockForUpdate}) trong cùng giao dịch, để hai
+     * hóa đơn cùng loại thu tiền đồng thời không cùng qua bước kiểm tra E6b.
+     * <ul>
+     *   <li>Đã có gói cùng loại, cùng phạm vi chi nhánh đang UPCOMING: 422 E6b.</li>
+     *   <li>Chưa có gói cùng loại ACTIVE/FROZEN: ACTIVE từ hôm nay (giờ Việt Nam).</li>
+     *   <li>Có: UPCOMING từ {@link #plannedStartDate} (sau {@code end_date} gói cũ; chỉ SESSION 0 buổi bắt đầu ngày mai).</li>
+     * </ul>
+     * Số ngày hiệu lực giữ đúng số đã chốt lúc lập hóa đơn ({@link Membership#durationDays()}). Không đổi gói cũ.
+     *
+     * @return gói sau khi kích hoạt
+     * @throws BusinessRuleException (422) đã có gói cùng loại UPCOMING (E6b)
+     * @throws IllegalStateException dòng hóa đơn không có gói PENDING (lỗi dữ liệu)
+     */
+    @Transactional
+    public Membership activateForPaidInvoice(Long invoiceItemId) {
+        Membership pending = memberships.findByInvoiceItemId(invoiceItemId)
+            .orElseThrow(() -> new IllegalStateException("Dòng hóa đơn " + invoiceItemId + " không có gói tập."));
+        List<Membership> others = memberships.findSameType(pending.getMemberId(), pending.getPackageType(),
+            pending.getBranchId(), EnumSet.of(MembershipStatus.UPCOMING, MembershipStatus.ACTIVE,
+                MembershipStatus.FROZEN));
+        if (others.stream().anyMatch(m -> m.getStatus() == MembershipStatus.UPCOMING)) {
+            throw new BusinessRuleException(UPCOMING_EXISTS);
+        }
+        LocalDate today = time.today();
+        Membership held = others.stream().filter(m -> HELD.contains(m.getStatus())).findFirst().orElse(null);
+        if (held == null) {
+            pending.activate(today);
+        } else {
+            pending.scheduleFrom(plannedStartDate(held, today));
+        }
+        return memberships.saveAndFlush(pending);
+    }
+
+    /**
+     * Hủy gói PENDING đi kèm một dòng hóa đơn chờ bị hủy (BR-F5-08).
+     *
+     * @throws IllegalStateException gói của hóa đơn chờ không còn PENDING (lỗi dữ liệu): rollback cả việc hủy hóa
+     *     đơn, không để gói đang dùng được gắn với hóa đơn đã hủy
+     */
+    @Transactional
+    public void cancelPending(Long invoiceItemId) {
+        memberships.findByInvoiceItemId(invoiceItemId).ifPresent(m -> {
+            m.cancelPending();
+            memberships.saveAndFlush(m);
+        });
     }
 
     // ---------------------------------------------------------------------------------------------
