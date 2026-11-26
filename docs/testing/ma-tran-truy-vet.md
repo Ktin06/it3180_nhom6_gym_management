@@ -15,10 +15,10 @@
 | F5 | 5 | 5 | 41 | 0 | 41 | 0 |
 | F6 | 5 | 5 | 16 | 0 | 16 | 0 |
 | F7 | 5 | 0 | 0 | 0 | 0 | 0 |
-| F8 | 9 | 9 | 55 | 45 | 10 | 57 |
+| F8 | 9 | 9 | 55 | 45 | 10 | 58 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **42** | **254** | **132** | **122** | **366** |
+| **Tổng** | **57** | **42** | **254** | **132** | **122** | **367** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -827,6 +827,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
   - **US-F8.6.1** Điểm danh học viên lớp học nhóm (#161) ✅ mọi AC có TC
     - AC-F8.6.1-01 Điểm danh lần đầu từ BOOKED (BR-F8.6-01, BR-F8.6-04, BR-F8.6-05)
       - TC-F8.6.1-01a `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay`
+      - TC-F8.6.1-01c `ClassApiIntegrationTest#noShowOfSoftDeletedMemberIsRecordedWithoutPenalty`
     - AC-F8.6.1-02 Vắng mặt lần đầu đạt ngưỡng (BR-F8.6-03, BR-F8.3-02)
       - TC-F8.6.1-02a `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock`
     - AC-F8.6.1-03 Check-in không thay điểm danh (BR-F8.6-02)
@@ -1231,6 +1232,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F8.3.1-08a | AC-F8.3.1-08 | US-F8.3.1 | UC-F8.3 | BR-F8.3-04, BR-F8.3-01, BR-F8.3-02, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings` |
 | TC-F8.3.1-09a | AC-F8.3.1-09 | US-F8.3.1 | UC-F8.3 | BR-F8.7-05, BR-F8.3-01, BR-F8.3-04, BR-F8.3-02, BR-F8-03, BR-F8.1-03 | `ClassApiIntegrationTest#changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot` |
 | TC-F8.6.1-01a | AC-F8.6.1-01 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
+| TC-F8.6.1-01c | AC-F8.6.1-01 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#noShowOfSoftDeletedMemberIsRecordedWithoutPenalty` |
 | TC-F8.6.1-02a | AC-F8.6.1-02 | US-F8.6.1 | UC-F8.6 | BR-F8.6-03, BR-F8.3-02, BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock` |
 | TC-F8.6.1-03a | AC-F8.6.1-03 | US-F8.6.1 | UC-F8.6 | BR-F8.6-02, BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
 | TC-F8.6.1-04a | AC-F8.6.1-04 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
