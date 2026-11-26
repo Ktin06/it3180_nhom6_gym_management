@@ -47,6 +47,9 @@ public class MembershipService {
     /** SRS F4 UC-F4.2 E4. */
     public static final String SESSIONS_USED_UP =
         "Gói tập theo buổi của hội viên đã hết lượt sử dụng. Vui lòng gia hạn thêm gói mới.";
+    /** SRS F5 UC-F5.2 E6b. */
+    static final String UPCOMING_EXISTS = "Hội viên đã có gói cùng loại đang chờ kích hoạt (UPCOMING). Không thể "
+        + "kích hoạt thêm gói này. Vui lòng liên hệ quản lý để kiểm tra hoặc hoàn tiền hóa đơn.";
 
     /** Gói đang giữ quyền lợi; chỉ mục {@code uq_one_active_per_type} bảo đảm tối đa một gói mỗi loại. */
     private static final Set<MembershipStatus> HELD = EnumSet.of(MembershipStatus.ACTIVE, MembershipStatus.FROZEN);
@@ -141,6 +144,7 @@ public class MembershipService {
      *   <li>Đã có gói cùng loại, cùng phạm vi chi nhánh đang UPCOMING: 422 E6b.</li>
      *   <li>Chưa có gói cùng loại ACTIVE/FROZEN: ACTIVE từ hôm nay (giờ Việt Nam).</li>
      *   <li>Có: UPCOMING từ {@link #plannedStartDate} (sau {@code end_date} gói cũ, hoặc ngày mai nếu gói cũ 0 buổi).</li>
+     *   <li>Có: UPCOMING từ {@link #plannedStartDate} (sau {@code end_date} gói cũ; chỉ SESSION 0 buổi bắt đầu ngày mai).</li>
      * </ul>
      * Số ngày hiệu lực giữ đúng số đã chốt lúc lập hóa đơn ({@link Membership#durationDays()}). Không đổi gói cũ.
      *

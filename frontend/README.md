@@ -98,3 +98,13 @@ Ghi nhận ngày 06/11/2026 khi xem giao diện #27: cần cân nhắc phần **
 - Khi triển khai: phối hợp Lân và người phụ trách nghiệp vụ gói để thống nhất hợp đồng, cập nhật đặc tả/wireframe, rồi thêm phần xem và kiểm thử. Cần kiểm tra các trường hợp chưa mua gói, có TIME cùng PT, gói UPCOMING/hết hạn, và truy cập hồ sơ ngoài quyền.
 
 Ghi chú này chưa được gửi thành issue/comment trên GitHub và chưa xác nhận mốc triển khai; dùng làm đầu việc cần bàn giao khi nhóm chốt phần bổ sung.
+
+## Lịch và đặt lớp nhóm (F8)
+
+- Khách mở `/lich-lop` từ menu công khai, chọn chi nhánh và khoảng ngày, rồi đăng nhập để đặt chỗ.
+- Hội viên mở `/member/classes` để đặt, hủy và lọc các chỗ của mình. Giao diện hiển thị lý do khi máy chủ từ chối.
+- Huấn luyện viên mở `/trainer/classes` để xem lịch dạy, vào điểm danh và xem trạng thái check-in.
+  Máy chủ kiểm tra phân công, thời hạn và bản cập nhật hiện tại trước khi lưu.
+
+Lịch hiển thị theo giờ Việt Nam. Các màn hình dùng API thật qua HTTP client của F1.
+Chạy `npm test -- --run src/features/classes` trong thư mục `frontend/` để kiểm tra các luồng F8.

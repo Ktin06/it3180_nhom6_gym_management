@@ -112,6 +112,33 @@ public class Invoice extends BaseEntity {
         return item;
     }
 
+    /**
+     * PENDING → PAID (UC-F5.2 bước 5c). Nơi gọi đã kiểm tra trạng thái và trả 422; ở đây chỉ chặn lỗi lập trình.
+     *
+     * @param paidAt thời điểm xác nhận thu tiền, UTC
+     */
+    public void markPaid(OffsetDateTime paidAt) {
+        requirePending();
+        this.status = InvoiceStatus.PAID;
+        this.paidAt = paidAt;
+    }
+
+    /** PENDING → CANCELLED (UC-F5.3 luồng A1). Gói PENDING đi kèm do {@code MembershipService} hủy. */
+    public void cancel() {
+        requirePending();
+        this.status = InvoiceStatus.CANCELLED;
+    }
+
+    public boolean isPending() {
+        return status == InvoiceStatus.PENDING;
+    }
+
+    private void requirePending() {
+        if (!isPending()) {
+            throw new IllegalStateException("Hóa đơn " + code + " không ở trạng thái PENDING: " + status);
+        }
+    }
+
     public List<InvoiceItem> getItems() {
         return Collections.unmodifiableList(items);
     }

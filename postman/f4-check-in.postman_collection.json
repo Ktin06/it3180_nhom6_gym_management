@@ -1,0 +1,909 @@
+{
+  "info": {
+    "name": "F4 – Check-in tại quầy: tra cứu, check-in, check-out, lịch sử",
+    "description": "API của thẻ S2-11.1 và S2-11.2 (UC-F4.1 → UC-F4.5). baseUrl gồm /api/v1. Chạy tuần tự, trong giờ mở cửa CN01 (05:30 – 22:00 theo dữ liệu mẫu). Nhập token tại máy, không lưu lên Git. receptionistToken: lễ tân CN01; ownerToken: chủ chuỗi. Thư mục Tra cứu lưu memberId vào biến cho thư mục Check-in; Check-in lưu lastCheckinId cho thư mục Check-out. Check-in ghi dữ liệu thật (trừ buổi của HV999005): chạy lại cùng ngày thì KB2 trả sessionDeducted = false. Ghi arrived_at (UC-F4.3): xem classArrivals trong kết quả khi hội viên có chỗ BOOKED ở buổi CN01 bắt đầu trong [now − 15 phút, now + 60 phút].",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api/v1"
+    },
+    {
+      "key": "receptionistToken",
+      "value": ""
+    },
+    {
+      "key": "ownerToken",
+      "value": ""
+    },
+    {
+      "key": "timeSessionMemberId",
+      "value": ""
+    },
+    {
+      "key": "lastSessionMemberId",
+      "value": ""
+    },
+    {
+      "key": "ptOnlyMemberId",
+      "value": ""
+    },
+    {
+      "key": "noPackageMemberId",
+      "value": ""
+    },
+    {
+      "key": "inactiveMemberId",
+      "value": ""
+    },
+    {
+      "key": "lastCheckinId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Tra cứu – US-F4.1.1",
+      "item": [
+        {
+          "name": "US-F4.1.1 KB 200 – Tra cứu theo mã HV999004",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/checkins/search-member?keyword=HV999004",
+            "description": "Hồ sơ, mọi gói ở mọi trạng thái, hasAvatar, isCurrentlyCheckedIn. Lưu memberId.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('có gói', () => { const j = pm.response.json(); pm.expect(j.memberCode).to.eql('HV999004'); pm.expect(j.memberships).to.be.an('array').that.is.not.empty; pm.collectionVariables.set('timeSessionMemberId', j.memberId); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.1.1 KB 200 – Tra cứu theo SĐT có khoảng trắng",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/checkins/search-member?keyword=0905%20555%20555",
+            "description": "SĐT được chuẩn hóa về 10 chữ số. Lưu memberId của HV999005 (SESSION còn 1 buổi).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('HV999005', () => { const j = pm.response.json(); pm.expect(j.memberCode).to.eql('HV999005'); pm.collectionVariables.set('lastSessionMemberId', j.memberId); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.1.1 E1 400 – Từ khóa sai định dạng",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/checkins/search-member?keyword=abc",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.1.1 E2 404 – Hội viên CN02 (HV999012)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/checkins/search-member?keyword=HV999012",
+            "description": "Hội viên chi nhánh khác xử lý như không tìm thấy (S3).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.1.1 E3 200 – Hồ sơ INACTIVE (HV999009) vẫn trả kèm status",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/checkins/search-member?keyword=HV999009",
+            "description": "Lưu memberId để thử E7.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('INACTIVE', () => { const j = pm.response.json(); pm.expect(j.status).to.eql('INACTIVE'); pm.collectionVariables.set('inactiveMemberId', j.memberId); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.1.1 HV999006 – Lấy memberId hội viên chỉ có gói PT",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/checkins/search-member?keyword=HV999006",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('ptOnlyMemberId', pm.response.json().memberId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.1.1 HV999010 – Lấy memberId hội viên chưa có gói",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/checkins/search-member?keyword=HV999010",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('noPackageMemberId', pm.response.json().memberId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.1.1 S3 403 – Chủ chuỗi không tra cứu tại quầy",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/checkins/search-member?keyword=HV999004",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Check-in – US-F4.2.1, US-F4.3.1",
+      "item": [
+        {
+          "name": "US-F4.2.1 KB5 201 – Có TIME và SESSION thì dùng TIME (HV999004)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/checkins",
+            "description": "Chạy trong giờ mở cửa CN01. sessionDeducted = false.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"memberId\": {{timeSessionMemberId}}}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "pm.test('TIME', () => { const j = pm.response.json(); pm.expect(j.appliedMembership.packageType).to.eql('TIME'); pm.expect(j.appliedMembership.sessionDeducted).to.eql(false); pm.collectionVariables.set('lastCheckinId', j.checkinId); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.2.1 KB2/KB6 201 – SESSION còn 1 buổi: lần đầu trừ về 0 (HV999005)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/checkins",
+            "description": "Nếu hôm nay đã chạy trước đó thì lần này sessionDeducted = false (KB6).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"memberId\": {{lastSessionMemberId}}}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "pm.test('SESSION 0 buổi', () => { const j = pm.response.json(); pm.expect(j.appliedMembership.packageType).to.eql('SESSION'); pm.expect(j.appliedMembership.remainingSessions).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.2.1 KB6 201 – Quay lại cùng ngày không trừ, không bị E4 (HV999005)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/checkins",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"memberId\": {{lastSessionMemberId}}}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "pm.test('không trừ', () => pm.expect(pm.response.json().appliedMembership.sessionDeducted).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.2.1 KB4 422 – Chỉ có gói PT, hôm nay không có buổi PT (HV999006)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/checkins",
+            "description": "Nếu hôm nay HV999006 có buổi PT BOOKED ở CN01 thì sẽ 201 (KB4b, BR-F4.8).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"memberId\": {{ptOnlyMemberId}}}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.2.1 E2 422 – Chưa có gói (HV999010)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/checkins",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"memberId\": {{noPackageMemberId}}}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.2.1 E7 422 – Hồ sơ INACTIVE (HV999009)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/checkins",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"memberId\": {{inactiveMemberId}}}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.2.1 E2 404 – memberId không tồn tại",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/checkins",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"memberId\": 999999}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.2.1 S5 400 – Thiếu memberId",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/checkins",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => pm.response.to.have.status(400));",
+                  "pm.test('errors.memberId', () => pm.expect(pm.response.json().errors).to.have.property('memberId'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.2.1 S3 403 – Chủ chuỗi không check-in",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/checkins",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"memberId\": {{timeSessionMemberId}}}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Check-out – US-F4.4.1",
+      "item": [
+        {
+          "name": "US-F4.4.1 KB 200 – Check-out lượt vừa tạo",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/checkins/{{lastCheckinId}}/checkout",
+            "description": "Ghi checked_out_at, trả durationMinutes và câu xác nhận SRS mục 6.3.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('durationMinutes', () => { const j = pm.response.json(); pm.expect(j.checkedOutAt).to.be.a('string'); pm.expect(j.durationMinutes).to.be.a('number'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.4.1 E1 404 – Check-out hai lần",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/checkins/{{lastCheckinId}}/checkout",
+            "description": "Lượt đã check-out rồi trả 404 câu E1.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.4.1 E1 404 – ID không tồn tại",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/checkins/999999/checkout",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.4.1 S3 403 – Chủ chuỗi không check-out",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/checkins/{{lastCheckinId}}/checkout",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lịch sử trong ngày – US-F4.5.1",
+      "item": [
+        {
+          "name": "US-F4.5.1 KB 200 – Lịch sử hôm nay (mặc định ngày VN)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/checkins?page=0&size=20",
+            "description": "Mới nhất trước, trả PageResponse; mỗi dòng có hasAvatar (không có avatarUrl).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('PageResponse', () => { const j = pm.response.json(); pm.expect(j.content).to.be.an('array'); if (j.content.length > 0) { pm.expect(j.content[0]).to.have.property('hasAvatar'); pm.expect(j.content[0]).to.not.have.property('avatarUrl'); } });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.5.1 KB 200 – Lọc đang tập (status=CHECKED_IN)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/checkins?status=CHECKED_IN&page=0&size=20",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.5.1 KB 200 – Lọc đã về, phương thức MANUAL, mã HV999004",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/checkins?status=CHECKED_OUT&method=MANUAL&keyword=HV999004",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F4.5.1 S3 403 – Chủ chuỗi không xem lịch sử quầy",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/checkins",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

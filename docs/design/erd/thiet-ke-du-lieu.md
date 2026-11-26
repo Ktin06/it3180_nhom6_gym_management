@@ -15,7 +15,7 @@ Mọi bảng tuân theo cùng một quy ước, để mã do 8 người (và AI)
 - **Tiền:** số nguyên đơn vị VND, không dùng số thực để tránh sai số làm tròn.
 - **Trạng thái:** giá trị viết hoa (`ACTIVE`, `EXPIRED`). Trong migration lưu kiểu `varchar` kèm ràng buộc `CHECK`; entity Java dùng `@Enumerated(EnumType.STRING)`. Các `Enum` trong file DBML chỉ để vẽ sơ đồ.
 - **Mỗi thông tin chỉ lưu ở một nơi:** vai trò ở `users.role`; email ở `users.email`; chi nhánh làm việc của nhân viên ở `staff.branch_id`; số điện thoại ở `members.phone` hoặc `staff.phone`.
-- **Cột chép có chủ đích:** một số cột được chép lại như ảnh chụp tại một thời điểm và không đổi về sau, ví dụ giá lúc bán (`invoice_items.unit_price`), loại gói lúc mua (`memberships.package_type`), huấn luyện viên và phòng của từng buổi (`class_sessions`). Trong file DBML các cột này có ghi chú "chép từ".
+- **Cột chép có chủ đích:** một số cột được chép lại theo giá trị lúc tạo, ví dụ giá lúc bán (`invoice_items.unit_price`), loại gói lúc mua (`memberships.package_type`), loại lớp, huấn luyện viên và phòng của từng buổi (`class_sessions`). Trong file DBML các cột này có ghi chú "chép từ".
 - **Không xóa cứng** dữ liệu nghiệp vụ (hội viên, hóa đơn, gói tập): dùng trạng thái hoặc cột `deleted_at`. Ngoại lệ duy nhất là `face_embeddings`: hội viên rút lại đồng ý thì xóa thật (S8).
 - **Chi nhánh từ ngày đầu:** các bảng nghiệp vụ gốc có `branch_id` ngay từ v1 (dùng một chi nhánh mặc định), dù đa chi nhánh (F18) làm ở v4, để v4 không phải sửa lại cơ sở dữ liệu. Bảng con lấy chi nhánh qua bảng cha (ví dụ `class_bookings` qua `class_sessions`, `payments` qua `invoices`), không chép lại; riêng `payrolls.branch_id` được chép lúc tính lương, vì nhân viên có thể chuyển chi nhánh.
 - **Dữ liệu chuẩn hóa:** email lưu chữ thường (`CHECK email = lower(email)`); số điện thoại lưu 10 chữ số bắt đầu bằng 0 (`CHECK phone ~ '^0[0-9]{9}$'`). Mã nguồn chuẩn hóa trước khi lưu và trước khi tìm kiếm.
@@ -67,7 +67,7 @@ Trạng thái gói (`memberships.status`): PENDING (đã có hóa đơn, chưa t
 | `checkins` | Mỗi lượt vào phòng tập | `member_id`, `membership_id` (gói TIME hoặc SESSION), `branch_id`, `created_by`, `method` (MANUAL, FACE), `match_score`, `checkin_date`, `session_deducted`, `checked_in_at`, `checked_out_at` | F4, F6, F20 |
 | `class_types` | Loại lớp: Yoga, Zumba, Boxing… | `name`, `status` | F8 |
 | `class_schedules` | Lịch lặp hằng tuần | `branch_id`, `class_type_id`, `trainer_id`, `room_id`, `day_of_week` (1 = thứ Hai … 7 = Chủ nhật), `start_time`, `end_time`, `capacity`, `valid_from`, `valid_to` | F8 |
-| `class_sessions` | Từng buổi cụ thể sinh ra từ lịch lặp; hội viên đặt chỗ vào buổi | `class_schedule_id`, `branch_id`, `trainer_id`, `room_id`, `occurrence_date` (ngày theo lịch lặp, không đổi khi đổi giờ), `start_at`, `end_at`, `original_start_at`, `capacity`, `status` | F8 |
+| `class_sessions` | Từng buổi cụ thể sinh ra từ lịch lặp; hội viên đặt chỗ vào buổi | `class_schedule_id`, `class_type_id` (loại lớp lúc sinh), `branch_id`, `trainer_id`, `room_id`, `occurrence_date` (ngày theo lịch lặp, không đổi khi đổi giờ), `start_at`, `end_at`, `original_start_at`, `capacity`, `status` | F8 |
 | `class_bookings` | Đặt chỗ lớp nhóm (không có danh sách chờ, ADR 0014) | `class_session_id`, `member_id`, `created_by`, `status`, `booked_at`, `arrived_at`, `cancel_reason`, `is_late_cancel`, `attendance_marked_by` | F8, F10 |
 
 ### 5. Huấn luyện viên (4 bảng)
@@ -89,7 +89,7 @@ Trạng thái gói (`memberships.status`): PENDING (đã có hóa đơn, chưa t
 | `promotions` | Mã giảm giá | `branch_id`, `code`, `type` (PERCENT, FIXED), `value`, `max_discount`, `min_amount`, `start_at`, `end_at`, `usage_limit`, `used_count`, `version` | F14 |
 | `invoices` | Hóa đơn | `branch_id`, `member_id` (rỗng nếu khách lẻ), `created_by` (lễ tân, hoặc hội viên với hóa đơn chờ từ F7), `source` (COUNTER, MEMBER_PORTAL), `promotion_id`, `subtotal`, `discount`, `total`, `status`, `paid_at`, thông tin hoàn tiền, `version` | F5, F7, F12, F14 |
 | `invoice_items` | Dòng hóa đơn | `invoice_id`, `item_type` (PACKAGE, PRODUCT, TRANSFER_FEE), `package_id`, `product_id`, `description`, `quantity`, `unit_price`, `amount`, `discount_amount` (phần giảm giá phân bổ cho dòng) | F5, F12, F15, F16 |
-| `payments` | Mỗi lần thu tiền | `invoice_id`, `method` (CASH, BANK_TRANSFER), `amount`, `status`, `transaction_ref`, `received_by`, `paid_at` | F5 |
+| `payments` | Mỗi lần thu tiền | `invoice_id`, `method` (CASH, BANK_TRANSFER), `amount` (≥ 0: hóa đơn 0 đồng vẫn có phiếu thu 0 đồng), `status`, `transaction_ref`, `received_by`, `paid_at` | F5 |
 
 ### 7. Nhân sự (4 bảng)
 
