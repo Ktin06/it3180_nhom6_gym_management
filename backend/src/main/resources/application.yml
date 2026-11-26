@@ -18,6 +18,10 @@ spring:
     locations: classpath:db/migration
   jackson:
     time-zone: UTC
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
 
 server:
   port: ${PORT:8080}

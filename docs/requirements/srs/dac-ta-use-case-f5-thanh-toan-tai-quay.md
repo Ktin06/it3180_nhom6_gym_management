@@ -176,8 +176,8 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
     - Xác định số ngày hiệu lực của gói từ chính bản ghi `memberships` PENDING: `số ngày = (memberships.end_date - memberships.start_date + 1)` (không đọc lại `packages.duration_days` từ bảng `packages` để tránh bị ảnh hưởng nếu danh mục gói bị sửa đổi sau khi lập hóa đơn).
     - Chuyển `status = ACTIVE` (nếu hội viên mua mới, chưa có gói cùng loại đang `ACTIVE` hoặc `FROZEN` tại chi nhánh); `start_date` cập nhật bằng ngày thanh toán (`:today` theo giờ Việt Nam `Asia/Ho_Chi_Minh`), `end_date = start_date + số ngày - 1`.
     - Chuyển `status = UPCOMING` (nếu là gói gia hạn nối tiếp khi hội viên đã có gói cùng loại đang `ACTIVE` hoặc `FROZEN` theo BR-F3-11):
-      + Nếu gói cũ là gói `TIME` hoặc gói `SESSION`/`PT` còn buổi (`remaining_sessions > 0`): `start_date = end_date_gói_cũ + 1 ngày`.
-      + Nếu gói cũ là gói `SESSION`/`PT` đã hết buổi (`remaining_sessions = 0`, vẫn giữ `ACTIVE` đến hết ngày hôm nay): `start_date = :today + 1 ngày` (bắt đầu từ ngày mai theo `ban-chot-pham-vi.md` dòng 85 và `ADR 0005` mục 27).
+      + Nếu gói cũ là gói `TIME`, gói `PT` (kể cả dữ liệu 0 buổi vẫn còn `ACTIVE`/`FROZEN`) hoặc gói `SESSION` còn buổi (`remaining_sessions > 0`): `start_date = end_date_gói_cũ + 1 ngày`, không sớm hơn `:today`.
+      + Chỉ khi gói cũ là `SESSION` đã hết buổi (`remaining_sessions = 0`, vẫn giữ `ACTIVE` đến hết ngày hôm nay): `start_date = :today + 1 ngày` (bắt đầu từ ngày mai theo `ban-chot-pham-vi.md` dòng 85 và `ADR 0005` mục 27).
       + `end_date = start_date + số ngày - 1`.
 - **Thất bại:** Dữ liệu giữ nguyên vẹn (rollback giao dịch); không có bản ghi `payments` rác.
 
@@ -196,8 +196,8 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
      - Xác định số ngày hiệu lực của gói đã chốt lúc tạo hóa đơn: `số ngày = (memberships.end_date - memberships.start_date + 1)` (hệ thống tính toán từ 2 mốc ngày dự kiến đã lưu lúc tạo PENDING, **tuyệt đối không đọc lại `packages.duration_days`** từ bảng `packages` để tránh trường hợp quản lý chi nhánh chỉnh sửa cấu hình gói trong danh mục trong thời gian hóa đơn đang chờ thanh toán).
      - Nếu hội viên chưa có gói cùng loại đang `ACTIVE` hoặc `FROZEN`: cập nhật `memberships.status = ACTIVE`, `start_date = :today` (ngày hiện tại tính theo múi giờ `Asia/Ho_Chi_Minh`, không dùng `CURRENT_DATE` UTC của PostgreSQL), `end_date = start_date + số ngày - 1`.
      - Nếu hội viên đã có gói cùng loại đang `ACTIVE` hoặc `FROZEN`: cập nhật `memberships.status = UPCOMING`:
-       + Nếu gói cũ là `TIME` hoặc `SESSION`/`PT` còn buổi (`remaining_sessions > 0`): `start_date = end_date_gói_cũ + 1 ngày`.
-       + Nếu gói cũ là `SESSION`/`PT` đã hết buổi (`remaining_sessions = 0`): `start_date = :today + 1 ngày` (bắt đầu từ ngày mai).
+       + Nếu gói cũ là `TIME`, `PT` (kể cả dữ liệu 0 buổi vẫn còn `ACTIVE`/`FROZEN`) hoặc `SESSION` còn buổi (`remaining_sessions > 0`): `start_date = end_date_gói_cũ + 1 ngày`, không sớm hơn `:today`.
+       + Chỉ khi gói cũ là `SESSION` đã hết buổi (`remaining_sessions = 0`): `start_date = :today + 1 ngày` (bắt đầu từ ngày mai).
        + `end_date = start_date + số ngày - 1` (theo BR-F3-11, BR-F5-04).
 6. Hệ thống trả về `200 OK` kèm `PaymentConfirmationDto` thông báo xác nhận thanh toán thành công và trạng thái gói tập đã được kích hoạt.
 
@@ -227,8 +227,8 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 - **BR-F5-03:** Chỉ Lễ tân và Quản lý chi nhánh mới có quyền xác nhận đã thu tiền tại quầy (S7, [ADR 0004](../../decisions/0004-thanh-toan-chi-tai-quay.md)).
 - **BR-F5-04:** Gói tập chỉ kích hoạt (`ACTIVE` hoặc `UPCOMING`) khi và chỉ khi hóa đơn chuyển sang trạng thái `PAID`. Ngày bắt đầu và ngày kết thúc của gói được tính toán lại tại chính thời điểm thanh toán thành công theo ngày hiện tại (`:today` theo múi giờ `Asia/Ho_Chi_Minh` – BR-F3-12). Số ngày hiệu lực của gói được bảo toàn nguyên vẹn dựa trên khoảng ngày dự kiến đã lưu lúc lập hóa đơn (`memberships.end_date - memberships.start_date + 1`), không bị ảnh hưởng nếu Quản lý chi nhánh thay đổi `packages.duration_days` trong danh mục sau đó (BR-F3-06).
   - Nếu hội viên đã có gói cùng loại đang `ACTIVE` hoặc `FROZEN`, gói mới bắt buộc chuyển `UPCOMING` để đảm bảo ràng buộc duy nhất `uq_one_active_per_type` (BR-F3-10, BR-F3-11).
-  - Quy tắc xác định `start_date` cho gói `UPCOMING`: nếu gói cũ là `TIME` hoặc `SESSION`/`PT` còn buổi, `start_date = end_date_gói_cũ + 1 ngày`; nếu gói cũ là `SESSION`/`PT` đã về 0 buổi (`remaining_sessions = 0`, vẫn giữ `ACTIVE` hết hôm nay), gói mới bắt đầu từ ngày mai: `start_date = :today + 1 ngày` (`ban-chot-pham-vi.md` dòng 85, `ADR 0005` mục 27).
-  - **Điểm lệch cần duyệt:** nhánh PT 0 buổi trong mô tả cũ ở B/C/E chưa khớp bản chốt phạm vi (PT hết hiệu lực ngay khi xác nhận buổi cuối). Giữ lại để trưởng nhóm đối chiếu tại mục 4.3; AC-F5.2.1-02 chỉ xác nhận nhánh SESSION 0 buổi, chưa cấp AC cho nhánh PT 0 buổi.
+  - Quy tắc xác định `start_date` cho gói `UPCOMING`: nếu gói cũ là `TIME`, `PT` (kể cả dữ liệu 0 buổi vẫn còn `ACTIVE`/`FROZEN`) hoặc `SESSION` còn buổi, `start_date = end_date_gói_cũ + 1 ngày`, không sớm hơn `:today`; chỉ khi gói cũ là `SESSION` đã về 0 buổi (`remaining_sessions = 0`, vẫn giữ `ACTIVE` hết hôm nay), gói mới bắt đầu từ ngày mai: `start_date = :today + 1 ngày` (`ban-chot-pham-vi.md` dòng 85, `ADR 0005` mục 27).
+  - **Phân biệt PT với SESSION:** F9 chuyển PT hết buổi sang `EXPIRED` ngay khi xác nhận buổi cuối. Nếu còn dữ liệu PT 0 buổi ở `ACTIVE`/`FROZEN`, F5 giữ gói cũ và xếp gói mới sau `end_date` theo cùng quy tắc F3; không áp dụng ngoại lệ SESSION 0 buổi và không tự sửa trạng thái gói cũ trong giao dịch thu tiền.
 - **BR-F5-05:** Toàn vẹn đồng thời (NF6): Bảng `invoices` sử dụng khóa lạc quan `@Version`. Service sử dụng `invoiceRepository.saveAndFlush(invoice)`, bắt `OptimisticLockingFailureException` và ném `ConflictException` (409) để trả thông báo xung đột cụ thể. Nếu hai nhân viên cùng xác nhận một hóa đơn, chỉ một giao dịch thành công, giao dịch còn lại nhận lỗi 409.
 - **Quyết định VD-10 (20/11/2026):** Hóa đơn tổng tiền 0 vẫn chuyển PAID và ghi phiếu thu CONFIRMED amount=0; không bỏ phiếu thu. ERD/schema đang ghi amount > 0 cần được đồng bộ bằng thay đổi phù hợp trong S2-09; PR SRS này không sửa migration đã gộp.
 - **NF1:** Phản hồi xác nhận thanh toán và kích hoạt gói dưới 2 giây.
@@ -337,6 +337,11 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
     - **Given** Hóa đơn PENDING có tổng tiền đã được server chốt; client gửi thêm amount hoặc total giả vào yêu cầu thu tiền
     - **When** Lễ tân/Quản lý xác nhận thu bằng CASH hoặc BANK_TRANSFER
     - **Then** Số tiền ghi nhận phải bằng invoices.total; giá và tổng tiền do client gửi không được dùng để thay đổi khoản thu hoặc hóa đơn. Không sửa đơn giá lịch sử trong invoice_items
+
+  - **AC-F5.2.1-11: Gia hạn sau gói PT 0 buổi còn giữ trạng thái ACTIVE hoặc FROZEN** (BR-F3-11)
+    - **Given** Dữ liệu gói PT cũ cùng phạm vi còn ACTIVE hoặc FROZEN nhưng remaining_sessions=0; hóa đơn mới PENDING và chưa có UPCOMING cùng nhóm
+    - **When** Xác nhận thu tiền hóa đơn mới
+    - **Then** Kế thừa plannedStartDate của F3: gói mới UPCOMING từ ngày sau end_date gói cũ, không sớm hơn hôm nay theo giờ Việt Nam; không áp dụng ngoại lệ SESSION 0 buổi bắt đầu ngày mai. Giữ số ngày và số buổi đã chốt; gói cũ giữ nguyên. Ví dụ gói PT cũ hết hạn 05/12/2026, thu tiền ngày 20/11/2026 cho gói mới 30 ngày thì gói mới có hạn 06/12/2026–04/01/2027. Không thay quy tắc F9 chuyển PT sang EXPIRED ngay khi dùng buổi cuối; nếu gói cũ đã EXPIRED và không còn gói đang giữ thì áp dụng quy tắc mua mới
 
 
 ---
@@ -789,7 +794,7 @@ Các mục sau cần trưởng nhóm Hoàng Kim Tiến duyệt, chưa phải yê
 
 | Nội dung cần quyết định | Gợi ý prototype / căn cứ hiện có | Trạng thái |
 | --- | --- | --- |
-| Gói PT hết buổi trong mô tả gia hạn cũ | B/C/BR-F5-04 đang gộp SESSION/PT 0 buổi và cho bắt đầu ngày mai; bản chốt quy định PT hết hiệu lực ngay khi xác nhận buổi cuối. Cần đồng bộ với F3/F9; chưa cấp AC cho nhánh PT 0 buổi | Chờ Hoàng Kim Tiến chốt cách sửa điểm lệch |
+| Gói PT hết buổi trong mô tả gia hạn cũ | Đã đồng bộ B/C/BR-F5-04 với F3 và F5 #257: ngoại lệ bắt đầu ngày mai chỉ dành cho SESSION 0 buổi; PT 0 buổi còn ACTIVE/FROZEN bắt đầu gói mới sau `end_date` gói cũ. F9 vẫn chịu trách nhiệm chuyển PT sang EXPIRED khi xác nhận buổi cuối | AC-F5.2.1-11; đã chốt và đồng bộ ngày 26/11/2026 |
 | Thiếu BANK_* ở cả chi nhánh và toàn chuỗi | Prototype VietQR chọn 422; N0 SystemConfigService coi thiếu cấu hình là lỗi hệ thống 500. Cần chốt mã lỗi và câu thông báo riêng | Chờ trưởng nhóm |
 | Nhân viên không có phân công chi nhánh hoạt động | Prototype và N0 trả 403; cần xác nhận cách ghi AC riêng cho F5 | Chờ trưởng nhóm; không tự gán chi nhánh mặc định |
 | Giới hạn bộ lọc danh sách | Prototype chọn page >= 0, size 1..100, fromDate <= toDate, enum/ngày sai trả 400; SRS gốc mới ghi mặc định page=0,size=20. Giữ S5 nhưng chưa chốt giới hạn chi tiết | Chờ trưởng nhóm |
