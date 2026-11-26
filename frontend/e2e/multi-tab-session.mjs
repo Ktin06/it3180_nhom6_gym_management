@@ -246,10 +246,11 @@ test(
 
     async function changePassword(page, currentPassword, nextPassword) {
       await page.goto(`${baseURL}/doi-mat-khau`)
-      await page.getByLabel('Mật khẩu hiện tại', { exact: true }).fill(currentPassword)
-      await page.getByLabel('Mật khẩu mới', { exact: true }).fill(nextPassword)
-      await page.getByLabel('Nhập lại mật khẩu mới', { exact: true }).fill(nextPassword)
-      await page.getByRole('button', { name: 'Đổi mật khẩu', exact: true }).click()
+      const form = page.locator('form')
+      await form.getByLabel('Mật khẩu hiện tại', { exact: true }).fill(currentPassword)
+      await form.getByLabel('Mật khẩu mới', { exact: true }).fill(nextPassword)
+      await form.getByLabel('Nhập lại mật khẩu mới', { exact: true }).fill(nextPassword)
+      await form.getByRole('button', { name: 'Đổi mật khẩu', exact: true }).click()
     }
 
     const newPassword = `A1${password}`
@@ -258,6 +259,11 @@ test(
     const changedOnServer = deferred()
     const releaseChangeResponse = deferred()
     const changePath = '**/api/v1/auth/change-password'
+    const cookieRevision = (page) => page.evaluate(async () =>
+      (await import('/src/auth/session-revision.ts')).readCookieRevision(),
+    )
+    let newSession
+    const delayedResponse = first.waitForResponse(changePath)
     await first.route(changePath, async (route) => {
       const response = await route.fetch()
       changedOnServer.resolve(response.status())
@@ -268,13 +274,15 @@ test(
       await changePassword(first, password, newPassword)
       assert.equal(await changedOnServer.promise, 204)
       await signIn(second, newPassword)
+      newSession = await cookieRevision(second)
     } finally {
       releaseChangeResponse.resolve()
     }
-    await first.getByRole('button', { name: 'Đổi mật khẩu', exact: true }).waitFor()
+    assert.equal((await delayedResponse).status(), 204)
     await first.waitForFunction(() =>
       !document.querySelector('button[type="submit"][aria-busy="true"]'),
     )
+    assert.deepEqual(await cookieRevision(second), newSession)
     assert.equal(await identity(second), userA)
     assert.equal(await refresh(second), null, 'Phản hồi đổi mật khẩu cũ phải giữ phiên đăng nhập mới.')
     await first.unroute(changePath)
