@@ -85,7 +85,7 @@ class MemberAccountServiceTest {
         var linked = new CreateMemberAccountResponse(9L, 88L, "member9@example.com");
         when(memberService.linkAccount(receptionist, 9L, "member9@example.com")).thenReturn(linked);
         when(passwordResetService.issue(88L, Duration.ofHours(72))).thenReturn("super-secret-raw-token-xyz");
-        doThrow(new RuntimeException("Brevo 503 Service Unavailable"))
+        doThrow(new RuntimeException("Brevo trả lại nội dung thư có liên kết ?token=super-secret-raw-token-xyz"))
             .when(emailSender).send(eq("member9@example.com"), eq("Kích hoạt tài khoản"), anyString());
 
         CreateMemberAccountResponse response = memberAccountService.createAccount(

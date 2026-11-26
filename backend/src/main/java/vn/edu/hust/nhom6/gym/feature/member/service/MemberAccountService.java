@@ -69,9 +69,9 @@ public class MemberAccountService {
         try {
             emailSender.send(created.email(), ACTIVATION_EMAIL_SUBJECT, body);
         } catch (RuntimeException ex) {
-            // Không làm hỏng việc tạo tài khoản khi nhà cung cấp email lỗi; tuyệt đối không ghi token ra log.
-            log.error("Không gửi được email kích hoạt tài khoản cho hội viên memberId={}, userId={}: {}",
-                created.memberId(), created.userId(), ex.getMessage());
+            // Phản hồi lỗi của nhà cung cấp có thể chứa nội dung thư và liên kết kích hoạt.
+            log.error("Không gửi được email kích hoạt tài khoản cho hội viên memberId={}, userId={}",
+                created.memberId(), created.userId());
         }
         return created;
     }

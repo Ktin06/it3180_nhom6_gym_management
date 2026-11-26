@@ -3,6 +3,7 @@ package vn.edu.hust.nhom6.gym.feature.groupclass.dto;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.List;
 import jakarta.validation.constraints.*;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import tools.jackson.databind.annotation.JsonDeserialize;
@@ -28,6 +29,27 @@ public final class ClassDtos {
             throw new IllegalArgumentException("Request chứa trường không được phép.");
         }
     }
+
+    public record SessionTimeRequest(
+        @NotNull(message = "Giờ bắt đầu là bắt buộc.") OffsetDateTime startAt,
+        @NotNull(message = "Giờ kết thúc là bắt buộc.") OffsetDateTime endAt) {}
+
+    public record SessionRoomRequest(
+        @NotNull(message = "Phòng là bắt buộc.") @Positive(message = "Mã phòng phải lớn hơn 0.")
+        @JsonDeserialize(using = ClassJsonValues.LongValue.class) Long roomId) {}
+
+    public enum AttendanceStatus { ATTENDED, NO_SHOW }
+
+    public record AttendanceRequest(
+        @NotNull(message = "Chỗ đặt là bắt buộc.") @Positive(message = "Mã chỗ đặt phải lớn hơn 0.")
+        @JsonDeserialize(using = ClassJsonValues.LongValue.class) Long bookingId,
+        @NotNull(message = "Kết quả điểm danh là bắt buộc.") AttendanceStatus status,
+        @NotNull(message = "Thời điểm cập nhật chỗ đặt là bắt buộc.") OffsetDateTime expectedUpdatedAt) {}
+
+    public record AttendanceRow(Long bookingId, Long memberId, String memberCode, String fullName,
+        String status, OffsetDateTime arrivedAt, Long attendanceMarkedBy, OffsetDateTime updatedAt) {}
+
+    public record AttendanceRoster(Session session, List<AttendanceRow> bookings) {}
 
     public record Schedule(Long id, Long branchId, Long classTypeId, Long trainerId, Long roomId,
         Integer dayOfWeek, LocalTime startTime, LocalTime endTime, Integer capacity,
