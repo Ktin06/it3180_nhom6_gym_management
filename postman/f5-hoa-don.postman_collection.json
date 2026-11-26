@@ -1,0 +1,1058 @@
+{
+  "info": {
+    "name": "F5 – Hóa đơn, thu tiền tại quầy, VietQR và PDF (S2-09)",
+    "description": "API của thẻ S2-09.1 (UC-F5.2, UC-F5.3 luồng A1). baseUrl gồm /api/v1. Chạy tuần tự từng thư mục. Nhập token tại máy, không lưu lên Git. saleMemberId và cancelMemberId là hai hội viên CN01 chưa có gói cùng loại với salePackageId (dữ liệu mẫu: HV999010 và một hội viên khác chưa có gói); salePackageId là gói TIME đang bán ở CN01. Phạm vi S2-09: sáu endpoint hóa đơn; hoàn tiền thuộc S2-38. Hai thư mục thu tiền/hủy chạy tuần tự. Thư mục kiểm tra số tiền dùng amountMemberId và freeMemberId riêng (chưa có gói chờ cùng loại); freePackageId phải có giá 0. Các token để trống trong file, nhập tại máy.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Thu tiền – US-F5.2.1 (chạy tuần tự)",
+      "item": [
+        {
+          "name": "Bước 1 – Bán gói (tạo hóa đơn PENDING để thu tiền)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "description": "Hội viên saleMemberId chưa có gói cùng loại. Lưu invoiceId vào payInvoiceId.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{saleMemberId}},\n  \"items\": [{ \"itemType\": \"PACKAGE\", \"packageId\": {{salePackageId}} }]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('payInvoiceId', pm.response.json().invoiceId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.2.1 E1 400 – method sai",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices/{{payInvoiceId}}/payments",
+            "description": "method chỉ nhận CASH hoặc BANK_TRANSFER.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"method\": \"MOMO\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400, lỗi trường method', () => { pm.response.to.have.status(400); pm.expect(pm.response.json().errors).to.have.property('method'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.2.1 E3 403 – token Hội viên hoặc Huấn luyện viên",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices/{{payInvoiceId}}/payments",
+            "description": "Chỉ lễ tân, quản lý chi nhánh được xác nhận thu tiền (BR-F5-03).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{deniedRoleToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"method\": \"CASH\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F5.2.1-01a 200 – Thu tiền chuyển khoản, gói ACTIVE từ hôm nay",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices/{{payInvoiceId}}/payments",
+            "description": "Số tiền lấy từ invoices.total, client không gửi. Gói ACTIVE, end_date = hôm nay + số ngày - 1.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"method\": \"BANK_TRANSFER\", \"transactionRef\": \"FT263078912345\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200, hóa đơn PAID, gói ACTIVE', () => { pm.response.to.have.status(200); const r = pm.response.json(); pm.expect(r.status).to.eql('PAID'); pm.expect(r.method).to.eql('BANK_TRANSFER'); pm.expect(r.amount).to.be.at.least(0); pm.expect(r.paymentId).to.be.a('number'); pm.expect(r.activatedMemberships[0].status).to.eql('ACTIVE'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.2.1 E6a 422 – Thu tiền lần hai",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices/{{payInvoiceId}}/payments",
+            "description": "Hóa đơn đã PAID.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"method\": \"CASH\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().detail).to.eql('Hóa đơn đã được thanh toán hoặc đã bị hủy trước đó.'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.3.1 KB2 422 – Hủy hóa đơn đã PAID",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/invoices/{{payInvoiceId}}/cancel",
+            "description": "Chỉ hủy được hóa đơn PENDING.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().detail).to.eql('Chỉ có thể hủy hóa đơn đang ở trạng thái chờ thanh toán.'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.2.1 E4 404 – Hóa đơn không tồn tại",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices/999999999/payments",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"method\": \"CASH\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Hủy hóa đơn chờ – US-F5.3.1 (chạy tuần tự)",
+      "item": [
+        {
+          "name": "Bước 1 – Bán gói (tạo hóa đơn PENDING để hủy)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "description": "Dùng cancelMemberId: hội viên chưa có gói cùng loại với salePackageId. Lưu invoiceId vào cancelInvoiceId.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{cancelMemberId}},\n  \"items\": [{ \"itemType\": \"PACKAGE\", \"packageId\": {{salePackageId}} }]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('cancelInvoiceId', pm.response.json().invoiceId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.3.1 KB1 200 – Hủy hóa đơn PENDING",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/invoices/{{cancelInvoiceId}}/cancel",
+            "description": "Hóa đơn và gói PENDING đi kèm chuyển CANCELLED (BR-F5-08).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200, CANCELLED', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().status).to.eql('CANCELLED'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.2.1 E6a 422 – Thu tiền hóa đơn đã hủy",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices/{{cancelInvoiceId}}/payments",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"method\": \"CASH\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.3.1 E2 401 – Hủy không có token",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/invoices/{{cancelInvoiceId}}/cancel",
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tra cứu hóa đơn – US-F5.3.1 (S2-09.3)",
+      "item": [
+        {
+          "name": "US-F5.3.1 KB 200 – Danh sách hóa đơn chi nhánh (mới nhất trước)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices?page=0&size=20",
+            "description": "Lễ tân hoặc quản lý chỉ thấy hóa đơn chi nhánh mình, sắp xếp createdAt DESC. Hóa đơn khách lẻ (member_id rỗng) vẫn hiện nhờ LEFT JOIN members.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200, PageResponse', () => { pm.response.to.have.status(200); const r = pm.response.json(); pm.expect(r.content).to.be.an('array'); pm.expect(r.page).to.eql(0); pm.expect(r.size).to.eql(20); if (r.content.length > 0 && !pm.collectionVariables.get('payInvoiceId')) { pm.collectionVariables.set('payInvoiceId', r.content[0].id); } });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.3.1 KB 200 – Lọc theo status, source, fromDate, toDate, keyword",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices?status=PENDING&source=COUNTER&fromDate=2026-11-01&toDate=2026-11-30&keyword=HD",
+            "description": "fromDate/toDate tính theo ngày Việt Nam nửa mở [from 00:00 VN, to+1 00:00 VN). keyword khớp mã hóa đơn, tên hoặc số điện thoại hội viên.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200, kết quả lọc', () => { pm.response.to.have.status(200); const r = pm.response.json(); pm.expect(r.content).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.3.1 BR-F5-06 200 – Chủ chuỗi xem toàn chuỗi và lọc branchId",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices?branchId={{branchId}}",
+            "description": "SUPER_ADMIN xem mọi chi nhánh (bỏ branchId) hoặc lọc theo branchId. Lễ tân/quản lý truyền branchId sẽ bị bỏ qua.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.3.1 KB 200 – Chi tiết hóa đơn (gồm items và payments)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices/{{payInvoiceId}}",
+            "description": "Trả thông tin hóa đơn, hội viên (rỗng với khách lẻ), danh sách dòng hóa đơn (items) và phiếu thu (payments kèm receivedByName).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200, có items và payments', () => { pm.response.to.have.status(200); const r = pm.response.json(); pm.expect(r.items).to.be.an('array'); pm.expect(r.payments).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.3.1 E3 404 – Chi tiết hóa đơn không tồn tại hoặc chi nhánh khác",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices/999999999",
+            "description": "Hóa đơn ngoài chi nhánh cũng trả 404 để không lộ sự tồn tại.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => { pm.response.to.have.status(404); pm.expect(pm.response.json().detail).to.eql('Hóa đơn không tồn tại trên hệ thống.'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.3.1 E2 403 – Huấn luyện viên hoặc Hội viên bị từ chối",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices",
+            "description": "TRAINER và MEMBER không được xem danh sách hóa đơn tại quầy.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{deniedRoleToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.3.1 kiểm tra dữ liệu 400 – fromDate lớn hơn toDate",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices?fromDate=2026-11-30&toDate=2026-11-01",
+            "description": "Khoảng ngày không hợp lệ trả 400.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "VietQR và hóa đơn PDF – US-F5.1.1, US-F5.4.1 (S2-09.2)",
+      "item": [
+        {
+          "name": "US-F5.1.1 KB1 200 – Sinh mã VietQR cho hóa đơn PENDING",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices/{{pendingInvoiceId}}/vietqr",
+            "description": "Lễ tân hoặc quản lý chi nhánh lấy URL VietQR cho hóa đơn đang PENDING trong chi nhánh mình. Số tiền lấy từ invoices.total, nội dung '{branch_code} {invoice_code}'.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200, có qrImageUrl và transferContent', () => { pm.response.to.have.status(200); const r = pm.response.json(); pm.expect(r.qrImageUrl).to.include('https://img.vietqr.io/image/'); pm.expect(r.transferContent).to.include(r.invoiceCode); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.4.1 KB1 200 – Tải hóa đơn PDF (PAID hoặc REFUNDED)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices/{{payInvoiceId}}/pdf",
+            "description": "Xuất file PDF hóa đơn đã thanh toán hoặc đã hoàn tiền (Content-Type: application/pdf, tên file hoa-don-{code}.pdf). Hội viên dùng token của mình cũng tải được hóa đơn của chính mình.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200, application/pdf', () => { pm.response.to.have.status(200); pm.expect(pm.response.headers.get('Content-Type')).to.include('application/pdf'); pm.expect(pm.response.headers.get('Content-Disposition')).to.include('hoa-don-'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bảo toàn số tiền và hóa đơn 0 đồng – chạy tuần tự",
+      "item": [
+        {
+          "name": "Chuẩn bị hóa đơn kiểm tra số tiền",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"memberId\":{{amountMemberId}},\"items\":[{\"itemType\":\"PACKAGE\",\"packageId\":{{salePackageId}}}]}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201',()=>pm.response.to.have.status(201));",
+                  "const r=pm.response.json(); pm.collectionVariables.set('amountInvoiceId',r.invoiceId); pm.collectionVariables.set('expectedInvoiceTotal',r.total);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F5.2.1-10a – Thu tiền bỏ qua amount/total giả",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices/{{amountInvoiceId}}/payments",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"method\":\"CASH\",\"amount\":1,\"total\":1,\"unitPrice\":1}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200, tiền lấy từ hóa đơn server',()=>{pm.response.to.have.status(200); pm.expect(pm.response.json().amount).to.eql(Number(pm.collectionVariables.get('expectedInvoiceTotal')));});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AC-F5.2.1-10 – Đọc lại đơn giá và tổng tiền",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices/{{amountInvoiceId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Giữ tổng tiền và đơn giá',()=>{pm.response.to.have.status(200); const r=pm.response.json(),expected=Number(pm.collectionVariables.get('expectedInvoiceTotal')); pm.expect(r.total).to.eql(expected); pm.expect(r.items[0].unitPrice).to.eql(expected); pm.expect(r.payments).to.have.lengthOf(1);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Chuẩn bị hóa đơn 0 đồng",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"memberId\":{{freeMemberId}},\"items\":[{\"itemType\":\"PACKAGE\",\"packageId\":{{freePackageId}}}]}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 và total=0',()=>{pm.response.to.have.status(201); pm.expect(pm.response.json().total).to.eql(0);});",
+                  "pm.collectionVariables.set('freeInvoiceId',pm.response.json().invoiceId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F5.2.1-03a – Thu hóa đơn 0 đồng có phiếu thu",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices/{{freeInvoiceId}}/payments",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"method\":\"CASH\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200, PAID, phiếu thu 0 đồng',()=>{pm.response.to.have.status(200); const r=pm.response.json(); pm.expect(r.status).to.eql('PAID'); pm.expect(r.amount).to.eql(0); pm.expect(r.paymentId).to.be.a('number');});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Giới hạn dữ liệu tra cứu và chứng từ",
+      "item": [
+        {
+          "name": "AC-F5.3.1-09 – size vượt 100",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices?size=101",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400',()=>pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AC-F5.3.1-09 – Ngày bắt đầu sau ngày kết thúc",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices?fromDate=2026-11-25&toDate=2026-11-24",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400',()=>pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F5.1.1-07b – ID VietQR không hợp lệ",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices/0/vietqr",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 có errors.id',()=>{pm.response.to.have.status(400);pm.expect(pm.response.json().errors).to.have.property('id');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F5.4.1-07b – ID PDF không hợp lệ",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices/abc/pdf",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 có errors.id',()=>{pm.response.to.have.status(400);pm.expect(pm.response.json().errors).to.have.property('id');});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api/v1"
+    },
+    {
+      "key": "receptionistToken",
+      "value": ""
+    },
+    {
+      "key": "ownerToken",
+      "value": ""
+    },
+    {
+      "key": "deniedRoleToken",
+      "value": ""
+    },
+    {
+      "key": "branchId",
+      "value": "1"
+    },
+    {
+      "key": "saleMemberId",
+      "value": ""
+    },
+    {
+      "key": "cancelMemberId",
+      "value": ""
+    },
+    {
+      "key": "salePackageId",
+      "value": ""
+    },
+    {
+      "key": "payInvoiceId",
+      "value": ""
+    },
+    {
+      "key": "pendingInvoiceId",
+      "value": ""
+    },
+    {
+      "key": "cancelInvoiceId",
+      "value": ""
+    },
+    {
+      "key": "amountMemberId",
+      "value": ""
+    },
+    {
+      "key": "freeMemberId",
+      "value": ""
+    },
+    {
+      "key": "freePackageId",
+      "value": ""
+    },
+    {
+      "key": "amountInvoiceId",
+      "value": ""
+    },
+    {
+      "key": "expectedInvoiceTotal",
+      "value": ""
+    },
+    {
+      "key": "freeInvoiceId",
+      "value": ""
+    }
+  ]
+}

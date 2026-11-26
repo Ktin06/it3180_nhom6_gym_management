@@ -80,23 +80,23 @@ describe('roleAwareReturnPath', () => {
   })
 
   describe('trang mới chỉ cần khai báo một dòng trong ROUTE_ACCESS', () => {
-    const access = { ...ROUTE_ACCESS, '/checkins': { roles: ['RECEPTIONIST'] as const } }
+    const access = { ...ROUTE_ACCESS, '/chua-khai-bao': { roles: ['RECEPTIONIST'] as const } }
 
     it('lễ tân quay lại đúng trang mới sau khi đăng nhập', () => {
       expect(
         roleAwareReturnPath(
-          { from: { pathname: '/checkins', search: '?date=2026-11-19' } },
+          { from: { pathname: '/chua-khai-bao', search: '?date=2026-11-19' } },
           'https://gym.example',
           'RECEPTIONIST',
           access,
         ),
-      ).toBe('/checkins?date=2026-11-19')
+      ).toBe('/chua-khai-bao?date=2026-11-19')
     })
 
     it('hội viên mở trang mới của lễ tân thì về trang chủ hội viên', () => {
       expect(
         roleAwareReturnPath(
-          { from: { pathname: '/checkins' } },
+          { from: { pathname: '/chua-khai-bao' } },
           'https://gym.example',
           'MEMBER',
           access,
@@ -107,7 +107,7 @@ describe('roleAwareReturnPath', () => {
     it('chưa khai báo thì lễ tân cũng về trang chủ của mình', () => {
       expect(
         roleAwareReturnPath(
-          { from: { pathname: '/checkins' } },
+          { from: { pathname: '/chua-khai-bao' } },
           'https://gym.example',
           'RECEPTIONIST',
         ),

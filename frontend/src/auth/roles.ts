@@ -17,6 +17,10 @@ export const STAFF_ROLES: Role[] = ['SUPER_ADMIN', 'BRANCH_MANAGER', 'RECEPTIONI
 /** Vai trò được tra cứu và quản lý hồ sơ hội viên, danh mục gói. */
 export const MEMBER_MANAGEMENT_ROLES: Role[] = ['SUPER_ADMIN', 'BRANCH_MANAGER', 'RECEPTIONIST']
 
+export function canManageMembers(role: Role | undefined): boolean {
+  return role !== undefined && MEMBER_MANAGEMENT_ROLES.includes(role)
+}
+
 /** Trang chủ của từng vai trò sau khi đăng nhập; quyền mở khai báo ở routes/route-access.ts. */
 export const HOME_PATH_BY_ROLE = {
   SUPER_ADMIN: '/admin',
