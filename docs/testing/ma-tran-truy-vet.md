@@ -14,11 +14,11 @@
 | F4 | 5 | 5 | 37 | 0 | 37 | 0 |
 | F5 | 5 | 5 | 51 | 51 | 0 | 158 |
 | F6 | 5 | 5 | 16 | 0 | 16 | 0 |
-| F7 | 5 | 5 | 34 | 14 | 20 | 31 |
+| F7 | 5 | 5 | 34 | 29 | 5 | 48 |
 | F8 | 9 | 9 | 55 | 53 | 2 | 81 |
 | F9 | 7 | 7 | 63 | 0 | 63 | 0 |
 | F10 | 5 | 4 | 25 | 0 | 25 | 0 |
-| **Tổng** | **57** | **58** | **388** | **220** | **168** | **661** |
+| **Tổng** | **57** | **58** | **388** | **235** | **153** | **678** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -100,23 +100,8 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F6.4.1-06 | Thao tác Gia hạn nhanh trên giao diện | US-F6.4.1 |
 | AC-F6.5.1-01 | Danh sách các lượt check-in mới nhất trong ngày | US-F6.5.1 |
 | AC-F6.5.1-02 | Thao tác Check-out nhanh từ danh sách Live Feed | US-F6.5.1 |
-| AC-F7.1.1-01 | Hội viên thấy đủ thông tin các gói của mình | US-F7.1.1 |
-| AC-F7.1.1-02 | Chỉ thấy gói của chính mình | US-F7.1.1 |
-| AC-F7.1.1-03 | Hội viên chưa có gói nào | US-F7.1.1 |
 | AC-F7.1.1-04 | Gói đã hủy không có nút Gia hạn, gói hết hạn vẫn có | US-F7.1.1 |
-| AC-F7.1.1-05 | Từ chối người không được xem | US-F7.1.1 |
-| AC-F7.2.1-01 | Xem lịch sử mới nhất trước, có phân trang | US-F7.2.1 |
-| AC-F7.2.1-02 | Hội viên chưa check-in lần nào | US-F7.2.1 |
-| AC-F7.2.1-03 | Chỉ thấy lượt của chính mình | US-F7.2.1 |
-| AC-F7.2.1-04 | Tham số phân trang | US-F7.2.1 |
 | AC-F7.2.1-05 | Tải trang dưới 2 giây | US-F7.2.1 |
-| AC-F7.2.1-06 | Từ chối người không được xem | US-F7.2.1 |
-| AC-F7.3.1-01 | Xem hóa đơn của mình, mới nhất trước | US-F7.3.1 |
-| AC-F7.3.1-02 | Hóa đơn chờ do cổng hội viên kèm hạn tự hủy | US-F7.3.1 |
-| AC-F7.3.1-03 | Chỉ thấy hóa đơn của chính mình | US-F7.3.1 |
-| AC-F7.3.1-04 | Hội viên chưa có hóa đơn nào | US-F7.3.1 |
-| AC-F7.3.1-05 | Tham số phân trang | US-F7.3.1 |
-| AC-F7.3.1-06 | Từ chối người không được xem | US-F7.3.1 |
 | AC-F7.4.1-02 | Gói chỉ hiệu lực sau khi lễ tân thu tiền | US-F7.4.1 |
 | AC-F7.5.1-07 | Hai yêu cầu gia hạn gửi cùng lúc | US-F7.5.1 |
 | AC-F7.5.1-08 | Hóa đơn gia hạn tự hủy kéo theo gói chờ | US-F7.5.1 |
@@ -1059,27 +1044,44 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 
 - **UC-F7.1** Xem gói tập
   - **US-F7.1.1** Xem gói của tôi (#150)
-    - AC-F7.1.1-01 Hội viên thấy đủ thông tin các gói của mình ❌ chưa có TC
-    - AC-F7.1.1-02 Chỉ thấy gói của chính mình ❌ chưa có TC
-    - AC-F7.1.1-03 Hội viên chưa có gói nào ❌ chưa có TC
+    - AC-F7.1.1-01 Hội viên thấy đủ thông tin các gói của mình
+      - TC-F7.1.1-01a `MemberPortalQueryIntegrationTest#membershipsReturnsAllOwnMembershipsWithDetails`
+    - AC-F7.1.1-02 Chỉ thấy gói của chính mình
+      - TC-F7.1.1-02a `MemberPortalQueryIntegrationTest#membershipsNeverLeaksOtherMembersData`
+    - AC-F7.1.1-03 Hội viên chưa có gói nào
+      - TC-F7.1.1-03a `MemberPortalQueryIntegrationTest#membershipsEmptyWhenMemberHasNone`
     - AC-F7.1.1-04 Gói đã hủy không có nút Gia hạn, gói hết hạn vẫn có ❌ chưa có TC
-    - AC-F7.1.1-05 Từ chối người không được xem ❌ chưa có TC
+    - AC-F7.1.1-05 Từ chối người không được xem
+      - TC-F7.1.1-05a `MemberPortalQueryIntegrationTest#membershipsForbiddenForNonMemberRoles`
+      - TC-F7.1.1-05b `MemberPortalQueryIntegrationTest#membershipsForbiddenWithoutProfileAndUnauthorizedWithoutToken`
 - **UC-F7.2** Xem lịch sử check-in
   - **US-F7.2.1** Lịch sử check-in của tôi (#151)
-    - AC-F7.2.1-01 Xem lịch sử mới nhất trước, có phân trang ❌ chưa có TC
-    - AC-F7.2.1-02 Hội viên chưa check-in lần nào ❌ chưa có TC
-    - AC-F7.2.1-03 Chỉ thấy lượt của chính mình ❌ chưa có TC
-    - AC-F7.2.1-04 Tham số phân trang ❌ chưa có TC
+    - AC-F7.2.1-01 Xem lịch sử mới nhất trước, có phân trang
+      - TC-F7.2.1-01a `MemberPortalQueryIntegrationTest#checkinsPaginatedNewestFirstWithBranchAndTimes`
+    - AC-F7.2.1-02 Hội viên chưa check-in lần nào
+      - TC-F7.2.1-02a `MemberPortalQueryIntegrationTest#checkinsEmptyWhenMemberHasNone`
+    - AC-F7.2.1-03 Chỉ thấy lượt của chính mình
+      - TC-F7.2.1-03a `MemberPortalQueryIntegrationTest#checkinsNeverLeaksOtherMembersData`
+    - AC-F7.2.1-04 Tham số phân trang
+      - TC-F7.2.1-04a `MemberPortalQueryIntegrationTest#checkinsInvalidPagingReturns400`
     - AC-F7.2.1-05 Tải trang dưới 2 giây ❌ chưa có TC
-    - AC-F7.2.1-06 Từ chối người không được xem ❌ chưa có TC
+    - AC-F7.2.1-06 Từ chối người không được xem
+      - TC-F7.2.1-06a `MemberPortalQueryIntegrationTest#checkinsForbiddenAndUnauthorized`
 - **UC-F7.3** Xem hóa đơn
-  - **US-F7.3.1** Hóa đơn của tôi (#152)
-    - AC-F7.3.1-01 Xem hóa đơn của mình, mới nhất trước ❌ chưa có TC
-    - AC-F7.3.1-02 Hóa đơn chờ do cổng hội viên kèm hạn tự hủy ❌ chưa có TC
-    - AC-F7.3.1-03 Chỉ thấy hóa đơn của chính mình ❌ chưa có TC
-    - AC-F7.3.1-04 Hội viên chưa có hóa đơn nào ❌ chưa có TC
-    - AC-F7.3.1-05 Tham số phân trang ❌ chưa có TC
-    - AC-F7.3.1-06 Từ chối người không được xem ❌ chưa có TC
+  - **US-F7.3.1** Hóa đơn của tôi (#152) ✅ mọi AC có TC
+    - AC-F7.3.1-01 Xem hóa đơn của mình, mới nhất trước
+      - TC-F7.3.1-01a `MemberPortalQueryIntegrationTest#invoicesPaginatedNewestFirstWithExpiresAtOnlyForPendingPortal`
+    - AC-F7.3.1-02 Hóa đơn chờ do cổng hội viên kèm hạn tự hủy
+      - TC-F7.3.1-02a `MemberPortalQueryIntegrationTest#invoicesPaginatedNewestFirstWithExpiresAtOnlyForPendingPortal`
+      - TC-F7.3.1-02b `MemberPortalQueryIntegrationTest#invoicesExpiresAtUsesBranchConfigAndNullForPaidPortal`
+    - AC-F7.3.1-03 Chỉ thấy hóa đơn của chính mình
+      - TC-F7.3.1-03a `MemberPortalQueryIntegrationTest#invoicesNeverLeaksOtherMembersOrWalkInInvoices`
+    - AC-F7.3.1-04 Hội viên chưa có hóa đơn nào
+      - TC-F7.3.1-04a `MemberPortalQueryIntegrationTest#invoicesEmptyWhenMemberHasNone`
+    - AC-F7.3.1-05 Tham số phân trang
+      - TC-F7.3.1-05a `MemberPortalQueryIntegrationTest#invoicesInvalidPagingReturns400`
+    - AC-F7.3.1-06 Từ chối người không được xem
+      - TC-F7.3.1-06a `MemberPortalQueryIntegrationTest#invoicesForbiddenAndUnauthorized`
 - **UC-F7.4** Gửi yêu cầu mua gói
   - **US-F7.4.1** Gửi yêu cầu mua gói (#153)
     - AC-F7.4.1-01 Gửi yêu cầu mua tạo hóa đơn chờ và gói chờ, giá lấy ở server
@@ -1962,6 +1964,23 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F5.5.1-11d | AC-F5.5.1-11 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#classBookingDoesNotBlockPtRefund` |
 | TC-F5.5.1-11e | AC-F5.5.1-11 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-11e: lỗi 422 gói đã dùng và còn chỗ đặt lớp hiện đ` |
 | TC-F5.5.1-12a | AC-F5.5.1-12 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#otherMembershipUsageDoesNotBlock` |
+| TC-F7.1.1-01a | AC-F7.1.1-01 | US-F7.1.1 | UC-F7.1 |  | `MemberPortalQueryIntegrationTest#membershipsReturnsAllOwnMembershipsWithDetails` |
+| TC-F7.1.1-02a | AC-F7.1.1-02 | US-F7.1.1 | UC-F7.1 |  | `MemberPortalQueryIntegrationTest#membershipsNeverLeaksOtherMembersData` |
+| TC-F7.1.1-03a | AC-F7.1.1-03 | US-F7.1.1 | UC-F7.1 |  | `MemberPortalQueryIntegrationTest#membershipsEmptyWhenMemberHasNone` |
+| TC-F7.1.1-05a | AC-F7.1.1-05 | US-F7.1.1 | UC-F7.1 |  | `MemberPortalQueryIntegrationTest#membershipsForbiddenForNonMemberRoles` |
+| TC-F7.1.1-05b | AC-F7.1.1-05 | US-F7.1.1 | UC-F7.1 |  | `MemberPortalQueryIntegrationTest#membershipsForbiddenWithoutProfileAndUnauthorizedWithoutToken` |
+| TC-F7.2.1-01a | AC-F7.2.1-01 | US-F7.2.1 | UC-F7.2 |  | `MemberPortalQueryIntegrationTest#checkinsPaginatedNewestFirstWithBranchAndTimes` |
+| TC-F7.2.1-02a | AC-F7.2.1-02 | US-F7.2.1 | UC-F7.2 |  | `MemberPortalQueryIntegrationTest#checkinsEmptyWhenMemberHasNone` |
+| TC-F7.2.1-03a | AC-F7.2.1-03 | US-F7.2.1 | UC-F7.2 |  | `MemberPortalQueryIntegrationTest#checkinsNeverLeaksOtherMembersData` |
+| TC-F7.2.1-04a | AC-F7.2.1-04 | US-F7.2.1 | UC-F7.2 |  | `MemberPortalQueryIntegrationTest#checkinsInvalidPagingReturns400` |
+| TC-F7.2.1-06a | AC-F7.2.1-06 | US-F7.2.1 | UC-F7.2 |  | `MemberPortalQueryIntegrationTest#checkinsForbiddenAndUnauthorized` |
+| TC-F7.3.1-01a | AC-F7.3.1-01 | US-F7.3.1 | UC-F7.3 |  | `MemberPortalQueryIntegrationTest#invoicesPaginatedNewestFirstWithExpiresAtOnlyForPendingPortal` |
+| TC-F7.3.1-02a | AC-F7.3.1-02 | US-F7.3.1 | UC-F7.3 |  | `MemberPortalQueryIntegrationTest#invoicesPaginatedNewestFirstWithExpiresAtOnlyForPendingPortal` |
+| TC-F7.3.1-02b | AC-F7.3.1-02 | US-F7.3.1 | UC-F7.3 |  | `MemberPortalQueryIntegrationTest#invoicesExpiresAtUsesBranchConfigAndNullForPaidPortal` |
+| TC-F7.3.1-03a | AC-F7.3.1-03 | US-F7.3.1 | UC-F7.3 |  | `MemberPortalQueryIntegrationTest#invoicesNeverLeaksOtherMembersOrWalkInInvoices` |
+| TC-F7.3.1-04a | AC-F7.3.1-04 | US-F7.3.1 | UC-F7.3 |  | `MemberPortalQueryIntegrationTest#invoicesEmptyWhenMemberHasNone` |
+| TC-F7.3.1-05a | AC-F7.3.1-05 | US-F7.3.1 | UC-F7.3 |  | `MemberPortalQueryIntegrationTest#invoicesInvalidPagingReturns400` |
+| TC-F7.3.1-06a | AC-F7.3.1-06 | US-F7.3.1 | UC-F7.3 |  | `MemberPortalQueryIntegrationTest#invoicesForbiddenAndUnauthorized` |
 | TC-F7.4.1-01a | AC-F7.4.1-01 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#purchaseCreatesPortalInvoice` |
 | TC-F7.4.1-03a | AC-F7.4.1-03 | US-F7.4.1 | UC-F7.4 |  | `PendingInvoiceExpiryIntegrationTest#cancelsPortalInvoiceExactlyAtTtl` |
 | TC-F7.4.1-03b | AC-F7.4.1-03 | US-F7.4.1 | UC-F7.4 |  | `PendingInvoiceExpiryIntegrationTest#runningTwiceChangesNothingMore` |
