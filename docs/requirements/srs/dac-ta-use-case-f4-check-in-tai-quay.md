@@ -10,6 +10,7 @@
   - [Thiết kế dữ liệu](../../design/erd/thiet-ke-du-lieu.md) (Nhóm 4 bảng `checkins`, `class_bookings`)
   - [Quy tắc mã nguồn](../../guides/quy-tac-ma-nguon.md)
   - [ADR 0001](../../decisions/0001-cong-nghe.md), [ADR 0007](../../decisions/0007-cau-truc-ma-nguon.md)
+- **Cập nhật 27/11/2026:** đồng bộ mục A–H theo mẫu SRS và bổ sung liên kết truy vết S2-32 (#204).
 
 ---
 
@@ -78,6 +79,18 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
   - Bản ghi `members.status = 'INACTIVE'` hoặc tài khoản liên kết `users.status = 'DISABLED'`.
   - Tra cứu vẫn trả 200 kèm trường `status` để màn hình hiện hồ sơ, giúp lễ tân giải thích cho hội viên. Giao diện hiển thị cảnh báo màu đỏ: *"Hồ sơ hội viên này đã ngừng hoạt động. Vui lòng liên hệ quản lý để được hỗ trợ."* và vô hiệu hóa nút Check-in.
   - Nếu vẫn gửi `POST /api/v1/checkins` cho hội viên này, backend từ chối theo E7 của UC-F4.2 (kiểm tra ở backend, không dựa vào nút bị vô hiệu hóa).
+
+#### E. Quy tắc nghiệp vụ liên quan
+
+- BR-F4.5, BR-F4.6. Xem các BR nội bộ ở mục 4.
+
+#### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
+
+- `members`, `member_avatars`, `memberships`, `packages`, `class_bookings`, `class_sessions`, `class_schedules`, `class_types`, `rooms`, `staff`, `users`. Xem mục 5 và [bảng truy vết](bang-truy-vet-yeu-cau.md).
+
+#### G. Thiết kế giao diện và API liên quan
+
+- Hợp đồng tham chiếu ở mục 6.1.
 
 #### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
 
@@ -192,6 +205,18 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
   - `members.status = 'INACTIVE'` (kiểm tra ở bước 3), kể cả khi hội viên vẫn còn gói tập `ACTIVE`.
   - Hệ thống từ chối: *"Hồ sơ hội viên này đã ngừng hoạt động. Vui lòng liên hệ quản lý để được hỗ trợ."*
 
+#### E. Quy tắc nghiệp vụ liên quan
+
+- BR-F4.1–BR-F4.4, BR-F4.6–BR-F4.8. Xem các BR nội bộ ở mục 4.
+
+#### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
+
+- `checkins`, `memberships`, `members`, `branches`, `users`, `staff`, `pt_sessions`, `class_bookings`, `class_sessions`. Xem mục 5 và [bảng truy vết](bang-truy-vet-yeu-cau.md).
+
+#### G. Thiết kế giao diện và API liên quan
+
+- Hợp đồng tham chiếu ở mục 6.2.
+
 #### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
 
 ##### US-F4.2.1: Check-in thủ công tại quầy
@@ -297,11 +322,27 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 2. Nếu tìm thấy bản ghi thỏa mãn, hệ thống cập nhật `arrived_at = now()`.
 3. Thông tin về lớp học sắp diễn ra (Tên loại lớp, phòng, giờ bắt đầu) được đính kèm vào dữ liệu phản hồi check-in để lễ tân nhắc nhở hội viên (ví dụ: *"Hội viên có lớp Yoga tại Phòng 201 bắt đầu lúc 18:00"*).
 
+#### D. Các luồng thay thế và ngoại lệ
+
+- Bỏ qua lớp ngoài khung giờ, khác chi nhánh hoặc chỗ đã ghi thời điểm đến. Lượt check-in vẫn thành công.
+
+#### E. Quy tắc nghiệp vụ liên quan
+
+- VD-05 và quy tắc về chỗ đặt của F8. Xem các BR nội bộ ở mục 4.
+
+#### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
+
+- `class_bookings`, `class_sessions`, `class_schedules`, `class_types`, `rooms`. Xem mục 5 và [bảng truy vết](bang-truy-vet-yeu-cau.md).
+
+#### G. Thiết kế giao diện và API liên quan
+
+- Hợp đồng tham chiếu ở mục 6.2 (chạy trong thao tác check-in).
+
 #### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
 
 ##### US-F4.3.1: Tự đánh dấu đến lớp khi check-in
 - **User story:** Là **Hệ thống**, tôi muốn **tự động ghi nhận thời điểm đến (`arrived_at`) cho chỗ đặt lớp học nhóm khi hội viên check-in hợp lệ**, để **huấn luyện viên nắm được học viên đã có mặt và hỗ trợ điểm danh chính xác**.
-- **BR liên quan:** BR-F4.1; tích hợp F8 (`class_bookings`); VD-05 (khung giờ `[start_at - 15 phút, start_at + 60 phút]`).
+- **BR liên quan:** BR-F4.1 và VD-05. Tích hợp F8 qua `class_bookings`. Giờ bắt đầu lớp nằm trong khoảng `[thời điểm check-in − 15 phút, thời điểm check-in + 60 phút]`.
 - **Version / Sprint:** v1 / Sprint 2
 - **Issue:** #137
 - **Tiêu chí chấp nhận:**
@@ -350,6 +391,18 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
   - Hội viên chưa thực hiện check-in trước đó, đã check-out rồi, hoặc lượt check-in thuộc chi nhánh khác.
   - Hệ thống báo: *"Hội viên không có lượt tập nào đang diễn ra cần check-out."*
 
+#### E. Quy tắc nghiệp vụ liên quan
+
+- BR-F4.6 và BR-F6.1 ([đặc tả F6](dac-ta-use-case-f6-dashboard-co-ban.md)). Xem các BR nội bộ ở mục 4.
+
+#### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
+
+- `checkins`, `staff`. Xem mục 5 và [bảng truy vết](bang-truy-vet-yeu-cau.md).
+
+#### G. Thiết kế giao diện và API liên quan
+
+- Hợp đồng tham chiếu ở mục 6.3.
+
 #### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
 
 ##### US-F4.4.1: Check-out cho hội viên
@@ -386,7 +439,7 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 - **Mã UC:** UC-F4.5
 - **Tên Use Case:** Xem lịch sử lượt check-in theo ngày tại quầy
 - **Tác nhân chính:** Lễ tân (`RECEPTIONIST`), Quản lý chi nhánh (`BRANCH_MANAGER`)
-- **Mô tả ngắn gọn:** Lễ tân/quản lý xem danh sách các lượt check-in trong ngày hoặc khoảng ngày tại chi nhánh, hỗ trợ lọc theo trạng thái (đang tập / đã về) và tìm kiếm theo tên hội viên.
+- **Mô tả ngắn gọn:** Lễ tân/quản lý xem danh sách các lượt check-in theo ngày đã chọn tại chi nhánh, lọc theo trạng thái (đang tập / đã về) và tìm kiếm theo tên hoặc mã hội viên.
 
 #### A. Tiền điều kiện
 - Người dùng đã đăng nhập với vai trò `RECEPTIONIST` hoặc `BRANCH_MANAGER`.
@@ -399,6 +452,22 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
 2. Hệ thống mặc định tải danh sách check-in của ngày hôm nay tại chi nhánh hiện tại.
 3. Người dùng có thể lọc theo: Ngày tập, Trạng thái (Đang tập: `checked_out_at IS NULL` / Đã ra về: `checked_out_at IS NOT NULL`), Phương thức (`MANUAL` / `FACE`), hoặc tìm theo tên/mã hội viên.
 4. Hệ thống trả về dữ liệu phân trang: Mã check-in, Mã hội viên, Họ tên hội viên, cờ ảnh đại diện (`hasAvatar`), Tên gói tập, Giờ vào, Giờ ra, Nhân viên thực hiện, Thời lượng tập luyện, Trạng thái.
+
+#### D. Các luồng thay thế và ngoại lệ
+
+- Khi không có lượt khớp bộ lọc, trả trang rỗng. Tham số phân trang sai bị từ chối theo S5.
+
+#### E. Quy tắc nghiệp vụ liên quan
+
+- BR-F4.3 (ngày Việt Nam), BR-F4.6 và S5. Xem các BR nội bộ ở mục 4.
+
+#### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
+
+- `checkins`, `members`, `member_avatars`, `memberships`, `packages`, `users`, `staff`. Xem mục 5 và [bảng truy vết](bang-truy-vet-yeu-cau.md).
+
+#### G. Thiết kế giao diện và API liên quan
+
+- Hợp đồng tham chiếu ở mục 6.4.
 
 #### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
 
@@ -536,6 +605,13 @@ Chức năng **F4 – Check-in tại quầy** là nghiệp vụ cốt lõi tại
     "message": "Check-out thành công. Hẹn gặp lại quý hội viên!"
   }
   ```
+
+### 6.4. Xem lịch sử check-in
+
+- **Endpoint:** `GET /api/v1/checkins`.
+- **Quyền truy cập:** `RECEPTIONIST`, `BRANCH_MANAGER`. Kết quả giới hạn ở chi nhánh của người thao tác.
+- **Tham số:** `date` (mặc định hôm nay theo giờ Việt Nam), `status`, `method`, `keyword`, `page` (mặc định 0) và `size` (mặc định 20, từ 1 đến 100).
+- **Kết quả:** `PageResponse`, mới nhất trước, với các trường ở UC-F4.5.
 
 ---
 

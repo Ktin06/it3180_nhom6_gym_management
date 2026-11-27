@@ -10,6 +10,7 @@
   - [Thiết kế dữ liệu](../../design/erd/thiet-ke-du-lieu.md) (bảng `checkins`, `invoices`, `payments`, `memberships`)
   - [Quy tắc mã nguồn](../../guides/quy-tac-ma-nguon.md) (Quy tắc số 6: Tiền là số nguyên VND; Báo cáo doanh thu dùng `LEFT JOIN` với `members`)
   - [ADR 0001](../../decisions/0001-cong-nghe.md), [ADR 0007](../../decisions/0007-cau-truc-ma-nguon.md)
+- **Cập nhật 27/11/2026:** đồng bộ mục A–H theo mẫu SRS và bổ sung liên kết truy vết S2-32 (#204).
 
 ---
 
@@ -68,6 +69,22 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
      AND checked_out_at IS NULL;
    ```
 4. Hệ thống trả về con số đếm và hiển thị trên thẻ Stat Card "Hội viên đang tập" kèm chỉ báo trạng thái hoạt động (chấm xanh nhấp nháy).
+
+#### D. Các luồng thay thế và ngoại lệ
+
+- Chủ chuỗi chưa chọn chi nhánh hoặc truyền chi nhánh không tồn tại thì xử lý theo bước 2.
+
+#### E. Quy tắc nghiệp vụ liên quan
+
+- BR-F6.1 và BR-F6.4. Xem các BR nội bộ ở mục 4.
+
+#### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
+
+- `checkins`, `branches`, `staff`. Xem mục 5 và [bảng truy vết](bang-truy-vet-yeu-cau.md).
+
+#### G. Thiết kế giao diện và API liên quan
+
+- Hợp đồng tham chiếu ở mục 6.1.
 
 #### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
 
@@ -134,6 +151,22 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 3. Hệ thống chuẩn bị đủ các khung giờ từ giờ của `branches.open_time` đến giờ của (`branches.close_time` trừ 1 phút), vì đúng giờ đóng cửa là ngoài giờ (F4). Ví dụ chi nhánh mở 06:00, đóng 22:00 thì có 16 khung 06h–21h; chi nhánh mở 05:30 thì khung đầu là 05h (lượt check-in 05:30–05:59). Khung giờ nào không có lượt check-in thì gán giá trị 0. Tổng các khung luôn bằng tổng lượt check-in ở bước 1, vì F4 chỉ nhận check-in trong giờ mở cửa.
 4. Hệ thống hiển thị biểu đồ cột (Bar Chart) giúp lễ tân nhận diện các khung giờ cao điểm (thường từ 17:00 – 20:00).
 
+#### D. Các luồng thay thế và ngoại lệ
+
+- Khung giờ mở cửa không có lượt check-in hiển thị 0 theo bước 3.
+
+#### E. Quy tắc nghiệp vụ liên quan
+
+- BR-F6.4. Xem các BR nội bộ ở mục 4.
+
+#### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
+
+- `checkins`, `branches`, `staff`. Xem mục 5 và [bảng truy vết](bang-truy-vet-yeu-cau.md).
+
+#### G. Thiết kế giao diện và API liên quan
+
+- Hợp đồng tham chiếu ở mục 6.1 và 6.2.
+
 #### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
 
 ##### US-F6.2.1: Lượt check-in theo giờ
@@ -178,10 +211,26 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
    WHERE i.branch_id = :branchId
      AND i.status = 'PAID'
      AND p.status = 'CONFIRMED'
-     AND (p.paid_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::date = :today;
+     AND p.paid_at >= :dayStart AND p.paid_at < :dayEnd;
    ```
 2. **Quy tắc bắt buộc:** Truy vấn sử dụng `LEFT JOIN members m ON i.member_id = m.id` vì đối với các hóa đơn khách lẻ mua nước, khăn, phụ kiện tại quầy, trường `member_id` có giá trị `NULL`. Nếu dùng `INNER JOIN` sẽ làm thất thoát số liệu doanh thu bán lẻ (Quy tắc nghiệp vụ dễ làm sai số 8).
 3. Hệ thống định dạng tiền tệ theo tiêu chuẩn Việt Nam (ví dụ: `15.450.000 đ`) và hiển thị trên thẻ Stat Card "Doanh thu hôm nay".
+
+#### D. Các luồng thay thế và ngoại lệ
+
+- Ngày không có khoản thu phù hợp hiển thị doanh thu bằng 0.
+
+#### E. Quy tắc nghiệp vụ liên quan
+
+- BR-F6.2–BR-F6.4. Xem các BR nội bộ ở mục 4.
+
+#### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
+
+- `invoices`, `payments`, `members`, `branches`, `staff`. Xem mục 5 và [bảng truy vết](bang-truy-vet-yeu-cau.md).
+
+#### G. Thiết kế giao diện và API liên quan
+
+- Hợp đồng tham chiếu ở mục 6.1.
 
 #### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
 
@@ -225,6 +274,22 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 3. Sắp xếp: gói `SESSION` đã về 0 buổi (ngày mai hết dùng) xếp lên đầu; còn lại theo ngày hết hạn tăng dần. Mỗi dòng ghi lý do cảnh báo: "Sắp hết hạn" (theo ngày) hoặc "Sắp hết buổi" (theo ngưỡng buổi); gói `SESSION` đã về 0 buổi luôn ghi "Sắp hết buổi"; các gói khác thỏa cả hai thì ghi "Sắp hết hạn".
 4. Hệ thống hiển thị bảng cảnh báo trên giao diện Dashboard.
 5. Khi lễ tân bấm nút **"Gia hạn"** tại một dòng hội viên, hệ thống điều hướng sang màn hình bán/gia hạn gói tập (F3) với thông tin hội viên đã được điền sẵn.
+
+#### D. Các luồng thay thế và ngoại lệ
+
+- Nếu không có gói thỏa điều kiện, trả danh sách rỗng và hiển thị danh sách không có cảnh báo.
+
+#### E. Quy tắc nghiệp vụ liên quan
+
+- BR-F6.4, BR-F6.5 và VD-25. Xem các BR nội bộ ở mục 4.
+
+#### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
+
+- `memberships`, `members`, `member_avatars`, `packages`, `system_configs`, `branches`, `staff`. Xem mục 5 và [bảng truy vết](bang-truy-vet-yeu-cau.md).
+
+#### G. Thiết kế giao diện và API liên quan
+
+- Hợp đồng tham chiếu ở mục 6.3.
 
 #### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
 
@@ -278,7 +343,8 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 1. Hệ thống truy vấn 10 bản ghi mới nhất từ bảng `checkins` tại chi nhánh trong ngày:
    ```sql
    SELECT c.id, c.checked_in_at, c.checked_out_at, c.method,
-          m.member_code, m.full_name, m.avatar_url,
+          m.member_code, m.full_name,
+          EXISTS (SELECT 1 FROM member_avatars ma WHERE ma.member_id = m.id) AS has_avatar,
           pkg.name AS package_name, ms.package_type
    FROM checkins c
    JOIN members m ON c.member_id = m.id
@@ -292,6 +358,22 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
 2. Hiển thị bảng kèm tag trạng thái:
    - Nếu `checked_out_at IS NULL`: Tag xanh lá "Đang tập" kèm nút bấm "Check-out nhanh".
    - Nếu `checked_out_at IS NOT NULL`: Tag xám "Đã về" kèm thời lượng tập.
+
+#### D. Các luồng thay thế và ngoại lệ
+
+- Khi không có lượt check-in trong ngày, danh sách rỗng. Check-out nhanh dùng luồng UC-F4.4.
+
+#### E. Quy tắc nghiệp vụ liên quan
+
+- BR-F6.1 và BR-F6.4. Xem các BR nội bộ ở mục 4.
+
+#### F. Dữ liệu và bảng cơ sở dữ liệu liên quan
+
+- `checkins`, `members`, `member_avatars`, `memberships`, `packages`, `branches`, `staff`. Xem mục 5 và [bảng truy vết](bang-truy-vet-yeu-cau.md).
+
+#### G. Thiết kế giao diện và API liên quan
+
+- Hợp đồng tham chiếu ở mục 6.4.
 
 #### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
 
@@ -369,7 +451,7 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
   ```
 
 ### 6.3. Lấy danh sách gói tập sắp hết hạn
-- **Endpoint:** `GET /api/v1/dashboard/expiring-memberships?limit=5`
+- **Endpoint:** `GET /api/v1/dashboard/expiring-memberships?limit=10`. Giới hạn kết quả từ 1 đến 100, mặc định 10.
 - **Quyền truy cập:** giống mục 6.1; chỉ trả dữ liệu của chi nhánh được xác định như ở UC-F6.1. Vai trò khác (`MEMBER`, `TRAINER`) nhận 403, vì API này trả họ tên và số điện thoại của hội viên (S3).
 - **Response Success (200 OK):**
   ```json
@@ -380,6 +462,7 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
       "memberCode": "HV000015",
       "fullName": "Trần Thị Mai",
       "phone": "0987654321",
+      "hasAvatar": false,
       "packageName": "Gói Hội Viên Vàng 3 Tháng",
       "packageType": "TIME",
       "endDate": "2026-11-05",
@@ -389,6 +472,12 @@ Chức năng **F6 – Dashboard cơ bản** là màn hình trung tâm đầu ti�
     }
   ]
   ```
+
+### 6.4. Xem lượt check-in mới nhất
+
+- **Endpoint:** `GET /api/v1/dashboard/latest-checkins?limit=10`. Giới hạn kết quả từ 1 đến 50, mặc định 10.
+- **Quyền truy cập và tham số `branchId`:** áp dụng mục 6.1.
+- **Kết quả:** danh sách lượt check-in trong ngày, mới nhất trước. Mỗi lượt gồm mã lượt check-in, thông tin hội viên, cờ `hasAvatar`, gói tập, phương thức check-in, giờ vào/ra, thời lượng và trạng thái.
 
 ---
 
