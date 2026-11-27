@@ -61,6 +61,11 @@ public class ClassRepository {
         jdbc.queryForList("SELECT id FROM branches WHERE id=:id FOR UPDATE", Map.of("id", branchId), Long.class);
     }
 
+    /** Khóa dòng huấn luyện viên ({@code FOR NO KEY UPDATE}) để đồng bộ với luồng đặt buổi PT (NF6). */
+    public void lockTrainer(long trainerId) {
+        jdbc.queryForList("SELECT id FROM staff WHERE id=:id FOR NO KEY UPDATE", Map.of("id", trainerId), Long.class);
+    }
+
     public Resources resources(long branchId, ScheduleRequest request) {
         return rows("""
             SELECT r.branch_id room_branch_id, s.branch_id trainer_branch_id, r.capacity room_capacity,
