@@ -8,17 +8,17 @@
 
 | Chức năng | UC | US | AC | AC đã có TC | AC chưa có TC | TC |
 | --- | --- | --- | --- | --- | --- | --- |
-| F1 | 6 | 6 | 29 | 24 | 5 | 118 |
+| F1 | 6 | 6 | 31 | 30 | 1 | 144 |
 | F2 | 5 | 6 | 31 | 27 | 4 | 110 |
-| F3 | 5 | 6 | 45 | 44 | 1 | 136 |
+| F3 | 5 | 6 | 45 | 45 | 0 | 137 |
 | F4 | 5 | 5 | 37 | 0 | 37 | 0 |
 | F5 | 5 | 5 | 49 | 49 | 0 | 154 |
 | F6 | 5 | 5 | 16 | 0 | 16 | 0 |
-| F7 | 5 | 5 | 34 | 0 | 34 | 0 |
+| F7 | 5 | 5 | 34 | 14 | 20 | 31 |
 | F8 | 9 | 9 | 55 | 53 | 2 | 81 |
 | F9 | 7 | 7 | 63 | 0 | 63 | 0 |
 | F10 | 5 | 4 | 25 | 12 | 13 | 29 |
-| **Tổng** | **57** | **58** | **384** | **209** | **175** | **628** |
+| **Tổng** | **57** | **58** | **386** | **230** | **156** | **686** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -43,15 +43,10 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC | Tên | US |
 | --- | --- | --- |
 | AC-F1.2.1-06 | Từ chối dữ liệu đăng nhập sai định dạng (không hỗ trợ đăng nhập bằng số điện thoại) | US-F1.2.1 |
-| AC-F1.4.1-01 | Đổi mật khẩu thành công, thu hồi toàn bộ phiên và yêu cầu đăng nhập lại | US-F1.4.1 |
-| AC-F1.4.1-02 | Từ chối khi mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ | US-F1.4.1 |
-| AC-F1.4.1-03 | Từ chối khi dữ liệu đầu vào sai định dạng hoặc mật khẩu mới không đạt chuẩn bảo mật | US-F1.4.1 |
-| AC-F1.4.1-04 | Chặn truy cập khi chưa đăng nhập và mở đúng khung giao diện cho mọi vai trò đã đăng nhập | US-F1.4.1 |
 | AC-F2.5.1-01 | Ghi chỉ số cơ thể thành công với ít nhất một chỉ số | US-F2.5.1 |
 | AC-F2.5.1-02 | Từ chối dữ liệu chỉ số cơ thể không hợp lệ | US-F2.5.1 |
 | AC-F2.5.1-03 | Xem lịch sử chỉ số cơ thể sắp xếp mới nhất trước | US-F2.5.1 |
 | AC-F2.5.1-04 | Phân quyền ghi và xem chỉ số cơ thể theo vai trò, chi nhánh và quan hệ PT | US-F2.5.1 |
-| AC-F3.5.1-09 | Hóa đơn tại quầy không tự hủy | US-F3.5.1 |
 | AC-F4.1.1-01 | Tìm theo mã hội viên hoặc số điện thoại | US-F4.1.1 |
 | AC-F4.1.1-02 | Hiển thị ảnh đại diện và thông tin lớp học sắp diễn ra | US-F4.1.1 |
 | AC-F4.1.1-03 | Từ khóa tìm kiếm sai định dạng | US-F4.1.1 |
@@ -122,23 +117,9 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F7.3.1-04 | Hội viên chưa có hóa đơn nào | US-F7.3.1 |
 | AC-F7.3.1-05 | Tham số phân trang | US-F7.3.1 |
 | AC-F7.3.1-06 | Từ chối người không được xem | US-F7.3.1 |
-| AC-F7.4.1-01 | Gửi yêu cầu mua tạo hóa đơn chờ và gói chờ, giá lấy ở server | US-F7.4.1 |
 | AC-F7.4.1-02 | Gói chỉ hiệu lực sau khi lễ tân thu tiền | US-F7.4.1 |
-| AC-F7.4.1-03 | Hóa đơn chờ tự hủy sau `PENDING_INVOICE_TTL_DAYS`, kéo theo gói chờ | US-F7.4.1 |
-| AC-F7.4.1-04 | Số ngày tự hủy đọc từ cấu hình | US-F7.4.1 |
-| AC-F7.4.1-05 | Đã có gói cùng loại đang chờ | US-F7.4.1 |
-| AC-F7.4.1-06 | Hai yêu cầu gửi cùng lúc | US-F7.4.1 |
-| AC-F7.4.1-07 | Gói không hợp lệ để mua | US-F7.4.1 |
-| AC-F7.4.1-08 | Dữ liệu sai và người không được gửi | US-F7.4.1 |
-| AC-F7.5.1-01 | Gia hạn gói còn hiệu lực: tạo gói mới chờ, gói cũ không đổi | US-F7.5.1 |
-| AC-F7.5.1-02 | Gói đã hết hạn vẫn gia hạn được | US-F7.5.1 |
-| AC-F7.5.1-03 | Gói đã hủy không gia hạn được | US-F7.5.1 |
-| AC-F7.5.1-04 | Gói của hội viên khác hoặc không tồn tại: cùng một câu trả lời | US-F7.5.1 |
-| AC-F7.5.1-05 | Loại gói đã ngừng bán | US-F7.5.1 |
-| AC-F7.5.1-06 | Đã có gói cùng loại đang chờ | US-F7.5.1 |
 | AC-F7.5.1-07 | Hai yêu cầu gia hạn gửi cùng lúc | US-F7.5.1 |
 | AC-F7.5.1-08 | Hóa đơn gia hạn tự hủy kéo theo gói chờ | US-F7.5.1 |
-| AC-F7.5.1-09 | Dữ liệu sai và người không được gửi | US-F7.5.1 |
 | AC-F8.7.1-06 | Giảm sức chứa đúng biên | US-F8.7.1 |
 | AC-F8.7.1-07 | Buổi không cho sửa sức chứa | US-F8.7.1 |
 | AC-F9.1.1-01 | Khai báo khung rảnh hợp lệ | US-F9.1.1 |
@@ -313,11 +294,39 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F1.3.1-04e `AuthSessionConcurrencyIntegrationTest#dangXuatBangJwtHetHanCuaTaiKhoanAVanGiuPhienCuaTaiKhoanB`
       - TC-F1.3.1-04f `auth/account-change.test.tsx › TC-F1.3.1-04f: refresh khác tài khoản đóng trang bảo vệ và đ`
 - **UC-F1.4** Đổi mật khẩu
-  - **US-F1.4.1** Đổi mật khẩu (#120)
-    - AC-F1.4.1-01 Đổi mật khẩu thành công, thu hồi toàn bộ phiên và yêu cầu đăng nhập lại (BR-F1-03, BR-F1-04) ❌ chưa có TC
-    - AC-F1.4.1-02 Từ chối khi mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ (BR-F1-07) ❌ chưa có TC
-    - AC-F1.4.1-03 Từ chối khi dữ liệu đầu vào sai định dạng hoặc mật khẩu mới không đạt chuẩn bảo mật (BR-F1-03) ❌ chưa có TC
-    - AC-F1.4.1-04 Chặn truy cập khi chưa đăng nhập và mở đúng khung giao diện cho mọi vai trò đã đăng nhập (BR-F1-05) ❌ chưa có TC
+  - **US-F1.4.1** Đổi mật khẩu (#120) ✅ mọi AC có TC
+    - AC-F1.4.1-01 Đổi mật khẩu thành công, thu hồi toàn bộ phiên và yêu cầu đăng nhập lại (BR-F1-03, BR-F1-04)
+      - TC-F1.4.1-01a `ChangePasswordIntegrationTest#doiMatKhauThanhCongMatKhauMoiDangNhapDuocMatKhauCuKhong`
+      - TC-F1.4.1-01b `ChangePasswordIntegrationTest#doiMatKhauThuHoiMoiRefreshTokenCuaNguoiDung`
+      - TC-F1.4.1-01c `AuthServiceTest#doiMatKhauThanhCongCapNhatPasswordHash`
+      - TC-F1.4.1-01d `AuthServiceTest#doiMatKhauThuHoiMoiPhienCuaNguoiDung`
+      - TC-F1.4.1-01e `features/auth/api/auth-api.test.ts › TC-F1.4.1-01e: changePassword gọi POST /auth/change-password`
+      - TC-F1.4.1-01f `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-01f: Đổi mật khẩu thành công gọi API, xóa phiên tr`
+      - TC-F1.4.1-01g `auth/AuthProvider.test.tsx › TC-F1.4.1-01g: completePasswordChange phát publishSessionCha`
+      - TC-F1.4.1-01h `ChangePasswordIntegrationTest#concurrentPasswordChangesAcceptOldPasswordOnlyOnce`
+      - TC-F1.4.1-01i `ChangePasswordIntegrationTest#passwordChangeRevokesInFlightRefreshSuccessor`
+      - TC-F1.4.1-01j `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-01j: Phản hồi đổi mật khẩu đến muộn giữ phiên mới `
+      - TC-F1.4.1-01k `auth/AuthProvider.test.tsx › TC-F1.4.1-01k: giữ lượt đăng nhập mới cùng tài khoản khi tab`
+    - AC-F1.4.1-02 Từ chối khi mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ (BR-F1-07)
+      - TC-F1.4.1-02a `AuthServiceTest#doiMatKhauHienTaiSaiHoacMatKhauMoiTrungCuNemBusinessRuleException`
+      - TC-F1.4.1-02b `AuthControllerTest#doiMatKhauViPhamQuyTacNghiepVuTra422`
+      - TC-F1.4.1-02c `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-02c: Lỗi 422 từ API hiển thị đúng thông báo và khô`
+    - AC-F1.4.1-03 Từ chối khi dữ liệu đầu vào sai định dạng hoặc mật khẩu mới không đạt chuẩn bảo mật (BR-F1-03)
+      - TC-F1.4.1-03a `AuthControllerTest#doiMatKhauSaiDinhDangTra400KemErrors`
+      - TC-F1.4.1-03b `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-03b: Kiểm tra quy tắc mật khẩu S1, khớp mật khẩu n`
+    - AC-F1.4.1-04 Chặn truy cập khi chưa đăng nhập và mở đúng khung giao diện cho mọi vai trò đã đăng nhập (BR-F1-05)
+      - TC-F1.4.1-04a `AuthControllerTest#doiMatKhauKhongCoTokenTra401`
+      - TC-F1.4.1-04b `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-04b: mở /doi-mat-khau đúng layout theo vai trò và `
+      - TC-F1.4.1-04c `layouts/UserMenu.test.tsx › TC-F1.4.1-04c: UserMenu có mục Đổi mật khẩu cho mọi vai trò,`
+      - TC-F1.4.1-04d `layouts/UserMenu.test.tsx › TC-F1.4.1-04d: ẩn chữ của nút trên màn hẹp 360px, giữ tên nú`
+      - TC-F1.4.1-04e `AuthServiceTest#doiMatKhauTaiKhoanKhongActiveNemForbiddenException`
+    - AC-F1.4.1-05 Nhập sai mật khẩu hiện tại dùng chung bộ đếm khóa tạm với đăng nhập (BR-F1-06)
+      - TC-F1.4.1-05a `ChangePasswordIntegrationTest#saiMatKhauHienTaiNhieuLanThiKhoaTam`
+      - TC-F1.4.1-05b `ChangePasswordIntegrationTest#dangNhapSaiVaDoiMatKhauSaiDungChungBoDem`
+      - TC-F1.4.1-05c `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-05c: Tài khoản đang khóa tạm (403) thì hiển thị câ`
+    - AC-F1.4.1-06 Đổi mật khẩu thành công đặt lại bộ đếm sai và khóa tạm (BR-F1-04, BR-F1-06)
+      - TC-F1.4.1-06a `ChangePasswordIntegrationTest#doiMatKhauThanhCongDatLaiBoDemVaXoaCookie`
+      - TC-F1.4.1-06b `ChangePasswordIntegrationTest#matKhauMoiTrungKhongTangBoDem`
 - **UC-F1.5** Quên mật khẩu và đặt lại mật khẩu (Sprint 2)
   - **US-F1.5.1** Quên và đặt lại mật khẩu (#121) ✅ mọi AC có TC
     - AC-F1.5.1-01 Yêu cầu quên mật khẩu cho tài khoản ACTIVE tạo token băm SHA-256 hạn 30 phút, gửi email và trả 200 câu chung (BR-F1-01, BR-F1-08)
@@ -659,7 +668,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F3.4.1-06f `PackageDeactivateIntegrationTest#missingPackageIs404WithEmptyJsonBodyWithoutMutation`
       - TC-F3.4.1-06h `features/packages/pages/PackagesPage.test.tsx › TC-F3.4.1-04c, TC-F3.4.1-06h: Lỗi 422, 403, 404 khi ngừng bá`
 - **UC-F3.5** Bán gói tập tại quầy (đăng ký mới / gia hạn)
-  - **US-F3.5.1** Bán và gia hạn gói tại quầy (#134)
+  - **US-F3.5.1** Bán và gia hạn gói tại quầy (#134) ✅ mọi AC có TC
     - AC-F3.5.1-01 Bán gói tạo hóa đơn chờ và gói chờ, giá lấy ở server (BR-F3-04, BR-F3-13)
       - TC-F3.5.1-01a `InvoiceSaleIntegrationTest#sellCreatesPendingInvoiceAndMembershipWithServerPrice`
       - TC-F3.5.1-01b `InvoiceSaleIntegrationTest#sessionPackageCopiesSessionCount`
@@ -699,7 +708,8 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F3.5.1-08e `InvoiceSaleIntegrationTest#memberOfOtherBranchIsHidden`
       - TC-F3.5.1-08f `InvoiceSaleConcurrencyIntegrationTest#saleWaitsForCatalogChangeAndReadsCommittedValues`
       - TC-F3.5.1-08g `features/packages/pages/SellPackagePage.test.tsx › TC-F3.5.1-08g: Lỗi 422 hoặc 404 khi hội viên ngừng hoạt động`
-    - AC-F3.5.1-09 Hóa đơn tại quầy không tự hủy (BR-F3-14) ❌ chưa có TC
+    - AC-F3.5.1-09 Hóa đơn tại quầy không tự hủy (BR-F3-14)
+      - TC-F3.5.1-09a `PendingInvoiceExpiryIntegrationTest#counterInvoiceIsNeverAutoCancelled`
     - AC-F3.5.1-10 Tự kích hoạt gói nối tiếp đúng ngày (BR-F3-11)
       - TC-F3.5.1-10a `MembershipLifecycleIntegrationTest#expiresOldBeforeActivatingNext`
       - TC-F3.5.1-10b `MembershipLifecycleIntegrationTest#lastDeductionTodayRetainsAccess`
@@ -1054,25 +1064,56 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F7.3.1-06 Từ chối người không được xem ❌ chưa có TC
 - **UC-F7.4** Gửi yêu cầu mua gói
   - **US-F7.4.1** Gửi yêu cầu mua gói (#153)
-    - AC-F7.4.1-01 Gửi yêu cầu mua tạo hóa đơn chờ và gói chờ, giá lấy ở server ❌ chưa có TC
+    - AC-F7.4.1-01 Gửi yêu cầu mua tạo hóa đơn chờ và gói chờ, giá lấy ở server
+      - TC-F7.4.1-01a `PortalPurchaseIntegrationTest#purchaseCreatesPortalInvoice`
     - AC-F7.4.1-02 Gói chỉ hiệu lực sau khi lễ tân thu tiền ❌ chưa có TC
-    - AC-F7.4.1-03 Hóa đơn chờ tự hủy sau `PENDING_INVOICE_TTL_DAYS`, kéo theo gói chờ ❌ chưa có TC
-    - AC-F7.4.1-04 Số ngày tự hủy đọc từ cấu hình ❌ chưa có TC
-    - AC-F7.4.1-05 Đã có gói cùng loại đang chờ ❌ chưa có TC
-    - AC-F7.4.1-06 Hai yêu cầu gửi cùng lúc ❌ chưa có TC
-    - AC-F7.4.1-07 Gói không hợp lệ để mua ❌ chưa có TC
-    - AC-F7.4.1-08 Dữ liệu sai và người không được gửi ❌ chưa có TC
+    - AC-F7.4.1-03 Hóa đơn chờ tự hủy sau `PENDING_INVOICE_TTL_DAYS`, kéo theo gói chờ
+      - TC-F7.4.1-03a `PendingInvoiceExpiryIntegrationTest#cancelsPortalInvoiceExactlyAtTtl`
+      - TC-F7.4.1-03b `PendingInvoiceExpiryIntegrationTest#runningTwiceChangesNothingMore`
+      - TC-F7.4.1-03c `PendingInvoiceExpiryIntegrationTest#paidPortalInvoiceIsUntouched`
+      - TC-F7.4.1-03d `PendingInvoiceExpiryIntegrationTest#canBuyAgainAfterAutoCancel`
+      - TC-F7.4.1-03e `PendingInvoiceExpiryIntegrationTest#brokenInvoiceDoesNotBlockOthers`
+      - TC-F7.4.1-03f `PendingInvoiceExpiryIntegrationTest#expiredOwnInvoiceIsCancelledOnNewRequest`
+      - TC-F7.4.1-03g `PendingInvoiceExpiryIntegrationTest#notYetExpiredOwnInvoiceStillBlocks`
+    - AC-F7.4.1-04 Số ngày tự hủy đọc từ cấu hình
+      - TC-F7.4.1-04a `PortalPurchaseIntegrationTest#expiresAtUsesBranchTtl`
+      - TC-F7.4.1-04b `PendingInvoiceExpiryIntegrationTest#ttlIsReadPerBranch`
+    - AC-F7.4.1-05 Đã có gói cùng loại đang chờ
+      - TC-F7.4.1-05a `PortalPurchaseIntegrationTest#duplicatePendingForSamePackageIs422`
+      - TC-F7.4.1-05b `PortalPurchaseIntegrationTest#counterPendingForSamePackageIs422`
+      - TC-F7.4.1-05c `PortalPurchaseIntegrationTest#otherPackageOfSameTypePendingIs422`
+      - TC-F7.4.1-05d `PortalPurchaseIntegrationTest#upcomingOfSameTypeIs422`
+      - TC-F7.4.1-05e `PortalPurchaseIntegrationTest#inactiveMemberWithPendingIs422`
+    - AC-F7.4.1-06 Hai yêu cầu gửi cùng lúc
+      - TC-F7.4.1-06a `PortalPurchaseConcurrencyIntegrationTest#twoPurchasesAtOnceCreateExactlyOne`
+    - AC-F7.4.1-07 Gói không hợp lệ để mua
+      - TC-F7.4.1-07a `PortalPurchaseIntegrationTest#unknownPackageIs404`
+      - TC-F7.4.1-07b `PortalPurchaseIntegrationTest#inactivePackageIs422`
+      - TC-F7.4.1-07c `PortalPurchaseIntegrationTest#packageOfOtherBranchIs422`
+      - TC-F7.4.1-07d `PortalPurchaseIntegrationTest#inactiveMemberIs422`
+    - AC-F7.4.1-08 Dữ liệu sai và người không được gửi
+      - TC-F7.4.1-08a `PortalPurchaseIntegrationTest#invalidPurchaseBodyIs400`
+      - TC-F7.4.1-08b `PortalPurchaseIntegrationTest#nonMemberIs403`
+      - TC-F7.4.1-08c `PortalPurchaseIntegrationTest#memberWithoutProfileIs403`
 - **UC-F7.5** Gửi yêu cầu gia hạn gói
   - **US-F7.5.1** Gửi yêu cầu gia hạn (#154)
-    - AC-F7.5.1-01 Gia hạn gói còn hiệu lực: tạo gói mới chờ, gói cũ không đổi ❌ chưa có TC
-    - AC-F7.5.1-02 Gói đã hết hạn vẫn gia hạn được ❌ chưa có TC
-    - AC-F7.5.1-03 Gói đã hủy không gia hạn được ❌ chưa có TC
-    - AC-F7.5.1-04 Gói của hội viên khác hoặc không tồn tại: cùng một câu trả lời ❌ chưa có TC
-    - AC-F7.5.1-05 Loại gói đã ngừng bán ❌ chưa có TC
-    - AC-F7.5.1-06 Đã có gói cùng loại đang chờ ❌ chưa có TC
+    - AC-F7.5.1-01 Gia hạn gói còn hiệu lực: tạo gói mới chờ, gói cũ không đổi
+      - TC-F7.5.1-01a `PortalPurchaseIntegrationTest#renewCreatesNewPendingMembership`
+    - AC-F7.5.1-02 Gói đã hết hạn vẫn gia hạn được
+      - TC-F7.5.1-02a `PortalPurchaseIntegrationTest#renewCancelledMembershipIs422`
+    - AC-F7.5.1-03 Gói đã hủy không gia hạn được
+      - TC-F7.5.1-03a `PortalPurchaseIntegrationTest#renewCancelledMembershipIs422`
+    - AC-F7.5.1-04 Gói của hội viên khác hoặc không tồn tại: cùng một câu trả lời
+      - TC-F7.5.1-04a `PortalPurchaseIntegrationTest#renewOthersMembershipIs404`
+      - TC-F7.5.1-04b `PortalPurchaseIntegrationTest#renewUnknownMembershipIs404`
+    - AC-F7.5.1-05 Loại gói đã ngừng bán
+      - TC-F7.5.1-05a `PortalPurchaseIntegrationTest#renewInactivePackageIs422`
+    - AC-F7.5.1-06 Đã có gói cùng loại đang chờ
+      - TC-F7.5.1-06a `PortalPurchaseIntegrationTest#renewTwiceIs422`
     - AC-F7.5.1-07 Hai yêu cầu gia hạn gửi cùng lúc ❌ chưa có TC
     - AC-F7.5.1-08 Hóa đơn gia hạn tự hủy kéo theo gói chờ ❌ chưa có TC
-    - AC-F7.5.1-09 Dữ liệu sai và người không được gửi ❌ chưa có TC
+    - AC-F7.5.1-09 Dữ liệu sai và người không được gửi
+      - TC-F7.5.1-09a `PortalPurchaseIntegrationTest#invalidRenewBodyIs400`
 
 ### F8
 
@@ -1452,6 +1493,32 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F1.3.1-04d | AC-F1.3.1-04 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthSessionConcurrencyIntegrationTest#dangXuatBangJwtCuaTaiKhoanAKhongThuHoiHoacXoaCookieCuaTaiKhoanB` |
 | TC-F1.3.1-04e | AC-F1.3.1-04 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthSessionConcurrencyIntegrationTest#dangXuatBangJwtHetHanCuaTaiKhoanAVanGiuPhienCuaTaiKhoanB` |
 | TC-F1.3.1-04f | AC-F1.3.1-04 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `auth/account-change.test.tsx › TC-F1.3.1-04f: refresh khác tài khoản đóng trang bảo vệ và đ` |
+| TC-F1.4.1-01a | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06, BR-F1-07 | `ChangePasswordIntegrationTest#doiMatKhauThanhCongMatKhauMoiDangNhapDuocMatKhauCuKhong` |
+| TC-F1.4.1-01b | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06, BR-F1-07 | `ChangePasswordIntegrationTest#doiMatKhauThuHoiMoiRefreshTokenCuaNguoiDung` |
+| TC-F1.4.1-01c | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06, BR-F1-07 | `AuthServiceTest#doiMatKhauThanhCongCapNhatPasswordHash` |
+| TC-F1.4.1-01d | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06, BR-F1-07 | `AuthServiceTest#doiMatKhauThuHoiMoiPhienCuaNguoiDung` |
+| TC-F1.4.1-01e | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06, BR-F1-07 | `features/auth/api/auth-api.test.ts › TC-F1.4.1-01e: changePassword gọi POST /auth/change-password` |
+| TC-F1.4.1-01f | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06, BR-F1-07 | `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-01f: Đổi mật khẩu thành công gọi API, xóa phiên tr` |
+| TC-F1.4.1-01g | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06, BR-F1-07 | `auth/AuthProvider.test.tsx › TC-F1.4.1-01g: completePasswordChange phát publishSessionCha` |
+| TC-F1.4.1-01h | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06, BR-F1-07 | `ChangePasswordIntegrationTest#concurrentPasswordChangesAcceptOldPasswordOnlyOnce` |
+| TC-F1.4.1-01i | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06, BR-F1-07 | `ChangePasswordIntegrationTest#passwordChangeRevokesInFlightRefreshSuccessor` |
+| TC-F1.4.1-01j | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06, BR-F1-07 | `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-01j: Phản hồi đổi mật khẩu đến muộn giữ phiên mới ` |
+| TC-F1.4.1-01k | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06, BR-F1-07 | `auth/AuthProvider.test.tsx › TC-F1.4.1-01k: giữ lượt đăng nhập mới cùng tài khoản khi tab` |
+| TC-F1.4.1-02a | AC-F1.4.1-02 | US-F1.4.1 | UC-F1.4 | BR-F1-07, BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06 | `AuthServiceTest#doiMatKhauHienTaiSaiHoacMatKhauMoiTrungCuNemBusinessRuleException` |
+| TC-F1.4.1-02b | AC-F1.4.1-02 | US-F1.4.1 | UC-F1.4 | BR-F1-07, BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06 | `AuthControllerTest#doiMatKhauViPhamQuyTacNghiepVuTra422` |
+| TC-F1.4.1-02c | AC-F1.4.1-02 | US-F1.4.1 | UC-F1.4 | BR-F1-07, BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06 | `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-02c: Lỗi 422 từ API hiển thị đúng thông báo và khô` |
+| TC-F1.4.1-03a | AC-F1.4.1-03 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06, BR-F1-07 | `AuthControllerTest#doiMatKhauSaiDinhDangTra400KemErrors` |
+| TC-F1.4.1-03b | AC-F1.4.1-03 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06, BR-F1-07 | `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-03b: Kiểm tra quy tắc mật khẩu S1, khớp mật khẩu n` |
+| TC-F1.4.1-04a | AC-F1.4.1-04 | US-F1.4.1 | UC-F1.4 | BR-F1-05, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-07 | `AuthControllerTest#doiMatKhauKhongCoTokenTra401` |
+| TC-F1.4.1-04b | AC-F1.4.1-04 | US-F1.4.1 | UC-F1.4 | BR-F1-05, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-07 | `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-04b: mở /doi-mat-khau đúng layout theo vai trò và ` |
+| TC-F1.4.1-04c | AC-F1.4.1-04 | US-F1.4.1 | UC-F1.4 | BR-F1-05, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-07 | `layouts/UserMenu.test.tsx › TC-F1.4.1-04c: UserMenu có mục Đổi mật khẩu cho mọi vai trò,` |
+| TC-F1.4.1-04d | AC-F1.4.1-04 | US-F1.4.1 | UC-F1.4 | BR-F1-05, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-07 | `layouts/UserMenu.test.tsx › TC-F1.4.1-04d: ẩn chữ của nút trên màn hẹp 360px, giữ tên nú` |
+| TC-F1.4.1-04e | AC-F1.4.1-04 | US-F1.4.1 | UC-F1.4 | BR-F1-05, BR-F1-03, BR-F1-04, BR-F1-06, BR-F1-07 | `AuthServiceTest#doiMatKhauTaiKhoanKhongActiveNemForbiddenException` |
+| TC-F1.4.1-05a | AC-F1.4.1-05 | US-F1.4.1 | UC-F1.4 | BR-F1-06, BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `ChangePasswordIntegrationTest#saiMatKhauHienTaiNhieuLanThiKhoaTam` |
+| TC-F1.4.1-05b | AC-F1.4.1-05 | US-F1.4.1 | UC-F1.4 | BR-F1-06, BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `ChangePasswordIntegrationTest#dangNhapSaiVaDoiMatKhauSaiDungChungBoDem` |
+| TC-F1.4.1-05c | AC-F1.4.1-05 | US-F1.4.1 | UC-F1.4 | BR-F1-06, BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-05c: Tài khoản đang khóa tạm (403) thì hiển thị câ` |
+| TC-F1.4.1-06a | AC-F1.4.1-06 | US-F1.4.1 | UC-F1.4 | BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05, BR-F1-07 | `ChangePasswordIntegrationTest#doiMatKhauThanhCongDatLaiBoDemVaXoaCookie` |
+| TC-F1.4.1-06b | AC-F1.4.1-06 | US-F1.4.1 | UC-F1.4 | BR-F1-04, BR-F1-06, BR-F1-03, BR-F1-05, BR-F1-07 | `ChangePasswordIntegrationTest#matKhauMoiTrungKhongTangBoDem` |
 | TC-F1.5.1-01a | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#emailActiveTaoPasswordResetBamHan30PhutVaGuiEmail` |
 | TC-F1.5.1-01b | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `AuthControllerTest#quenMatKhauCongKhaiTra200CauChung` |
 | TC-F1.5.1-01c | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `features/auth/pages/ForgotPasswordPage.test.tsx › TC-F1.5.1-01c: nhập email ở /quen-mat-khau gửi email chuẩn h` |
@@ -1720,6 +1787,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.5.1-08e | AC-F3.5.1-08 | US-F3.5.1 | UC-F3.5 | BR-F3-09, BR-F3-04, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#memberOfOtherBranchIsHidden` |
 | TC-F3.5.1-08f | AC-F3.5.1-08 | US-F3.5.1 | UC-F3.5 | BR-F3-09, BR-F3-04, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleConcurrencyIntegrationTest#saleWaitsForCatalogChangeAndReadsCommittedValues` |
 | TC-F3.5.1-08g | AC-F3.5.1-08 | US-F3.5.1 | UC-F3.5 | BR-F3-09, BR-F3-04, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `features/packages/pages/SellPackagePage.test.tsx › TC-F3.5.1-08g: Lỗi 422 hoặc 404 khi hội viên ngừng hoạt động` |
+| TC-F3.5.1-09a | AC-F3.5.1-09 | US-F3.5.1 | UC-F3.5 | BR-F3-14, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13 | `PendingInvoiceExpiryIntegrationTest#counterInvoiceIsNeverAutoCancelled` |
 | TC-F3.5.1-10a | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#expiresOldBeforeActivatingNext` |
 | TC-F3.5.1-10b | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#lastDeductionTodayRetainsAccess` |
 | TC-F3.5.1-10c | AC-F3.5.1-10 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipLifecycleIntegrationTest#zeroSessionsFromYesterdayExpire` |
@@ -1901,6 +1969,37 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F5.5.1-11d | AC-F5.5.1-11 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#classBookingDoesNotBlockPtRefund` |
 | TC-F5.5.1-11e | AC-F5.5.1-11 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-11e: lỗi 422 gói đã dùng và còn chỗ đặt lớp hiện đ` |
 | TC-F5.5.1-12a | AC-F5.5.1-12 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#otherMembershipUsageDoesNotBlock` |
+| TC-F7.4.1-01a | AC-F7.4.1-01 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#purchaseCreatesPortalInvoice` |
+| TC-F7.4.1-03a | AC-F7.4.1-03 | US-F7.4.1 | UC-F7.4 |  | `PendingInvoiceExpiryIntegrationTest#cancelsPortalInvoiceExactlyAtTtl` |
+| TC-F7.4.1-03b | AC-F7.4.1-03 | US-F7.4.1 | UC-F7.4 |  | `PendingInvoiceExpiryIntegrationTest#runningTwiceChangesNothingMore` |
+| TC-F7.4.1-03c | AC-F7.4.1-03 | US-F7.4.1 | UC-F7.4 |  | `PendingInvoiceExpiryIntegrationTest#paidPortalInvoiceIsUntouched` |
+| TC-F7.4.1-03d | AC-F7.4.1-03 | US-F7.4.1 | UC-F7.4 |  | `PendingInvoiceExpiryIntegrationTest#canBuyAgainAfterAutoCancel` |
+| TC-F7.4.1-03e | AC-F7.4.1-03 | US-F7.4.1 | UC-F7.4 |  | `PendingInvoiceExpiryIntegrationTest#brokenInvoiceDoesNotBlockOthers` |
+| TC-F7.4.1-03f | AC-F7.4.1-03 | US-F7.4.1 | UC-F7.4 |  | `PendingInvoiceExpiryIntegrationTest#expiredOwnInvoiceIsCancelledOnNewRequest` |
+| TC-F7.4.1-03g | AC-F7.4.1-03 | US-F7.4.1 | UC-F7.4 |  | `PendingInvoiceExpiryIntegrationTest#notYetExpiredOwnInvoiceStillBlocks` |
+| TC-F7.4.1-04a | AC-F7.4.1-04 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#expiresAtUsesBranchTtl` |
+| TC-F7.4.1-04b | AC-F7.4.1-04 | US-F7.4.1 | UC-F7.4 |  | `PendingInvoiceExpiryIntegrationTest#ttlIsReadPerBranch` |
+| TC-F7.4.1-05a | AC-F7.4.1-05 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#duplicatePendingForSamePackageIs422` |
+| TC-F7.4.1-05b | AC-F7.4.1-05 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#counterPendingForSamePackageIs422` |
+| TC-F7.4.1-05c | AC-F7.4.1-05 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#otherPackageOfSameTypePendingIs422` |
+| TC-F7.4.1-05d | AC-F7.4.1-05 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#upcomingOfSameTypeIs422` |
+| TC-F7.4.1-05e | AC-F7.4.1-05 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#inactiveMemberWithPendingIs422` |
+| TC-F7.4.1-06a | AC-F7.4.1-06 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseConcurrencyIntegrationTest#twoPurchasesAtOnceCreateExactlyOne` |
+| TC-F7.4.1-07a | AC-F7.4.1-07 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#unknownPackageIs404` |
+| TC-F7.4.1-07b | AC-F7.4.1-07 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#inactivePackageIs422` |
+| TC-F7.4.1-07c | AC-F7.4.1-07 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#packageOfOtherBranchIs422` |
+| TC-F7.4.1-07d | AC-F7.4.1-07 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#inactiveMemberIs422` |
+| TC-F7.4.1-08a | AC-F7.4.1-08 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#invalidPurchaseBodyIs400` |
+| TC-F7.4.1-08b | AC-F7.4.1-08 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#nonMemberIs403` |
+| TC-F7.4.1-08c | AC-F7.4.1-08 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#memberWithoutProfileIs403` |
+| TC-F7.5.1-01a | AC-F7.5.1-01 | US-F7.5.1 | UC-F7.5 |  | `PortalPurchaseIntegrationTest#renewCreatesNewPendingMembership` |
+| TC-F7.5.1-02a | AC-F7.5.1-02 | US-F7.5.1 | UC-F7.5 |  | `PortalPurchaseIntegrationTest#renewCancelledMembershipIs422` |
+| TC-F7.5.1-03a | AC-F7.5.1-03 | US-F7.5.1 | UC-F7.5 |  | `PortalPurchaseIntegrationTest#renewCancelledMembershipIs422` |
+| TC-F7.5.1-04a | AC-F7.5.1-04 | US-F7.5.1 | UC-F7.5 |  | `PortalPurchaseIntegrationTest#renewOthersMembershipIs404` |
+| TC-F7.5.1-04b | AC-F7.5.1-04 | US-F7.5.1 | UC-F7.5 |  | `PortalPurchaseIntegrationTest#renewUnknownMembershipIs404` |
+| TC-F7.5.1-05a | AC-F7.5.1-05 | US-F7.5.1 | UC-F7.5 |  | `PortalPurchaseIntegrationTest#renewInactivePackageIs422` |
+| TC-F7.5.1-06a | AC-F7.5.1-06 | US-F7.5.1 | UC-F7.5 |  | `PortalPurchaseIntegrationTest#renewTwiceIs422` |
+| TC-F7.5.1-09a | AC-F7.5.1-09 | US-F7.5.1 | UC-F7.5 |  | `PortalPurchaseIntegrationTest#invalidRenewBodyIs400` |
 | TC-F8.0.1-01a | AC-F8.0.1-01 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates` |
 | TC-F8.0.1-01b | AC-F8.0.1-01 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-01b, TC-F8.0.1-04b: khách xem giờ Việt Nam và đăng` |
 | TC-F8.0.1-02a | AC-F8.0.1-02 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates` |

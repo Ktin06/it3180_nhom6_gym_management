@@ -15,6 +15,7 @@ import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
+import vn.edu.hust.nhom6.gym.common.exception.NotFoundException;
 import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.common.time.VnTime;
 import vn.edu.hust.nhom6.gym.feature.member.service.MemberService;
@@ -321,7 +322,12 @@ public class MembershipService {
             return new ScopeKey(m.getPackageType(), m.getBranchId());
         }
     }
-
+    public Membership requireOwnedBy(Long membershipId, Long memberId) {
+        return memberships.findById(membershipId)
+                .filter(membership -> membership.getMemberId().equals(memberId))
+                .orElseThrow(() -> new NotFoundException(
+                        "Gói tập của hội viên không tồn tại trên hệ thống."));
+    }
     // ---------------------------------------------------------------------------------------------
     // S2-38.1: hủy gói khi hoàn tiền hóa đơn (UC-F5.5 bước 5d, BR-F5-13)
     // ---------------------------------------------------------------------------------------------

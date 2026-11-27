@@ -30,6 +30,7 @@ function renderAt(
         register: async () => user!,
         logout: async () => {},
         retrySession,
+        completePasswordChange: async () => {},
       }}
     >
       <MemoryRouter initialEntries={[path]}>

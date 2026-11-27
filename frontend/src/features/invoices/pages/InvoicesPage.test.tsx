@@ -71,6 +71,7 @@ function renderPage(api: Pick<InvoicesGateway, 'list' | 'branches'>, role: Role 
           register: vi.fn(),
           logout: vi.fn(),
           retrySession: vi.fn(),
+          completePasswordChange: vi.fn(),
         }}
       >
         <MemoryRouter>

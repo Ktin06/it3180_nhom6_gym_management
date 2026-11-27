@@ -19,6 +19,7 @@ function renderRegister() {
         register,
         logout: vi.fn(),
         retrySession,
+        completePasswordChange: vi.fn(),
       }}
     >
       <MemoryRouter initialEntries={['/register']}>
