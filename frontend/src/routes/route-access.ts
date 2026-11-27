@@ -39,6 +39,7 @@ export const ROUTE_ACCESS = {
   '/hoa-don': { roles: MEMBER_MANAGEMENT_ROLES }, // F5
   '/hoa-don/:id': { roles: MEMBER_MANAGEMENT_ROLES }, // F5
   '/member/invoices/:id/pdf': { roles: ['MEMBER'] }, // F5, điểm vào từ lịch sử F7
+  '/member/memberships': { roles: ['MEMBER'] }, // F7
 } satisfies RouteAccessTable
 
 /** Đường dẫn đã khai báo quyền; viết sai tên thì TypeScript báo lỗi. */

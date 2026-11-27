@@ -14,11 +14,11 @@
 | F4 | 5 | 5 | 37 | 0 | 37 | 0 |
 | F5 | 5 | 5 | 49 | 49 | 0 | 154 |
 | F6 | 5 | 5 | 16 | 0 | 16 | 0 |
-| F7 | 5 | 5 | 34 | 29 | 5 | 48 |
+| F7 | 5 | 5 | 34 | 30 | 4 | 73 |
 | F8 | 9 | 9 | 55 | 53 | 2 | 81 |
-| F9 | 7 | 7 | 63 | 0 | 63 | 0 |
+| F9 | 7 | 7 | 63 | 44 | 19 | 119 |
 | F10 | 5 | 4 | 25 | 0 | 25 | 0 |
-| **Tổng** | **57** | **58** | **386** | **233** | **153** | **674** |
+| **Tổng** | **57** | **58** | **386** | **278** | **108** | **818** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -100,46 +100,12 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F6.4.1-06 | Thao tác Gia hạn nhanh trên giao diện | US-F6.4.1 |
 | AC-F6.5.1-01 | Danh sách các lượt check-in mới nhất trong ngày | US-F6.5.1 |
 | AC-F6.5.1-02 | Thao tác Check-out nhanh từ danh sách Live Feed | US-F6.5.1 |
-| AC-F7.1.1-04 | Gói đã hủy không có nút Gia hạn, gói hết hạn vẫn có | US-F7.1.1 |
 | AC-F7.2.1-05 | Tải trang dưới 2 giây | US-F7.2.1 |
 | AC-F7.4.1-02 | Gói chỉ hiệu lực sau khi lễ tân thu tiền | US-F7.4.1 |
 | AC-F7.5.1-07 | Hai yêu cầu gia hạn gửi cùng lúc | US-F7.5.1 |
 | AC-F7.5.1-08 | Hóa đơn gia hạn tự hủy kéo theo gói chờ | US-F7.5.1 |
 | AC-F8.7.1-06 | Giảm sức chứa đúng biên | US-F8.7.1 |
 | AC-F8.7.1-07 | Buổi không cho sửa sức chứa | US-F8.7.1 |
-| AC-F9.1.1-01 | Khai báo khung rảnh hợp lệ | US-F9.1.1 |
-| AC-F9.1.1-02 | Dữ liệu sai bị từ chối | US-F9.1.1 |
-| AC-F9.1.1-03 | Hai khung của cùng một PT không chồng nhau | US-F9.1.1 |
-| AC-F9.1.1-04 | Khung liền kề hoặc khác thứ không bị coi là chồng | US-F9.1.1 |
-| AC-F9.1.1-05 | Hai PT khác nhau được trùng giờ | US-F9.1.1 |
-| AC-F9.1.1-06 | Sửa khung rảnh của mình | US-F9.1.1 |
-| AC-F9.1.1-07 | Không xóa hoặc thu hẹp khung đang có buổi đã đặt | US-F9.1.1 |
-| AC-F9.1.1-08 | Buổi đã xong hoặc đã hủy không chặn việc xóa khung | US-F9.1.1 |
-| AC-F9.1.1-09 | Xem lịch dạy gồm khung rảnh, buổi PT và lớp nhóm | US-F9.1.1 |
-| AC-F9.1.1-10 | PT chỉ thao tác trên lịch của mình | US-F9.1.1 |
-| AC-F9.1.1-11 | Từ chối người không phải PT | US-F9.1.1 |
-| AC-F9.2.1-01 | Đặt buổi hợp lệ chỉ giữ chỗ, không trừ buổi | US-F9.2.1 |
-| AC-F9.2.1-02 | Chỉ đặt trong giờ PT rảnh | US-F9.2.1 |
-| AC-F9.2.1-03 | Đặt sát giờ bị từ chối, đúng mốc thì được | US-F9.2.1 |
-| AC-F9.2.1-04 | Số giờ tối thiểu đọc từ cấu hình | US-F9.2.1 |
-| AC-F9.2.1-05 | Không trùng lịch của PT | US-F9.2.1 |
-| AC-F9.2.1-06 | Không trùng lịch của hội viên | US-F9.2.1 |
-| AC-F9.2.1-07 | Phải có gói PT đang hiệu lực | US-F9.2.1 |
-| AC-F9.2.1-08 | Không đặt quá số buổi còn lại, kể cả buổi đã qua giờ chưa xác nhận | US-F9.2.1 |
-| AC-F9.2.1-09 | Còn chỗ khi số buổi `BOOKED` ít hơn số buổi còn lại | US-F9.2.1 |
-| AC-F9.2.1-10 | Hai yêu cầu cùng lúc cho một giờ | US-F9.2.1 |
-| AC-F9.2.1-11 | Dữ liệu sai, PT không tồn tại | US-F9.2.1 |
-| AC-F9.2.1-12 | Từ chối người không được đặt | US-F9.2.1 |
-| AC-F9.3.1-01 | Xác nhận buổi đã diễn ra, trừ một buổi | US-F9.3.1 |
-| AC-F9.3.1-02 | Hoa hồng chốt lúc xác nhận và không đổi về sau | US-F9.3.1 |
-| AC-F9.3.1-03 | Chưa tới giờ bắt đầu thì không xác nhận được | US-F9.3.1 |
-| AC-F9.3.1-04 | Không xác nhận hai lần | US-F9.3.1 |
-| AC-F9.3.1-05 | Hai thao tác cùng lúc chỉ trừ một lần | US-F9.3.1 |
-| AC-F9.3.1-06 | Buổi cuối thì gói hết hạn và gói nối tiếp được kích hoạt ngay | US-F9.3.1 |
-| AC-F9.3.1-07 | Buổi cuối nhưng không có gói nối tiếp | US-F9.3.1 |
-| AC-F9.3.1-08 | Hội viên vắng mặt vẫn bị trừ buổi, không có hoa hồng | US-F9.3.1 |
-| AC-F9.3.1-09 | Hạn xác nhận 23:59 cùng ngày | US-F9.3.1 |
-| AC-F9.3.1-10 | Chỉ PT được phân công mới xác nhận | US-F9.3.1 |
 | AC-F9.4.1-01 | Soạn giáo án cho học viên có buổi PT với mình | US-F9.4.1 |
 | AC-F9.4.1-02 | Soạn giáo án cho học viên có đặt chỗ lớp do mình dạy | US-F9.4.1 |
 | AC-F9.4.1-03 | Không soạn cho học viên mình không dạy | US-F9.4.1 |
@@ -159,17 +125,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F9.6.1-05 | Khoảng thời gian sai | US-F9.6.1 |
 | AC-F9.6.1-06 | Chỉ dựa trên dữ liệu thực, không có gợi ý AI | US-F9.6.1 |
 | AC-F9.6.1-07 | Từ chối người chưa đăng nhập hoặc vai trò khác | US-F9.6.1 |
-| AC-F9.7.1-01 | Hội viên hủy trước hạn, không mất buổi | US-F9.7.1 |
-| AC-F9.7.1-02 | Hủy sát giờ bị từ chối, đúng mốc thì được | US-F9.7.1 |
-| AC-F9.7.1-03 | Mốc hủy đọc từ cấu hình | US-F9.7.1 |
-| AC-F9.7.1-04 | Lễ tân hủy hộ theo đúng quy tắc của hội viên | US-F9.7.1 |
-| AC-F9.7.1-05 | Quản lý chi nhánh hủy hộ, có lý do, có dấu vết | US-F9.7.1 |
-| AC-F9.7.1-06 | Quản lý hủy hộ phải nhập lý do | US-F9.7.1 |
-| AC-F9.7.1-07 | Quản lý không hủy buổi đã tới giờ bắt đầu | US-F9.7.1 |
-| AC-F9.7.1-08 | Chỉ hủy được buổi đang `BOOKED` | US-F9.7.1 |
-| AC-F9.7.1-09 | PT không tự hủy buổi đã có khách | US-F9.7.1 |
-| AC-F9.7.1-10 | Phân quyền theo chủ buổi và chi nhánh | US-F9.7.1 |
-| AC-F9.7.1-11 | Hai yêu cầu hủy cùng lúc | US-F9.7.1 |
 | AC-F10.1.1-01 | Thông báo khi gói TIME hoặc gói ACTIVE sắp hết hạn | US-F10.1.1 |
 | AC-F10.1.1-02 | Thông báo khi gói SESSION sắp hết buổi | US-F10.1.1 |
 | AC-F10.1.1-03 | Không gửi thông báo trùng cho cùng một gói | US-F10.1.1 |
@@ -1037,14 +992,19 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 ### F7
 
 - **UC-F7.1** Xem gói tập
-  - **US-F7.1.1** Xem gói của tôi (#150)
+  - **US-F7.1.1** Xem gói của tôi (#150) ✅ mọi AC có TC
     - AC-F7.1.1-01 Hội viên thấy đủ thông tin các gói của mình
       - TC-F7.1.1-01a `MemberPortalQueryIntegrationTest#membershipsReturnsAllOwnMembershipsWithDetails`
+      - TC-F7.1.1-01b `features/member-portal/api/member-portal.test.ts › TC-F7.1.1-01b, TC-F7.1.1-02b: listMemberships gọi GET /me/me`
+      - TC-F7.1.1-01c `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.1.1-01c: hiển thị nhãn trạng thái tiếng Việt, số buổi `
     - AC-F7.1.1-02 Chỉ thấy gói của chính mình
       - TC-F7.1.1-02a `MemberPortalQueryIntegrationTest#membershipsNeverLeaksOtherMembersData`
+      - TC-F7.1.1-02b `features/member-portal/api/member-portal.test.ts › TC-F7.1.1-01b, TC-F7.1.1-02b: listMemberships gọi GET /me/me`
     - AC-F7.1.1-03 Hội viên chưa có gói nào
       - TC-F7.1.1-03a `MemberPortalQueryIntegrationTest#membershipsEmptyWhenMemberHasNone`
-    - AC-F7.1.1-04 Gói đã hủy không có nút Gia hạn, gói hết hạn vẫn có ❌ chưa có TC
+      - TC-F7.1.1-03b `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.1.1-03b: chưa có gói tập hiện đúng câu "Bạn chưa có gó`
+    - AC-F7.1.1-04 Gói đã hủy không có nút Gia hạn, gói hết hạn vẫn có
+      - TC-F7.1.1-04a `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.1.1-04a, TC-F7.5.1-03b: gói Đã hủy không có nút Gia hạ`
     - AC-F7.1.1-05 Từ chối người không được xem
       - TC-F7.1.1-05a `MemberPortalQueryIntegrationTest#membershipsForbiddenForNonMemberRoles`
       - TC-F7.1.1-05b `MemberPortalQueryIntegrationTest#membershipsForbiddenWithoutProfileAndUnauthorizedWithoutToken`
@@ -1052,10 +1012,14 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
   - **US-F7.2.1** Lịch sử check-in của tôi (#151)
     - AC-F7.2.1-01 Xem lịch sử mới nhất trước, có phân trang
       - TC-F7.2.1-01a `MemberPortalQueryIntegrationTest#checkinsPaginatedNewestFirstWithBranchAndTimes`
+      - TC-F7.2.1-01b `features/member-portal/api/member-portal.test.ts › TC-F7.2.1-01b, TC-F7.2.1-03b: listCheckins gọi GET /me/check`
+      - TC-F7.2.1-01c `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.2.1-01c: tab Lịch sử check-in hiển thị giờ Việt Nam và`
     - AC-F7.2.1-02 Hội viên chưa check-in lần nào
       - TC-F7.2.1-02a `MemberPortalQueryIntegrationTest#checkinsEmptyWhenMemberHasNone`
+      - TC-F7.2.1-02b `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.2.1-02b: chưa có lượt check-in nào hiện đúng câu "Chưa`
     - AC-F7.2.1-03 Chỉ thấy lượt của chính mình
       - TC-F7.2.1-03a `MemberPortalQueryIntegrationTest#checkinsNeverLeaksOtherMembersData`
+      - TC-F7.2.1-03b `features/member-portal/api/member-portal.test.ts › TC-F7.2.1-01b, TC-F7.2.1-03b: listCheckins gọi GET /me/check`
     - AC-F7.2.1-04 Tham số phân trang
       - TC-F7.2.1-04a `MemberPortalQueryIntegrationTest#checkinsInvalidPagingReturns400`
     - AC-F7.2.1-05 Tải trang dưới 2 giây ❌ chưa có TC
@@ -1065,13 +1029,18 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
   - **US-F7.3.1** Hóa đơn của tôi (#152) ✅ mọi AC có TC
     - AC-F7.3.1-01 Xem hóa đơn của mình, mới nhất trước
       - TC-F7.3.1-01a `MemberPortalQueryIntegrationTest#invoicesPaginatedNewestFirstWithExpiresAtOnlyForPendingPortal`
+      - TC-F7.3.1-01b `features/member-portal/api/member-portal.test.ts › TC-F7.3.1-01b, TC-F7.3.1-03b: listInvoices gọi GET /me/invoi`
+      - TC-F7.3.1-01c `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.3.1-01c, TC-F7.3.1-02c: tab Hóa đơn hiện hạn tự hủy ch`
     - AC-F7.3.1-02 Hóa đơn chờ do cổng hội viên kèm hạn tự hủy
       - TC-F7.3.1-02a `MemberPortalQueryIntegrationTest#invoicesPaginatedNewestFirstWithExpiresAtOnlyForPendingPortal`
       - TC-F7.3.1-02b `MemberPortalQueryIntegrationTest#invoicesExpiresAtUsesBranchConfigAndNullForPaidPortal`
+      - TC-F7.3.1-02c `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.3.1-01c, TC-F7.3.1-02c: tab Hóa đơn hiện hạn tự hủy ch`
     - AC-F7.3.1-03 Chỉ thấy hóa đơn của chính mình
       - TC-F7.3.1-03a `MemberPortalQueryIntegrationTest#invoicesNeverLeaksOtherMembersOrWalkInInvoices`
+      - TC-F7.3.1-03b `features/member-portal/api/member-portal.test.ts › TC-F7.3.1-01b, TC-F7.3.1-03b: listInvoices gọi GET /me/invoi`
     - AC-F7.3.1-04 Hội viên chưa có hóa đơn nào
       - TC-F7.3.1-04a `MemberPortalQueryIntegrationTest#invoicesEmptyWhenMemberHasNone`
+      - TC-F7.3.1-04b `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.3.1-04b: chưa có hóa đơn nào hiện đúng câu "Bạn chưa c`
     - AC-F7.3.1-05 Tham số phân trang
       - TC-F7.3.1-05a `MemberPortalQueryIntegrationTest#invoicesInvalidPagingReturns400`
     - AC-F7.3.1-06 Từ chối người không được xem
@@ -1080,6 +1049,9 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
   - **US-F7.4.1** Gửi yêu cầu mua gói (#153)
     - AC-F7.4.1-01 Gửi yêu cầu mua tạo hóa đơn chờ và gói chờ, giá lấy ở server
       - TC-F7.4.1-01a `PortalPurchaseIntegrationTest#purchaseCreatesPortalInvoice`
+      - TC-F7.4.1-01b `features/member-portal/api/member-portal.test.ts › TC-F7.4.1-01b: requestPurchase chỉ gửi packageId lên POST /m`
+      - TC-F7.4.1-01c `features/member-portal/api/member-portal.test.ts › TC-F7.4.1-01c: listPublicPackages dùng lại publicPackagesApi`
+      - TC-F7.4.1-01d `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.4.1-01d: tab Mua gói tải bảng giá công khai, bấm Mua g`
     - AC-F7.4.1-02 Gói chỉ hiệu lực sau khi lễ tân thu tiền ❌ chưa có TC
     - AC-F7.4.1-03 Hóa đơn chờ tự hủy sau `PENDING_INVOICE_TTL_DAYS`, kéo theo gói chờ
       - TC-F7.4.1-03a `PendingInvoiceExpiryIntegrationTest#cancelsPortalInvoiceExactlyAtTtl`
@@ -1098,6 +1070,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F7.4.1-05c `PortalPurchaseIntegrationTest#otherPackageOfSameTypePendingIs422`
       - TC-F7.4.1-05d `PortalPurchaseIntegrationTest#upcomingOfSameTypeIs422`
       - TC-F7.4.1-05e `PortalPurchaseIntegrationTest#inactiveMemberWithPendingIs422`
+      - TC-F7.4.1-05f `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.4.1-05f, TC-F7.4.1-07e: mua gói lỗi 409 và 422 hiện ng`
     - AC-F7.4.1-06 Hai yêu cầu gửi cùng lúc
       - TC-F7.4.1-06a `PortalPurchaseConcurrencyIntegrationTest#twoPurchasesAtOnceCreateExactlyOne`
     - AC-F7.4.1-07 Gói không hợp lệ để mua
@@ -1105,6 +1078,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F7.4.1-07b `PortalPurchaseIntegrationTest#inactivePackageIs422`
       - TC-F7.4.1-07c `PortalPurchaseIntegrationTest#packageOfOtherBranchIs422`
       - TC-F7.4.1-07d `PortalPurchaseIntegrationTest#inactiveMemberIs422`
+      - TC-F7.4.1-07e `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.4.1-05f, TC-F7.4.1-07e: mua gói lỗi 409 và 422 hiện ng`
     - AC-F7.4.1-08 Dữ liệu sai và người không được gửi
       - TC-F7.4.1-08a `PortalPurchaseIntegrationTest#invalidPurchaseBodyIs400`
       - TC-F7.4.1-08b `PortalPurchaseIntegrationTest#nonMemberIs403`
@@ -1113,17 +1087,23 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
   - **US-F7.5.1** Gửi yêu cầu gia hạn (#154)
     - AC-F7.5.1-01 Gia hạn gói còn hiệu lực: tạo gói mới chờ, gói cũ không đổi
       - TC-F7.5.1-01a `PortalPurchaseIntegrationTest#renewCreatesNewPendingMembership`
+      - TC-F7.5.1-01b `features/member-portal/api/member-portal.test.ts › TC-F7.5.1-01b: requestRenewal chỉ gửi membershipId lên POST `
+      - TC-F7.5.1-01c `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.5.1-01c, TC-F7.5.1-02b: bấm Gia hạn gọi renewal-reques`
     - AC-F7.5.1-02 Gói đã hết hạn vẫn gia hạn được
       - TC-F7.5.1-02a `PortalPurchaseIntegrationTest#renewCancelledMembershipIs422`
+      - TC-F7.5.1-02b `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.5.1-01c, TC-F7.5.1-02b: bấm Gia hạn gọi renewal-reques`
     - AC-F7.5.1-03 Gói đã hủy không gia hạn được
       - TC-F7.5.1-03a `PortalPurchaseIntegrationTest#renewCancelledMembershipIs422`
+      - TC-F7.5.1-03b `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.1.1-04a, TC-F7.5.1-03b: gói Đã hủy không có nút Gia hạ`
     - AC-F7.5.1-04 Gói của hội viên khác hoặc không tồn tại: cùng một câu trả lời
       - TC-F7.5.1-04a `PortalPurchaseIntegrationTest#renewOthersMembershipIs404`
       - TC-F7.5.1-04b `PortalPurchaseIntegrationTest#renewUnknownMembershipIs404`
     - AC-F7.5.1-05 Loại gói đã ngừng bán
       - TC-F7.5.1-05a `PortalPurchaseIntegrationTest#renewInactivePackageIs422`
+      - TC-F7.5.1-05b `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.5.1-05b, TC-F7.5.1-06b: gia hạn lỗi 409 và 422 hiện ng`
     - AC-F7.5.1-06 Đã có gói cùng loại đang chờ
       - TC-F7.5.1-06a `PortalPurchaseIntegrationTest#renewTwiceIs422`
+      - TC-F7.5.1-06b `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.5.1-05b, TC-F7.5.1-06b: gia hạn lỗi 409 và 422 hiện ng`
     - AC-F7.5.1-07 Hai yêu cầu gia hạn gửi cùng lúc ❌ chưa có TC
     - AC-F7.5.1-08 Hóa đơn gia hạn tự hủy kéo theo gói chờ ❌ chưa có TC
     - AC-F7.5.1-09 Dữ liệu sai và người không được gửi
@@ -1289,44 +1269,143 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 ### F9
 
 - **UC-F9.1** Khai báo lịch rảnh và xem lịch dạy
-  - **US-F9.1.1** Lịch rảnh và lịch dạy (#164)
-    - AC-F9.1.1-01 Khai báo khung rảnh hợp lệ ❌ chưa có TC
-    - AC-F9.1.1-02 Dữ liệu sai bị từ chối ❌ chưa có TC
-    - AC-F9.1.1-03 Hai khung của cùng một PT không chồng nhau (BR-F9.14) ❌ chưa có TC
-    - AC-F9.1.1-04 Khung liền kề hoặc khác thứ không bị coi là chồng (BR-F9.14) ❌ chưa có TC
-    - AC-F9.1.1-05 Hai PT khác nhau được trùng giờ (BR-F9.14) ❌ chưa có TC
-    - AC-F9.1.1-06 Sửa khung rảnh của mình ❌ chưa có TC
-    - AC-F9.1.1-07 Không xóa hoặc thu hẹp khung đang có buổi đã đặt (BR-F9.15) ❌ chưa có TC
-    - AC-F9.1.1-08 Buổi đã xong hoặc đã hủy không chặn việc xóa khung (BR-F9.15) ❌ chưa có TC
-    - AC-F9.1.1-09 Xem lịch dạy gồm khung rảnh, buổi PT và lớp nhóm ❌ chưa có TC
-    - AC-F9.1.1-10 PT chỉ thao tác trên lịch của mình ❌ chưa có TC
-    - AC-F9.1.1-11 Từ chối người không phải PT ❌ chưa có TC
+  - **US-F9.1.1** Lịch rảnh và lịch dạy (#164) ✅ mọi AC có TC
+    - AC-F9.1.1-01 Khai báo khung rảnh hợp lệ
+      - TC-F9.1.1-01a `TrainerAvailabilityApiIntegrationTest#createAvailabilityTakesTrainerFromTokenAndPreservesVnTime`
+      - TC-F9.1.1-01b `TrainerAvailabilityApiIntegrationTest#readSqlSeededTimeColumnWithoutTimezoneShift`
+    - AC-F9.1.1-02 Dữ liệu sai bị từ chối
+      - TC-F9.1.1-02a `TrainerAvailabilityApiIntegrationTest#invalidInputReturns400`
+    - AC-F9.1.1-03 Hai khung của cùng một PT không chồng nhau (BR-F9.14)
+      - TC-F9.1.1-03a `TrainerAvailabilityTest#overlapsHalfOpenSameDay`
+      - TC-F9.1.1-03b `TrainerAvailabilityApiIntegrationTest#overlapSameTrainerIs422ButAdjacentOrOtherTrainerIs201`
+      - TC-F9.1.1-03c `TrainerAvailabilityApiIntegrationTest#updateOverlapSameTrainerIs422`
+    - AC-F9.1.1-04 Khung liền kề hoặc khác thứ không bị coi là chồng (BR-F9.14)
+      - TC-F9.1.1-04a `TrainerAvailabilityTest#overlapsHalfOpenSameDay`
+      - TC-F9.1.1-04b `TrainerAvailabilityApiIntegrationTest#overlapSameTrainerIs422ButAdjacentOrOtherTrainerIs201`
+    - AC-F9.1.1-05 Hai PT khác nhau được trùng giờ (BR-F9.14)
+      - TC-F9.1.1-05a `TrainerAvailabilityApiIntegrationTest#overlapSameTrainerIs422ButAdjacentOrOtherTrainerIs201`
+    - AC-F9.1.1-06 Sửa khung rảnh của mình
+      - TC-F9.1.1-06a `TrainerAvailabilityApiIntegrationTest#updateOverlapSameTrainerIs422`
+      - TC-F9.1.1-06b `TrainerAvailabilityApiIntegrationTest#updateNarrowBlockedByFutureBookedButWidenAllowed`
+    - AC-F9.1.1-07 Không xóa hoặc thu hẹp khung đang có buổi đã đặt (BR-F9.15)
+      - TC-F9.1.1-07a `TrainerAvailabilityTest#vnTimezoneBoundaryAtEarlyMorning`
+      - TC-F9.1.1-07b `TrainerAvailabilityTest#adjacentSlotBoundaryDoesNotOverlap`
+      - TC-F9.1.1-07c `TrainerAvailabilityApiIntegrationTest#deleteBlockedByFutureBookedOtherwiseHardDeletesAndAudits`
+      - TC-F9.1.1-07d `TrainerAvailabilityApiIntegrationTest#updateNarrowBlockedByFutureBookedButWidenAllowed`
+      - TC-F9.1.1-07e `TrainerAvailabilityApiIntegrationTest#vnTimezoneEarlyMorningBlocksCorrectVnWeekday`
+    - AC-F9.1.1-08 Buổi đã xong hoặc đã hủy không chặn việc xóa khung (BR-F9.15)
+      - TC-F9.1.1-08a `TrainerAvailabilityApiIntegrationTest#pastOrNonBookedSessionsDoNotBlockDelete`
+    - AC-F9.1.1-09 Xem lịch dạy gồm khung rảnh, buổi PT và lớp nhóm
+      - TC-F9.1.1-09a `TrainerAvailabilityApiIntegrationTest#trainerScheduleReturnsAvailabilitiesPtAndAssignedClassSessionsInVnRange`
+    - AC-F9.1.1-10 PT chỉ thao tác trên lịch của mình
+      - TC-F9.1.1-10a `TrainerAvailabilityApiIntegrationTest#otherTrainerIs403AndMissingSlotIs404`
+    - AC-F9.1.1-11 Từ chối người không phải PT
+      - TC-F9.1.1-11a `TrainerAvailabilityApiIntegrationTest#nonTrainerCannotAccessPtEndpoints`
+      - TC-F9.1.1-11b `TrainerAvailabilityApiIntegrationTest#anonymousIs401AndInactiveTrainerIs403`
 - **UC-F9.2** Đặt buổi PT
-  - **US-F9.2.1** Đặt buổi PT (#165)
-    - AC-F9.2.1-01 Đặt buổi hợp lệ chỉ giữ chỗ, không trừ buổi ❌ chưa có TC
-    - AC-F9.2.1-02 Chỉ đặt trong giờ PT rảnh ❌ chưa có TC
-    - AC-F9.2.1-03 Đặt sát giờ bị từ chối, đúng mốc thì được ❌ chưa có TC
-    - AC-F9.2.1-04 Số giờ tối thiểu đọc từ cấu hình ❌ chưa có TC
-    - AC-F9.2.1-05 Không trùng lịch của PT ❌ chưa có TC
-    - AC-F9.2.1-06 Không trùng lịch của hội viên ❌ chưa có TC
-    - AC-F9.2.1-07 Phải có gói PT đang hiệu lực ❌ chưa có TC
-    - AC-F9.2.1-08 Không đặt quá số buổi còn lại, kể cả buổi đã qua giờ chưa xác nhận ❌ chưa có TC
-    - AC-F9.2.1-09 Còn chỗ khi số buổi `BOOKED` ít hơn số buổi còn lại ❌ chưa có TC
-    - AC-F9.2.1-10 Hai yêu cầu cùng lúc cho một giờ ❌ chưa có TC
-    - AC-F9.2.1-11 Dữ liệu sai, PT không tồn tại ❌ chưa có TC
-    - AC-F9.2.1-12 Từ chối người không được đặt ❌ chưa có TC
+  - **US-F9.2.1** Đặt buổi PT (#165) ✅ mọi AC có TC
+    - AC-F9.2.1-01 Đặt buổi hợp lệ chỉ giữ chỗ, không trừ buổi
+      - TC-F9.2.1-01a `PtSessionBookingApiIntegrationTest#bookSuccess`
+      - TC-F9.2.1-01b `PtSessionBookingApiIntegrationTest#acceptsSrsDraftFieldNames`
+      - TC-F9.2.1-01c `PtSessionBookingApiIntegrationTest#chainWidePtPackageIsUsable`
+      - TC-F9.2.1-01d `PtSessionBookingApiIntegrationTest#sessionBranchIsTrainerBranch`
+    - AC-F9.2.1-02 Chỉ đặt trong giờ PT rảnh
+      - TC-F9.2.1-02a `TrainerAvailabilityApiIntegrationTest#memberReadsTrainerAvailabilitiesAndInvalidCases`
+      - TC-F9.2.1-02b `PtSessionBookingApiIntegrationTest#outsideAvailability`
+    - AC-F9.2.1-03 Đặt sát giờ bị từ chối, đúng mốc thì được
+      - TC-F9.2.1-03a `PtSessionBookingApiIntegrationTest#exactlyTwelveHoursAhead`
+      - TC-F9.2.1-03b `PtSessionBookingApiIntegrationTest#elevenHoursFiftyNineMinutesAhead`
+    - AC-F9.2.1-04 Số giờ tối thiểu đọc từ cấu hình
+      - TC-F9.2.1-04a `PtSessionBookingApiIntegrationTest#leadHoursReadFromConfig`
+    - AC-F9.2.1-05 Không trùng lịch của PT
+      - TC-F9.2.1-05a `PtSessionBookingApiIntegrationTest#overlapsTrainerPtSession`
+      - TC-F9.2.1-05b `PtSessionBookingApiIntegrationTest#adjacentOrCancelledDoesNotBlock`
+      - TC-F9.2.1-05c `PtSessionBookingApiIntegrationTest#overlapsTrainerClassSession`
+      - TC-F9.2.1-05d `PtSessionBookingApiIntegrationTest#overlapsRescheduledClassSession`
+      - TC-F9.2.1-05e `PtSessionBookingApiIntegrationTest#overlapsTrainerScheduleNotYetGenerated`
+      - TC-F9.2.1-05f `PtSessionBookingApiIntegrationTest#skippedOccurrenceInsideGenerationWindowDoesNotBlock`
+      - TC-F9.2.1-05g `PtSessionConcurrencyIntegrationTest#bookingRacesClassReschedule`
+    - AC-F9.2.1-06 Không trùng lịch của hội viên
+      - TC-F9.2.1-06a `PtSessionBookingApiIntegrationTest#overlapsMemberPtSessionWithOtherTrainer`
+      - TC-F9.2.1-06b `PtSessionBookingApiIntegrationTest#overlapsMemberClassBooking`
+    - AC-F9.2.1-07 Phải có gói PT đang hiệu lực
+      - TC-F9.2.1-07a `PtSessionBookingApiIntegrationTest#noUsablePtPackage`
+      - TC-F9.2.1-07b `PtSessionBookingApiIntegrationTest#inactiveMember`
+    - AC-F9.2.1-08 Không đặt quá số buổi còn lại, kể cả buổi đã qua giờ chưa xác nhận
+      - TC-F9.2.1-08a `PtSessionBookingApiIntegrationTest#bookedEnoughSessions`
+      - TC-F9.2.1-08b `PtSessionBookingApiIntegrationTest#pastUnconfirmedSessionBlocksBooking`
+      - TC-F9.2.1-08c `PtSessionBookingApiIntegrationTest#vd23PastMorningBlocksEveningAndConfirmExpiresPackage`
+      - TC-F9.2.1-08d `PtSessionBookingApiIntegrationTest#twoRemainingWithOnePastUnconfirmedAllowsExactlyOneMore`
+      - TC-F9.2.1-08e `PtSessionConcurrencyIntegrationTest#lastSessionRace`
+    - AC-F9.2.1-09 Còn chỗ khi số buổi `BOOKED` ít hơn số buổi còn lại
+      - TC-F9.2.1-09a `PtSessionBookingApiIntegrationTest#twoRemainingWithOnePastUnconfirmedAllowsExactlyOneMore`
+      - TC-F9.2.1-09b `PtSessionBookingApiIntegrationTest#cancelOnTimeFreesQuotaForRebooking`
+    - AC-F9.2.1-10 Hai yêu cầu cùng lúc cho một giờ
+      - TC-F9.2.1-10a `PtSessionConcurrencyIntegrationTest#trainerSlotTakenWhileWaitingIs409`
+      - TC-F9.2.1-10b `PtSessionConcurrencyIntegrationTest#memberSlotTakenWhileWaitingIs409`
+      - TC-F9.2.1-10c `PtSessionConcurrencyIntegrationTest#twoMembersRaceForSameTrainerSlot`
+      - TC-F9.2.1-10d `PtSessionConcurrencyIntegrationTest#sameMemberRacesTwoTrainers`
+      - TC-F9.2.1-10e `PtSessionConcurrencyIntegrationTest#lastSessionRace`
+      - TC-F9.2.1-10f `PtSessionConcurrencyIntegrationTest#bookingRacesClassReschedule`
+    - AC-F9.2.1-11 Dữ liệu sai, PT không tồn tại
+      - TC-F9.2.1-11a `TrainerAvailabilityApiIntegrationTest#memberReadsTrainerAvailabilitiesAndInvalidCases`
+      - TC-F9.2.1-11b `PtSessionBookingApiIntegrationTest#invalidInput`
+      - TC-F9.2.1-11c `PtSessionBookingApiIntegrationTest#trainerNotFound`
+    - AC-F9.2.1-12 Từ chối người không được đặt
+      - TC-F9.2.1-12a `TrainerAvailabilityApiIntegrationTest#memberReadsTrainerAvailabilitiesAndInvalidCases`
+      - TC-F9.2.1-12b `PtSessionBookingApiIntegrationTest#nonMemberIsForbidden`
+      - TC-F9.2.1-12c `PtSessionBookingApiIntegrationTest#anonymousIs401`
 - **UC-F9.3** Xác nhận buổi PT đã diễn ra
-  - **US-F9.3.1** Xác nhận buổi PT đã diễn ra (#166)
-    - AC-F9.3.1-01 Xác nhận buổi đã diễn ra, trừ một buổi ❌ chưa có TC
-    - AC-F9.3.1-02 Hoa hồng chốt lúc xác nhận và không đổi về sau ❌ chưa có TC
-    - AC-F9.3.1-03 Chưa tới giờ bắt đầu thì không xác nhận được ❌ chưa có TC
-    - AC-F9.3.1-04 Không xác nhận hai lần ❌ chưa có TC
-    - AC-F9.3.1-05 Hai thao tác cùng lúc chỉ trừ một lần ❌ chưa có TC
-    - AC-F9.3.1-06 Buổi cuối thì gói hết hạn và gói nối tiếp được kích hoạt ngay ❌ chưa có TC
-    - AC-F9.3.1-07 Buổi cuối nhưng không có gói nối tiếp ❌ chưa có TC
-    - AC-F9.3.1-08 Hội viên vắng mặt vẫn bị trừ buổi, không có hoa hồng (BR-F9.18) ❌ chưa có TC
-    - AC-F9.3.1-09 Hạn xác nhận 23:59 cùng ngày (BR-F9.19) ❌ chưa có TC
-    - AC-F9.3.1-10 Chỉ PT được phân công mới xác nhận ❌ chưa có TC
+  - **US-F9.3.1** Xác nhận buổi PT đã diễn ra (#166) ✅ mọi AC có TC
+    - AC-F9.3.1-01 Xác nhận buổi đã diễn ra, trừ một buổi
+      - TC-F9.3.1-01a `PtSessionCompletionApiIntegrationTest#confirmSuccess`
+      - TC-F9.3.1-01b `PtSessionCompletionApiIntegrationTest#notFound`
+    - AC-F9.3.1-02 Hoa hồng chốt lúc xác nhận và không đổi về sau
+      - TC-F9.3.1-02a `PtCommissionTest#formula`
+      - TC-F9.3.1-02b `PtCommissionTest#missingDataGivesZero`
+      - TC-F9.3.1-02c `PtCommissionTest#invalidTotalSessions`
+      - TC-F9.3.1-02d `PtSessionCompletionApiIntegrationTest#confirmSuccess`
+      - TC-F9.3.1-02e `PtSessionCompletionApiIntegrationTest#commissionRoundsHalfUpAndIsFrozen`
+      - TC-F9.3.1-02f `PtSessionCompletionApiIntegrationTest#commissionUsesNetPrice`
+      - TC-F9.3.1-02g `PtSessionCompletionApiIntegrationTest#nullRateGivesZeroCommission`
+    - AC-F9.3.1-03 Chưa tới giờ bắt đầu thì không xác nhận được
+      - TC-F9.3.1-03a `PtSessionCompletionApiIntegrationTest#beforeStartRejected`
+    - AC-F9.3.1-04 Không xác nhận hai lần
+      - TC-F9.3.1-04a `PtSessionCompletionApiIntegrationTest#secondTimeRejected`
+      - TC-F9.3.1-04b `PtSessionCompletionApiIntegrationTest#cancelledRejected`
+      - TC-F9.3.1-04c `PtSessionCompletionApiIntegrationTest#leftoverSessionOnUsedUpPackage`
+    - AC-F9.3.1-05 Hai thao tác cùng lúc chỉ trừ một lần
+      - TC-F9.3.1-05a `PtSessionCompletionConcurrencyIntegrationTest#sessionCompletedWhileWaitingIs409`
+      - TC-F9.3.1-05b `PtSessionCompletionConcurrencyIntegrationTest#doubleConfirmRace`
+      - TC-F9.3.1-05c `PtSessionCompletionConcurrencyIntegrationTest#confirmVersusNoShowRace`
+      - TC-F9.3.1-05d `PtSessionCompletionConcurrencyIntegrationTest#lastSessionRace`
+      - TC-F9.3.1-05e `PtSessionCompletionConcurrencyIntegrationTest#confirmLastRacesMemberCancellingFuture`
+    - AC-F9.3.1-06 Buổi cuối thì gói hết hạn và gói nối tiếp được kích hoạt ngay
+      - TC-F9.3.1-06a `PtSessionCompletionApiIntegrationTest#lastSessionExpiresAndPullsNextPackage`
+      - TC-F9.3.1-06b `PtSessionCompletionApiIntegrationTest#overdueUpcomingKeepsItsDates`
+      - TC-F9.3.1-06c `PtSessionCompletionApiIntegrationTest#noShowOnLastSessionPullsNextPackage`
+      - TC-F9.3.1-06d `PtSessionCompletionApiIntegrationTest#futureSessionsMoveToNextPackage`
+      - TC-F9.3.1-06e `PtSessionCompletionApiIntegrationTest#extraSessionsCancelledWhenNextPackageTooSmall`
+      - TC-F9.3.1-06f `PtSessionCompletionApiIntegrationTest#sessionsBeyondNextPackageEndAreCancelled`
+      - TC-F9.3.1-06g `PtSessionCompletionApiIntegrationTest#pastUnconfirmedSessionLeftAlone`
+      - TC-F9.3.1-06h `PtSessionCompletionApiIntegrationTest#otherMembersSessionsUntouched`
+    - AC-F9.3.1-07 Buổi cuối nhưng không có gói nối tiếp
+      - TC-F9.3.1-07a `PtSessionCompletionApiIntegrationTest#lastSessionWithoutNextPackage`
+      - TC-F9.3.1-07b `PtSessionCompletionApiIntegrationTest#futureSessionsCancelledWithoutNextPackage`
+    - AC-F9.3.1-08 Hội viên vắng mặt vẫn bị trừ buổi, không có hoa hồng (BR-F9.18)
+      - TC-F9.3.1-08a `PtSessionCompletionApiIntegrationTest#noShowDeductsWithoutCommission`
+      - TC-F9.3.1-08b `PtSessionCompletionApiIntegrationTest#noShowOnLastSessionPullsNextPackage`
+      - TC-F9.3.1-08c `PtSessionCompletionApiIntegrationTest#managerNoShowAfterDeadline`
+    - AC-F9.3.1-09 Hạn xác nhận 23:59 cùng ngày (BR-F9.19)
+      - TC-F9.3.1-09a `PtSessionCompletionApiIntegrationTest#trainerAt2359Allowed`
+      - TC-F9.3.1-09b `PtSessionCompletionApiIntegrationTest#trainerAtMidnightRejected`
+      - TC-F9.3.1-09c `PtSessionCompletionApiIntegrationTest#managerAfterDeadlineAllowedWithAudit`
+      - TC-F9.3.1-09d `PtSessionCompletionApiIntegrationTest#managerNoShowAfterDeadline`
+      - TC-F9.3.1-09e `PtSessionCompletionApiIntegrationTest#managerConfirmsOnPackageExpiredByDate`
+    - AC-F9.3.1-10 Chỉ PT được phân công mới xác nhận
+      - TC-F9.3.1-10a `PtSessionCompletionApiIntegrationTest#otherTrainerForbidden`
+      - TC-F9.3.1-10b `PtSessionCompletionApiIntegrationTest#otherBranchManagerForbidden`
+      - TC-F9.3.1-10c `PtSessionCompletionApiIntegrationTest#otherRolesForbidden`
 - **UC-F9.4** Soạn giáo án
   - **US-F9.4.1** Soạn giáo án (#167)
     - AC-F9.4.1-01 Soạn giáo án cho học viên có buổi PT với mình (BR-F9.10) ❌ chưa có TC
@@ -1353,18 +1432,38 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F9.6.1-06 Chỉ dựa trên dữ liệu thực, không có gợi ý AI (BR-F9.13) ❌ chưa có TC
     - AC-F9.6.1-07 Từ chối người chưa đăng nhập hoặc vai trò khác ❌ chưa có TC
 - **UC-F9.7** Hủy buổi PT
-  - **US-F9.7.1** Hủy buổi PT (*(chưa có, cần trưởng nhóm tạo issue cho US-F9.7.1)*)
-    - AC-F9.7.1-01 Hội viên hủy trước hạn, không mất buổi (BR-F9.16) ❌ chưa có TC
-    - AC-F9.7.1-02 Hủy sát giờ bị từ chối, đúng mốc thì được (BR-F9.16) ❌ chưa có TC
-    - AC-F9.7.1-03 Mốc hủy đọc từ cấu hình ❌ chưa có TC
-    - AC-F9.7.1-04 Lễ tân hủy hộ theo đúng quy tắc của hội viên (BR-F9.16) ❌ chưa có TC
-    - AC-F9.7.1-05 Quản lý chi nhánh hủy hộ, có lý do, có dấu vết (BR-F9.17) ❌ chưa có TC
-    - AC-F9.7.1-06 Quản lý hủy hộ phải nhập lý do (BR-F9.17) ❌ chưa có TC
-    - AC-F9.7.1-07 Quản lý không hủy buổi đã tới giờ bắt đầu ❌ chưa có TC
-    - AC-F9.7.1-08 Chỉ hủy được buổi đang `BOOKED` ❌ chưa có TC
-    - AC-F9.7.1-09 PT không tự hủy buổi đã có khách (BR-F9.17) ❌ chưa có TC
-    - AC-F9.7.1-10 Phân quyền theo chủ buổi và chi nhánh ❌ chưa có TC
-    - AC-F9.7.1-11 Hai yêu cầu hủy cùng lúc ❌ chưa có TC
+  - **US-F9.7.1** Hủy buổi PT (*(chưa có, cần trưởng nhóm tạo issue cho US-F9.7.1)*) ✅ mọi AC có TC
+    - AC-F9.7.1-01 Hội viên hủy trước hạn, không mất buổi (BR-F9.16)
+      - TC-F9.7.1-01a `PtSessionCancelApiIntegrationTest#memberCancelsAtExactlyTwelveHours`
+    - AC-F9.7.1-02 Hủy sát giờ bị từ chối, đúng mốc thì được (BR-F9.16)
+      - TC-F9.7.1-02a `PtSessionCancelApiIntegrationTest#memberCancelsAtExactlyTwelveHours`
+      - TC-F9.7.1-02b `PtSessionCancelApiIntegrationTest#memberCancelsTooLate`
+      - TC-F9.7.1-02c `PtSessionCancelApiIntegrationTest#lateCancelMessageDependsOnRole`
+    - AC-F9.7.1-03 Mốc hủy đọc từ cấu hình
+      - TC-F9.7.1-03a `PtSessionCancelApiIntegrationTest#cancelLeadReadsBranchConfig`
+    - AC-F9.7.1-04 Lễ tân hủy hộ theo đúng quy tắc của hội viên (BR-F9.16)
+      - TC-F9.7.1-04a `PtSessionCancelApiIntegrationTest#receptionistCancelsOnBehalf`
+      - TC-F9.7.1-04b `PtSessionCancelApiIntegrationTest#lateCancelMessageDependsOnRole`
+    - AC-F9.7.1-05 Quản lý chi nhánh hủy hộ, có lý do, có dấu vết (BR-F9.17)
+      - TC-F9.7.1-05a `PtSessionCancelApiIntegrationTest#managerCancelsWithReason`
+    - AC-F9.7.1-06 Quản lý hủy hộ phải nhập lý do (BR-F9.17)
+      - TC-F9.7.1-06a `PtSessionCancelApiIntegrationTest#managerBlankReason`
+      - TC-F9.7.1-06b `PtSessionCancelApiIntegrationTest#managerNoBody`
+      - TC-F9.7.1-06c `PtSessionCancelApiIntegrationTest#managerWithoutReasonGetsNotFoundOrForbiddenFirst`
+    - AC-F9.7.1-07 Quản lý không hủy buổi đã tới giờ bắt đầu
+      - TC-F9.7.1-07a `PtSessionCancelApiIntegrationTest#managerAtStartTime`
+    - AC-F9.7.1-08 Chỉ hủy được buổi đang `BOOKED`
+      - TC-F9.7.1-08a `PtSessionCancelApiIntegrationTest#notBooked`
+    - AC-F9.7.1-09 PT không tự hủy buổi đã có khách (BR-F9.17)
+      - TC-F9.7.1-09a `PtSessionCancelApiIntegrationTest#trainerAndOwnerForbidden`
+    - AC-F9.7.1-10 Phân quyền theo chủ buổi và chi nhánh
+      - TC-F9.7.1-10a `PtSessionCancelApiIntegrationTest#trainerAndOwnerForbidden`
+      - TC-F9.7.1-10b `PtSessionCancelApiIntegrationTest#memberCannotCancelOthers`
+      - TC-F9.7.1-10c `PtSessionCancelApiIntegrationTest#otherBranchStaffForbidden`
+      - TC-F9.7.1-10d `PtSessionCancelApiIntegrationTest#notFound`
+      - TC-F9.7.1-10e `PtSessionCancelApiIntegrationTest#managerWithoutReasonGetsNotFoundOrForbiddenFirst`
+    - AC-F9.7.1-11 Hai yêu cầu hủy cùng lúc
+      - TC-F9.7.1-11a `PtSessionConcurrencyIntegrationTest#doubleCancelRace`
 
 ### F10
 
@@ -1955,23 +2054,40 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F5.5.1-11e | AC-F5.5.1-11 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-11e: lỗi 422 gói đã dùng và còn chỗ đặt lớp hiện đ` |
 | TC-F5.5.1-12a | AC-F5.5.1-12 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#otherMembershipUsageDoesNotBlock` |
 | TC-F7.1.1-01a | AC-F7.1.1-01 | US-F7.1.1 | UC-F7.1 |  | `MemberPortalQueryIntegrationTest#membershipsReturnsAllOwnMembershipsWithDetails` |
+| TC-F7.1.1-01b | AC-F7.1.1-01 | US-F7.1.1 | UC-F7.1 |  | `features/member-portal/api/member-portal.test.ts › TC-F7.1.1-01b, TC-F7.1.1-02b: listMemberships gọi GET /me/me` |
+| TC-F7.1.1-01c | AC-F7.1.1-01 | US-F7.1.1 | UC-F7.1 |  | `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.1.1-01c: hiển thị nhãn trạng thái tiếng Việt, số buổi ` |
 | TC-F7.1.1-02a | AC-F7.1.1-02 | US-F7.1.1 | UC-F7.1 |  | `MemberPortalQueryIntegrationTest#membershipsNeverLeaksOtherMembersData` |
+| TC-F7.1.1-02b | AC-F7.1.1-02 | US-F7.1.1 | UC-F7.1 |  | `features/member-portal/api/member-portal.test.ts › TC-F7.1.1-01b, TC-F7.1.1-02b: listMemberships gọi GET /me/me` |
 | TC-F7.1.1-03a | AC-F7.1.1-03 | US-F7.1.1 | UC-F7.1 |  | `MemberPortalQueryIntegrationTest#membershipsEmptyWhenMemberHasNone` |
+| TC-F7.1.1-03b | AC-F7.1.1-03 | US-F7.1.1 | UC-F7.1 |  | `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.1.1-03b: chưa có gói tập hiện đúng câu "Bạn chưa có gó` |
+| TC-F7.1.1-04a | AC-F7.1.1-04 | US-F7.1.1 | UC-F7.1 |  | `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.1.1-04a, TC-F7.5.1-03b: gói Đã hủy không có nút Gia hạ` |
 | TC-F7.1.1-05a | AC-F7.1.1-05 | US-F7.1.1 | UC-F7.1 |  | `MemberPortalQueryIntegrationTest#membershipsForbiddenForNonMemberRoles` |
 | TC-F7.1.1-05b | AC-F7.1.1-05 | US-F7.1.1 | UC-F7.1 |  | `MemberPortalQueryIntegrationTest#membershipsForbiddenWithoutProfileAndUnauthorizedWithoutToken` |
 | TC-F7.2.1-01a | AC-F7.2.1-01 | US-F7.2.1 | UC-F7.2 |  | `MemberPortalQueryIntegrationTest#checkinsPaginatedNewestFirstWithBranchAndTimes` |
+| TC-F7.2.1-01b | AC-F7.2.1-01 | US-F7.2.1 | UC-F7.2 |  | `features/member-portal/api/member-portal.test.ts › TC-F7.2.1-01b, TC-F7.2.1-03b: listCheckins gọi GET /me/check` |
+| TC-F7.2.1-01c | AC-F7.2.1-01 | US-F7.2.1 | UC-F7.2 |  | `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.2.1-01c: tab Lịch sử check-in hiển thị giờ Việt Nam và` |
 | TC-F7.2.1-02a | AC-F7.2.1-02 | US-F7.2.1 | UC-F7.2 |  | `MemberPortalQueryIntegrationTest#checkinsEmptyWhenMemberHasNone` |
+| TC-F7.2.1-02b | AC-F7.2.1-02 | US-F7.2.1 | UC-F7.2 |  | `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.2.1-02b: chưa có lượt check-in nào hiện đúng câu "Chưa` |
 | TC-F7.2.1-03a | AC-F7.2.1-03 | US-F7.2.1 | UC-F7.2 |  | `MemberPortalQueryIntegrationTest#checkinsNeverLeaksOtherMembersData` |
+| TC-F7.2.1-03b | AC-F7.2.1-03 | US-F7.2.1 | UC-F7.2 |  | `features/member-portal/api/member-portal.test.ts › TC-F7.2.1-01b, TC-F7.2.1-03b: listCheckins gọi GET /me/check` |
 | TC-F7.2.1-04a | AC-F7.2.1-04 | US-F7.2.1 | UC-F7.2 |  | `MemberPortalQueryIntegrationTest#checkinsInvalidPagingReturns400` |
 | TC-F7.2.1-06a | AC-F7.2.1-06 | US-F7.2.1 | UC-F7.2 |  | `MemberPortalQueryIntegrationTest#checkinsForbiddenAndUnauthorized` |
 | TC-F7.3.1-01a | AC-F7.3.1-01 | US-F7.3.1 | UC-F7.3 |  | `MemberPortalQueryIntegrationTest#invoicesPaginatedNewestFirstWithExpiresAtOnlyForPendingPortal` |
+| TC-F7.3.1-01b | AC-F7.3.1-01 | US-F7.3.1 | UC-F7.3 |  | `features/member-portal/api/member-portal.test.ts › TC-F7.3.1-01b, TC-F7.3.1-03b: listInvoices gọi GET /me/invoi` |
+| TC-F7.3.1-01c | AC-F7.3.1-01 | US-F7.3.1 | UC-F7.3 |  | `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.3.1-01c, TC-F7.3.1-02c: tab Hóa đơn hiện hạn tự hủy ch` |
 | TC-F7.3.1-02a | AC-F7.3.1-02 | US-F7.3.1 | UC-F7.3 |  | `MemberPortalQueryIntegrationTest#invoicesPaginatedNewestFirstWithExpiresAtOnlyForPendingPortal` |
 | TC-F7.3.1-02b | AC-F7.3.1-02 | US-F7.3.1 | UC-F7.3 |  | `MemberPortalQueryIntegrationTest#invoicesExpiresAtUsesBranchConfigAndNullForPaidPortal` |
+| TC-F7.3.1-02c | AC-F7.3.1-02 | US-F7.3.1 | UC-F7.3 |  | `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.3.1-01c, TC-F7.3.1-02c: tab Hóa đơn hiện hạn tự hủy ch` |
 | TC-F7.3.1-03a | AC-F7.3.1-03 | US-F7.3.1 | UC-F7.3 |  | `MemberPortalQueryIntegrationTest#invoicesNeverLeaksOtherMembersOrWalkInInvoices` |
+| TC-F7.3.1-03b | AC-F7.3.1-03 | US-F7.3.1 | UC-F7.3 |  | `features/member-portal/api/member-portal.test.ts › TC-F7.3.1-01b, TC-F7.3.1-03b: listInvoices gọi GET /me/invoi` |
 | TC-F7.3.1-04a | AC-F7.3.1-04 | US-F7.3.1 | UC-F7.3 |  | `MemberPortalQueryIntegrationTest#invoicesEmptyWhenMemberHasNone` |
+| TC-F7.3.1-04b | AC-F7.3.1-04 | US-F7.3.1 | UC-F7.3 |  | `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.3.1-04b: chưa có hóa đơn nào hiện đúng câu "Bạn chưa c` |
 | TC-F7.3.1-05a | AC-F7.3.1-05 | US-F7.3.1 | UC-F7.3 |  | `MemberPortalQueryIntegrationTest#invoicesInvalidPagingReturns400` |
 | TC-F7.3.1-06a | AC-F7.3.1-06 | US-F7.3.1 | UC-F7.3 |  | `MemberPortalQueryIntegrationTest#invoicesForbiddenAndUnauthorized` |
 | TC-F7.4.1-01a | AC-F7.4.1-01 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#purchaseCreatesPortalInvoice` |
+| TC-F7.4.1-01b | AC-F7.4.1-01 | US-F7.4.1 | UC-F7.4 |  | `features/member-portal/api/member-portal.test.ts › TC-F7.4.1-01b: requestPurchase chỉ gửi packageId lên POST /m` |
+| TC-F7.4.1-01c | AC-F7.4.1-01 | US-F7.4.1 | UC-F7.4 |  | `features/member-portal/api/member-portal.test.ts › TC-F7.4.1-01c: listPublicPackages dùng lại publicPackagesApi` |
+| TC-F7.4.1-01d | AC-F7.4.1-01 | US-F7.4.1 | UC-F7.4 |  | `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.4.1-01d: tab Mua gói tải bảng giá công khai, bấm Mua g` |
 | TC-F7.4.1-03a | AC-F7.4.1-03 | US-F7.4.1 | UC-F7.4 |  | `PendingInvoiceExpiryIntegrationTest#cancelsPortalInvoiceExactlyAtTtl` |
 | TC-F7.4.1-03b | AC-F7.4.1-03 | US-F7.4.1 | UC-F7.4 |  | `PendingInvoiceExpiryIntegrationTest#runningTwiceChangesNothingMore` |
 | TC-F7.4.1-03c | AC-F7.4.1-03 | US-F7.4.1 | UC-F7.4 |  | `PendingInvoiceExpiryIntegrationTest#paidPortalInvoiceIsUntouched` |
@@ -1986,21 +2102,29 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F7.4.1-05c | AC-F7.4.1-05 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#otherPackageOfSameTypePendingIs422` |
 | TC-F7.4.1-05d | AC-F7.4.1-05 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#upcomingOfSameTypeIs422` |
 | TC-F7.4.1-05e | AC-F7.4.1-05 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#inactiveMemberWithPendingIs422` |
+| TC-F7.4.1-05f | AC-F7.4.1-05 | US-F7.4.1 | UC-F7.4 |  | `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.4.1-05f, TC-F7.4.1-07e: mua gói lỗi 409 và 422 hiện ng` |
 | TC-F7.4.1-06a | AC-F7.4.1-06 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseConcurrencyIntegrationTest#twoPurchasesAtOnceCreateExactlyOne` |
 | TC-F7.4.1-07a | AC-F7.4.1-07 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#unknownPackageIs404` |
 | TC-F7.4.1-07b | AC-F7.4.1-07 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#inactivePackageIs422` |
 | TC-F7.4.1-07c | AC-F7.4.1-07 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#packageOfOtherBranchIs422` |
 | TC-F7.4.1-07d | AC-F7.4.1-07 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#inactiveMemberIs422` |
+| TC-F7.4.1-07e | AC-F7.4.1-07 | US-F7.4.1 | UC-F7.4 |  | `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.4.1-05f, TC-F7.4.1-07e: mua gói lỗi 409 và 422 hiện ng` |
 | TC-F7.4.1-08a | AC-F7.4.1-08 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#invalidPurchaseBodyIs400` |
 | TC-F7.4.1-08b | AC-F7.4.1-08 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#nonMemberIs403` |
 | TC-F7.4.1-08c | AC-F7.4.1-08 | US-F7.4.1 | UC-F7.4 |  | `PortalPurchaseIntegrationTest#memberWithoutProfileIs403` |
 | TC-F7.5.1-01a | AC-F7.5.1-01 | US-F7.5.1 | UC-F7.5 |  | `PortalPurchaseIntegrationTest#renewCreatesNewPendingMembership` |
+| TC-F7.5.1-01b | AC-F7.5.1-01 | US-F7.5.1 | UC-F7.5 |  | `features/member-portal/api/member-portal.test.ts › TC-F7.5.1-01b: requestRenewal chỉ gửi membershipId lên POST ` |
+| TC-F7.5.1-01c | AC-F7.5.1-01 | US-F7.5.1 | UC-F7.5 |  | `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.5.1-01c, TC-F7.5.1-02b: bấm Gia hạn gọi renewal-reques` |
 | TC-F7.5.1-02a | AC-F7.5.1-02 | US-F7.5.1 | UC-F7.5 |  | `PortalPurchaseIntegrationTest#renewCancelledMembershipIs422` |
+| TC-F7.5.1-02b | AC-F7.5.1-02 | US-F7.5.1 | UC-F7.5 |  | `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.5.1-01c, TC-F7.5.1-02b: bấm Gia hạn gọi renewal-reques` |
 | TC-F7.5.1-03a | AC-F7.5.1-03 | US-F7.5.1 | UC-F7.5 |  | `PortalPurchaseIntegrationTest#renewCancelledMembershipIs422` |
+| TC-F7.5.1-03b | AC-F7.5.1-03 | US-F7.5.1 | UC-F7.5 |  | `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.1.1-04a, TC-F7.5.1-03b: gói Đã hủy không có nút Gia hạ` |
 | TC-F7.5.1-04a | AC-F7.5.1-04 | US-F7.5.1 | UC-F7.5 |  | `PortalPurchaseIntegrationTest#renewOthersMembershipIs404` |
 | TC-F7.5.1-04b | AC-F7.5.1-04 | US-F7.5.1 | UC-F7.5 |  | `PortalPurchaseIntegrationTest#renewUnknownMembershipIs404` |
 | TC-F7.5.1-05a | AC-F7.5.1-05 | US-F7.5.1 | UC-F7.5 |  | `PortalPurchaseIntegrationTest#renewInactivePackageIs422` |
+| TC-F7.5.1-05b | AC-F7.5.1-05 | US-F7.5.1 | UC-F7.5 |  | `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.5.1-05b, TC-F7.5.1-06b: gia hạn lỗi 409 và 422 hiện ng` |
 | TC-F7.5.1-06a | AC-F7.5.1-06 | US-F7.5.1 | UC-F7.5 |  | `PortalPurchaseIntegrationTest#renewTwiceIs422` |
+| TC-F7.5.1-06b | AC-F7.5.1-06 | US-F7.5.1 | UC-F7.5 |  | `features/member-portal/pages/MemberPortalPage.test.tsx › TC-F7.5.1-05b, TC-F7.5.1-06b: gia hạn lỗi 409 và 422 hiện ng` |
 | TC-F7.5.1-09a | AC-F7.5.1-09 | US-F7.5.1 | UC-F7.5 |  | `PortalPurchaseIntegrationTest#invalidRenewBodyIs400` |
 | TC-F8.0.1-01a | AC-F8.0.1-01 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates` |
 | TC-F8.0.1-01b | AC-F8.0.1-01 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-01b, TC-F8.0.1-04b: khách xem giờ Việt Nam và đăng` |
@@ -2083,10 +2207,129 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F8.8.1-03a | AC-F8.8.1-03 | US-F8.8.1 | UC-F8.8 | BR-F8.8-01, BR-F8.8-03, BR-F8.8-02, BR-F8.7-06 | `ClassApiIntegrationTest#generationSkipsInactiveAndOutOfValidityDates` |
 | TC-F8.8.1-04a | AC-F8.8.1-04 | US-F8.8.1 | UC-F8.8 | BR-F8.8-02, BR-F8.8-01, BR-F8.8-03, BR-F8.7-06 | `ClassApiIntegrationTest#concurrentGenerationAndChangedSessionDoNotCreateDuplicates` |
 | TC-F8.8.1-05a | AC-F8.8.1-05 | US-F8.8.1 | UC-F8.8 | BR-F8.8-01, BR-F8.8-03, BR-F8.7-06, BR-F8.8-02 | `ClassApiIntegrationTest#generationRejectsInactiveRoomOrConflictingSession` |
+| TC-F9.1.1-01a | AC-F9.1.1-01 | US-F9.1.1 | UC-F9.1 | BR-F9.14, BR-F9.15 | `TrainerAvailabilityApiIntegrationTest#createAvailabilityTakesTrainerFromTokenAndPreservesVnTime` |
+| TC-F9.1.1-01b | AC-F9.1.1-01 | US-F9.1.1 | UC-F9.1 | BR-F9.14, BR-F9.15 | `TrainerAvailabilityApiIntegrationTest#readSqlSeededTimeColumnWithoutTimezoneShift` |
+| TC-F9.1.1-02a | AC-F9.1.1-02 | US-F9.1.1 | UC-F9.1 | BR-F9.14, BR-F9.15 | `TrainerAvailabilityApiIntegrationTest#invalidInputReturns400` |
+| TC-F9.1.1-03a | AC-F9.1.1-03 | US-F9.1.1 | UC-F9.1 | BR-F9.14, BR-F9.15 | `TrainerAvailabilityTest#overlapsHalfOpenSameDay` |
+| TC-F9.1.1-03b | AC-F9.1.1-03 | US-F9.1.1 | UC-F9.1 | BR-F9.14, BR-F9.15 | `TrainerAvailabilityApiIntegrationTest#overlapSameTrainerIs422ButAdjacentOrOtherTrainerIs201` |
+| TC-F9.1.1-03c | AC-F9.1.1-03 | US-F9.1.1 | UC-F9.1 | BR-F9.14, BR-F9.15 | `TrainerAvailabilityApiIntegrationTest#updateOverlapSameTrainerIs422` |
+| TC-F9.1.1-04a | AC-F9.1.1-04 | US-F9.1.1 | UC-F9.1 | BR-F9.14, BR-F9.15 | `TrainerAvailabilityTest#overlapsHalfOpenSameDay` |
+| TC-F9.1.1-04b | AC-F9.1.1-04 | US-F9.1.1 | UC-F9.1 | BR-F9.14, BR-F9.15 | `TrainerAvailabilityApiIntegrationTest#overlapSameTrainerIs422ButAdjacentOrOtherTrainerIs201` |
+| TC-F9.1.1-05a | AC-F9.1.1-05 | US-F9.1.1 | UC-F9.1 | BR-F9.14, BR-F9.15 | `TrainerAvailabilityApiIntegrationTest#overlapSameTrainerIs422ButAdjacentOrOtherTrainerIs201` |
+| TC-F9.1.1-06a | AC-F9.1.1-06 | US-F9.1.1 | UC-F9.1 | BR-F9.14, BR-F9.15 | `TrainerAvailabilityApiIntegrationTest#updateOverlapSameTrainerIs422` |
+| TC-F9.1.1-06b | AC-F9.1.1-06 | US-F9.1.1 | UC-F9.1 | BR-F9.14, BR-F9.15 | `TrainerAvailabilityApiIntegrationTest#updateNarrowBlockedByFutureBookedButWidenAllowed` |
+| TC-F9.1.1-07a | AC-F9.1.1-07 | US-F9.1.1 | UC-F9.1 | BR-F9.15, BR-F9.14 | `TrainerAvailabilityTest#vnTimezoneBoundaryAtEarlyMorning` |
+| TC-F9.1.1-07b | AC-F9.1.1-07 | US-F9.1.1 | UC-F9.1 | BR-F9.15, BR-F9.14 | `TrainerAvailabilityTest#adjacentSlotBoundaryDoesNotOverlap` |
+| TC-F9.1.1-07c | AC-F9.1.1-07 | US-F9.1.1 | UC-F9.1 | BR-F9.15, BR-F9.14 | `TrainerAvailabilityApiIntegrationTest#deleteBlockedByFutureBookedOtherwiseHardDeletesAndAudits` |
+| TC-F9.1.1-07d | AC-F9.1.1-07 | US-F9.1.1 | UC-F9.1 | BR-F9.15, BR-F9.14 | `TrainerAvailabilityApiIntegrationTest#updateNarrowBlockedByFutureBookedButWidenAllowed` |
+| TC-F9.1.1-07e | AC-F9.1.1-07 | US-F9.1.1 | UC-F9.1 | BR-F9.15, BR-F9.14 | `TrainerAvailabilityApiIntegrationTest#vnTimezoneEarlyMorningBlocksCorrectVnWeekday` |
+| TC-F9.1.1-08a | AC-F9.1.1-08 | US-F9.1.1 | UC-F9.1 | BR-F9.15, BR-F9.14 | `TrainerAvailabilityApiIntegrationTest#pastOrNonBookedSessionsDoNotBlockDelete` |
+| TC-F9.1.1-09a | AC-F9.1.1-09 | US-F9.1.1 | UC-F9.1 | BR-F9.14, BR-F9.15 | `TrainerAvailabilityApiIntegrationTest#trainerScheduleReturnsAvailabilitiesPtAndAssignedClassSessionsInVnRange` |
+| TC-F9.1.1-10a | AC-F9.1.1-10 | US-F9.1.1 | UC-F9.1 | BR-F9.14, BR-F9.15 | `TrainerAvailabilityApiIntegrationTest#otherTrainerIs403AndMissingSlotIs404` |
+| TC-F9.1.1-11a | AC-F9.1.1-11 | US-F9.1.1 | UC-F9.1 | BR-F9.14, BR-F9.15 | `TrainerAvailabilityApiIntegrationTest#nonTrainerCannotAccessPtEndpoints` |
+| TC-F9.1.1-11b | AC-F9.1.1-11 | US-F9.1.1 | UC-F9.1 | BR-F9.14, BR-F9.15 | `TrainerAvailabilityApiIntegrationTest#anonymousIs401AndInactiveTrainerIs403` |
+| TC-F9.2.1-01a | AC-F9.2.1-01 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#bookSuccess` |
+| TC-F9.2.1-01b | AC-F9.2.1-01 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#acceptsSrsDraftFieldNames` |
+| TC-F9.2.1-01c | AC-F9.2.1-01 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#chainWidePtPackageIsUsable` |
+| TC-F9.2.1-01d | AC-F9.2.1-01 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#sessionBranchIsTrainerBranch` |
+| TC-F9.2.1-02a | AC-F9.2.1-02 | US-F9.2.1 | UC-F9.2 |  | `TrainerAvailabilityApiIntegrationTest#memberReadsTrainerAvailabilitiesAndInvalidCases` |
+| TC-F9.2.1-02b | AC-F9.2.1-02 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#outsideAvailability` |
+| TC-F9.2.1-03a | AC-F9.2.1-03 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#exactlyTwelveHoursAhead` |
+| TC-F9.2.1-03b | AC-F9.2.1-03 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#elevenHoursFiftyNineMinutesAhead` |
+| TC-F9.2.1-04a | AC-F9.2.1-04 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#leadHoursReadFromConfig` |
+| TC-F9.2.1-05a | AC-F9.2.1-05 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#overlapsTrainerPtSession` |
+| TC-F9.2.1-05b | AC-F9.2.1-05 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#adjacentOrCancelledDoesNotBlock` |
+| TC-F9.2.1-05c | AC-F9.2.1-05 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#overlapsTrainerClassSession` |
+| TC-F9.2.1-05d | AC-F9.2.1-05 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#overlapsRescheduledClassSession` |
+| TC-F9.2.1-05e | AC-F9.2.1-05 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#overlapsTrainerScheduleNotYetGenerated` |
+| TC-F9.2.1-05f | AC-F9.2.1-05 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#skippedOccurrenceInsideGenerationWindowDoesNotBlock` |
+| TC-F9.2.1-05g | AC-F9.2.1-05 | US-F9.2.1 | UC-F9.2 |  | `PtSessionConcurrencyIntegrationTest#bookingRacesClassReschedule` |
+| TC-F9.2.1-06a | AC-F9.2.1-06 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#overlapsMemberPtSessionWithOtherTrainer` |
+| TC-F9.2.1-06b | AC-F9.2.1-06 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#overlapsMemberClassBooking` |
+| TC-F9.2.1-07a | AC-F9.2.1-07 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#noUsablePtPackage` |
+| TC-F9.2.1-07b | AC-F9.2.1-07 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#inactiveMember` |
+| TC-F9.2.1-08a | AC-F9.2.1-08 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#bookedEnoughSessions` |
+| TC-F9.2.1-08b | AC-F9.2.1-08 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#pastUnconfirmedSessionBlocksBooking` |
+| TC-F9.2.1-08c | AC-F9.2.1-08 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#vd23PastMorningBlocksEveningAndConfirmExpiresPackage` |
+| TC-F9.2.1-08d | AC-F9.2.1-08 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#twoRemainingWithOnePastUnconfirmedAllowsExactlyOneMore` |
+| TC-F9.2.1-08e | AC-F9.2.1-08 | US-F9.2.1 | UC-F9.2 |  | `PtSessionConcurrencyIntegrationTest#lastSessionRace` |
+| TC-F9.2.1-09a | AC-F9.2.1-09 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#twoRemainingWithOnePastUnconfirmedAllowsExactlyOneMore` |
+| TC-F9.2.1-09b | AC-F9.2.1-09 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#cancelOnTimeFreesQuotaForRebooking` |
+| TC-F9.2.1-10a | AC-F9.2.1-10 | US-F9.2.1 | UC-F9.2 |  | `PtSessionConcurrencyIntegrationTest#trainerSlotTakenWhileWaitingIs409` |
+| TC-F9.2.1-10b | AC-F9.2.1-10 | US-F9.2.1 | UC-F9.2 |  | `PtSessionConcurrencyIntegrationTest#memberSlotTakenWhileWaitingIs409` |
+| TC-F9.2.1-10c | AC-F9.2.1-10 | US-F9.2.1 | UC-F9.2 |  | `PtSessionConcurrencyIntegrationTest#twoMembersRaceForSameTrainerSlot` |
+| TC-F9.2.1-10d | AC-F9.2.1-10 | US-F9.2.1 | UC-F9.2 |  | `PtSessionConcurrencyIntegrationTest#sameMemberRacesTwoTrainers` |
+| TC-F9.2.1-10e | AC-F9.2.1-10 | US-F9.2.1 | UC-F9.2 |  | `PtSessionConcurrencyIntegrationTest#lastSessionRace` |
+| TC-F9.2.1-10f | AC-F9.2.1-10 | US-F9.2.1 | UC-F9.2 |  | `PtSessionConcurrencyIntegrationTest#bookingRacesClassReschedule` |
+| TC-F9.2.1-11a | AC-F9.2.1-11 | US-F9.2.1 | UC-F9.2 |  | `TrainerAvailabilityApiIntegrationTest#memberReadsTrainerAvailabilitiesAndInvalidCases` |
+| TC-F9.2.1-11b | AC-F9.2.1-11 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#invalidInput` |
+| TC-F9.2.1-11c | AC-F9.2.1-11 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#trainerNotFound` |
+| TC-F9.2.1-12a | AC-F9.2.1-12 | US-F9.2.1 | UC-F9.2 |  | `TrainerAvailabilityApiIntegrationTest#memberReadsTrainerAvailabilitiesAndInvalidCases` |
+| TC-F9.2.1-12b | AC-F9.2.1-12 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#nonMemberIsForbidden` |
+| TC-F9.2.1-12c | AC-F9.2.1-12 | US-F9.2.1 | UC-F9.2 |  | `PtSessionBookingApiIntegrationTest#anonymousIs401` |
+| TC-F9.3.1-01a | AC-F9.3.1-01 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#confirmSuccess` |
+| TC-F9.3.1-01b | AC-F9.3.1-01 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#notFound` |
+| TC-F9.3.1-02a | AC-F9.3.1-02 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtCommissionTest#formula` |
+| TC-F9.3.1-02b | AC-F9.3.1-02 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtCommissionTest#missingDataGivesZero` |
+| TC-F9.3.1-02c | AC-F9.3.1-02 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtCommissionTest#invalidTotalSessions` |
+| TC-F9.3.1-02d | AC-F9.3.1-02 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#confirmSuccess` |
+| TC-F9.3.1-02e | AC-F9.3.1-02 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#commissionRoundsHalfUpAndIsFrozen` |
+| TC-F9.3.1-02f | AC-F9.3.1-02 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#commissionUsesNetPrice` |
+| TC-F9.3.1-02g | AC-F9.3.1-02 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#nullRateGivesZeroCommission` |
+| TC-F9.3.1-03a | AC-F9.3.1-03 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#beforeStartRejected` |
+| TC-F9.3.1-04a | AC-F9.3.1-04 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#secondTimeRejected` |
+| TC-F9.3.1-04b | AC-F9.3.1-04 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#cancelledRejected` |
+| TC-F9.3.1-04c | AC-F9.3.1-04 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#leftoverSessionOnUsedUpPackage` |
+| TC-F9.3.1-05a | AC-F9.3.1-05 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionConcurrencyIntegrationTest#sessionCompletedWhileWaitingIs409` |
+| TC-F9.3.1-05b | AC-F9.3.1-05 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionConcurrencyIntegrationTest#doubleConfirmRace` |
+| TC-F9.3.1-05c | AC-F9.3.1-05 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionConcurrencyIntegrationTest#confirmVersusNoShowRace` |
+| TC-F9.3.1-05d | AC-F9.3.1-05 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionConcurrencyIntegrationTest#lastSessionRace` |
+| TC-F9.3.1-05e | AC-F9.3.1-05 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionConcurrencyIntegrationTest#confirmLastRacesMemberCancellingFuture` |
+| TC-F9.3.1-06a | AC-F9.3.1-06 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#lastSessionExpiresAndPullsNextPackage` |
+| TC-F9.3.1-06b | AC-F9.3.1-06 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#overdueUpcomingKeepsItsDates` |
+| TC-F9.3.1-06c | AC-F9.3.1-06 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#noShowOnLastSessionPullsNextPackage` |
+| TC-F9.3.1-06d | AC-F9.3.1-06 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#futureSessionsMoveToNextPackage` |
+| TC-F9.3.1-06e | AC-F9.3.1-06 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#extraSessionsCancelledWhenNextPackageTooSmall` |
+| TC-F9.3.1-06f | AC-F9.3.1-06 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#sessionsBeyondNextPackageEndAreCancelled` |
+| TC-F9.3.1-06g | AC-F9.3.1-06 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#pastUnconfirmedSessionLeftAlone` |
+| TC-F9.3.1-06h | AC-F9.3.1-06 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#otherMembersSessionsUntouched` |
+| TC-F9.3.1-07a | AC-F9.3.1-07 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#lastSessionWithoutNextPackage` |
+| TC-F9.3.1-07b | AC-F9.3.1-07 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#futureSessionsCancelledWithoutNextPackage` |
+| TC-F9.3.1-08a | AC-F9.3.1-08 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#noShowDeductsWithoutCommission` |
+| TC-F9.3.1-08b | AC-F9.3.1-08 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#noShowOnLastSessionPullsNextPackage` |
+| TC-F9.3.1-08c | AC-F9.3.1-08 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#managerNoShowAfterDeadline` |
+| TC-F9.3.1-09a | AC-F9.3.1-09 | US-F9.3.1 | UC-F9.3 | BR-F9.19, BR-F9.18 | `PtSessionCompletionApiIntegrationTest#trainerAt2359Allowed` |
+| TC-F9.3.1-09b | AC-F9.3.1-09 | US-F9.3.1 | UC-F9.3 | BR-F9.19, BR-F9.18 | `PtSessionCompletionApiIntegrationTest#trainerAtMidnightRejected` |
+| TC-F9.3.1-09c | AC-F9.3.1-09 | US-F9.3.1 | UC-F9.3 | BR-F9.19, BR-F9.18 | `PtSessionCompletionApiIntegrationTest#managerAfterDeadlineAllowedWithAudit` |
+| TC-F9.3.1-09d | AC-F9.3.1-09 | US-F9.3.1 | UC-F9.3 | BR-F9.19, BR-F9.18 | `PtSessionCompletionApiIntegrationTest#managerNoShowAfterDeadline` |
+| TC-F9.3.1-09e | AC-F9.3.1-09 | US-F9.3.1 | UC-F9.3 | BR-F9.19, BR-F9.18 | `PtSessionCompletionApiIntegrationTest#managerConfirmsOnPackageExpiredByDate` |
+| TC-F9.3.1-10a | AC-F9.3.1-10 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#otherTrainerForbidden` |
+| TC-F9.3.1-10b | AC-F9.3.1-10 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#otherBranchManagerForbidden` |
+| TC-F9.3.1-10c | AC-F9.3.1-10 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#otherRolesForbidden` |
+| TC-F9.7.1-01a | AC-F9.7.1-01 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#memberCancelsAtExactlyTwelveHours` |
+| TC-F9.7.1-02a | AC-F9.7.1-02 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#memberCancelsAtExactlyTwelveHours` |
+| TC-F9.7.1-02b | AC-F9.7.1-02 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#memberCancelsTooLate` |
+| TC-F9.7.1-02c | AC-F9.7.1-02 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#lateCancelMessageDependsOnRole` |
+| TC-F9.7.1-03a | AC-F9.7.1-03 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#cancelLeadReadsBranchConfig` |
+| TC-F9.7.1-04a | AC-F9.7.1-04 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#receptionistCancelsOnBehalf` |
+| TC-F9.7.1-04b | AC-F9.7.1-04 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#lateCancelMessageDependsOnRole` |
+| TC-F9.7.1-05a | AC-F9.7.1-05 | US-F9.7.1 | UC-F9.7 | BR-F9.17, BR-F9.16 | `PtSessionCancelApiIntegrationTest#managerCancelsWithReason` |
+| TC-F9.7.1-06a | AC-F9.7.1-06 | US-F9.7.1 | UC-F9.7 | BR-F9.17, BR-F9.16 | `PtSessionCancelApiIntegrationTest#managerBlankReason` |
+| TC-F9.7.1-06b | AC-F9.7.1-06 | US-F9.7.1 | UC-F9.7 | BR-F9.17, BR-F9.16 | `PtSessionCancelApiIntegrationTest#managerNoBody` |
+| TC-F9.7.1-06c | AC-F9.7.1-06 | US-F9.7.1 | UC-F9.7 | BR-F9.17, BR-F9.16 | `PtSessionCancelApiIntegrationTest#managerWithoutReasonGetsNotFoundOrForbiddenFirst` |
+| TC-F9.7.1-07a | AC-F9.7.1-07 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#managerAtStartTime` |
+| TC-F9.7.1-08a | AC-F9.7.1-08 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#notBooked` |
+| TC-F9.7.1-09a | AC-F9.7.1-09 | US-F9.7.1 | UC-F9.7 | BR-F9.17, BR-F9.16 | `PtSessionCancelApiIntegrationTest#trainerAndOwnerForbidden` |
+| TC-F9.7.1-10a | AC-F9.7.1-10 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#trainerAndOwnerForbidden` |
+| TC-F9.7.1-10b | AC-F9.7.1-10 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#memberCannotCancelOthers` |
+| TC-F9.7.1-10c | AC-F9.7.1-10 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#otherBranchStaffForbidden` |
+| TC-F9.7.1-10d | AC-F9.7.1-10 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#notFound` |
+| TC-F9.7.1-10e | AC-F9.7.1-10 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#managerWithoutReasonGetsNotFoundOrForbiddenFirst` |
+| TC-F9.7.1-11a | AC-F9.7.1-11 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionConcurrencyIntegrationTest#doubleCancelRace` |
 
 ## 6. Kiểm thử chưa mang mã TC
 
-Có 263 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
+Có 265 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
 
 | File | Số kiểm thử |
 | --- | --- |
@@ -2117,7 +2360,7 @@ Có 263 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PackageCatalogServiceTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PackageMapperTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PublicPackageIntegrationTest.java` | 1 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/staff/StaffServiceTest.java` | 4 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/staff/StaffServiceTest.java` | 6 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/systemconfig/SystemConfigServiceTest.java` | 4 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/SeedDataMigrationIntegrationTest.java` | 1 |
 | `frontend/src/app/router.test.ts` | 3 |
