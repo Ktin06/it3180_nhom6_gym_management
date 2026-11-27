@@ -2,7 +2,7 @@ import { LockOutlined } from '@ant-design/icons'
 import { Alert, Button, Form, Input, Typography } from 'antd'
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { errorMessage } from '../../shared/api-error'
+import { errorMessage } from '../../../services/api-error'
 import { getProblemDetail, resetPassword } from '../api/auth-api'
 import { isValidPassword } from '../api/validation'
 

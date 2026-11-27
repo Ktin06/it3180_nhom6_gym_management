@@ -5,7 +5,7 @@ import { App as AntdApp } from 'antd'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { menuForRole } from '../../../layouts/staff-menu'
 import { canOpen } from '../../../routes/route-access'
-import type { PageResponse } from '../../shared/types'
+import type { PageResponse } from '../../../services/list-types'
 import type {
   CheckinGateway,
   CheckinHistoryItem,

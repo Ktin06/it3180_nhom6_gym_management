@@ -1,7 +1,7 @@
 import { Alert, Button, Card, Empty, Input, Select, Skeleton, Tag, theme, Typography } from 'antd'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link, type LinkProps } from 'react-router-dom'
-import { errorMessage } from '../shared/api-error'
+import { errorMessage } from '../../services/api-error'
 import type { BranchOption, CalendarFilter, CalendarSession } from './class-api'
 import { classDateKey, classDay, classTimeRange } from './class-time'
 import './class-calendar.css'

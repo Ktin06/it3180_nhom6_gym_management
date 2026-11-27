@@ -3,8 +3,8 @@ import { Alert, Button, Input, Select, Table, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { MemberAvatar } from '../../members/components/MemberAvatar'
-import { errorMessage } from '../../shared/api-error'
-import { useRemoteQuery } from '../../shared/use-remote-query'
+import { errorMessage } from '../../../services/api-error'
+import { useRemoteQuery } from '../../../services/use-remote-query'
 import {
   CHECKIN_METHOD_LABELS,
   CHECKIN_STATUS_META,

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { errorMessage } from '../shared/api-error'
+import { errorMessage } from '../../services/api-error'
 
 /** Dùng chung cho nhân viên và điểm vào PDF của hội viên; chỉ cấp URL sau khi API kiểm tra quyền. */
 export function useInvoicePdf(loadPdf: (id: number) => Promise<Blob>) {

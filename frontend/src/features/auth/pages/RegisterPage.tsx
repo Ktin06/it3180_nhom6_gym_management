@@ -6,7 +6,8 @@ import { HOME_PATH_BY_ROLE } from '../../../auth/roles'
 import { useAuth } from '../../../auth/useAuth'
 import { getProblemDetail } from '../api/auth-api'
 import type { RegisterRequest } from '../types/auth'
-import { isValidPassword, isValidPhone, normalizeEmail, normalizePhone } from '../api/validation'
+import { isValidPhone, normalizePhone } from '../../../services/phone'
+import { isValidPassword, normalizeEmail } from '../api/validation'
 
 interface RegisterForm extends RegisterRequest {
   confirmPassword: string

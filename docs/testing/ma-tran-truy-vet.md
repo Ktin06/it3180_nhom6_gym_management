@@ -9,8 +9,8 @@
 | Chức năng | UC | US | AC | AC đã có TC | AC chưa có TC | TC |
 | --- | --- | --- | --- | --- | --- | --- |
 | F1 | 6 | 6 | 31 | 30 | 1 | 144 |
-| F2 | 5 | 6 | 31 | 27 | 4 | 110 |
-| F3 | 5 | 6 | 45 | 45 | 0 | 137 |
+| F2 | 5 | 6 | 31 | 27 | 4 | 113 |
+| F3 | 5 | 6 | 45 | 45 | 0 | 138 |
 | F4 | 5 | 5 | 37 | 0 | 37 | 0 |
 | F5 | 5 | 5 | 49 | 49 | 0 | 154 |
 | F6 | 5 | 5 | 16 | 0 | 16 | 0 |
@@ -18,7 +18,7 @@
 | F8 | 9 | 9 | 55 | 53 | 2 | 81 |
 | F9 | 7 | 7 | 63 | 0 | 63 | 0 |
 | F10 | 5 | 4 | 25 | 0 | 25 | 0 |
-| **Tổng** | **57** | **58** | **386** | **233** | **153** | **674** |
+| **Tổng** | **57** | **58** | **386** | **233** | **153** | **678** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -460,6 +460,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F2.3.1-01i `MemberApiIntegrationTest#measuresSearchOnTenThousandProfiles`
       - TC-F2.3.1-01j `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01j: đổi trang gọi API từ 0, tìm kiếm mới trở về t`
       - TC-F2.3.1-01k `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01k: áp dụng từ khóa đang nhập khi đổi trạng thái `
+      - TC-F2.3.1-01l `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01l, TC-F2.4.1-01f: giữ trang khi sửa và về trang `
     - AC-F2.3.1-02 Chủ chuỗi tra cứu và xem chi tiết hồ sơ mọi chi nhánh (BR-F2-10)
       - TC-F2.3.1-02a `F1RegistrationIntegrationTest#listGetsBatchEmailsThroughRealF1AndIncludesUnlinkedProfile`
       - TC-F2.3.1-02b `MemberApiIntegrationTest#searchScopesBothRowsAndCountAndIncludesUnlinkedProfiles`
@@ -477,6 +478,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F2.4.1-01c `MemberApiIntegrationTest#updateSamePhoneAndDisableRevokeAndActivate`
       - TC-F2.4.1-01d `MemberServiceTest#editingProfileWithoutStatusTransitionDoesNotDisableOrActivateAccount`
       - TC-F2.4.1-01e `features/members/components/MemberFormModal.test.tsx › TC-F2.4.1-01e: sửa hồ sơ gửi đầy đủ trạng thái và giữ giá tr`
+      - TC-F2.4.1-01f `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01l, TC-F2.4.1-01f: giữ trang khi sửa và về trang `
     - AC-F2.4.1-02 Từ chối trùng số điện thoại, thiếu trạng thái hoặc hồ sơ ngoài phạm vi (BR-F2-06, BR-F2-10)
       - TC-F2.4.1-02a `MemberApiIntegrationTest#createAndUpdateRejectTodayOrFutureBirthDateWithoutChanges`
       - TC-F2.4.1-02b `MemberApiIntegrationTest#invalidNamesAreRejectedByRequestValidationOnCreateAndUpdate`
@@ -492,6 +494,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F2.4.1-03e `MemberApiIntegrationTest#updateSamePhoneAndDisableRevokeAndActivate`
       - TC-F2.4.1-03f `MemberApiIntegrationTest#failedAccountOperationRollsBackMemberUserAndTokens`
       - TC-F2.4.1-03g `MemberServiceTest#failedAccountTransitionDoesNotMutateNamePhoneOrStatus`
+      - TC-F2.4.1-03h `features/members/components/MemberFormModal.test.tsx › TC-F2.4.1-03h: hiện cảnh báo khi ngừng hồ sơ đang hoạt động `
     - AC-F2.4.1-04 Kích hoạt lại hồ sơ khôi phục tài khoản nhưng không khôi phục token cũ và không gỡ khóa tạm (BR-F2-08)
       - TC-F2.4.1-04a `AccountServiceTest#activateAccountIfDisabledChiMoTaiKhoanDisabledKhongMoLocked`
       - TC-F2.4.1-04b `F1RegistrationIntegrationTest#disablingRevokesAllMemberSessionsAndReactivationDoesNotRestoreOldTokens`
@@ -549,6 +552,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
   - **US-F3.1.1** Xem danh mục gói (nội bộ) (#129) ✅ mọi AC có TC
     - AC-F3.1.1-01 Nhân viên chi nhánh chỉ thấy gói của chi nhánh mình và gói toàn chuỗi (BR-F3-01)
       - TC-F3.1.1-01a `PackageCatalogIntegrationTest#scopesRowsAndCountAndIgnoresClientBranch`
+      - TC-F3.1.1-01b `features/packages/pages/PackagesPage.test.tsx › TC-F3.1.1-01b: chỉ hiện danh mục rỗng sau khi tải xong`
     - AC-F3.1.1-02 Lọc, sắp xếp và phân trang
       - TC-F3.1.1-02a `PackageCatalogIntegrationTest#defaultActiveAndOrderingMatchContract`
       - TC-F3.1.1-02b `PackageCatalogIntegrationTest#inactiveFilterAndEmptyResults`
@@ -1606,6 +1610,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F2.3.1-01i | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#measuresSearchOnTenThousandProfiles` |
 | TC-F2.3.1-01j | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01j: đổi trang gọi API từ 0, tìm kiếm mới trở về t` |
 | TC-F2.3.1-01k | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01k: áp dụng từ khóa đang nhập khi đổi trạng thái ` |
+| TC-F2.3.1-01l | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01l, TC-F2.4.1-01f: giữ trang khi sửa và về trang ` |
 | TC-F2.3.1-02a | AC-F2.3.1-02 | US-F2.3.1 | UC-F2.3 | BR-F2-10, BR-F2-05, BR-F2-06, BR-F2-09 | `F1RegistrationIntegrationTest#listGetsBatchEmailsThroughRealF1AndIncludesUnlinkedProfile` |
 | TC-F2.3.1-02b | AC-F2.3.1-02 | US-F2.3.1 | UC-F2.3 | BR-F2-10, BR-F2-05, BR-F2-06, BR-F2-09 | `MemberApiIntegrationTest#searchScopesBothRowsAndCountAndIncludesUnlinkedProfiles` |
 | TC-F2.3.1-03a | AC-F2.3.1-03 | US-F2.3.1 | UC-F2.3 | BR-F2-09, BR-F2-10, BR-F2-05, BR-F2-06 | `F1RegistrationIntegrationTest#realF1RegistrationCreatesProfileAndJwtCanReadOwnF2Profile` |
@@ -1617,6 +1622,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F2.4.1-01c | AC-F2.4.1-01 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberApiIntegrationTest#updateSamePhoneAndDisableRevokeAndActivate` |
 | TC-F2.4.1-01d | AC-F2.4.1-01 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberServiceTest#editingProfileWithoutStatusTransitionDoesNotDisableOrActivateAccount` |
 | TC-F2.4.1-01e | AC-F2.4.1-01 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `features/members/components/MemberFormModal.test.tsx › TC-F2.4.1-01e: sửa hồ sơ gửi đầy đủ trạng thái và giữ giá tr` |
+| TC-F2.4.1-01f | AC-F2.4.1-01 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01l, TC-F2.4.1-01f: giữ trang khi sửa và về trang ` |
 | TC-F2.4.1-02a | AC-F2.4.1-02 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberApiIntegrationTest#createAndUpdateRejectTodayOrFutureBirthDateWithoutChanges` |
 | TC-F2.4.1-02b | AC-F2.4.1-02 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberApiIntegrationTest#invalidNamesAreRejectedByRequestValidationOnCreateAndUpdate` |
 | TC-F2.4.1-02c | AC-F2.4.1-02 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberApiIntegrationTest#missingUpdateStatusIsRejectedByRequestValidation` |
@@ -1630,6 +1636,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F2.4.1-03e | AC-F2.4.1-03 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-09, BR-F2-06, BR-F2-10 | `MemberApiIntegrationTest#updateSamePhoneAndDisableRevokeAndActivate` |
 | TC-F2.4.1-03f | AC-F2.4.1-03 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-09, BR-F2-06, BR-F2-10 | `MemberApiIntegrationTest#failedAccountOperationRollsBackMemberUserAndTokens` |
 | TC-F2.4.1-03g | AC-F2.4.1-03 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-09, BR-F2-06, BR-F2-10 | `MemberServiceTest#failedAccountTransitionDoesNotMutateNamePhoneOrStatus` |
+| TC-F2.4.1-03h | AC-F2.4.1-03 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-09, BR-F2-06, BR-F2-10 | `features/members/components/MemberFormModal.test.tsx › TC-F2.4.1-03h: hiện cảnh báo khi ngừng hồ sơ đang hoạt động ` |
 | TC-F2.4.1-04a | AC-F2.4.1-04 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-06, BR-F2-09, BR-F2-10 | `AccountServiceTest#activateAccountIfDisabledChiMoTaiKhoanDisabledKhongMoLocked` |
 | TC-F2.4.1-04b | AC-F2.4.1-04 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-06, BR-F2-09, BR-F2-10 | `F1RegistrationIntegrationTest#disablingRevokesAllMemberSessionsAndReactivationDoesNotRestoreOldTokens` |
 | TC-F2.4.1-04c | AC-F2.4.1-04 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-06, BR-F2-09, BR-F2-10 | `F1RegistrationIntegrationTest#activatingMemberDoesNotUnlockCurrentlyLockedAccount` |
@@ -1664,6 +1671,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F2.4.2-08b | AC-F2.4.2-08 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#profileResponsesReflectAvatarPresence` |
 | TC-F2.4.2-08b | AC-F2.4.2-08 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `features/members/components/MemberFormModal.test.tsx › TC-F2.4.2-08b: mở hồ sơ chưa có ảnh thì hiện chữ cái đầu và ` |
 | TC-F3.1.1-01a | AC-F3.1.1-01 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#scopesRowsAndCountAndIgnoresClientBranch` |
+| TC-F3.1.1-01b | AC-F3.1.1-01 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `features/packages/pages/PackagesPage.test.tsx › TC-F3.1.1-01b: chỉ hiện danh mục rỗng sau khi tải xong` |
 | TC-F3.1.1-02a | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#defaultActiveAndOrderingMatchContract` |
 | TC-F3.1.1-02b | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#inactiveFilterAndEmptyResults` |
 | TC-F3.1.1-02c | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#maximumSizeAndPagePastEndAreValid` |
@@ -2140,10 +2148,10 @@ Có 263 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `frontend/src/features/members/pages/MembersPage.test.tsx` | 4 |
 | `frontend/src/features/packages/api/packages.test.ts` | 2 |
 | `frontend/src/features/packages/pages/SellPackagePage.test.tsx` | 3 |
-| `frontend/src/features/shared/use-remote-query.test.ts` | 2 |
 | `frontend/src/layouts/member-menu.test.ts` | 2 |
 | `frontend/src/layouts/staff-menu.test.ts` | 2 |
 | `frontend/src/layouts/UserMenu.test.tsx` | 1 |
 | `frontend/src/routes/ProtectedRoute.test.tsx` | 2 |
 | `frontend/src/routes/route-access.test.ts` | 5 |
 | `frontend/src/services/http.test.ts` | 12 |
+| `frontend/src/services/use-remote-query.test.ts` | 2 |

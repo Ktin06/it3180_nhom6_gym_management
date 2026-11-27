@@ -1,6 +1,6 @@
 import { Alert, Button, Card, Col, Empty, Row, Skeleton, Tag, Typography } from 'antd'
 import { Link } from 'react-router-dom'
-import { useRemoteQuery } from '../../shared/use-remote-query'
+import { useRemoteQuery } from '../../../services/use-remote-query'
 import { publicPackagesApi } from '../api/public-packages'
 import { packageTypeLabels, vndFormat } from '../package-format'
 import type { PackageType, PublicPackage, PublicPackagesGateway } from '../types/package'

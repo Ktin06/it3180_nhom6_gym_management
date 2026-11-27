@@ -2,15 +2,15 @@ import { EditOutlined, PlusOutlined, ReloadOutlined, StopOutlined } from '@ant-d
 import { Alert, App, Button, Modal, Select, Space, Table, Tag, Typography } from 'antd'
 import { useContext, useState } from 'react'
 import { AuthContext } from '../../../auth/AuthContext'
-import type { Status } from '../../shared/types'
-import { errorMessage } from '../../shared/api-error'
-import { DemoNotice } from '../../shared/DemoNotice'
-import { useRemoteQuery } from '../../shared/use-remote-query'
+import type { Status } from '../../../services/list-types'
+import { errorMessage } from '../../../services/api-error'
+import { DemoNotice } from '../../../components/DemoNotice'
+import { useRemoteQuery } from '../../../services/use-remote-query'
 import { packagesApi } from '../api/packages'
 import { PackageFormModal } from '../components/PackageFormModal'
 import { packageTypeLabels as typeLabels, vndFormat as money } from '../package-format'
 import type { GymPackage, PackageQuery, PackagesGateway, PackageType } from '../types/package'
-import '../../shared/feature-pages.css'
+import '../../../components/feature-pages.css'
 
 const initialQuery: PackageQuery = { page: 0, size: 20, status: 'ACTIVE' }
 
@@ -149,7 +149,11 @@ export function PackagesPage({ api = packagesApi }: { api?: PackagesGateway }) {
             dataSource={list.data?.content ?? []}
             scroll={{ x: isManager ? 1090 : 900 }}
             locale={{
-              emptyText: list.error ? 'Chưa tải được dữ liệu.' : 'Không có gói tập phù hợp.',
+              emptyText: list.loading
+                ? 'Đang tải danh mục gói tập…'
+                : list.error
+                  ? 'Chưa tải được dữ liệu.'
+                  : 'Không có gói tập phù hợp.',
             }}
             columns={[
               { title: 'Mã gói', dataIndex: 'code', width: 140 },

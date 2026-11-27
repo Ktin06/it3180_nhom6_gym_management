@@ -2,7 +2,7 @@ import { LockOutlined } from '@ant-design/icons'
 import { Alert, Button, Card, Form, Input, Typography } from 'antd'
 import { useState } from 'react'
 import { useAuth } from '../../../auth/useAuth'
-import { errorMessage } from '../../shared/api-error'
+import { errorMessage } from '../../../services/api-error'
 import { getProblemDetail } from '../api/auth-api'
 import { isValidPassword } from '../api/validation'
 

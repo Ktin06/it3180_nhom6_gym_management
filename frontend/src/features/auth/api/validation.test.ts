@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { isValidPassword, isValidPhone, normalizeEmail, normalizePhone } from './validation'
+import { isValidPhone, normalizePhone } from '../../../services/phone'
+import { isValidPassword, normalizeEmail } from './validation'
 
 describe('validation F1', () => {
   it('chuẩn hóa email và số Việt Nam theo SRS', () => {
     expect(normalizeEmail('  HV@Example.COM ')).toBe('hv@example.com')
     expect(normalizePhone('+84 912 345 678')).toBe('0912345678')
-    expect(isValidPhone('+84 (912) 345-678')).toBe(true)
+    expect(isValidPhone('+84 912.345-678')).toBe(true)
+    expect(isValidPhone('+84 (912) 345-678')).toBe(false)
     expect(isValidPhone('091234567')).toBe(false)
     expect(normalizePhone('84912345678')).toBe('0912345678')
     expect(isValidPhone('84 912 345 678')).toBe(true)
