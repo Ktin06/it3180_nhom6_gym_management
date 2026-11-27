@@ -104,8 +104,9 @@ public class NotificationQueryRepository {
               AND m.deleted_at IS NULL
               AND m.user_id IS NOT NULL
               AND COALESCE(ms.branch_id, m.home_branch_id) = :branchId
+              AND ms.end_date >= CAST(:today AS date)
               AND (
-                  (ms.end_date >= CAST(:today AS date) AND ms.end_date < CAST(:expireBefore AS date))
+                  ms.end_date < CAST(:expireBefore AS date)
                   OR (ms.package_type = 'SESSION' AND ms.remaining_sessions <= :sessionThreshold)
               )
               AND NOT EXISTS (
@@ -160,8 +161,7 @@ public class NotificationQueryRepository {
                    b.name AS branch_name
             FROM class_bookings cb
             JOIN class_sessions cs ON cs.id = cb.class_session_id
-            JOIN class_schedules sc ON sc.id = cs.class_schedule_id
-            JOIN class_types ct ON ct.id = sc.class_type_id
+            JOIN class_types ct ON ct.id = cs.class_type_id
             JOIN rooms r ON r.id = cs.room_id
             JOIN branches b ON b.id = cs.branch_id
             JOIN members m ON m.id = cb.member_id
@@ -196,6 +196,47 @@ public class NotificationQueryRepository {
                 (String) r[5],
                 (String) r[6]))
             .toList();
+    }
+
+    /** Đọc thông tin buổi lớp hiện tại của một lượt đặt chỗ để dựng lại nội dung email nhắc lớp lúc gửi. */
+    @SuppressWarnings("unchecked")
+    public Optional<ClassReminderRow> findClassReminderByBookingId(Long bookingId) {
+        NativeQuery<Object[]> query = nativeQuery("""
+            SELECT cb.id AS booking_id,
+                   m.user_id,
+                   cs.branch_id,
+                   ct.name AS class_name,
+                   cs.start_at,
+                   r.name AS room_name,
+                   b.name AS branch_name
+            FROM class_bookings cb
+            JOIN class_sessions cs ON cs.id = cb.class_session_id
+            JOIN class_types ct ON ct.id = cs.class_type_id
+            JOIN rooms r ON r.id = cs.room_id
+            JOIN branches b ON b.id = cs.branch_id
+            JOIN members m ON m.id = cb.member_id
+            WHERE cb.id = :bookingId""")
+            .addScalar("booking_id", StandardBasicTypes.LONG)
+            .addScalar("user_id", StandardBasicTypes.LONG)
+            .addScalar("branch_id", StandardBasicTypes.LONG)
+            .addScalar("class_name", StandardBasicTypes.STRING)
+            .addScalar("start_at", StandardBasicTypes.OFFSET_DATE_TIME)
+            .addScalar("room_name", StandardBasicTypes.STRING)
+            .addScalar("branch_name", StandardBasicTypes.STRING);
+        query.setParameter("bookingId", bookingId);
+        List<Object[]> rows = query.getResultList();
+        if (rows.isEmpty()) {
+            return Optional.empty();
+        }
+        Object[] r = rows.getFirst();
+        return Optional.of(new ClassReminderRow(
+            (Long) r[0],
+            (Long) r[1],
+            (Long) r[2],
+            (String) r[3],
+            ((OffsetDateTime) r[4]).withOffsetSameInstant(ZoneOffset.UTC),
+            (String) r[5],
+            (String) r[6]));
     }
 
     /** Lấy danh sách mã dòng {@code EMAIL} đang {@code PENDING} đã tới {@code scheduled_at}, cũ trước. */
@@ -277,8 +318,7 @@ public class NotificationQueryRepository {
         List<?> rows = entities.createNativeQuery("""
             SELECT ct.name, r.name, b.name
             FROM class_sessions cs
-            JOIN class_schedules sc ON sc.id = cs.class_schedule_id
-            JOIN class_types ct ON ct.id = sc.class_type_id
+            JOIN class_types ct ON ct.id = cs.class_type_id
             JOIN rooms r ON r.id = cs.room_id
             JOIN branches b ON b.id = cs.branch_id
             WHERE cs.id = :sessionId""")

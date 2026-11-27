@@ -66,7 +66,7 @@ class NotificationEventListenerIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.4.1 KB1: đổi giờ buổi lớp tạo CLASS_RESCHEDULED (IN_APP và EMAIL) ghi giờ cũ, giờ mới theo giờ VN, không hạn xác nhận lại")
+    @DisplayName("TC-F10.4.1-02a: đổi giờ buổi lớp tạo CLASS_RESCHEDULED (IN_APP và EMAIL) ghi giờ cũ, giờ mới theo giờ VN, không hạn xác nhận lại")
     void rescheduleCreatesNotificationsWithOldAndNewVietnamTimes() {
         Account hv1 = f.account(f.cn01);
         Account hv2 = f.account(f.cn01);
@@ -97,7 +97,7 @@ class NotificationEventListenerIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.4.1 KB2: đổi phòng buổi lớp tạo CLASS_ROOM_CHANGED ghi phòng cũ và phòng mới")
+    @DisplayName("TC-F10.4.1-01a: đổi phòng buổi lớp tạo CLASS_ROOM_CHANGED ghi phòng cũ và phòng mới")
     void changeRoomCreatesNotificationsWithRoomNames() {
         Account hv = f.account(f.cn01);
         Long sessionId = f.session(f.cn01, OLD_START_VN, "SCHEDULED");
@@ -120,7 +120,7 @@ class NotificationEventListenerIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.4.1 KB3: hủy buổi lớp tạo CLASS_CANCELLED cho mọi hội viên có chỗ vừa bị hủy và có tài khoản")
+    @DisplayName("TC-F10.4.1-01b: hủy buổi lớp tạo CLASS_CANCELLED cho mọi hội viên có chỗ vừa bị hủy và có tài khoản")
     void cancelClassCreatesNotifications() {
         Account hv1 = f.account(f.cn01);
         Account hv2 = f.account(f.cn01);
@@ -141,7 +141,7 @@ class NotificationEventListenerIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.4.1 A1: hội viên không có chỗ BOOKED hoặc chưa có tài khoản không nhận thông báo sự kiện lớp")
+    @DisplayName("TC-F10.4.1-04a: hội viên không có chỗ BOOKED hoặc chưa có tài khoản không nhận thông báo sự kiện lớp")
     void nonBookedOrNoAccountMembersReceiveNothing() {
         Account bookedMember = f.account(f.cn01);
         Account cancelledMember = f.account(f.cn01);
@@ -164,7 +164,7 @@ class NotificationEventListenerIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.4.1 E1: lỗi khi tạo thông báo không rollback thao tác F8 và không chặn người nhận khác")
+    @DisplayName("TC-F10.4.1-06a: lỗi khi tạo thông báo không rollback thao tác F8 và không chặn người nhận khác")
     void notificationFailureDoesNotRollbackF8OrBlockOtherRecipients() {
         Account hvFail = f.account(f.cn01);
         Account hvOk = f.account(f.cn01);
@@ -187,5 +187,28 @@ class NotificationEventListenerIntegrationTest {
         List<Map<String, Object>> rows = f.rows("class_sessions", sessionId);
         assertThat(rows).hasSize(2);
         assertThat(rows).extracting(r -> r.get("user_id")).containsOnly(hvOk.userId());
+    }
+
+    @Test
+    @DisplayName("TC-F10.4.1-01c: tên lớp trong thông báo sự kiện F8 lấy theo class_sessions.class_type_id dù khung lịch đổi loại lớp")
+    void eventNotificationUsesSessionClassTypeNotSchedule() {
+        Account hv = f.account(f.cn01);
+        Long sessionId = f.session(f.cn01, OLD_START_VN, "SCHEDULED");
+        f.booking(sessionId, hv.memberId(), "BOOKED");
+        Long pilatesTypeId = jdbc.queryForObject(
+            "INSERT INTO class_types (name, description, duration_minutes, is_active) VALUES ('Pilates', 'Mới', 60, true) RETURNING id",
+            Long.class);
+        jdbc.update("""
+            UPDATE class_schedules SET class_type_id = ?
+            WHERE id = (SELECT class_schedule_id FROM class_sessions WHERE id = ?)""",
+            pilatesTypeId, sessionId);
+
+        classSessions.changeTime(manager, sessionId, new SessionTimeRequest(
+            NotificationFixtures.utc(NEW_START_VN), NotificationFixtures.utc(NEW_START_VN.plusMinutes(60))));
+
+        List<Map<String, Object>> rows = f.rows("class_sessions", sessionId);
+        assertThat(rows).hasSize(2);
+        assertThat((String) rows.getFirst().get("title")).contains("Yoga").doesNotContain("Pilates");
+        assertThat((String) rows.getFirst().get("content")).contains("Yoga").doesNotContain("Pilates");
     }
 }

@@ -1,5 +1,6 @@
 package vn.edu.hust.nhom6.gym.feature.notification.service;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
@@ -13,7 +14,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 import lombok.extern.slf4j.Slf4j;
 import vn.edu.hust.nhom6.gym.common.mail.EmailSender;
 import vn.edu.hust.nhom6.gym.feature.notification.entity.Notification;
+import vn.edu.hust.nhom6.gym.feature.notification.entity.NotificationType;
 import vn.edu.hust.nhom6.gym.feature.notification.repository.NotificationQueryRepository;
+import vn.edu.hust.nhom6.gym.feature.notification.repository.NotificationQueryRepository.ClassReminderRow;
 import vn.edu.hust.nhom6.gym.feature.notification.repository.NotificationQueryRepository.EmailTarget;
 import vn.edu.hust.nhom6.gym.feature.notification.repository.NotificationRepository;
 
@@ -21,13 +24,15 @@ import vn.edu.hust.nhom6.gym.feature.notification.repository.NotificationReposit
  * Quét và gửi các thông báo kênh {@code EMAIL} đã đến {@code scheduled_at} (UC-F10.1 bước 5, BR-F10.3).
  *
  * <p>Mỗi bản ghi được xử lý trong một giao dịch riêng với khóa {@code FOR UPDATE SKIP LOCKED}: kiểm tra lại
- * điều kiện nhắc còn hiệu lực (E5), kiểm tra lại giờ mở cửa chi nhánh (nếu ngoài giờ thì hẹn lại), bỏ qua tài
- * khoản {@code DISABLED} và chặn miền {@code @example.com} ngoài profile {@code local} (ADR 0013).
+ * điều kiện nhắc còn hiệu lực (E5), kiểm tra lại giờ mở cửa chi nhánh (nếu ngoài giờ thì hẹn lại), dựng lại
+ * nội dung nhắc lịch lớp theo giờ/phòng mới nhất, bỏ qua tài khoản {@code DISABLED} và chặn miền
+ * {@code @example.com} ngoài profile {@code local} (ADR 0013).
  */
 @Slf4j
 @Service
 public class EmailDispatchService {
-    public static final int BATCH_SIZE = 100;
+    public static final int BATCH_SIZE = 25;
+    public static final Duration MAX_RUN_DURATION = Duration.ofSeconds(45);
     static final String BLOCKED_DOMAIN = "@example.com";
 
     private final NotificationRepository notifications;
@@ -54,13 +59,18 @@ public class EmailDispatchService {
 
     private enum Outcome { SENT, FAILED, RESCHEDULED, SKIPPED }
 
-    /** Xử lý tối đa {@link #BATCH_SIZE} email đến hạn tại thời điểm {@code now}. */
+    /** Xử lý tối đa {@link #BATCH_SIZE} email đến hạn tại thời điểm {@code now}, giới hạn thời gian {@link #MAX_RUN_DURATION}. */
     public DispatchResult dispatchDue(OffsetDateTime now) {
         List<Long> ids = queries.findDueEmailIds(now, BATCH_SIZE);
         int sent = 0;
         int failed = 0;
         int rescheduled = 0;
+        long deadlineNanos = System.nanoTime() + MAX_RUN_DURATION.toNanos();
         for (Long id : ids) {
+            if (System.nanoTime() >= deadlineNanos) {
+                log.warn("Lượt gửi email vượt giới hạn {}, dừng sớm để lượt sau xử lý tiếp", MAX_RUN_DURATION);
+                break;
+            }
             Outcome outcome;
             try {
                 outcome = tx.execute(status -> dispatchOne(id, now));
@@ -109,6 +119,7 @@ public class EmailDispatchService {
             row.markFailed();
             return Outcome.FAILED;
         }
+        refreshClassReminderContent(row);
         try {
             emailSender.send(target.email(), row.getTitle(), row.getContent() == null ? "" : row.getContent());
             row.markSent(now);
@@ -117,6 +128,17 @@ public class EmailDispatchService {
             log.error("Gửi email thông báo {} thất bại: {}", id, ex.getMessage());
             row.markFailed();
             return Outcome.FAILED;
+        }
+    }
+
+    /** Dựng lại tiêu đề và nội dung email nhắc lớp theo giờ/phòng mới nhất lúc gửi (tránh gửi giờ cũ nếu buổi đã dời). */
+    private void refreshClassReminderContent(Notification row) {
+        if (row.getType() != NotificationType.CLASS_REMINDER || row.getRelatedId() == null) {
+            return;
+        }
+        ClassReminderRow current = queries.findClassReminderByBookingId(row.getRelatedId()).orElse(null);
+        if (current != null) {
+            row.updateContent("Nhắc lịch lớp " + current.className(), ClassReminderService.buildContent(current));
         }
     }
 

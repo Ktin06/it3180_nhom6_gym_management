@@ -60,7 +60,7 @@ class NotificationReminderIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.1.1 BR-F10.1: create tạo hai dòng, IN_APP đã có trong web (SENT), EMAIL PENDING gửi ngay khi đang mở cửa")
+    @DisplayName("TC-F10.1.1-06a: create tạo hai dòng, IN_APP đã có trong web (SENT), EMAIL PENDING gửi ngay khi đang mở cửa")
     void createMakesTwoRows() {
         clock.setVn(LocalDateTime.of(2026, 11, 21, 10, 0));
         Account a = f.account(f.cn01);
@@ -86,7 +86,7 @@ class NotificationReminderIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.1.1 BR-F10.3: tạo lúc 23:00 thì email hẹn giờ mở cửa hôm sau của đúng chi nhánh, dòng trong web có ngay")
+    @DisplayName("TC-F10.1.1-07a: tạo lúc 23:00 thì email hẹn giờ mở cửa hôm sau của đúng chi nhánh, dòng trong web có ngay")
     void createAfterCloseSchedulesNextOpening() {
         clock.setVn(LocalDateTime.of(2026, 11, 21, 23, 0));
         Account a = f.account(f.cn01);
@@ -101,7 +101,7 @@ class NotificationReminderIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.1.1 BR-F10.1: create từ chối tham số sai (thiếu chi nhánh, tiêu đề rỗng, đối tượng liên quan thiếu id)")
+    @DisplayName("TC-F10.1.1-06b: create từ chối tham số sai (thiếu chi nhánh, tiêu đề rỗng, đối tượng liên quan thiếu id)")
     void createRejectsInvalidArguments() {
         Account a = f.account(f.cn01);
         assertThatThrownBy(() -> notifications.create(a.userId(), NotificationType.CLASS_CANCELLED, "T", null,
@@ -116,7 +116,7 @@ class NotificationReminderIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.1.1 KB1: gói ACTIVE hết hạn trong [hôm nay, hôm nay+7) được nhắc hai dòng; hết hạn đúng ngày +7, gói EXPIRED, UPCOMING thì không")
+    @DisplayName("TC-F10.1.1-01a: gói ACTIVE hết hạn trong [hôm nay, hôm nay+7) được nhắc hai dòng; hết hạn đúng ngày +7, gói EXPIRED, UPCOMING thì không")
     void expiringWithinSevenDays() {
         Account soon = f.account(f.cn01);
         Account today = f.account(f.cn01);
@@ -145,22 +145,25 @@ class NotificationReminderIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.1.1 KB2 CONFIG-F10.1: gói SESSION còn ≤ ngưỡng (đọc system_configs, chi nhánh ghi đè toàn chuỗi) được nhắc; còn hơn ngưỡng thì không")
+    @DisplayName("TC-F10.1.1-02a: gói SESSION còn ≤ ngưỡng và chưa quá hạn được nhắc; hơn ngưỡng hoặc đã quá end_date thì không")
     void sessionThresholdFromConfig() {
         f.branchThreshold(f.cn02, 3);
         Account two = f.account(f.cn01);
         Account three = f.account(f.cn01);
         Account threeCn02 = f.account(f.cn02);
         Account zero = f.account(f.cn01);
+        Account overdueSession = f.account(f.cn01);
         Long twoId = f.membership(two.memberId(), "SESSION", f.cn01, "ACTIVE", TODAY.minusDays(5), TODAY.plusDays(60), 2);
         Long threeId = f.membership(three.memberId(), "SESSION", f.cn01, "ACTIVE", TODAY.minusDays(5), TODAY.plusDays(60), 3);
         Long threeCn02Id = f.membership(threeCn02.memberId(), "SESSION", f.cn02, "ACTIVE", TODAY.minusDays(5), TODAY.plusDays(60), 3);
         Long zeroId = f.membership(zero.memberId(), "SESSION", f.cn01, "ACTIVE", TODAY.minusDays(5), TODAY.plusDays(60), 0);
+        Long overdueId = f.membership(overdueSession.memberId(), "SESSION", f.cn01, "ACTIVE", TODAY.minusDays(30), TODAY.minusDays(1), 1);
 
         List<Long> reminded = membershipReminders.run(TODAY);
 
         assertThat(reminded).containsExactlyInAnyOrder(twoId, threeCn02Id, zeroId);
         assertThat(f.rows("memberships", threeId)).isEmpty();
+        assertThat(f.rows("memberships", overdueId)).isEmpty();
         Map<String, Object> inApp = f.rows("memberships", twoId).get(0);
         assertThat(inApp).containsEntry("title", "Gói tập sắp hết buổi");
         assertThat((String) inApp.get("content")).contains("còn 2 buổi");
@@ -169,7 +172,7 @@ class NotificationReminderIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.1.1 E5: đã có gói UPCOMING cùng loại cùng chi nhánh thì không nhắc; UPCOMING khác loại vẫn nhắc")
+    @DisplayName("TC-F10.1.1-04a: đã có gói UPCOMING cùng loại cùng chi nhánh thì không nhắc; UPCOMING khác loại vẫn nhắc")
     void upcomingSameTypeSkips() {
         Account renewed = f.account(f.cn01);
         Account otherType = f.account(f.cn01);
@@ -183,7 +186,7 @@ class NotificationReminderIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.1.1 A1: hội viên chưa có tài khoản thì bỏ qua, không lỗi")
+    @DisplayName("TC-F10.1.1-05a: hội viên chưa có tài khoản thì bỏ qua, không lỗi")
     void memberWithoutAccountSkipped() {
         Long memberId = f.memberWithoutAccount(f.cn01);
         Long pkg = f.membership(memberId, "TIME", f.cn01, "ACTIVE", TODAY.minusDays(20), TODAY.plusDays(2), null);
@@ -193,7 +196,7 @@ class NotificationReminderIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.1.1 BR-F10.2: chạy lặp (cùng ngày và hôm sau) không tạo thêm thông báo cho cùng gói")
+    @DisplayName("TC-F10.1.1-03a: chạy lặp (cùng ngày và hôm sau) không tạo thêm thông báo cho cùng gói")
     void rerunDoesNotDuplicate() {
         Account a = f.account(f.cn01);
         Long pkg = f.membership(a.memberId(), "SESSION", f.cn01, "ACTIVE", TODAY.minusDays(20), TODAY.plusDays(5), 1);
@@ -207,7 +210,7 @@ class NotificationReminderIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.1.1 KB1: gói toàn chuỗi (branch_id rỗng) tính theo chi nhánh gốc hội viên, email hẹn theo giờ chi nhánh đó")
+    @DisplayName("TC-F10.1.1-01b: gói toàn chuỗi (branch_id rỗng) tính theo chi nhánh gốc hội viên, email hẹn theo giờ chi nhánh đó")
     void chainWideMembershipUsesHomeBranch() {
         Account a = f.account(f.cn02);
         Long pkg = f.membership(a.memberId(), "TIME", null, "ACTIVE", TODAY.minusDays(20), TODAY.plusDays(1), null);
@@ -218,7 +221,29 @@ class NotificationReminderIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.2.1 KB1: chỗ BOOKED của buổi bắt đầu trong 24 giờ tới được nhắc hai dòng; buổi còn hơn 24 giờ thì chờ lượt sau")
+    @DisplayName("TC-F10.1.1-01f: lỗi cấu hình ở một chi nhánh không hủy nhắc các chi nhánh khác và báo lỗi để tác vụ thử lại")
+    void branchConfigErrorDoesNotRollbackOtherBranch() {
+        Account a1 = f.account(f.cn01);
+        Account a2 = f.account(f.cn02);
+        Long pkg1 = f.membership(a1.memberId(), "TIME", f.cn01, "ACTIVE", TODAY.minusDays(20), TODAY.plusDays(2), null);
+        Long pkg2 = f.membership(a2.memberId(), "TIME", f.cn02, "ACTIVE", TODAY.minusDays(20), TODAY.plusDays(2), null);
+        jdbc.update("INSERT INTO system_configs (branch_id, config_key, config_value) VALUES (?, 'SESSION_WARNING_THRESHOLD', 'khong-phai-so')",
+            f.cn02);
+
+        assertThatThrownBy(() -> membershipReminders.run(TODAY))
+            .isInstanceOf(IllegalStateException.class);
+        assertThat(f.rows("memberships", pkg1)).hasSize(2);
+        assertThat(f.rows("memberships", pkg2)).isEmpty();
+
+        jdbc.update("UPDATE system_configs SET config_value = '2' WHERE branch_id = ? AND config_key = 'SESSION_WARNING_THRESHOLD'",
+            f.cn02);
+        assertThat(membershipReminders.run(TODAY)).containsExactly(pkg2);
+        assertThat(f.rows("memberships", pkg1)).hasSize(2);
+        assertThat(f.rows("memberships", pkg2)).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("TC-F10.2.1-01a: chỗ BOOKED của buổi bắt đầu trong 24 giờ tới được nhắc hai dòng; buổi còn hơn 24 giờ thì chờ lượt sau")
     void classWithin24Hours() {
         clock.setVn(LocalDateTime.of(2026, 11, 21, 10, 0));
         Account a = f.account(f.cn01);
@@ -239,7 +264,28 @@ class NotificationReminderIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.2.1 E5: chỗ đã hủy, buổi đã hủy, buổi đã bắt đầu, hội viên chưa có tài khoản thì không nhắc; buổi đã đổi giờ vẫn nhắc")
+    @DisplayName("TC-F10.2.1-01b: tên lớp nhắc lấy theo class_sessions.class_type_id dù khung lịch class_schedules đổi sang loại lớp khác")
+    void classReminderUsesSessionClassTypeNotSchedule() {
+        clock.setVn(LocalDateTime.of(2026, 11, 21, 10, 0));
+        Account a = f.account(f.cn01);
+        Long session = f.session(f.cn01, LocalDateTime.of(2026, 11, 22, 9, 0), "SCHEDULED");
+        Long booking = f.booking(session, a.memberId(), "BOOKED");
+        Long pilatesTypeId = jdbc.queryForObject(
+            "INSERT INTO class_types (name, description, duration_minutes, is_active) VALUES ('Pilates', 'Mới', 60, true) RETURNING id",
+            Long.class);
+        jdbc.update("""
+            UPDATE class_schedules SET class_type_id = ?
+            WHERE id = (SELECT class_schedule_id FROM class_sessions WHERE id = ?)""",
+            pilatesTypeId, session);
+
+        assertThat(classReminders.run(time.now())).containsExactly(booking);
+        List<Map<String, Object>> rows = f.rows("class_bookings", booking);
+        assertThat(rows.get(0)).containsEntry("title", "Nhắc lịch lớp Yoga");
+        assertThat((String) rows.get(0).get("content")).contains("Lớp Yoga");
+    }
+
+    @Test
+    @DisplayName("TC-F10.2.1-03a: chỗ đã hủy, buổi đã hủy, buổi đã bắt đầu, hội viên chưa có tài khoản thì không nhắc; buổi đã đổi giờ vẫn nhắc")
     void cancelledOrStartedNotReminded() {
         clock.setVn(LocalDateTime.of(2026, 11, 21, 10, 0));
         Account a = f.account(f.cn01);
@@ -263,7 +309,7 @@ class NotificationReminderIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.2.1 BR-F10.4: chạy lặp mỗi 15 phút chỉ nhắc mỗi chỗ đúng một lần")
+    @DisplayName("TC-F10.2.1-02a: chạy lặp mỗi 15 phút chỉ nhắc mỗi chỗ đúng một lần")
     void classReminderOnce() {
         clock.setVn(LocalDateTime.of(2026, 11, 21, 10, 0));
         Account a = f.account(f.cn01);

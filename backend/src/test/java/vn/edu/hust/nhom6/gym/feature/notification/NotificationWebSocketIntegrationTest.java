@@ -83,7 +83,7 @@ class NotificationWebSocketIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.5.1 A3: STOMP CONNECT không có token, token sai chữ ký hoặc hết hạn đều bị từ chối")
+    @DisplayName("TC-F10.5.1-01c: STOMP CONNECT không có token, token sai chữ ký hoặc hết hạn đều bị từ chối")
     void stompConnectRejectsMissingOrInvalidTokens() {
         Account hv = f.account(f.cn01);
 
@@ -105,7 +105,7 @@ class NotificationWebSocketIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.5.1 A3: STOMP 1.2 frame STOMP không token trả ERROR, kèm token hợp lệ trả CONNECTED")
+    @DisplayName("TC-F10.5.1-01d: STOMP 1.2 frame STOMP không token trả ERROR, kèm token hợp lệ trả CONNECTED")
     void stomp12FrameRequiresValidJwt() throws Exception {
         Account hv = f.account(f.cn01);
         String validToken = tokens.generateAccessToken(hv.userId(), "hv-stomp12@gym-test.vn", UserRole.MEMBER);
@@ -118,7 +118,7 @@ class NotificationWebSocketIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.5.1 A3: thông báo mới đẩy qua /user/queue/notifications tới đúng hội viên, người khác không nhận")
+    @DisplayName("TC-F10.5.1-03a: thông báo mới đẩy qua /user/queue/notifications tới đúng hội viên, người khác không nhận")
     void notificationPushedOnlyToIntendedUserAfterCommit() throws Exception {
         Account hvA = f.account(f.cn01);
         Account hvB = f.account(f.cn01);
@@ -172,7 +172,7 @@ class NotificationWebSocketIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.5.1 A3: STOMP SUBSCRIBE ngoài /user/queue/notifications bị từ chối")
+    @DisplayName("TC-F10.5.1-05d: STOMP SUBSCRIBE ngoài /user/queue/notifications bị từ chối")
     void stompSubscribeOutsideUserQueueIsRejected() throws Exception {
         Account hv = f.account(f.cn01);
         String token = tokens.generateAccessToken(hv.userId(), "hv-sub@gym-test.vn", UserRole.MEMBER);
@@ -208,6 +208,50 @@ class NotificationWebSocketIntegrationTest {
 
             Throwable error = transportError.get(5, TimeUnit.SECONDS);
             assertThat(error).isNotNull();
+        } finally {
+            if (session.isConnected()) {
+                session.disconnect();
+            }
+            client.stop();
+        }
+    }
+
+    @Test
+    @DisplayName("TC-F10.5.1-05e: phiên WebSocket có JWT đã quá exp thì không nhận thông báo đẩy và bị đóng kết nối")
+    void expiredTokenSessionDoesNotReceiveNotificationsAndCloses() throws Exception {
+        Account hv = f.account(f.cn01);
+        Long sessionId = f.session(f.cn01, CLASS_START_VN, "SCHEDULED");
+        f.booking(sessionId, hv.memberId(), "BOOKED");
+
+        Instant issuedAt = Instant.now().minus(JwtTokenService.ACCESS_TOKEN_TTL).plusSeconds(2);
+        String shortLivedToken = tokens.generateAccessToken(hv.userId(), "hv-exp@gym-test.vn", UserRole.MEMBER, issuedAt);
+
+        WebSocketStompClient client = newStompClient();
+        CompletableFuture<Throwable> closed = new CompletableFuture<>();
+        WebSocketHttpHeaders httpHeaders = new WebSocketHttpHeaders();
+        httpHeaders.add(HttpHeaders.ORIGIN, ALLOWED_ORIGIN);
+        StompSession session = client.connectAsync(wsUrl(), httpHeaders, bearerConnectHeaders(shortLivedToken),
+            new StompSessionHandlerAdapter() {
+                @Override
+                public void handleTransportError(StompSession s, Throwable ex) {
+                    closed.complete(ex);
+                }
+            }).get(5, TimeUnit.SECONDS);
+
+        try {
+            BlockingQueue<String> inbox = subscribeUserQueue(session);
+            awaitUserSubscription(hv.userId(), "/user/queue/notifications", Duration.ofSeconds(5));
+
+            TimeUnit.MILLISECONDS.sleep(2300);
+
+            classSessions.changeTime(manager, sessionId, new SessionTimeRequest(
+                NotificationFixtures.utc(CLASS_START_VN.plusHours(1)),
+                NotificationFixtures.utc(CLASS_START_VN.plusHours(2))));
+
+            assertThat(inbox.poll(1, TimeUnit.SECONDS))
+                .as("Kết nối có token quá hạn không được nhận thông báo mới")
+                .isNull();
+            assertThat(closed.get(5, TimeUnit.SECONDS)).isNotNull();
         } finally {
             if (session.isConnected()) {
                 session.disconnect();

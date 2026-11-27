@@ -61,7 +61,7 @@ class NotificationApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.5.1 KB1: GET /api/v1/me/notifications chỉ trả IN_APP của chính mình, mới nhất trước, phân trang")
+    @DisplayName("TC-F10.5.1-02a: GET /api/v1/me/notifications chỉ trả IN_APP của chính mình, mới nhất trước, phân trang")
     void listReturnsOnlyOwnInAppNewestFirstPaginated() throws Exception {
         Account me = f.account(f.cn01);
         Account other = f.account(f.cn01);
@@ -111,7 +111,7 @@ class NotificationApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.5.1 A1: chưa có thông báo trả danh sách rỗng và unread-count bằng 0")
+    @DisplayName("TC-F10.5.1-01b: chưa có thông báo trả danh sách rỗng và unread-count bằng 0")
     void emptyNotificationsAndZeroUnreadCount() throws Exception {
         Account me = f.account(f.cn01);
 
@@ -127,7 +127,7 @@ class NotificationApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.5.1 A2 BR-F10.8: đánh dấu đã đọc ghi read_at, gọi lại giữ nguyên read_at, unread-count giảm đúng")
+    @DisplayName("TC-F10.5.1-04a: đánh dấu đã đọc ghi read_at, gọi lại giữ nguyên read_at, unread-count giảm đúng")
     void markReadSetsReadAtAndUpdatesUnreadCount() throws Exception {
         Account me = f.account(f.cn01);
         Account other = f.account(f.cn01);
@@ -167,7 +167,7 @@ class NotificationApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.5.1 E2 BR-F10.7: đánh dấu đã đọc thông báo của người khác trả 403, không đổi read_at")
+    @DisplayName("TC-F10.5.1-05c: đánh dấu đã đọc thông báo của người khác trả 403, không đổi read_at")
     void markReadOfAnotherMemberIsForbidden() throws Exception {
         Account owner = f.account(f.cn01);
         Account intruder = f.account(f.cn01);
@@ -185,7 +185,7 @@ class NotificationApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.5.1 E3: đánh dấu đã đọc thông báo không tồn tại hoặc dòng EMAIL trả 404")
+    @DisplayName("TC-F10.5.1-06a: đánh dấu đã đọc thông báo không tồn tại hoặc dòng EMAIL trả 404")
     void markReadNotFoundOrEmailChannelReturns404() throws Exception {
         Account me = f.account(f.cn01);
         CreatedNotifications created = notificationService.create(me.userId(), NotificationType.CLASS_CANCELLED,
@@ -203,7 +203,7 @@ class NotificationApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.5.1 E1 E2: chưa đăng nhập 401, vai trò khác MEMBER 403, tham số phân trang hoặc id sai 400")
+    @DisplayName("TC-F10.5.1-06b: chưa đăng nhập 401, vai trò khác MEMBER 403, tham số phân trang hoặc id sai 400")
     void authAndValidationChecks() throws Exception {
         Account me = f.account(f.cn01);
         Long managerId = f.bookings.f.user("ql-noti@example.com", UserRole.BRANCH_MANAGER, f.cn01);
