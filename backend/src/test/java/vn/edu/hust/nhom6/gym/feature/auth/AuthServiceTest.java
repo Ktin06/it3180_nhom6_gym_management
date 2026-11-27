@@ -761,7 +761,10 @@ class AuthServiceTest {
             .isInstanceOf(BusinessRuleException.class)
             .hasMessage("Mật khẩu mới phải khác mật khẩu hiện tại.");
 
-        verify(userRepository, never()).save(any());
+        // Không đổi mật khẩu, không thu hồi phiên; hai lần sai mật khẩu hiện tại được đếm (AC-F1.4.1-05),
+        // lần mật khẩu mới trùng thì không đếm vì mật khẩu hiện tại đúng.
+        assertThat(user.getPasswordHash()).isEqualTo("old-hash");
+        assertThat(user.getFailedLoginCount()).isEqualTo(2);
         verify(refreshTokenRepository, never()).revokeAllByUserId(any(), any());
     }
 

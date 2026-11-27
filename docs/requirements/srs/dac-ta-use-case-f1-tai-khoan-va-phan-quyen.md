@@ -203,25 +203,26 @@ Chức năng **F1 – Tài khoản và phân quyền** cung cấp cơ chế xác
 - **Tác nhân:** Người dùng đang đăng nhập (mọi vai trò: `SUPER_ADMIN`, `BRANCH_MANAGER`, `RECEPTIONIST`, `TRAINER`, `MEMBER`).
 - **Tiền điều kiện:** Người dùng đã xác thực bằng JWT hợp lệ.
 - **Hậu điều kiện:**
-  - **Thành công:** Cập nhật `users.password_hash` bằng bcrypt, thu hồi toàn bộ `refresh_tokens` đang hiệu lực của tài khoản trong cùng giao dịch; giao diện xóa phiên trình duyệt và chuyển về `/login` kèm thông báo.
-  - **Thất bại:** Giữ nguyên `password_hash` và các phiên hiện tại.
+  - **Thành công:** Cập nhật `users.password_hash` bằng bcrypt, đặt lại `failed_login_count = 0` và `locked_until = null`, thu hồi toàn bộ `refresh_tokens` đang hiệu lực của tài khoản trong cùng giao dịch; phản hồi xóa cookie `refresh_token`; giao diện xóa phiên trình duyệt và chuyển về `/login` kèm thông báo.
+  - **Thất bại:** Giữ nguyên `password_hash` và các phiên hiện tại. Nếu mật khẩu hiện tại sai thì tăng `failed_login_count` như đăng nhập sai (BR-F1-06).
 - **Luồng chính (`POST /api/v1/auth/change-password`):**
   1. Người dùng gửi mật khẩu hiện tại (`currentPassword`) và mật khẩu mới (`newPassword`).
   2. Hệ thống kiểm tra định dạng dữ liệu đầu vào bằng Bean Validation (`currentPassword` không được để trống; `newPassword` tối thiểu 8 ký tự, bao gồm cả chữ cái và chữ số, tối đa 72 byte UTF-8 theo S1).
-  3. Hệ thống kiểm tra quy tắc nghiệp vụ: `currentPassword` phải khớp với `users.password_hash` và `newPassword` phải khác `currentPassword`.
-  4. Hệ thống cập nhật `password_hash` mới và **thu hồi toàn bộ các phiên đăng nhập hiện có** của người dùng (`UPDATE refresh_tokens SET revoked_at = now() WHERE user_id = ? AND revoked_at IS NULL`).
-  5. Trả `204 No Content`.
+  3. Hệ thống kiểm tra quy tắc nghiệp vụ: tài khoản không đang khóa tạm (E5), `currentPassword` phải khớp với `users.password_hash` (sai thì đếm như đăng nhập sai, BR-F1-06) và `newPassword` phải khác `currentPassword`.
+  4. Hệ thống cập nhật `password_hash` mới, đặt lại `failed_login_count = 0`, `locked_until = null` và **thu hồi toàn bộ các phiên đăng nhập hiện có** của người dùng (`UPDATE refresh_tokens SET revoked_at = now() WHERE user_id = ? AND revoked_at IS NULL`).
+  5. Trả `204 No Content` kèm `Set-Cookie` xóa cookie `refresh_token` (`Max-Age=0`).
 - **Luồng ngoại lệ:**
   - **E1 – Dữ liệu đầu vào sai định dạng (400 Bad Request):** Để trống trường bắt buộc hoặc `newPassword` dưới 8 ký tự / thiếu chữ cái hoặc chữ số / vượt quá 72 byte UTF-8 (Bean Validation) → Trả `ProblemDetail` (400) kèm danh sách lỗi theo từng trường (`errors`).
-  - **E2 – Vi phạm quy tắc nghiệp vụ (422 Unprocessable Content):** Mật khẩu hiện tại (`currentPassword`) không đúng (*"Mật khẩu hiện tại không đúng."*), hoặc mật khẩu mới (`newPassword`) trùng với mật khẩu hiện tại (*"Mật khẩu mới phải khác mật khẩu hiện tại."*) → Trả `ProblemDetail` (422) thông báo chi tiết lý do, không xóa phiên.
+  - **E2 – Vi phạm quy tắc nghiệp vụ (422 Unprocessable Content):** Mật khẩu hiện tại (`currentPassword`) không đúng (*"Mật khẩu hiện tại không đúng."*), hoặc mật khẩu mới (`newPassword`) trùng với mật khẩu hiện tại (*"Mật khẩu mới phải khác mật khẩu hiện tại."*) → Trả `ProblemDetail` (422) thông báo chi tiết lý do, không xóa phiên. Mật khẩu hiện tại sai thì tăng `failed_login_count` dùng chung với đăng nhập; đủ 5 lần thì đặt `locked_until = now() + 15 phút` (BR-F1-06, S4), để người cầm Access Token không thử mật khẩu được không giới hạn.
   - **E3 – Chưa đăng nhập (401 Unauthorized):** Không gửi JWT hợp lệ → Trả `ProblemDetail` (401).
   - **E4 – Tài khoản bị khóa hoặc ngừng hoạt động (403 Forbidden):** Tài khoản không còn ở trạng thái `ACTIVE` (`LOCKED` / `DISABLED`) dù Access Token chưa hết hạn → Trả `ProblemDetail` (403): *"Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên."*
+  - **E5 – Tài khoản đang khóa tạm do nhập sai mật khẩu nhiều lần (403 Forbidden):** Khi `locked_until > now()` (do đăng nhập sai hoặc đổi mật khẩu sai), từ chối đổi mật khẩu kể cả khi mật khẩu hiện tại đúng, không tăng thêm `failed_login_count`, trả `ProblemDetail` (403) cùng câu với E2 của UC-F1.2: *"Tài khoản đang bị khóa tạm thời do nhập sai mật khẩu nhiều lần. Vui lòng thử lại sau N phút."*
 
 #### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
 
 ##### US-F1.4.1: Đổi mật khẩu
 - **User story:** Là **người dùng đã đăng nhập**, tôi muốn **đổi mật khẩu**, để **giữ tài khoản an toàn**.
-- **BR liên quan:** BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07; S1, S2, S3
+- **BR liên quan:** BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-06, BR-F1-07; S1, S2, S3, S4
 - **Version / Sprint:** v1 / Sprint 2
 - **Issue:** #120
 - **Tiêu chí chấp nhận:**
@@ -240,7 +241,15 @@ Chức năng **F1 – Tài khoản và phân quyền** cung cấp cơ chế xác
   - **AC-F1.4.1-04: Chặn truy cập khi chưa đăng nhập và mở đúng khung giao diện cho mọi vai trò đã đăng nhập** (BR-F1-05)
     - **Given** Người dùng chưa đăng nhập hoặc đã đăng nhập với bất kỳ vai trò nào (`SUPER_ADMIN`, `BRANCH_MANAGER`, `RECEPTIONIST`, `TRAINER`, `MEMBER`)
     - **When** Gọi `POST /api/v1/auth/change-password` không kèm JWT hợp lệ, hoặc bấm **Đổi mật khẩu** để mở `/doi-mat-khau`
-    - **Then** Request không có JWT hợp lệ bị chặn với `401 Unauthorized`; người dùng đã đăng nhập mở được `/doi-mat-khau` trong đúng khung giao diện của vai trò mình mà không bị chuyển sang `/403`
+    - **Then** Request không có JWT hợp lệ bị chặn với `401 Unauthorized`; tài khoản không còn `ACTIVE` (`LOCKED`/`DISABLED`) dù JWT còn hạn thì nhận `403 Forbidden` (E4) và không đổi mật khẩu; người dùng đã đăng nhập mở được `/doi-mat-khau` trong đúng khung giao diện của vai trò mình mà không bị chuyển sang `/403`
+  - **AC-F1.4.1-05: Nhập sai mật khẩu hiện tại dùng chung bộ đếm khóa tạm với đăng nhập** (BR-F1-06, S4)
+    - **Given** Người dùng đã đăng nhập; `failed_login_count` có thể đã tăng do đăng nhập sai trước đó
+    - **When** Gửi đổi mật khẩu với `currentPassword` sai nhiều lần, hoặc gửi đổi mật khẩu khi `locked_until > now()`
+    - **Then** Mỗi lần sai trả `422` *"Mật khẩu hiện tại không đúng."* và tăng `failed_login_count` thêm 1 (cộng dồn với đăng nhập sai); đủ 5 lần thì đặt `locked_until = now + 15 phút`; trong thời gian khóa, đổi mật khẩu (kể cả mật khẩu hiện tại đúng) và đăng nhập đều trả `403` câu khóa tạm, không tăng bộ đếm, không đổi `password_hash`; giao diện hiển thị câu khóa tạm và giữ phiên hiện tại. Lần gửi có mật khẩu hiện tại đúng nhưng mật khẩu mới trùng thì không tăng bộ đếm
+  - **AC-F1.4.1-06: Đổi mật khẩu thành công đặt lại bộ đếm sai và xóa cookie phiên** (BR-F1-04, BR-F1-06)
+    - **Given** Người dùng đã đăng nhập, không đang khóa tạm, có thể còn `failed_login_count > 0` hoặc `locked_until` đã hết hạn
+    - **When** Đổi mật khẩu thành công
+    - **Then** `failed_login_count = 0`, `locked_until = null` (như đăng nhập thành công); phản hồi `204` kèm `Set-Cookie` xóa cookie `refresh_token` (`Max-Age=0`) để trình duyệt không gửi lại refresh token đã thu hồi
 
 ---
 

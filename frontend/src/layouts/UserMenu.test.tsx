@@ -60,7 +60,11 @@ describe('UserMenu', () => {
     expect(warning).toBeInTheDocument()
     expect(screen.getByRole('banner')).not.toContainElement(warning)
     expect(screen.getByText('Nội dung lễ tân')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Thử đăng xuất lại' })).toHaveTextContent('Thử lại')
+    const retryButton = screen.getByRole('button', { name: 'Thử đăng xuất lại' })
+    expect(retryButton).toHaveTextContent('Thử lại')
+    // Màn 360px vẫn thấy chữ "Thử lại": nhãn không bị ẩn như lúc bình thường
+    const retryLabel = Array.from(retryButton.querySelectorAll('span')).find((el) => el.textContent === 'Thử lại')
+    expect(retryLabel).not.toHaveClass('hide-on-mobile')
     expect(screen.queryByText('Trang đăng nhập')).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Thử đăng xuất lại' }))
