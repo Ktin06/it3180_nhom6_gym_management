@@ -327,7 +327,7 @@ public class MembershipService {
                 .filter(membership -> membership.getMemberId().equals(memberId))
                 .orElseThrow(() -> new NotFoundException(
                         "Gói tập của hội viên không tồn tại trên hệ thống."));
-
+    }
     // ---------------------------------------------------------------------------------------------
     // S2-38.1: hủy gói khi hoàn tiền hóa đơn (UC-F5.5 bước 5d, BR-F5-13)
     // ---------------------------------------------------------------------------------------------
