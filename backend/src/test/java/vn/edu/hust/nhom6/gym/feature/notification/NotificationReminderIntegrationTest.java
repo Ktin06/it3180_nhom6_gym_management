@@ -270,9 +270,7 @@ class NotificationReminderIntegrationTest {
         Account a = f.account(f.cn01);
         Long session = f.session(f.cn01, LocalDateTime.of(2026, 11, 22, 9, 0), "SCHEDULED");
         Long booking = f.booking(session, a.memberId(), "BOOKED");
-        Long pilatesTypeId = jdbc.queryForObject(
-            "INSERT INTO class_types (name, description, duration_minutes, is_active) VALUES ('Pilates', 'Mới', 60, true) RETURNING id",
-            Long.class);
+        Long pilatesTypeId = f.bookings.f.classType("Pilates");
         jdbc.update("""
             UPDATE class_schedules SET class_type_id = ?
             WHERE id = (SELECT class_schedule_id FROM class_sessions WHERE id = ?)""",
