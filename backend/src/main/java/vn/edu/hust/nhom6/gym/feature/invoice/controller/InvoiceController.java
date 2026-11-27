@@ -2,6 +2,7 @@ package vn.edu.hust.nhom6.gym.feature.invoice.controller;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.feature.invoice.dto.CancelledInvoiceDto;
 import vn.edu.hust.nhom6.gym.feature.invoice.dto.CreateInvoiceRequest;
 import vn.edu.hust.nhom6.gym.feature.invoice.dto.InvoiceDetailDto;
+import vn.edu.hust.nhom6.gym.feature.invoice.dto.InvoiceBranchDto;
 import vn.edu.hust.nhom6.gym.feature.invoice.dto.InvoiceSummaryDto;
 import vn.edu.hust.nhom6.gym.feature.invoice.dto.PackageInvoiceDto;
 import vn.edu.hust.nhom6.gym.feature.invoice.dto.PayInvoiceRequest;
@@ -119,6 +121,17 @@ public class InvoiceController {
             @Min(value = 1, message = "Kích thước trang phải từ 1 đến 100.")
             @Max(value = 100, message = "Kích thước trang phải từ 1 đến 100.") int size) {
         return invoices.search(CurrentUser.from(auth), status, source, fromDate, toDate, keyword, branchId, page, size);
+    }
+
+    @GetMapping("/branches")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @Operation(summary = "Danh mục chi nhánh để Chủ chuỗi lọc hóa đơn (AC-F5.3.1-04)",
+        description = "Chỉ đọc id, mã và tên; gồm chi nhánh ngừng hoạt động để tra cứu hóa đơn lịch sử.")
+    @ApiResponse(responseCode = "200", description = "Danh mục chi nhánh sắp theo mã")
+    @ApiResponse(responseCode = "401", description = "Chưa đăng nhập hoặc token không hợp lệ")
+    @ApiResponse(responseCode = "403", description = "Không phải Chủ chuỗi")
+    public List<InvoiceBranchDto> branches() {
+        return invoices.branchesForFilter();
     }
 
     @GetMapping("/{id}")
