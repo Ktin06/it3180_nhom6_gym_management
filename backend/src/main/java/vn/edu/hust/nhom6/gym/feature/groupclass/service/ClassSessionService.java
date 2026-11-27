@@ -88,8 +88,9 @@ public class ClassSessionService {
                 && staff.requireBranchId(actor.userId()).equals(observed.branchId()))) {
             throw new ForbiddenException("Bạn không có quyền quản lý buổi học ở chi nhánh này.");
         }
-        // Cùng thứ tự với sinh buổi. Đổi/hủy buổi chỉ đụng đến buổi, phòng và các chỗ đặt.
+        // Cùng thứ tự với sinh buổi và đặt buổi PT (NF6): branches -> staff -> class_sessions.
         classes.lockBranch(observed.branchId());
+        classes.lockTrainer(observed.trainerId());
         return classes.session(id, true);
     }
 
