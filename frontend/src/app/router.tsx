@@ -32,6 +32,7 @@ import { DashboardPage } from '../features/dashboard/pages/DashboardPage'
 import { InvoicesPage } from '../features/invoices/pages/InvoicesPage'
 import { InvoiceDetailPage } from '../features/invoices/pages/InvoiceDetailPage'
 import { MemberInvoicePdfPage } from '../features/invoices/pages/MemberInvoicePdfPage'
+import { MemberPortalPage } from '../features/member-portal/pages/MemberPortalPage'
 // S2-20.2: giao diện học viên của huấn luyện viên (F9)
 import { TrainerStudentsPage } from '../features/trainer/pages/TrainerStudentsPage'
 
@@ -95,6 +96,7 @@ export const routes: RouteObject[] = [
       guarded(HOME_PATH_BY_ROLE.MEMBER, <RoleHomePage role="MEMBER" />),
       guarded('/member/classes', <MemberClassCalendarPage />),
       guarded('/member/invoices/:id/pdf', <MemberInvoicePdfPage />),
+      guarded('/member/memberships', <MemberPortalPage />),
       // Trang mới của hội viên: thêm một dòng guarded(...) ở đây.
     ],
   },
