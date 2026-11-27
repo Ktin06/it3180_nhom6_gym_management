@@ -31,9 +31,9 @@ import vn.edu.hust.nhom6.gym.feature.memberportal.PortalFixtures;
 import vn.edu.hust.nhom6.gym.feature.memberportal.PortalFixtures.MemberAccount;
 
 /**
- * Tác vụ tự hủy hóa đơn chờ cổng hội viên quá {@code PENDING_INVOICE_TTL_DAYS} (BR-F7.5, UC-F7.4 A1, AC-F3.5.1-09).
- * Tác vụ nền tắt trong kiểm thử; gọi thẳng {@link PortalInvoiceService#cancelExpired()} và đổi giờ bằng
- * {@link MutableClock}.
+- Tác vụ tự hủy hóa đơn chờ cổng hội viên quá {@code PENDING_INVOICE_TTL_DAYS} (BR-F7.5, UC-F7.4 A1, AC-F3.5.1-09).
+- Tác vụ nền tắt trong kiểm thử; gọi thẳng {@link PortalInvoiceService#cancelExpired()} và đổi giờ bằng
+- {@link MutableClock}.
  */
 @SpringBootTest
 @Import({TestcontainersConfiguration.class, MutableClockConfiguration.class})
@@ -65,7 +65,7 @@ class PendingInvoiceExpiryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.4.1 A1: Chưa đủ 3 ngày thì giữ; đúng created_at + 3 ngày thì hóa đơn và gói PENDING thành CANCELLED")
+    @DisplayName("TC-F7.4.1-03a: Chưa đủ 3 ngày thì giữ; đúng created_at + 3 ngày thì hóa đơn và gói PENDING thành CANCELLED")
     void cancelsPortalInvoiceExactlyAtTtl() {
         PortalInvoiceDto sale = buy(me);
 
@@ -80,7 +80,7 @@ class PendingInvoiceExpiryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.4.1 A1: Chạy lặp lần hai không đổi thêm gì")
+    @DisplayName("TC-F7.4.1-03b: Chạy lặp lần hai không đổi thêm gì")
     void runningTwiceChangesNothingMore() {
         PortalInvoiceDto sale = buy(me);
         clock.setVn(CREATED.plusDays(4));
@@ -112,7 +112,7 @@ class PendingInvoiceExpiryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.4.1 A1: Hóa đơn cổng đã thu tiền thì tác vụ không đụng; gói vẫn ACTIVE")
+    @DisplayName("TC-F7.4.1-03c: Hóa đơn cổng đã thu tiền thì tác vụ không đụng; gói vẫn ACTIVE")
     void paidPortalInvoiceIsUntouched() {
         PortalInvoiceDto sale = buy(me);
         invoiceService.pay(new CurrentUser(receptionist, UserRole.RECEPTIONIST), sale.invoiceId(),
@@ -125,7 +125,7 @@ class PendingInvoiceExpiryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.4.1 CONFIG-F7.1: Hạn đọc từ system_configs theo chi nhánh (1 ngày ở CN01), không viết cứng")
+    @DisplayName("TC-F7.4.1-04b: Hạn đọc từ system_configs theo chi nhánh (1 ngày ở CN01), không viết cứng")
     void ttlIsReadPerBranch() {
         p.branchTtl(f.cn01, 1);
         MemberAccount cn02Member = p.memberAccount("HV000503", "0912000503", f.cn02, "ACTIVE");
@@ -145,7 +145,7 @@ class PendingInvoiceExpiryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.4.1 A1: Sau khi tự hủy, hội viên gửi lại yêu cầu mua cùng gói được (không còn 409 hay 422)")
+    @DisplayName("TC-F7.4.1-03d: Sau khi tự hủy, hội viên gửi lại yêu cầu mua cùng gói được (không còn 409 hay 422)")
     void canBuyAgainAfterAutoCancel() {
         buy(me);
         clock.setVn(CREATED.plusDays(3));
@@ -156,7 +156,7 @@ class PendingInvoiceExpiryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.4.1 A1: Một hóa đơn lỗi dữ liệu (gói đi kèm không còn PENDING) bị bỏ qua, hóa đơn khác vẫn hủy")
+    @DisplayName("TC-F7.4.1-03e: Một hóa đơn lỗi dữ liệu (gói đi kèm không còn PENDING) bị bỏ qua, hóa đơn khác vẫn hủy")
     void brokenInvoiceDoesNotBlockOthers() {
         PortalInvoiceDto broken = buy(me);
         jdbc.update("UPDATE memberships SET status = 'CANCELLED' WHERE id = ?", broken.membershipId());

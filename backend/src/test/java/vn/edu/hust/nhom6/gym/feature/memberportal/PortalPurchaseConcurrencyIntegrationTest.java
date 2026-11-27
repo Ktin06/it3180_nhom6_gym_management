@@ -34,8 +34,8 @@ import vn.edu.hust.nhom6.gym.feature.invoice.SaleFixtures;
 import vn.edu.hust.nhom6.gym.feature.memberportal.PortalFixtures.MemberAccount;
 
 /**
- * NF6 của UC-F7.4: hội viên bấm "Mua" hai lần gần như cùng lúc (hai tab, mạng chậm). Hai luồng chờ ở một chốt rồi
- * cùng gửi, lặp nhiều vòng. Không khóa dòng {@code members} thì cả hai cùng qua bước kiểm tra trùng.
+- NF6 của UC-F7.4: hội viên bấm "Mua" hai lần gần như cùng lúc (hai tab, mạng chậm). Hai luồng chờ ở một chốt rồi
+- cùng gửi, lặp nhiều vòng. Không khóa dòng {@code members} thì cả hai cùng qua bước kiểm tra trùng.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -62,7 +62,7 @@ class PortalPurchaseConcurrencyIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.4.1 NF6: Hai yêu cầu mua cùng gói gửi cùng lúc: một 201, một 422; chỉ một hóa đơn và một gói")
+    @DisplayName("TC-F7.4.1-06a: Hai yêu cầu mua cùng gói gửi cùng lúc: một 201, một 422; chỉ một hóa đơn và một gói")
     void twoPurchasesAtOnceCreateExactlyOne() throws Exception {
         Long timePkg = f.pkg("TIME_30", "TIME", null, 500_000, f.cn01, "ACTIVE");
         String body = "{\"packageId\": " + timePkg + "}";
