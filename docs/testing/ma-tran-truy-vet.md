@@ -12,13 +12,13 @@
 | F2 | 5 | 6 | 31 | 25 | 6 | 93 |
 | F3 | 5 | 6 | 45 | 44 | 1 | 136 |
 | F4 | 5 | 5 | 37 | 0 | 37 | 0 |
-| F5 | 5 | 5 | 49 | 47 | 2 | 144 |
+| F5 | 5 | 5 | 49 | 49 | 0 | 154 |
 | F6 | 5 | 5 | 16 | 0 | 16 | 0 |
 | F7 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F8 | 9 | 9 | 55 | 53 | 2 | 81 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **42** | **262** | **193** | **69** | **572** |
+| **Tổng** | **57** | **42** | **262** | **195** | **67** | **582** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -91,8 +91,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F4.5.1-02 | Đầy đủ thông tin chi tiết của từng lượt check-in | US-F4.5.1 |
 | AC-F4.5.1-03 | Lọc trạng thái, phương thức và tìm kiếm theo tên hoặc mã hội viên | US-F4.5.1 |
 | AC-F4.5.1-04 | Phân quyền và phạm vi dữ liệu theo chi nhánh | US-F4.5.1 |
-| AC-F5.5.1-02 | Không làm thay đổi gói nối tiếp mua bằng hóa đơn khác | US-F5.5.1 |
-| AC-F5.5.1-09 | Gói đã có check-in không được hoàn | US-F5.5.1 |
 | AC-F6.1.1-01 | Đếm chính xác số hội viên duy nhất đang tập và tổng lượt check-in | US-F6.1.1 |
 | AC-F6.1.1-02 | Chủ chuỗi bắt buộc phải chọn chi nhánh cụ thể | US-F6.1.1 |
 | AC-F6.1.1-03 | Nhân viên chi nhánh chỉ xem số liệu chi nhánh mình | US-F6.1.1 |
@@ -826,12 +824,14 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F5.4.1-07b `InvoiceDocumentIntegrationTest#invalidDocumentIdsReturnFieldErrors`
       - TC-F5.4.1-07c `features/invoices/pages/MemberInvoicePdfPage.test.tsx › TC-F5.4.1-07c: ID %s bị chặn trước khi gọi tải PDF`
 - **UC-F5.5** Hoàn tiền hóa đơn (Refund)
-  - **US-F5.5.1** Hoàn tiền có kiểm soát (#144)
+  - **US-F5.5.1** Hoàn tiền có kiểm soát (#144) ✅ mọi AC có TC
     - AC-F5.5.1-01 Hoàn toàn bộ hóa đơn có gói chưa dùng (BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14)
+      - TC-F5.5.1-01a `RefundIntegrationTest#refundSucceeds`
       - TC-F5.5.1-01b `RefundIntegrationTest#refundUpcomingRenewal`
       - TC-F5.5.1-01c `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-01c: quản lý chi nhánh hoàn tiền hai bước thành cô`
       - TC-F5.5.1-01d `features/invoices/api/invoices.test.ts › TC-F5.5.1-01d: refund gửi POST /invoices/{id}/refund với ref`
-    - AC-F5.5.1-02 Không làm thay đổi gói nối tiếp mua bằng hóa đơn khác (BR-F5-13) ❌ chưa có TC
+    - AC-F5.5.1-02 Không làm thay đổi gói nối tiếp mua bằng hóa đơn khác (BR-F5-13)
+      - TC-F5.5.1-02a `RefundIntegrationTest#refundKeepsFollowingUpcomingUntouched`
     - AC-F5.5.1-03 Chỉ Quản lý chi nhánh được hoàn tiền (BR-F5-11)
       - TC-F5.5.1-03a `RefundIntegrationTest#receptionistIsForbidden`
       - TC-F5.5.1-03b `RefundIntegrationTest#otherRolesAreForbidden`
@@ -849,6 +849,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F5.5.1-05c `RefundIntegrationTest#otherBranchManagerIs404`
       - TC-F5.5.1-05d `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-05d: lỗi 403 và 404 khi hoàn tiền hiện đúng câu de`
     - AC-F5.5.1-06 Hai quản lý cùng hoàn một hóa đơn (BR-F5-12)
+      - TC-F5.5.1-06a `RefundConcurrencyIntegrationTest#twoManagersRefundingSameInvoice`
       - TC-F5.5.1-06b `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-06b: lỗi 409 và 422 hóa đơn không PAID hiện đúng c`
     - AC-F5.5.1-07 Chỉ hoàn hóa đơn đang PAID
       - TC-F5.5.1-07a `RefundIntegrationTest#pendingInvoiceIs422`
@@ -856,10 +857,17 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F5.5.1-07c `RefundIntegrationTest#refundTwiceIs422`
     - AC-F5.5.1-08 Gói ngoài ACTIVE hoặc UPCOMING không đủ điều kiện (BR-F5-14)
       - TC-F5.5.1-08a `RefundIntegrationTest#frozenMembershipIs422`
-    - AC-F5.5.1-09 Gói đã có check-in không được hoàn (BR-F5-14) ❌ chưa có TC
+      - TC-F5.5.1-08b `RefundConcurrencyIntegrationTest#membershipExpiredByJobBetweenCheckAndCancel`
+    - AC-F5.5.1-09 Gói đã có check-in không được hoàn (BR-F5-14)
+      - TC-F5.5.1-09a `RefundIntegrationTest#checkedInMembershipIs422`
+      - TC-F5.5.1-09b `RefundIntegrationTest#ptMembershipUsedForCheckinIs422`
     - AC-F5.5.1-10 Gói PT có buổi đặt kể cả đã hủy không được hoàn (BR-F5-14)
+      - TC-F5.5.1-10a `RefundIntegrationTest#bookedPtSessionIs422`
       - TC-F5.5.1-10b `RefundIntegrationTest#cancelledPtSessionStillCounts`
     - AC-F5.5.1-11 Chỗ lớp BOOKED chưa kết thúc chặn hoàn gói TIME (BR-F5-14)
+      - TC-F5.5.1-11a `RefundIntegrationTest#upcomingClassBookingIs422`
+      - TC-F5.5.1-11b `RefundIntegrationTest#inProgressClassBookingIs422`
+      - TC-F5.5.1-11c `RefundIntegrationTest#pastOrCancelledBookingDoesNotBlock`
       - TC-F5.5.1-11d `RefundIntegrationTest#classBookingDoesNotBlockPtRefund`
       - TC-F5.5.1-11e `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-11e: lỗi 422 gói đã dùng và còn chỗ đặt lớp hiện đ`
     - AC-F5.5.1-12 Lượt dùng gắn với gói khác không chặn hoàn gói chưa dùng (BR-F5-14)
@@ -1523,9 +1531,11 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F5.4.1-07a | AC-F5.4.1-07 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId` |
 | TC-F5.4.1-07b | AC-F5.4.1-07 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#invalidDocumentIdsReturnFieldErrors` |
 | TC-F5.4.1-07c | AC-F5.4.1-07 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `features/invoices/pages/MemberInvoicePdfPage.test.tsx › TC-F5.4.1-07c: ID %s bị chặn trước khi gọi tải PDF` |
+| TC-F5.5.1-01a | AC-F5.5.1-01 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#refundSucceeds` |
 | TC-F5.5.1-01b | AC-F5.5.1-01 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#refundUpcomingRenewal` |
 | TC-F5.5.1-01c | AC-F5.5.1-01 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-01c: quản lý chi nhánh hoàn tiền hai bước thành cô` |
 | TC-F5.5.1-01d | AC-F5.5.1-01 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `features/invoices/api/invoices.test.ts › TC-F5.5.1-01d: refund gửi POST /invoices/{id}/refund với ref` |
+| TC-F5.5.1-02a | AC-F5.5.1-02 | US-F5.5.1 | UC-F5.5 | BR-F5-13, BR-F5-11, BR-F5-12, BR-F5-14 | `RefundIntegrationTest#refundKeepsFollowingUpcomingUntouched` |
 | TC-F5.5.1-03a | AC-F5.5.1-03 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#receptionistIsForbidden` |
 | TC-F5.5.1-03b | AC-F5.5.1-03 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#otherRolesAreForbidden` |
 | TC-F5.5.1-03c | AC-F5.5.1-03 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#forbiddenComesBeforeValidation` |
@@ -1539,12 +1549,20 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F5.5.1-05b | AC-F5.5.1-05 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#unknownInvoiceIs404` |
 | TC-F5.5.1-05c | AC-F5.5.1-05 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#otherBranchManagerIs404` |
 | TC-F5.5.1-05d | AC-F5.5.1-05 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-05d: lỗi 403 và 404 khi hoàn tiền hiện đúng câu de` |
+| TC-F5.5.1-06a | AC-F5.5.1-06 | US-F5.5.1 | UC-F5.5 | BR-F5-12, BR-F5-11, BR-F5-13, BR-F5-14 | `RefundConcurrencyIntegrationTest#twoManagersRefundingSameInvoice` |
 | TC-F5.5.1-06b | AC-F5.5.1-06 | US-F5.5.1 | UC-F5.5 | BR-F5-12, BR-F5-11, BR-F5-13, BR-F5-14 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-06b: lỗi 409 và 422 hóa đơn không PAID hiện đúng c` |
 | TC-F5.5.1-07a | AC-F5.5.1-07 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#pendingInvoiceIs422` |
 | TC-F5.5.1-07b | AC-F5.5.1-07 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#cancelledInvoiceIs422` |
 | TC-F5.5.1-07c | AC-F5.5.1-07 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#refundTwiceIs422` |
 | TC-F5.5.1-08a | AC-F5.5.1-08 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#frozenMembershipIs422` |
+| TC-F5.5.1-08b | AC-F5.5.1-08 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundConcurrencyIntegrationTest#membershipExpiredByJobBetweenCheckAndCancel` |
+| TC-F5.5.1-09a | AC-F5.5.1-09 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#checkedInMembershipIs422` |
+| TC-F5.5.1-09b | AC-F5.5.1-09 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#ptMembershipUsedForCheckinIs422` |
+| TC-F5.5.1-10a | AC-F5.5.1-10 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#bookedPtSessionIs422` |
 | TC-F5.5.1-10b | AC-F5.5.1-10 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#cancelledPtSessionStillCounts` |
+| TC-F5.5.1-11a | AC-F5.5.1-11 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#upcomingClassBookingIs422` |
+| TC-F5.5.1-11b | AC-F5.5.1-11 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#inProgressClassBookingIs422` |
+| TC-F5.5.1-11c | AC-F5.5.1-11 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#pastOrCancelledBookingDoesNotBlock` |
 | TC-F5.5.1-11d | AC-F5.5.1-11 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#classBookingDoesNotBlockPtRefund` |
 | TC-F5.5.1-11e | AC-F5.5.1-11 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-11e: lỗi 422 gói đã dùng và còn chỗ đặt lớp hiện đ` |
 | TC-F5.5.1-12a | AC-F5.5.1-12 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#otherMembershipUsageDoesNotBlock` |
@@ -1632,7 +1650,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 
 ## 6. Kiểm thử chưa mang mã TC
 
-Có 272 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
+Có 263 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
 
 | File | Số kiểm thử |
 | --- | --- |
@@ -1654,8 +1672,6 @@ Có 272 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/dashboard/DashboardApiIntegrationTest.java` | 13 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/groupclass/ClassApiIntegrationTest.java` | 2 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/invoice/InvoiceSaleIntegrationTest.java` | 2 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/invoice/RefundConcurrencyIntegrationTest.java` | 1 |
-| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/invoice/RefundIntegrationTest.java` | 8 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/F1RegistrationIntegrationTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberApiIntegrationTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberPhoneSupportTest.java` | 6 |

@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Ghi dòng {@code audit_logs} khi quản lý hoàn tiền hóa đơn (BR-F5-12, S9). Chưa có service nhật ký chung (F17 thuộc
- * v3), nên F5 tự ghi bằng câu SQL có tham số, cùng mẫu {@code TrainerAuditRepository}, {@code GroupClassAuditRepository}.
+ * v3), nên F5 tự ghi bằng câu SQL có tham số, cùng mẫu {@code ClassRepository} (ghi nhật ký khóa và gỡ khóa đặt lớp).
  */
 @Repository
 @RequiredArgsConstructor

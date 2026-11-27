@@ -867,4 +867,4 @@ S2-38: cắt khoảng trắng hai đầu trước khi kiểm tra và lưu lý do
 - Các API/luồng giao diện thuộc S2-09 #184, S2-10 #185 và S2-38 #213. PR S2-50 chỉ chuẩn hóa tài liệu; S2-09 triển khai API và migration theo các AC của UC-F5.1–F5.4. Các yêu cầu giao diện và hoàn tiền tiếp tục thuộc task tương ứng.
 - Khi gắn TC cho test đã có, chỉ đổi tên hiển thị trong commit riêng theo ADR 0012 mục 8, không đổi logic; một AC có thể có nhiều TC.
 - Ma trận docs/testing/ma-tran-truy-vet.md được sinh từ SRS và mã test đang có. AC F5 chưa có TC trên main phải giữ trạng thái chưa có TC; danh sách test prototype không được dùng để đánh dấu đã chạy thành công.
-- Các lựa chọn S2-09 tại mục 4.3 được bổ sung AC với số tiếp theo..
+- Các lựa chọn S2-09 tại mục 4.3 được bổ sung AC với số tiếp theo.

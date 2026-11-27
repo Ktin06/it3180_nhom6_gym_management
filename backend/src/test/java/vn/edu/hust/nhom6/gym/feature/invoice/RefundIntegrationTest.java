@@ -85,8 +85,7 @@ class RefundIntegrationTest {
     // ---------------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("TC-F5.5.1-01a: Quản lý hoàn hóa đơn PAID có gói chưa dùng: 200, hóa đơn REFUNDED, gói CANCELLED, "
-        + "phiếu thu CANCELLED, một dòng audit_logs REFUND")
+    @DisplayName("TC-F5.5.1-01a: Quản lý hoàn hóa đơn PAID có gói chưa dùng: 200, hóa đơn REFUNDED, gói CANCELLED, phiếu thu CANCELLED, một dòng audit_logs REFUND")
     void refundSucceeds() throws Exception {
         PackageInvoiceDto sale = paid(timePkg);
 
@@ -138,8 +137,7 @@ class RefundIntegrationTest {
     }
 
     @Test
-    @DisplayName("TC-F5.5.1-02a: Hoàn hóa đơn gói A đang ACTIVE thì gói B UPCOMING của hóa đơn khác giữ nguyên "
-        + "trạng thái và ngày bắt đầu (BR-F5-13, Q5 = A)")
+    @DisplayName("TC-F5.5.1-02a: Hoàn hóa đơn gói A đang ACTIVE thì gói B UPCOMING của hóa đơn khác giữ nguyên trạng thái và ngày bắt đầu (BR-F5-13, Q5 = A)")
     void refundKeepsFollowingUpcomingUntouched() throws Exception {
         PackageInvoiceDto a = paid(timePkg);
         PackageInvoiceDto bSale = paid(timePkg);
@@ -320,8 +318,7 @@ class RefundIntegrationTest {
     }
 
     @Test
-    @DisplayName("TC-F5.5.1-09a: Gói TIME đã có một lượt check-in thì 422; hóa đơn vẫn PAID, gói vẫn ACTIVE, phiếu thu "
-        + "vẫn CONFIRMED, không ghi audit_logs (BR-F5-14 điều kiện 2)")
+    @DisplayName("TC-F5.5.1-09a: Gói TIME đã có một lượt check-in thì 422; hóa đơn vẫn PAID, gói vẫn ACTIVE, phiếu thu vẫn CONFIRMED, không ghi audit_logs (BR-F5-14 điều kiện 2)")
     void checkedInMembershipIs422() throws Exception {
         PackageInvoiceDto sale = paid(timePkg);
         checkin(sale.membershipId(), false);
@@ -333,8 +330,7 @@ class RefundIntegrationTest {
     }
 
     @Test
-    @DisplayName("TC-F5.5.1-09b: Gói PT đã dùng để check-in (ngày có buổi PT, không trừ buổi) thì 422 "
-        + "(BR-F5-14 điều kiện 2)")
+    @DisplayName("TC-F5.5.1-09b: Gói PT đã dùng để check-in (ngày có buổi PT, không trừ buổi) thì 422 (BR-F5-14 điều kiện 2)")
     void ptMembershipUsedForCheckinIs422() throws Exception {
         PackageInvoiceDto sale = paid(ptPkg);
         checkin(sale.membershipId(), false);
@@ -346,8 +342,7 @@ class RefundIntegrationTest {
     }
 
     @Test
-    @DisplayName("TC-F5.5.1-10a: Gói PT có một buổi PT BOOKED thì 422; buổi PT giữ nguyên BOOKED "
-        + "(BR-F5-14 điều kiện 3)")
+    @DisplayName("TC-F5.5.1-10a: Gói PT có một buổi PT BOOKED thì 422; buổi PT giữ nguyên BOOKED (BR-F5-14 điều kiện 3)")
     void bookedPtSessionIs422() throws Exception {
         PackageInvoiceDto sale = paid(ptPkg);
         Long session = ptSession(sale.membershipId(), "BOOKED");
@@ -373,8 +368,7 @@ class RefundIntegrationTest {
     }
 
     @Test
-    @DisplayName("TC-F5.5.1-11a: Gói TIME chưa check-in nhưng hội viên còn chỗ lớp BOOKED ngày mai thì 422 với câu "
-        + "riêng; chỗ đặt giữ nguyên (BR-F5-14 điều kiện 4)")
+    @DisplayName("TC-F5.5.1-11a: Gói TIME chưa check-in nhưng hội viên còn chỗ lớp BOOKED ngày mai thì 422 với câu riêng; chỗ đặt giữ nguyên (BR-F5-14 điều kiện 4)")
     void upcomingClassBookingIs422() throws Exception {
         PackageInvoiceDto sale = paid(timePkg);
         Long session = b.session(b.cn01, NOW_VN.plusDays(1).withHour(18), 20);
@@ -388,8 +382,7 @@ class RefundIntegrationTest {
     }
 
     @Test
-    @DisplayName("TC-F5.5.1-11b: Chỗ lớp BOOKED của buổi đang diễn ra (08:30–09:30, lúc 09:00) cũng chặn hoàn tiền "
-        + "(nháp prototype, GĐ-1)")
+    @DisplayName("TC-F5.5.1-11b: Chỗ lớp BOOKED của buổi đang diễn ra (08:30–09:30, lúc 09:00) cũng chặn hoàn tiền (nháp prototype, GĐ-1)")
     void inProgressClassBookingIs422() throws Exception {
         PackageInvoiceDto sale = paid(timePkg);
         b.booking(b.session(b.cn01, NOW_VN.minusMinutes(30), 20), member, "BOOKED");
@@ -401,8 +394,7 @@ class RefundIntegrationTest {
     }
 
     @Test
-    @DisplayName("TC-F5.5.1-11c: Chỗ lớp đã CANCELLED, hoặc BOOKED của buổi đã kết thúc, không chặn hoàn tiền "
-        + "(nháp prototype, GĐ-1)")
+    @DisplayName("TC-F5.5.1-11c: Chỗ lớp đã CANCELLED, hoặc BOOKED của buổi đã kết thúc, không chặn hoàn tiền (nháp prototype, GĐ-1)")
     void pastOrCancelledBookingDoesNotBlock() throws Exception {
         PackageInvoiceDto sale = paid(timePkg);
         b.booking(b.session(b.cn01, NOW_VN.plusDays(1), 20), member, "CANCELLED");

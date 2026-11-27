@@ -129,6 +129,10 @@ public class RefundService {
         } catch (OptimisticLockingFailureException ex) {
             // Gói vừa bị thao tác khác sửa (memberships.version), ví dụ tác vụ nền kích hoạt gói UPCOMING.
             throw new ConflictException(CONFLICT);
+        } catch (IllegalStateException ex) {
+            // Tác vụ vòng đời gói (00:00) không khóa dòng hội viên, nên có thể đổi gói sang EXPIRED sau bước
+            // findUsage. Lúc hủy, gói không còn ACTIVE/UPCOMING: trả 422 E7 như gói đã dùng, không để thành 500.
+            throw new BusinessRuleException(MEMBERSHIP_USED);
         }
 
         audit.insertRefund(me.userId(), invoice.getBranchId(), invoiceId, oldValue(invoice),
