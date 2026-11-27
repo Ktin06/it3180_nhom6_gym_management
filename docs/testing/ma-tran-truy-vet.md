@@ -1484,7 +1484,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 
 ## 6. Kiểm thử chưa mang mã TC
 
-Có 176 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
+Có 285 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
 
 | File | Số kiểm thử |
 | --- | --- |
@@ -1499,6 +1499,11 @@ Có 176 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthControllerTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthServiceTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/JwtTokenServiceTest.java` | 5 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/checkin/CheckinApiIntegrationTest.java` | 36 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/checkin/CheckinCheckoutConcurrencyIntegrationTest.java` | 2 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/checkin/CheckinCheckoutHistoryIntegrationTest.java` | 10 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/checkin/CheckinConcurrencyIntegrationTest.java` | 3 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/dashboard/DashboardApiIntegrationTest.java` | 13 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/groupclass/ClassApiIntegrationTest.java` | 2 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/invoice/InvoiceSaleIntegrationTest.java` | 2 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/F1RegistrationIntegrationTest.java` | 1 |
@@ -1507,6 +1512,9 @@ Có 176 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/MemberServiceTest.java` | 4 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/StaffBranchIntegrationTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/membership/MembershipListIntegrationTest.java` | 1 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/notification/EmailDispatchIntegrationTest.java` | 7 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/notification/NotificationReminderIntegrationTest.java` | 11 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/notification/OpeningHoursTest.java` | 4 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PackageCatalogServiceTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PackageMapperTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/packagecatalog/PublicPackageIntegrationTest.java` | 1 |
@@ -1523,6 +1531,10 @@ Có 176 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `frontend/src/features/auth/api/validation.test.ts` | 1 |
 | `frontend/src/features/auth/pages/LoginPage.test.tsx` | 5 |
 | `frontend/src/features/auth/pages/RegisterPage.test.tsx` | 1 |
+| `frontend/src/features/checkins/api/checkins.test.ts` | 1 |
+| `frontend/src/features/checkins/pages/CheckinPage.test.tsx` | 12 |
+| `frontend/src/features/dashboard/api/dashboard.test.ts` | 1 |
+| `frontend/src/features/dashboard/pages/DashboardPage.test.tsx` | 9 |
 | `frontend/src/features/members/api/members.test.ts` | 6 |
 | `frontend/src/features/members/components/MemberAvatar.test.tsx` | 2 |
 | `frontend/src/features/members/components/MemberFormModal.test.tsx` | 1 |
