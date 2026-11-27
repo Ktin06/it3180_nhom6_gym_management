@@ -116,10 +116,29 @@ public class MemberService {
             "Tài khoản chưa gắn hồ sơ hội viên. Vui lòng liên hệ quầy lễ tân."));
     }
 
+    /**
+     * Tìm hồ sơ chưa xóa mềm gắn với tài khoản đang đăng nhập; trả rỗng nếu chưa gắn hoặc đã xóa mềm.
+     * Dùng cho luồng tự quyết định mã lỗi khi không có hồ sơ (ví dụ PDF hóa đơn F5 trả 404).
+     */
+    public Optional<Member> findByUserId(Long userId) {
+        return members.findByUserIdAndDeletedAtIsNull(userId);
+    }
+
     /** Khóa hội viên đến hết giao dịch bán, trước khi kiểm tra gói đang chờ (NF6). */
     @Transactional
     public Member lockForUpdate(Long memberId) {
         return members.findForUpdate(memberId).orElseThrow(() ->
+            new NotFoundException("Hội viên không tồn tại trên hệ thống."));
+    }
+
+    /**
+     * Khóa dòng hội viên (kể cả hồ sơ đã xóa mềm) đến hết giao dịch thu tiền (NF6, S2-09).
+     *
+     * @throws NotFoundException (404) khi không có bản ghi hội viên nào mang {@code memberId}
+     */
+    @Transactional
+    public Member lockForUpdateIncludingDeleted(Long memberId) {
+        return members.findForUpdateIncludingDeleted(memberId).orElseThrow(() ->
             new NotFoundException("Hội viên không tồn tại trên hệ thống."));
     }
 

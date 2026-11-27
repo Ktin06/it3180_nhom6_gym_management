@@ -190,6 +190,33 @@ class InvoiceDocumentIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F5.1.1-09a: hóa đơn 0 đồng trả 422 ở API VietQR dù có hay thiếu BANK_* và không đổi hóa đơn/gói")
+    void vietQrForZeroTotalInvoiceIs422() throws Exception {
+        Long freePkg = insertPackage("FREE_TRIAL", "Gói tập thử 0đ", 0, f.cn01);
+        PackageInvoiceDto zeroSale = invoiceService.createPackageInvoice(
+            receptionistCn01, f.cn01, memberAn, freePkg, InvoiceSource.COUNTER);
+
+        // Chưa cấu hình BANK_* vẫn trả lỗi 422 về hóa đơn 0 đồng, không bị che bởi lỗi cấu hình.
+        mvc.perform(get("/api/v1/invoices/{id}/vietqr", zeroSale.invoiceId())
+                .with(f.bearer(receptionistCn01, UserRole.RECEPTIONIST)))
+            .andExpect(status().isUnprocessableContent())
+            .andExpect(jsonPath("$.detail").value("Hóa đơn 0 đồng không cần chuyển khoản, vui lòng xác nhận tại quầy."));
+
+        insertBankConfig(null, "MB", "0987654321", "CONG TY GYM NHOM 6");
+        mvc.perform(get("/api/v1/invoices/{id}/vietqr", zeroSale.invoiceId())
+                .with(f.bearer(receptionistCn01, UserRole.RECEPTIONIST)))
+            .andExpect(status().isUnprocessableContent())
+            .andExpect(jsonPath("$.detail").value("Hóa đơn 0 đồng không cần chuyển khoản, vui lòng xác nhận tại quầy."));
+
+        assertThat(jdbc.queryForObject("SELECT status FROM invoices WHERE id = ?", String.class, zeroSale.invoiceId()))
+            .isEqualTo("PENDING");
+        assertThat(jdbc.queryForObject("SELECT status FROM memberships WHERE id = ?", String.class,
+            zeroSale.membershipId())).isEqualTo("PENDING");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM payments WHERE invoice_id = ?", Long.class,
+            zeroSale.invoiceId())).isZero();
+    }
+
+    @Test
     @DisplayName("TC-F5.1.1-03a: cấu hình BANK_* của chi nhánh ghi đè giá trị toàn chuỗi")
     void vietQrBranchBankConfigOverridesChainConfig() throws Exception {
         insertBankConfig(null, "MB", "0000000001", "GYM TOAN CHUOI");
@@ -406,6 +433,29 @@ class InvoiceDocumentIntegrationTest {
         // Hóa đơn không tồn tại -> 404
         mvc.perform(get("/api/v1/invoices/{id}/pdf", 999_999L)
                 .with(f.bearer(receptionistCn01, UserRole.RECEPTIONIST)))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.detail").value(NOT_FOUND_DETAIL));
+
+        // MEMBER chưa gắn hồ sơ -> 404 cho cả hóa đơn tồn tại và ID không tồn tại
+        Long unlinkedMemberUser = insertUser("chua-gan-ho-so@example.com", UserRole.MEMBER);
+        mvc.perform(get("/api/v1/invoices/{id}/pdf", anInvoice.invoiceId())
+                .with(f.bearer(unlinkedMemberUser, UserRole.MEMBER)))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.detail").value(NOT_FOUND_DETAIL));
+        mvc.perform(get("/api/v1/invoices/{id}/pdf", 999_999L)
+                .with(f.bearer(unlinkedMemberUser, UserRole.MEMBER)))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.detail").value(NOT_FOUND_DETAIL));
+
+        // MEMBER có hồ sơ đã xóa mềm -> 404
+        Long deletedMemberUser = insertUser("da-xoa-mem@example.com", UserRole.MEMBER);
+        Long deletedMemberId = insertMember(deletedMemberUser, "HV000901", "Hội viên xóa mềm", "0901999888", f.cn01);
+        PackageInvoiceDto deletedMemberInvoice = invoiceService.createPackageInvoice(
+            receptionistCn01, f.cn01, deletedMemberId, pkgTimeCn01, InvoiceSource.COUNTER);
+        payInvoice(deletedMemberInvoice.invoiceId(), "CASH", null);
+        jdbc.update("UPDATE members SET deleted_at = now() WHERE id = ?", deletedMemberId);
+        mvc.perform(get("/api/v1/invoices/{id}/pdf", deletedMemberInvoice.invoiceId())
+                .with(f.bearer(deletedMemberUser, UserRole.MEMBER)))
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.detail").value(NOT_FOUND_DETAIL));
 

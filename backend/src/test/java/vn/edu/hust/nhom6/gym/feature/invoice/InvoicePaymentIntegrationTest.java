@@ -426,6 +426,47 @@ class InvoicePaymentIntegrationTest {
         assertUnpaid(sale);
     }
 
+    @Test
+    @DisplayName("TC-F5.2.1-13a: thu tiền khi hội viên INACTIVE hoặc đã xóa mềm trả 422, giữ nguyên hóa đơn và gói")
+    void cannotPayWhenMemberIsInactiveOrSoftDeleted() throws Exception {
+        int seq = 0;
+        for (InvoiceSource source : new InvoiceSource[] { InvoiceSource.COUNTER, InvoiceSource.MEMBER_PORTAL }) {
+            // 1. INACTIVE, deleted_at IS NULL -> 422
+            Long inactiveMember = f.member("HV0006" + (++seq) + "1",
+                source == InvoiceSource.COUNTER ? "0912300001" : "0912300002", f.cn01, "ACTIVE");
+            PackageInvoiceDto inactiveSale = invoiceService.createPackageInvoice(
+                receptionist, f.cn01, inactiveMember, timePkg, source);
+            jdbc.update("UPDATE members SET status = 'INACTIVE' WHERE id = ?", inactiveMember);
+            pay(receptionist, inactiveSale.invoiceId(), "{\"method\":\"CASH\"}")
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.detail").value("Hội viên đã ngừng hoạt động, không thể thu tiền."));
+            assertUnpaid(inactiveSale);
+
+            // 2. ACTIVE nhưng deleted_at IS NOT NULL -> 422 (không trả 404)
+            Long softDeletedActive = f.member("HV0006" + (++seq) + "2",
+                source == InvoiceSource.COUNTER ? "0912300003" : "0912300004", f.cn01, "ACTIVE");
+            PackageInvoiceDto delActiveSale = invoiceService.createPackageInvoice(
+                receptionist, f.cn01, softDeletedActive, timePkg, source);
+            jdbc.update("UPDATE members SET deleted_at = now() WHERE id = ?", softDeletedActive);
+            pay(receptionist, delActiveSale.invoiceId(), "{\"method\":\"CASH\"}")
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.detail").value("Hội viên đã ngừng hoạt động, không thể thu tiền."));
+            assertUnpaid(delActiveSale);
+
+            // 3. INACTIVE và deleted_at IS NOT NULL -> 422
+            Long softDeletedInactive = f.member("HV0006" + (++seq) + "3",
+                source == InvoiceSource.COUNTER ? "0912300005" : "0912300006", f.cn01, "ACTIVE");
+            PackageInvoiceDto delInactiveSale = invoiceService.createPackageInvoice(
+                receptionist, f.cn01, softDeletedInactive, timePkg, source);
+            jdbc.update("UPDATE members SET status = 'INACTIVE', deleted_at = now() WHERE id = ?",
+                softDeletedInactive);
+            pay(receptionist, delInactiveSale.invoiceId(), "{\"method\":\"CASH\"}")
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.detail").value("Hội viên đã ngừng hoạt động, không thể thu tiền."));
+            assertUnpaid(delInactiveSale);
+        }
+    }
+
     private ResultActions pay(Long userId, Long invoiceId, String body) throws Exception {
         return mvc.perform(post("/api/v1/invoices/{id}/payments", invoiceId)
             .with(f.bearer(userId, UserRole.RECEPTIONIST))

@@ -174,6 +174,10 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
     - **Given** Hóa đơn MEMBER_PORTAL còn PENDING đúng phạm vi nhưng now > created_at + PENDING_INVOICE_TTL_DAYS ngày, tác vụ tự hủy F7 chưa chạy
     - **When** Lễ tân/Quản lý gọi API VietQR
     - **Then** 422 “Hóa đơn chờ đã quá hạn thanh toán, vui lòng lập hóa đơn mới tại quầy.”; không sinh QR, không đổi hóa đơn/gói hoặc ghi phiếu thu. Đọc TTL của chi nhánh, thiếu thì dùng toàn chuỗi; trước hoặc đúng mốc hạn vẫn sinh được QR nếu đủ điều kiện khác. Hóa đơn COUNTER không áp dụng hạn này
+  - **AC-F5.1.1-09: Không sinh VietQR cho hóa đơn 0 đồng** (BR-F5-01, S5)
+    - **Given** Hóa đơn PENDING đúng phạm vi, chưa quá hạn và có `total = 0` (kể cả khi chi nhánh chưa cấu hình `BANK_*`)
+    - **When** Lễ tân/Quản lý gọi API VietQR
+    - **Then** 422 “Hóa đơn 0 đồng không cần chuyển khoản, vui lòng xác nhận tại quầy.”; không sinh QR, không đổi hóa đơn/gói hoặc ghi phiếu thu. Hóa đơn 0 đồng vẫn xác nhận thu tiền tại quầy theo AC-F5.2.1-03
 
 
 ---
@@ -373,6 +377,10 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
     - **Given** Hóa đơn MEMBER_PORTAL còn PENDING đúng phạm vi nhưng now > created_at + PENDING_INVOICE_TTL_DAYS ngày, tác vụ tự hủy F7 chưa chạy
     - **When** Lễ tân/Quản lý xác nhận thu tiền
     - **Then** 422 “Hóa đơn chờ đã quá hạn thanh toán, vui lòng lập hóa đơn mới tại quầy.”; hóa đơn/gói vẫn PENDING, không ghi phiếu thu, không kích hoạt gói. TTL đọc theo chi nhánh rồi toàn chuỗi; trước hoặc đúng mốc hạn vẫn được thu nếu đủ điều kiện khác. Hóa đơn COUNTER không áp dụng hạn này
+  - **AC-F5.2.1-13: Không thu tiền khi hội viên ngừng hoạt động hoặc đã xóa mềm** (BR-F5-03, NF6)
+    - **Given** Hóa đơn PENDING (COUNTER hoặc MEMBER_PORTAL chưa quá hạn) gắn với hội viên hiện có `status != ACTIVE` hoặc `deleted_at IS NOT NULL`
+    - **When** Lễ tân/Quản lý xác nhận thu tiền (sau khi khóa dòng hội viên)
+    - **Then** 422 “Hội viên đã ngừng hoạt động, không thể thu tiền.”; hóa đơn và gói vẫn PENDING, không ghi phiếu thu, không kích hoạt gói
 
 ---
 
@@ -524,7 +532,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
     - **Then** Chưa đăng nhập trả 401; sai vai trò trả 403 “Bạn không có quyền thực hiện thao tác này.”; chi tiết/hủy ngoài chi nhánh hoặc không tồn tại trả 404 cùng câu “Hóa đơn không tồn tại trên hệ thống.”. Không thay đổi dữ liệu khi bị từ chối
 
   - **AC-F5.3.1-09: Bộ lọc và phân trang không hợp lệ** (S5)
-    - **Given** Người gọi đúng quyền; page<0, size ngoài 1..100, fromDate>toDate, ngày/enum sai hoặc ID chi tiết/hủy không phải số nguyên dương
+    - **Given** Người gọi đúng quyền; page<0, size ngoài 1..100, fromDate>toDate, `keyword` vượt quá 100 ký tự, ngày/enum sai hoặc ID chi tiết/hủy không phải số nguyên dương
     - **When** Gọi danh sách, chi tiết hoặc hủy hóa đơn
     - **Then** 400 ProblemDetail, kèm errors theo trường khi xác định được; không truy cập dữ liệu ngoài phạm vi. Mặc định page=0,size=20; branchId nếu truyền phải là số nguyên dương
   - **AC-F5.3.1-10: Nhân viên không có phân công chi nhánh hoạt động** (S3)
@@ -627,9 +635,9 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
     - **When** Gọi xuất PDF
     - **Then** 422 “Chỉ có thể xuất hóa đơn cho các giao dịch đã thanh toán hoặc đã hoàn tiền.”; không trả file; giao diện không hiện nút in/tải cho hóa đơn PENDING
   - **AC-F5.4.1-04: Hội viên chỉ tải hóa đơn của mình; nhân viên đúng chi nhánh** (S3)
-    - **Given** Hội viên A có hóa đơn đã thanh toán; hóa đơn khác thuộc B; hoặc Lễ tân/Quản lý CN01 gọi hóa đơn CN02
+    - **Given** Hội viên A có hóa đơn đã thanh toán; hóa đơn khác thuộc B; tài khoản MEMBER chưa gắn hồ sơ hoặc hồ sơ đã xóa mềm; hoặc Lễ tân/Quản lý CN01 gọi hóa đơn CN02
     - **When** Gọi xuất PDF các hóa đơn tương ứng
-    - **Then** A tải hóa đơn của A nhận 200; tải hóa đơn B hoặc nhân viên tải ngoài chi nhánh trả 404 giống ID không tồn tại: “Hóa đơn không tồn tại trên hệ thống.”
+    - **Then** A tải hóa đơn của A nhận 200; tải hóa đơn B, tài khoản MEMBER chưa gắn hồ sơ/đã xóa mềm, hoặc nhân viên tải ngoài chi nhánh trả 404 giống ID không tồn tại: “Hóa đơn không tồn tại trên hệ thống.”
   - **AC-F5.4.1-05: Vai trò không được tải PDF và chưa đăng nhập** (S2, S3)
     - **Given** Người gọi là Huấn luyện viên, Chủ chuỗi hoặc không có token hợp lệ
     - **When** Gọi xuất PDF

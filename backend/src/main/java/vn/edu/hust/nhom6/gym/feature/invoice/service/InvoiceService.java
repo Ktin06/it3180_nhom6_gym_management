@@ -151,7 +151,10 @@ public class InvoiceService {
             throw new BusinessRuleException("Hóa đơn đã được thanh toán hoặc đã bị hủy trước đó.");
         }
         if (invoice.getMemberId() != null) {
-            members.lockForUpdate(invoice.getMemberId());
+            Member member = members.lockForUpdateIncludingDeleted(invoice.getMemberId());
+            if (member.getDeletedAt() != null || member.getStatus() != MemberStatus.ACTIVE) {
+                throw new BusinessRuleException("Hội viên đã ngừng hoạt động, không thể thu tiền.");
+            }
         }
         requireWithinPaymentDeadline(invoice);
 

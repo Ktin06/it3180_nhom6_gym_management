@@ -25,6 +25,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import vn.edu.hust.nhom6.gym.common.dto.PageResponse;
 import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
@@ -76,7 +77,7 @@ public class InvoiceController {
     @ApiResponse(responseCode = "403", description = "Không phải lễ tân hay quản lý chi nhánh")
     @ApiResponse(responseCode = "404", description = "Hóa đơn không tồn tại hoặc thuộc chi nhánh khác")
     @ApiResponse(responseCode = "409", description = "Dữ liệu hóa đơn vừa được cập nhật bởi thao tác khác")
-    @ApiResponse(responseCode = "422", description = "Hóa đơn không còn chờ thanh toán, hóa đơn MEMBER_PORTAL quá hạn, hoặc đã có gói cùng loại UPCOMING")
+    @ApiResponse(responseCode = "422", description = "Hóa đơn không còn chờ thanh toán, hóa đơn MEMBER_PORTAL quá hạn, hội viên đã ngừng hoạt động, hoặc đã có gói cùng loại UPCOMING")
     public PaymentConfirmationDto pay(Authentication auth,
             @PathVariable @Positive(message = "ID hóa đơn phải lớn hơn 0.") Long id,
             @Valid @RequestBody PayInvoiceRequest request) {
@@ -105,7 +106,7 @@ public class InvoiceController {
             + "chuỗi và lọc được theo branchId. Khoảng ngày fromDate..toDate tính theo ngày Việt Nam nửa mở. "
             + "Dùng LEFT JOIN members nên hóa đơn khách lẻ vẫn hiện.")
     @ApiResponse(responseCode = "200", description = "Danh sách hóa đơn phân trang")
-    @ApiResponse(responseCode = "400", description = "Tham số lọc hoặc phân trang không hợp lệ")
+    @ApiResponse(responseCode = "400", description = "Tham số lọc hoặc phân trang không hợp lệ (gồm keyword vượt quá 100 ký tự)")
     @ApiResponse(responseCode = "401", description = "Chưa xác thực hoặc JWT sai")
     @ApiResponse(responseCode = "403", description = "Không phải lễ tân, quản lý chi nhánh hay chủ chuỗi")
     public PageResponse<InvoiceSummaryDto> list(Authentication auth,
@@ -113,7 +114,7 @@ public class InvoiceController {
             @RequestParam(required = false) InvoiceSource source,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
-            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) @Size(max = 100, message = "Từ khóa tối đa 100 ký tự.") String keyword,
             @RequestParam(required = false) @Positive(message = "ID chi nhánh phải lớn hơn 0.") Long branchId,
             @Parameter(description = "Trang từ 0") @RequestParam(defaultValue = "0")
             @Min(value = 0, message = "Trang phải từ 0.") int page,

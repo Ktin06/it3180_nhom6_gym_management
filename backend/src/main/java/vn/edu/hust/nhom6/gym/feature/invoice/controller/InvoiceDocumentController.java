@@ -42,7 +42,7 @@ public class InvoiceDocumentController {
     @ApiResponse(responseCode = "401", description = "Chưa xác thực hoặc JWT sai")
     @ApiResponse(responseCode = "403", description = "Không phải lễ tân hay quản lý chi nhánh")
     @ApiResponse(responseCode = "404", description = "Hóa đơn không tồn tại hoặc thuộc chi nhánh khác")
-    @ApiResponse(responseCode = "422", description = "Hóa đơn không ở trạng thái PENDING, hóa đơn MEMBER_PORTAL quá hạn hoặc chi nhánh chưa cấu hình tài khoản ngân hàng")
+    @ApiResponse(responseCode = "422", description = "Hóa đơn không ở trạng thái PENDING, hóa đơn 0 đồng, hóa đơn MEMBER_PORTAL quá hạn hoặc chi nhánh chưa cấu hình tài khoản ngân hàng")
     public VietQrPaymentDto vietQr(Authentication auth,
             @PathVariable @Positive(message = "ID hóa đơn phải lớn hơn 0.") Long id) {
         return documents.generateVietQr(CurrentUser.from(auth), id);
