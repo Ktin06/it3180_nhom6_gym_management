@@ -39,6 +39,8 @@ export const ROUTE_ACCESS = {
   '/hoa-don': { roles: MEMBER_MANAGEMENT_ROLES }, // F5
   '/hoa-don/:id': { roles: MEMBER_MANAGEMENT_ROLES }, // F5
   '/member/invoices/:id/pdf': { roles: ['MEMBER'] }, // F5, điểm vào từ lịch sử F7
+  // S2-20.2: giao diện học viên của huấn luyện viên (F9)
+  '/pt/hoc-vien': { roles: ['TRAINER'] }, // F9
 } satisfies RouteAccessTable
 
 /** Đường dẫn đã khai báo quyền; viết sai tên thì TypeScript báo lỗi. */
