@@ -76,6 +76,7 @@ function renderResetPasswordFlow(initialUrl: string) {
         register: vi.fn(),
         logout: vi.fn(),
         retrySession: vi.fn(),
+        completePasswordChange: vi.fn(),
       }}
     >
       <MemoryRouter initialEntries={[initialUrl]}>
@@ -262,6 +263,7 @@ describe('ResetPasswordPage', () => {
             register: vi.fn(),
             logout: vi.fn(),
             retrySession: vi.fn(),
+            completePasswordChange: vi.fn(),
           }}
         >
           <RouterProvider router={memoryRouter} />

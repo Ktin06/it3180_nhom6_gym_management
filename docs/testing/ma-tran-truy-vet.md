@@ -8,7 +8,7 @@
 
 | Chức năng | UC | US | AC | AC đã có TC | AC chưa có TC | TC |
 | --- | --- | --- | --- | --- | --- | --- |
-| F1 | 6 | 6 | 29 | 24 | 5 | 118 |
+| F1 | 6 | 6 | 29 | 28 | 1 | 139 |
 | F2 | 5 | 6 | 31 | 27 | 4 | 110 |
 | F3 | 5 | 6 | 45 | 44 | 1 | 136 |
 | F4 | 5 | 5 | 37 | 0 | 37 | 0 |
@@ -18,7 +18,7 @@
 | F8 | 9 | 9 | 55 | 53 | 2 | 81 |
 | F9 | 7 | 7 | 63 | 0 | 63 | 0 |
 | F10 | 5 | 4 | 25 | 0 | 25 | 0 |
-| **Tổng** | **57** | **58** | **384** | **197** | **187** | **599** |
+| **Tổng** | **57** | **58** | **384** | **201** | **183** | **620** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -43,10 +43,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC | Tên | US |
 | --- | --- | --- |
 | AC-F1.2.1-06 | Từ chối dữ liệu đăng nhập sai định dạng (không hỗ trợ đăng nhập bằng số điện thoại) | US-F1.2.1 |
-| AC-F1.4.1-01 | Đổi mật khẩu thành công, thu hồi toàn bộ phiên và yêu cầu đăng nhập lại | US-F1.4.1 |
-| AC-F1.4.1-02 | Từ chối khi mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ | US-F1.4.1 |
-| AC-F1.4.1-03 | Từ chối khi dữ liệu đầu vào sai định dạng hoặc mật khẩu mới không đạt chuẩn bảo mật | US-F1.4.1 |
-| AC-F1.4.1-04 | Chặn truy cập khi chưa đăng nhập và mở đúng khung giao diện cho mọi vai trò đã đăng nhập | US-F1.4.1 |
 | AC-F2.5.1-01 | Ghi chỉ số cơ thể thành công với ít nhất một chỉ số | US-F2.5.1 |
 | AC-F2.5.1-02 | Từ chối dữ liệu chỉ số cơ thể không hợp lệ | US-F2.5.1 |
 | AC-F2.5.1-03 | Xem lịch sử chỉ số cơ thể sắp xếp mới nhất trước | US-F2.5.1 |
@@ -325,11 +321,32 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F1.3.1-04e `AuthSessionConcurrencyIntegrationTest#dangXuatBangJwtHetHanCuaTaiKhoanAVanGiuPhienCuaTaiKhoanB`
       - TC-F1.3.1-04f `auth/account-change.test.tsx › TC-F1.3.1-04f: refresh khác tài khoản đóng trang bảo vệ và đ`
 - **UC-F1.4** Đổi mật khẩu
-  - **US-F1.4.1** Đổi mật khẩu (#120)
-    - AC-F1.4.1-01 Đổi mật khẩu thành công, thu hồi toàn bộ phiên và yêu cầu đăng nhập lại (BR-F1-03, BR-F1-04) ❌ chưa có TC
-    - AC-F1.4.1-02 Từ chối khi mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ (BR-F1-07) ❌ chưa có TC
-    - AC-F1.4.1-03 Từ chối khi dữ liệu đầu vào sai định dạng hoặc mật khẩu mới không đạt chuẩn bảo mật (BR-F1-03) ❌ chưa có TC
-    - AC-F1.4.1-04 Chặn truy cập khi chưa đăng nhập và mở đúng khung giao diện cho mọi vai trò đã đăng nhập (BR-F1-05) ❌ chưa có TC
+  - **US-F1.4.1** Đổi mật khẩu (#120) ✅ mọi AC có TC
+    - AC-F1.4.1-01 Đổi mật khẩu thành công, thu hồi toàn bộ phiên và yêu cầu đăng nhập lại (BR-F1-03, BR-F1-04)
+      - TC-F1.4.1-01a `ChangePasswordIntegrationTest#doiMatKhauThanhCongMatKhauMoiDangNhapDuocMatKhauCuKhong`
+      - TC-F1.4.1-01b `ChangePasswordIntegrationTest#doiMatKhauThuHoiMoiRefreshTokenCuaNguoiDung`
+      - TC-F1.4.1-01c `AuthServiceTest#doiMatKhauThanhCongCapNhatPasswordHash`
+      - TC-F1.4.1-01d `AuthServiceTest#doiMatKhauThuHoiMoiPhienCuaNguoiDung`
+      - TC-F1.4.1-01e `features/auth/api/auth-api.test.ts › TC-F1.4.1-01e: changePassword gọi POST /auth/change-password`
+      - TC-F1.4.1-01f `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-01f: Đổi mật khẩu thành công gọi API, xóa phiên tr`
+      - TC-F1.4.1-01g `auth/AuthProvider.test.tsx › TC-F1.4.1-01g: completePasswordChange phát publishSessionCha`
+      - TC-F1.4.1-01h `ChangePasswordIntegrationTest#concurrentPasswordChangesAcceptOldPasswordOnlyOnce`
+      - TC-F1.4.1-01i `ChangePasswordIntegrationTest#passwordChangeRevokesInFlightRefreshSuccessor`
+      - TC-F1.4.1-01j `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-01j: Phản hồi đổi mật khẩu đến muộn giữ phiên mới `
+      - TC-F1.4.1-01k `auth/AuthProvider.test.tsx › TC-F1.4.1-01k: giữ lượt đăng nhập mới cùng tài khoản khi tab`
+    - AC-F1.4.1-02 Từ chối khi mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ (BR-F1-07)
+      - TC-F1.4.1-02a `AuthServiceTest#doiMatKhauHienTaiSaiHoacMatKhauMoiTrungCuNemBusinessRuleException`
+      - TC-F1.4.1-02b `AuthControllerTest#doiMatKhauViPhamQuyTacNghiepVuTra422`
+      - TC-F1.4.1-02c `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-02c: Lỗi 422 từ API hiển thị đúng thông báo và khô`
+    - AC-F1.4.1-03 Từ chối khi dữ liệu đầu vào sai định dạng hoặc mật khẩu mới không đạt chuẩn bảo mật (BR-F1-03)
+      - TC-F1.4.1-03a `AuthControllerTest#doiMatKhauSaiDinhDangTra400KemErrors`
+      - TC-F1.4.1-03b `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-03b: Kiểm tra quy tắc mật khẩu S1, khớp mật khẩu n`
+    - AC-F1.4.1-04 Chặn truy cập khi chưa đăng nhập và mở đúng khung giao diện cho mọi vai trò đã đăng nhập (BR-F1-05)
+      - TC-F1.4.1-04a `AuthControllerTest#doiMatKhauKhongCoTokenTra401`
+      - TC-F1.4.1-04b `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-04b: mở /doi-mat-khau đúng layout theo vai trò và `
+      - TC-F1.4.1-04c `layouts/UserMenu.test.tsx › TC-F1.4.1-04c: UserMenu có mục Đổi mật khẩu cho mọi vai trò,`
+      - TC-F1.4.1-04d `layouts/UserMenu.test.tsx › TC-F1.4.1-04d: ẩn chữ của nút trên màn hẹp 360px, giữ tên nú`
+      - TC-F1.4.1-04e `AuthServiceTest#doiMatKhauTaiKhoanKhongActiveNemForbiddenException`
 - **UC-F1.5** Quên mật khẩu và đặt lại mật khẩu (Sprint 2)
   - **US-F1.5.1** Quên và đặt lại mật khẩu (#121) ✅ mọi AC có TC
     - AC-F1.5.1-01 Yêu cầu quên mật khẩu cho tài khoản ACTIVE tạo token băm SHA-256 hạn 30 phút, gửi email và trả 200 câu chung (BR-F1-01, BR-F1-08)
@@ -1435,6 +1452,27 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F1.3.1-04d | AC-F1.3.1-04 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthSessionConcurrencyIntegrationTest#dangXuatBangJwtCuaTaiKhoanAKhongThuHoiHoacXoaCookieCuaTaiKhoanB` |
 | TC-F1.3.1-04e | AC-F1.3.1-04 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `AuthSessionConcurrencyIntegrationTest#dangXuatBangJwtHetHanCuaTaiKhoanAVanGiuPhienCuaTaiKhoanB` |
 | TC-F1.3.1-04f | AC-F1.3.1-04 | US-F1.3.1 | UC-F1.3 | BR-F1-04 | `auth/account-change.test.tsx › TC-F1.3.1-04f: refresh khác tài khoản đóng trang bảo vệ và đ` |
+| TC-F1.4.1-01a | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `ChangePasswordIntegrationTest#doiMatKhauThanhCongMatKhauMoiDangNhapDuocMatKhauCuKhong` |
+| TC-F1.4.1-01b | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `ChangePasswordIntegrationTest#doiMatKhauThuHoiMoiRefreshTokenCuaNguoiDung` |
+| TC-F1.4.1-01c | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `AuthServiceTest#doiMatKhauThanhCongCapNhatPasswordHash` |
+| TC-F1.4.1-01d | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `AuthServiceTest#doiMatKhauThuHoiMoiPhienCuaNguoiDung` |
+| TC-F1.4.1-01e | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `features/auth/api/auth-api.test.ts › TC-F1.4.1-01e: changePassword gọi POST /auth/change-password` |
+| TC-F1.4.1-01f | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-01f: Đổi mật khẩu thành công gọi API, xóa phiên tr` |
+| TC-F1.4.1-01g | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `auth/AuthProvider.test.tsx › TC-F1.4.1-01g: completePasswordChange phát publishSessionCha` |
+| TC-F1.4.1-01h | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `ChangePasswordIntegrationTest#concurrentPasswordChangesAcceptOldPasswordOnlyOnce` |
+| TC-F1.4.1-01i | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `ChangePasswordIntegrationTest#passwordChangeRevokesInFlightRefreshSuccessor` |
+| TC-F1.4.1-01j | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-01j: Phản hồi đổi mật khẩu đến muộn giữ phiên mới ` |
+| TC-F1.4.1-01k | AC-F1.4.1-01 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `auth/AuthProvider.test.tsx › TC-F1.4.1-01k: giữ lượt đăng nhập mới cùng tài khoản khi tab` |
+| TC-F1.4.1-02a | AC-F1.4.1-02 | US-F1.4.1 | UC-F1.4 | BR-F1-07, BR-F1-03, BR-F1-04, BR-F1-05 | `AuthServiceTest#doiMatKhauHienTaiSaiHoacMatKhauMoiTrungCuNemBusinessRuleException` |
+| TC-F1.4.1-02b | AC-F1.4.1-02 | US-F1.4.1 | UC-F1.4 | BR-F1-07, BR-F1-03, BR-F1-04, BR-F1-05 | `AuthControllerTest#doiMatKhauViPhamQuyTacNghiepVuTra422` |
+| TC-F1.4.1-02c | AC-F1.4.1-02 | US-F1.4.1 | UC-F1.4 | BR-F1-07, BR-F1-03, BR-F1-04, BR-F1-05 | `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-02c: Lỗi 422 từ API hiển thị đúng thông báo và khô` |
+| TC-F1.4.1-03a | AC-F1.4.1-03 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `AuthControllerTest#doiMatKhauSaiDinhDangTra400KemErrors` |
+| TC-F1.4.1-03b | AC-F1.4.1-03 | US-F1.4.1 | UC-F1.4 | BR-F1-03, BR-F1-04, BR-F1-05, BR-F1-07 | `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-03b: Kiểm tra quy tắc mật khẩu S1, khớp mật khẩu n` |
+| TC-F1.4.1-04a | AC-F1.4.1-04 | US-F1.4.1 | UC-F1.4 | BR-F1-05, BR-F1-03, BR-F1-04, BR-F1-07 | `AuthControllerTest#doiMatKhauKhongCoTokenTra401` |
+| TC-F1.4.1-04b | AC-F1.4.1-04 | US-F1.4.1 | UC-F1.4 | BR-F1-05, BR-F1-03, BR-F1-04, BR-F1-07 | `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-04b: mở /doi-mat-khau đúng layout theo vai trò và ` |
+| TC-F1.4.1-04c | AC-F1.4.1-04 | US-F1.4.1 | UC-F1.4 | BR-F1-05, BR-F1-03, BR-F1-04, BR-F1-07 | `layouts/UserMenu.test.tsx › TC-F1.4.1-04c: UserMenu có mục Đổi mật khẩu cho mọi vai trò,` |
+| TC-F1.4.1-04d | AC-F1.4.1-04 | US-F1.4.1 | UC-F1.4 | BR-F1-05, BR-F1-03, BR-F1-04, BR-F1-07 | `layouts/UserMenu.test.tsx › TC-F1.4.1-04d: ẩn chữ của nút trên màn hẹp 360px, giữ tên nú` |
+| TC-F1.4.1-04e | AC-F1.4.1-04 | US-F1.4.1 | UC-F1.4 | BR-F1-05, BR-F1-03, BR-F1-04, BR-F1-07 | `AuthServiceTest#doiMatKhauTaiKhoanKhongActiveNemForbiddenException` |
 | TC-F1.5.1-01a | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `PasswordResetServiceTest#emailActiveTaoPasswordResetBamHan30PhutVaGuiEmail` |
 | TC-F1.5.1-01b | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `AuthControllerTest#quenMatKhauCongKhaiTra200CauChung` |
 | TC-F1.5.1-01c | AC-F1.5.1-01 | US-F1.5.1 | UC-F1.5 | BR-F1-01, BR-F1-08, BR-F1-03, BR-F1-04, BR-F1-06 | `features/auth/pages/ForgotPasswordPage.test.tsx › TC-F1.5.1-01c: nhập email ở /quen-mat-khau gửi email chuẩn h` |

@@ -4,15 +4,20 @@ import { useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const authApi = vi.hoisted(() => ({
+  changePassword: vi.fn(),
   getCurrentUser: vi.fn(),
   login: vi.fn(),
   logout: vi.fn(),
   register: vi.fn(),
 }))
 const refresh = vi.hoisted(() => vi.fn())
+const publishSessionChange = vi.hoisted(() => vi.fn())
+const captureCookieRevision = vi.hoisted(() => vi.fn())
+const currentTabCookieRevision = vi.hoisted(() => vi.fn())
 
 vi.mock('../features/auth/api/auth-api', () => authApi)
 vi.mock('../services/http', () => ({ refreshAccessToken: refresh }))
+vi.mock('./session-coordination', () => ({ captureCookieRevision, currentTabCookieRevision, publishSessionChange }))
 
 import { AuthProvider } from './AuthProvider'
 import { useAuth } from './useAuth'
@@ -58,6 +63,9 @@ function AuthProbe() {
       <button onClick={() => void auth.logout().catch(() => setLastError('logout failed'))}>
         Đăng xuất thử
       </button>
+      <button onClick={() => void auth.completePasswordChange({
+        currentPassword: 'OldPassword1', newPassword: 'NewPassword2',
+      })}>Hoàn tất đổi mật khẩu</button>
     </>
   )
 }
@@ -90,6 +98,10 @@ describe('AuthProvider', () => {
     authApi.logout.mockReset().mockResolvedValue(undefined)
     authApi.register.mockReset()
     refresh.mockReset().mockRejectedValue(unauthorizedError())
+    publishSessionChange.mockReset().mockResolvedValue(undefined)
+    captureCookieRevision.mockReset().mockResolvedValue({ session: 'session-old', refresh: null })
+    currentTabCookieRevision.mockReset().mockResolvedValue({ session: 'session-old', refresh: null })
+    authApi.changePassword.mockReset().mockResolvedValue(undefined)
   })
 
   it('TC-F1.3.1-01e: bootstrap làm mới cookie rồi lấy user từ /me', async () => {
@@ -262,5 +274,46 @@ describe('AuthProvider', () => {
     pendingMe.resolve({ email: 'cu@example.com', role: 'MEMBER' })
     await waitFor(() => expect(getAccessToken()).toBeNull())
     expect(screen.queryByText('authenticated')).not.toBeInTheDocument()
+  })
+
+  it('TC-F1.4.1-01g: completePasswordChange phát publishSessionChange(null) cho các tab khác và xóa phiên hiện tại kèm thông báo', async () => {
+    refresh.mockImplementation(async (epoch: number) => {
+      setAccessToken('bootstrap-jwt', epoch)
+      return 'bootstrap-jwt'
+    })
+    authApi.getCurrentUser.mockResolvedValue({ email: 'hv@example.com', role: 'MEMBER' })
+    const user = userEvent.setup()
+    renderProvider()
+    await screen.findByText('authenticated')
+
+    await user.click(screen.getByRole('button', { name: 'Hoàn tất đổi mật khẩu' }))
+
+    expect(await screen.findByText('anonymous')).toBeInTheDocument()
+    expect(publishSessionChange).toHaveBeenCalledWith(null)
+    expect(getAccessToken()).toBeNull()
+    expect(screen.getByText('Đã đổi mật khẩu, vui lòng đăng nhập lại')).toBeInTheDocument()
+  })
+
+  it('TC-F1.4.1-01k: giữ lượt đăng nhập mới cùng tài khoản khi tab đã nhận revision mới', async () => {
+    refresh.mockImplementation(async (epoch: number) => {
+      setAccessToken('bootstrap-jwt', epoch)
+      return 'bootstrap-jwt'
+    })
+    authApi.getCurrentUser.mockResolvedValue({ email: 'hv@example.com', role: 'MEMBER' })
+    const pending = deferred<void>()
+    authApi.changePassword.mockReturnValue(pending.promise)
+    const user = userEvent.setup()
+    renderProvider()
+    await screen.findByText('authenticated')
+    await user.click(screen.getByRole('button', { name: 'Hoàn tất đổi mật khẩu' }))
+    await waitFor(() => expect(authApi.changePassword).toHaveBeenCalledOnce())
+
+    currentTabCookieRevision.mockResolvedValue({ session: 'session-new', refresh: null })
+    await act(async () => pending.resolve(undefined))
+
+    expect(currentTabCookieRevision).toHaveBeenCalledTimes(2)
+    expect(publishSessionChange).not.toHaveBeenCalled()
+    expect(screen.getByText('authenticated')).toBeInTheDocument()
+    expect(getAccessToken()).toBe('bootstrap-jwt')
   })
 })

@@ -138,6 +138,7 @@ function renderDetail(api: InvoicesGateway, role: Role = 'RECEPTIONIST', entry =
           register: vi.fn(),
           logout: vi.fn(),
           retrySession: vi.fn(),
+          completePasswordChange: vi.fn(),
         }}
       >
         <MemoryRouter initialEntries={[entry]}>

@@ -215,6 +215,7 @@ Chức năng **F1 – Tài khoản và phân quyền** cung cấp cơ chế xác
   - **E1 – Dữ liệu đầu vào sai định dạng (400 Bad Request):** Để trống trường bắt buộc hoặc `newPassword` dưới 8 ký tự / thiếu chữ cái hoặc chữ số / vượt quá 72 byte UTF-8 (Bean Validation) → Trả `ProblemDetail` (400) kèm danh sách lỗi theo từng trường (`errors`).
   - **E2 – Vi phạm quy tắc nghiệp vụ (422 Unprocessable Content):** Mật khẩu hiện tại (`currentPassword`) không đúng (*"Mật khẩu hiện tại không đúng."*), hoặc mật khẩu mới (`newPassword`) trùng với mật khẩu hiện tại (*"Mật khẩu mới phải khác mật khẩu hiện tại."*) → Trả `ProblemDetail` (422) thông báo chi tiết lý do, không xóa phiên.
   - **E3 – Chưa đăng nhập (401 Unauthorized):** Không gửi JWT hợp lệ → Trả `ProblemDetail` (401).
+  - **E4 – Tài khoản bị khóa hoặc ngừng hoạt động (403 Forbidden):** Tài khoản không còn ở trạng thái `ACTIVE` (`LOCKED` / `DISABLED`) dù Access Token chưa hết hạn → Trả `ProblemDetail` (403): *"Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên."*
 
 #### H. User story và tiêu chí chấp nhận (Acceptance Criteria)
 
@@ -227,7 +228,7 @@ Chức năng **F1 – Tài khoản và phân quyền** cung cấp cơ chế xác
   - **AC-F1.4.1-01: Đổi mật khẩu thành công, thu hồi toàn bộ phiên và yêu cầu đăng nhập lại** (BR-F1-03, BR-F1-04)
     - **Given** Người dùng đã đăng nhập (bất kỳ vai trò nào trong 5 vai trò) và có một hoặc nhiều phiên `refresh_tokens` đang hiệu lực
     - **When** Gửi `POST /api/v1/auth/change-password` (hoặc gửi biểu mẫu tại `/doi-mat-khau`) với `currentPassword` đúng và `newPassword` hợp lệ, khác mật khẩu hiện tại
-    - **Then** Hệ thống trả `204 No Content`, cập nhật `users.password_hash` bằng bcrypt, đánh dấu `revoked_at` cho toàn bộ `refresh_tokens` đang hiệu lực của tài khoản đó (không ảnh hưởng tài khoản khác); mật khẩu mới đăng nhập được, mật khẩu cũ và các refresh token cũ bị từ chối `401`; giao diện xóa phiên cục bộ và chuyển về `/login` kèm thông báo *"Đã đổi mật khẩu, vui lòng đăng nhập lại"*
+    - **Then** Hệ thống trả `204 No Content`, cập nhật `users.password_hash` bằng bcrypt, đánh dấu `revoked_at` cho toàn bộ `refresh_tokens` đang hiệu lực của tài khoản đó (không ảnh hưởng tài khoản khác); mật khẩu mới đăng nhập được, mật khẩu cũ và các refresh token cũ bị từ chối `401`; giao diện xóa phiên cục bộ, báo cho các tab khác qua kênh đồng bộ phiên (`publishSessionChange(null)`) và chuyển về `/login` kèm thông báo *"Đã đổi mật khẩu, vui lòng đăng nhập lại"*
   - **AC-F1.4.1-02: Từ chối khi mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ** (BR-F1-07)
     - **Given** Người dùng đã đăng nhập
     - **When** Gửi `POST /api/v1/auth/change-password` với `currentPassword` không khớp (kể cả vượt quá 72 byte UTF-8) hoặc `newPassword` trùng `currentPassword`

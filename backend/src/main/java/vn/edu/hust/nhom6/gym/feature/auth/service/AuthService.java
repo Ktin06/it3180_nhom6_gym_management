@@ -14,9 +14,11 @@ import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.ForbiddenException;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.common.time.VnTime;
 import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.AuthMeResponse;
+import vn.edu.hust.nhom6.gym.feature.auth.dto.ChangePasswordRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.RegisterRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.RefreshToken;
@@ -185,13 +187,13 @@ public class AuthService {
         }
 
         String tokenHash = TokenHashUtil.sha256Hex(rawRefreshToken);
+        User user = userRepository.findByRefreshTokenHashForUpdate(tokenHash)
+            .orElseThrow(() -> new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ."));
         RefreshToken refreshToken = refreshTokenRepository.findByTokenHashForUpdate(tokenHash)
             .orElseThrow(() -> new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ."));
 
         if (refreshToken.getRevokedAt() != null) {
-            if (refreshToken.getUser() != null) {
-                refreshTokenRepository.revokeAllByUserId(refreshToken.getUser().getId(), OffsetDateTime.now());
-            }
+            refreshTokenRepository.revokeAllByUserId(user.getId(), OffsetDateTime.now());
             throw new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ.");
         }
 
@@ -199,7 +201,6 @@ public class AuthService {
             throw new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ.");
         }
 
-        User user = refreshToken.getUser();
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ.");
         }
@@ -273,6 +274,36 @@ public class AuthService {
             refreshTokenRepository.save(token);
         }
         return true;
+    }
+
+    /**
+     * Đổi mật khẩu và thu hồi toàn bộ các phiên đăng nhập hiện có của người dùng (UC-F1.4).
+     */
+    @Transactional
+    public void changePassword(CurrentUser me, ChangePasswordRequest request) {
+        User user = userRepository.findByIdForUpdate(me.userId())
+            .orElseThrow(() -> new UnauthorizedException("Token không hợp lệ."));
+
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new ForbiddenException("Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên.");
+        }
+
+        validatePasswordLength(request.newPassword());
+
+        String currentPassword = request.currentPassword();
+        boolean currentTooLong = currentPassword == null
+            || currentPassword.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES;
+        if (currentTooLong || !passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new BusinessRuleException("Mật khẩu hiện tại không đúng.");
+        }
+
+        if (currentPassword.equals(request.newPassword())) {
+            throw new BusinessRuleException("Mật khẩu mới phải khác mật khẩu hiện tại.");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+        refreshTokenRepository.revokeAllByUserId(me.userId(), vnTime.now());
     }
 
     private String issueRefreshToken(User user) {
