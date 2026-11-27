@@ -89,4 +89,16 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
         ORDER BY i.createdAt, i.id""")
     java.util.List<Invoice> findPendingPortalCreatedBefore(
             @org.springframework.data.repository.query.Param("createdBefore") java.time.OffsetDateTime createdBefore);
+
+    /** Hóa đơn PENDING {@code MEMBER_PORTAL} của một hội viên lập trước mốc {@code createdBefore} (cũ trước). */
+    @Query("""
+        SELECT i FROM Invoice i
+        WHERE i.memberId = :memberId
+          AND i.status = 'PENDING'
+          AND i.source = 'MEMBER_PORTAL'
+          AND i.createdAt < :createdBefore
+        ORDER BY i.createdAt, i.id""")
+    java.util.List<Invoice> findPendingPortalOfMemberCreatedBefore(
+            @org.springframework.data.repository.query.Param("memberId") Long memberId,
+            @org.springframework.data.repository.query.Param("createdBefore") java.time.OffsetDateTime createdBefore);
 }
