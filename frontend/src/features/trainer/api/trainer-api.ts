@@ -4,9 +4,6 @@ import { errorMessage } from '../../shared/api-error'
 import type {
   BodyMetric,
   ProgressResponse,
-  PtSessionCompletionResult,
-  TrainerAvailability,
-  TrainerScheduleGateway,
   TrainerScheduleResponse,
   TrainerStudent,
   TrainerStudentsGateway,
@@ -28,7 +25,7 @@ export function trainerApiDetailMessage(error: unknown): string {
 }
 
 /**
- * Đọc bản đồ lỗi từng trường `errors` từ phản hồi 400 của backend (VD: `errors.title`, `errors.endTime`).
+ * Đọc bản đồ lỗi từng trường `errors` từ phản hồi 400 của backend (VD: `errors.title`, `errors.exercise`).
  */
 export function trainerApiFieldErrors(error: unknown): Record<string, string> {
   if (!axios.isAxiosError(error) || error.response?.status !== 400) {
@@ -47,25 +44,9 @@ export function trainerApiFieldErrors(error: unknown): Record<string, string> {
   return result
 }
 
-export const trainerApi: TrainerScheduleGateway & TrainerStudentsGateway = {
+export const trainerApi: TrainerStudentsGateway = {
   getSchedule: async (query) =>
     (await http.get<TrainerScheduleResponse>('/pt/schedule', { params: query })).data,
-
-  createAvailability: async (input) =>
-    (await http.post<TrainerAvailability>('/pt/availabilities', input)).data,
-
-  updateAvailability: async (id, input) =>
-    (await http.put<TrainerAvailability>(`/pt/availabilities/${id}`, input)).data,
-
-  deleteAvailability: async (id) => {
-    await http.delete(`/pt/availabilities/${id}`)
-  },
-
-  confirmPtSession: async (sessionId) =>
-    (await http.patch<PtSessionCompletionResult>(`/pt-sessions/${sessionId}/confirm`)).data,
-
-  markPtSessionNoShow: async (sessionId) =>
-    (await http.patch<PtSessionCompletionResult>(`/pt-sessions/${sessionId}/no-show`)).data,
 
   listStudents: async () => (await http.get<TrainerStudent[]>('/pt/students')).data,
 

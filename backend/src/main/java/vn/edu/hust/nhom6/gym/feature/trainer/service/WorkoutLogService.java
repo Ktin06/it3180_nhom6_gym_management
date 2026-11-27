@@ -14,14 +14,12 @@ import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.InvalidRequestException;
 import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.common.time.VnTime;
-import vn.edu.hust.nhom6.gym.feature.staff.service.StaffService;
 import vn.edu.hust.nhom6.gym.feature.trainer.dto.WorkoutLogDto;
 import vn.edu.hust.nhom6.gym.feature.trainer.dto.WorkoutLogRequest;
-import vn.edu.hust.nhom6.gym.feature.trainer.entity.PtSession;
-import vn.edu.hust.nhom6.gym.feature.trainer.entity.PtSessionStatus;
 import vn.edu.hust.nhom6.gym.feature.trainer.entity.WorkoutLog;
-import vn.edu.hust.nhom6.gym.feature.trainer.repository.PtSessionRepository;
-import vn.edu.hust.nhom6.gym.feature.trainer.repository.TrainerAuditRepository;
+import vn.edu.hust.nhom6.gym.feature.trainer.repository.TrainerStudentLookupRepository;
+import vn.edu.hust.nhom6.gym.feature.trainer.repository.TrainerStudentLookupRepository.PtSessionRow;
+import vn.edu.hust.nhom6.gym.feature.trainer.repository.WorkoutLogAuditRepository;
 import vn.edu.hust.nhom6.gym.feature.trainer.repository.WorkoutLogRepository;
 
 /**
@@ -38,14 +36,14 @@ public class WorkoutLogService {
 
     private final TrainerStudentAccess access;
     private final WorkoutLogRepository logs;
-    private final PtSessionRepository ptSessions;
-    private final TrainerAuditRepository audit;
+    private final TrainerStudentLookupRepository lookup;
+    private final WorkoutLogAuditRepository audit;
     private final VnTime vnTime;
     private final JsonMapper json;
 
     @Transactional
     public WorkoutLogDto create(CurrentUser trainer, Long memberId, WorkoutLogRequest request) {
-        StaffService.StaffIdentity me = access.requireTrainerTeaching(trainer, memberId);
+        TrainerStudentAccess.TrainerIdentity me = access.requireTrainerTeaching(trainer, memberId);
         if (request.loggedAt().isAfter(vnTime.today())) {
             throw new InvalidRequestException("Ngày tập không được sau hôm nay.");
         }
@@ -81,13 +79,13 @@ public class WorkoutLogService {
      * "hội viên không tồn tại".
      */
     private void requireLoggableSession(Long sessionId, Long trainerId, Long memberId, LocalDate loggedAt) {
-        PtSession session = ptSessions.findById(sessionId)
-            .filter(s -> s.getTrainerId().equals(trainerId) && s.getMemberId().equals(memberId))
+        PtSessionRow session = lookup.findPtSession(sessionId)
+            .filter(s -> s.trainerId().equals(trainerId) && s.memberId().equals(memberId))
             .orElseThrow(() -> new BusinessRuleException(SESSION_NOT_OWNED));
-        if (session.getStatus() != PtSessionStatus.DONE) {
+        if (!"DONE".equals(session.status())) {
             throw new BusinessRuleException(SESSION_NOT_DONE);
         }
-        if (!vnTime.toVnDate(session.getStartAt()).equals(loggedAt)) {
+        if (!vnTime.toVnDate(session.startAt()).equals(loggedAt)) {
             throw new BusinessRuleException(SESSION_OTHER_DAY);
         }
     }

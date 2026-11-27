@@ -1,23 +1,5 @@
 export type PtSessionStatus = 'BOOKED' | 'DONE' | 'CANCELLED' | 'NO_SHOW'
 
-export interface TrainerAvailability {
-  id: number
-  trainerId: number
-  branchId: number
-  dayOfWeek: number
-  startTime: string
-  endTime: string
-  createdAt: string
-  updatedAt: string
-}
-
-export interface TrainerAvailabilityInput {
-  branchId?: number
-  dayOfWeek: number
-  startTime: string
-  endTime: string
-}
-
 export interface PtSessionScheduleItem {
   id: number
   memberId: number
@@ -31,53 +13,17 @@ export interface PtSessionScheduleItem {
   note: string | null
 }
 
-export interface ClassSessionScheduleItem {
-  id: number
-  classScheduleId: number
-  branchId: number
-  classTypeId: number
-  classTypeName: string
-  roomId: number
-  roomName: string
-  occurrenceDate: string
-  startAt: string
-  endAt: string
-  originalStartAt: string | null
-  capacity: number
-  status: string
-}
-
 export interface TrainerScheduleResponse {
   trainerId: number
   branchId: number
   from: string
   to: string
-  availabilities: TrainerAvailability[]
   ptSessions: PtSessionScheduleItem[]
-  classSessions: ClassSessionScheduleItem[]
 }
 
 export interface TrainerScheduleQuery {
   from?: string
   to?: string
-}
-
-export interface PtSessionCompletionResult {
-  id: number
-  trainerId: number
-  memberId: number
-  membershipId: number
-  branchId: number
-  startAt: string
-  endAt: string
-  status: PtSessionStatus
-  confirmedAt: string | null
-  commissionAmount: number | null
-  remainingSessions: number | null
-  membershipStatus: string
-  activatedMembershipId: number | null
-  movedSessionIds: number[]
-  cancelledSessionIds: number[]
 }
 
 export interface TrainerStudent {
@@ -175,15 +121,6 @@ export interface ProgressResponse {
   to: string
   bodyMetrics: BodyMetric[]
   workoutLogs: WorkoutLog[]
-}
-
-export interface TrainerScheduleGateway {
-  getSchedule(query?: TrainerScheduleQuery): Promise<TrainerScheduleResponse>
-  createAvailability(input: TrainerAvailabilityInput): Promise<TrainerAvailability>
-  updateAvailability(id: number, input: TrainerAvailabilityInput): Promise<TrainerAvailability>
-  deleteAvailability(id: number): Promise<void>
-  confirmPtSession(sessionId: number): Promise<PtSessionCompletionResult>
-  markPtSessionNoShow(sessionId: number): Promise<PtSessionCompletionResult>
 }
 
 export interface TrainerStudentsGateway {

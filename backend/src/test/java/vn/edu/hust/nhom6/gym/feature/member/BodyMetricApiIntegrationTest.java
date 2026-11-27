@@ -78,7 +78,7 @@ class BodyMetricApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F2.5.1 KB1: lễ tân ghi chỉ số cho hội viên chi nhánh mình → 201, recorded_by = người đang đăng nhập")
+    @DisplayName("TC-F2.5.1-01a: lễ tân ghi chỉ số cho hội viên chi nhánh mình → 201, recorded_by = người đang đăng nhập")
     void receptionistRecords() throws Exception {
         record(receptionist, UserRole.RECEPTIONIST, student.memberId(), VALID)
             .andExpect(status().isCreated())
@@ -98,7 +98,7 @@ class BodyMetricApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F2.5.1 KB1: PT ghi chỉ số cho học viên mình dạy → 201; chỉ một chỉ số cũng được")
+    @DisplayName("TC-F2.5.1-01b: PT ghi chỉ số cho học viên mình dạy → 201; chỉ một chỉ số cũng được")
     void trainerRecordsForStudent() throws Exception {
         record(pt.userId(), UserRole.TRAINER, student.memberId(), "{\"measuredAt\": \"2026-11-20\", \"weight\": 64}")
             .andExpect(status().isCreated())
@@ -107,7 +107,7 @@ class BodyMetricApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F2.5.1 BR-F9.10: PT không dạy hội viên cùng chi nhánh → 403; chi nhánh khác → 404; không lưu")
+    @DisplayName("TC-F2.5.1-04a: PT không dạy hội viên cùng chi nhánh → 403; chi nhánh khác → 404; không lưu")
     void trainerNotTeaching() throws Exception {
         Trainer other = f.trainer(f.cn01);
         record(other.userId(), UserRole.TRAINER, student.memberId(), VALID).andExpect(status().isForbidden());
@@ -117,7 +117,7 @@ class BodyMetricApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F2.5.1 S3: nhân viên chi nhánh khác → 404; chủ chuỗi ghi được mọi chi nhánh → 201; hội viên tự ghi → 403")
+    @DisplayName("TC-F2.5.1-04b: nhân viên chi nhánh khác → 404; chủ chuỗi ghi được mọi chi nhánh → 201; hội viên tự ghi → 403")
     void staffScope() throws Exception {
         Long otherReceptionist = f.staffUser(UserRole.RECEPTIONIST, f.cn02);
         record(otherReceptionist, UserRole.RECEPTIONIST, student.memberId(), VALID).andExpect(status().isNotFound());
@@ -133,7 +133,7 @@ class BodyMetricApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F2.5.1 GĐ-6: không có chỉ số nào → 400 với câu báo rõ")
+    @DisplayName("TC-F2.5.1-02a: không có chỉ số nào → 400 với câu báo rõ")
     void noMetric() throws Exception {
         record(receptionist, UserRole.RECEPTIONIST, student.memberId(), "{\"measuredAt\": \"2026-11-21\", \"note\": \"x\"}")
             .andExpect(status().isBadRequest())
@@ -142,7 +142,7 @@ class BodyMetricApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F2.5.1 GĐ-5: ngày đo sau hôm nay (giờ VN) → 400")
+    @DisplayName("TC-F2.5.1-02b: ngày đo sau hôm nay (giờ VN) → 400")
     void futureDate() throws Exception {
         record(receptionist, UserRole.RECEPTIONIST, student.memberId(), "{\"measuredAt\": \"2026-11-22\", \"weight\": 60}")
             .andExpect(status().isBadRequest())
@@ -160,14 +160,14 @@ class BodyMetricApiIntegrationTest {
         "{\"measuredAt\": \"2026-11-21\", \"muscleMass\": 0}",
         "{\"measuredAt\": \"2026-11-21\", \"weight\": 60.123}"
     })
-    @DisplayName("US-F2.5.1 E1: thiếu ngày đo, chỉ số âm, bằng 0 hoặc ngoài khoảng, quá 2 chữ số thập phân → 400")
+    @DisplayName("TC-F2.5.1-02c: thiếu ngày đo, chỉ số âm, bằng 0 hoặc ngoài khoảng, quá 2 chữ số thập phân → 400")
     void invalidInput(String json) throws Exception {
         record(receptionist, UserRole.RECEPTIONIST, student.memberId(), json).andExpect(status().isBadRequest());
         assertThat(f.count("body_metrics")).isZero();
     }
 
     @Test
-    @DisplayName("US-F2.5.1 KB3: xem lịch sử sắp measured_at giảm dần (cùng ngày thì dòng ghi sau trước); không lẫn hội viên khác")
+    @DisplayName("TC-F2.5.1-03a: xem lịch sử sắp measured_at giảm dần (cùng ngày thì dòng ghi sau trước); không lẫn hội viên khác")
     void historySorted() throws Exception {
         Long oldest = f.bodyMetric(student.memberId(), receptionist, LocalDate.of(2026, 10, 1), "70");
         Long sameDayFirst = f.bodyMetric(student.memberId(), pt.userId(), LocalDate.of(2026, 11, 15), "67");
@@ -185,7 +185,7 @@ class BodyMetricApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F2.5.1 BR-F9.12: hội viên xem chỉ số của mình → 200; của người khác → 404")
+    @DisplayName("TC-F2.5.1-04c: hội viên xem chỉ số của mình → 200; của người khác → 404")
     void memberSeesOnlyOwn() throws Exception {
         f.bodyMetric(student.memberId(), receptionist, LocalDate.of(2026, 11, 1), "70");
         Member other = f.member(f.cn01);
@@ -199,7 +199,7 @@ class BodyMetricApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F2.5.1 BR-F9.10: PT dạy xem được → 200; PT không dạy → 403; nhân viên chi nhánh khác → 404; chủ chuỗi → 200")
+    @DisplayName("TC-F2.5.1-04d: PT dạy xem được → 200; PT không dạy → 403; nhân viên chi nhánh khác → 404; chủ chuỗi → 200")
     void historyScopes() throws Exception {
         f.bodyMetric(student.memberId(), receptionist, LocalDate.of(2026, 11, 1), "70");
 

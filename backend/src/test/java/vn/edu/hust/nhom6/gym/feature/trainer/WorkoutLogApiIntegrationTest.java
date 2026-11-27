@@ -75,7 +75,7 @@ class WorkoutLogApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.5.1 KB1: PT ghi nhật ký ngoài buổi PT cho học viên PT mình dạy → 201, ghi audit_logs CREATE với người ghi là PT")
+    @DisplayName("TC-F9.5.1-01a: PT ghi nhật ký ngoài buổi PT cho học viên PT mình dạy → 201, ghi audit_logs CREATE với người ghi là PT")
     void createWithoutSession() throws Exception {
         f.ptSession(pt, student, LocalDateTime.of(2026, 11, 25, 9, 0), "BOOKED");
 
@@ -99,7 +99,7 @@ class WorkoutLogApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.5.1 GĐ-4: gắn buổi PT DONE của đúng PT, đúng hội viên, đúng ngày VN (buổi 06:30 VN = 23:30 UTC hôm trước) → 201")
+    @DisplayName("TC-F9.5.1-03a: gắn buổi PT DONE của đúng PT, đúng hội viên, đúng ngày VN (buổi 06:30 VN = 23:30 UTC hôm trước) → 201")
     void createWithDoneSessionSameVnDay() throws Exception {
         Long session = f.ptSession(pt, student, SESSION_AT, "DONE");
 
@@ -110,7 +110,7 @@ class WorkoutLogApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.5.1 GĐ-4: ngày tập khác ngày VN của buổi (ghi theo ngày UTC 19/11) → 422")
+    @DisplayName("TC-F9.5.1-03b: ngày tập khác ngày VN của buổi (ghi theo ngày UTC 19/11) → 422")
     void sessionDateMismatch() throws Exception {
         Long session = f.ptSession(pt, student, SESSION_AT, "DONE");
 
@@ -122,7 +122,7 @@ class WorkoutLogApiIntegrationTest {
 
     @ParameterizedTest(name = "buổi {0}")
     @ValueSource(strings = {"BOOKED", "NO_SHOW", "CANCELLED"})
-    @DisplayName("US-F9.5.1 GĐ-4: buổi PT chưa DONE (BOOKED, NO_SHOW, CANCELLED) → 422, không lưu")
+    @DisplayName("TC-F9.5.1-03c: buổi PT chưa DONE (BOOKED, NO_SHOW, CANCELLED) → 422, không lưu")
     void sessionNotDone(String status) throws Exception {
         f.ptSession(pt, student, LocalDateTime.of(2026, 11, 10, 9, 0), "DONE");
         Long session = f.ptSession(pt, student, SESSION_AT, status);
@@ -135,7 +135,7 @@ class WorkoutLogApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.5.1 GĐ-4: buổi PT của hội viên khác, của PT khác, hoặc không tồn tại → 422")
+    @DisplayName("TC-F9.5.1-03d: buổi PT của hội viên khác, của PT khác, hoặc không tồn tại → 422")
     void sessionNotBelonging() throws Exception {
         f.ptSession(pt, student, LocalDateTime.of(2026, 11, 10, 9, 0), "DONE");
         Member other = f.member(f.cn01);
@@ -152,7 +152,7 @@ class WorkoutLogApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.5.1 GĐ-5: ngày tập sau hôm nay (giờ VN) → 400; đúng hôm nay → 201")
+    @DisplayName("TC-F9.5.1-04a: ngày tập sau hôm nay (giờ VN) → 400; đúng hôm nay → 201")
     void futureDate() throws Exception {
         f.ptSession(pt, student, LocalDateTime.of(2026, 11, 25, 9, 0), "BOOKED");
         clock.setVn(LocalDateTime.of(2026, 11, 21, 23, 30)); // 16:30 UTC, ngày UTC vẫn 21/11
@@ -177,7 +177,7 @@ class WorkoutLogApiIntegrationTest {
         "{\"loggedAt\": \"21/11/2026\", \"exercise\": \"Squat\"}",
         "{\"loggedAt\": \"2026-11-21\", \"exercise\": \"Squat\", \"ptSessionId\": 0}"
     })
-    @DisplayName("US-F9.5.1 E1: thiếu ngày, thiếu bài tập, giá trị ngoài khoảng, sai định dạng → 400, không lưu")
+    @DisplayName("TC-F9.5.1-04b: thiếu ngày, thiếu bài tập, giá trị ngoài khoảng, sai định dạng → 400, không lưu")
     void invalidInput(String json) throws Exception {
         f.ptSession(pt, student, LocalDateTime.of(2026, 11, 25, 9, 0), "BOOKED");
 
@@ -186,7 +186,7 @@ class WorkoutLogApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.5.1 E1: bài không tạ (weight = 0) và không có số hiệp, số lần vẫn hợp lệ → 201")
+    @DisplayName("TC-F9.5.1-01b: bài không tạ (weight = 0) và không có số hiệp, số lần vẫn hợp lệ → 201")
     void minimalValid() throws Exception {
         f.ptSession(pt, student, LocalDateTime.of(2026, 11, 25, 9, 0), "BOOKED");
 
@@ -196,7 +196,7 @@ class WorkoutLogApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.5.1 E2, E3: PT không dạy cùng chi nhánh → 403; không tồn tại hoặc chi nhánh khác → 404; không lưu")
+    @DisplayName("TC-F9.5.1-05a: PT không dạy cùng chi nhánh → 403; không tồn tại hoặc chi nhánh khác → 404; không lưu")
     void forbiddenAndNotFound() throws Exception {
         log(pt, student.memberId(), body(null, "2026-11-21")).andExpect(status().isForbidden());
         log(pt, 999_999L, body(null, "2026-11-21")).andExpect(status().isNotFound());
@@ -206,7 +206,7 @@ class WorkoutLogApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.5.1 S3: hội viên tự ghi qua API của PT → 403; lễ tân → 403")
+    @DisplayName("TC-F9.5.1-06a: hội viên tự ghi qua API của PT → 403; lễ tân → 403")
     void otherRolesForbidden() throws Exception {
         f.ptSession(pt, student, LocalDateTime.of(2026, 11, 25, 9, 0), "BOOKED");
         mvc.perform(post("/api/v1/pt/members/{id}/workout-logs", student.memberId())

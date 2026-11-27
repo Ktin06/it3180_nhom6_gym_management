@@ -72,7 +72,7 @@ class ProgressApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.6.1 KB1: PT xem tiến độ học viên mình dạy → 200, chỉ số và nhật ký trong khoảng, sắp ngày tăng dần, không lẫn người khác")
+    @DisplayName("TC-F9.6.1-02a: PT xem tiến độ học viên mình dạy → 200, chỉ số và nhật ký trong khoảng, sắp ngày tăng dần, không lẫn người khác")
     void trainerSeesStudentProgress() throws Exception {
         Long receptionist = f.staffUser(UserRole.RECEPTIONIST, f.cn01);
         f.bodyMetric(student.memberId(), receptionist, LocalDate.of(2026, 11, 15), "66.8");
@@ -107,7 +107,7 @@ class ProgressApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.6.1 BR-F9.13: phản hồi chỉ có dữ liệu thô (không có trường gợi ý, nhận xét hay dự đoán)")
+    @DisplayName("TC-F9.6.1-06a: phản hồi chỉ có dữ liệu thô (không có trường gợi ý, nhận xét hay dự đoán)")
     void rawDataOnly() throws Exception {
         String body = as(pt.userId(), UserRole.TRAINER, progressOf(student.memberId()))
             .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
@@ -118,7 +118,7 @@ class ProgressApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.6.1 GĐ-8: bỏ trống khoảng → 90 ngày đến hôm nay theo giờ VN (24/08 có, 23/08 không)")
+    @DisplayName("TC-F9.6.1-02b: bỏ trống khoảng → 90 ngày đến hôm nay theo giờ VN (24/08 có, 23/08 không)")
     void defaultRange() throws Exception {
         f.workoutLog(student.memberId(), LocalDate.of(2026, 8, 23), "Quá cũ");
         f.workoutLog(student.memberId(), LocalDate.of(2026, 8, 24), "Ngày đầu");
@@ -135,7 +135,7 @@ class ProgressApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.6.1 A1: chưa có dữ liệu → 200 với hai danh sách rỗng")
+    @DisplayName("TC-F9.6.1-04a: chưa có dữ liệu → 200 với hai danh sách rỗng")
     void emptyProgress() throws Exception {
         as(student.userId(), UserRole.MEMBER, get("/api/v1/me/progress"))
             .andExpect(status().isOk())
@@ -144,7 +144,7 @@ class ProgressApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.6.1 BR-F9.12: hội viên xem của mình qua /me/progress và /members/{id}/progress → 200; id người khác → 404")
+    @DisplayName("TC-F9.6.1-01a: hội viên xem của mình qua /me/progress và /members/{id}/progress → 200; id người khác → 404")
     void memberSeesOnlyOwn() throws Exception {
         f.workoutLog(student.memberId(), LocalDate.of(2026, 11, 20), "Squat");
         Member other = f.member(f.cn01);
@@ -163,7 +163,7 @@ class ProgressApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.6.1 E1: from sau to, khoảng dài hơn 366 ngày, sai định dạng ngày → 400; đúng 366 ngày → 200")
+    @DisplayName("TC-F9.6.1-05a: from sau to, khoảng dài hơn 366 ngày, sai định dạng ngày → 400; đúng 366 ngày → 200")
     void invalidRange() throws Exception {
         as(pt.userId(), UserRole.TRAINER, progressOf(student.memberId()).param("from", "2026-11-21")
                 .param("to", "2026-11-20"))
@@ -181,7 +181,7 @@ class ProgressApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.6.1 E2: PT không dạy cùng chi nhánh → 403; chi nhánh khác → 404; không tồn tại → 404")
+    @DisplayName("TC-F9.6.1-03a: PT không dạy cùng chi nhánh → 403; chi nhánh khác → 404; không tồn tại → 404")
     void trainerScope() throws Exception {
         Trainer other = f.trainer(f.cn01);
         as(other.userId(), UserRole.TRAINER, progressOf(student.memberId())).andExpect(status().isForbidden());
@@ -191,7 +191,7 @@ class ProgressApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.6.1 GĐ-9: lễ tân, quản lý, chủ chuỗi gọi API tiến độ → 403; PT gọi /me/progress → 403; chưa đăng nhập → 401")
+    @DisplayName("TC-F9.6.1-07a: lễ tân, quản lý, chủ chuỗi gọi API tiến độ → 403; PT gọi /me/progress → 403; chưa đăng nhập → 401")
     void otherRoles() throws Exception {
         for (UserRole role : new UserRole[] {UserRole.RECEPTIONIST, UserRole.BRANCH_MANAGER}) {
             Long staff = f.staffUser(role, f.cn01);

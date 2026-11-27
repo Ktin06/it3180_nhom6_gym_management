@@ -29,24 +29,18 @@ export const ROUTE_ACCESS = {
   '/checkins': { roles: ['RECEPTIONIST', 'BRANCH_MANAGER'] }, // F4
   '/members': { roles: MEMBER_MANAGEMENT_ROLES }, // F2
   '/packages': { roles: MEMBER_MANAGEMENT_ROLES }, // F3
+  '/doi-mat-khau': { roles: ROLES }, // F1
   '/member/classes': { roles: ['MEMBER'] },
   '/trainer/classes': { roles: ['TRAINER'] },
   '/trainer/classes/:sessionId/attendance': { roles: ['TRAINER'] },
   '/ban-goi': { roles: ['RECEPTIONIST'] }, // F3
-  '/checkins': { roles: ['RECEPTIONIST', 'BRANCH_MANAGER'] }, // F4
-  '/hoa-don': { roles: MEMBER_MANAGEMENT_ROLES }, // F5
-  '/hoa-don/:id': { roles: MEMBER_MANAGEMENT_ROLES }, // F5
-  '/dat-cho-lop': { roles: ['RECEPTIONIST'] }, // F8
-  '/classes': { roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'TRAINER'] }, // F8
-  '/member/classes': { roles: ['MEMBER'] }, // F8
-  '/doi-mat-khau': { roles: ROLES }, // F1
-  // S2-20.2: giao diện huấn luyện viên (F9)
-  '/pt/lich': { roles: ['TRAINER'] }, // F9
-  '/pt/hoc-vien': { roles: ['TRAINER'] }, // F9
-  // S2-15.1: giao diện cổng hội viên (F7)
-  '/member/memberships': { roles: ['MEMBER'] }, // F7
   // S2-12.2: giao diện dashboard cơ bản (F6)
   '/dashboard': { roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'RECEPTIONIST'] }, // F6
+  '/hoa-don': { roles: MEMBER_MANAGEMENT_ROLES }, // F5
+  '/hoa-don/:id': { roles: MEMBER_MANAGEMENT_ROLES }, // F5
+  '/member/invoices/:id/pdf': { roles: ['MEMBER'] }, // F5, điểm vào từ lịch sử F7
+  // S2-20.2: giao diện học viên của huấn luyện viên (F9)
+  '/pt/hoc-vien': { roles: ['TRAINER'] }, // F9
 } satisfies RouteAccessTable
 
 /** Đường dẫn đã khai báo quyền; viết sai tên thì TypeScript báo lỗi. */

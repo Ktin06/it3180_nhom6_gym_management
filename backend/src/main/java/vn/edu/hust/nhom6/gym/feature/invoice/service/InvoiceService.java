@@ -27,6 +27,7 @@ import vn.edu.hust.nhom6.gym.feature.invoice.dto.ActivatedMembershipDto;
 import vn.edu.hust.nhom6.gym.feature.invoice.dto.CancelledInvoiceDto;
 import vn.edu.hust.nhom6.gym.feature.invoice.dto.CreateInvoiceRequest;
 import vn.edu.hust.nhom6.gym.feature.invoice.dto.InvoiceDetailDto;
+import vn.edu.hust.nhom6.gym.feature.invoice.dto.InvoiceBranchDto;
 import vn.edu.hust.nhom6.gym.feature.invoice.dto.InvoiceItemDto;
 import vn.edu.hust.nhom6.gym.feature.invoice.dto.InvoicePaymentDto;
 import vn.edu.hust.nhom6.gym.feature.invoice.dto.InvoiceSummaryDto;
@@ -40,6 +41,7 @@ import vn.edu.hust.nhom6.gym.feature.invoice.entity.InvoiceSource;
 import vn.edu.hust.nhom6.gym.feature.invoice.entity.InvoiceStatus;
 import vn.edu.hust.nhom6.gym.feature.invoice.entity.Payment;
 import vn.edu.hust.nhom6.gym.feature.invoice.repository.InvoiceRepository;
+import vn.edu.hust.nhom6.gym.feature.invoice.repository.InvoiceDocumentRepository;
 import vn.edu.hust.nhom6.gym.feature.invoice.repository.PaymentRepository;
 import vn.edu.hust.nhom6.gym.feature.member.entity.Member;
 import vn.edu.hust.nhom6.gym.feature.member.entity.MemberStatus;
@@ -64,6 +66,7 @@ public class InvoiceService {
     private static final String MEMBER_NOT_FOUND = "Hội viên không tồn tại trên hệ thống.";
 
     private final InvoiceRepository invoices;
+    private final InvoiceDocumentRepository invoiceLookups;
     private final PaymentRepository payments;
     private final MemberService members;
     private final PackageCatalogService packages;
@@ -264,6 +267,11 @@ public class InvoiceService {
 
         return PageResponse.of(invoices.searchSummaries(effectiveBranchId, status, source, hasFrom, fromInstant,
             hasTo, toInstant, hasKeyword, keywordPattern, PageRequest.of(page, size)));
+    }
+
+    /** Danh mục chi nhánh cho bộ lọc S2-10 (AC-F5.3.1-04); quyền SUPER_ADMIN kiểm tra tại controller. */
+    public List<InvoiceBranchDto> branchesForFilter() {
+        return invoiceLookups.findBranchesForInvoiceFilter();
     }
 
     /**

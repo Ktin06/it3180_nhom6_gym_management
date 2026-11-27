@@ -3,6 +3,7 @@ package vn.edu.hust.nhom6.gym.feature.trainer.service;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,21 +58,31 @@ public class TrainerStudentAccess {
         throw new ForbiddenException(NOT_TEACHING);
     }
 
+    /** Danh tính nhân viên đang gọi API: {@code staff.id} và {@code branch_id} đều ACTIVE. */
+    public record TrainerIdentity(Long staffId, Long branchId) { }
+
     /**
      * Như {@link #requireTeaches} nhưng nhận người gọi API vai trò {@code TRAINER}: đổi {@code users.id} trong token
      * thành {@code staff.id}. Trả {@code staff.id} và chi nhánh làm việc để nơi gọi ghi dữ liệu.
      *
-     * @throws org.springframework.security.access.AccessDeniedException (403) không có dòng staff ACTIVE
+     * @throws AccessDeniedException (403) không có dòng staff ACTIVE hoặc chi nhánh ngừng hoạt động
      */
-    public StaffService.StaffIdentity requireTrainerTeaching(CurrentUser trainer, Long memberId) {
-        StaffService.StaffIdentity me = staff.requireActiveStaff(trainer.userId());
+    public TrainerIdentity requireTrainerTeaching(CurrentUser trainer, Long memberId) {
+        TrainerIdentity me = requireActiveTrainer(trainer.userId());
         requireTeaches(me.staffId(), memberId);
         return me;
     }
 
     /** Học viên của huấn luyện viên đang gọi API (GĐ-10), sắp theo họ tên. */
     public List<TrainerStudentDto> myStudents(CurrentUser trainer) {
-        return lookup.findStudents(staff.requireStaffId(trainer.userId()));
+        return lookup.findStudents(requireActiveTrainer(trainer.userId()).staffId());
+    }
+
+    private TrainerIdentity requireActiveTrainer(Long userId) {
+        Long branchId = staff.requireBranchId(userId);
+        Long staffId = lookup.findActiveStaffIdByUserId(userId)
+            .orElseThrow(() -> new AccessDeniedException("Nhân viên chưa có chi nhánh làm việc hợp lệ."));
+        return new TrainerIdentity(staffId, branchId);
     }
 
     private static NotFoundException notFound() {

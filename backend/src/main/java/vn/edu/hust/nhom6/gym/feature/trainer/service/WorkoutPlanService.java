@@ -12,7 +12,6 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.json.JsonMapper;
 import vn.edu.hust.nhom6.gym.common.exception.InvalidRequestException;
 import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
-import vn.edu.hust.nhom6.gym.feature.staff.service.StaffService;
 import vn.edu.hust.nhom6.gym.feature.trainer.dto.WorkoutPlanDto;
 import vn.edu.hust.nhom6.gym.feature.trainer.dto.WorkoutPlanRequest;
 import vn.edu.hust.nhom6.gym.feature.trainer.dto.WorkoutPlanRequest.PlanSession;
@@ -37,7 +36,7 @@ public class WorkoutPlanService {
 
     @Transactional
     public WorkoutPlanDto create(CurrentUser trainer, Long memberId, WorkoutPlanRequest request) {
-        StaffService.StaffIdentity me = access.requireTrainerTeaching(trainer, memberId);
+        TrainerStudentAccess.TrainerIdentity me = access.requireTrainerTeaching(trainer, memberId);
         if (request.startDate() != null && request.endDate() != null
                 && request.endDate().isBefore(request.startDate())) {
             throw new InvalidRequestException("Ngày kết thúc không được trước ngày bắt đầu.");

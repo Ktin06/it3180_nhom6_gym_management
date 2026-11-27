@@ -68,16 +68,9 @@ export const STAFF_MENU: StaffMenuItem[] = [
     ready: true,
   },
   {
-    path: '/dat-cho-lop',
-    label: 'Đặt chỗ lớp (F8)',
-    icon: <CalendarOutlined />,
-    ready: true,
-  },
-  {
     path: '/classes',
     label: 'Lớp học (F8)',
     icon: <CalendarOutlined />,
-    ready: true,
     roles: ['BRANCH_MANAGER', 'RECEPTIONIST'],
     ready: false,
   },
@@ -87,25 +80,19 @@ export const STAFF_MENU: StaffMenuItem[] = [
     icon: <CalendarOutlined />,
     ready: true,
   },
+  // S2-20.2: giao diện học viên của huấn luyện viên (F9)
+  {
+    path: '/pt/hoc-vien',
+    label: 'Học viên (F9)',
+    icon: <TeamOutlined />,
+    ready: true,
+  },
   {
     path: '/branches',
     label: 'Chi nhánh (F18)',
     icon: <ShopOutlined />,
     roles: ['SUPER_ADMIN'],
     ready: false,
-  },
-  // S2-20.2: giao diện huấn luyện viên (F9)
-  {
-    path: '/pt/lich',
-    label: 'Lịch của tôi (F9)',
-    icon: <CalendarOutlined />,
-    ready: true,
-  },
-  {
-    path: '/pt/hoc-vien',
-    label: 'Học viên (F9)',
-    icon: <TeamOutlined />,
-    ready: true,
   },
 ]
 

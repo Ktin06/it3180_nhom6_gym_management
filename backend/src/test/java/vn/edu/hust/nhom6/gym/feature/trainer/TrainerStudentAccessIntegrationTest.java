@@ -68,7 +68,7 @@ class TrainerStudentAccessIntegrationTest {
 
     @ParameterizedTest(name = "buổi PT {0}")
     @ValueSource(strings = {"BOOKED", "DONE", "NO_SHOW"})
-    @DisplayName("US-F9.4.1 BR-F9.10: có buổi PT chưa hủy (BOOKED, DONE, NO_SHOW) với PT → PT dạy hội viên, 200")
+    @DisplayName("TC-F9.4.1-01d: có buổi PT chưa hủy (BOOKED, DONE, NO_SHOW) với PT → PT dạy hội viên, 200")
     void ptSessionNotCancelledCounts(String status) throws Exception {
         Member m = f.member(f.cn01);
         f.ptSession(pt, m, "BOOKED".equals(status) ? FUTURE : PAST, status);
@@ -77,7 +77,7 @@ class TrainerStudentAccessIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 VD26-6: chỉ có buổi PT đã hủy → không dạy, cùng chi nhánh 403 và không có trong /pt/students")
+    @DisplayName("TC-F9.4.1-03c: chỉ có buổi PT đã hủy → không dạy, cùng chi nhánh 403 và không có trong /pt/students")
     void cancelledPtSessionDoesNotCount() throws Exception {
         Member m = f.member(f.cn01);
         f.ptSession(pt, m, FUTURE, "CANCELLED");
@@ -92,7 +92,7 @@ class TrainerStudentAccessIntegrationTest {
 
     @ParameterizedTest(name = "chỗ lớp {0}")
     @ValueSource(strings = {"BOOKED", "ATTENDED", "NO_SHOW"})
-    @DisplayName("US-F9.4.1 VD26-1: chỉ dạy lớp nhóm (BOOKED, ATTENDED, NO_SHOW) không làm hội viên thành học viên PT → 403 và không có trong /pt/students")
+    @DisplayName("TC-F9.4.1-03d: chỉ dạy lớp nhóm (BOOKED, ATTENDED, NO_SHOW) không làm hội viên thành học viên PT → 403 và không có trong /pt/students")
     void classBookingDoesNotGrantAccess(String status) throws Exception {
         Member m = f.member(f.cn01);
         f.classBooking(pt, m, status);
@@ -106,7 +106,7 @@ class TrainerStudentAccessIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 VD26-2: dạy thay lớp nhóm cũng không cấp quyền xem dữ liệu sức khỏe → cả hai huấn luyện viên 403")
+    @DisplayName("TC-F9.4.1-03e: dạy thay lớp nhóm cũng không cấp quyền xem dữ liệu sức khỏe → cả hai huấn luyện viên 403")
     void substituteClassTeacherDoesNotGrantAccess() throws Exception {
         Member m = f.member(f.cn01);
         f.classBooking(otherPt, pt, m, "ATTENDED");
@@ -116,7 +116,7 @@ class TrainerStudentAccessIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 VD26-4: huấn luyện viên chỉ dạy lớp nhóm có hội viên đặt chỗ → 403 mọi API xem/ghi giáo án, nhật ký, chỉ số, tiến độ và không có trong /pt/students; khác chi nhánh vẫn 404")
+    @DisplayName("TC-F9.4.1-03f: huấn luyện viên chỉ dạy lớp nhóm có hội viên đặt chỗ → 403 mọi API xem/ghi giáo án, nhật ký, chỉ số, tiến độ và không có trong /pt/students; khác chi nhánh vẫn 404")
     void classOnlyStudentForbiddenAcrossAllHealthApis() throws Exception {
         Member sameBranch = f.member(f.cn01);
         f.classBooking(pt, sameBranch, "BOOKED");
@@ -168,7 +168,7 @@ class TrainerStudentAccessIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 VD26-5: có buổi PT BOOKED chưa diễn ra → có trong /pt/students (viaClass=false) và được xem/ghi giáo án, nhật ký, chỉ số, tiến độ")
+    @DisplayName("TC-F9.4.1-01e: có buổi PT BOOKED chưa diễn ra → có trong /pt/students (viaClass=false) và được xem/ghi giáo án, nhật ký, chỉ số, tiến độ")
     void futureBookedPtSessionAllowsAccessAndListsStudent() throws Exception {
         Member m = f.member(f.cn01);
         f.ptSession(pt, m, FUTURE, "BOOKED");
@@ -215,7 +215,7 @@ class TrainerStudentAccessIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 BR-F9.10: buổi PT và chỗ lớp của PT khác không làm PT này thành người dạy → 403")
+    @DisplayName("TC-F9.4.1-03g: buổi PT và chỗ lớp của PT khác không làm PT này thành người dạy → 403")
     void otherTrainersStudentIsForbidden() throws Exception {
         Member m = f.member(f.cn01);
         f.ptSession(otherPt, m, PAST, "DONE");
@@ -225,7 +225,7 @@ class TrainerStudentAccessIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 E3: hội viên không tồn tại hoặc đã xóa mềm → 404")
+    @DisplayName("TC-F9.4.1-04b: hội viên không tồn tại hoặc đã xóa mềm → 404")
     void missingOrSoftDeletedIs404() throws Exception {
         probe(pt, 999_999L).andExpect(status().isNotFound())
             .andExpect(jsonPath("$.detail").value("Không tìm thấy hội viên."));
@@ -237,7 +237,7 @@ class TrainerStudentAccessIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 GĐ-2: hội viên chi nhánh khác mà PT không dạy → 404 (không lộ hồ sơ ngoài chi nhánh)")
+    @DisplayName("TC-F9.4.1-04c: hội viên chi nhánh khác mà PT không dạy → 404 (không lộ hồ sơ ngoài chi nhánh)")
     void otherBranchNotTaughtIs404() throws Exception {
         Member m = f.member(f.cn02);
 
@@ -245,7 +245,7 @@ class TrainerStudentAccessIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 GĐ-2: hội viên chi nhánh khác có buổi PT với PT (gói toàn chuỗi) → vẫn là học viên, 200")
+    @DisplayName("TC-F9.4.1-01f: hội viên chi nhánh khác có buổi PT với PT (gói toàn chuỗi) → vẫn là học viên, 200")
     void otherBranchButTaughtIsAllowed() throws Exception {
         Member m = f.member(f.cn02);
         f.ptSession(pt, m, PAST, "DONE");
@@ -254,7 +254,7 @@ class TrainerStudentAccessIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 VD26-3: danh sách học viên chỉ gồm người có buổi PT chưa hủy (viaClass luôn false); bỏ người chỉ có lớp nhóm, buổi hủy, của PT khác, đã xóa mềm")
+    @DisplayName("TC-F9.4.1-01g: danh sách học viên chỉ gồm người có buổi PT chưa hủy (viaClass luôn false); bỏ người chỉ có lớp nhóm, buổi hủy, của PT khác, đã xóa mềm")
     void myStudents() throws Exception {
         Member viaPt = f.member(f.cn01);
         f.ptSession(pt, viaPt, PAST, "DONE");
@@ -291,7 +291,7 @@ class TrainerStudentAccessIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 KB1: PT chưa dạy ai → danh sách rỗng; vai trò khác PT → 403; chưa đăng nhập → 401")
+    @DisplayName("TC-F9.4.1-06b: PT chưa dạy ai → danh sách rỗng; vai trò khác PT → 403; chưa đăng nhập → 401")
     void studentsEmptyAndRoles() throws Exception {
         mvc.perform(get("/api/v1/pt/students").with(f.bearer(pt.userId(), UserRole.TRAINER)))
             .andExpect(status().isOk())

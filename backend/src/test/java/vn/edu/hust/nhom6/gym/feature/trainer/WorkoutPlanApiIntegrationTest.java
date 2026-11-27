@@ -70,7 +70,7 @@ class WorkoutPlanApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 KB1: PT soạn giáo án cho học viên mình dạy → 201, trainerId lấy từ token, nội dung lưu jsonb đúng")
+    @DisplayName("TC-F9.4.1-01a: PT soạn giáo án cho học viên mình dạy → 201, trainerId lấy từ token, nội dung lưu jsonb đúng")
     void createSuccess() throws Exception {
         create(pt.userId(), UserRole.TRAINER, student.memberId(), VALID)
             .andExpect(status().isCreated())
@@ -95,7 +95,7 @@ class WorkoutPlanApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 KB1: không gửi ngày áp dụng vẫn lưu được (start_date, end_date rỗng)")
+    @DisplayName("TC-F9.4.1-01b: không gửi ngày áp dụng vẫn lưu được (start_date, end_date rỗng)")
     void datesAreOptional() throws Exception {
         create(pt.userId(), UserRole.TRAINER, student.memberId(), """
             {"title": "Giáo án cơ bản", "content": [{"session": 1, "exercises": [{"name": "Chạy bộ"}]}]}""")
@@ -116,14 +116,14 @@ class WorkoutPlanApiIntegrationTest {
         "{\"title\": \"A\", \"content\": [{\"session\": 1, \"exercises\": [{\"name\": \"Squat\", \"reps\": 1001}]}]}",
         "{\"title\": \"A\", \"content\": \"Squat 4x10\"}"
     })
-    @DisplayName("US-F9.4.1 E1: thiếu tên, nội dung rỗng hoặc sai định dạng → 400, không lưu")
+    @DisplayName("TC-F9.4.1-05a: thiếu tên, nội dung rỗng hoặc sai định dạng → 400, không lưu")
     void invalidInput(String body) throws Exception {
         create(pt.userId(), UserRole.TRAINER, student.memberId(), body).andExpect(status().isBadRequest());
         assertThat(f.count("workout_plans")).isZero();
     }
 
     @Test
-    @DisplayName("US-F9.4.1 E1: ngày kết thúc trước ngày bắt đầu → 400")
+    @DisplayName("TC-F9.4.1-05b: ngày kết thúc trước ngày bắt đầu → 400")
     void endBeforeStart() throws Exception {
         create(pt.userId(), UserRole.TRAINER, student.memberId(), """
             {"title": "A", "content": [{"session": 1, "exercises": [{"name": "Squat"}]}],
@@ -134,7 +134,7 @@ class WorkoutPlanApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 E2: PT không dạy hội viên cùng chi nhánh → 403, không lưu")
+    @DisplayName("TC-F9.4.1-03a: PT không dạy hội viên cùng chi nhánh → 403, không lưu")
     void notTeachingIs403() throws Exception {
         Trainer other = f.trainer(f.cn01);
 
@@ -143,7 +143,7 @@ class WorkoutPlanApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 E3: hội viên không tồn tại → 404; hội viên chi nhánh khác PT không dạy → 404")
+    @DisplayName("TC-F9.4.1-04a: hội viên không tồn tại → 404; hội viên chi nhánh khác PT không dạy → 404")
     void notFoundAndOtherBranch() throws Exception {
         create(pt.userId(), UserRole.TRAINER, 999_999L, VALID).andExpect(status().isNotFound());
         Member otherBranch = f.member(f.cn02);
@@ -152,7 +152,7 @@ class WorkoutPlanApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 S3: hội viên, lễ tân, quản lý, chủ chuỗi không soạn giáo án → 403; chưa đăng nhập → 401")
+    @DisplayName("TC-F9.4.1-06a: hội viên, lễ tân, quản lý, chủ chuỗi không soạn giáo án → 403; chưa đăng nhập → 401")
     void otherRolesForbidden() throws Exception {
         create(student.userId(), UserRole.MEMBER, student.memberId(), VALID).andExpect(status().isForbidden());
         for (UserRole role : new UserRole[] {UserRole.RECEPTIONIST, UserRole.BRANCH_MANAGER}) {
@@ -167,7 +167,7 @@ class WorkoutPlanApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 GĐ-3: một hội viên có nhiều giáo án; PT xem được mọi giáo án của học viên (kể cả PT khác soạn), mới nhất trước")
+    @DisplayName("TC-F9.4.1-01c: một hội viên có nhiều giáo án; PT xem được mọi giáo án của học viên (kể cả PT khác soạn), mới nhất trước")
     void listPlans() throws Exception {
         Trainer second = f.trainer(f.cn01);
         f.ptSession(second, student, LocalDateTime.of(2026, 11, 25, 9, 0), "BOOKED");
@@ -188,7 +188,7 @@ class WorkoutPlanApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.4.1 E2: PT không dạy xem giáo án → 403; hội viên gọi API xem của PT → 403")
+    @DisplayName("TC-F9.4.1-03b: PT không dạy xem giáo án → 403; hội viên gọi API xem của PT → 403")
     void listForbidden() throws Exception {
         Trainer other = f.trainer(f.cn01);
         mvc.perform(get("/api/v1/pt/members/{id}/workout-plans", student.memberId())

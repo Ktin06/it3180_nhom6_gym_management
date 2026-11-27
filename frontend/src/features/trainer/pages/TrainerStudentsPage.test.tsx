@@ -111,7 +111,6 @@ function makeSchedule(): TrainerScheduleResponse {
     branchId: 1,
     from: '2026-08-24',
     to: '2026-11-21',
-    availabilities: [],
     ptSessions: [
       {
         id: 10,
@@ -126,7 +125,6 @@ function makeSchedule(): TrainerScheduleResponse {
         note: null,
       },
     ],
-    classSessions: [],
   }
 }
 
@@ -158,7 +156,7 @@ function renderStudentsPage(
 }
 
 describe('TrainerStudentsPage (Học viên, giáo án, nhật ký, chỉ số, tiến độ – F9, F2)', () => {
-  it('US-F9.4.1 KB1-E2: chọn học viên, xem và tạo giáo án, lỗi 400 dưới đúng ô và API 403 hiện đúng câu', async () => {
+  it('TC-F9.4.1-01h: chọn học viên, xem và tạo giáo án, lỗi 400 dưới đúng ô và API 403 hiện đúng câu', async () => {
     const user = userEvent.setup()
     const createPlanMock = vi
       .fn()
@@ -212,7 +210,7 @@ describe('TrainerStudentsPage (Học viên, giáo án, nhật ký, chỉ số, t
     ).toBeInTheDocument()
   })
 
-  it('US-F9.5.1 KB1-E1: thêm nhật ký tập, hiển thị lỗi 400 dưới đúng ô và lỗi 422 đúng câu API', async () => {
+  it('TC-F9.5.1-01c: thêm nhật ký tập, hiển thị lỗi 400 dưới đúng ô và lỗi 422 đúng câu API', async () => {
     const user = userEvent.setup()
     const createLogMock = vi
       .fn()
@@ -246,7 +244,7 @@ describe('TrainerStudentsPage (Học viên, giáo án, nhật ký, chỉ số, t
     })
   })
 
-  it('US-F2.5.1 KB1-E1: xem lịch sử và thêm chỉ số cơ thể, lỗi 400 dưới đúng ô', async () => {
+  it('TC-F2.5.1-01c: xem lịch sử và thêm chỉ số cơ thể, lỗi 400 dưới đúng ô', async () => {
     const user = userEvent.setup()
     const createMetricMock = vi
       .fn()
@@ -280,7 +278,7 @@ describe('TrainerStudentsPage (Học viên, giáo án, nhật ký, chỉ số, t
     })
   })
 
-  it('US-F9.6.1 A1-KB1-E2: biểu đồ tiến độ rỗng hiện chưa có dữ liệu, có dữ liệu vẽ bằng div CSS từ dữ liệu thô và 403 hiện đúng câu', async () => {
+  it('TC-F9.6.1-04b: biểu đồ tiến độ rỗng hiện chưa có dữ liệu, có dữ liệu vẽ bằng div CSS từ dữ liệu thô và 403 hiện đúng câu', async () => {
     const user = userEvent.setup()
 
     // Ca 1: Tiến độ rỗng -> hiện câu "Chưa có dữ liệu tiến độ"
@@ -333,7 +331,7 @@ describe('TrainerStudentsPage (Học viên, giáo án, nhật ký, chỉ số, t
       await screen.findByText('Bạn chỉ thao tác được với học viên mình dạy.'),
     ).toBeInTheDocument()
   })
-  it('US-F9.5.1 (M5): mở trang không truyền now thì chỉ tải lịch buổi PT một lần, không gọi API lặp vô hạn', async () => {
+  it('TC-F9.5.1-03e: mở trang không truyền now thì chỉ tải lịch buổi PT một lần, không gọi API lặp vô hạn', async () => {
     const getScheduleMock = vi.fn(async () => makeSchedule())
     const api = makeGateway({ getSchedule: getScheduleMock })
 
@@ -347,7 +345,7 @@ describe('TrainerStudentsPage (Học viên, giáo án, nhật ký, chỉ số, t
     await new Promise((resolve) => setTimeout(resolve, 300))
     expect(getScheduleMock).toHaveBeenCalledTimes(1)
   })
-  it('US-F9.4.1 VD-26 (M5): phụ đề nói đúng phạm vi học viên là người có buổi PT với mình, không nhắc lớp nhóm', async () => {
+  it('TC-F9.4.1-01i: phụ đề nói đúng phạm vi học viên là người có buổi PT với mình, không nhắc lớp nhóm', async () => {
     renderStudentsPage(makeGateway())
 
     expect(await screen.findByText('Chỉ hiển thị học viên có buổi PT 1-1 với bạn.')).toBeInTheDocument()

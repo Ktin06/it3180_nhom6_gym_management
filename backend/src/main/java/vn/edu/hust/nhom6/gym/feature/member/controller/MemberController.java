@@ -96,7 +96,6 @@ public class MemberController {
             @Valid @RequestBody CreateMemberAccountRequest request) {
         return memberAccounts.createAccount(CurrentUser.from(auth), id, request);
     }
-
     // --- Chỉ số cơ thể (UC-F2.5, S2-20.1). Thêm ở cuối file, không sửa endpoint có sẵn. ---
 
     private final BodyMetricService bodyMetrics;

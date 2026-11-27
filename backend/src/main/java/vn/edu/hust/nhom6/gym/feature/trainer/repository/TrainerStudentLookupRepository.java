@@ -1,5 +1,6 @@
 package vn.edu.hust.nhom6.gym.feature.trainer.repository;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +29,9 @@ public class TrainerStudentLookupRepository {
     /** Hội viên chưa xóa mềm: id, chi nhánh gốc, mã, họ tên. */
     public record MemberRow(Long id, Long homeBranchId, String memberCode, String fullName) { }
 
+    /** Buổi PT (chỉ đọc) phục vụ kiểm tra khi ghi nhật ký tập (UC-F9.5). */
+    public record PtSessionRow(Long trainerId, Long memberId, String status, OffsetDateTime startAt) { }
+
     private static final String TAUGHT_BY_PT = """
         SELECT 1 FROM pt_sessions p
         WHERE p.trainer_id = :trainerId AND p.member_id = %s AND p.status <> 'CANCELLED'""";
@@ -45,12 +49,35 @@ public class TrainerStudentLookupRepository {
             .map(r -> new MemberRow((Long) r[0], (Long) r[1], (String) r[2], (String) r[3]));
     }
 
+    /** {@code staff.id} của dòng {@code staff} ACTIVE gắn với {@code users.id}. */
+    public Optional<Long> findActiveStaffIdByUserId(Long userId) {
+        List<?> rows = entities.createNativeQuery(
+            "SELECT id FROM staff WHERE user_id = :userId AND status = 'ACTIVE'")
+            .setParameter("userId", userId)
+            .getResultList();
+        return rows.stream().findFirst().map(v -> ((Number) v).longValue());
+    }
+
     /** Chi nhánh làm việc của huấn luyện viên theo {@code staff.id}. */
     public Optional<Long> findStaffBranchId(Long staffId) {
         List<?> rows = entities.createNativeQuery("SELECT branch_id FROM staff WHERE id = :id")
             .setParameter("id", staffId)
             .getResultList();
         return rows.stream().findFirst().map(v -> ((Number) v).longValue());
+    }
+
+    /** Buổi PT theo id (chỉ đọc) để kiểm tra khi ghi nhật ký tập (UC-F9.5). */
+    public Optional<PtSessionRow> findPtSession(Long sessionId) {
+        List<Object[]> rows = rows(native_("""
+            SELECT trainer_id, member_id, status, start_at
+            FROM pt_sessions WHERE id = :id""")
+            .addScalar("trainer_id", StandardBasicTypes.LONG)
+            .addScalar("member_id", StandardBasicTypes.LONG)
+            .addScalar("status", StandardBasicTypes.STRING)
+            .addScalar("start_at", StandardBasicTypes.OFFSET_DATE_TIME)
+            .setParameter("id", sessionId));
+        return rows.stream().findFirst()
+            .map(r -> new PtSessionRow((Long) r[0], (Long) r[1], (String) r[2], (OffsetDateTime) r[3]));
     }
 
     /** Họ tên huấn luyện viên theo {@code staff.id}; rỗng nếu không có. */

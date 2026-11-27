@@ -28,20 +28,12 @@ import { TrainerAttendancePage } from '../features/classes/TrainerAttendancePage
 import { PublicPricingPage } from '../features/packages/pages/PublicPricingPage'
 import { CheckinPage } from '../features/checkins/pages/CheckinPage'
 import { SellPackagePage } from '../features/packages/pages/SellPackagePage'
+import { DashboardPage } from '../features/dashboard/pages/DashboardPage'
 import { InvoicesPage } from '../features/invoices/pages/InvoicesPage'
 import { InvoiceDetailPage } from '../features/invoices/pages/InvoiceDetailPage'
-import { MemberClassesPage } from '../features/group-classes/pages/MemberClassesPage'
-import { PublicClassesPage } from '../features/group-classes/pages/PublicClassesPage'
-import { ReceptionClassBookingPage } from '../features/group-classes/pages/ReceptionClassBookingPage'
-import { StaffClassesPage } from '../features/group-classes/pages/StaffClassesPage'
-import { CheckinPage } from '../features/checkins/pages/CheckinPage'
-// S2-20.2: giao diện huấn luyện viên (F9)
-import { TrainerSchedulePage } from '../features/trainer/pages/TrainerSchedulePage'
+import { MemberInvoicePdfPage } from '../features/invoices/pages/MemberInvoicePdfPage'
+// S2-20.2: giao diện học viên của huấn luyện viên (F9)
 import { TrainerStudentsPage } from '../features/trainer/pages/TrainerStudentsPage'
-// S2-15.1: giao diện cổng hội viên (F7)
-import { MemberPortalPage } from '../features/member-portal/pages/MemberPortalPage'
-// S2-12.2: giao diện dashboard cơ bản (F6)
-import { DashboardPage } from '../features/dashboard/pages/DashboardPage'
 
 /** Route cần đăng nhập; vai trò được vào đọc từ ROUTE_ACCESS (routes/route-access.ts). */
 function guarded(path: ProtectedPath, element: ReactNode): RouteObject {
@@ -57,7 +49,6 @@ export const routes: RouteObject[] = [
     children: [
       { path: '/', element: <GuestHomePage /> },
       { path: '/bang-gia', element: <PublicPricingPage /> },
-      { path: '/lich-lop', element: <PublicClassesPage /> },
       { path: '/lich-lop', element: <PublicClassCalendarPage /> },
       { path: '/403', element: <ForbiddenPage /> },
       { path: '*', element: <NotFoundPage /> },
@@ -85,17 +76,12 @@ export const routes: RouteObject[] = [
       guarded('/trainer/classes', <TrainerClassCalendarPage />),
       guarded('/trainer/classes/:sessionId/attendance', <TrainerAttendancePage />),
       guarded('/ban-goi', <SellPackagePage />),
-      guarded('/hoa-don', <InvoicesPage />),
-      guarded('/hoa-don/:id', <InvoiceDetailPage />),
-      guarded('/dat-cho-lop', <ReceptionClassBookingPage />),
-      guarded('/classes', <StaffClassesPage />),
-      guarded('/checkins', <CheckinPage />),
-      // S2-20.2: giao diện huấn luyện viên (F9)
-      guarded('/pt/lich', <TrainerSchedulePage />),
-      guarded('/pt/hoc-vien', <TrainerStudentsPage />),
-      // S2-12.2: giao diện dashboard cơ bản (F6)
       guarded('/checkins', <CheckinPage />),
       guarded('/dashboard', <DashboardPage />),
+      guarded('/hoa-don', <InvoicesPage />),
+      guarded('/hoa-don/:id', <InvoiceDetailPage />),
+      // S2-20.2: giao diện học viên của huấn luyện viên (F9)
+      guarded('/pt/hoc-vien', <TrainerStudentsPage />),
       // Trang mới của nhân viên: thêm một dòng guarded(...) ở đây.
     ],
   },
@@ -107,11 +93,9 @@ export const routes: RouteObject[] = [
     ),
     children: [
       guarded(HOME_PATH_BY_ROLE.MEMBER, <RoleHomePage role="MEMBER" />),
-      guarded('/member/classes', <MemberClassesPage />),
-      // S2-15.1: giao diện cổng hội viên (F7)
-      guarded('/member/memberships', <MemberPortalPage />),
-      // Trang mới của hội viên: thêm một dòng guarded(...) ở đây.
       guarded('/member/classes', <MemberClassCalendarPage />),
+      guarded('/member/invoices/:id/pdf', <MemberInvoicePdfPage />),
+      // Trang mới của hội viên: thêm một dòng guarded(...) ở đây.
     ],
   },
   {
