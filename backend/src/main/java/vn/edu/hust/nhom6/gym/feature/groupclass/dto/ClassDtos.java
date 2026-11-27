@@ -30,6 +30,17 @@ public final class ClassDtos {
         }
     }
 
+    public record BranchOption(Long id, String name) {}
+
+    public record CalendarSession(Long id, Long branchId, String branchName, String className, String roomName,
+        String trainerName, OffsetDateTime startAt, OffsetDateTime endAt, String status) {}
+
+    public record MemberSession(Long id, Long branchId, String branchName, String className, String roomName,
+        String trainerName, OffsetDateTime startAt, OffsetDateTime endAt, String status, Integer capacity,
+        Integer remaining, Long bookingId, String bookingStatus, OffsetDateTime originalStartAt) {}
+
+    public record MemberCalendar(Long memberId, List<MemberSession> sessions) {}
+
     public record SessionTimeRequest(
         @NotNull(message = "Giờ bắt đầu là bắt buộc.") OffsetDateTime startAt,
         @NotNull(message = "Giờ kết thúc là bắt buộc.") OffsetDateTime endAt) {}

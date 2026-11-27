@@ -10,15 +10,15 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | F1 | 6 | 6 | 29 | 28 | 1 | 139 |
 | F2 | 5 | 6 | 31 | 25 | 6 | 93 |
-| F3 | 5 | 6 | 45 | 44 | 1 | 132 |
+| F3 | 5 | 6 | 45 | 44 | 1 | 136 |
 | F4 | 5 | 5 | 37 | 0 | 37 | 0 |
-| F5 | 5 | 5 | 41 | 0 | 41 | 0 |
+| F5 | 5 | 5 | 49 | 37 | 12 | 65 |
 | F6 | 5 | 5 | 16 | 0 | 16 | 0 |
 | F7 | 5 | 0 | 0 | 0 | 0 | 0 |
-| F8 | 9 | 9 | 55 | 45 | 10 | 58 |
+| F8 | 9 | 9 | 55 | 53 | 2 | 81 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **42** | **254** | **142** | **112** | **422** |
+| **Tổng** | **57** | **42** | **262** | **187** | **75** | **514** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -87,35 +87,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F4.5.1-02 | Đầy đủ thông tin chi tiết của từng lượt check-in | US-F4.5.1 |
 | AC-F4.5.1-03 | Lọc trạng thái, phương thức và tìm kiếm theo tên hoặc mã hội viên | US-F4.5.1 |
 | AC-F4.5.1-04 | Phân quyền và phạm vi dữ liệu theo chi nhánh | US-F4.5.1 |
-| AC-F5.1.1-01 | Sinh VietQR cho hóa đơn chờ bằng số tiền server | US-F5.1.1 |
-| AC-F5.1.1-02 | Chỉ sinh VietQR khi hóa đơn PENDING | US-F5.1.1 |
-| AC-F5.1.1-03 | Cấu hình ngân hàng ưu tiên theo chi nhánh | US-F5.1.1 |
-| AC-F5.1.1-04 | Từ chối chưa đăng nhập và sai vai trò | US-F5.1.1 |
-| AC-F5.1.1-05 | Hóa đơn ngoài chi nhánh được giấu như không tồn tại | US-F5.1.1 |
-| AC-F5.2.1-01 | Thu tiền mặt kích hoạt gói mới đúng ngày và giữ thời hạn đã chốt | US-F5.2.1 |
-| AC-F5.2.1-02 | Thu chuyển khoản cho gia hạn nối tiếp | US-F5.2.1 |
-| AC-F5.2.1-03 | Hóa đơn 0 đồng vẫn ghi phiếu thu và kích hoạt gói | US-F5.2.1 |
-| AC-F5.2.1-04 | Chỉ Lễ tân và Quản lý chi nhánh được xác nhận thu | US-F5.2.1 |
-| AC-F5.2.1-05 | Dữ liệu thu tiền sai không làm thay đổi hóa đơn | US-F5.2.1 |
-| AC-F5.2.1-06 | Thu tiền hóa đơn không tồn tại hoặc ngoài chi nhánh | US-F5.2.1 |
-| AC-F5.2.1-07 | Hai nhân viên cùng thu một hóa đơn | US-F5.2.1 |
-| AC-F5.2.1-08 | Không thu lại hóa đơn đã xử lý | US-F5.2.1 |
-| AC-F5.2.1-09 | Kiểm tra lại gói UPCOMING ở thời điểm thu tiền | US-F5.2.1 |
-| AC-F5.2.1-10 | Không sử dụng số tiền giả từ trình duyệt | US-F5.2.1 |
-| AC-F5.2.1-11 | Gia hạn sau gói PT 0 buổi còn giữ trạng thái ACTIVE hoặc FROZEN | US-F5.2.1 |
-| AC-F5.3.1-01 | Danh sách hóa đơn theo chi nhánh của nhân viên | US-F5.3.1 |
-| AC-F5.3.1-02 | Lọc và tìm hóa đơn theo ngày Việt Nam | US-F5.3.1 |
-| AC-F5.3.1-03 | Hóa đơn có member_id rỗng vẫn tra cứu được | US-F5.3.1 |
-| AC-F5.3.1-04 | Chủ chuỗi xem toàn chuỗi hoặc lọc chi nhánh | US-F5.3.1 |
-| AC-F5.3.1-05 | Chi tiết hóa đơn gồm dòng hóa đơn và lịch sử thu | US-F5.3.1 |
-| AC-F5.3.1-06 | Hủy hóa đơn chờ đồng thời hủy gói chờ | US-F5.3.1 |
-| AC-F5.3.1-07 | Không hủy hóa đơn ngoài trạng thái PENDING | US-F5.3.1 |
-| AC-F5.3.1-08 | Phân biệt sai vai trò với hóa đơn ngoài phạm vi | US-F5.3.1 |
-| AC-F5.4.1-01 | Xuất PDF hóa đơn PAID hoặc REFUNDED | US-F5.4.1 |
-| AC-F5.4.1-02 | PDF giữ tên và giá ở thời điểm bán | US-F5.4.1 |
-| AC-F5.4.1-03 | Không xuất PDF hóa đơn chưa thanh toán | US-F5.4.1 |
-| AC-F5.4.1-04 | Hội viên chỉ tải hóa đơn của mình; nhân viên đúng chi nhánh | US-F5.4.1 |
-| AC-F5.4.1-05 | Vai trò không được tải PDF và chưa đăng nhập | US-F5.4.1 |
 | AC-F5.5.1-01 | Hoàn toàn bộ hóa đơn có gói chưa dùng | US-F5.5.1 |
 | AC-F5.5.1-02 | Không làm thay đổi gói nối tiếp mua bằng hóa đơn khác | US-F5.5.1 |
 | AC-F5.5.1-03 | Chỉ Quản lý chi nhánh được hoàn tiền | US-F5.5.1 |
@@ -144,14 +115,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F6.4.1-06 | Thao tác Gia hạn nhanh trên giao diện | US-F6.4.1 |
 | AC-F6.5.1-01 | Danh sách các lượt check-in mới nhất trong ngày | US-F6.5.1 |
 | AC-F6.5.1-02 | Thao tác Check-out nhanh từ danh sách Live Feed | US-F6.5.1 |
-| AC-F8.0.1-01 | Xem lịch không cần đăng nhập | US-F8.0.1 |
-| AC-F8.0.1-02 | Lịch rỗng | US-F8.0.1 |
-| AC-F8.0.1-03 | Bộ lọc không hợp lệ | US-F8.0.1 |
-| AC-F8.0.1-04 | Khách muốn đặt | US-F8.0.1 |
-| AC-F8.5.1-01 | Lịch của người được phân công | US-F8.5.1 |
-| AC-F8.5.1-02 | Buổi có người dạy thay | US-F8.5.1 |
-| AC-F8.5.1-03 | Không có lớp | US-F8.5.1 |
-| AC-F8.5.1-04 | Sai vai trò hoặc yêu cầu lịch người khác | US-F8.5.1 |
 | AC-F8.7.1-06 | Giảm sức chứa đúng biên | US-F8.7.1 |
 | AC-F8.7.1-07 | Buổi không cho sửa sức chứa | US-F8.7.1 |
 
@@ -609,19 +572,23 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F3.5.1-01e `features/packages/pages/SellPackagePage.test.tsx › TC-F3.5.1-01e: Chọn hội viên và gói, chỉ gửi memberId và ite`
     - AC-F3.5.1-02 Gói chỉ hiệu lực sau khi hóa đơn PAID; ngày hết hạn tính đúng (BR-F3-12)
       - TC-F3.5.1-02a `MembershipListIntegrationTest#pendingSaleIsNotUsableBeforePayment`
+      - TC-F3.5.1-02b `InvoicePaymentIntegrationTest#payActivatesWithDatesRecomputedAtPaymentTime`
     - AC-F3.5.1-03 Gia hạn khi gói cũ còn hiệu lực (BR-F3-11)
       - TC-F3.5.1-03a `InvoiceSaleIntegrationTest#renewalStartsDayAfterOldTimePackage`
       - TC-F3.5.1-03b `MembershipServiceTest#newOrTimeRenewal`
+      - TC-F3.5.1-03c `InvoicePaymentIntegrationTest#payRenewalAfterActiveTimePackageIsUpcoming`
       - TC-F3.5.1-03c `MembershipServiceTest#ptRenewalWithSessionsLeft`
       - TC-F3.5.1-03d `features/packages/pages/SellPackagePage.test.tsx › TC-F3.5.1-03d: Hội viên có gói TIME ACTIVE cùng phạm vi thì `
     - AC-F3.5.1-04 Gia hạn khi gói SESSION cũ đã hết buổi (BR-F3-11)
       - TC-F3.5.1-04a `InvoiceSaleIntegrationTest#renewalAfterEmptySessionPackageStartsTomorrow`
       - TC-F3.5.1-04b `InvoiceSaleIntegrationTest#renewalAfterSessionPackageWithSessionsLeftStartsAfterEndDate`
       - TC-F3.5.1-04c `MembershipServiceTest#sessionRenewal`
+      - TC-F3.5.1-04d `InvoicePaymentIntegrationTest#payRenewalAfterEmptySessionPackageStartsTomorrow`
       - TC-F3.5.1-04d `MembershipServiceTest#emptyPtDoesNotUseSessionTomorrowRule`
       - TC-F3.5.1-04e `features/packages/pages/SellPackagePage.test.tsx › TC-F3.5.1-04e: Hội viên có gói SESSION đã hết buổi hiển thị `
     - AC-F3.5.1-05 Giữ đồng thời nhiều loại gói (BR-F3-10)
       - TC-F3.5.1-05a `InvoiceSaleIntegrationTest#differentPackageTypesKeepExistingMembershipIntact`
+      - TC-F3.5.1-05b `InvoicePaymentIntegrationTest#payPtWhileHoldingTimeActivatesPt`
     - AC-F3.5.1-06 Chỉ một gói chờ cho mỗi loại (BR-F3-11)
       - TC-F3.5.1-06a `InvoiceSaleIntegrationTest#secondWaitingPackageOfSameTypeIsRejected`
       - TC-F3.5.1-06b `InvoiceSaleIntegrationTest#pendingWithoutActiveAlsoBlocks`
@@ -722,42 +689,115 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 ### F5
 
 - **UC-F5.1** Sinh mã VietQR và xem chi tiết thanh toán hóa đơn
-  - **US-F5.1.1** Mã VietQR cho hóa đơn (#140)
-    - AC-F5.1.1-01 Sinh VietQR cho hóa đơn chờ bằng số tiền server (BR-F5-01, BR-F5-02) ❌ chưa có TC
-    - AC-F5.1.1-02 Chỉ sinh VietQR khi hóa đơn PENDING ❌ chưa có TC
-    - AC-F5.1.1-03 Cấu hình ngân hàng ưu tiên theo chi nhánh ❌ chưa có TC
-    - AC-F5.1.1-04 Từ chối chưa đăng nhập và sai vai trò ❌ chưa có TC
-    - AC-F5.1.1-05 Hóa đơn ngoài chi nhánh được giấu như không tồn tại ❌ chưa có TC
+  - **US-F5.1.1** Mã VietQR cho hóa đơn (#140) ✅ mọi AC có TC
+    - AC-F5.1.1-01 Sinh VietQR cho hóa đơn chờ bằng số tiền server (BR-F5-01, BR-F5-02)
+      - TC-F5.1.1-01a `InvoiceDocumentIntegrationTest#vietQrForPendingInvoiceUsesServerTotalAndEncodesParams`
+    - AC-F5.1.1-02 Chỉ sinh VietQR khi hóa đơn PENDING
+      - TC-F5.1.1-02a `InvoiceDocumentIntegrationTest#vietQrForNonPendingInvoiceIs422`
+    - AC-F5.1.1-03 Cấu hình ngân hàng ưu tiên theo chi nhánh
+      - TC-F5.1.1-03a `InvoiceDocumentIntegrationTest#vietQrBranchBankConfigOverridesChainConfig`
+      - TC-F5.1.1-03b `InvoiceDocumentIntegrationTest#vietQrFallsBackForEachMissingBranchKey`
+    - AC-F5.1.1-04 Từ chối chưa đăng nhập và sai vai trò
+      - TC-F5.1.1-04a `InvoiceDocumentIntegrationTest#vietQrSecurityAndScope`
+    - AC-F5.1.1-05 Hóa đơn ngoài chi nhánh được giấu như không tồn tại
+      - TC-F5.1.1-05a `InvoiceDocumentIntegrationTest#vietQrSecurityAndScope`
+    - AC-F5.1.1-06 Thiếu cấu hình ngân hàng không sinh VietQR
+      - TC-F5.1.1-06a `InvoiceDocumentIntegrationTest#vietQrMissingBankConfigIs422`
+      - TC-F5.1.1-06b `InvoiceDocumentIntegrationTest#blankBranchBankConfigIs422`
+    - AC-F5.1.1-07 ID VietQR không hợp lệ
+      - TC-F5.1.1-07a `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId`
+      - TC-F5.1.1-07b `InvoiceDocumentIntegrationTest#invalidDocumentIdsReturnFieldErrors`
+    - AC-F5.1.1-08 Không sinh VietQR cho hóa đơn cổng hội viên quá hạn (BR-F5-07)
+      - TC-F5.1.1-08a `InvoiceExpiryIntegrationTest#paymentAndVietQrRespectPortalDeadline`
 - **UC-F5.2** Ghi nhận thanh toán tại quầy và kích hoạt dịch vụ
-  - **US-F5.2.1** Ghi nhận thanh toán, kích hoạt gói (#141)
-    - AC-F5.2.1-01 Thu tiền mặt kích hoạt gói mới đúng ngày và giữ thời hạn đã chốt (BR-F5-03, BR-F5-04, BR-F3-06) ❌ chưa có TC
-    - AC-F5.2.1-02 Thu chuyển khoản cho gia hạn nối tiếp (BR-F5-04, BR-F3-11) ❌ chưa có TC
-    - AC-F5.2.1-03 Hóa đơn 0 đồng vẫn ghi phiếu thu và kích hoạt gói (BR-F5-04) ❌ chưa có TC
-    - AC-F5.2.1-04 Chỉ Lễ tân và Quản lý chi nhánh được xác nhận thu (BR-F5-03) ❌ chưa có TC
-    - AC-F5.2.1-05 Dữ liệu thu tiền sai không làm thay đổi hóa đơn ❌ chưa có TC
-    - AC-F5.2.1-06 Thu tiền hóa đơn không tồn tại hoặc ngoài chi nhánh ❌ chưa có TC
-    - AC-F5.2.1-07 Hai nhân viên cùng thu một hóa đơn (BR-F5-05) ❌ chưa có TC
-    - AC-F5.2.1-08 Không thu lại hóa đơn đã xử lý ❌ chưa có TC
-    - AC-F5.2.1-09 Kiểm tra lại gói UPCOMING ở thời điểm thu tiền (BR-F5-04, BR-F3-11) ❌ chưa có TC
-    - AC-F5.2.1-10 Không sử dụng số tiền giả từ trình duyệt (BR-F5-01) ❌ chưa có TC
-    - AC-F5.2.1-11 Gia hạn sau gói PT 0 buổi còn giữ trạng thái ACTIVE hoặc FROZEN (BR-F3-11) ❌ chưa có TC
+  - **US-F5.2.1** Ghi nhận thanh toán, kích hoạt gói (#141) ✅ mọi AC có TC
+    - AC-F5.2.1-01 Thu tiền mặt kích hoạt gói mới đúng ngày và giữ thời hạn đã chốt (BR-F5-03, BR-F5-04, BR-F3-06)
+      - TC-F5.2.1-01a `InvoicePaymentIntegrationTest#payActivatesWithDatesRecomputedAtPaymentTime`
+      - TC-F5.2.1-01b `InvoicePaymentIntegrationTest#payPtWhileHoldingTimeActivatesPt`
+      - TC-F5.2.1-01c `InvoicePaymentIntegrationTest#paysPortalInvoiceAtCounter`
+    - AC-F5.2.1-02 Thu chuyển khoản cho gia hạn nối tiếp (BR-F5-04, BR-F3-11)
+      - TC-F5.2.1-02a `InvoicePaymentIntegrationTest#payRenewalAfterActiveTimePackageIsUpcoming`
+      - TC-F5.2.1-02b `InvoicePaymentIntegrationTest#payRenewalAfterFrozenPackageIsUpcoming`
+      - TC-F5.2.1-02c `InvoicePaymentIntegrationTest#payRenewalAfterEmptySessionPackageStartsTomorrow`
+    - AC-F5.2.1-03 Hóa đơn 0 đồng vẫn ghi phiếu thu và kích hoạt gói (BR-F5-04)
+      - TC-F5.2.1-03a `InvoicePaymentIntegrationTest#zeroTotalInvoiceActivatesWithZeroPaymentRow`
+      - TC-F5.2.1-03b `PaymentAmountMigrationIntegrationTest#upgradesExistingPaymentsWithoutChangingHistory`
+    - AC-F5.2.1-04 Chỉ Lễ tân và Quản lý chi nhánh được xác nhận thu (BR-F5-03)
+      - TC-F5.2.1-04a `InvoicePaymentIntegrationTest#branchManagerCanPay`
+      - TC-F5.2.1-04b `InvoicePaymentIntegrationTest#otherRolesAreForbidden`
+      - TC-F5.2.1-04c `InvoicePaymentIntegrationTest#noTokenIs401`
+    - AC-F5.2.1-05 Dữ liệu thu tiền sai không làm thay đổi hóa đơn
+      - TC-F5.2.1-05a `InvoicePaymentIntegrationTest#invalidMethodIs400`
+      - TC-F5.2.1-05b `InvoicePaymentIntegrationTest#tooLongTransactionRefIs400`
+      - TC-F5.2.1-05c `InvoicePaymentIntegrationTest#invalidPaymentIdIs400`
+    - AC-F5.2.1-06 Thu tiền hóa đơn không tồn tại hoặc ngoài chi nhánh
+      - TC-F5.2.1-06a `InvoicePaymentIntegrationTest#unknownInvoiceIs404`
+      - TC-F5.2.1-06b `InvoicePaymentIntegrationTest#otherBranchIs404`
+    - AC-F5.2.1-07 Hai nhân viên cùng thu một hóa đơn (BR-F5-05)
+      - TC-F5.2.1-07a `InvoicePaymentConcurrencyIntegrationTest#twoReceptionistsPayingSameInvoice`
+    - AC-F5.2.1-08 Không thu lại hóa đơn đã xử lý
+      - TC-F5.2.1-08a `InvoicePaymentIntegrationTest#payingTwiceIs422`
+      - TC-F5.2.1-08b `InvoicePaymentIntegrationTest#payingCancelledInvoiceIs422`
+    - AC-F5.2.1-09 Kiểm tra lại gói UPCOMING ở thời điểm thu tiền (BR-F5-04, BR-F3-11)
+      - TC-F5.2.1-09a `InvoicePaymentConcurrencyIntegrationTest#twoRenewalsPaidAtOnceYieldOneUpcoming`
+      - TC-F5.2.1-09b `InvoicePaymentIntegrationTest#upcomingSameTypeBlocksActivation`
+      - TC-F5.2.1-09c `InvoicePaymentIntegrationTest#upcomingOfOtherTypeOrScopeDoesNotBlock`
+    - AC-F5.2.1-10 Không sử dụng số tiền giả từ trình duyệt (BR-F5-01)
+      - TC-F5.2.1-10a `InvoicePaymentIntegrationTest#ignoresClientSuppliedAmounts`
+    - AC-F5.2.1-11 Gia hạn sau gói PT 0 buổi còn giữ trạng thái ACTIVE hoặc FROZEN (BR-F3-11)
+      - TC-F5.2.1-11a `InvoicePaymentIntegrationTest#zeroSessionPtStillHeldSchedulesAfterOldEndDate`
+    - AC-F5.2.1-12 Không thu tiền hóa đơn cổng hội viên quá hạn (BR-F5-07)
+      - TC-F5.2.1-12a `InvoiceExpiryIntegrationTest#paymentAndVietQrRespectPortalDeadline`
 - **UC-F5.3** Tra cứu và quản lý hóa đơn tại quầy (và toàn chuỗi)
-  - **US-F5.3.1** Tra cứu và hủy hóa đơn chờ (#142)
-    - AC-F5.3.1-01 Danh sách hóa đơn theo chi nhánh của nhân viên (BR-F5-06) ❌ chưa có TC
-    - AC-F5.3.1-02 Lọc và tìm hóa đơn theo ngày Việt Nam (BR-F5-06) ❌ chưa có TC
-    - AC-F5.3.1-03 Hóa đơn có member_id rỗng vẫn tra cứu được (BR-F5-06) ❌ chưa có TC
-    - AC-F5.3.1-04 Chủ chuỗi xem toàn chuỗi hoặc lọc chi nhánh (BR-F5-06) ❌ chưa có TC
-    - AC-F5.3.1-05 Chi tiết hóa đơn gồm dòng hóa đơn và lịch sử thu (BR-F5-06) ❌ chưa có TC
-    - AC-F5.3.1-06 Hủy hóa đơn chờ đồng thời hủy gói chờ (BR-F5-06, BR-F5-08) ❌ chưa có TC
-    - AC-F5.3.1-07 Không hủy hóa đơn ngoài trạng thái PENDING ❌ chưa có TC
-    - AC-F5.3.1-08 Phân biệt sai vai trò với hóa đơn ngoài phạm vi (BR-F5-06) ❌ chưa có TC
+  - **US-F5.3.1** Tra cứu và hủy hóa đơn chờ (#142) ✅ mọi AC có TC
+    - AC-F5.3.1-01 Danh sách hóa đơn theo chi nhánh của nhân viên (BR-F5-06)
+      - TC-F5.3.1-01a `InvoiceQueryIntegrationTest#receptionistListsOwnBranchNewestFirstWithPaging`
+      - TC-F5.3.1-01b `InvoiceQueryIntegrationTest#staffCannotOverrideBranchFilter`
+    - AC-F5.3.1-02 Lọc và tìm hóa đơn theo ngày Việt Nam (BR-F5-06)
+      - TC-F5.3.1-02a `InvoiceQueryIntegrationTest#filterByStatusSourceAndKeyword`
+      - TC-F5.3.1-02b `InvoiceQueryIntegrationTest#filterByVietnamDateRangeHalfOpen`
+    - AC-F5.3.1-03 Hóa đơn có member_id rỗng vẫn tra cứu được (BR-F5-06)
+      - TC-F5.3.1-03a `InvoiceQueryIntegrationTest#walkInInvoiceWithNullMemberIsVisibleInListAndDetail`
+    - AC-F5.3.1-04 Chủ chuỗi xem toàn chuỗi hoặc lọc chi nhánh (BR-F5-06)
+      - TC-F5.3.1-04a `InvoiceQueryIntegrationTest#superAdminListsAllBranchesAndFiltersByBranchId`
+    - AC-F5.3.1-05 Chi tiết hóa đơn gồm dòng hóa đơn và lịch sử thu (BR-F5-06)
+      - TC-F5.3.1-05a `InvoiceQueryIntegrationTest#detailReturnsItemsAndPaymentsWithReceiverName`
+    - AC-F5.3.1-06 Hủy hóa đơn chờ đồng thời hủy gói chờ (BR-F5-06, BR-F5-08)
+      - TC-F5.3.1-06a `InvoiceCancelIntegrationTest#cancelPendingInvoiceCancelsMembership`
+      - TC-F5.3.1-06b `InvoiceCancelIntegrationTest#cancelledInvoiceNoLongerBlocksSale`
+      - TC-F5.3.1-06c `InvoiceCancelIntegrationTest#managerAndOwnerCanCancel`
+    - AC-F5.3.1-07 Không hủy hóa đơn ngoài trạng thái PENDING
+      - TC-F5.3.1-07a `InvoiceCancelIntegrationTest#cancelPaidInvoiceIs422`
+      - TC-F5.3.1-07b `InvoiceCancelIntegrationTest#cancelTwiceIs422`
+    - AC-F5.3.1-08 Phân biệt sai vai trò với hóa đơn ngoài phạm vi (BR-F5-06)
+      - TC-F5.3.1-08a `InvoiceCancelIntegrationTest#unknownInvoiceIs404`
+      - TC-F5.3.1-08b `InvoiceCancelIntegrationTest#otherBranchIs404`
+      - TC-F5.3.1-08c `InvoiceCancelIntegrationTest#otherRolesAreForbidden`
+      - TC-F5.3.1-08d `InvoiceQueryIntegrationTest#detailOfOtherBranchOrUnknownIs404`
+      - TC-F5.3.1-08e `InvoiceQueryIntegrationTest#trainerAndMemberAreForbidden`
+      - TC-F5.3.1-08f `InvoiceQueryIntegrationTest#unauthenticatedRequestsAre401`
+    - AC-F5.3.1-09 Bộ lọc và phân trang không hợp lệ
+      - TC-F5.3.1-09a `InvoiceQueryIntegrationTest#invalidQueryParamsAndIdReturn400`
+      - TC-F5.3.1-09b `InvoiceCancelIntegrationTest#invalidCancelIdIs400`
+    - AC-F5.3.1-10 Nhân viên không có phân công chi nhánh hoạt động
+      - TC-F5.3.1-10a `InvoiceQueryIntegrationTest#staffWithoutActiveBranchIs403`
 - **UC-F5.4** In và xuất hóa đơn PDF
-  - **US-F5.4.1** Hóa đơn PDF (#143)
-    - AC-F5.4.1-01 Xuất PDF hóa đơn PAID hoặc REFUNDED ❌ chưa có TC
-    - AC-F5.4.1-02 PDF giữ tên và giá ở thời điểm bán (BR-F5-09) ❌ chưa có TC
-    - AC-F5.4.1-03 Không xuất PDF hóa đơn chưa thanh toán ❌ chưa có TC
-    - AC-F5.4.1-04 Hội viên chỉ tải hóa đơn của mình; nhân viên đúng chi nhánh ❌ chưa có TC
-    - AC-F5.4.1-05 Vai trò không được tải PDF và chưa đăng nhập ❌ chưa có TC
+  - **US-F5.4.1** Hóa đơn PDF (#143) ✅ mọi AC có TC
+    - AC-F5.4.1-01 Xuất PDF hóa đơn PAID hoặc REFUNDED
+      - TC-F5.4.1-01a `InvoiceDocumentIntegrationTest#pdfForPaidAndRefundedInvoiceIsReadableWithVietnameseText`
+    - AC-F5.4.1-02 PDF giữ tên và giá ở thời điểm bán (BR-F5-09)
+      - TC-F5.4.1-02a `InvoiceDocumentIntegrationTest#pdfUsesSnapshotPriceAndDescriptionFromInvoiceItems`
+    - AC-F5.4.1-03 Không xuất PDF hóa đơn chưa thanh toán
+      - TC-F5.4.1-03a `InvoiceDocumentIntegrationTest#pdfForPendingOrCancelledInvoiceIs422`
+    - AC-F5.4.1-04 Hội viên chỉ tải hóa đơn của mình; nhân viên đúng chi nhánh
+      - TC-F5.4.1-04a `InvoiceDocumentIntegrationTest#pdfSecurityOwnershipAndScope`
+    - AC-F5.4.1-05 Vai trò không được tải PDF và chưa đăng nhập
+      - TC-F5.4.1-05a `InvoiceDocumentIntegrationTest#pdfSecurityOwnershipAndScope`
+    - AC-F5.4.1-06 Xuất PDF hóa đơn khách lẻ đã có (BR-F5-09)
+      - TC-F5.4.1-06a `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId`
+    - AC-F5.4.1-07 ID xuất PDF không hợp lệ
+      - TC-F5.4.1-07a `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId`
+      - TC-F5.4.1-07b `InvoiceDocumentIntegrationTest#invalidDocumentIdsReturnFieldErrors`
 - **UC-F5.5** Hoàn tiền hóa đơn (Refund)
   - **US-F5.5.1** Hoàn tiền có kiểm soát (#144)
     - AC-F5.5.1-01 Hoàn toàn bộ hóa đơn có gói chưa dùng (BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14) ❌ chưa có TC
@@ -805,21 +845,34 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 ### F8
 
 - **UC-F8.0** Xem lịch lớp học nhóm công khai
-  - **US-F8.0.1** Xem lịch lớp công khai (#155)
-    - AC-F8.0.1-01 Xem lịch không cần đăng nhập (BR-F8.0-01, BR-F8.0-02) ❌ chưa có TC
-    - AC-F8.0.1-02 Lịch rỗng (BR-F8.0-01) ❌ chưa có TC
-    - AC-F8.0.1-03 Bộ lọc không hợp lệ (BR-F8.0-01) ❌ chưa có TC
-    - AC-F8.0.1-04 Khách muốn đặt (BR-F8.0-01) ❌ chưa có TC
+  - **US-F8.0.1** Xem lịch lớp công khai (#155) ✅ mọi AC có TC
+    - AC-F8.0.1-01 Xem lịch không cần đăng nhập (BR-F8.0-01, BR-F8.0-02)
+      - TC-F8.0.1-01a `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates`
+      - TC-F8.0.1-01b `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-01b, TC-F8.0.1-04b: khách xem giờ Việt Nam và đăng`
+    - AC-F8.0.1-02 Lịch rỗng (BR-F8.0-01)
+      - TC-F8.0.1-02a `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates`
+      - TC-F8.0.1-02b `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-02b, TC-F8.0.1-03b: lịch rỗng và bộ lọc từ chối kh`
+    - AC-F8.0.1-03 Bộ lọc không hợp lệ (BR-F8.0-01)
+      - TC-F8.0.1-03a `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates`
+      - TC-F8.0.1-03b `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-02b, TC-F8.0.1-03b: lịch rỗng và bộ lọc từ chối kh`
+    - AC-F8.0.1-04 Khách muốn đặt (BR-F8.0-01)
+      - TC-F8.0.1-04a `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates`
+      - TC-F8.0.1-04b `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-01b, TC-F8.0.1-04b: khách xem giờ Việt Nam và đăng`
 - **UC-F8.1** Đặt chỗ lớp nhóm
   - **US-F8.1.1** Đặt chỗ lớp nhóm (#156) ✅ mọi AC có TC
     - AC-F8.1.1-01 Đặt khi còn chỗ và ghi người tạo (BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01)
       - TC-F8.1.1-01a `ClassApiIntegrationTest#apiAuthorizationValidationAndPersistence`
       - TC-F8.1.1-01b `ClassApiIntegrationTest#receptionistIsRecordedWhenBookingForMember`
+      - TC-F8.1.1-01c `ClassApiIntegrationTest#memberCalendarReturnsOwnBookingAndAvailability`
+      - TC-F8.1.1-01d `features/classes/ClassCalendarPages.test.tsx › TC-F8.1.1-01d, TC-F8.1.1-03d: đặt đúng hội viên, làm mới sĩ `
     - AC-F8.1.1-02 Gói hoặc quyền đặt không hợp lệ (BR-F8.1-01, BR-F8.3-02)
       - TC-F8.1.1-02a `ClassApiIntegrationTest#rejectsIneligibleMemberships`
+      - TC-F8.1.1-02b `features/classes/ClassCalendarPages.test.tsx › TC-F8.1.1-02b: hiển thị nguyên nhân server từ chối đặt chỗ`
     - AC-F8.1.1-03 Lớp đủ chỗ (BR-F8.1-03, BR-F8-01)
       - TC-F8.1.1-03a `ClassApiIntegrationTest#fullClassRejectsBookingAndCancellationReleasesSeat`
       - TC-F8.1.1-03b `ClassApiIntegrationTest#occupiedStatusesCountTowardsCapacity`
+      - TC-F8.1.1-03c `ClassApiIntegrationTest#memberCalendarReturnsOwnBookingAndAvailability`
+      - TC-F8.1.1-03d `features/classes/ClassCalendarPages.test.tsx › TC-F8.1.1-01d, TC-F8.1.1-03d: đặt đúng hội viên, làm mới sĩ `
     - AC-F8.1.1-04 Hai yêu cầu tranh chỗ cuối (BR-F8.1-03)
       - TC-F8.1.1-04a `ClassApiIntegrationTest#concurrentRequestsDoNotExceedCapacity`
     - AC-F8.1.1-05 Trùng buổi và trùng giờ (BR-F8.1-04)
@@ -848,6 +901,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F8.3.1-02a `ClassApiIntegrationTest#violationsLockOnceAndExpiredLockDoesNotReuseOldViolations`
     - AC-F8.3.1-03 Hủy chỗ buổi đã đổi giờ (BR-F8.3-01, BR-F8-03)
       - TC-F8.3.1-03a `ClassApiIntegrationTest#cancellationAfterRescheduleIsNotLate`
+      - TC-F8.3.1-03b `features/classes/ClassCalendarPages.test.tsx › TC-F8.3.1-03b: xác nhận hủy chỗ đã đổi giờ và hiển thị trạng`
     - AC-F8.3.1-04 Đặt suất vừa hủy (BR-F8.3-04, BR-F8.1-03)
       - TC-F8.3.1-04a `ClassApiIntegrationTest#fullClassRejectsBookingAndCancellationReleasesSeat`
     - AC-F8.3.1-05 Qua tháng Việt Nam (BR-F8.3-02)
@@ -863,20 +917,27 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 - **UC-F8.4** Đã bỏ (ADR 0014)
   - **US-F8.4.1** Đã bỏ (ADR 0014) (#159)
 - **UC-F8.5** Xem lịch dạy lớp nhóm
-  - **US-F8.5.1** Xem lịch dạy lớp nhóm (#160)
-    - AC-F8.5.1-01 Lịch của người được phân công (BR-F8.5-01, BR-F8.5-02, BR-F8.5-03) ❌ chưa có TC
-    - AC-F8.5.1-02 Buổi có người dạy thay (BR-F8.5-01) ❌ chưa có TC
-    - AC-F8.5.1-03 Không có lớp (BR-F8.5-01) ❌ chưa có TC
-    - AC-F8.5.1-04 Sai vai trò hoặc yêu cầu lịch người khác (BR-F8.5-02) ❌ chưa có TC
+  - **US-F8.5.1** Xem lịch dạy lớp nhóm (#160) ✅ mọi AC có TC
+    - AC-F8.5.1-01 Lịch của người được phân công (BR-F8.5-01, BR-F8.5-02, BR-F8.5-03)
+      - TC-F8.5.1-01a `ClassApiIntegrationTest#trainerCalendarUsesActualSessionAssignment`
+      - TC-F8.5.1-01b `features/classes/ClassCalendarPages.test.tsx › TC-F8.5.1-01b, TC-F8.6.1-01b, TC-F8.6.1-03b: đi vào buổi đượ`
+    - AC-F8.5.1-02 Buổi có người dạy thay (BR-F8.5-01)
+      - TC-F8.5.1-02a `ClassApiIntegrationTest#trainerCalendarUsesActualSessionAssignment`
+    - AC-F8.5.1-03 Không có lớp (BR-F8.5-01)
+      - TC-F8.5.1-03a `ClassApiIntegrationTest#trainerCalendarUsesActualSessionAssignment`
+    - AC-F8.5.1-04 Sai vai trò hoặc yêu cầu lịch người khác (BR-F8.5-02)
+      - TC-F8.5.1-04a `ClassApiIntegrationTest#trainerCalendarUsesActualSessionAssignment`
 - **UC-F8.6** Điểm danh học viên lớp học nhóm
   - **US-F8.6.1** Điểm danh học viên lớp học nhóm (#161) ✅ mọi AC có TC
     - AC-F8.6.1-01 Điểm danh lần đầu từ BOOKED (BR-F8.6-01, BR-F8.6-04, BR-F8.6-05)
       - TC-F8.6.1-01a `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay`
+      - TC-F8.6.1-01b `features/classes/ClassCalendarPages.test.tsx › TC-F8.5.1-01b, TC-F8.6.1-01b, TC-F8.6.1-03b: đi vào buổi đượ`
       - TC-F8.6.1-01c `ClassApiIntegrationTest#noShowOfSoftDeletedMemberIsRecordedWithoutPenalty`
     - AC-F8.6.1-02 Vắng mặt lần đầu đạt ngưỡng (BR-F8.6-03, BR-F8.3-02)
       - TC-F8.6.1-02a `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock`
     - AC-F8.6.1-03 Check-in không thay điểm danh (BR-F8.6-02)
       - TC-F8.6.1-03a `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay`
+      - TC-F8.6.1-03b `features/classes/ClassCalendarPages.test.tsx › TC-F8.5.1-01b, TC-F8.6.1-01b, TC-F8.6.1-03b: đi vào buổi đượ`
     - AC-F8.6.1-04 Sai phân công hoặc chi nhánh (BR-F8.6-01)
       - TC-F8.6.1-04a `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay`
     - AC-F8.6.1-05 Biên thời gian của huấn luyện viên (BR-F8.6-01, BR-F8.6-05)
@@ -907,6 +968,8 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F8.7.1-04a `ClassApiIntegrationTest#recurringOverlapUsesActualWeekdaysNotJustIntersectingDateRanges`
     - AC-F8.7.1-05 Sửa hoặc ngừng lịch không đổi buổi đã sinh (BR-F8.7-02, BR-F8.7-04)
       - TC-F8.7.1-05a `ClassApiIntegrationTest#scheduleGenerationIsIdempotentSnapshotsAndDeactivationPreserveSessions`
+      - TC-F8.7.1-05b `ClassApiIntegrationTest#calendarsPreserveGeneratedClassTypeAfterScheduleEdit`
+      - TC-F8.7.1-05c `ClassSessionTypeMigrationIntegrationTest#migrationBackfillsExistingSessionsAndAcceptsInsertsFromPreviousBackend`
     - AC-F8.7.1-06 Giảm sức chứa đúng biên (BR-F8.7-02, BR-F8.1-03) ❌ chưa có TC
     - AC-F8.7.1-07 Buổi không cho sửa sức chứa (BR-F8.7-02) ❌ chưa có TC
     - AC-F8.7.1-08 Quyền lịch lặp và buổi riêng lẻ (BR-F8-04)
@@ -1258,16 +1321,20 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.5.1-01d | AC-F3.5.1-01 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-13, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-14 | `features/packages/api/package-sales.test.ts › TC-F3.5.1-01d: livePackageSalesApi gọi đúng GET /memberships` |
 | TC-F3.5.1-01e | AC-F3.5.1-01 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-13, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-14 | `features/packages/pages/SellPackagePage.test.tsx › TC-F3.5.1-01e: Chọn hội viên và gói, chỉ gửi memberId và ite` |
 | TC-F3.5.1-02a | AC-F3.5.1-02 | US-F3.5.1 | UC-F3.5 | BR-F3-12, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-13, BR-F3-14 | `MembershipListIntegrationTest#pendingSaleIsNotUsableBeforePayment` |
+| TC-F3.5.1-02b | AC-F3.5.1-02 | US-F3.5.1 | UC-F3.5 | BR-F3-12, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-13, BR-F3-14 | `InvoicePaymentIntegrationTest#payActivatesWithDatesRecomputedAtPaymentTime` |
 | TC-F3.5.1-03a | AC-F3.5.1-03 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#renewalStartsDayAfterOldTimePackage` |
 | TC-F3.5.1-03b | AC-F3.5.1-03 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipServiceTest#newOrTimeRenewal` |
+| TC-F3.5.1-03c | AC-F3.5.1-03 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoicePaymentIntegrationTest#payRenewalAfterActiveTimePackageIsUpcoming` |
 | TC-F3.5.1-03c | AC-F3.5.1-03 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipServiceTest#ptRenewalWithSessionsLeft` |
 | TC-F3.5.1-03d | AC-F3.5.1-03 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `features/packages/pages/SellPackagePage.test.tsx › TC-F3.5.1-03d: Hội viên có gói TIME ACTIVE cùng phạm vi thì ` |
 | TC-F3.5.1-04a | AC-F3.5.1-04 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#renewalAfterEmptySessionPackageStartsTomorrow` |
 | TC-F3.5.1-04b | AC-F3.5.1-04 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#renewalAfterSessionPackageWithSessionsLeftStartsAfterEndDate` |
 | TC-F3.5.1-04c | AC-F3.5.1-04 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipServiceTest#sessionRenewal` |
+| TC-F3.5.1-04d | AC-F3.5.1-04 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoicePaymentIntegrationTest#payRenewalAfterEmptySessionPackageStartsTomorrow` |
 | TC-F3.5.1-04d | AC-F3.5.1-04 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipServiceTest#emptyPtDoesNotUseSessionTomorrowRule` |
 | TC-F3.5.1-04e | AC-F3.5.1-04 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `features/packages/pages/SellPackagePage.test.tsx › TC-F3.5.1-04e: Hội viên có gói SESSION đã hết buổi hiển thị ` |
 | TC-F3.5.1-05a | AC-F3.5.1-05 | US-F3.5.1 | UC-F3.5 | BR-F3-10, BR-F3-04, BR-F3-09, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#differentPackageTypesKeepExistingMembershipIntact` |
+| TC-F3.5.1-05b | AC-F3.5.1-05 | US-F3.5.1 | UC-F3.5 | BR-F3-10, BR-F3-04, BR-F3-09, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoicePaymentIntegrationTest#payPtWhileHoldingTimeActivatesPt` |
 | TC-F3.5.1-06a | AC-F3.5.1-06 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#secondWaitingPackageOfSameTypeIsRejected` |
 | TC-F3.5.1-06b | AC-F3.5.1-06 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#pendingWithoutActiveAlsoBlocks` |
 | TC-F3.5.1-06c | AC-F3.5.1-06 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#waitingPackageOfOtherTypeDoesNotBlock` |
@@ -1306,11 +1373,89 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.5.1-12e | AC-F3.5.1-12 | US-F3.5.1 | UC-F3.5 | BR-F3-11, BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-12, BR-F3-13, BR-F3-14 | `MembershipServiceTest#neverBeforeToday` |
 | TC-F3.5.1-13a | AC-F3.5.1-13 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#invoiceCodesAreSequential` |
 | TC-F3.5.1-13b | AC-F3.5.1-13 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceCodeMigrationIntegrationTest#upgradesExistingDatabaseWithoutChangingInvoiceHistory` |
+| TC-F5.1.1-01a | AC-F5.1.1-01 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrForPendingInvoiceUsesServerTotalAndEncodesParams` |
+| TC-F5.1.1-02a | AC-F5.1.1-02 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrForNonPendingInvoiceIs422` |
+| TC-F5.1.1-03a | AC-F5.1.1-03 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrBranchBankConfigOverridesChainConfig` |
+| TC-F5.1.1-03b | AC-F5.1.1-03 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrFallsBackForEachMissingBranchKey` |
+| TC-F5.1.1-04a | AC-F5.1.1-04 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrSecurityAndScope` |
+| TC-F5.1.1-05a | AC-F5.1.1-05 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrSecurityAndScope` |
+| TC-F5.1.1-06a | AC-F5.1.1-06 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrMissingBankConfigIs422` |
+| TC-F5.1.1-06b | AC-F5.1.1-06 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#blankBranchBankConfigIs422` |
+| TC-F5.1.1-07a | AC-F5.1.1-07 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId` |
+| TC-F5.1.1-07b | AC-F5.1.1-07 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#invalidDocumentIdsReturnFieldErrors` |
+| TC-F5.1.1-08a | AC-F5.1.1-08 | US-F5.1.1 | UC-F5.1 | BR-F5-07, BR-F5-01, BR-F5-02 | `InvoiceExpiryIntegrationTest#paymentAndVietQrRespectPortalDeadline` |
+| TC-F5.2.1-01a | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F5-07, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payActivatesWithDatesRecomputedAtPaymentTime` |
+| TC-F5.2.1-01b | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F5-07, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payPtWhileHoldingTimeActivatesPt` |
+| TC-F5.2.1-01c | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F5-07, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#paysPortalInvoiceAtCounter` |
+| TC-F5.2.1-02a | AC-F5.2.1-02 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#payRenewalAfterActiveTimePackageIsUpcoming` |
+| TC-F5.2.1-02b | AC-F5.2.1-02 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#payRenewalAfterFrozenPackageIsUpcoming` |
+| TC-F5.2.1-02c | AC-F5.2.1-02 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#payRenewalAfterEmptySessionPackageStartsTomorrow` |
+| TC-F5.2.1-03a | AC-F5.2.1-03 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#zeroTotalInvoiceActivatesWithZeroPaymentRow` |
+| TC-F5.2.1-03b | AC-F5.2.1-03 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `PaymentAmountMigrationIntegrationTest#upgradesExistingPaymentsWithoutChangingHistory` |
+| TC-F5.2.1-04a | AC-F5.2.1-04 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#branchManagerCanPay` |
+| TC-F5.2.1-04b | AC-F5.2.1-04 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#otherRolesAreForbidden` |
+| TC-F5.2.1-04c | AC-F5.2.1-04 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#noTokenIs401` |
+| TC-F5.2.1-05a | AC-F5.2.1-05 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#invalidMethodIs400` |
+| TC-F5.2.1-05b | AC-F5.2.1-05 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#tooLongTransactionRefIs400` |
+| TC-F5.2.1-05c | AC-F5.2.1-05 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#invalidPaymentIdIs400` |
+| TC-F5.2.1-06a | AC-F5.2.1-06 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#unknownInvoiceIs404` |
+| TC-F5.2.1-06b | AC-F5.2.1-06 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#otherBranchIs404` |
+| TC-F5.2.1-07a | AC-F5.2.1-07 | US-F5.2.1 | UC-F5.2 | BR-F5-05, BR-F5-03, BR-F5-04, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentConcurrencyIntegrationTest#twoReceptionistsPayingSameInvoice` |
+| TC-F5.2.1-08a | AC-F5.2.1-08 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payingTwiceIs422` |
+| TC-F5.2.1-08b | AC-F5.2.1-08 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payingCancelledInvoiceIs422` |
+| TC-F5.2.1-09a | AC-F5.2.1-09 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentConcurrencyIntegrationTest#twoRenewalsPaidAtOnceYieldOneUpcoming` |
+| TC-F5.2.1-09b | AC-F5.2.1-09 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#upcomingSameTypeBlocksActivation` |
+| TC-F5.2.1-09c | AC-F5.2.1-09 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#upcomingOfOtherTypeOrScopeDoesNotBlock` |
+| TC-F5.2.1-10a | AC-F5.2.1-10 | US-F5.2.1 | UC-F5.2 | BR-F5-01, BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#ignoresClientSuppliedAmounts` |
+| TC-F5.2.1-11a | AC-F5.2.1-11 | US-F5.2.1 | UC-F5.2 | BR-F3-11, BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#zeroSessionPtStillHeldSchedulesAfterOldEndDate` |
+| TC-F5.2.1-12a | AC-F5.2.1-12 | US-F5.2.1 | UC-F5.2 | BR-F5-07, BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoiceExpiryIntegrationTest#paymentAndVietQrRespectPortalDeadline` |
+| TC-F5.3.1-01a | AC-F5.3.1-01 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#receptionistListsOwnBranchNewestFirstWithPaging` |
+| TC-F5.3.1-01b | AC-F5.3.1-01 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#staffCannotOverrideBranchFilter` |
+| TC-F5.3.1-02a | AC-F5.3.1-02 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#filterByStatusSourceAndKeyword` |
+| TC-F5.3.1-02b | AC-F5.3.1-02 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#filterByVietnamDateRangeHalfOpen` |
+| TC-F5.3.1-03a | AC-F5.3.1-03 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#walkInInvoiceWithNullMemberIsVisibleInListAndDetail` |
+| TC-F5.3.1-04a | AC-F5.3.1-04 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#superAdminListsAllBranchesAndFiltersByBranchId` |
+| TC-F5.3.1-05a | AC-F5.3.1-05 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#detailReturnsItemsAndPaymentsWithReceiverName` |
+| TC-F5.3.1-06a | AC-F5.3.1-06 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-08, BR-F5-07 | `InvoiceCancelIntegrationTest#cancelPendingInvoiceCancelsMembership` |
+| TC-F5.3.1-06b | AC-F5.3.1-06 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-08, BR-F5-07 | `InvoiceCancelIntegrationTest#cancelledInvoiceNoLongerBlocksSale` |
+| TC-F5.3.1-06c | AC-F5.3.1-06 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-08, BR-F5-07 | `InvoiceCancelIntegrationTest#managerAndOwnerCanCancel` |
+| TC-F5.3.1-07a | AC-F5.3.1-07 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceCancelIntegrationTest#cancelPaidInvoiceIs422` |
+| TC-F5.3.1-07b | AC-F5.3.1-07 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceCancelIntegrationTest#cancelTwiceIs422` |
+| TC-F5.3.1-08a | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceCancelIntegrationTest#unknownInvoiceIs404` |
+| TC-F5.3.1-08b | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceCancelIntegrationTest#otherBranchIs404` |
+| TC-F5.3.1-08c | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceCancelIntegrationTest#otherRolesAreForbidden` |
+| TC-F5.3.1-08d | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#detailOfOtherBranchOrUnknownIs404` |
+| TC-F5.3.1-08e | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#trainerAndMemberAreForbidden` |
+| TC-F5.3.1-08f | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#unauthenticatedRequestsAre401` |
+| TC-F5.3.1-09a | AC-F5.3.1-09 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#invalidQueryParamsAndIdReturn400` |
+| TC-F5.3.1-09b | AC-F5.3.1-09 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceCancelIntegrationTest#invalidCancelIdIs400` |
+| TC-F5.3.1-10a | AC-F5.3.1-10 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#staffWithoutActiveBranchIs403` |
+| TC-F5.4.1-01a | AC-F5.4.1-01 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#pdfForPaidAndRefundedInvoiceIsReadableWithVietnameseText` |
+| TC-F5.4.1-02a | AC-F5.4.1-02 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#pdfUsesSnapshotPriceAndDescriptionFromInvoiceItems` |
+| TC-F5.4.1-03a | AC-F5.4.1-03 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#pdfForPendingOrCancelledInvoiceIs422` |
+| TC-F5.4.1-04a | AC-F5.4.1-04 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#pdfSecurityOwnershipAndScope` |
+| TC-F5.4.1-05a | AC-F5.4.1-05 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#pdfSecurityOwnershipAndScope` |
+| TC-F5.4.1-06a | AC-F5.4.1-06 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId` |
+| TC-F5.4.1-07a | AC-F5.4.1-07 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId` |
+| TC-F5.4.1-07b | AC-F5.4.1-07 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#invalidDocumentIdsReturnFieldErrors` |
+| TC-F8.0.1-01a | AC-F8.0.1-01 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates` |
+| TC-F8.0.1-01b | AC-F8.0.1-01 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-01b, TC-F8.0.1-04b: khách xem giờ Việt Nam và đăng` |
+| TC-F8.0.1-02a | AC-F8.0.1-02 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates` |
+| TC-F8.0.1-02b | AC-F8.0.1-02 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-02b, TC-F8.0.1-03b: lịch rỗng và bộ lọc từ chối kh` |
+| TC-F8.0.1-03a | AC-F8.0.1-03 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates` |
+| TC-F8.0.1-03b | AC-F8.0.1-03 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-02b, TC-F8.0.1-03b: lịch rỗng và bộ lọc từ chối kh` |
+| TC-F8.0.1-04a | AC-F8.0.1-04 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates` |
+| TC-F8.0.1-04b | AC-F8.0.1-04 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-01b, TC-F8.0.1-04b: khách xem giờ Việt Nam và đăng` |
 | TC-F8.1.1-01a | AC-F8.1.1-01 | US-F8.1.1 | UC-F8.1 | BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#apiAuthorizationValidationAndPersistence` |
 | TC-F8.1.1-01b | AC-F8.1.1-01 | US-F8.1.1 | UC-F8.1 | BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#receptionistIsRecordedWhenBookingForMember` |
+| TC-F8.1.1-01c | AC-F8.1.1-01 | US-F8.1.1 | UC-F8.1 | BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#memberCalendarReturnsOwnBookingAndAvailability` |
+| TC-F8.1.1-01d | AC-F8.1.1-01 | US-F8.1.1 | UC-F8.1 | BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02, BR-F8.1-04 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.1.1-01d, TC-F8.1.1-03d: đặt đúng hội viên, làm mới sĩ ` |
 | TC-F8.1.1-02a | AC-F8.1.1-02 | US-F8.1.1 | UC-F8.1 | BR-F8.1-01, BR-F8.3-02, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.1-04 | `ClassApiIntegrationTest#rejectsIneligibleMemberships` |
+| TC-F8.1.1-02b | AC-F8.1.1-02 | US-F8.1.1 | UC-F8.1 | BR-F8.1-01, BR-F8.3-02, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.1-04 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.1.1-02b: hiển thị nguyên nhân server từ chối đặt chỗ` |
 | TC-F8.1.1-03a | AC-F8.1.1-03 | US-F8.1.1 | UC-F8.1 | BR-F8.1-03, BR-F8-01, BR-F8.1-01, BR-F8.1-02, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#fullClassRejectsBookingAndCancellationReleasesSeat` |
 | TC-F8.1.1-03b | AC-F8.1.1-03 | US-F8.1.1 | UC-F8.1 | BR-F8.1-03, BR-F8-01, BR-F8.1-01, BR-F8.1-02, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#occupiedStatusesCountTowardsCapacity` |
+| TC-F8.1.1-03c | AC-F8.1.1-03 | US-F8.1.1 | UC-F8.1 | BR-F8.1-03, BR-F8-01, BR-F8.1-01, BR-F8.1-02, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#memberCalendarReturnsOwnBookingAndAvailability` |
+| TC-F8.1.1-03d | AC-F8.1.1-03 | US-F8.1.1 | UC-F8.1 | BR-F8.1-03, BR-F8-01, BR-F8.1-01, BR-F8.1-02, BR-F8.3-02, BR-F8.1-04 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.1.1-01d, TC-F8.1.1-03d: đặt đúng hội viên, làm mới sĩ ` |
 | TC-F8.1.1-04a | AC-F8.1.1-04 | US-F8.1.1 | UC-F8.1 | BR-F8.1-03, BR-F8.1-01, BR-F8.1-02, BR-F8-01, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#concurrentRequestsDoNotExceedCapacity` |
 | TC-F8.1.1-05a | AC-F8.1.1-05 | US-F8.1.1 | UC-F8.1 | BR-F8.1-04, BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02 | `ClassApiIntegrationTest#concurrentOverlappingRequestsRespectMemberLock` |
 | TC-F8.1.1-05b | AC-F8.1.1-05 | US-F8.1.1 | UC-F8.1 | BR-F8.1-04, BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02 | `ClassApiIntegrationTest#apiAuthorizationValidationAndPersistence` |
@@ -1325,16 +1470,24 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F8.3.1-01b | AC-F8.3.1-01 | US-F8.3.1 | UC-F8.3 | BR-F8.3-01, BR-F8.3-04, BR-F8.3-02, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#receptionistIsRecordedWhenBookingForMember` |
 | TC-F8.3.1-02a | AC-F8.3.1-02 | US-F8.3.1 | UC-F8.3 | BR-F8.3-01, BR-F8.3-02, BR-F8.3-04, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#violationsLockOnceAndExpiredLockDoesNotReuseOldViolations` |
 | TC-F8.3.1-03a | AC-F8.3.1-03 | US-F8.3.1 | UC-F8.3 | BR-F8.3-01, BR-F8-03, BR-F8.3-04, BR-F8.3-02, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#cancellationAfterRescheduleIsNotLate` |
+| TC-F8.3.1-03b | AC-F8.3.1-03 | US-F8.3.1 | UC-F8.3 | BR-F8.3-01, BR-F8-03, BR-F8.3-04, BR-F8.3-02, BR-F8.1-03, BR-F8.7-05 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.3.1-03b: xác nhận hủy chỗ đã đổi giờ và hiển thị trạng` |
 | TC-F8.3.1-04a | AC-F8.3.1-04 | US-F8.3.1 | UC-F8.3 | BR-F8.3-04, BR-F8.1-03, BR-F8.3-01, BR-F8.3-02, BR-F8-03, BR-F8.7-05 | `ClassApiIntegrationTest#fullClassRejectsBookingAndCancellationReleasesSeat` |
 | TC-F8.3.1-05a | AC-F8.3.1-05 | US-F8.3.1 | UC-F8.3 | BR-F8.3-02, BR-F8.3-01, BR-F8.3-04, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#oldCalendarMonthViolationsDoNotCountAtVietnamMidnight` |
 | TC-F8.3.1-06a | AC-F8.3.1-06 | US-F8.3.1 | UC-F8.3 | BR-F8.3-02, BR-F8.3-01, BR-F8.3-04, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#violationsLockOnceAndExpiredLockDoesNotReuseOldViolations` |
 | TC-F8.3.1-07a | AC-F8.3.1-07 | US-F8.3.1 | UC-F8.3 | BR-F8.3-02, BR-F8.3-04, BR-F8.3-01, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#doubleCancellationOnlyRecordsOneViolation` |
 | TC-F8.3.1-08a | AC-F8.3.1-08 | US-F8.3.1 | UC-F8.3 | BR-F8.3-04, BR-F8.3-01, BR-F8.3-02, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings` |
 | TC-F8.3.1-09a | AC-F8.3.1-09 | US-F8.3.1 | UC-F8.3 | BR-F8.7-05, BR-F8.3-01, BR-F8.3-04, BR-F8.3-02, BR-F8-03, BR-F8.1-03 | `ClassApiIntegrationTest#changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot` |
+| TC-F8.5.1-01a | AC-F8.5.1-01 | US-F8.5.1 | UC-F8.5 | BR-F8.5-01, BR-F8.5-02, BR-F8.5-03 | `ClassApiIntegrationTest#trainerCalendarUsesActualSessionAssignment` |
+| TC-F8.5.1-01b | AC-F8.5.1-01 | US-F8.5.1 | UC-F8.5 | BR-F8.5-01, BR-F8.5-02, BR-F8.5-03 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.5.1-01b, TC-F8.6.1-01b, TC-F8.6.1-03b: đi vào buổi đượ` |
+| TC-F8.5.1-02a | AC-F8.5.1-02 | US-F8.5.1 | UC-F8.5 | BR-F8.5-01, BR-F8.5-02, BR-F8.5-03 | `ClassApiIntegrationTest#trainerCalendarUsesActualSessionAssignment` |
+| TC-F8.5.1-03a | AC-F8.5.1-03 | US-F8.5.1 | UC-F8.5 | BR-F8.5-01, BR-F8.5-02, BR-F8.5-03 | `ClassApiIntegrationTest#trainerCalendarUsesActualSessionAssignment` |
+| TC-F8.5.1-04a | AC-F8.5.1-04 | US-F8.5.1 | UC-F8.5 | BR-F8.5-02, BR-F8.5-01, BR-F8.5-03 | `ClassApiIntegrationTest#trainerCalendarUsesActualSessionAssignment` |
 | TC-F8.6.1-01a | AC-F8.6.1-01 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
+| TC-F8.6.1-01b | AC-F8.6.1-01 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.5.1-01b, TC-F8.6.1-01b, TC-F8.6.1-03b: đi vào buổi đượ` |
 | TC-F8.6.1-01c | AC-F8.6.1-01 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#noShowOfSoftDeletedMemberIsRecordedWithoutPenalty` |
 | TC-F8.6.1-02a | AC-F8.6.1-02 | US-F8.6.1 | UC-F8.6 | BR-F8.6-03, BR-F8.3-02, BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock` |
 | TC-F8.6.1-03a | AC-F8.6.1-03 | US-F8.6.1 | UC-F8.6 | BR-F8.6-02, BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
+| TC-F8.6.1-03b | AC-F8.6.1-03 | US-F8.6.1 | UC-F8.6 | BR-F8.6-02, BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-06, BR-F8-02 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.5.1-01b, TC-F8.6.1-01b, TC-F8.6.1-03b: đi vào buổi đượ` |
 | TC-F8.6.1-04a | AC-F8.6.1-04 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
 | TC-F8.6.1-05a | AC-F8.6.1-05 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-05, BR-F8.6-04, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
 | TC-F8.6.1-06a | AC-F8.6.1-06 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-05, BR-F8.6-04, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
@@ -1350,6 +1503,8 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F8.7.1-03c | AC-F8.7.1-03 | US-F8.7.1 | UC-F8.7 | BR-F8.7-06, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#scheduleRejectsConcreteRoomTrainerAndPtConflicts` |
 | TC-F8.7.1-04a | AC-F8.7.1-04 | US-F8.7.1 | UC-F8.7 | BR-F8.7-06, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#recurringOverlapUsesActualWeekdaysNotJustIntersectingDateRanges` |
 | TC-F8.7.1-05a | AC-F8.7.1-05 | US-F8.7.1 | UC-F8.7 | BR-F8.7-02, BR-F8.7-04, BR-F8.7-01, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#scheduleGenerationIsIdempotentSnapshotsAndDeactivationPreserveSessions` |
+| TC-F8.7.1-05b | AC-F8.7.1-05 | US-F8.7.1 | UC-F8.7 | BR-F8.7-02, BR-F8.7-04, BR-F8.7-01, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#calendarsPreserveGeneratedClassTypeAfterScheduleEdit` |
+| TC-F8.7.1-05c | AC-F8.7.1-05 | US-F8.7.1 | UC-F8.7 | BR-F8.7-02, BR-F8.7-04, BR-F8.7-01, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassSessionTypeMigrationIntegrationTest#migrationBackfillsExistingSessionsAndAcceptsInsertsFromPreviousBackend` |
 | TC-F8.7.1-08a | AC-F8.7.1-08 | US-F8.7.1 | UC-F8.7 | BR-F8-04, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings` |
 | TC-F8.7.1-08b | AC-F8.7.1-08 | US-F8.7.1 | UC-F8.7 | BR-F8-04, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#scheduleApiDistinguishesMissingOutOfScopeAndIneligibleResources` |
 | TC-F8.7.1-08c | AC-F8.7.1-08 | US-F8.7.1 | UC-F8.7 | BR-F8-04, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot` |
@@ -1367,7 +1522,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 
 ## 6. Kiểm thử chưa mang mã TC
 
-Có 176 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
+Có 263 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
 
 | File | Số kiểm thử |
 | --- | --- |
@@ -1382,6 +1537,11 @@ Có 176 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthControllerTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthServiceTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/JwtTokenServiceTest.java` | 5 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/checkin/CheckinApiIntegrationTest.java` | 36 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/checkin/CheckinCheckoutConcurrencyIntegrationTest.java` | 2 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/checkin/CheckinCheckoutHistoryIntegrationTest.java` | 10 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/checkin/CheckinConcurrencyIntegrationTest.java` | 3 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/dashboard/DashboardApiIntegrationTest.java` | 13 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/groupclass/ClassApiIntegrationTest.java` | 2 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/invoice/InvoiceSaleIntegrationTest.java` | 2 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/F1RegistrationIntegrationTest.java` | 1 |
@@ -1406,6 +1566,10 @@ Có 176 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `frontend/src/features/auth/api/validation.test.ts` | 1 |
 | `frontend/src/features/auth/pages/LoginPage.test.tsx` | 5 |
 | `frontend/src/features/auth/pages/RegisterPage.test.tsx` | 1 |
+| `frontend/src/features/checkins/api/checkins.test.ts` | 1 |
+| `frontend/src/features/checkins/pages/CheckinPage.test.tsx` | 12 |
+| `frontend/src/features/dashboard/api/dashboard.test.ts` | 1 |
+| `frontend/src/features/dashboard/pages/DashboardPage.test.tsx` | 9 |
 | `frontend/src/features/members/api/members.test.ts` | 6 |
 | `frontend/src/features/members/components/MemberAvatar.test.tsx` | 2 |
 | `frontend/src/features/members/components/MemberFormModal.test.tsx` | 1 |
