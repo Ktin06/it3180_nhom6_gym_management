@@ -133,10 +133,9 @@ public class AuthController {
             Authentication auth,
             @Valid @RequestBody ChangePasswordRequest request) {
         authService.changePassword(CurrentUser.from(auth), request);
-        // Mọi refresh token đã bị thu hồi: xóa cookie để trình duyệt không gửi lại token cũ (AC-F1.4.1-06).
-        return ResponseEntity.noContent()
-            .header(HttpHeaders.SET_COOKIE, cookieHelper.createCleanRefreshCookie().toString())
-            .build();
+        // Không xóa cookie refresh_token ở đây: phản hồi đến muộn có thể xóa nhầm cookie của phiên mới mà tab khác
+        // vừa đăng nhập bằng mật khẩu mới (cookie dùng chung giữa các tab, TC-F1.4.1-01j).
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Yêu cầu gửi liên kết đặt lại mật khẩu qua email")

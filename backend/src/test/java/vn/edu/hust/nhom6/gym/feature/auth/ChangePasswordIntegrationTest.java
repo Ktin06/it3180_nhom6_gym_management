@@ -181,7 +181,7 @@ class ChangePasswordIntegrationTest {
     }
 
     @Test
-    @DisplayName("TC-F1.4.1-06a: Đổi mật khẩu thành công đặt bộ đếm sai về 0, xóa khóa tạm đã hết hạn và trả cookie refresh_token đã hết hạn")
+    @DisplayName("TC-F1.4.1-06a: Đổi mật khẩu thành công đặt bộ đếm sai về 0, xóa khóa tạm đã hết hạn và không xóa cookie refresh_token")
     void doiMatKhauThanhCongDatLaiBoDemVaXoaCookie() throws Exception {
         SessionTokens session = registerMember("Nguyễn Văn A", "member@example.com", "0912345678", "OldPass123");
         jdbcTemplate.update("""
@@ -194,10 +194,8 @@ class ChangePasswordIntegrationTest {
 
         assertThat(failedLoginCount("member@example.com")).isZero();
         assertThat(lockedUntilSet("member@example.com")).isFalse();
-        Cookie cleared = result.getResponse().getCookie("refresh_token");
-        assertThat(cleared).isNotNull();
-        assertThat(cleared.getMaxAge()).isZero();
-        assertThat(cleared.getValue()).isEmpty();
+        // Không gửi Set-Cookie: tránh xóa nhầm cookie của phiên mới ở tab khác (TC-F1.4.1-01j)
+        assertThat(result.getResponse().getHeaders(HttpHeaders.SET_COOKIE)).isEmpty();
     }
 
     @Test

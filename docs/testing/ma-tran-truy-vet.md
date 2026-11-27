@@ -336,7 +336,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F1.4.1-05a `ChangePasswordIntegrationTest#saiMatKhauHienTaiNhieuLanThiKhoaTam`
       - TC-F1.4.1-05b `ChangePasswordIntegrationTest#dangNhapSaiVaDoiMatKhauSaiDungChungBoDem`
       - TC-F1.4.1-05c `features/auth/pages/ChangePasswordPage.test.tsx › TC-F1.4.1-05c: Tài khoản đang khóa tạm (403) thì hiển thị câ`
-    - AC-F1.4.1-06 Đổi mật khẩu thành công đặt lại bộ đếm sai và xóa cookie phiên (BR-F1-04, BR-F1-06)
+    - AC-F1.4.1-06 Đổi mật khẩu thành công đặt lại bộ đếm sai và khóa tạm (BR-F1-04, BR-F1-06)
       - TC-F1.4.1-06a `ChangePasswordIntegrationTest#doiMatKhauThanhCongDatLaiBoDemVaXoaCookie`
       - TC-F1.4.1-06b `ChangePasswordIntegrationTest#matKhauMoiTrungKhongTangBoDem`
 - **UC-F1.5** Quên mật khẩu và đặt lại mật khẩu (Sprint 2)
