@@ -3,6 +3,23 @@ import { HOME_PATH_BY_ROLE, ROLES } from '../auth/roles'
 import { canOpen, ROUTE_ACCESS, rolesFor } from './route-access'
 
 describe('ROUTE_ACCESS', () => {
+  describe('TC-F5.3.1-08j: %s mở được danh sách và chi tiết hóa đơn', () => {
+    it.each(['SUPER_ADMIN', 'BRANCH_MANAGER', 'RECEPTIONIST'] as const)('trường hợp %s', (role) => {
+      expect(canOpen(role, '/hoa-don')).toBe(true)
+      expect(canOpen(role, '/hoa-don/88')).toBe(true)
+      expect(canOpen(role, '/member/invoices/88/pdf')).toBe(false)
+    })
+  })
+  describe('TC-F5.3.1-08k: %s không mở được trang hóa đơn của nhân viên', () => {
+    it.each(['TRAINER', 'MEMBER'] as const)('trường hợp %s', (role) => {
+      expect(canOpen(role, '/hoa-don')).toBe(false)
+      expect(canOpen(role, '/hoa-don/88')).toBe(false)
+    })
+  })
+  it('TC-F5.4.1-04f: chỉ MEMBER mở điểm vào PDF hội viên', () => {
+    expect(canOpen('MEMBER', '/member/invoices/88/pdf')).toBe(true)
+    expect(canOpen('TRAINER', '/member/invoices/88/pdf')).toBe(false)
+  })
   it.each(ROLES)('trang chủ của %s chỉ vai trò đó mở được, gồm cả trang con', (role) => {
     const home = HOME_PATH_BY_ROLE[role]
     expect(rolesFor(home)).toEqual([role])

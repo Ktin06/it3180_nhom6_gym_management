@@ -12,13 +12,13 @@
 | F2 | 5 | 6 | 31 | 25 | 6 | 93 |
 | F3 | 5 | 6 | 45 | 44 | 1 | 136 |
 | F4 | 5 | 5 | 37 | 0 | 37 | 0 |
-| F5 | 5 | 5 | 49 | 37 | 12 | 65 |
+| F5 | 5 | 5 | 49 | 49 | 0 | 154 |
 | F6 | 5 | 5 | 16 | 0 | 16 | 0 |
 | F7 | 5 | 0 | 0 | 0 | 0 | 0 |
 | F8 | 9 | 9 | 55 | 53 | 2 | 81 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **42** | **262** | **183** | **79** | **493** |
+| **Tổng** | **57** | **42** | **262** | **195** | **67** | **582** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -91,18 +91,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F4.5.1-02 | Đầy đủ thông tin chi tiết của từng lượt check-in | US-F4.5.1 |
 | AC-F4.5.1-03 | Lọc trạng thái, phương thức và tìm kiếm theo tên hoặc mã hội viên | US-F4.5.1 |
 | AC-F4.5.1-04 | Phân quyền và phạm vi dữ liệu theo chi nhánh | US-F4.5.1 |
-| AC-F5.5.1-01 | Hoàn toàn bộ hóa đơn có gói chưa dùng | US-F5.5.1 |
-| AC-F5.5.1-02 | Không làm thay đổi gói nối tiếp mua bằng hóa đơn khác | US-F5.5.1 |
-| AC-F5.5.1-03 | Chỉ Quản lý chi nhánh được hoàn tiền | US-F5.5.1 |
-| AC-F5.5.1-04 | Bắt buộc lý do hoàn tiền có nội dung | US-F5.5.1 |
-| AC-F5.5.1-05 | Hóa đơn không tồn tại, ngoài chi nhánh và chưa đăng nhập | US-F5.5.1 |
-| AC-F5.5.1-06 | Hai quản lý cùng hoàn một hóa đơn | US-F5.5.1 |
-| AC-F5.5.1-07 | Chỉ hoàn hóa đơn đang PAID | US-F5.5.1 |
-| AC-F5.5.1-08 | Gói ngoài ACTIVE hoặc UPCOMING không đủ điều kiện | US-F5.5.1 |
-| AC-F5.5.1-09 | Gói đã có check-in không được hoàn | US-F5.5.1 |
-| AC-F5.5.1-10 | Gói PT có buổi đặt kể cả đã hủy không được hoàn | US-F5.5.1 |
-| AC-F5.5.1-11 | Chỗ lớp BOOKED chưa kết thúc chặn hoàn gói TIME | US-F5.5.1 |
-| AC-F5.5.1-12 | Lượt dùng gắn với gói khác không chặn hoàn gói chưa dùng | US-F5.5.1 |
 | AC-F6.1.1-01 | Đếm chính xác số hội viên duy nhất đang tập và tổng lượt check-in | US-F6.1.1 |
 | AC-F6.1.1-02 | Chủ chuỗi bắt buộc phải chọn chi nhánh cụ thể | US-F6.1.1 |
 | AC-F6.1.1-03 | Nhân viên chi nhánh chỉ xem số liệu chi nhánh mình | US-F6.1.1 |
@@ -675,6 +663,11 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
   - **US-F5.1.1** Mã VietQR cho hóa đơn (#140) ✅ mọi AC có TC
     - AC-F5.1.1-01 Sinh VietQR cho hóa đơn chờ bằng số tiền server (BR-F5-01, BR-F5-02)
       - TC-F5.1.1-01a `InvoiceDocumentIntegrationTest#vietQrForPendingInvoiceUsesServerTotalAndEncodesParams`
+      - TC-F5.1.1-01b `features/invoices/api/invoices.test.ts › TC-F5.1.1-01b: vietqr gọi GET /invoices/{id}/vietqr`
+      - TC-F5.1.1-01c `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.1.1-01c: chọn chuyển khoản gọi VietQR, hiện ảnh QR và `
+      - TC-F5.1.1-01d `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.1.1-01d: ảnh QR lỗi vẫn giữ thông tin chuyển khoản và `
+      - TC-F5.1.1-01e `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.1.1-01e: phản hồi QR cũ không ghi đè yêu cầu tải QR mớ`
+      - TC-F5.1.1-01f `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.1.1-01f: thiếu Clipboard API không được báo sao chép t`
     - AC-F5.1.1-02 Chỉ sinh VietQR khi hóa đơn PENDING
       - TC-F5.1.1-02a `InvoiceDocumentIntegrationTest#vietQrForNonPendingInvoiceIs422`
     - AC-F5.1.1-03 Cấu hình ngân hàng ưu tiên theo chi nhánh
@@ -687,71 +680,100 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F5.1.1-06 Thiếu cấu hình ngân hàng không sinh VietQR
       - TC-F5.1.1-06a `InvoiceDocumentIntegrationTest#vietQrMissingBankConfigIs422`
       - TC-F5.1.1-06b `InvoiceDocumentIntegrationTest#blankBranchBankConfigIs422`
+      - TC-F5.1.1-06c `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.1.1-06c: lỗi 422 khi tải VietQR hiện đúng câu detail c`
     - AC-F5.1.1-07 ID VietQR không hợp lệ
       - TC-F5.1.1-07a `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId`
       - TC-F5.1.1-07b `InvoiceDocumentIntegrationTest#invalidDocumentIdsReturnFieldErrors`
     - AC-F5.1.1-08 Không sinh VietQR cho hóa đơn cổng hội viên quá hạn (BR-F5-07)
       - TC-F5.1.1-08a `InvoiceExpiryIntegrationTest#paymentAndVietQrRespectPortalDeadline`
+      - TC-F5.1.1-08b `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.1.1-08b: hóa đơn portal quá hạn hiện lỗi VietQR và khô`
 - **UC-F5.2** Ghi nhận thanh toán tại quầy và kích hoạt dịch vụ
   - **US-F5.2.1** Ghi nhận thanh toán, kích hoạt gói (#141) ✅ mọi AC có TC
     - AC-F5.2.1-01 Thu tiền mặt kích hoạt gói mới đúng ngày và giữ thời hạn đã chốt (BR-F5-03, BR-F5-04, BR-F3-06)
       - TC-F5.2.1-01a `InvoicePaymentIntegrationTest#payActivatesWithDatesRecomputedAtPaymentTime`
       - TC-F5.2.1-01b `InvoicePaymentIntegrationTest#payPtWhileHoldingTimeActivatesPt`
       - TC-F5.2.1-01c `InvoicePaymentIntegrationTest#paysPortalInvoiceAtCounter`
+      - TC-F5.2.1-01d `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-01d: xác nhận thu tiền mặt gửi method CASH và khôn`
+      - TC-F5.2.1-01e `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-01e: hiển thị ACTIVE từ server sau thu tiền`
+      - TC-F5.2.1-01f `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-01f: hóa đơn nguồn %s vẫn thu được tại quầy`
     - AC-F5.2.1-02 Thu chuyển khoản cho gia hạn nối tiếp (BR-F5-04, BR-F3-11)
       - TC-F5.2.1-02a `InvoicePaymentIntegrationTest#payRenewalAfterActiveTimePackageIsUpcoming`
       - TC-F5.2.1-02b `InvoicePaymentIntegrationTest#payRenewalAfterFrozenPackageIsUpcoming`
       - TC-F5.2.1-02c `InvoicePaymentIntegrationTest#payRenewalAfterEmptySessionPackageStartsTomorrow`
+      - TC-F5.2.1-02d `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-02d: hiển thị trạng thái UPCOMING và ngày hiệu lực`
     - AC-F5.2.1-03 Hóa đơn 0 đồng vẫn ghi phiếu thu và kích hoạt gói (BR-F5-04)
       - TC-F5.2.1-03a `InvoicePaymentIntegrationTest#zeroTotalInvoiceActivatesWithZeroPaymentRow`
       - TC-F5.2.1-03b `PaymentAmountMigrationIntegrationTest#upgradesExistingPaymentsWithoutChangingHistory`
+      - TC-F5.2.1-03c `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-03c: cho phép xác nhận hóa đơn 0 đồng và hiển thị `
     - AC-F5.2.1-04 Chỉ Lễ tân và Quản lý chi nhánh được xác nhận thu (BR-F5-03)
       - TC-F5.2.1-04a `InvoicePaymentIntegrationTest#branchManagerCanPay`
       - TC-F5.2.1-04b `InvoicePaymentIntegrationTest#otherRolesAreForbidden`
       - TC-F5.2.1-04c `InvoicePaymentIntegrationTest#noTokenIs401`
+      - TC-F5.2.1-04d `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-04d: %s không thấy chức năng thu tiền hoặc VietQR`
     - AC-F5.2.1-05 Dữ liệu thu tiền sai không làm thay đổi hóa đơn
       - TC-F5.2.1-05a `InvoicePaymentIntegrationTest#invalidMethodIs400`
       - TC-F5.2.1-05b `InvoicePaymentIntegrationTest#tooLongTransactionRefIs400`
       - TC-F5.2.1-05c `InvoicePaymentIntegrationTest#invalidPaymentIdIs400`
+      - TC-F5.2.1-05d `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-05d: lỗi transactionRef 400 được hiển thị ngay dướ`
     - AC-F5.2.1-06 Thu tiền hóa đơn không tồn tại hoặc ngoài chi nhánh
       - TC-F5.2.1-06a `InvoicePaymentIntegrationTest#unknownInvoiceIs404`
       - TC-F5.2.1-06b `InvoicePaymentIntegrationTest#otherBranchIs404`
     - AC-F5.2.1-07 Hai nhân viên cùng thu một hóa đơn (BR-F5-05)
       - TC-F5.2.1-07a `InvoicePaymentConcurrencyIntegrationTest#twoReceptionistsPayingSameInvoice`
+      - TC-F5.2.1-07b `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-07b: lỗi 409 hiện đúng câu detail của API và tải l`
+      - TC-F5.2.1-07c `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-07c: bấm xác nhận lặp khi đang gửi chỉ gọi pay một`
     - AC-F5.2.1-08 Không thu lại hóa đơn đã xử lý
       - TC-F5.2.1-08a `InvoicePaymentIntegrationTest#payingTwiceIs422`
       - TC-F5.2.1-08b `InvoicePaymentIntegrationTest#payingCancelledInvoiceIs422`
+      - TC-F5.2.1-08c `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-08c: lỗi 422 hiện đúng câu detail của API`
     - AC-F5.2.1-09 Kiểm tra lại gói UPCOMING ở thời điểm thu tiền (BR-F5-04, BR-F3-11)
       - TC-F5.2.1-09a `InvoicePaymentConcurrencyIntegrationTest#twoRenewalsPaidAtOnceYieldOneUpcoming`
       - TC-F5.2.1-09b `InvoicePaymentIntegrationTest#upcomingSameTypeBlocksActivation`
       - TC-F5.2.1-09c `InvoicePaymentIntegrationTest#upcomingOfOtherTypeOrScopeDoesNotBlock`
+      - TC-F5.2.1-09d `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-09d: 422 do có UPCOMING tải lại PENDING, không báo`
     - AC-F5.2.1-10 Không sử dụng số tiền giả từ trình duyệt (BR-F5-01)
       - TC-F5.2.1-10a `InvoicePaymentIntegrationTest#ignoresClientSuppliedAmounts`
+      - TC-F5.2.1-10b `features/invoices/api/invoices.test.ts › TC-F5.2.1-10b: pay gửi đúng method và không gửi số tiền lên `
+      - TC-F5.2.1-10c `features/invoices/api/invoices.test.ts › TC-F5.2.1-10c: loại bỏ giá trị tiền gửi thêm và chuẩn hóa mã`
     - AC-F5.2.1-11 Gia hạn sau gói PT 0 buổi còn giữ trạng thái ACTIVE hoặc FROZEN (BR-F3-11)
       - TC-F5.2.1-11a `InvoicePaymentIntegrationTest#zeroSessionPtStillHeldSchedulesAfterOldEndDate`
     - AC-F5.2.1-12 Không thu tiền hóa đơn cổng hội viên quá hạn (BR-F5-07)
       - TC-F5.2.1-12a `InvoiceExpiryIntegrationTest#paymentAndVietQrRespectPortalDeadline`
+      - TC-F5.2.1-12b `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-12b: hóa đơn portal quá hạn hiện lỗi server và khô`
 - **UC-F5.3** Tra cứu và quản lý hóa đơn tại quầy (và toàn chuỗi)
   - **US-F5.3.1** Tra cứu và hủy hóa đơn chờ (#142) ✅ mọi AC có TC
     - AC-F5.3.1-01 Danh sách hóa đơn theo chi nhánh của nhân viên (BR-F5-06)
       - TC-F5.3.1-01a `InvoiceQueryIntegrationTest#receptionistListsOwnBranchNewestFirstWithPaging`
       - TC-F5.3.1-01b `InvoiceQueryIntegrationTest#staffCannotOverrideBranchFilter`
+      - TC-F5.3.1-01c `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-01c: %s không tải danh mục hoặc chọn chi nhánh khá`
     - AC-F5.3.1-02 Lọc và tìm hóa đơn theo ngày Việt Nam (BR-F5-06)
       - TC-F5.3.1-02a `InvoiceQueryIntegrationTest#filterByStatusSourceAndKeyword`
       - TC-F5.3.1-02b `InvoiceQueryIntegrationTest#filterByVietnamDateRangeHalfOpen`
+      - TC-F5.3.1-02c `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-02c: lọc danh sách hóa đơn theo trạng thái, nguồn,`
+      - TC-F5.3.1-02d `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-02d: lỗi danh sách có thể tải lại và hiển thị trạn`
     - AC-F5.3.1-03 Hóa đơn có member_id rỗng vẫn tra cứu được (BR-F5-06)
       - TC-F5.3.1-03a `InvoiceQueryIntegrationTest#walkInInvoiceWithNullMemberIsVisibleInListAndDetail`
+      - TC-F5.3.1-03b `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-03b: hiển thị hóa đơn khách lẻ và tiền định dạng V`
     - AC-F5.3.1-04 Chủ chuỗi xem toàn chuỗi hoặc lọc chi nhánh (BR-F5-06)
       - TC-F5.3.1-04a `InvoiceQueryIntegrationTest#superAdminListsAllBranchesAndFiltersByBranchId`
+      - TC-F5.3.1-04b `InvoiceQueryIntegrationTest#ownerListsBranchOptionsIncludingInactiveBranches`
+      - TC-F5.3.1-04c `features/invoices/api/invoices.test.ts › TC-F5.3.1-04c: danh mục chi nhánh dùng endpoint hóa đơn dành`
+      - TC-F5.3.1-04d `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-04d: Chủ chuỗi lọc chi nhánh bằng danh mục toàn ch`
+      - TC-F5.3.1-04e `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-04e: lỗi danh mục chi nhánh có thể thử lại, danh s`
     - AC-F5.3.1-05 Chi tiết hóa đơn gồm dòng hóa đơn và lịch sử thu (BR-F5-06)
       - TC-F5.3.1-05a `InvoiceQueryIntegrationTest#detailReturnsItemsAndPaymentsWithReceiverName`
+      - TC-F5.3.1-05b `features/invoices/api/invoices.test.ts › TC-F5.3.1-05b: list và detail gọi đúng endpoint và tham số l`
+      - TC-F5.3.1-05c `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.3.1-05c: đổi mã hóa đơn trong route phải tải dữ liệu m`
     - AC-F5.3.1-06 Hủy hóa đơn chờ đồng thời hủy gói chờ (BR-F5-06, BR-F5-08)
       - TC-F5.3.1-06a `InvoiceCancelIntegrationTest#cancelPendingInvoiceCancelsMembership`
       - TC-F5.3.1-06b `InvoiceCancelIntegrationTest#cancelledInvoiceNoLongerBlocksSale`
       - TC-F5.3.1-06c `InvoiceCancelIntegrationTest#managerAndOwnerCanCancel`
+      - TC-F5.3.1-06d `features/invoices/api/invoices.test.ts › TC-F5.3.1-06d: cancel gọi PUT /invoices/{id}/cancel`
+      - TC-F5.3.1-06e `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.3.1-06e: hủy hóa đơn PENDING thành công và cập nhật tr`
     - AC-F5.3.1-07 Không hủy hóa đơn ngoài trạng thái PENDING
       - TC-F5.3.1-07a `InvoiceCancelIntegrationTest#cancelPaidInvoiceIs422`
       - TC-F5.3.1-07b `InvoiceCancelIntegrationTest#cancelTwiceIs422`
+      - TC-F5.3.1-07c `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.3.1-07c: hủy gặp %s phải tải lại trạng thái mới`
     - AC-F5.3.1-08 Phân biệt sai vai trò với hóa đơn ngoài phạm vi (BR-F5-06)
       - TC-F5.3.1-08a `InvoiceCancelIntegrationTest#unknownInvoiceIs404`
       - TC-F5.3.1-08b `InvoiceCancelIntegrationTest#otherBranchIs404`
@@ -759,42 +781,97 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F5.3.1-08d `InvoiceQueryIntegrationTest#detailOfOtherBranchOrUnknownIs404`
       - TC-F5.3.1-08e `InvoiceQueryIntegrationTest#trainerAndMemberAreForbidden`
       - TC-F5.3.1-08f `InvoiceQueryIntegrationTest#unauthenticatedRequestsAre401`
+      - TC-F5.3.1-08g `InvoiceQueryIntegrationTest#nonOwnerCannotReadBranchOptions`
+      - TC-F5.3.1-08h `InvoiceQueryIntegrationTest#anonymousCannotReadBranchOptions`
+      - TC-F5.3.1-08i `layouts/staff-menu.test.ts › TC-F5.3.1-08i: menu Thanh toán bật đúng vai trò theo quyền r`
+      - TC-F5.3.1-08j `routes/route-access.test.ts › TC-F5.3.1-08j: %s mở được danh sách và chi tiết hóa đơn`
+      - TC-F5.3.1-08k `routes/route-access.test.ts › TC-F5.3.1-08k: %s không mở được trang hóa đơn của nhân viên`
     - AC-F5.3.1-09 Bộ lọc và phân trang không hợp lệ
       - TC-F5.3.1-09a `InvoiceQueryIntegrationTest#invalidQueryParamsAndIdReturn400`
       - TC-F5.3.1-09b `InvoiceCancelIntegrationTest#invalidCancelIdIs400`
+      - TC-F5.3.1-09c `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-09c: khoảng ngày ngược báo lỗi và không gửi bộ lọc`
+      - TC-F5.3.1-09d `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.3.1-09d: mã route không hợp lệ %s không gọi API`
     - AC-F5.3.1-10 Nhân viên không có phân công chi nhánh hoạt động
       - TC-F5.3.1-10a `InvoiceQueryIntegrationTest#staffWithoutActiveBranchIs403`
 - **UC-F5.4** In và xuất hóa đơn PDF
   - **US-F5.4.1** Hóa đơn PDF (#143) ✅ mọi AC có TC
     - AC-F5.4.1-01 Xuất PDF hóa đơn PAID hoặc REFUNDED
       - TC-F5.4.1-01a `InvoiceDocumentIntegrationTest#pdfForPaidAndRefundedInvoiceIsReadableWithVietnameseText`
+      - TC-F5.4.1-01b `features/invoices/api/invoices.test.ts › TC-F5.4.1-01b: pdf gọi GET /invoices/{id}/pdf với responseTy`
+      - TC-F5.4.1-01c `features/invoices/api/invoices.test.ts › TC-F5.4.1-01c: lỗi PDF không phải JSON vẫn giữ được lỗi HTTP`
+      - TC-F5.4.1-01d `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.4.1-01d: hóa đơn PAID và REFUNDED tải PDF bằng Blob, m`
+      - TC-F5.4.1-01e `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.4.1-01e: mở được tab PDF thì không tải file lần nữa; b`
+      - TC-F5.4.1-01f `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.4.1-01f: rời trang khi PDF đang tải không tạo URL hoặc`
     - AC-F5.4.1-02 PDF giữ tên và giá ở thời điểm bán (BR-F5-09)
       - TC-F5.4.1-02a `InvoiceDocumentIntegrationTest#pdfUsesSnapshotPriceAndDescriptionFromInvoiceItems`
     - AC-F5.4.1-03 Không xuất PDF hóa đơn chưa thanh toán
       - TC-F5.4.1-03a `InvoiceDocumentIntegrationTest#pdfForPendingOrCancelledInvoiceIs422`
+      - TC-F5.4.1-03b `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.4.1-03b: hóa đơn PENDING không hiển thị nút In / tải P`
     - AC-F5.4.1-04 Hội viên chỉ tải hóa đơn của mình; nhân viên đúng chi nhánh
       - TC-F5.4.1-04a `InvoiceDocumentIntegrationTest#pdfSecurityOwnershipAndScope`
+      - TC-F5.4.1-04b `features/invoices/api/invoices.test.ts › TC-F5.4.1-04b: giữ status và detail của lỗi PDF Blob %s`
+      - TC-F5.4.1-04c `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.4.1-04c: PDF 404 dạng Blob phải hiện detail server tha`
+      - TC-F5.4.1-04d `features/invoices/pages/MemberInvoicePdfPage.test.tsx › TC-F5.4.1-04d: gọi API PDF trực tiếp, không cần quyền API ch`
+      - TC-F5.4.1-04e `features/invoices/pages/MemberInvoicePdfPage.test.tsx › TC-F5.4.1-04e: hiển thị lỗi API %s, không tạo PDF từ dữ liệu`
+      - TC-F5.4.1-04f `routes/route-access.test.ts › TC-F5.4.1-04f: chỉ MEMBER mở điểm vào PDF hội viên`
     - AC-F5.4.1-05 Vai trò không được tải PDF và chưa đăng nhập
       - TC-F5.4.1-05a `InvoiceDocumentIntegrationTest#pdfSecurityOwnershipAndScope`
+      - TC-F5.4.1-05b `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.4.1-05b: Chủ chuỗi không thấy nút PDF dù hóa đơn PAID`
     - AC-F5.4.1-06 Xuất PDF hóa đơn khách lẻ đã có (BR-F5-09)
       - TC-F5.4.1-06a `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId`
     - AC-F5.4.1-07 ID xuất PDF không hợp lệ
       - TC-F5.4.1-07a `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId`
       - TC-F5.4.1-07b `InvoiceDocumentIntegrationTest#invalidDocumentIdsReturnFieldErrors`
+      - TC-F5.4.1-07c `features/invoices/pages/MemberInvoicePdfPage.test.tsx › TC-F5.4.1-07c: ID %s bị chặn trước khi gọi tải PDF`
 - **UC-F5.5** Hoàn tiền hóa đơn (Refund)
-  - **US-F5.5.1** Hoàn tiền có kiểm soát (#144)
-    - AC-F5.5.1-01 Hoàn toàn bộ hóa đơn có gói chưa dùng (BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14) ❌ chưa có TC
-    - AC-F5.5.1-02 Không làm thay đổi gói nối tiếp mua bằng hóa đơn khác (BR-F5-13) ❌ chưa có TC
-    - AC-F5.5.1-03 Chỉ Quản lý chi nhánh được hoàn tiền (BR-F5-11) ❌ chưa có TC
-    - AC-F5.5.1-04 Bắt buộc lý do hoàn tiền có nội dung ❌ chưa có TC
-    - AC-F5.5.1-05 Hóa đơn không tồn tại, ngoài chi nhánh và chưa đăng nhập (BR-F5-11) ❌ chưa có TC
-    - AC-F5.5.1-06 Hai quản lý cùng hoàn một hóa đơn (BR-F5-12) ❌ chưa có TC
-    - AC-F5.5.1-07 Chỉ hoàn hóa đơn đang PAID ❌ chưa có TC
-    - AC-F5.5.1-08 Gói ngoài ACTIVE hoặc UPCOMING không đủ điều kiện (BR-F5-14) ❌ chưa có TC
-    - AC-F5.5.1-09 Gói đã có check-in không được hoàn (BR-F5-14) ❌ chưa có TC
-    - AC-F5.5.1-10 Gói PT có buổi đặt kể cả đã hủy không được hoàn (BR-F5-14) ❌ chưa có TC
-    - AC-F5.5.1-11 Chỗ lớp BOOKED chưa kết thúc chặn hoàn gói TIME (BR-F5-14) ❌ chưa có TC
-    - AC-F5.5.1-12 Lượt dùng gắn với gói khác không chặn hoàn gói chưa dùng (BR-F5-14) ❌ chưa có TC
+  - **US-F5.5.1** Hoàn tiền có kiểm soát (#144) ✅ mọi AC có TC
+    - AC-F5.5.1-01 Hoàn toàn bộ hóa đơn có gói chưa dùng (BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14)
+      - TC-F5.5.1-01a `RefundIntegrationTest#refundSucceeds`
+      - TC-F5.5.1-01b `RefundIntegrationTest#refundUpcomingRenewal`
+      - TC-F5.5.1-01c `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-01c: quản lý chi nhánh hoàn tiền hai bước thành cô`
+      - TC-F5.5.1-01d `features/invoices/api/invoices.test.ts › TC-F5.5.1-01d: refund gửi POST /invoices/{id}/refund với ref`
+    - AC-F5.5.1-02 Không làm thay đổi gói nối tiếp mua bằng hóa đơn khác (BR-F5-13)
+      - TC-F5.5.1-02a `RefundIntegrationTest#refundKeepsFollowingUpcomingUntouched`
+    - AC-F5.5.1-03 Chỉ Quản lý chi nhánh được hoàn tiền (BR-F5-11)
+      - TC-F5.5.1-03a `RefundIntegrationTest#receptionistIsForbidden`
+      - TC-F5.5.1-03b `RefundIntegrationTest#otherRolesAreForbidden`
+      - TC-F5.5.1-03c `RefundIntegrationTest#forbiddenComesBeforeValidation`
+      - TC-F5.5.1-03d `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-03d: nút Hoàn tiền chỉ hiện cho BRANCH_MANAGER với`
+    - AC-F5.5.1-04 Bắt buộc lý do hoàn tiền có nội dung
+      - TC-F5.5.1-04a `RefundIntegrationTest#missingReasonIs400`
+      - TC-F5.5.1-04b `RefundIntegrationTest#noBodyOrTooLongReasonIs400`
+      - TC-F5.5.1-04c `RefundIntegrationTest#reasonLengthCountedAfterStrip`
+      - TC-F5.5.1-04d `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-04d: để trống lý do hoàn tiền không gửi API và hiệ`
+      - TC-F5.5.1-04e `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-04e: lỗi 400 từ API hiện đúng câu errors.refundRea`
+    - AC-F5.5.1-05 Hóa đơn không tồn tại, ngoài chi nhánh và chưa đăng nhập (BR-F5-11)
+      - TC-F5.5.1-05a `RefundIntegrationTest#anonymousIs401`
+      - TC-F5.5.1-05b `RefundIntegrationTest#unknownInvoiceIs404`
+      - TC-F5.5.1-05c `RefundIntegrationTest#otherBranchManagerIs404`
+      - TC-F5.5.1-05d `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-05d: lỗi 403 và 404 khi hoàn tiền hiện đúng câu de`
+    - AC-F5.5.1-06 Hai quản lý cùng hoàn một hóa đơn (BR-F5-12)
+      - TC-F5.5.1-06a `RefundConcurrencyIntegrationTest#twoManagersRefundingSameInvoice`
+      - TC-F5.5.1-06b `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-06b: lỗi 409 và 422 hóa đơn không PAID hiện đúng c`
+    - AC-F5.5.1-07 Chỉ hoàn hóa đơn đang PAID
+      - TC-F5.5.1-07a `RefundIntegrationTest#pendingInvoiceIs422`
+      - TC-F5.5.1-07b `RefundIntegrationTest#cancelledInvoiceIs422`
+      - TC-F5.5.1-07c `RefundIntegrationTest#refundTwiceIs422`
+    - AC-F5.5.1-08 Gói ngoài ACTIVE hoặc UPCOMING không đủ điều kiện (BR-F5-14)
+      - TC-F5.5.1-08a `RefundIntegrationTest#frozenMembershipIs422`
+      - TC-F5.5.1-08b `RefundConcurrencyIntegrationTest#membershipExpiredByJobBetweenCheckAndCancel`
+    - AC-F5.5.1-09 Gói đã có check-in không được hoàn (BR-F5-14)
+      - TC-F5.5.1-09a `RefundIntegrationTest#checkedInMembershipIs422`
+      - TC-F5.5.1-09b `RefundIntegrationTest#ptMembershipUsedForCheckinIs422`
+    - AC-F5.5.1-10 Gói PT có buổi đặt kể cả đã hủy không được hoàn (BR-F5-14)
+      - TC-F5.5.1-10a `RefundIntegrationTest#bookedPtSessionIs422`
+      - TC-F5.5.1-10b `RefundIntegrationTest#cancelledPtSessionStillCounts`
+    - AC-F5.5.1-11 Chỗ lớp BOOKED chưa kết thúc chặn hoàn gói TIME (BR-F5-14)
+      - TC-F5.5.1-11a `RefundIntegrationTest#upcomingClassBookingIs422`
+      - TC-F5.5.1-11b `RefundIntegrationTest#inProgressClassBookingIs422`
+      - TC-F5.5.1-11c `RefundIntegrationTest#pastOrCancelledBookingDoesNotBlock`
+      - TC-F5.5.1-11d `RefundIntegrationTest#classBookingDoesNotBlockPtRefund`
+      - TC-F5.5.1-11e `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-11e: lỗi 422 gói đã dùng và còn chỗ đặt lớp hiện đ`
+    - AC-F5.5.1-12 Lượt dùng gắn với gói khác không chặn hoàn gói chưa dùng (BR-F5-14)
+      - TC-F5.5.1-12a `RefundIntegrationTest#otherMembershipUsageDoesNotBlock`
 
 ### F6
 
@@ -1336,6 +1413,11 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F3.5.1-13a | AC-F3.5.1-13 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceSaleIntegrationTest#invoiceCodesAreSequential` |
 | TC-F3.5.1-13b | AC-F3.5.1-13 | US-F3.5.1 | UC-F3.5 | BR-F3-04, BR-F3-09, BR-F3-10, BR-F3-11, BR-F3-12, BR-F3-13, BR-F3-14 | `InvoiceCodeMigrationIntegrationTest#upgradesExistingDatabaseWithoutChangingInvoiceHistory` |
 | TC-F5.1.1-01a | AC-F5.1.1-01 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrForPendingInvoiceUsesServerTotalAndEncodesParams` |
+| TC-F5.1.1-01b | AC-F5.1.1-01 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `features/invoices/api/invoices.test.ts › TC-F5.1.1-01b: vietqr gọi GET /invoices/{id}/vietqr` |
+| TC-F5.1.1-01c | AC-F5.1.1-01 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.1.1-01c: chọn chuyển khoản gọi VietQR, hiện ảnh QR và ` |
+| TC-F5.1.1-01d | AC-F5.1.1-01 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.1.1-01d: ảnh QR lỗi vẫn giữ thông tin chuyển khoản và ` |
+| TC-F5.1.1-01e | AC-F5.1.1-01 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.1.1-01e: phản hồi QR cũ không ghi đè yêu cầu tải QR mớ` |
+| TC-F5.1.1-01f | AC-F5.1.1-01 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.1.1-01f: thiếu Clipboard API không được báo sao chép t` |
 | TC-F5.1.1-02a | AC-F5.1.1-02 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrForNonPendingInvoiceIs422` |
 | TC-F5.1.1-03a | AC-F5.1.1-03 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrBranchBankConfigOverridesChainConfig` |
 | TC-F5.1.1-03b | AC-F5.1.1-03 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrFallsBackForEachMissingBranchKey` |
@@ -1343,63 +1425,147 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F5.1.1-05a | AC-F5.1.1-05 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrSecurityAndScope` |
 | TC-F5.1.1-06a | AC-F5.1.1-06 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrMissingBankConfigIs422` |
 | TC-F5.1.1-06b | AC-F5.1.1-06 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#blankBranchBankConfigIs422` |
+| TC-F5.1.1-06c | AC-F5.1.1-06 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.1.1-06c: lỗi 422 khi tải VietQR hiện đúng câu detail c` |
 | TC-F5.1.1-07a | AC-F5.1.1-07 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId` |
 | TC-F5.1.1-07b | AC-F5.1.1-07 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#invalidDocumentIdsReturnFieldErrors` |
 | TC-F5.1.1-08a | AC-F5.1.1-08 | US-F5.1.1 | UC-F5.1 | BR-F5-07, BR-F5-01, BR-F5-02 | `InvoiceExpiryIntegrationTest#paymentAndVietQrRespectPortalDeadline` |
+| TC-F5.1.1-08b | AC-F5.1.1-08 | US-F5.1.1 | UC-F5.1 | BR-F5-07, BR-F5-01, BR-F5-02 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.1.1-08b: hóa đơn portal quá hạn hiện lỗi VietQR và khô` |
 | TC-F5.2.1-01a | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F5-07, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payActivatesWithDatesRecomputedAtPaymentTime` |
 | TC-F5.2.1-01b | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F5-07, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payPtWhileHoldingTimeActivatesPt` |
 | TC-F5.2.1-01c | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F5-07, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#paysPortalInvoiceAtCounter` |
+| TC-F5.2.1-01d | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F5-07, BR-F3-11, BR-F3-12 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-01d: xác nhận thu tiền mặt gửi method CASH và khôn` |
+| TC-F5.2.1-01e | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F5-07, BR-F3-11, BR-F3-12 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-01e: hiển thị ACTIVE từ server sau thu tiền` |
+| TC-F5.2.1-01f | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F5-07, BR-F3-11, BR-F3-12 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-01f: hóa đơn nguồn %s vẫn thu được tại quầy` |
 | TC-F5.2.1-02a | AC-F5.2.1-02 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#payRenewalAfterActiveTimePackageIsUpcoming` |
 | TC-F5.2.1-02b | AC-F5.2.1-02 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#payRenewalAfterFrozenPackageIsUpcoming` |
 | TC-F5.2.1-02c | AC-F5.2.1-02 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#payRenewalAfterEmptySessionPackageStartsTomorrow` |
+| TC-F5.2.1-02d | AC-F5.2.1-02 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-02d: hiển thị trạng thái UPCOMING và ngày hiệu lực` |
 | TC-F5.2.1-03a | AC-F5.2.1-03 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#zeroTotalInvoiceActivatesWithZeroPaymentRow` |
 | TC-F5.2.1-03b | AC-F5.2.1-03 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `PaymentAmountMigrationIntegrationTest#upgradesExistingPaymentsWithoutChangingHistory` |
+| TC-F5.2.1-03c | AC-F5.2.1-03 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-03c: cho phép xác nhận hóa đơn 0 đồng và hiển thị ` |
 | TC-F5.2.1-04a | AC-F5.2.1-04 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#branchManagerCanPay` |
 | TC-F5.2.1-04b | AC-F5.2.1-04 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#otherRolesAreForbidden` |
 | TC-F5.2.1-04c | AC-F5.2.1-04 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#noTokenIs401` |
+| TC-F5.2.1-04d | AC-F5.2.1-04 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-04d: %s không thấy chức năng thu tiền hoặc VietQR` |
 | TC-F5.2.1-05a | AC-F5.2.1-05 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#invalidMethodIs400` |
 | TC-F5.2.1-05b | AC-F5.2.1-05 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#tooLongTransactionRefIs400` |
 | TC-F5.2.1-05c | AC-F5.2.1-05 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#invalidPaymentIdIs400` |
+| TC-F5.2.1-05d | AC-F5.2.1-05 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-05d: lỗi transactionRef 400 được hiển thị ngay dướ` |
 | TC-F5.2.1-06a | AC-F5.2.1-06 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#unknownInvoiceIs404` |
 | TC-F5.2.1-06b | AC-F5.2.1-06 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#otherBranchIs404` |
 | TC-F5.2.1-07a | AC-F5.2.1-07 | US-F5.2.1 | UC-F5.2 | BR-F5-05, BR-F5-03, BR-F5-04, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentConcurrencyIntegrationTest#twoReceptionistsPayingSameInvoice` |
+| TC-F5.2.1-07b | AC-F5.2.1-07 | US-F5.2.1 | UC-F5.2 | BR-F5-05, BR-F5-03, BR-F5-04, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-07b: lỗi 409 hiện đúng câu detail của API và tải l` |
+| TC-F5.2.1-07c | AC-F5.2.1-07 | US-F5.2.1 | UC-F5.2 | BR-F5-05, BR-F5-03, BR-F5-04, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-07c: bấm xác nhận lặp khi đang gửi chỉ gọi pay một` |
 | TC-F5.2.1-08a | AC-F5.2.1-08 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payingTwiceIs422` |
 | TC-F5.2.1-08b | AC-F5.2.1-08 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payingCancelledInvoiceIs422` |
+| TC-F5.2.1-08c | AC-F5.2.1-08 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-08c: lỗi 422 hiện đúng câu detail của API` |
 | TC-F5.2.1-09a | AC-F5.2.1-09 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentConcurrencyIntegrationTest#twoRenewalsPaidAtOnceYieldOneUpcoming` |
 | TC-F5.2.1-09b | AC-F5.2.1-09 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#upcomingSameTypeBlocksActivation` |
 | TC-F5.2.1-09c | AC-F5.2.1-09 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#upcomingOfOtherTypeOrScopeDoesNotBlock` |
+| TC-F5.2.1-09d | AC-F5.2.1-09 | US-F5.2.1 | UC-F5.2 | BR-F5-04, BR-F3-11, BR-F5-03, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-09d: 422 do có UPCOMING tải lại PENDING, không báo` |
 | TC-F5.2.1-10a | AC-F5.2.1-10 | US-F5.2.1 | UC-F5.2 | BR-F5-01, BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#ignoresClientSuppliedAmounts` |
+| TC-F5.2.1-10b | AC-F5.2.1-10 | US-F5.2.1 | UC-F5.2 | BR-F5-01, BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `features/invoices/api/invoices.test.ts › TC-F5.2.1-10b: pay gửi đúng method và không gửi số tiền lên ` |
+| TC-F5.2.1-10c | AC-F5.2.1-10 | US-F5.2.1 | UC-F5.2 | BR-F5-01, BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `features/invoices/api/invoices.test.ts › TC-F5.2.1-10c: loại bỏ giá trị tiền gửi thêm và chuẩn hóa mã` |
 | TC-F5.2.1-11a | AC-F5.2.1-11 | US-F5.2.1 | UC-F5.2 | BR-F3-11, BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#zeroSessionPtStillHeldSchedulesAfterOldEndDate` |
 | TC-F5.2.1-12a | AC-F5.2.1-12 | US-F5.2.1 | UC-F5.2 | BR-F5-07, BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoiceExpiryIntegrationTest#paymentAndVietQrRespectPortalDeadline` |
+| TC-F5.2.1-12b | AC-F5.2.1-12 | US-F5.2.1 | UC-F5.2 | BR-F5-07, BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-12b: hóa đơn portal quá hạn hiện lỗi server và khô` |
 | TC-F5.3.1-01a | AC-F5.3.1-01 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#receptionistListsOwnBranchNewestFirstWithPaging` |
 | TC-F5.3.1-01b | AC-F5.3.1-01 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#staffCannotOverrideBranchFilter` |
+| TC-F5.3.1-01c | AC-F5.3.1-01 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-01c: %s không tải danh mục hoặc chọn chi nhánh khá` |
 | TC-F5.3.1-02a | AC-F5.3.1-02 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#filterByStatusSourceAndKeyword` |
 | TC-F5.3.1-02b | AC-F5.3.1-02 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#filterByVietnamDateRangeHalfOpen` |
+| TC-F5.3.1-02c | AC-F5.3.1-02 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-02c: lọc danh sách hóa đơn theo trạng thái, nguồn,` |
+| TC-F5.3.1-02d | AC-F5.3.1-02 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-02d: lỗi danh sách có thể tải lại và hiển thị trạn` |
 | TC-F5.3.1-03a | AC-F5.3.1-03 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#walkInInvoiceWithNullMemberIsVisibleInListAndDetail` |
+| TC-F5.3.1-03b | AC-F5.3.1-03 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-03b: hiển thị hóa đơn khách lẻ và tiền định dạng V` |
 | TC-F5.3.1-04a | AC-F5.3.1-04 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#superAdminListsAllBranchesAndFiltersByBranchId` |
+| TC-F5.3.1-04b | AC-F5.3.1-04 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#ownerListsBranchOptionsIncludingInactiveBranches` |
+| TC-F5.3.1-04c | AC-F5.3.1-04 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `features/invoices/api/invoices.test.ts › TC-F5.3.1-04c: danh mục chi nhánh dùng endpoint hóa đơn dành` |
+| TC-F5.3.1-04d | AC-F5.3.1-04 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-04d: Chủ chuỗi lọc chi nhánh bằng danh mục toàn ch` |
+| TC-F5.3.1-04e | AC-F5.3.1-04 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-04e: lỗi danh mục chi nhánh có thể thử lại, danh s` |
 | TC-F5.3.1-05a | AC-F5.3.1-05 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#detailReturnsItemsAndPaymentsWithReceiverName` |
+| TC-F5.3.1-05b | AC-F5.3.1-05 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `features/invoices/api/invoices.test.ts › TC-F5.3.1-05b: list và detail gọi đúng endpoint và tham số l` |
+| TC-F5.3.1-05c | AC-F5.3.1-05 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.3.1-05c: đổi mã hóa đơn trong route phải tải dữ liệu m` |
 | TC-F5.3.1-06a | AC-F5.3.1-06 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-08, BR-F5-07 | `InvoiceCancelIntegrationTest#cancelPendingInvoiceCancelsMembership` |
 | TC-F5.3.1-06b | AC-F5.3.1-06 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-08, BR-F5-07 | `InvoiceCancelIntegrationTest#cancelledInvoiceNoLongerBlocksSale` |
 | TC-F5.3.1-06c | AC-F5.3.1-06 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-08, BR-F5-07 | `InvoiceCancelIntegrationTest#managerAndOwnerCanCancel` |
+| TC-F5.3.1-06d | AC-F5.3.1-06 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-08, BR-F5-07 | `features/invoices/api/invoices.test.ts › TC-F5.3.1-06d: cancel gọi PUT /invoices/{id}/cancel` |
+| TC-F5.3.1-06e | AC-F5.3.1-06 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-08, BR-F5-07 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.3.1-06e: hủy hóa đơn PENDING thành công và cập nhật tr` |
 | TC-F5.3.1-07a | AC-F5.3.1-07 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceCancelIntegrationTest#cancelPaidInvoiceIs422` |
 | TC-F5.3.1-07b | AC-F5.3.1-07 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceCancelIntegrationTest#cancelTwiceIs422` |
+| TC-F5.3.1-07c | AC-F5.3.1-07 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.3.1-07c: hủy gặp %s phải tải lại trạng thái mới` |
 | TC-F5.3.1-08a | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceCancelIntegrationTest#unknownInvoiceIs404` |
 | TC-F5.3.1-08b | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceCancelIntegrationTest#otherBranchIs404` |
 | TC-F5.3.1-08c | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceCancelIntegrationTest#otherRolesAreForbidden` |
 | TC-F5.3.1-08d | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#detailOfOtherBranchOrUnknownIs404` |
 | TC-F5.3.1-08e | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#trainerAndMemberAreForbidden` |
 | TC-F5.3.1-08f | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#unauthenticatedRequestsAre401` |
+| TC-F5.3.1-08g | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#nonOwnerCannotReadBranchOptions` |
+| TC-F5.3.1-08h | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#anonymousCannotReadBranchOptions` |
+| TC-F5.3.1-08i | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `layouts/staff-menu.test.ts › TC-F5.3.1-08i: menu Thanh toán bật đúng vai trò theo quyền r` |
+| TC-F5.3.1-08j | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `routes/route-access.test.ts › TC-F5.3.1-08j: %s mở được danh sách và chi tiết hóa đơn` |
+| TC-F5.3.1-08k | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `routes/route-access.test.ts › TC-F5.3.1-08k: %s không mở được trang hóa đơn của nhân viên` |
 | TC-F5.3.1-09a | AC-F5.3.1-09 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#invalidQueryParamsAndIdReturn400` |
 | TC-F5.3.1-09b | AC-F5.3.1-09 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceCancelIntegrationTest#invalidCancelIdIs400` |
+| TC-F5.3.1-09c | AC-F5.3.1-09 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-09c: khoảng ngày ngược báo lỗi và không gửi bộ lọc` |
+| TC-F5.3.1-09d | AC-F5.3.1-09 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.3.1-09d: mã route không hợp lệ %s không gọi API` |
 | TC-F5.3.1-10a | AC-F5.3.1-10 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#staffWithoutActiveBranchIs403` |
 | TC-F5.4.1-01a | AC-F5.4.1-01 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#pdfForPaidAndRefundedInvoiceIsReadableWithVietnameseText` |
+| TC-F5.4.1-01b | AC-F5.4.1-01 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `features/invoices/api/invoices.test.ts › TC-F5.4.1-01b: pdf gọi GET /invoices/{id}/pdf với responseTy` |
+| TC-F5.4.1-01c | AC-F5.4.1-01 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `features/invoices/api/invoices.test.ts › TC-F5.4.1-01c: lỗi PDF không phải JSON vẫn giữ được lỗi HTTP` |
+| TC-F5.4.1-01d | AC-F5.4.1-01 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.4.1-01d: hóa đơn PAID và REFUNDED tải PDF bằng Blob, m` |
+| TC-F5.4.1-01e | AC-F5.4.1-01 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.4.1-01e: mở được tab PDF thì không tải file lần nữa; b` |
+| TC-F5.4.1-01f | AC-F5.4.1-01 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.4.1-01f: rời trang khi PDF đang tải không tạo URL hoặc` |
 | TC-F5.4.1-02a | AC-F5.4.1-02 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#pdfUsesSnapshotPriceAndDescriptionFromInvoiceItems` |
 | TC-F5.4.1-03a | AC-F5.4.1-03 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#pdfForPendingOrCancelledInvoiceIs422` |
+| TC-F5.4.1-03b | AC-F5.4.1-03 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.4.1-03b: hóa đơn PENDING không hiển thị nút In / tải P` |
 | TC-F5.4.1-04a | AC-F5.4.1-04 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#pdfSecurityOwnershipAndScope` |
+| TC-F5.4.1-04b | AC-F5.4.1-04 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `features/invoices/api/invoices.test.ts › TC-F5.4.1-04b: giữ status và detail của lỗi PDF Blob %s` |
+| TC-F5.4.1-04c | AC-F5.4.1-04 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.4.1-04c: PDF 404 dạng Blob phải hiện detail server tha` |
+| TC-F5.4.1-04d | AC-F5.4.1-04 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `features/invoices/pages/MemberInvoicePdfPage.test.tsx › TC-F5.4.1-04d: gọi API PDF trực tiếp, không cần quyền API ch` |
+| TC-F5.4.1-04e | AC-F5.4.1-04 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `features/invoices/pages/MemberInvoicePdfPage.test.tsx › TC-F5.4.1-04e: hiển thị lỗi API %s, không tạo PDF từ dữ liệu` |
+| TC-F5.4.1-04f | AC-F5.4.1-04 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `routes/route-access.test.ts › TC-F5.4.1-04f: chỉ MEMBER mở điểm vào PDF hội viên` |
 | TC-F5.4.1-05a | AC-F5.4.1-05 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#pdfSecurityOwnershipAndScope` |
+| TC-F5.4.1-05b | AC-F5.4.1-05 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.4.1-05b: Chủ chuỗi không thấy nút PDF dù hóa đơn PAID` |
 | TC-F5.4.1-06a | AC-F5.4.1-06 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId` |
 | TC-F5.4.1-07a | AC-F5.4.1-07 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId` |
 | TC-F5.4.1-07b | AC-F5.4.1-07 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#invalidDocumentIdsReturnFieldErrors` |
+| TC-F5.4.1-07c | AC-F5.4.1-07 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `features/invoices/pages/MemberInvoicePdfPage.test.tsx › TC-F5.4.1-07c: ID %s bị chặn trước khi gọi tải PDF` |
+| TC-F5.5.1-01a | AC-F5.5.1-01 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#refundSucceeds` |
+| TC-F5.5.1-01b | AC-F5.5.1-01 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#refundUpcomingRenewal` |
+| TC-F5.5.1-01c | AC-F5.5.1-01 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-01c: quản lý chi nhánh hoàn tiền hai bước thành cô` |
+| TC-F5.5.1-01d | AC-F5.5.1-01 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `features/invoices/api/invoices.test.ts › TC-F5.5.1-01d: refund gửi POST /invoices/{id}/refund với ref` |
+| TC-F5.5.1-02a | AC-F5.5.1-02 | US-F5.5.1 | UC-F5.5 | BR-F5-13, BR-F5-11, BR-F5-12, BR-F5-14 | `RefundIntegrationTest#refundKeepsFollowingUpcomingUntouched` |
+| TC-F5.5.1-03a | AC-F5.5.1-03 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#receptionistIsForbidden` |
+| TC-F5.5.1-03b | AC-F5.5.1-03 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#otherRolesAreForbidden` |
+| TC-F5.5.1-03c | AC-F5.5.1-03 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#forbiddenComesBeforeValidation` |
+| TC-F5.5.1-03d | AC-F5.5.1-03 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-03d: nút Hoàn tiền chỉ hiện cho BRANCH_MANAGER với` |
+| TC-F5.5.1-04a | AC-F5.5.1-04 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#missingReasonIs400` |
+| TC-F5.5.1-04b | AC-F5.5.1-04 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#noBodyOrTooLongReasonIs400` |
+| TC-F5.5.1-04c | AC-F5.5.1-04 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#reasonLengthCountedAfterStrip` |
+| TC-F5.5.1-04d | AC-F5.5.1-04 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-04d: để trống lý do hoàn tiền không gửi API và hiệ` |
+| TC-F5.5.1-04e | AC-F5.5.1-04 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-04e: lỗi 400 từ API hiện đúng câu errors.refundRea` |
+| TC-F5.5.1-05a | AC-F5.5.1-05 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#anonymousIs401` |
+| TC-F5.5.1-05b | AC-F5.5.1-05 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#unknownInvoiceIs404` |
+| TC-F5.5.1-05c | AC-F5.5.1-05 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#otherBranchManagerIs404` |
+| TC-F5.5.1-05d | AC-F5.5.1-05 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-05d: lỗi 403 và 404 khi hoàn tiền hiện đúng câu de` |
+| TC-F5.5.1-06a | AC-F5.5.1-06 | US-F5.5.1 | UC-F5.5 | BR-F5-12, BR-F5-11, BR-F5-13, BR-F5-14 | `RefundConcurrencyIntegrationTest#twoManagersRefundingSameInvoice` |
+| TC-F5.5.1-06b | AC-F5.5.1-06 | US-F5.5.1 | UC-F5.5 | BR-F5-12, BR-F5-11, BR-F5-13, BR-F5-14 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-06b: lỗi 409 và 422 hóa đơn không PAID hiện đúng c` |
+| TC-F5.5.1-07a | AC-F5.5.1-07 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#pendingInvoiceIs422` |
+| TC-F5.5.1-07b | AC-F5.5.1-07 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#cancelledInvoiceIs422` |
+| TC-F5.5.1-07c | AC-F5.5.1-07 | US-F5.5.1 | UC-F5.5 | BR-F5-11, BR-F5-12, BR-F5-13, BR-F5-14 | `RefundIntegrationTest#refundTwiceIs422` |
+| TC-F5.5.1-08a | AC-F5.5.1-08 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#frozenMembershipIs422` |
+| TC-F5.5.1-08b | AC-F5.5.1-08 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundConcurrencyIntegrationTest#membershipExpiredByJobBetweenCheckAndCancel` |
+| TC-F5.5.1-09a | AC-F5.5.1-09 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#checkedInMembershipIs422` |
+| TC-F5.5.1-09b | AC-F5.5.1-09 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#ptMembershipUsedForCheckinIs422` |
+| TC-F5.5.1-10a | AC-F5.5.1-10 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#bookedPtSessionIs422` |
+| TC-F5.5.1-10b | AC-F5.5.1-10 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#cancelledPtSessionStillCounts` |
+| TC-F5.5.1-11a | AC-F5.5.1-11 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#upcomingClassBookingIs422` |
+| TC-F5.5.1-11b | AC-F5.5.1-11 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#inProgressClassBookingIs422` |
+| TC-F5.5.1-11c | AC-F5.5.1-11 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#pastOrCancelledBookingDoesNotBlock` |
+| TC-F5.5.1-11d | AC-F5.5.1-11 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#classBookingDoesNotBlockPtRefund` |
+| TC-F5.5.1-11e | AC-F5.5.1-11 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.5.1-11e: lỗi 422 gói đã dùng và còn chỗ đặt lớp hiện đ` |
+| TC-F5.5.1-12a | AC-F5.5.1-12 | US-F5.5.1 | UC-F5.5 | BR-F5-14, BR-F5-11, BR-F5-12, BR-F5-13 | `RefundIntegrationTest#otherMembershipUsageDoesNotBlock` |
 | TC-F8.0.1-01a | AC-F8.0.1-01 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates` |
 | TC-F8.0.1-01b | AC-F8.0.1-01 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-01b, TC-F8.0.1-04b: khách xem giờ Việt Nam và đăng` |
 | TC-F8.0.1-02a | AC-F8.0.1-02 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates` |
@@ -1484,7 +1650,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 
 ## 6. Kiểm thử chưa mang mã TC
 
-Có 176 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
+Có 263 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
 
 | File | Số kiểm thử |
 | --- | --- |
@@ -1499,6 +1665,11 @@ Có 176 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthControllerTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthServiceTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/JwtTokenServiceTest.java` | 5 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/checkin/CheckinApiIntegrationTest.java` | 36 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/checkin/CheckinCheckoutConcurrencyIntegrationTest.java` | 2 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/checkin/CheckinCheckoutHistoryIntegrationTest.java` | 10 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/checkin/CheckinConcurrencyIntegrationTest.java` | 3 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/dashboard/DashboardApiIntegrationTest.java` | 13 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/groupclass/ClassApiIntegrationTest.java` | 2 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/invoice/InvoiceSaleIntegrationTest.java` | 2 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/F1RegistrationIntegrationTest.java` | 1 |
@@ -1523,6 +1694,10 @@ Có 176 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `frontend/src/features/auth/api/validation.test.ts` | 1 |
 | `frontend/src/features/auth/pages/LoginPage.test.tsx` | 5 |
 | `frontend/src/features/auth/pages/RegisterPage.test.tsx` | 1 |
+| `frontend/src/features/checkins/api/checkins.test.ts` | 1 |
+| `frontend/src/features/checkins/pages/CheckinPage.test.tsx` | 12 |
+| `frontend/src/features/dashboard/api/dashboard.test.ts` | 1 |
+| `frontend/src/features/dashboard/pages/DashboardPage.test.tsx` | 9 |
 | `frontend/src/features/members/api/members.test.ts` | 6 |
 | `frontend/src/features/members/components/MemberAvatar.test.tsx` | 2 |
 | `frontend/src/features/members/components/MemberFormModal.test.tsx` | 1 |

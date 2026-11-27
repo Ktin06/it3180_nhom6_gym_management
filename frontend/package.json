@@ -14,6 +14,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest",
+    "test:f5:ui": "node e2e/invoices-ui.mjs",
     "test:auth:tabs": "node --test e2e/multi-tab-session.mjs"
   },
   "dependencies": {
