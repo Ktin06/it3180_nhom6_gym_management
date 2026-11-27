@@ -27,9 +27,11 @@ import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.ForbiddenException;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.common.time.VnTime;
 import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.AuthMeResponse;
+import vn.edu.hust.nhom6.gym.feature.auth.dto.ChangePasswordRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.RegisterRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.RefreshToken;
@@ -286,6 +288,7 @@ class AuthServiceTest {
             .build();
 
         when(refreshTokenRepository.findByTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(existingToken));
+        when(userRepository.findByRefreshTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(user));
         when(jwtTokenService.generateAccessToken(any(), eq("member@example.com"), eq(UserRole.MEMBER)))
             .thenReturn("new-access-token");
 
@@ -319,6 +322,7 @@ class AuthServiceTest {
             .build();
 
         when(refreshTokenRepository.findByTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(existingToken));
+        when(userRepository.findByRefreshTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(user));
 
         assertThatThrownBy(() -> authService.refresh(rawToken))
             .isInstanceOf(UnauthorizedException.class)
@@ -348,6 +352,7 @@ class AuthServiceTest {
             .build();
 
         when(refreshTokenRepository.findByTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(existingToken));
+        when(userRepository.findByRefreshTokenHashForUpdate(tokenHash)).thenReturn(Optional.of(user));
 
         assertThatThrownBy(() -> authService.refresh(rawToken))
             .isInstanceOf(UnauthorizedException.class)
@@ -674,5 +679,117 @@ class AuthServiceTest {
         assertThat(user.getFailedLoginCount()).isEqualTo(1);
         assertThat(user.getLockedUntil()).isNull();
         verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("TC-F1.4.1-01c: đổi mật khẩu thành công cập nhật password_hash")
+    void doiMatKhauThanhCongCapNhatPasswordHash() {
+        CurrentUser me = new CurrentUser(10L, UserRole.MEMBER);
+        ChangePasswordRequest request = new ChangePasswordRequest("OldPass123", "NewPass456");
+        User user = User.builder()
+            .email("member@example.com")
+            .passwordHash("old-hash")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .build();
+        OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-19T16:45:00Z");
+
+        when(userRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("OldPass123", "old-hash")).thenReturn(true);
+        when(passwordEncoder.encode("NewPass456")).thenReturn("new-hash");
+        when(vnTime.now()).thenReturn(fixedNow);
+
+        authService.changePassword(me, request);
+
+        assertThat(user.getPasswordHash()).isEqualTo("new-hash");
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("TC-F1.4.1-01d: đổi mật khẩu thu hồi mọi phiên của người dùng")
+    void doiMatKhauThuHoiMoiPhienCuaNguoiDung() {
+        CurrentUser me = new CurrentUser(10L, UserRole.MEMBER);
+        ChangePasswordRequest request = new ChangePasswordRequest("OldPass123", "NewPass456");
+        User user = User.builder()
+            .email("member@example.com")
+            .passwordHash("old-hash")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .build();
+        OffsetDateTime fixedNow = OffsetDateTime.parse("2026-11-19T16:45:00Z");
+
+        when(userRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("OldPass123", "old-hash")).thenReturn(true);
+        when(passwordEncoder.encode("NewPass456")).thenReturn("new-hash");
+        when(vnTime.now()).thenReturn(fixedNow);
+
+        authService.changePassword(me, request);
+
+        verify(refreshTokenRepository).revokeAllByUserId(10L, fixedNow);
+    }
+
+    @Test
+    @DisplayName("TC-F1.4.1-02a: mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ trả 422")
+    void doiMatKhauHienTaiSaiHoacMatKhauMoiTrungCuNemBusinessRuleException() {
+        CurrentUser me = new CurrentUser(10L, UserRole.MEMBER);
+        User user = User.builder()
+            .email("member@example.com")
+            .passwordHash("old-hash")
+            .role(UserRole.MEMBER)
+            .status(UserStatus.ACTIVE)
+            .build();
+
+        when(userRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("WrongPass123", "old-hash")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.changePassword(
+                me, new ChangePasswordRequest("WrongPass123", "NewPass456")))
+            .isInstanceOf(BusinessRuleException.class)
+            .hasMessage("Mật khẩu hiện tại không đúng.");
+
+        String currentTooLong = "ă".repeat(30) + "Pass1234567890123456";
+        assertThatThrownBy(() -> authService.changePassword(
+                me, new ChangePasswordRequest(currentTooLong, "NewPass456")))
+            .isInstanceOf(BusinessRuleException.class)
+            .hasMessage("Mật khẩu hiện tại không đúng.");
+        verify(passwordEncoder, never()).matches(eq(currentTooLong), anyString());
+
+        when(passwordEncoder.matches("OldPass123", "old-hash")).thenReturn(true);
+
+        assertThatThrownBy(() -> authService.changePassword(
+                me, new ChangePasswordRequest("OldPass123", "OldPass123")))
+            .isInstanceOf(BusinessRuleException.class)
+            .hasMessage("Mật khẩu mới phải khác mật khẩu hiện tại.");
+
+        // Không đổi mật khẩu, không thu hồi phiên; hai lần sai mật khẩu hiện tại được đếm (AC-F1.4.1-05),
+        // lần mật khẩu mới trùng thì không đếm vì mật khẩu hiện tại đúng.
+        assertThat(user.getPasswordHash()).isEqualTo("old-hash");
+        assertThat(user.getFailedLoginCount()).isEqualTo(2);
+        verify(refreshTokenRepository, never()).revokeAllByUserId(any(), any());
+    }
+
+    @Test
+    @DisplayName("TC-F1.4.1-04e: tài khoản DISABLED hoặc LOCKED không thể đổi mật khẩu và trả 403")
+    void doiMatKhauTaiKhoanKhongActiveNemForbiddenException() {
+        CurrentUser me = new CurrentUser(10L, UserRole.MEMBER);
+        ChangePasswordRequest request = new ChangePasswordRequest("OldPass123", "NewPass456");
+
+        for (UserStatus nonActive : new UserStatus[] { UserStatus.DISABLED, UserStatus.LOCKED }) {
+            User user = User.builder()
+                .email("member@example.com")
+                .passwordHash("old-hash")
+                .role(UserRole.MEMBER)
+                .status(nonActive)
+                .build();
+            when(userRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(user));
+
+            assertThatThrownBy(() -> authService.changePassword(me, request))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên.");
+        }
+
+        verify(passwordEncoder, never()).matches(anyString(), anyString());
+        verify(userRepository, never()).save(any());
+        verify(refreshTokenRepository, never()).revokeAllByUserId(any(), any());
     }
 }

@@ -16,6 +16,7 @@ function authValue(role: Role): AuthContextValue {
     register: vi.fn(),
     logout: vi.fn(),
     retrySession: vi.fn(),
+    completePasswordChange: vi.fn(),
   }
 }
 

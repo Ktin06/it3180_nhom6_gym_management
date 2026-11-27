@@ -15,6 +15,7 @@ import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
+import vn.edu.hust.nhom6.gym.common.exception.NotFoundException;
 import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.common.time.VnTime;
 import vn.edu.hust.nhom6.gym.feature.member.service.MemberService;
@@ -320,5 +321,31 @@ public class MembershipService {
         static ScopeKey of(Membership m) {
             return new ScopeKey(m.getPackageType(), m.getBranchId());
         }
+    }
+    public Membership requireOwnedBy(Long membershipId, Long memberId) {
+        return memberships.findById(membershipId)
+                .filter(membership -> membership.getMemberId().equals(memberId))
+                .orElseThrow(() -> new NotFoundException(
+                        "Gói tập của hội viên không tồn tại trên hệ thống."));
+    }
+    // ---------------------------------------------------------------------------------------------
+    // S2-38.1: hủy gói khi hoàn tiền hóa đơn (UC-F5.5 bước 5d, BR-F5-13)
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Hủy gói của một dòng hóa đơn vừa hoàn tiền: ACTIVE/UPCOMING → CANCELLED. Chỉ đụng đúng gói của dòng này; gói
+     * khác của hội viên (kể cả gói UPCOMING nối tiếp mua bằng hóa đơn khác) giữ nguyên trạng thái và ngày (Q5 = A).
+     * Không hủy buổi PT hay chỗ đặt lớp: nơi gọi đã chặn hoàn tiền khi gói đã dùng (BR-F5-14).
+     *
+     * <p>Dòng không có gói (dữ liệu cũ không qua luồng bán) thì bỏ qua.
+     *
+     * @throws IllegalStateException gói không ACTIVE/UPCOMING (nơi gọi đã kiểm tra trước): rollback cả việc hoàn tiền
+     */
+    @Transactional
+    public void cancelForRefund(Long invoiceItemId) {
+        memberships.findByInvoiceItemId(invoiceItemId).ifPresent(m -> {
+            m.cancelForRefund();
+            memberships.saveAndFlush(m);
+        });
     }
 }

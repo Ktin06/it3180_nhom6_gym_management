@@ -50,6 +50,7 @@
         },
         {
           "name": "US-F7.4.1 E4 409 – Gửi lại đúng gói đó",
+          "name": "US-F7.4.1 E4 422 – Gửi lại đúng gói đó",
           "request": {
             "method": "POST",
             "url": "{{baseUrl}}/me/purchase-requests",
@@ -82,6 +83,8 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('409', () => pm.response.to.have.status(409));"
+                  "pm.test('422', () => pm.response.to.have.status(422));",
+                  "pm.test('thông báo WAITING_EXISTS', () => pm.expect(pm.response.json().detail).to.eql('Hội viên đã có gói cùng loại đang chờ thanh toán hoặc chờ kích hoạt. Không thể tạo thêm gói mới.'));"
                 ]
               }
             }
@@ -251,6 +254,7 @@
         },
         {
           "name": "US-F7.5.1 E4 409 – Gia hạn lần hai",
+          "name": "US-F7.5.1 E4 422 – Gia hạn lần hai",
           "request": {
             "method": "POST",
             "url": "{{baseUrl}}/me/renewal-requests",
@@ -283,6 +287,8 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('409', () => pm.response.to.have.status(409));"
+                  "pm.test('422', () => pm.response.to.have.status(422));",
+                  "pm.test('thông báo WAITING_EXISTS', () => pm.expect(pm.response.json().detail).to.eql('Hội viên đã có gói cùng loại đang chờ thanh toán hoặc chờ kích hoạt. Không thể tạo thêm gói mới.'));"
                 ]
               }
             }

@@ -60,4 +60,9 @@ public class Payment extends BaseEntity {
         p.paidAt = invoice.getPaidAt();
         return p;
     }
+
+    /** Hoàn tiền hóa đơn (UC-F5.5 bước 5c): CONFIRMED → CANCELLED. Phiếu thu đã hủy thì giữ nguyên. */
+    public void cancel() {
+        this.status = PaymentStatus.CANCELLED;
+    }
 }

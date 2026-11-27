@@ -62,6 +62,10 @@ public class PortalInvoiceService {
      *   <li>Gói tồn tại, đang bán, dùng được ở chi nhánh gốc: 404 E3, 422 E5.</li>
      *   <li>Đã có hóa đơn chờ chứa đúng gói này: 409 E4.</li>
      *   <li>Gói khác nhưng cùng loại đang PENDING hoặc UPCOMING: 422 như AC-F3.5.1-06 (trong {@code createPackageInvoice}).</li>
+     *   <li>Hủy hóa đơn chờ cổng của chính hội viên đã quá hạn {@code PENDING_INVOICE_TTL_DAYS} mà tác vụ nền chưa
+     *       kịp quét (BR-F7.5), rồi mới kiểm tra trùng.</li>
+     *   <li>Đã có gói cùng loại đang PENDING hoặc UPCOMING hoặc hóa đơn chờ: 422 như AC-F3.5.1-06
+     *       (trong {@code createPackageInvoice}).</li>
      * </ol>
      *
      * @param userId tài khoản hội viên, ghi vào {@code invoices.created_by}
@@ -81,10 +85,34 @@ public class PortalInvoiceService {
         if (invoices.existsPendingWithPackage(memberId, packageId)) {
             throw new ConflictException(DUPLICATE_PENDING);
         }
+            // Kiểm tra trước: hội viên ngừng hoạt động nhận đúng lý do (cùng câu với createPackageInvoice).
+            throw new BusinessRuleException(MEMBER_INACTIVE);
+        }
+        packages.requireSellable(packageId, homeBranchId);
+        // Hóa đơn chờ của chính hội viên đã quá hạn mà tác vụ nền chưa quét thì hủy ngay (cùng giao dịch, đang giữ
+        // khóa dòng hội viên), để gói PENDING cũ không chặn yêu cầu mới ở createPackageInvoice.
+        cancelExpiredOfMember(memberId);
         PackageInvoiceDto sale = invoiceService.createPackageInvoice(userId, homeBranchId, memberId, packageId,
             InvoiceSource.MEMBER_PORTAL);
         Invoice invoice = invoices.findById(sale.invoiceId()).orElseThrow();
         return PortalInvoiceDto.of(sale, expiresAt(homeBranchId, invoice.getCreatedAt()));
+    }
+
+    /**
+     * Hủy các hóa đơn PENDING {@code MEMBER_PORTAL} của một hội viên đã tới hạn, kèm gói PENDING đi kèm, trong giao dịch
+     * của nơi gọi (nơi gọi đã khóa dòng {@code members}). Cùng điều kiện hạn với {@link #cancelExpired()}: hạn tính theo
+     * chi nhánh của hóa đơn.
+     */
+    private void cancelExpiredOfMember(Long memberId) {
+        OffsetDateTime now = time.now();
+        Map<Long, Integer> ttlByBranch = new HashMap<>();
+        for (Invoice candidate : invoices.findPendingPortalOfMemberCreatedBefore(memberId, now)) {
+            int ttlDays = ttlByBranch.computeIfAbsent(candidate.getBranchId(),
+                branchId -> configs.getInt(branchId, SystemConfigKeys.PENDING_INVOICE_TTL_DAYS));
+            if (!now.isBefore(candidate.getCreatedAt().plusDays(ttlDays))) {
+                cancelIfPending(candidate.getId());
+            }
+        }
     }
 
     /**
