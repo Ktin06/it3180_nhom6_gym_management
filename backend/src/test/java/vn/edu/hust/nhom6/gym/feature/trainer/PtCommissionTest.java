@@ -31,20 +31,20 @@ class PtCommissionTest {
         "1.0000, 2000000, 2000000, 10, 0",    // giảm hết giá
         "0.0000, 2000000, 0, 10, 0"
     })
-    @DisplayName("US-F9.3.1 KB2: hoa hồng = tỷ lệ × (giá sau giảm ÷ tổng buổi), BigDecimal, HALF_UP về đồng")
+    @DisplayName("TC-F9.3.1-02a: hoa hồng = tỷ lệ × (giá sau giảm ÷ tổng buổi), BigDecimal, HALF_UP về đồng")
     void formula(String rate, int amount, int discount, int total, int expected) {
         assertThat(PtCommission.calculate(in(rate, amount, discount, total))).isEqualTo(expected);
     }
 
     @Test
-    @DisplayName("US-F9.3.1 KB2: chưa có tỷ lệ hoặc gói không có dòng hóa đơn → 0 (GĐ-3)")
+    @DisplayName("TC-F9.3.1-02b: chưa có tỷ lệ hoặc gói không có dòng hóa đơn → 0 (GĐ-3)")
     void missingDataGivesZero() {
         assertThat(PtCommission.calculate(in(null, 5_000_000, 0, 10))).isZero();
         assertThat(PtCommission.calculate(in("0.1000", null, null, 10))).isZero();
     }
 
     @Test
-    @DisplayName("US-F9.3.1 KB2: gói PT không có tổng số buổi dương → lỗi dữ liệu, không chia cho 0")
+    @DisplayName("TC-F9.3.1-02c: gói PT không có tổng số buổi dương → lỗi dữ liệu, không chia cho 0")
     void invalidTotalSessions() {
         assertThatThrownBy(() -> PtCommission.calculate(in("0.1000", 1_000_000, 0, 0)))
             .isInstanceOf(IllegalStateException.class);

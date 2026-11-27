@@ -13,7 +13,7 @@ import vn.edu.hust.nhom6.gym.feature.trainer.entity.TrainerAvailability;
 class TrainerAvailabilityTest {
 
     @Test
-    @DisplayName("US-F9.1.1 E4: kiểm tra chồng khung nửa mở cùng thứ; chạm biên và khác thứ không chồng")
+    @DisplayName("TC-F9.1.1-03a, TC-F9.1.1-04a: kiểm tra chồng khung nửa mở cùng thứ; chạm biên và khác thứ không chồng")
     void overlapsHalfOpenSameDay() {
         TrainerAvailability slot = TrainerAvailability.create(1L, 1L, 2, LocalTime.of(8, 0), LocalTime.of(12, 0));
 
@@ -28,7 +28,7 @@ class TrainerAvailabilityTest {
     }
 
     @Test
-    @DisplayName("US-F9.1.1 BR-F9.15: buổi 06:30 thứ Ba giờ VN (23:30 thứ Hai UTC) thuộc khung thứ Ba, không thuộc thứ Hai")
+    @DisplayName("TC-F9.1.1-07a: buổi 06:30 thứ Ba giờ VN (23:30 thứ Hai UTC) thuộc khung thứ Ba, không thuộc thứ Hai")
     void vnTimezoneBoundaryAtEarlyMorning() {
         // Thứ Ba 2026-11-24 06:30-07:30 Asia/Ho_Chi_Minh == 2026-11-23T23:30:00Z .. 2026-11-24T00:30:00Z
         OffsetDateTime startUtc = OffsetDateTime.parse("2026-11-23T23:30:00Z");
@@ -49,7 +49,7 @@ class TrainerAvailabilityTest {
     }
 
     @Test
-    @DisplayName("US-F9.1.1 BR-F9.15: buổi chạm biên khung kề không bị coi là chồng vào khung liền kề")
+    @DisplayName("TC-F9.1.1-07b: buổi chạm biên khung kề không bị coi là chồng vào khung liền kề")
     void adjacentSlotBoundaryDoesNotOverlap() {
         // Thứ Ba 2026-11-24 12:00-13:00 VN == 05:00-06:00 UTC
         OffsetDateTime startUtc = OffsetDateTime.parse("2026-11-24T05:00:00Z");

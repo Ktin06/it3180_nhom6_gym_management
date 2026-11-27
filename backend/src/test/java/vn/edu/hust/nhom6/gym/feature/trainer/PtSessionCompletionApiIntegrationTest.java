@@ -98,7 +98,7 @@ class PtSessionCompletionApiIntegrationTest {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("US-F9.3.1 KB1: PT xác nhận buổi đã diễn ra → 200 DONE, confirmed_at, trừ 1 buổi, hoa hồng 0,1 × 4.500.000 ÷ 10 = 45.000")
+    @DisplayName("TC-F9.3.1-01a, TC-F9.3.1-02d: PT xác nhận buổi đã diễn ra → 200 DONE, confirmed_at, trừ 1 buổi, hoa hồng 0,1 × 4.500.000 ÷ 10 = 45.000")
     void confirmSuccess() throws Exception {
         Long a = packageA(5);
         Long id = c.session(pt, owner, a, AT_18);
@@ -118,7 +118,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 KB2: hoa hồng làm tròn HALF_UP một lần: 0,1 × 1.000.050 ÷ 2 = 50.002,5 → 50.003; đổi tỷ lệ sau khi chốt không đổi số đã chốt")
+    @DisplayName("TC-F9.3.1-02e: hoa hồng làm tròn HALF_UP một lần: 0,1 × 1.000.050 ÷ 2 = 50.002,5 → 50.003; đổi tỷ lệ sau khi chốt không đổi số đã chốt")
     void commissionRoundsHalfUpAndIsFrozen() throws Exception {
         Long a = c.soldPt(owner, "ACTIVE", A_START, A_END, 2, 2, 1_000_050, 0);
         Long id = c.session(pt, owner, a, AT_18);
@@ -133,7 +133,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 KB2: hoa hồng dùng giá sau giảm của dòng hóa đơn: 0,15 × (3.000.000 − 1.000.000) ÷ 12 = 25.000")
+    @DisplayName("TC-F9.3.1-02f: hoa hồng dùng giá sau giảm của dòng hóa đơn: 0,15 × (3.000.000 − 1.000.000) ÷ 12 = 25.000")
     void commissionUsesNetPrice() throws Exception {
         Trainer pt15 = c.trainer("0.1500");
         Long a = c.soldPt(owner, "ACTIVE", A_START, A_END, 12, 12, 3_000_000, 1_000_000);
@@ -145,7 +145,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 KB2: huấn luyện viên chưa có tỷ lệ hoa hồng → DONE, hoa hồng 0 (GĐ-3), vẫn trừ buổi")
+    @DisplayName("TC-F9.3.1-02g: huấn luyện viên chưa có tỷ lệ hoa hồng → DONE, hoa hồng 0 (GĐ-3), vẫn trừ buổi")
     void nullRateGivesZeroCommission() throws Exception {
         Trainer noRate = c.trainer(null);
         Long a = packageA(5);
@@ -162,7 +162,7 @@ class PtSessionCompletionApiIntegrationTest {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("US-F9.3.1 KB3 (ví dụ SRS): xác nhận buổi cuối của gói A ngày 03/11 → A EXPIRED 0 buổi; gói B 60 ngày dời về 03/11–01/01 và ACTIVE")
+    @DisplayName("TC-F9.3.1-06a: xác nhận buổi cuối của gói A ngày 03/11 → A EXPIRED 0 buổi; gói B 60 ngày dời về 03/11–01/01 và ACTIVE")
     void lastSessionExpiresAndPullsNextPackage() throws Exception {
         Long a = packageA(1);
         Long b = packageB(10);
@@ -183,7 +183,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 KB3: gói nối tiếp đã tới ngày bắt đầu (01/11) mà tác vụ nền chưa kích hoạt → ACTIVE, giữ nguyên 01/11–30/12, không dời muộn hơn")
+    @DisplayName("TC-F9.3.1-06b: gói nối tiếp đã tới ngày bắt đầu (01/11) mà tác vụ nền chưa kích hoạt → ACTIVE, giữ nguyên 01/11–30/12, không dời muộn hơn")
     void overdueUpcomingKeepsItsDates() throws Exception {
         Long a = c.soldPt(owner, "ACTIVE", A_START, LocalDate.of(2026, 10, 31), 10, 1, 5_000_000, 500_000);
         Long b = c.soldPt(owner, "UPCOMING", LocalDate.of(2026, 11, 1), LocalDate.of(2026, 12, 30), 10, 10,
@@ -199,7 +199,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 KB3: buổi cuối, không có gói nối tiếp → gói EXPIRED, không kích hoạt gì")
+    @DisplayName("TC-F9.3.1-07a: buổi cuối, không có gói nối tiếp → gói EXPIRED, không kích hoạt gì")
     void lastSessionWithoutNextPackage() throws Exception {
         Long a = packageA(1);
         Long id = c.session(pt, owner, a, AT_18);
@@ -212,7 +212,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 BR-F9.18: PT ghi vắng sau giờ bắt đầu → NO_SHOW, vẫn trừ 1 buổi, commission_amount rỗng")
+    @DisplayName("TC-F9.3.1-08a: PT ghi vắng sau giờ bắt đầu → NO_SHOW, vẫn trừ 1 buổi, commission_amount rỗng")
     void noShowDeductsWithoutCommission() throws Exception {
         Long a = packageA(5);
         Long id = c.session(pt, owner, a, AT_18);
@@ -231,7 +231,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 BR-F9.18: ghi vắng buổi cuối → áp dụng BR-F9.7 như DONE: A EXPIRED, B về hôm nay và ACTIVE")
+    @DisplayName("TC-F9.3.1-08b, TC-F9.3.1-06c: ghi vắng buổi cuối → áp dụng BR-F9.7 như DONE: A EXPIRED, B về hôm nay và ACTIVE")
     void noShowOnLastSessionPullsNextPackage() throws Exception {
         Long a = packageA(1);
         Long b = packageB(10);
@@ -248,7 +248,7 @@ class PtSessionCompletionApiIntegrationTest {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("US-F9.3.1 E2: PT không được phân công xác nhận hoặc ghi vắng → 403, buổi và gói giữ nguyên")
+    @DisplayName("TC-F9.3.1-10a: PT không được phân công xác nhận hoặc ghi vắng → 403, buổi và gói giữ nguyên")
     void otherTrainerForbidden() throws Exception {
         Long a = packageA(5);
         Long id = c.session(pt, owner, a, AT_18);
@@ -261,7 +261,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 E2: quản lý chi nhánh khác → 403")
+    @DisplayName("TC-F9.3.1-10b: quản lý chi nhánh khác → 403")
     void otherBranchManagerForbidden() throws Exception {
         Long id = c.session(pt, owner, packageA(5), AT_18);
         Long otherManager = c.f.staffUser(UserRole.BRANCH_MANAGER, c.f.cn02);
@@ -272,7 +272,7 @@ class PtSessionCompletionApiIntegrationTest {
 
     @ParameterizedTest(name = "{0}")
     @ValueSource(strings = {"MEMBER", "RECEPTIONIST", "SUPER_ADMIN"})
-    @DisplayName("US-F9.3.1 E2: hội viên, lễ tân, chủ chuỗi không xác nhận được → 403")
+    @DisplayName("TC-F9.3.1-10c: hội viên, lễ tân, chủ chuỗi không xác nhận được → 403")
     void otherRolesForbidden(String role) throws Exception {
         Long id = c.session(pt, owner, packageA(5), AT_18);
         Long userId = switch (role) {
@@ -286,7 +286,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 E3: buổi không tồn tại → 404")
+    @DisplayName("TC-F9.3.1-01b: buổi không tồn tại → 404")
     void notFound() throws Exception {
         confirm(pt.userId(), UserRole.TRAINER, 999_999L)
             .andExpect(status().isNotFound())
@@ -294,7 +294,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 E5 (Q11): chưa tới giờ bắt đầu → 422 \"Buổi tập chưa diễn ra.\" cho cả xác nhận và ghi vắng; đúng giờ bắt đầu → 200")
+    @DisplayName("TC-F9.3.1-03a: chưa tới giờ bắt đầu → 422 \"Buổi tập chưa diễn ra.\" cho cả xác nhận và ghi vắng; đúng giờ bắt đầu → 200")
     void beforeStartRejected() throws Exception {
         Long a = packageA(5);
         Long id = c.session(pt, owner, a, AT_18);
@@ -312,7 +312,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 E5: xác nhận lần hai, hoặc ghi vắng buổi đã xác nhận → 422, không trừ lần hai")
+    @DisplayName("TC-F9.3.1-04a: xác nhận lần hai, hoặc ghi vắng buổi đã xác nhận → 422, không trừ lần hai")
     void secondTimeRejected() throws Exception {
         Long a = packageA(5);
         Long id = c.session(pt, owner, a, AT_18);
@@ -329,7 +329,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 E5: buổi đã hủy → 422, gói giữ nguyên")
+    @DisplayName("TC-F9.3.1-04b: buổi đã hủy → 422, gói giữ nguyên")
     void cancelledRejected() throws Exception {
         Long a = packageA(5);
         Long id = c.f.ptSession(pt.staffId(), owner.memberId(), a, AT_18, "CANCELLED");
@@ -345,7 +345,7 @@ class PtSessionCompletionApiIntegrationTest {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("US-F9.3.1 BR-F9.19: PT xác nhận lúc 23:59 cùng ngày giờ Việt Nam → 200")
+    @DisplayName("TC-F9.3.1-09a: PT xác nhận lúc 23:59 cùng ngày giờ Việt Nam → 200")
     void trainerAt2359Allowed() throws Exception {
         Long id = c.session(pt, owner, packageA(5), AT_18);
         clock.setVn(DAY.atTime(23, 59, 59));
@@ -355,7 +355,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 BR-F9.19: PT xác nhận hoặc ghi vắng lúc 00:00 hôm sau → 422 \"Đã quá hạn xác nhận, liên hệ quản lý chi nhánh\"")
+    @DisplayName("TC-F9.3.1-09b: PT xác nhận hoặc ghi vắng lúc 00:00 hôm sau → 422 \"Đã quá hạn xác nhận, liên hệ quản lý chi nhánh\"")
     void trainerAtMidnightRejected() throws Exception {
         Long a = packageA(5);
         Long id = c.session(pt, owner, a, AT_18);
@@ -371,7 +371,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 BR-F9.19: quá hạn, quản lý chi nhánh của buổi xác nhận lúc 00:00 hôm sau → 200, hoa hồng của PT, ghi audit_logs CONFIRM")
+    @DisplayName("TC-F9.3.1-09c: quá hạn, quản lý chi nhánh của buổi xác nhận lúc 00:00 hôm sau → 200, hoa hồng của PT, ghi audit_logs CONFIRM")
     void managerAfterDeadlineAllowedWithAudit() throws Exception {
         Long a = packageA(5);
         Long id = c.session(pt, owner, a, AT_18);
@@ -393,7 +393,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 BR-F9.19: quá hạn, quản lý ghi vắng → 200 NO_SHOW, trừ buổi, ghi audit_logs NO_SHOW")
+    @DisplayName("TC-F9.3.1-09d, TC-F9.3.1-08c: quá hạn, quản lý ghi vắng → 200 NO_SHOW, trừ buổi, ghi audit_logs NO_SHOW")
     void managerNoShowAfterDeadline() throws Exception {
         Long a = packageA(5);
         Long id = c.session(pt, owner, a, AT_18);
@@ -407,7 +407,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 KB5: quản lý xác nhận muộn buổi ngày cuối của gói đã EXPIRED vì hết ngày → DONE, vẫn trừ buổi, không đổi trạng thái gói (chốt 20/11)")
+    @DisplayName("TC-F9.3.1-09e: quản lý xác nhận muộn buổi ngày cuối của gói đã EXPIRED vì hết ngày → DONE, vẫn trừ buổi, không đổi trạng thái gói (chốt 20/11)")
     void managerConfirmsOnPackageExpiredByDate() throws Exception {
         Long a = c.soldPt(owner, "EXPIRED", A_START, DAY, 10, 3, 5_000_000, 500_000);
         Long b = c.soldPt(owner, "ACTIVE", DAY.plusDays(1), DAY.plusDays(60), 10, 10, 6_000_000, 0);
@@ -426,7 +426,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 E5: buổi đã qua giờ còn sót trên gói đã hết buổi → 422 gói đã hết buổi, buổi vẫn BOOKED")
+    @DisplayName("TC-F9.3.1-04c: buổi đã qua giờ còn sót trên gói đã hết buổi → 422 gói đã hết buổi, buổi vẫn BOOKED")
     void leftoverSessionOnUsedUpPackage() throws Exception {
         Long a = packageA(1);
         Long earlier = c.session(pt, owner, a, DAY.atTime(8, 0));
@@ -445,7 +445,7 @@ class PtSessionCompletionApiIntegrationTest {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("US-F9.3.1 GĐ-8: buổi cuối làm gói A về 0 → buổi BOOKED tương lai của A chuyển sang gói B vừa ACTIVE, vẫn BOOKED, không phát sự kiện hủy")
+    @DisplayName("TC-F9.3.1-06d: buổi cuối làm gói A về 0 → buổi BOOKED tương lai của A chuyển sang gói B vừa ACTIVE, vẫn BOOKED, không phát sự kiện hủy")
     void futureSessionsMoveToNextPackage() throws Exception {
         Long a = packageA(1);
         Long b = packageB(10);
@@ -466,7 +466,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 GĐ-8: buổi cuối, không có gói nối tiếp → hủy mọi buổi BOOKED tương lai (CANCELLED, cancelled_at), phát sự kiện cho F10 sau commit")
+    @DisplayName("TC-F9.3.1-07b: buổi cuối, không có gói nối tiếp → hủy mọi buổi BOOKED tương lai (CANCELLED, cancelled_at), phát sự kiện cho F10 sau commit")
     void futureSessionsCancelledWithoutNextPackage() throws Exception {
         Long a = packageA(1);
         Long id = c.session(pt, owner, a, AT_18);
@@ -494,7 +494,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 GĐ-8: gói B chỉ còn 1 buổi (BR-F9.4 trên gói mới) → buổi sớm nhất chuyển sang B, buổi dư bị hủy và báo hội viên")
+    @DisplayName("TC-F9.3.1-06e: gói B chỉ còn 1 buổi (BR-F9.4 trên gói mới) → buổi sớm nhất chuyển sang B, buổi dư bị hủy và báo hội viên")
     void extraSessionsCancelledWhenNextPackageTooSmall() throws Exception {
         Long a = packageA(1);
         Long b = packageB(1);
@@ -513,7 +513,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 GĐ-8: buổi tương lai sau end_date mới của gói B (kéo về hôm nay, 7 ngày) → hủy; buổi trong hạn B → chuyển")
+    @DisplayName("TC-F9.3.1-06f: buổi tương lai sau end_date mới của gói B (kéo về hôm nay, 7 ngày) → hủy; buổi trong hạn B → chuyển")
     void sessionsBeyondNextPackageEndAreCancelled() throws Exception {
         Long a = packageA(1);
         Long b = c.soldPt(owner, "UPCOMING", LocalDate.of(2026, 12, 1), LocalDate.of(2026, 12, 7), 10, 10,
@@ -531,7 +531,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 GĐ-8: buổi đã qua giờ chưa xác nhận của gói A không bị chuyển, không bị hủy (chỉ xét buổi chưa diễn ra, Q16)")
+    @DisplayName("TC-F9.3.1-06g: buổi đã qua giờ chưa xác nhận của gói A không bị chuyển, không bị hủy (chỉ xét buổi chưa diễn ra, Q16)")
     void pastUnconfirmedSessionLeftAlone() throws Exception {
         Long a = packageA(1);
         Long b = packageB(10);
@@ -545,7 +545,7 @@ class PtSessionCompletionApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 GĐ-8: buổi của hội viên khác, gói khác không bị đụng tới")
+    @DisplayName("TC-F9.3.1-06h: buổi của hội viên khác, gói khác không bị đụng tới")
     void otherMembersSessionsUntouched() throws Exception {
         Long a = packageA(1);
         Long id = c.session(pt, owner, a, AT_18);

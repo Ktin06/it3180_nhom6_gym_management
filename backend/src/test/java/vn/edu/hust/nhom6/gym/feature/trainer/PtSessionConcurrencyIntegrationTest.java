@@ -37,7 +37,8 @@ import vn.edu.hust.nhom6.gym.common.time.MutableClock;
 import vn.edu.hust.nhom6.gym.common.time.MutableClockConfiguration;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.UserRole;
 import vn.edu.hust.nhom6.gym.feature.auth.service.JwtTokenService;
-import vn.edu.hust.nhom6.gym.feature.groupclass.service.ClassSessionChangeService;
+import vn.edu.hust.nhom6.gym.feature.groupclass.dto.ClassDtos.SessionTimeRequest;
+import vn.edu.hust.nhom6.gym.feature.groupclass.service.ClassSessionService;
 import vn.edu.hust.nhom6.gym.feature.trainer.PtSessionFixtures.Account;
 import vn.edu.hust.nhom6.gym.feature.trainer.PtSessionFixtures.Trainer;
 import vn.edu.hust.nhom6.gym.feature.trainer.dto.PtSessionBookRequest;
@@ -66,7 +67,7 @@ class PtSessionConcurrencyIntegrationTest {
     @Autowired JwtTokenService tokens;
     @Autowired MutableClock clock;
     @Autowired PtSessionService ptSessions;
-    @Autowired ClassSessionChangeService classChanges;
+    @Autowired ClassSessionService classSessions;
 
     PtSessionFixtures f;
     ExecutorService pool;
@@ -160,7 +161,7 @@ class PtSessionConcurrencyIntegrationTest {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("US-F9.2.1 E4: yêu cầu khác đặt cùng khung của PT và commit trong lúc yêu cầu này chờ khóa staff → 409")
+    @DisplayName("TC-F9.2.1-10a: yêu cầu khác đặt cùng khung của PT và commit trong lúc yêu cầu này chờ khóa staff → 409")
     void trainerSlotTakenWhileWaitingIs409() throws Exception {
         Trainer pt = f.trainer(f.cn01);
         Account winner = f.ptMember(10);
@@ -180,7 +181,7 @@ class PtSessionConcurrencyIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 E4: chính hội viên vừa đặt cùng giờ với PT khác và commit trong lúc yêu cầu này chờ khóa members → 409")
+    @DisplayName("TC-F9.2.1-10b: chính hội viên vừa đặt cùng giờ với PT khác và commit trong lúc yêu cầu này chờ khóa members → 409")
     void memberSlotTakenWhileWaitingIs409() throws Exception {
         Trainer pt1 = f.trainer(f.cn01);
         Trainer pt2 = f.trainer(f.cn01);
@@ -204,7 +205,7 @@ class PtSessionConcurrencyIntegrationTest {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("US-F9.2.1 E4: hai hội viên cùng đặt một khung giờ của một PT cùng lúc → đúng một BOOKED")
+    @DisplayName("TC-F9.2.1-10c: hai hội viên cùng đặt một khung giờ của một PT cùng lúc → đúng một BOOKED")
     void twoMembersRaceForSameTrainerSlot() throws Exception {
         Trainer pt = f.trainer(f.cn01);
         for (int round = 0; round < ROUNDS; round++) {
@@ -220,7 +221,7 @@ class PtSessionConcurrencyIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 E4: một hội viên đặt cùng lúc hai PT khác nhau cùng giờ → đúng một BOOKED")
+    @DisplayName("TC-F9.2.1-10d: một hội viên đặt cùng lúc hai PT khác nhau cùng giờ → đúng một BOOKED")
     void sameMemberRacesTwoTrainers() throws Exception {
         Trainer pt1 = f.trainer(f.cn01);
         Trainer pt2 = f.trainer(f.cn01);
@@ -236,7 +237,7 @@ class PtSessionConcurrencyIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 E5 (BR-F9.4): gói còn 1 buổi, hội viên đặt cùng lúc hai khung khác nhau → đúng một BOOKED")
+    @DisplayName("TC-F9.2.1-08e, TC-F9.2.1-10e: gói còn 1 buổi, hội viên đặt cùng lúc hai khung khác nhau → đúng một BOOKED")
     void lastSessionRace() throws Exception {
         Trainer pt1 = f.trainer(f.cn01);
         Trainer pt2 = f.trainer(f.cn01);
@@ -252,7 +253,7 @@ class PtSessionConcurrencyIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 NF6: đặt buổi PT và đổi giờ buổi lớp của cùng PT sang khung đó cùng lúc → không khóa chéo, đúng một bên thành công")
+    @DisplayName("TC-F9.2.1-05g, TC-F9.2.1-10f: đặt buổi PT và đổi giờ buổi lớp của cùng PT sang khung đó cùng lúc → không khóa chéo, đúng một bên thành công")
     void bookingRacesClassReschedule() throws Exception {
         Trainer pt = f.trainer(f.cn01);
         Long manager = f.staffUser(UserRole.BRANCH_MANAGER, f.cn01);
@@ -263,8 +264,8 @@ class PtSessionConcurrencyIntegrationTest {
             Account a = f.ptMember(10);
             int ok = race(List.of(
                 () -> ptSessions.book(me(a), at(pt, slot)),
-                () -> classChanges.reschedule(managerUser, classSession, vn(slot.plusMinutes(30)),
-                    vn(slot.plusMinutes(90)))));
+                () -> classSessions.changeTime(managerUser, classSession,
+                    new SessionTimeRequest(vn(slot.plusMinutes(30)), vn(slot.plusMinutes(90))))));
             assertThat(ok).as("vòng %d", round).isEqualTo(1);
             long ptBooked = jdbc.queryForObject("""
                 SELECT COUNT(*) FROM pt_sessions WHERE status = 'BOOKED' AND trainer_id = ? AND start_at = ?""",
@@ -276,7 +277,7 @@ class PtSessionConcurrencyIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.7.1 NF6: hội viên và lễ tân cùng hủy một buổi → đúng một lần hủy thành công")
+    @DisplayName("TC-F9.7.1-11a: hội viên và lễ tân cùng hủy một buổi → đúng một lần hủy thành công")
     void doubleCancelRace() throws Exception {
         Trainer pt = f.trainer(f.cn01);
         Long receptionist = f.staffUser(UserRole.RECEPTIONIST, f.cn01);

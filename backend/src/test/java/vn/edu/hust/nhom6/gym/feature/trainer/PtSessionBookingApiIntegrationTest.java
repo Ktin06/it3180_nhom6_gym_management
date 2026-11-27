@@ -90,7 +90,7 @@ class PtSessionBookingApiIntegrationTest {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("US-F9.2.1 KB: gói PT ACTIVE, trong giờ rảnh, còn ≥ 12 giờ, không trùng → 201 BOOKED 60 phút, không trừ buổi")
+    @DisplayName("TC-F9.2.1-01a: gói PT ACTIVE, trong giờ rảnh, còn ≥ 12 giờ, không trùng → 201 BOOKED 60 phút, không trừ buổi")
     void bookSuccess() throws Exception {
         Account a = f.ptMember(10);
         Long membershipId = f.ptMembershipOf(a.memberId());
@@ -114,7 +114,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 E1: chấp nhận tên trường của API nháp SRS (ptId, startTime) → 201")
+    @DisplayName("TC-F9.2.1-01b: chấp nhận tên trường của API nháp SRS (ptId, startTime) → 201")
     void acceptsSrsDraftFieldNames() throws Exception {
         Account a = f.ptMember(10);
         Map<String, Object> body = new LinkedHashMap<>();
@@ -124,7 +124,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 KB: gói PT toàn chuỗi (branch_id rỗng) dùng được ở chi nhánh của PT → 201")
+    @DisplayName("TC-F9.2.1-01c: gói PT toàn chuỗi (branch_id rỗng) dùng được ở chi nhánh của PT → 201")
     void chainWidePtPackageIsUsable() throws Exception {
         Account a = f.account(f.cn02, "ACTIVE");
         f.membership(a.memberId(), "PT", null, "ACTIVE", PtSessionFixtures.PKG_START, PtSessionFixtures.PKG_END, 5);
@@ -136,7 +136,7 @@ class PtSessionBookingApiIntegrationTest {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("US-F9.2.1 E5: không có gói PT ACTIVE dùng được (chỉ TIME/SESSION, PT chi nhánh khác, PT hết hạn trước ngày tập, PT UPCOMING) → 422")
+    @DisplayName("TC-F9.2.1-07a: không có gói PT ACTIVE dùng được (chỉ TIME/SESSION, PT chi nhánh khác, PT hết hạn trước ngày tập, PT UPCOMING) → 422")
     void noUsablePtPackage() throws Exception {
         Account onlyTimeAndSession = f.account(f.cn01, "ACTIVE");
         f.membership(onlyTimeAndSession.memberId(), "TIME", f.cn01, "ACTIVE", PtSessionFixtures.PKG_START,
@@ -162,7 +162,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 E5: hồ sơ hội viên INACTIVE → 422")
+    @DisplayName("TC-F9.2.1-07b: hồ sơ hội viên INACTIVE → 422")
     void inactiveMember() throws Exception {
         Account a = f.account(f.cn01, "INACTIVE");
         f.membership(a.memberId(), "PT", f.cn01, "ACTIVE", PtSessionFixtures.PKG_START, PtSessionFixtures.PKG_END, 10);
@@ -175,7 +175,7 @@ class PtSessionBookingApiIntegrationTest {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("US-F9.2.1 E5: ngoài giờ rảnh (19:30 vượt 20:00, 07:30 trước 08:00, PT không khai báo khung) → 422; 19:00 chạm biên → 201")
+    @DisplayName("TC-F9.2.1-02b: ngoài giờ rảnh (19:30 vượt 20:00, 07:30 trước 08:00, PT không khai báo khung) → 422; 19:00 chạm biên → 201")
     void outsideAvailability() throws Exception {
         Account a = f.ptMember(10);
         book(a, pt.staffId(), LocalDateTime.of(2026, 11, 21, 19, 30))
@@ -189,14 +189,14 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 E5: biên PT_MIN_LEAD_HOURS – còn đúng 12 giờ → 201")
+    @DisplayName("TC-F9.2.1-03a: biên PT_MIN_LEAD_HOURS – còn đúng 12 giờ → 201")
     void exactlyTwelveHoursAhead() throws Exception {
         Account a = f.ptMember(10);
         book(a, pt.staffId(), LocalDateTime.of(2026, 11, 20, 18, 0)).andExpect(status().isCreated());
     }
 
     @Test
-    @DisplayName("US-F9.2.1 E5: còn 11 giờ 59 phút → 422 đặt sát giờ")
+    @DisplayName("TC-F9.2.1-03b: còn 11 giờ 59 phút → 422 đặt sát giờ")
     void elevenHoursFiftyNineMinutesAhead() throws Exception {
         clock.setVn(NOW.plusMinutes(1));
         Account a = f.ptMember(10);
@@ -207,7 +207,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 CONFIG-F9.1: PT_MIN_LEAD_HOURS đọc từ system_configs, không viết cứng (đổi thành 24 thì 12 giờ bị 422)")
+    @DisplayName("TC-F9.2.1-04a: PT_MIN_LEAD_HOURS đọc từ system_configs, không viết cứng (đổi thành 24 thì 12 giờ bị 422)")
     void leadHoursReadFromConfig() throws Exception {
         f.chainConfig("PT_MIN_LEAD_HOURS", 24);
         Account a = f.ptMember(10);
@@ -222,7 +222,7 @@ class PtSessionBookingApiIntegrationTest {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("US-F9.2.1 E5: trùng buổi PT BOOKED của huấn luyện viên → 422")
+    @DisplayName("TC-F9.2.1-05a: trùng buổi PT BOOKED của huấn luyện viên → 422")
     void overlapsTrainerPtSession() throws Exception {
         f.otherPtSession(pt.staffId(), SAT_10.plusMinutes(30), "BOOKED");
         Account a = f.ptMember(10);
@@ -233,7 +233,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 E5: buổi chạm biên và buổi PT đã hủy không chặn → 201")
+    @DisplayName("TC-F9.2.1-05b: buổi chạm biên và buổi PT đã hủy không chặn → 201")
     void adjacentOrCancelledDoesNotBlock() throws Exception {
         f.otherPtSession(pt.staffId(), SAT_10.plusHours(1), "BOOKED");
         f.otherPtSession(pt.staffId(), SAT_10.minusHours(1), "BOOKED");
@@ -244,7 +244,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 E5: trùng buổi lớp nhóm huấn luyện viên đang dạy → 422; buổi lớp đã hủy không chặn")
+    @DisplayName("TC-F9.2.1-05c: trùng buổi lớp nhóm huấn luyện viên đang dạy → 422; buổi lớp đã hủy không chặn")
     void overlapsTrainerClassSession() throws Exception {
         f.classSession(pt.staffId(), SAT_10.plusMinutes(30), SAT_10.plusMinutes(90), "SCHEDULED");
         Account a = f.ptMember(10);
@@ -258,7 +258,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 E5: trùng buổi lớp đã đổi giờ sang khung PT đặt (RESCHEDULED) → 422")
+    @DisplayName("TC-F9.2.1-05d: trùng buổi lớp đã đổi giờ sang khung PT đặt (RESCHEDULED) → 422")
     void overlapsRescheduledClassSession() throws Exception {
         f.classSession(pt.staffId(), SAT_10, SAT_10.plusHours(1), "RESCHEDULED");
         Account a = f.ptMember(10);
@@ -266,7 +266,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 E5: trùng lịch lặp ACTIVE của huấn luyện viên chưa sinh buổi (đặt xa hơn 14 ngày) → 422")
+    @DisplayName("TC-F9.2.1-05e: trùng lịch lặp ACTIVE của huấn luyện viên chưa sinh buổi (đặt xa hơn 14 ngày) → 422")
     void overlapsTrainerScheduleNotYetGenerated() throws Exception {
         LocalDateTime far = LocalDateTime.of(2026, 12, 12, 10, 0); // thứ Bảy, sau cửa sổ sinh buổi 14 ngày
         f.classScheduleOnly(pt.staffId(), 6, LocalTime.of(10, 30), LocalTime.of(11, 30));
@@ -278,7 +278,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 BR-F9.3: lịch lặp trong cửa sổ 14 ngày mà không có buổi (tác vụ sinh đã bỏ qua) không chặn → 201")
+    @DisplayName("TC-F9.2.1-05f: lịch lặp trong cửa sổ 14 ngày mà không có buổi (tác vụ sinh đã bỏ qua) không chặn → 201")
     void skippedOccurrenceInsideGenerationWindowDoesNotBlock() throws Exception {
         f.classScheduleOnly(pt.staffId(), 6, LocalTime.of(10, 30), LocalTime.of(11, 30));
         Account a = f.ptMember(10);
@@ -286,7 +286,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 E5: trùng buổi PT BOOKED của chính hội viên với huấn luyện viên khác → 422")
+    @DisplayName("TC-F9.2.1-06a: trùng buổi PT BOOKED của chính hội viên với huấn luyện viên khác → 422")
     void overlapsMemberPtSessionWithOtherTrainer() throws Exception {
         Trainer other = f.trainer(f.cn01);
         Account a = f.ptMember(10);
@@ -297,7 +297,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 E5: trùng chỗ lớp nhóm BOOKED của hội viên → 422; chỗ đã hủy không chặn")
+    @DisplayName("TC-F9.2.1-06b: trùng chỗ lớp nhóm BOOKED của hội viên → 422; chỗ đã hủy không chặn")
     void overlapsMemberClassBooking() throws Exception {
         Trainer classTrainer = f.trainer(f.cn01);
         Account a = f.ptMember(10);
@@ -322,7 +322,7 @@ class PtSessionBookingApiIntegrationTest {
         "Bạn đã đặt đủ số buổi còn lại của gói PT. Vui lòng gia hạn gói để đặt thêm.";
 
     @Test
-    @DisplayName("US-F9.2.1 E5: gói còn 2 buổi, đã đặt 2 buổi chưa diễn ra → buổi thứ ba 422, câu lỗi không gợi ý chờ")
+    @DisplayName("TC-F9.2.1-08a: gói còn 2 buổi, đã đặt 2 buổi chưa diễn ra → buổi thứ ba 422, câu lỗi không gợi ý chờ")
     void bookedEnoughSessions() throws Exception {
         Account a = f.ptMember(2);
         book(a, pt.staffId(), SAT_10).andExpect(status().isCreated());
@@ -335,7 +335,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 VD23-1: buổi BOOKED đã qua giờ chưa xác nhận vẫn chặn đặt thêm; buổi CANCELLED, DONE, NO_SHOW không đếm")
+    @DisplayName("TC-F9.2.1-08b: buổi BOOKED đã qua giờ chưa xác nhận vẫn chặn đặt thêm; buổi CANCELLED, DONE, NO_SHOW không đếm")
     void pastUnconfirmedSessionBlocksBooking() throws Exception {
         Account blocked = f.ptMember(1);
         Long blockedMembership = f.ptMembershipOf(blocked.memberId());
@@ -357,7 +357,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 VD23-2: ví dụ VD-23 – gói còn 1 buổi, buổi 08:00 đã qua giờ chưa xác nhận → đặt 18:00 bị 422; PT xác nhận 08:00 → gói về 0, đặt tiếp vẫn bị từ chối")
+    @DisplayName("TC-F9.2.1-08c: ví dụ VD-23 – gói còn 1 buổi, buổi 08:00 đã qua giờ chưa xác nhận → đặt 18:00 bị 422; PT xác nhận 08:00 → gói về 0, đặt tiếp vẫn bị từ chối")
     void vd23PastMorningBlocksEveningAndConfirmExpiresPackage() throws Exception {
         f.chainConfig("PT_MIN_LEAD_HOURS", 1);
         clock.setVn(LocalDateTime.of(2026, 11, 20, 9, 0));
@@ -384,7 +384,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 VD23-3: gói còn 2 buổi, 1 buổi đã qua giờ chưa xác nhận → đặt được đúng 1 buổi nữa, buổi thứ hai bị 422")
+    @DisplayName("TC-F9.2.1-08d, TC-F9.2.1-09a: gói còn 2 buổi, 1 buổi đã qua giờ chưa xác nhận → đặt được đúng 1 buổi nữa, buổi thứ hai bị 422")
     void twoRemainingWithOnePastUnconfirmedAllowsExactlyOneMore() throws Exception {
         Account a = f.ptMember(2);
         Long membership = f.ptMembershipOf(a.memberId());
@@ -398,7 +398,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 VD23-4: hủy buổi BOOKED đúng hạn trả lại chỗ → hội viên đặt lại được buổi khác")
+    @DisplayName("TC-F9.2.1-09b: hủy buổi BOOKED đúng hạn trả lại chỗ → hội viên đặt lại được buổi khác")
     void cancelOnTimeFreesQuotaForRebooking() throws Exception {
         Account a = f.ptMember(1);
         String body = book(a, pt.staffId(), SAT_10)
@@ -423,7 +423,7 @@ class PtSessionBookingApiIntegrationTest {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("US-F9.2.1 E1: thiếu huấn luyện viên, thiếu giờ, giờ sai định dạng → 400")
+    @DisplayName("TC-F9.2.1-11b: thiếu huấn luyện viên, thiếu giờ, giờ sai định dạng → 400")
     void invalidInput() throws Exception {
         Account a = f.ptMember(10);
         send(a.userId(), UserRole.MEMBER, Map.of("startAt", "2026-11-21T03:00:00Z"))
@@ -436,7 +436,7 @@ class PtSessionBookingApiIntegrationTest {
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(value = UserRole.class, names = {"TRAINER", "RECEPTIONIST", "BRANCH_MANAGER", "SUPER_ADMIN"})
-    @DisplayName("US-F9.2.1 E2: người gọi không phải hội viên → 403")
+    @DisplayName("TC-F9.2.1-12b: người gọi không phải hội viên → 403")
     void nonMemberIsForbidden(UserRole role) throws Exception {
         Long userId = role == UserRole.TRAINER ? pt.userId() : f.staffUser(role, f.cn01);
         send(userId, role, Map.of("trainerId", pt.staffId(), "startAt", "2026-11-21T03:00:00Z"))
@@ -444,7 +444,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 E2: chưa đăng nhập → 401")
+    @DisplayName("TC-F9.2.1-12c: chưa đăng nhập → 401")
     void anonymousIs401() throws Exception {
         mvc.perform(post("/api/v1/pt-sessions").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"trainerId\":1,\"startAt\":\"2026-11-21T03:00:00Z\"}"))
@@ -452,7 +452,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 E3: huấn luyện viên không tồn tại, đã nghỉ, hoặc không phải vai trò TRAINER → 404")
+    @DisplayName("TC-F9.2.1-11c: huấn luyện viên không tồn tại, đã nghỉ, hoặc không phải vai trò TRAINER → 404")
     void trainerNotFound() throws Exception {
         Account a = f.ptMember(10);
         book(a, 999_999L, SAT_10).andExpect(status().isNotFound());
@@ -467,7 +467,7 @@ class PtSessionBookingApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 KB: buổi PT ở chi nhánh của huấn luyện viên (CN02), gói CN02 → branch_id = CN02")
+    @DisplayName("TC-F9.2.1-01d: buổi PT ở chi nhánh của huấn luyện viên (CN02), gói CN02 → branch_id = CN02")
     void sessionBranchIsTrainerBranch() throws Exception {
         Trainer cn02Trainer = f.trainer(f.cn02);
         Account a = f.account(f.cn02, "ACTIVE");

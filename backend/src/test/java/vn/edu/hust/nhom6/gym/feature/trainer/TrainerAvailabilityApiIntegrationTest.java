@@ -117,7 +117,7 @@ class TrainerAvailabilityApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.1.1 KB1: PT thêm khung rảnh hợp lệ thì 201, lấy trainerId từ token và giữ nguyên giờ VN")
+    @DisplayName("TC-F9.1.1-01a: PT thêm khung rảnh hợp lệ thì 201, lấy trainerId từ token và giữ nguyên giờ VN")
     void createAvailabilityTakesTrainerFromTokenAndPreservesVnTime() throws Exception {
         var payload = body(2, "18:30", "21:00");
         payload.put("trainerId", pt2StaffId); // cố tình gửi trainerId PT khác -> phải bị bỏ qua, lấy từ token
@@ -154,7 +154,7 @@ class TrainerAvailabilityApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.1.1 VD-13: Đọc lại khung giờ 18:30 do SQL ghi sẵn không bị lệch múi giờ")
+    @DisplayName("TC-F9.1.1-01b: Đọc lại khung giờ 18:30 do SQL ghi sẵn không bị lệch múi giờ")
     void readSqlSeededTimeColumnWithoutTimezoneShift() throws Exception {
         f.insertAvailabilityRaw(pt1StaffId, f.cn01, 2, "18:30:00", "20:30:00");
 
@@ -172,7 +172,7 @@ class TrainerAvailabilityApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.1.1 E1: Giờ kết thúc không sau giờ bắt đầu, thiếu trường hoặc thứ ngoài 1-7 thì 400")
+    @DisplayName("TC-F9.1.1-02a: Giờ kết thúc không sau giờ bắt đầu, thiếu trường hoặc thứ ngoài 1-7 thì 400")
     void invalidInputReturns400() throws Exception {
         createSlot(pt1UserId, UserRole.TRAINER, body(2, "10:00", "10:00"))
             .andExpect(status().isBadRequest())
@@ -197,7 +197,7 @@ class TrainerAvailabilityApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.1.1 E4: Khung chồng khung cùng PT cùng thứ thì 422; khung nối tiếp và PT khác trùng giờ thì 201")
+    @DisplayName("TC-F9.1.1-03b, TC-F9.1.1-04b, TC-F9.1.1-05a: Khung chồng khung cùng PT cùng thứ thì 422; khung nối tiếp và PT khác trùng giờ thì 201")
     void overlapSameTrainerIs422ButAdjacentOrOtherTrainerIs201() throws Exception {
         createOk(pt1UserId, 2, "08:00", "12:00");
 
@@ -227,7 +227,7 @@ class TrainerAvailabilityApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.1.1 E4: Sửa khung chồng lên khung khác cùng PT thì 422, giữ nguyên khung cũ")
+    @DisplayName("TC-F9.1.1-03c, TC-F9.1.1-06a: Sửa khung chồng lên khung khác cùng PT thì 422, giữ nguyên khung cũ")
     void updateOverlapSameTrainerIs422() throws Exception {
         createOk(pt1UserId, 2, "08:00", "12:00");
         Long slot2 = createOk(pt1UserId, 2, "13:00", "17:00");
@@ -249,7 +249,7 @@ class TrainerAvailabilityApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.1.1 E5: Xóa khung không còn buổi BOOKED tương lai thì 204 và ghi audit_logs; còn buổi BOOKED tương lai thì 422")
+    @DisplayName("TC-F9.1.1-07c: Xóa khung không còn buổi BOOKED tương lai thì 204 và ghi audit_logs; còn buổi BOOKED tương lai thì 422")
     void deleteBlockedByFutureBookedOtherwiseHardDeletesAndAudits() throws Exception {
         Long slotId = createOk(pt1UserId, 2, "18:00", "21:00");
         // Thứ Ba 24/11/2026 19:00-20:00 VN (tương lai so với 20/11 09:00)
@@ -288,7 +288,7 @@ class TrainerAvailabilityApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.1.1 E5: Buổi PT đã qua, DONE, CANCELLED hoặc NO_SHOW không chặn xóa khung")
+    @DisplayName("TC-F9.1.1-08a: Buổi PT đã qua, DONE, CANCELLED hoặc NO_SHOW không chặn xóa khung")
     void pastOrNonBookedSessionsDoNotBlockDelete() throws Exception {
         Long slotId = createOk(pt1UserId, 2, "18:00", "21:00");
 
@@ -317,7 +317,7 @@ class TrainerAvailabilityApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.1.1 E5: Sửa thu hẹp hoặc đổi thứ làm buổi BOOKED tương lai rơi ra ngoài thì 422; nới rộng thì 200")
+    @DisplayName("TC-F9.1.1-06b, TC-F9.1.1-07d: Sửa thu hẹp hoặc đổi thứ làm buổi BOOKED tương lai rơi ra ngoài thì 422; nới rộng thì 200")
     void updateNarrowBlockedByFutureBookedButWidenAllowed() throws Exception {
         Long slotId = createOk(pt1UserId, 2, "18:00", "21:00");
         f.insertPtSession(pt1StaffId, f.cn01,
@@ -349,7 +349,7 @@ class TrainerAvailabilityApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.1.1 BR-F9.15: Buổi 06:30 sáng VN là ngày hôm trước theo UTC vẫn chặn đúng khung thứ của ngày VN")
+    @DisplayName("TC-F9.1.1-07e: Buổi 06:30 sáng VN là ngày hôm trước theo UTC vẫn chặn đúng khung thứ của ngày VN")
     void vnTimezoneEarlyMorningBlocksCorrectVnWeekday() throws Exception {
         Long mondayNight = createOk(pt1UserId, 1, "22:00", "23:59");
         Long tuesdayMorning = createOk(pt1UserId, 2, "06:00", "08:00");
@@ -377,7 +377,7 @@ class TrainerAvailabilityApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.1.1 E2, E3: PT sửa hoặc xóa khung của PT khác thì 403; khung không tồn tại thì 404")
+    @DisplayName("TC-F9.1.1-10a: PT sửa hoặc xóa khung của PT khác thì 403; khung không tồn tại thì 404")
     void otherTrainerIs403AndMissingSlotIs404() throws Exception {
         Long pt1Slot = createOk(pt1UserId, 2, "08:00", "12:00");
 
@@ -396,7 +396,7 @@ class TrainerAvailabilityApiIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(value = UserRole.class, names = {"SUPER_ADMIN", "BRANCH_MANAGER", "RECEPTIONIST", "MEMBER"})
-    @DisplayName("US-F9.1.1 E2: Vai trò không phải TRAINER gọi API /api/v1/pt/* thì 403")
+    @DisplayName("TC-F9.1.1-11a: Vai trò không phải TRAINER gọi API /api/v1/pt/* thì 403")
     void nonTrainerCannotAccessPtEndpoints(UserRole role) throws Exception {
         Long slotId = createOk(pt1UserId, 2, "08:00", "12:00");
         Long caller = f.user("caller-" + role.name().toLowerCase() + "@example.com", role,
@@ -410,7 +410,7 @@ class TrainerAvailabilityApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.1.1 E2: Không có token thì 401; PT đã nghỉ việc (staff INACTIVE) thì 403")
+    @DisplayName("TC-F9.1.1-11b: Không có token thì 401; PT đã nghỉ việc (staff INACTIVE) thì 403")
     void anonymousIs401AndInactiveTrainerIs403() throws Exception {
         mvc.perform(post("/api/v1/pt/availabilities")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -426,7 +426,7 @@ class TrainerAvailabilityApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.1.1 KB6: PT xem lịch dạy gồm khung rảnh, buổi PT và buổi lớp nhóm được phân công trong khoảng ngày VN")
+    @DisplayName("TC-F9.1.1-09a: PT xem lịch dạy gồm khung rảnh, buổi PT và buổi lớp nhóm được phân công trong khoảng ngày VN")
     void trainerScheduleReturnsAvailabilitiesPtAndAssignedClassSessionsInVnRange() throws Exception {
         createOk(pt1UserId, 4, "14:00", "18:00");
         createOk(pt1UserId, 2, "08:00", "12:00");
@@ -501,7 +501,7 @@ class TrainerAvailabilityApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.2.1 KB: Hội viên xem khung rảnh của PT đang hoạt động thì 200; PT không tồn tại hoặc không phải TRAINER thì 404; vai trò khác thì 403")
+    @DisplayName("TC-F9.2.1-02a, TC-F9.2.1-11a, TC-F9.2.1-12a: Hội viên xem khung rảnh của PT đang hoạt động thì 200; PT không tồn tại hoặc không phải TRAINER thì 404; vai trò khác thì 403")
     void memberReadsTrainerAvailabilitiesAndInvalidCases() throws Exception {
         createOk(pt1UserId, 5, "13:00", "17:00");
         createOk(pt1UserId, 2, "14:00", "18:00");

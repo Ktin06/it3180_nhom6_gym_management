@@ -128,7 +128,7 @@ class PtSessionCompletionConcurrencyIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 E4: thao tác khác ghi DONE và commit trong lúc yêu cầu này chờ khóa members → 409, gói không bị trừ thêm")
+    @DisplayName("TC-F9.3.1-05a: thao tác khác ghi DONE và commit trong lúc yêu cầu này chờ khóa members → 409, gói không bị trừ thêm")
     void sessionCompletedWhileWaitingIs409() throws Exception {
         Trainer pt = c.trainer("0.1000");
         Account a = c.member();
@@ -157,7 +157,7 @@ class PtSessionCompletionConcurrencyIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 E4: hai lần xác nhận cùng lúc một buổi → đúng một thành công, gói trừ đúng 1 buổi")
+    @DisplayName("TC-F9.3.1-05b: hai lần xác nhận cùng lúc một buổi → đúng một thành công, gói trừ đúng 1 buổi")
     void doubleConfirmRace() throws Exception {
         Trainer pt = c.trainer("0.1000");
         for (int round = 0; round < ROUNDS; round++) {
@@ -176,7 +176,7 @@ class PtSessionCompletionConcurrencyIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 E4: xác nhận và ghi vắng cùng lúc một buổi → đúng một thành công, gói trừ đúng 1 buổi")
+    @DisplayName("TC-F9.3.1-05c: xác nhận và ghi vắng cùng lúc một buổi → đúng một thành công, gói trừ đúng 1 buổi")
     void confirmVersusNoShowRace() throws Exception {
         Trainer pt = c.trainer("0.1000");
         for (int round = 0; round < ROUNDS; round++) {
@@ -194,7 +194,7 @@ class PtSessionCompletionConcurrencyIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 E4: gói còn 1 buổi, hai buổi đã qua giờ được xác nhận cùng lúc → một thành công, bên kia 422, gói 0 buổi không âm")
+    @DisplayName("TC-F9.3.1-05d: gói còn 1 buổi, hai buổi đã qua giờ được xác nhận cùng lúc → một thành công, bên kia 422, gói 0 buổi không âm")
     void lastSessionRace() throws Exception {
         Trainer pt = c.trainer("0.1000");
         for (int round = 0; round < ROUNDS; round++) {
@@ -214,7 +214,7 @@ class PtSessionCompletionConcurrencyIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.3.1 NF6: hội viên hủy buổi tương lai trong lúc xác nhận buổi cuối chuyển hoặc hủy buổi đó → không khóa chéo, buổi tương lai CANCELLED đúng một lần")
+    @DisplayName("TC-F9.3.1-05e: hội viên hủy buổi tương lai trong lúc xác nhận buổi cuối chuyển hoặc hủy buổi đó → không khóa chéo, buổi tương lai CANCELLED đúng một lần")
     void confirmLastRacesMemberCancellingFuture() throws Exception {
         Trainer pt = c.trainer("0.1000");
         for (int round = 0; round < ROUNDS; round++) {

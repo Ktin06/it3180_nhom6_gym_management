@@ -95,7 +95,7 @@ class PtSessionCancelApiIntegrationTest {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("US-F9.7.1 KB: hội viên hủy buổi của mình khi còn đúng 12 giờ → 200 CANCELLED, cancelled_at, không trừ buổi, giờ đó đặt lại được")
+    @DisplayName("TC-F9.7.1-01a, TC-F9.7.1-02a: hội viên hủy buổi của mình khi còn đúng 12 giờ → 200 CANCELLED, cancelled_at, không trừ buổi, giờ đó đặt lại được")
     void memberCancelsAtExactlyTwelveHours() throws Exception {
         Long id = session(AT_18, "BOOKED");
 
@@ -118,7 +118,7 @@ class PtSessionCancelApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.7.1 E4: hội viên hủy khi còn 11 giờ 59 phút → 422, buổi vẫn BOOKED")
+    @DisplayName("TC-F9.7.1-02b: hội viên hủy khi còn 11 giờ 59 phút → 422, buổi vẫn BOOKED")
     void memberCancelsTooLate() throws Exception {
         Long id = session(AT_18, "BOOKED");
         clock.setVn(NOW.plusMinutes(1));
@@ -129,7 +129,7 @@ class PtSessionCancelApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.7.1 KB: lễ tân cùng chi nhánh hủy hộ khi còn ≥ 12 giờ → 200; còn < 12 giờ → 422")
+    @DisplayName("TC-F9.7.1-04a: lễ tân cùng chi nhánh hủy hộ khi còn ≥ 12 giờ → 200; còn < 12 giờ → 422")
     void receptionistCancelsOnBehalf() throws Exception {
         Long early = session(AT_18, "BOOKED");
         Long late = session(AT_18.minusHours(2), "BOOKED");
@@ -140,7 +140,7 @@ class PtSessionCancelApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.7.1 CONFIG-F9.1: mốc hủy đọc PT_MIN_LEAD_HOURS của chi nhánh buổi (CN01 = 24) → còn 12 giờ bị 422")
+    @DisplayName("TC-F9.7.1-03a: mốc hủy đọc PT_MIN_LEAD_HOURS của chi nhánh buổi (CN01 = 24) → còn 12 giờ bị 422")
     void cancelLeadReadsBranchConfig() throws Exception {
         f.branchConfig(f.cn01, "PT_MIN_LEAD_HOURS", 24);
         Long id = session(AT_18, "BOOKED");
@@ -154,7 +154,7 @@ class PtSessionCancelApiIntegrationTest {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("US-F9.7.1 KB: quản lý chi nhánh hủy hộ khi còn 1 giờ, có lý do → 200, ghi audit_logs, phát sự kiện cho F10 sau commit")
+    @DisplayName("TC-F9.7.1-05a: quản lý chi nhánh hủy hộ khi còn 1 giờ, có lý do → 200, ghi audit_logs, phát sự kiện cho F10 sau commit")
     void managerCancelsWithReason() throws Exception {
         Long id = session(LocalDateTime.of(2026, 11, 20, 7, 0), "BOOKED");
 
@@ -188,7 +188,7 @@ class PtSessionCancelApiIntegrationTest {
 
     @ParameterizedTest(name = "lý do = [{0}]")
     @ValueSource(strings = {"", "   "})
-    @DisplayName("US-F9.7.1 E6: quản lý hủy hộ không nhập lý do (rỗng, toàn khoảng trắng) → 400")
+    @DisplayName("TC-F9.7.1-06a: quản lý hủy hộ không nhập lý do (rỗng, toàn khoảng trắng) → 400")
     void managerBlankReason(String reason) throws Exception {
         Long id = session(AT_18, "BOOKED");
         cancel(manager, UserRole.BRANCH_MANAGER, id, reason).andExpect(status().isBadRequest());
@@ -198,7 +198,7 @@ class PtSessionCancelApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.7.1 E6: quản lý hủy hộ không gửi body → 400")
+    @DisplayName("TC-F9.7.1-06b: quản lý hủy hộ không gửi body → 400")
     void managerNoBody() throws Exception {
         Long id = session(AT_18, "BOOKED");
         cancel(manager, UserRole.BRANCH_MANAGER, id, null).andExpect(status().isBadRequest());
@@ -206,7 +206,7 @@ class PtSessionCancelApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.7.1 E5: quản lý hủy khi đã tới giờ bắt đầu → 422; còn 1 phút → 200")
+    @DisplayName("TC-F9.7.1-07a: quản lý hủy khi đã tới giờ bắt đầu → 422; còn 1 phút → 200")
     void managerAtStartTime() throws Exception {
         Long started = session(NOW, "BOOKED");
         Long soon = session(NOW.plusMinutes(1), "BOOKED");
@@ -222,7 +222,7 @@ class PtSessionCancelApiIntegrationTest {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Test
-    @DisplayName("US-F9.7.1 E1: huấn luyện viên (kể cả PT của buổi) và chủ chuỗi gọi API hủy → 403")
+    @DisplayName("TC-F9.7.1-09a, TC-F9.7.1-10a: huấn luyện viên (kể cả PT của buổi) và chủ chuỗi gọi API hủy → 403")
     void trainerAndOwnerForbidden() throws Exception {
         Long id = session(AT_18, "BOOKED");
         cancel(pt.userId(), UserRole.TRAINER, id, "bận").andExpect(status().isForbidden());
@@ -232,7 +232,7 @@ class PtSessionCancelApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.7.1 E1: hội viên hủy buổi của hội viên khác → 403")
+    @DisplayName("TC-F9.7.1-10b: hội viên hủy buổi của hội viên khác → 403")
     void memberCannotCancelOthers() throws Exception {
         Long id = session(AT_18, "BOOKED");
         Account stranger = f.ptMember(10);
@@ -241,7 +241,7 @@ class PtSessionCancelApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.7.1 E1: lễ tân, quản lý chi nhánh khác hủy → 403")
+    @DisplayName("TC-F9.7.1-10c: lễ tân, quản lý chi nhánh khác hủy → 403")
     void otherBranchStaffForbidden() throws Exception {
         Long id = session(AT_18, "BOOKED");
         Long receptionistCn02 = f.staffUser(UserRole.RECEPTIONIST, f.cn02);
@@ -253,13 +253,13 @@ class PtSessionCancelApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.7.1 E2: buổi không tồn tại → 404")
+    @DisplayName("TC-F9.7.1-10d: buổi không tồn tại → 404")
     void notFound() throws Exception {
         cancel(owner.userId(), UserRole.MEMBER, 999_999L, null).andExpect(status().isNotFound());
     }
 
     @Test
-    @DisplayName("US-F9.7.1 E1, E2: quản lý không gửi lý do cho buổi không tồn tại → 404, buổi chi nhánh khác → 403 (quyền xét trước lý do)")
+    @DisplayName("TC-F9.7.1-06c, TC-F9.7.1-10e: quản lý không gửi lý do cho buổi không tồn tại → 404, buổi chi nhánh khác → 403 (quyền xét trước lý do)")
     void managerWithoutReasonGetsNotFoundOrForbiddenFirst() throws Exception {
         cancel(manager, UserRole.BRANCH_MANAGER, 999_999L, null).andExpect(status().isNotFound());
         Long id = session(AT_18, "BOOKED");
@@ -268,7 +268,7 @@ class PtSessionCancelApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.7.1 E4: lễ tân hủy sát giờ nhận câu báo không có 'liên hệ quầy'; hội viên thì có")
+    @DisplayName("TC-F9.7.1-02c, TC-F9.7.1-04b: lễ tân hủy sát giờ nhận câu báo không có 'liên hệ quầy'; hội viên thì có")
     void lateCancelMessageDependsOnRole() throws Exception {
         Long id = session(AT_18.minusHours(2), "BOOKED");
         cancel(receptionist, UserRole.RECEPTIONIST, id, null)
@@ -279,7 +279,7 @@ class PtSessionCancelApiIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F9.7.1 E3: buổi DONE, CANCELLED, NO_SHOW → 422 'không còn ở trạng thái đã đặt'")
+    @DisplayName("TC-F9.7.1-08a: buổi DONE, CANCELLED, NO_SHOW → 422 'không còn ở trạng thái đã đặt'")
     void notBooked() throws Exception {
         for (String state : new String[] {"DONE", "CANCELLED", "NO_SHOW"}) {
             Long id = session(AT_18.plusDays(1), state);
