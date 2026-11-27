@@ -88,6 +88,18 @@
     {
       "key": "lockedMemberId",
       "value": ""
+    },
+    {
+      "key": "calendarFrom",
+      "value": ""
+    },
+    {
+      "key": "calendarTo",
+      "value": ""
+    },
+    {
+      "key": "calendarBranchId",
+      "value": ""
     }
   ],
   "item": [
@@ -562,6 +574,98 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Lịch công khai, hội viên và huấn luyện viên",
+      "item": [
+        {
+          "name": "Lấy chi nhánh để lọc lịch",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/public/class-branches"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Xem lịch lớp công khai",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/public/class-sessions?from={{calendarFrom}}&to={{calendarTo}}&branchId={{calendarBranchId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Xem lịch và chỗ đặt của tôi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{memberAccessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/members/me/class-sessions?from={{calendarFrom}}&to={{calendarTo}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Xem lịch dạy của tôi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{trainerAccessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/trainers/me/class-sessions?from={{calendarFrom}}&to={{calendarTo}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Điền ngày yyyy-MM-dd theo giờ Việt Nam. Chọn calendarBranchId từ danh sách chi nhánh. Lịch hội viên và lịch dạy lấy danh tính từ token."
     }
   ]
 }

@@ -1,9 +1,12 @@
 package vn.edu.hust.nhom6.gym.feature.groupclass.controller;
 
 import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -21,9 +24,42 @@ import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 @RequiredArgsConstructor
 public class ClassController {
     private final ClassScheduleService schedules;
+    private final ClassCalendarService calendars;
     private final ClassBookingService bookings;
     private final ClassSessionService sessions;
     private final ClassAttendanceService attendance;
+
+    @GetMapping("/public/class-branches")
+    @Operation(summary = "Danh sách chi nhánh đang hoạt động để lọc lịch lớp")
+    public List<BranchOption> publicBranches() {
+        return calendars.branches();
+    }
+
+    @GetMapping("/public/class-sessions")
+    @Operation(summary = "Lịch lớp công khai theo chi nhánh và khoảng ngày Việt Nam")
+    public List<CalendarSession> publicCalendar(@RequestParam(required = false) @Positive Long branchId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return calendars.publicSessions(branchId, from, to);
+    }
+
+    @GetMapping("/members/me/class-sessions")
+    @PreAuthorize("hasRole('MEMBER')")
+    @Operation(summary = "Lịch lớp, chỗ trống và trạng thái chỗ đặt của hội viên đang đăng nhập")
+    public MemberCalendar memberCalendar(Authentication auth, @RequestParam(required = false) @Positive Long branchId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return calendars.memberSessions(CurrentUser.from(auth), branchId, from, to);
+    }
+
+    @GetMapping("/trainers/me/class-sessions")
+    @PreAuthorize("hasRole('TRAINER')")
+    @Operation(summary = "Lịch dạy lớp nhóm theo phân công từng buổi của huấn luyện viên")
+    public List<CalendarSession> trainerCalendar(Authentication auth,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return calendars.trainerSessions(CurrentUser.from(auth), from, to);
+    }
 
     @GetMapping("/class-schedules")
     @PreAuthorize("hasRole('BRANCH_MANAGER')")

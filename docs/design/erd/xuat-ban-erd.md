@@ -12,7 +12,7 @@
 | [ERD xuất dbdiagram.io – PDF](hinh/dbdiagram-erd-v2.pdf) | Bản xuất trực tiếp ngày 06/11/2026; dùng trang 1 cho sơ đồ tổng quan; trang 2 là sơ đồ có liên kết tô nổi, trang 3–5 là Enum |
 | [ERD xuất dbdiagram.io – PNG](hinh/dbdiagram-erd-v2.png) | Ảnh tổng quan 4956 × 4945 px xuất trực tiếp cùng nguồn DBML |
 | [Nguồn bản xuất dbdiagram.io](hinh/dbdiagram-nguon-hinh.json) | Người/ngày xuất, SHA-256 nguồn và từng file, kích thước, số trang và kết quả đối chiếu |
-| [Từ điển dữ liệu](tu-dien-du-lieu.md) | Tra cứu đủ 425 cột: kiểu, NULL, mặc định, khóa, ý nghĩa và ghi chú; kèm 45 khai báo chỉ mục và 25 tập giá trị Enum |
+| [Từ điển dữ liệu](tu-dien-du-lieu.md) | Tra cứu cột, kiểu, NULL, mặc định, khóa, ý nghĩa, chỉ mục và tập giá trị Enum theo DBML hiện tại |
 | [ERD tổng quan PDF](hinh/erd-v2.pdf) | Hình vector, có thể phóng to hoặc chèn vào LaTeX bằng `\includegraphics` |
 | [ERD tổng quan PNG](hinh/erd-v2.png) | Xem ảnh trực tiếp hoặc chèn vào trình soạn thảo báo cáo |
 | [ERD tổng quan SVG](hinh/erd-v2.svg) | Bản vector để xem trong trình duyệt; muốn đổi cấu trúc thì sửa nguồn chuẩn và sinh lại |
@@ -22,7 +22,7 @@
 
 Bộ hình `erd-v2.*` và `nhom-*.pdf/svg` bên dưới vẫn là bản dựng cục bộ bằng bộ phân tích DBML chính thức và Graphviz. Hai nguồn xuất có thông tin nguồn riêng, dùng cùng DBML chuẩn; hình nhóm giúp đọc rõ hơn khi đưa vào báo cáo khổ giấy nhỏ.
 
-Hình tổng quan chứa đủ **40 bảng, 425 cột và 91 quan hệ**. Vì sơ đồ lớn, khi trình bày ở khổ giấy nhỏ nên dùng các hình theo nhóm bên dưới thay vì thu toàn bộ sơ đồ vào một trang A4.
+Hình tổng quan của đợt xuất bản này chứa **40 bảng, 425 cột và 91 quan hệ**. Dùng DBML và từ điển để tra cột `class_sessions.class_type_id` được thêm sau đợt xuất hình. Vì sơ đồ lớn, khi trình bày ở khổ giấy nhỏ nên dùng các hình theo nhóm bên dưới thay vì thu toàn bộ sơ đồ vào một trang A4.
 
 | Nhóm | Số bảng trong nhóm | PDF cho báo cáo | SVG để xem |
 | --- | ---: | --- | --- |

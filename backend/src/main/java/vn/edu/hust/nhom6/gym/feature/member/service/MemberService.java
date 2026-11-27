@@ -123,6 +123,20 @@ public class MemberService {
             new NotFoundException("Hội viên không tồn tại trên hệ thống."));
     }
 
+    /**
+     * Khóa dòng hội viên như {@link #lockForUpdate} nhưng <b>không chờ</b>: dòng đang bị giao dịch khác khóa (check-in,
+     * đặt lớp, đặt PT của cùng hội viên) thì ném ngay {@link org.springframework.dao.PessimisticLockingFailureException}.
+     * Chỉ dùng cho check-in tại quầy (SRS F4 Scenario 7: bên đến sau nhận 409 ngay); F8, F9 vẫn dùng
+     * {@link #lockForUpdate} (chờ).
+     *
+     * @throws NotFoundException (404) khi không có hồ sơ hoặc hồ sơ đã xóa mềm
+     */
+    @Transactional
+    public Member lockForUpdateNoWait(Long memberId) {
+        return members.findForUpdateNoWait(memberId).orElseThrow(() ->
+            new NotFoundException("Hội viên không tồn tại trên hệ thống."));
+    }
+
     /** Chức năng khác đọc hồ sơ theo cùng phạm vi chi nhánh với F2. */
     public Member requireInStaffScope(CurrentUser actor, Long memberId) {
         Member member = findMember(memberId);

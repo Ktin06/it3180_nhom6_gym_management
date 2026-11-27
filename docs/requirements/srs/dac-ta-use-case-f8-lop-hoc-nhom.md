@@ -533,7 +533,7 @@ Màn hình quản lý lịch lặp, phân công và thay đổi buổi. #198 xá
   - **AC-F8.7.1-05: Sửa hoặc ngừng lịch không đổi buổi đã sinh** (BR-F8.7-02, BR-F8.7-04)
     - **Given** Lịch đã sinh buổi và có chỗ đặt
     - **When** Quản lý cập nhật hoặc ngừng lịch
-    - **Then** Buổi, sức chứa và chỗ đã sinh giữ nguyên; chỉnh sửa dùng cho lần sinh sau, ngừng lịch chuyển trạng thái lịch sang INACTIVE.
+    - **Then** Buổi đã sinh giữ nguyên loại lớp, sức chứa và chỗ đặt. Chỉnh sửa áp dụng cho lần sinh sau. Ngừng lịch chuyển trạng thái lịch sang INACTIVE.
   - **AC-F8.7.1-06: Giảm sức chứa đúng biên** (BR-F8.7-02, BR-F8.1-03)
     - **Given** Buổi SCHEDULED hoặc RESCHEDULED chưa bắt đầu, còn bốn chỗ đang chiếm
     - **When** Quản lý yêu cầu giảm xuống ba hoặc bốn với phòng đủ sức chứa

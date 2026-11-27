@@ -16,8 +16,7 @@ export const MEMBER_MENU: MenuItem[] = [
     path: '/member/classes',
     label: 'Lớp học',
     icon: <CalendarOutlined />,
-    ready: false,
-    roles: ['MEMBER'],
+    ready: true,
   }, // F8
   { path: '/member/pt', label: 'PT', icon: <UserOutlined />, ready: false, roles: ['MEMBER'] }, // F9
 ]
