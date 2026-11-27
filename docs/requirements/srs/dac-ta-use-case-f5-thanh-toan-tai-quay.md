@@ -685,7 +685,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
 
 #### D. Các luồng thay thế và ngoại lệ (Alternative / Exception Flows)
 - **E1 – Thiếu lý do hoàn tiền (400 Bad Request):**
-  - Tại bước 3, quản lý không gửi body, thiếu `refundReason`, hoặc lý do rỗng/chỉ có khoảng trắng. Giới hạn 500 ký tự của prototype chưa được chốt, xem mục 4.
+  - Tại bước 3, quản lý không gửi body, thiếu `refundReason`, hoặc lý do rỗng/chỉ có khoảng trắng. Lý do quá 500 ký tự sau khi cắt khoảng trắng hai đầu cũng trả 400.
   - Hệ thống trả `ProblemDetail` (400) thông báo lỗi trường `refundReason` là bắt buộc.
 - **E2 – Chưa đăng nhập (401 Unauthorized):**
   - JWT không hợp lệ hoặc hết hạn.
@@ -783,7 +783,7 @@ Chức năng **F5 – Thanh toán tại quầy** là trung tâm dòng tiền và
     - **When** Gọi hoàn tiền, kể cả khi thiếu lý do
     - **Then** 403 “Chỉ quản lý chi nhánh mới có quyền hoàn tiền hóa đơn.”; kiểm tra quyền trước lỗi dữ liệu; không đổi hóa đơn, gói, phiếu thu và không ghi nhật ký hoàn. Giao diện chỉ hiện nút Hoàn tiền cho Quản lý khi hóa đơn PAID
   - **AC-F5.5.1-04: Bắt buộc lý do hoàn tiền có nội dung** (S5)
-    - **Given** Người gọi đúng quyền, hóa đơn PAID; body không có hoặc refundReason thiếu/rỗng/chỉ có khoảng trắng
+    - **Given** Người gọi đúng quyền, hóa đơn PAID; body không có hoặc refundReason thiếu, rỗng hoặc dài quá 500 ký tự sau khi cắt khoảng trắng hai đầu
     - **When** Gọi hoàn tiền
     - **Then** 400 Bad Request kèm errors.refundReason; hóa đơn vẫn PAID, không hủy gói/phiếu thu và không ghi nhật ký hoàn
   - **AC-F5.5.1-05: Hóa đơn không tồn tại, ngoài chi nhánh và chưa đăng nhập** (BR-F5-11, S2, S3)
@@ -860,11 +860,11 @@ Ngày 25/11/2026, thống nhất với người phụ trách áp dụng các hà
 | PT 0 buổi còn ACTIVE/FROZEN bắt đầu sau end_date gói cũ theo S2-07 | AC-F5.2.1-11; không áp dụng ngoại lệ SESSION, không thay quy tắc trừ buổi của F9 |
 | Quyền Chủ chuỗi tải PDF | Giữ 403 theo AC-F5.4.1-05 |
 
-Giới hạn 500 ký tự và chuẩn hóa khoảng trắng lý do hoàn tiền vẫn thuộc S2-38 và chờ quyết định riêng; S2-09 không thay đổi AC-F5.5.1-04.
+S2-38: cắt khoảng trắng hai đầu trước khi kiểm tra và lưu lý do. Nội dung sau chuẩn hóa phải dài từ 1 đến 500 ký tự, giữ nguyên khoảng trắng và xuống dòng bên trong.
 
 ### 4.4. Bàn giao kiểm thử và truy vết
 
 - Các API/luồng giao diện thuộc S2-09 #184, S2-10 #185 và S2-38 #213. PR S2-50 chỉ chuẩn hóa tài liệu; S2-09 triển khai API và migration theo các AC của UC-F5.1–F5.4. Các yêu cầu giao diện và hoàn tiền tiếp tục thuộc task tương ứng.
 - Khi gắn TC cho test đã có, chỉ đổi tên hiển thị trong commit riêng theo ADR 0012 mục 8, không đổi logic; một AC có thể có nhiều TC.
 - Ma trận docs/testing/ma-tran-truy-vet.md được sinh từ SRS và mã test đang có. AC F5 chưa có TC trên main phải giữ trạng thái chưa có TC; danh sách test prototype không được dùng để đánh dấu đã chạy thành công.
-- Các lựa chọn S2-09 tại mục 4.3 được bổ sung AC với số tiếp theo; phần hoàn tiền còn chờ quyết định không được tự cấp mã mới trong S2-09.
+- Các lựa chọn S2-09 tại mục 4.3 được bổ sung AC với số tiếp theo.

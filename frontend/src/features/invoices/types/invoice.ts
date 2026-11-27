@@ -119,6 +119,20 @@ export interface CancelledInvoice {
   updatedAt: string
 }
 
+export interface RefundInvoiceInput {
+  refundReason: string
+}
+
+export interface RefundResult {
+  invoiceId: number
+  invoiceCode: string
+  status: InvoiceStatus
+  refundedAt: string
+  refundedBy: number
+  refundedByName: string | null
+  refundReason: string
+}
+
 export interface InvoiceQuery extends PageQuery {
   status?: InvoiceStatus
   source?: InvoiceSource
@@ -136,4 +150,5 @@ export interface InvoicesGateway {
   pay(id: number, input: PayInvoiceInput): Promise<PaymentConfirmation>
   cancel(id: number): Promise<CancelledInvoice>
   pdf(id: number): Promise<Blob>
+  refund(id: number, input: RefundInvoiceInput): Promise<RefundResult>
 }

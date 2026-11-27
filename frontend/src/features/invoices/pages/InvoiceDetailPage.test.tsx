@@ -15,11 +15,11 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-function axiosProblem(status: number, detail: string) {
+function axiosProblem(status: number, detail: string, errors?: Record<string, string>) {
   const error = new AxiosError('Request failed')
   error.response = {
     status,
-    data: { detail },
+    data: errors ? { detail, errors } : { detail },
     statusText: 'Error',
     headers: {},
     config: { headers: new AxiosHeaders() },
@@ -113,6 +113,15 @@ function makeApi(overrides: Partial<InvoicesGateway> = {}): InvoicesGateway {
       updatedAt: '2026-11-20T10:00:00Z',
     }),
     pdf: vi.fn().mockResolvedValue(new Blob(['%PDF-1.4'], { type: 'application/pdf' })),
+    refund: vi.fn().mockResolvedValue({
+      invoiceId: 88,
+      invoiceCode: 'HD000088',
+      status: 'REFUNDED',
+      refundedAt: '2026-11-20T02:00:00Z',
+      refundedBy: 3,
+      refundedByName: 'Trần Quản Lý',
+      refundReason: 'Lễ tân bán nhầm gói TIME 3 tháng',
+    }),
     ...overrides,
   }
 }
@@ -708,5 +717,285 @@ describe('chi tiết hóa đơn và thanh toán F5', () => {
     await user.click(screen.getByRole('button', { name: /In \/ tải PDF/i }))
     await waitFor(() => expect(anchorClick).toHaveBeenCalledTimes(1))
     expect(openSpy).toHaveBeenCalledTimes(2)
+  })
+
+  it('TC-F5.5.1-03d: nút Hoàn tiền chỉ hiện cho BRANCH_MANAGER với hóa đơn PAID, ẩn với lễ tân, chủ chuỗi và trạng thái khác', async () => {
+    const paidInvoice = makeInvoice({ status: 'PAID', paidAt: '2026-11-20T09:15:00Z' })
+
+    // Quản lý chi nhánh xem hóa đơn PAID → thấy nút Hoàn tiền.
+    const managerRender = renderDetail(
+      makeApi({ detail: vi.fn().mockResolvedValue(paidInvoice) }),
+      'BRANCH_MANAGER',
+    )
+    expect(await screen.findByText('HD000088')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Hoàn tiền/i })).toBeInTheDocument()
+    managerRender.unmount()
+
+    // Lễ tân và chủ chuỗi xem hóa đơn PAID → không thấy nút Hoàn tiền.
+    for (const role of ['RECEPTIONIST', 'SUPER_ADMIN'] as const) {
+      const rendered = renderDetail(
+        makeApi({ detail: vi.fn().mockResolvedValue(paidInvoice) }),
+        role,
+      )
+      expect(await screen.findByText('HD000088')).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /Hoàn tiền/i })).not.toBeInTheDocument()
+      rendered.unmount()
+    }
+
+    // Quản lý chi nhánh xem hóa đơn không PAID (PENDING, CANCELLED, REFUNDED) → không thấy nút Hoàn tiền.
+    for (const status of ['PENDING', 'CANCELLED', 'REFUNDED'] as const) {
+      const rendered = renderDetail(
+        makeApi({
+          detail: vi.fn().mockResolvedValue(
+            makeInvoice({
+              status,
+              refundedBy: status === 'REFUNDED' ? 3 : null,
+              refundedAt: status === 'REFUNDED' ? '2026-11-20T02:00:00Z' : null,
+              refundReason: status === 'REFUNDED' ? 'Bán nhầm gói' : null,
+            }),
+          ),
+        }),
+        'BRANCH_MANAGER',
+      )
+      expect(await screen.findByText('HD000088')).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /Hoàn tiền/i })).not.toBeInTheDocument()
+      rendered.unmount()
+    }
+  })
+
+  it('TC-F5.5.1-04d: để trống lý do hoàn tiền không gửi API và hiện lỗi bắt buộc', async () => {
+    const user = userEvent.setup()
+    const api = makeApi({
+      detail: vi
+        .fn()
+        .mockResolvedValue(makeInvoice({ status: 'PAID', paidAt: '2026-11-20T09:15:00Z' })),
+    })
+
+    renderDetail(api, 'BRANCH_MANAGER')
+    expect(await screen.findByText('HD000088')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /Hoàn tiền/i }))
+    const dialog = await screen.findByRole('dialog')
+
+    // Để trống lý do và bấm Tiếp tục → báo lỗi, không gọi API.
+    await user.click(within(dialog).getByRole('button', { name: /Tiếp tục/i }))
+    expect(await within(dialog).findByText('Vui lòng nhập lý do hoàn tiền.')).toBeInTheDocument()
+    expect(api.refund).not.toHaveBeenCalled()
+
+    // Chỉ nhập khoảng trắng → vẫn báo lỗi, không gọi API.
+    await user.type(within(dialog).getByLabelText(/Lý do hoàn tiền/i), '   ')
+    await user.click(within(dialog).getByRole('button', { name: /Tiếp tục/i }))
+    expect(await within(dialog).findByText('Vui lòng nhập lý do hoàn tiền.')).toBeInTheDocument()
+    expect(api.refund).not.toHaveBeenCalled()
+  })
+
+  it('TC-F5.5.1-01c: quản lý chi nhánh hoàn tiền hai bước thành công, tải lại chi tiết và hiện người hoàn, giờ Việt Nam, lý do', async () => {
+    const user = userEvent.setup()
+    const paidInvoice = makeInvoice({
+      status: 'PAID',
+      paidAt: '2026-11-20T01:00:00Z',
+      payments: [
+        {
+          id: 105,
+          method: 'CASH',
+          amount: 3000000,
+          status: 'CONFIRMED',
+          transactionRef: null,
+          receivedBy: 2,
+          receivedByName: 'Nguyễn Văn Lễ Tân',
+          paidAt: '2026-11-20T01:00:00Z',
+        },
+      ],
+    })
+    const refundedInvoice = makeInvoice({
+      status: 'REFUNDED',
+      paidAt: '2026-11-20T01:00:00Z',
+      refundedBy: 3,
+      refundedAt: '2026-11-20T02:00:00Z',
+      refundReason: 'Lễ tân bán nhầm gói TIME 3 tháng',
+      payments: [
+        {
+          id: 105,
+          method: 'CASH',
+          amount: 3000000,
+          status: 'CANCELLED',
+          transactionRef: null,
+          receivedBy: 2,
+          receivedByName: 'Nguyễn Văn Lễ Tân',
+          paidAt: '2026-11-20T01:00:00Z',
+        },
+      ],
+    })
+    const api = makeApi({
+      detail: vi.fn().mockResolvedValueOnce(paidInvoice).mockResolvedValueOnce(refundedInvoice),
+    })
+
+    renderDetail(api, 'BRANCH_MANAGER')
+    expect(await screen.findByText('HD000088')).toBeInTheDocument()
+
+    // Bước 1: mở hộp thoại, nhập lý do, bấm Tiếp tục (chưa gọi API ngay).
+    await user.click(screen.getByRole('button', { name: /Hoàn tiền/i }))
+    const dialog = await screen.findByRole('dialog')
+    fireEvent.change(within(dialog).getByLabelText(/Lý do hoàn tiền/i), {
+      target: { value: '  Lễ tân bán nhầm gói TIME 3 tháng  ' },
+    })
+    await user.click(within(dialog).getByRole('button', { name: /Tiếp tục/i }))
+    expect(api.refund).not.toHaveBeenCalled()
+
+    // Bước 2: xác nhận hoàn tiền → gọi API và tải lại chi tiết từ server.
+    await user.click(within(dialog).getByRole('button', { name: /Xác nhận hoàn tiền/i }))
+
+    await waitFor(() =>
+      expect(api.refund).toHaveBeenCalledWith(88, {
+        refundReason: 'Lễ tân bán nhầm gói TIME 3 tháng',
+      }),
+    )
+    await waitFor(() => expect(api.detail).toHaveBeenCalledTimes(2))
+
+    const pageRegion = screen.getByRole('region', { name: /Chi tiết hóa đơn/i })
+    expect((await within(pageRegion).findAllByText('Đã hoàn tiền')).length).toBeGreaterThan(0)
+    expect(within(pageRegion).getByText('Trần Quản Lý')).toBeInTheDocument()
+    // 2026-11-20T02:00:00Z đổi sang giờ Asia/Ho_Chi_Minh (+07:00) là 09:00 20/11/2026.
+    expect(
+      within(pageRegion).getByText(/09:00.*20\/11\/2026|20\/11\/2026.*09:00/),
+    ).toBeInTheDocument()
+    expect(within(pageRegion).getByText('Lễ tân bán nhầm gói TIME 3 tháng')).toBeInTheDocument()
+    expect(within(pageRegion).queryByRole('button', { name: /Hoàn tiền/i })).not.toBeInTheDocument()
+  })
+
+  it('TC-F5.5.1-04e: lỗi 400 từ API hiện đúng câu errors.refundReason dưới ô lý do', async () => {
+    const user = userEvent.setup()
+    const api = makeApi({
+      detail: vi
+        .fn()
+        .mockResolvedValue(makeInvoice({ status: 'PAID', paidAt: '2026-11-20T09:15:00Z' })),
+      refund: vi.fn().mockRejectedValueOnce(
+        axiosProblem(400, 'Vui lòng kiểm tra lại các trường dữ liệu.', {
+          refundReason: 'Lý do hoàn tiền tối đa 500 ký tự.',
+        }),
+      ),
+    })
+
+    renderDetail(api, 'BRANCH_MANAGER')
+    expect(await screen.findByText('HD000088')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /Hoàn tiền/i }))
+    const dialog = await screen.findByRole('dialog')
+    fireEvent.change(within(dialog).getByLabelText(/Lý do hoàn tiền/i), {
+      target: { value: 'Lý do hợp lệ' },
+    })
+    await user.click(within(dialog).getByRole('button', { name: /Tiếp tục/i }))
+    await user.click(within(dialog).getByRole('button', { name: /Xác nhận hoàn tiền/i }))
+
+    expect(await within(dialog).findByText('Lý do hoàn tiền tối đa 500 ký tự.')).toBeInTheDocument()
+  })
+
+  it('TC-F5.5.1-05d: lỗi 403 và 404 khi hoàn tiền hiện đúng câu detail của API', async () => {
+    const user = userEvent.setup()
+    const cases = [
+      { status: 403, detail: 'Chỉ quản lý chi nhánh mới có quyền hoàn tiền hóa đơn.' },
+      { status: 404, detail: 'Hóa đơn không tồn tại trên hệ thống.' },
+    ]
+
+    for (const testCase of cases) {
+      const api = makeApi({
+        detail: vi
+          .fn()
+          .mockResolvedValue(makeInvoice({ status: 'PAID', paidAt: '2026-11-20T09:15:00Z' })),
+        refund: vi.fn().mockRejectedValueOnce(axiosProblem(testCase.status, testCase.detail)),
+      })
+
+      const { unmount } = renderDetail(api, 'BRANCH_MANAGER')
+      expect(await screen.findByText('HD000088')).toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: /Hoàn tiền/i }))
+      const dialog = await screen.findByRole('dialog')
+      fireEvent.change(within(dialog).getByLabelText(/Lý do hoàn tiền/i), {
+        target: { value: 'Bán nhầm gói' },
+      })
+      await user.click(within(dialog).getByRole('button', { name: /Tiếp tục/i }))
+      await user.click(within(dialog).getByRole('button', { name: /Xác nhận hoàn tiền/i }))
+
+      expect(await screen.findByText(testCase.detail)).toBeInTheDocument()
+      unmount()
+    }
+  })
+
+  it('TC-F5.5.1-06b: lỗi 409 và 422 hóa đơn không PAID hiện đúng câu detail và tải lại hóa đơn', async () => {
+    const user = userEvent.setup()
+    const cases = [
+      {
+        status: 409,
+        detail: 'Dữ liệu hóa đơn vừa được cập nhật bởi thao tác khác. Vui lòng thử lại.',
+      },
+      {
+        status: 422,
+        detail: 'Chỉ có thể hoàn tiền cho hóa đơn đã thanh toán thành công.',
+      },
+    ]
+
+    for (const testCase of cases) {
+      const api = makeApi({
+        detail: vi
+          .fn()
+          .mockResolvedValueOnce(makeInvoice({ status: 'PAID', paidAt: '2026-11-20T09:15:00Z' }))
+          .mockResolvedValueOnce(
+            makeInvoice({
+              status: 'REFUNDED',
+              paidAt: '2026-11-20T09:15:00Z',
+              refundedBy: 3,
+              refundedAt: '2026-11-20T10:00:00Z',
+              refundReason: 'Đã hoàn trước đó',
+            }),
+          ),
+        refund: vi.fn().mockRejectedValueOnce(axiosProblem(testCase.status, testCase.detail)),
+      })
+
+      const { unmount } = renderDetail(api, 'BRANCH_MANAGER')
+      expect(await screen.findByText('HD000088')).toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: /Hoàn tiền/i }))
+      const dialog = await screen.findByRole('dialog')
+      fireEvent.change(within(dialog).getByLabelText(/Lý do hoàn tiền/i), {
+        target: { value: 'Bán nhầm gói' },
+      })
+      await user.click(within(dialog).getByRole('button', { name: /Tiếp tục/i }))
+      await user.click(within(dialog).getByRole('button', { name: /Xác nhận hoàn tiền/i }))
+
+      expect(await screen.findByText(testCase.detail)).toBeInTheDocument()
+      await waitFor(() => expect(api.detail).toHaveBeenCalledTimes(2))
+      unmount()
+    }
+  })
+
+  it('TC-F5.5.1-11e: lỗi 422 gói đã dùng và còn chỗ đặt lớp hiện đúng từng câu detail theo BR-F5-14', async () => {
+    const user = userEvent.setup()
+    const brMessages = [
+      'Gói tập của hóa đơn đã được sử dụng nên không thể hoàn tiền. Hội viên có thể bảo lưu hoặc chuyển nhượng gói.',
+      'Hội viên còn chỗ đặt lớp nhóm chưa hủy. Hủy chỗ đặt trước khi hoàn tiền.',
+    ]
+
+    for (const detail of brMessages) {
+      const api = makeApi({
+        detail: vi
+          .fn()
+          .mockResolvedValue(makeInvoice({ status: 'PAID', paidAt: '2026-11-20T09:15:00Z' })),
+        refund: vi.fn().mockRejectedValueOnce(axiosProblem(422, detail)),
+      })
+
+      const { unmount } = renderDetail(api, 'BRANCH_MANAGER')
+      expect(await screen.findByText('HD000088')).toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: /Hoàn tiền/i }))
+      const dialog = await screen.findByRole('dialog')
+      fireEvent.change(within(dialog).getByLabelText(/Lý do hoàn tiền/i), {
+        target: { value: 'Bán nhầm gói' },
+      })
+      await user.click(within(dialog).getByRole('button', { name: /Tiếp tục/i }))
+      await user.click(within(dialog).getByRole('button', { name: /Xác nhận hoàn tiền/i }))
+
+      expect(await screen.findByText(detail)).toBeInTheDocument()
+      unmount()
+    }
   })
 })
