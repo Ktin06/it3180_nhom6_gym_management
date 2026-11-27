@@ -296,6 +296,23 @@ describe('ChangePasswordPage', () => {
     expect(getAccessToken()).toBe(jwt('15'))
   })
 
+  it('TC-F1.4.1-05c: Tài khoản đang khóa tạm (403) thì hiển thị câu khóa tạm, ở lại trang và giữ phiên', async () => {
+    const lockMessage =
+      'Tài khoản đang bị khóa tạm thời do nhập sai mật khẩu nhiều lần. Vui lòng thử lại sau 15 phút.'
+    const onChangePassword = vi.fn().mockResolvedValueOnce({ status: 403, data: { detail: lockMessage } })
+    renderChangePasswordFlow('MEMBER', onChangePassword)
+    const user = userEvent.setup()
+
+    fireEvent.change(await screen.findByLabelText('Mật khẩu hiện tại'), { target: { value: 'WrongPass1' } })
+    fireEvent.change(screen.getByLabelText('Mật khẩu mới'), { target: { value: 'NewPassword2' } })
+    fireEvent.change(screen.getByLabelText('Nhập lại mật khẩu mới'), { target: { value: 'NewPassword2' } })
+    await user.click(screen.getByRole('button', { name: 'Đổi mật khẩu' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(lockMessage)
+    expect(screen.getByRole('heading', { name: 'Đổi mật khẩu' })).toBeInTheDocument()
+    expect(getAccessToken()).toBe(jwt('15'))
+  })
+
   describe('TC-F1.4.1-04b: mở /doi-mat-khau đúng layout theo vai trò và không bị /403', () => {
     it.each([
       { role: 'RECEPTIONIST' as const },

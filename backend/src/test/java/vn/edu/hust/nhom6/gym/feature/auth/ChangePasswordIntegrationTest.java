@@ -132,6 +132,107 @@ class ChangePasswordIntegrationTest {
             .andExpect(status().isOk());
     }
 
+    @Test
+    @DisplayName("TC-F1.4.1-05a: Sai mật khẩu hiện tại 5 lần thì khóa tạm 15 phút; đang khóa thì đổi mật khẩu và đăng nhập đều trả 403, mật khẩu không đổi")
+    void saiMatKhauHienTaiNhieuLanThiKhoaTam() throws Exception {
+        SessionTokens session = registerMember("Nguyễn Văn A", "member@example.com", "0912345678", "OldPass123");
+        String oldHash = passwordHash("member@example.com");
+
+        for (int i = 1; i <= 5; i++) {
+            mockMvc.perform(changePassword(session, "WrongPass1", "NewPass456"))
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.detail").value("Mật khẩu hiện tại không đúng."));
+            assertThat(failedLoginCount("member@example.com")).isEqualTo(i);
+        }
+        assertThat(lockedUntilSet("member@example.com")).isTrue();
+
+        // Đang khóa: kể cả mật khẩu hiện tại đúng cũng bị từ chối, không tăng bộ đếm
+        mockMvc.perform(changePassword(session, "OldPass123", "NewPass456"))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.startsWith(
+                "Tài khoản đang bị khóa tạm thời do nhập sai mật khẩu nhiều lần.")));
+        assertThat(failedLoginCount("member@example.com")).isEqualTo(5);
+        assertThat(passwordHash("member@example.com")).isEqualTo(oldHash);
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(Map.of(
+                    "email", "member@example.com", "password", "OldPass123"))))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("TC-F1.4.1-05b: Đăng nhập sai và đổi mật khẩu sai dùng chung một bộ đếm: 4 lần đăng nhập sai cộng 1 lần đổi sai thì khóa tạm")
+    void dangNhapSaiVaDoiMatKhauSaiDungChungBoDem() throws Exception {
+        SessionTokens session = registerMember("Nguyễn Văn A", "member@example.com", "0912345678", "OldPass123");
+        for (int i = 0; i < 4; i++) {
+            mockMvc.perform(post("/api/v1/auth/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(Map.of(
+                        "email", "member@example.com", "password", "WrongPass1"))))
+                .andExpect(status().isUnauthorized());
+        }
+
+        mockMvc.perform(changePassword(session, "WrongPass1", "NewPass456"))
+            .andExpect(status().isUnprocessableContent());
+
+        assertThat(failedLoginCount("member@example.com")).isEqualTo(5);
+        assertThat(lockedUntilSet("member@example.com")).isTrue();
+    }
+
+    @Test
+    @DisplayName("TC-F1.4.1-06a: Đổi mật khẩu thành công đặt bộ đếm sai về 0, xóa khóa tạm đã hết hạn và không xóa cookie refresh_token")
+    void doiMatKhauThanhCongDatLaiBoDemVaXoaCookie() throws Exception {
+        SessionTokens session = registerMember("Nguyễn Văn A", "member@example.com", "0912345678", "OldPass123");
+        jdbcTemplate.update("""
+            UPDATE users SET failed_login_count = 3, locked_until = now() - interval '1 minute'
+            WHERE email = 'member@example.com'""");
+
+        MvcResult result = mockMvc.perform(changePassword(session, "OldPass123", "NewPass456"))
+            .andExpect(status().isNoContent())
+            .andReturn();
+
+        assertThat(failedLoginCount("member@example.com")).isZero();
+        assertThat(lockedUntilSet("member@example.com")).isFalse();
+        // Không gửi Set-Cookie: tránh xóa nhầm cookie của phiên mới ở tab khác (TC-F1.4.1-01j)
+        assertThat(result.getResponse().getHeaders(HttpHeaders.SET_COOKIE)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("TC-F1.4.1-06b: Mật khẩu mới trùng mật khẩu hiện tại thì 422 và không tăng bộ đếm sai")
+    void matKhauMoiTrungKhongTangBoDem() throws Exception {
+        SessionTokens session = registerMember("Nguyễn Văn A", "member@example.com", "0912345678", "OldPass123");
+
+        mockMvc.perform(changePassword(session, "OldPass123", "OldPass123"))
+            .andExpect(status().isUnprocessableContent())
+            .andExpect(jsonPath("$.detail").value("Mật khẩu mới phải khác mật khẩu hiện tại."));
+
+        assertThat(failedLoginCount("member@example.com")).isZero();
+    }
+
+    private org.springframework.test.web.servlet.RequestBuilder changePassword(
+            SessionTokens session, String currentPassword, String newPassword) throws Exception {
+        return post("/api/v1/auth/change-password")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + session.accessToken())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonMapper.writeValueAsString(Map.of(
+                "currentPassword", currentPassword, "newPassword", newPassword)));
+    }
+
+    private int failedLoginCount(String email) {
+        return jdbcTemplate.queryForObject(
+            "SELECT failed_login_count FROM users WHERE email = ?", Integer.class, email);
+    }
+
+    private boolean lockedUntilSet(String email) {
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
+            "SELECT locked_until IS NOT NULL FROM users WHERE email = ?", Boolean.class, email));
+    }
+
+    private String passwordHash(String email) {
+        return jdbcTemplate.queryForObject("SELECT password_hash FROM users WHERE email = ?", String.class, email);
+    }
+
     private int countActiveRefreshTokens(Long userId) {
         return jdbcTemplate.queryForObject(
             "SELECT count(*) FROM refresh_tokens WHERE user_id = ? AND revoked_at IS NULL",

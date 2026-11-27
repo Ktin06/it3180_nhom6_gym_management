@@ -50,7 +50,10 @@ export function UserMenu() {
             aria-label={logoutFailed ? 'Thử đăng xuất lại' : 'Đăng xuất'}
             onClick={() => void handleLogout()}
           >
-            <span className="hide-on-mobile">{logoutFailed ? 'Thử lại' : 'Đăng xuất'}</span>
+            {/* Đăng xuất lỗi thì luôn hiện chữ "Thử lại", kể cả màn 360px, để người dùng thấy nút đã đổi. */}
+            <span className={logoutFailed ? undefined : 'hide-on-mobile'}>
+              {logoutFailed ? 'Thử lại' : 'Đăng xuất'}
+            </span>
           </Button>
         </>
       )}
