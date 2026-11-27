@@ -1,6 +1,7 @@
 package vn.edu.hust.nhom6.gym.feature.invoice;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import vn.edu.hust.nhom6.gym.TestcontainersConfiguration;
+import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.common.time.MutableClock;
 import vn.edu.hust.nhom6.gym.common.time.MutableClockConfiguration;
@@ -31,9 +33,9 @@ import vn.edu.hust.nhom6.gym.feature.memberportal.PortalFixtures;
 import vn.edu.hust.nhom6.gym.feature.memberportal.PortalFixtures.MemberAccount;
 
 /**
-- Tác vụ tự hủy hóa đơn chờ cổng hội viên quá {@code PENDING_INVOICE_TTL_DAYS} (BR-F7.5, UC-F7.4 A1, AC-F3.5.1-09).
-- Tác vụ nền tắt trong kiểm thử; gọi thẳng {@link PortalInvoiceService#cancelExpired()} và đổi giờ bằng
-- {@link MutableClock}.
+ * Tác vụ tự hủy hóa đơn chờ cổng hội viên quá {@code PENDING_INVOICE_TTL_DAYS} (BR-F7.5, UC-F7.4 A1, AC-F3.5.1-09).
+ * Tác vụ nền tắt trong kiểm thử; gọi thẳng {@link PortalInvoiceService#cancelExpired()} và đổi giờ bằng
+ * {@link MutableClock}.
  */
 @SpringBootTest
 @Import({TestcontainersConfiguration.class, MutableClockConfiguration.class})
@@ -168,6 +170,32 @@ class PendingInvoiceExpiryIntegrationTest {
         assertThat(portalInvoices.cancelExpired()).isEqualTo(1);
         assertThat(invoiceStatus(broken.invoiceId())).isEqualTo("PENDING");
         assertThat(invoiceStatus(healthy.invoiceId())).isEqualTo("CANCELLED");
+    }
+
+    @Test
+    @DisplayName("TC-F7.4.1-03f: Hóa đơn của hội viên vừa quá hạn mà tác vụ nền chưa quét thì mua lại được ngay; hóa đơn cũ và gói cũ CANCELLED")
+    void expiredOwnInvoiceIsCancelledOnNewRequest() {
+        PortalInvoiceDto old = buy(me);
+        clock.setVn(CREATED.plusDays(3));
+
+        PortalInvoiceDto again = buy(me);
+
+        assertThat(invoiceStatus(old.invoiceId())).isEqualTo("CANCELLED");
+        assertThat(membershipStatus(old.membershipId())).isEqualTo("CANCELLED");
+        assertThat(invoiceStatus(again.invoiceId())).isEqualTo("PENDING");
+        assertThat(membershipStatus(again.membershipId())).isEqualTo("PENDING");
+    }
+
+    @Test
+    @DisplayName("TC-F7.4.1-03g: Hóa đơn chưa quá hạn thì vẫn chặn 422 và không bị hủy")
+    void notYetExpiredOwnInvoiceStillBlocks() {
+        PortalInvoiceDto old = buy(me);
+        clock.setVn(CREATED.plusDays(3).minusMinutes(1));
+
+        assertThatThrownBy(() -> buy(me)).isInstanceOf(BusinessRuleException.class);
+
+        assertThat(invoiceStatus(old.invoiceId())).isEqualTo("PENDING");
+        assertThat(membershipStatus(old.membershipId())).isEqualTo("PENDING");
     }
 
     private PortalInvoiceDto buy(MemberAccount who) {
