@@ -195,9 +195,7 @@ class NotificationEventListenerIntegrationTest {
         Account hv = f.account(f.cn01);
         Long sessionId = f.session(f.cn01, OLD_START_VN, "SCHEDULED");
         f.booking(sessionId, hv.memberId(), "BOOKED");
-        Long pilatesTypeId = jdbc.queryForObject(
-            "INSERT INTO class_types (name, description, duration_minutes, is_active) VALUES ('Pilates', 'Mới', 60, true) RETURNING id",
-            Long.class);
+        Long pilatesTypeId = f.bookings.f.classType("Pilates");
         jdbc.update("""
             UPDATE class_schedules SET class_type_id = ?
             WHERE id = (SELECT class_schedule_id FROM class_sessions WHERE id = ?)""",

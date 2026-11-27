@@ -223,7 +223,8 @@ class NotificationWebSocketIntegrationTest {
         Long sessionId = f.session(f.cn01, CLASS_START_VN, "SCHEDULED");
         f.booking(sessionId, hv.memberId(), "BOOKED");
 
-        Instant issuedAt = Instant.now().minus(JwtTokenService.ACCESS_TOKEN_TTL).plusSeconds(2);
+        Instant issuedAt = Instant.now().minus(JwtTokenService.ACCESS_TOKEN_TTL).plusSeconds(3);
+        Instant expiresAt = issuedAt.plus(JwtTokenService.ACCESS_TOKEN_TTL);
         String shortLivedToken = tokens.generateAccessToken(hv.userId(), "hv-exp@gym-test.vn", UserRole.MEMBER, issuedAt);
 
         WebSocketStompClient client = newStompClient();
@@ -242,7 +243,10 @@ class NotificationWebSocketIntegrationTest {
             BlockingQueue<String> inbox = subscribeUserQueue(session);
             awaitUserSubscription(hv.userId(), "/user/queue/notifications", Duration.ofSeconds(5));
 
-            TimeUnit.MILLISECONDS.sleep(2300);
+            long waitMs = Duration.between(Instant.now(), expiresAt.plusMillis(200)).toMillis();
+            if (waitMs > 0) {
+                TimeUnit.MILLISECONDS.sleep(waitMs);
+            }
 
             classSessions.changeTime(manager, sessionId, new SessionTimeRequest(
                 NotificationFixtures.utc(CLASS_START_VN.plusHours(1)),

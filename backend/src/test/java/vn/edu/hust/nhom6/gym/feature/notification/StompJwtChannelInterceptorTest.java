@@ -19,6 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
@@ -131,15 +133,15 @@ class StompJwtChannelInterceptorTest {
         connect.setNativeHeader("Authorization", "Bearer " + token);
         interceptor.preSend(MessageBuilder.createMessage(new byte[0], connect.getMessageHeaders()), NOOP_CHANNEL);
 
-        // Chưa hết hạn: tin đẩy ra đi qua bình thường
-        StompHeaderAccessor outBefore = StompHeaderAccessor.create(StompCommand.MESSAGE);
+        // Chưa hết hạn: tin đẩy ra từ SimpleBrokerMessageHandler (SimpMessageHeaderAccessor) đi qua bình thường
+        SimpMessageHeaderAccessor outBefore = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
         outBefore.setSessionId("ws-exp-1");
         Message<?> outBeforeMsg = MessageBuilder.createMessage(new byte[0], outBefore.getMessageHeaders());
         assertThat(interceptor.preSend(outBeforeMsg, NOOP_CHANNEL)).isSameAs(outBeforeMsg);
 
         // Sau 16 phút (quá TTL 15 phút): tin đẩy ra bị chặn (trả null) và phiên WebSocket bị đóng
         clock.advance(Duration.ofMinutes(16));
-        StompHeaderAccessor outAfter = StompHeaderAccessor.create(StompCommand.MESSAGE);
+        SimpMessageHeaderAccessor outAfter = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
         outAfter.setSessionId("ws-exp-1");
         Message<?> outAfterMsg = MessageBuilder.createMessage(new byte[0], outAfter.getMessageHeaders());
         assertThat(interceptor.preSend(outAfterMsg, NOOP_CHANNEL)).isNull();

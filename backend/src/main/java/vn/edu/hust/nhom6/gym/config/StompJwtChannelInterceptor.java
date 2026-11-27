@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -92,21 +93,25 @@ public class StompJwtChannelInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+        SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
         if (accessor == null) {
-            return message;
+            accessor = SimpMessageHeaderAccessor.wrap(message);
         }
-
+        StompHeaderAccessor stomp = accessor instanceof StompHeaderAccessor s ? s : null;
         SimpMessageType messageType = accessor.getMessageType();
-        if (messageType == SimpMessageType.CONNECT) {
-            AuthenticatedSession authenticated = authenticate(message, accessor);
-            accessor.setUser(authenticated.authentication());
-            Map<String, Object> attrs = accessor.getSessionAttributes();
+
+        if (stomp != null && stomp.getCommand() == StompCommand.SEND) {
+            throw new MessageDeliveryException(message, "Kênh thông báo chỉ hỗ trợ nhận tin từ máy chủ.");
+        }
+        if (messageType == SimpMessageType.CONNECT && stomp != null) {
+            AuthenticatedSession authenticated = authenticate(message, stomp);
+            stomp.setUser(authenticated.authentication());
+            Map<String, Object> attrs = stomp.getSessionAttributes();
             if (attrs != null) {
                 attrs.put(SESSION_EXPIRES_AT, authenticated.expiresAt());
             }
-            if (accessor.getSessionId() != null) {
-                sessionExpirations.put(accessor.getSessionId(), authenticated.expiresAt());
+            if (stomp.getSessionId() != null) {
+                sessionExpirations.put(stomp.getSessionId(), authenticated.expiresAt());
             }
             return message;
         }
@@ -116,16 +121,14 @@ public class StompJwtChannelInterceptor implements ChannelInterceptor {
             }
             return message;
         }
-
-        StompCommand command = accessor.getCommand();
-        if (command == StompCommand.MESSAGE) {
+        if (messageType == SimpMessageType.MESSAGE) {
             if (isSessionExpired(accessor)) {
                 closeExpiredSession(accessor.getSessionId());
                 return null;
             }
             return message;
         }
-        if (command == StompCommand.SUBSCRIBE) {
+        if (messageType == SimpMessageType.SUBSCRIBE) {
             if (accessor.getUser() == null) {
                 throw new MessageDeliveryException(message, "Bạn cần xác thực trước khi đăng ký kênh thông báo.");
             }
@@ -138,9 +141,6 @@ public class StompJwtChannelInterceptor implements ChannelInterceptor {
             }
             return message;
         }
-        if (command == StompCommand.SEND) {
-            throw new MessageDeliveryException(message, "Kênh thông báo chỉ hỗ trợ nhận tin từ máy chủ.");
-        }
         if (isSessionExpired(accessor)) {
             closeExpiredSession(accessor.getSessionId());
             if (messageType == SimpMessageType.HEARTBEAT) {
@@ -151,7 +151,7 @@ public class StompJwtChannelInterceptor implements ChannelInterceptor {
         return message;
     }
 
-    private boolean isSessionExpired(StompHeaderAccessor accessor) {
+    private boolean isSessionExpired(SimpMessageHeaderAccessor accessor) {
         Instant expiresAt = null;
         Map<String, Object> attrs = accessor.getSessionAttributes();
         if (attrs != null && attrs.get(SESSION_EXPIRES_AT) instanceof Instant attrExp) {
