@@ -5,6 +5,7 @@ import {
   CopyOutlined,
   PrinterOutlined,
   ReloadOutlined,
+  RollbackOutlined,
 } from '@ant-design/icons'
 import {
   Alert,
@@ -46,9 +47,31 @@ import type {
   InvoicesGateway,
   PaymentConfirmation,
   PaymentMethod,
+  RefundResult,
   VietQrPayment,
 } from '../types/invoice'
 import '../../shared/feature-pages.css'
+
+/**
+ * Trích xuất đúng thông báo lỗi của API hoàn tiền:
+ * - 400: ưu tiên `errors.refundReason` của Bean Validation.
+ * - 403/404/409/422: ưu tiên `detail` của ProblemDetail (không bị che bởi câu 403 mặc định).
+ */
+function refundErrorMessage(cause: unknown): string {
+  if (axios.isAxiosError(cause)) {
+    const data = cause.response?.data as
+      { detail?: unknown; errors?: Record<string, unknown> } | undefined
+    const fieldError = data?.errors?.refundReason
+    if (cause.response?.status === 400 && typeof fieldError === 'string' && fieldError.trim()) {
+      return fieldError
+    }
+    const detail = data?.detail
+    if (typeof detail === 'string' && detail.trim()) {
+      return detail
+    }
+  }
+  return errorMessage(cause)
+}
 
 export interface InvoiceDetailPageProps {
   api?: InvoicesGateway
@@ -71,6 +94,8 @@ function InvoiceDetailContent({ api = invoicesApi }: InvoiceDetailPageProps) {
   // Chủ chuỗi chỉ tra cứu và hủy hóa đơn chờ; thu tiền, VietQR và in PDF dành cho lễ tân / quản lý chi nhánh.
   const canCollectPayment = role === 'RECEPTIONIST' || role === 'BRANCH_MANAGER'
   const canExportPdf = canCollectPayment
+  // BR-F5-11: chỉ quản lý chi nhánh mới được hoàn tiền hóa đơn PAID.
+  const canRefund = role === 'BRANCH_MANAGER'
   const canCancel = canCollectPayment || role === 'SUPER_ADMIN'
 
   const fetchDetail = useCallback(
@@ -97,6 +122,13 @@ function InvoiceDetailContent({ api = invoicesApi }: InvoiceDetailPageProps) {
   const [cancelModalOpen, setCancelModalOpen] = useState(false)
   const [cancelling, setCancelling] = useState(false)
   const pdf = useInvoicePdf(api.pdf)
+  const [refundModalOpen, setRefundModalOpen] = useState(false)
+  const [refundStep, setRefundStep] = useState<1 | 2>(1)
+  const [refundReason, setRefundReason] = useState('')
+  const [refundReasonError, setRefundReasonError] = useState<string>()
+  const [refunding, setRefunding] = useState(false)
+  const [refundResult, setRefundResult] = useState<RefundResult>()
+
   const active = useRef(false)
   const mutationInFlight = useRef(false)
   const qrRequest = useRef(0)
@@ -219,6 +251,77 @@ function InvoiceDetailContent({ api = invoicesApi }: InvoiceDetailPageProps) {
     }
   }
 
+  function openRefundModal() {
+    setActionError(undefined)
+    setRefundStep(1)
+    setRefundReason('')
+    setRefundReasonError(undefined)
+    setRefundModalOpen(true)
+  }
+
+  function closeRefundModal() {
+    if (refunding) return
+    setRefundModalOpen(false)
+    setRefundStep(1)
+    setRefundReasonError(undefined)
+  }
+
+  function handleRefundNextStep() {
+    const trimmed = refundReason.trim()
+    if (!trimmed) {
+      setRefundReasonError('Vui lòng nhập lý do hoàn tiền.')
+      return
+    }
+    if (trimmed.length > 500) {
+      setRefundReasonError('Lý do hoàn tiền tối đa 500 ký tự.')
+      return
+    }
+    setRefundReasonError(undefined)
+    setRefundStep(2)
+  }
+
+  async function handleConfirmRefund() {
+    if (!canShowRefundButton || !invoice || mutationInFlight.current) return
+    const trimmed = refundReason.trim()
+    if (!trimmed) {
+      setRefundReasonError('Vui lòng nhập lý do hoàn tiền.')
+      setRefundStep(1)
+      return
+    }
+    mutationInFlight.current = true
+    setRefunding(true)
+    setActionError(undefined)
+    setRefundReasonError(undefined)
+    try {
+      const result = await api.refund(invoice.id, { refundReason: trimmed })
+      if (!active.current) return
+      setRefundResult(result)
+      setRefundModalOpen(false)
+      setRefundStep(1)
+      setRefundReason('')
+      void message?.success?.(`Đã hoàn tiền hóa đơn ${result.invoiceCode}.`)
+      loadDetail()
+    } catch (cause) {
+      const status = axios.isAxiosError(cause) ? cause.response?.status : undefined
+      if (!active.current) return
+      const detail = refundErrorMessage(cause)
+      if (status === 400) {
+        setRefundReasonError(detail)
+        setRefundStep(1)
+      } else {
+        setRefundModalOpen(false)
+        setRefundStep(1)
+        setActionError(detail)
+        if (status === 409 || status === 422) {
+          loadDetail()
+        }
+      }
+    } finally {
+      mutationInFlight.current = false
+      if (active.current) setRefunding(false)
+    }
+  }
+
   if (!validId) {
     return (
       <section className="feature-page">
@@ -241,6 +344,14 @@ function InvoiceDetailContent({ api = invoicesApi }: InvoiceDetailPageProps) {
     Boolean(invoice) &&
     canExportPdf &&
     (invoice?.status === 'PAID' || invoice?.status === 'REFUNDED')
+  const canShowRefundButton = Boolean(invoice) && canRefund && invoice?.status === 'PAID'
+  const currentRefundResult =
+    invoice && refundResult?.invoiceId === invoice.id ? refundResult : undefined
+  const refundedByDisplay = currentRefundResult?.refundedByName
+    ? currentRefundResult.refundedByName
+    : invoice?.refundedBy !== null && invoice?.refundedBy !== undefined
+      ? `Quản lý #${invoice.refundedBy}`
+      : '—'
 
   return (
     <section className="feature-page" aria-labelledby="invoice-detail-heading">
@@ -272,7 +383,18 @@ function InvoiceDetailContent({ api = invoicesApi }: InvoiceDetailPageProps) {
               In / tải PDF
             </Button>
           )}
-          {/* S2-38.2: gắn nút Hoàn tiền cho BRANCH_MANAGER tại đây khi invoice?.status === 'PAID'. */}
+
+          {canShowRefundButton && (
+            <Button
+              danger
+              icon={<RollbackOutlined />}
+              disabled={pdf.exporting || refunding}
+              onClick={openRefundModal}
+              style={{ minHeight: 40 }}
+            >
+              Hoàn tiền
+            </Button>
+          )}
           <Button
             icon={<ReloadOutlined />}
             onClick={() => void loadDetail()}
@@ -330,6 +452,15 @@ function InvoiceDetailContent({ api = invoicesApi }: InvoiceDetailPageProps) {
             />
           )}
 
+          {currentRefundResult && (
+            <Alert
+              type="success"
+              showIcon
+              title={`Đã hoàn tiền hóa đơn ${currentRefundResult.invoiceCode}.`}
+              description="Phiếu thu và các gói tập liên kết với hóa đơn đã chuyển sang trạng thái Đã hủy."
+            />
+          )}
+
           <Card title="Thông tin hóa đơn">
             <Descriptions column={{ xs: 1, sm: 2 }} bordered size="small">
               <Descriptions.Item label="Mã hóa đơn">
@@ -373,10 +504,11 @@ function InvoiceDetailContent({ api = invoicesApi }: InvoiceDetailPageProps) {
               </Descriptions.Item>
               {invoice.status === 'REFUNDED' && (
                 <>
+                  <Descriptions.Item label="Người hoàn tiền">{refundedByDisplay}</Descriptions.Item>
                   <Descriptions.Item label="Thời gian hoàn tiền">
                     {formatVnDateTime(invoice.refundedAt)}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Lý do hoàn tiền">
+                  <Descriptions.Item label="Lý do hoàn tiền" span={2}>
                     {invoice.refundReason ?? '—'}
                   </Descriptions.Item>
                 </>
@@ -709,6 +841,115 @@ function InvoiceDetailContent({ api = invoicesApi }: InvoiceDetailPageProps) {
           Hóa đơn <strong>{invoice?.code}</strong> và gói tập chờ thanh toán đi kèm (nếu có) sẽ
           chuyển sang trạng thái đã hủy. Thao tác này không thể hoàn tác.
         </p>
+      </Modal>
+
+      <Modal
+        open={refundModalOpen}
+        destroyOnHidden
+        title={
+          refundStep === 1
+            ? `Hoàn tiền hóa đơn ${invoice?.code ?? ''} (Bước 1/2)`
+            : `Xác nhận hoàn tiền hóa đơn ${invoice?.code ?? ''} (Bước 2/2)`
+        }
+        onCancel={closeRefundModal}
+        closable={!refunding}
+        mask={{ closable: !refunding }}
+        footer={
+          refundStep === 1 ? (
+            <div className="feature-form-actions" style={{ marginTop: 0 }}>
+              <Button disabled={refunding} onClick={closeRefundModal} style={{ minHeight: 40 }}>
+                Đóng
+              </Button>
+              <Button
+                type="primary"
+                danger
+                onClick={handleRefundNextStep}
+                style={{ minHeight: 40 }}
+              >
+                Tiếp tục
+              </Button>
+            </div>
+          ) : (
+            <div className="feature-form-actions" style={{ marginTop: 0 }}>
+              <Button
+                disabled={refunding}
+                onClick={() => setRefundStep(1)}
+                style={{ minHeight: 40 }}
+              >
+                Quay lại
+              </Button>
+              <Button
+                type="primary"
+                danger
+                loading={refunding}
+                onClick={() => void handleConfirmRefund()}
+                style={{ minHeight: 40 }}
+              >
+                Xác nhận hoàn tiền
+              </Button>
+            </div>
+          )
+        }
+      >
+        {refundStep === 1 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <Alert
+              type="info"
+              showIcon
+              title="Chỉ hoàn tiền khi thu sai sót và gói tập của hóa đơn chưa được sử dụng."
+              description={
+                invoice ? `Số tiền hoàn toàn bộ: ${vndFormat.format(invoice.total)}.` : undefined
+              }
+            />
+            <div>
+              <label
+                htmlFor="invoice-refund-reason"
+                style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 500 }}
+              >
+                Lý do hoàn tiền <span style={{ color: '#ff4d4f' }}>*</span>
+              </label>
+              <Input.TextArea
+                id="invoice-refund-reason"
+                rows={3}
+                showCount
+                placeholder="Ví dụ: Lễ tân bán nhầm gói TIME 3 tháng, hội viên mua gói 1 tháng"
+                value={refundReason}
+                status={refundReasonError ? 'error' : undefined}
+                onChange={(event) => {
+                  setRefundReason(event.target.value)
+                  if (refundReasonError) setRefundReasonError(undefined)
+                }}
+              />
+              {refundReasonError && (
+                <Typography.Text
+                  type="danger"
+                  role="alert"
+                  style={{ display: 'block', marginTop: 6 }}
+                >
+                  {refundReasonError}
+                </Typography.Text>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <Alert
+              type="warning"
+              showIcon
+              title="Thao tác không thể hoàn tác"
+              description={`Hóa đơn ${invoice?.code ?? ''} (${invoice ? vndFormat.format(invoice.total) : ''}) sẽ chuyển sang Đã hoàn tiền; phiếu thu và các gói tập của hóa đơn sẽ bị hủy.`}
+            />
+            <Descriptions column={1} bordered size="small">
+              <Descriptions.Item label="Mã hóa đơn">
+                <strong>{invoice?.code ?? '—'}</strong>
+              </Descriptions.Item>
+              <Descriptions.Item label="Số tiền hoàn">
+                <strong>{invoice ? vndFormat.format(invoice.total) : '—'}</strong>
+              </Descriptions.Item>
+              <Descriptions.Item label="Lý do hoàn tiền">{refundReason.trim()}</Descriptions.Item>
+            </Descriptions>
+          </div>
+        )}
       </Modal>
     </section>
   )

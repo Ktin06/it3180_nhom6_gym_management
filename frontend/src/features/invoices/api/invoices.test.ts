@@ -165,4 +165,32 @@ describe('kết nối API hóa đơn và thanh toán F5', () => {
     expect(get).toHaveBeenCalledWith('/invoices/88/pdf', { responseType: 'blob' })
     expect(result).toBe(blob)
   })
+
+  it('TC-F5.5.1-01d: refund gửi POST /invoices/{id}/refund với refundReason đã cắt khoảng trắng và không gửi số tiền', async () => {
+    const post = vi.spyOn(http, 'post').mockResolvedValue({
+      data: {
+        invoiceId: 88,
+        invoiceCode: 'HD000088',
+        status: 'REFUNDED',
+        refundedAt: '2026-11-20T02:00:00Z',
+        refundedBy: 3,
+        refundedByName: 'Trần Quản Lý',
+        refundReason: 'Lễ tân bán nhầm gói 3 tháng',
+      },
+    })
+
+    const result = await liveInvoicesApi.refund(88, {
+      refundReason: '  Lễ tân bán nhầm gói 3 tháng  ',
+    })
+
+    expect(post).toHaveBeenCalledWith('/invoices/88/refund', {
+      refundReason: 'Lễ tân bán nhầm gói 3 tháng',
+    })
+    const sentBody = post.mock.calls[0][1] as Record<string, unknown>
+    expect(sentBody).not.toHaveProperty('amount')
+    expect(sentBody).not.toHaveProperty('total')
+    expect(Object.keys(sentBody)).toEqual(['refundReason'])
+    expect(result.status).toBe('REFUNDED')
+    expect(result.refundedByName).toBe('Trần Quản Lý')
+  })
 })

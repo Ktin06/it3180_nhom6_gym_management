@@ -1,5 +1,5 @@
 import { http } from '../../../services/http'
-import type { InvoicesGateway, PayInvoiceInput } from '../types/invoice'
+import type { InvoicesGateway, PayInvoiceInput, RefundInvoiceInput } from '../types/invoice'
 import { decodePdfProblem } from '../invoice-errors'
 
 export const liveInvoicesApi: InvoicesGateway = {
@@ -15,6 +15,11 @@ export const liveInvoicesApi: InvoicesGateway = {
     return (await http.post(`/invoices/${id}/payments`, body)).data
   },
   cancel: async (id) => (await http.put(`/invoices/${id}/cancel`)).data,
+  refund: async (id, input) => {
+    // S7: chỉ gửi lý do hoàn tiền, không gửi số tiền (server luôn hoàn toàn bộ invoices.total).
+    const body: RefundInvoiceInput = { refundReason: input.refundReason.trim() }
+    return (await http.post(`/invoices/${id}/refund`, body)).data
+  },
   pdf: async (id) => {
     try {
       return (await http.get<Blob>(`/invoices/${id}/pdf`, { responseType: 'blob' })).data
