@@ -52,8 +52,7 @@ export const STAFF_MENU: StaffMenuItem[] = [
     path: '/checkins',
     label: 'Check-in (F4)',
     icon: <LoginOutlined />,
-    roles: ['RECEPTIONIST'],
-    ready: false,
+    ready: true,
   },
   {
     path: '/hoa-don',
@@ -61,19 +60,25 @@ export const STAFF_MENU: StaffMenuItem[] = [
     icon: <DollarOutlined />,
     ready: true,
   },
+  // S2-12.2: giao diện dashboard cơ bản (F6)
   {
     path: '/dashboard',
     label: 'Dashboard (F6)',
     icon: <BarChartOutlined />,
-    roles: ['SUPER_ADMIN', 'BRANCH_MANAGER'],
-    ready: false,
+    ready: true,
   },
   {
     path: '/classes',
     label: 'Lớp học (F8)',
     icon: <CalendarOutlined />,
-    roles: ['BRANCH_MANAGER', 'RECEPTIONIST', 'TRAINER'],
+    roles: ['BRANCH_MANAGER', 'RECEPTIONIST'],
     ready: false,
+  },
+  {
+    path: '/trainer/classes',
+    label: 'Lịch dạy lớp nhóm',
+    icon: <CalendarOutlined />,
+    ready: true,
   },
   {
     path: '/branches',

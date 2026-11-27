@@ -15,10 +15,10 @@
 | F5 | 5 | 5 | 49 | 37 | 12 | 119 |
 | F6 | 5 | 5 | 16 | 0 | 16 | 0 |
 | F7 | 5 | 0 | 0 | 0 | 0 | 0 |
-| F8 | 9 | 9 | 55 | 45 | 10 | 58 |
+| F8 | 9 | 9 | 55 | 53 | 2 | 81 |
 | F9 | 7 | 0 | 0 | 0 | 0 | 0 |
 | F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **42** | **262** | **175** | **87** | **524** |
+| **Tổng** | **57** | **42** | **262** | **183** | **79** | **547** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -119,14 +119,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F6.4.1-06 | Thao tác Gia hạn nhanh trên giao diện | US-F6.4.1 |
 | AC-F6.5.1-01 | Danh sách các lượt check-in mới nhất trong ngày | US-F6.5.1 |
 | AC-F6.5.1-02 | Thao tác Check-out nhanh từ danh sách Live Feed | US-F6.5.1 |
-| AC-F8.0.1-01 | Xem lịch không cần đăng nhập | US-F8.0.1 |
-| AC-F8.0.1-02 | Lịch rỗng | US-F8.0.1 |
-| AC-F8.0.1-03 | Bộ lọc không hợp lệ | US-F8.0.1 |
-| AC-F8.0.1-04 | Khách muốn đặt | US-F8.0.1 |
-| AC-F8.5.1-01 | Lịch của người được phân công | US-F8.5.1 |
-| AC-F8.5.1-02 | Buổi có người dạy thay | US-F8.5.1 |
-| AC-F8.5.1-03 | Không có lớp | US-F8.5.1 |
-| AC-F8.5.1-04 | Sai vai trò hoặc yêu cầu lịch người khác | US-F8.5.1 |
 | AC-F8.7.1-06 | Giảm sức chứa đúng biên | US-F8.7.1 |
 | AC-F8.7.1-07 | Buổi không cho sửa sức chứa | US-F8.7.1 |
 
@@ -890,21 +882,34 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 ### F8
 
 - **UC-F8.0** Xem lịch lớp học nhóm công khai
-  - **US-F8.0.1** Xem lịch lớp công khai (#155)
-    - AC-F8.0.1-01 Xem lịch không cần đăng nhập (BR-F8.0-01, BR-F8.0-02) ❌ chưa có TC
-    - AC-F8.0.1-02 Lịch rỗng (BR-F8.0-01) ❌ chưa có TC
-    - AC-F8.0.1-03 Bộ lọc không hợp lệ (BR-F8.0-01) ❌ chưa có TC
-    - AC-F8.0.1-04 Khách muốn đặt (BR-F8.0-01) ❌ chưa có TC
+  - **US-F8.0.1** Xem lịch lớp công khai (#155) ✅ mọi AC có TC
+    - AC-F8.0.1-01 Xem lịch không cần đăng nhập (BR-F8.0-01, BR-F8.0-02)
+      - TC-F8.0.1-01a `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates`
+      - TC-F8.0.1-01b `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-01b, TC-F8.0.1-04b: khách xem giờ Việt Nam và đăng`
+    - AC-F8.0.1-02 Lịch rỗng (BR-F8.0-01)
+      - TC-F8.0.1-02a `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates`
+      - TC-F8.0.1-02b `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-02b, TC-F8.0.1-03b: lịch rỗng và bộ lọc từ chối kh`
+    - AC-F8.0.1-03 Bộ lọc không hợp lệ (BR-F8.0-01)
+      - TC-F8.0.1-03a `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates`
+      - TC-F8.0.1-03b `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-02b, TC-F8.0.1-03b: lịch rỗng và bộ lọc từ chối kh`
+    - AC-F8.0.1-04 Khách muốn đặt (BR-F8.0-01)
+      - TC-F8.0.1-04a `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates`
+      - TC-F8.0.1-04b `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-01b, TC-F8.0.1-04b: khách xem giờ Việt Nam và đăng`
 - **UC-F8.1** Đặt chỗ lớp nhóm
   - **US-F8.1.1** Đặt chỗ lớp nhóm (#156) ✅ mọi AC có TC
     - AC-F8.1.1-01 Đặt khi còn chỗ và ghi người tạo (BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01)
       - TC-F8.1.1-01a `ClassApiIntegrationTest#apiAuthorizationValidationAndPersistence`
       - TC-F8.1.1-01b `ClassApiIntegrationTest#receptionistIsRecordedWhenBookingForMember`
+      - TC-F8.1.1-01c `ClassApiIntegrationTest#memberCalendarReturnsOwnBookingAndAvailability`
+      - TC-F8.1.1-01d `features/classes/ClassCalendarPages.test.tsx › TC-F8.1.1-01d, TC-F8.1.1-03d: đặt đúng hội viên, làm mới sĩ `
     - AC-F8.1.1-02 Gói hoặc quyền đặt không hợp lệ (BR-F8.1-01, BR-F8.3-02)
       - TC-F8.1.1-02a `ClassApiIntegrationTest#rejectsIneligibleMemberships`
+      - TC-F8.1.1-02b `features/classes/ClassCalendarPages.test.tsx › TC-F8.1.1-02b: hiển thị nguyên nhân server từ chối đặt chỗ`
     - AC-F8.1.1-03 Lớp đủ chỗ (BR-F8.1-03, BR-F8-01)
       - TC-F8.1.1-03a `ClassApiIntegrationTest#fullClassRejectsBookingAndCancellationReleasesSeat`
       - TC-F8.1.1-03b `ClassApiIntegrationTest#occupiedStatusesCountTowardsCapacity`
+      - TC-F8.1.1-03c `ClassApiIntegrationTest#memberCalendarReturnsOwnBookingAndAvailability`
+      - TC-F8.1.1-03d `features/classes/ClassCalendarPages.test.tsx › TC-F8.1.1-01d, TC-F8.1.1-03d: đặt đúng hội viên, làm mới sĩ `
     - AC-F8.1.1-04 Hai yêu cầu tranh chỗ cuối (BR-F8.1-03)
       - TC-F8.1.1-04a `ClassApiIntegrationTest#concurrentRequestsDoNotExceedCapacity`
     - AC-F8.1.1-05 Trùng buổi và trùng giờ (BR-F8.1-04)
@@ -933,6 +938,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F8.3.1-02a `ClassApiIntegrationTest#violationsLockOnceAndExpiredLockDoesNotReuseOldViolations`
     - AC-F8.3.1-03 Hủy chỗ buổi đã đổi giờ (BR-F8.3-01, BR-F8-03)
       - TC-F8.3.1-03a `ClassApiIntegrationTest#cancellationAfterRescheduleIsNotLate`
+      - TC-F8.3.1-03b `features/classes/ClassCalendarPages.test.tsx › TC-F8.3.1-03b: xác nhận hủy chỗ đã đổi giờ và hiển thị trạng`
     - AC-F8.3.1-04 Đặt suất vừa hủy (BR-F8.3-04, BR-F8.1-03)
       - TC-F8.3.1-04a `ClassApiIntegrationTest#fullClassRejectsBookingAndCancellationReleasesSeat`
     - AC-F8.3.1-05 Qua tháng Việt Nam (BR-F8.3-02)
@@ -948,20 +954,27 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 - **UC-F8.4** Đã bỏ (ADR 0014)
   - **US-F8.4.1** Đã bỏ (ADR 0014) (#159)
 - **UC-F8.5** Xem lịch dạy lớp nhóm
-  - **US-F8.5.1** Xem lịch dạy lớp nhóm (#160)
-    - AC-F8.5.1-01 Lịch của người được phân công (BR-F8.5-01, BR-F8.5-02, BR-F8.5-03) ❌ chưa có TC
-    - AC-F8.5.1-02 Buổi có người dạy thay (BR-F8.5-01) ❌ chưa có TC
-    - AC-F8.5.1-03 Không có lớp (BR-F8.5-01) ❌ chưa có TC
-    - AC-F8.5.1-04 Sai vai trò hoặc yêu cầu lịch người khác (BR-F8.5-02) ❌ chưa có TC
+  - **US-F8.5.1** Xem lịch dạy lớp nhóm (#160) ✅ mọi AC có TC
+    - AC-F8.5.1-01 Lịch của người được phân công (BR-F8.5-01, BR-F8.5-02, BR-F8.5-03)
+      - TC-F8.5.1-01a `ClassApiIntegrationTest#trainerCalendarUsesActualSessionAssignment`
+      - TC-F8.5.1-01b `features/classes/ClassCalendarPages.test.tsx › TC-F8.5.1-01b, TC-F8.6.1-01b, TC-F8.6.1-03b: đi vào buổi đượ`
+    - AC-F8.5.1-02 Buổi có người dạy thay (BR-F8.5-01)
+      - TC-F8.5.1-02a `ClassApiIntegrationTest#trainerCalendarUsesActualSessionAssignment`
+    - AC-F8.5.1-03 Không có lớp (BR-F8.5-01)
+      - TC-F8.5.1-03a `ClassApiIntegrationTest#trainerCalendarUsesActualSessionAssignment`
+    - AC-F8.5.1-04 Sai vai trò hoặc yêu cầu lịch người khác (BR-F8.5-02)
+      - TC-F8.5.1-04a `ClassApiIntegrationTest#trainerCalendarUsesActualSessionAssignment`
 - **UC-F8.6** Điểm danh học viên lớp học nhóm
   - **US-F8.6.1** Điểm danh học viên lớp học nhóm (#161) ✅ mọi AC có TC
     - AC-F8.6.1-01 Điểm danh lần đầu từ BOOKED (BR-F8.6-01, BR-F8.6-04, BR-F8.6-05)
       - TC-F8.6.1-01a `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay`
+      - TC-F8.6.1-01b `features/classes/ClassCalendarPages.test.tsx › TC-F8.5.1-01b, TC-F8.6.1-01b, TC-F8.6.1-03b: đi vào buổi đượ`
       - TC-F8.6.1-01c `ClassApiIntegrationTest#noShowOfSoftDeletedMemberIsRecordedWithoutPenalty`
     - AC-F8.6.1-02 Vắng mặt lần đầu đạt ngưỡng (BR-F8.6-03, BR-F8.3-02)
       - TC-F8.6.1-02a `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock`
     - AC-F8.6.1-03 Check-in không thay điểm danh (BR-F8.6-02)
       - TC-F8.6.1-03a `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay`
+      - TC-F8.6.1-03b `features/classes/ClassCalendarPages.test.tsx › TC-F8.5.1-01b, TC-F8.6.1-01b, TC-F8.6.1-03b: đi vào buổi đượ`
     - AC-F8.6.1-04 Sai phân công hoặc chi nhánh (BR-F8.6-01)
       - TC-F8.6.1-04a `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay`
     - AC-F8.6.1-05 Biên thời gian của huấn luyện viên (BR-F8.6-01, BR-F8.6-05)
@@ -992,6 +1005,8 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F8.7.1-04a `ClassApiIntegrationTest#recurringOverlapUsesActualWeekdaysNotJustIntersectingDateRanges`
     - AC-F8.7.1-05 Sửa hoặc ngừng lịch không đổi buổi đã sinh (BR-F8.7-02, BR-F8.7-04)
       - TC-F8.7.1-05a `ClassApiIntegrationTest#scheduleGenerationIsIdempotentSnapshotsAndDeactivationPreserveSessions`
+      - TC-F8.7.1-05b `ClassApiIntegrationTest#calendarsPreserveGeneratedClassTypeAfterScheduleEdit`
+      - TC-F8.7.1-05c `ClassSessionTypeMigrationIntegrationTest#migrationBackfillsExistingSessionsAndAcceptsInsertsFromPreviousBackend`
     - AC-F8.7.1-06 Giảm sức chứa đúng biên (BR-F8.7-02, BR-F8.1-03) ❌ chưa có TC
     - AC-F8.7.1-07 Buổi không cho sửa sức chứa (BR-F8.7-02) ❌ chưa có TC
     - AC-F8.7.1-08 Quyền lịch lặp và buổi riêng lẻ (BR-F8-04)
@@ -1493,11 +1508,24 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F5.4.1-07a | AC-F5.4.1-07 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#walkInPaidInvoicePdfAndInvalidId` |
 | TC-F5.4.1-07b | AC-F5.4.1-07 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `InvoiceDocumentIntegrationTest#invalidDocumentIdsReturnFieldErrors` |
 | TC-F5.4.1-07c | AC-F5.4.1-07 | US-F5.4.1 | UC-F5.4 | BR-F5-09, BR-F5-10 | `features/invoices/pages/MemberInvoicePdfPage.test.tsx › TC-F5.4.1-07c: ID %s bị chặn trước khi gọi tải PDF` |
+| TC-F8.0.1-01a | AC-F8.0.1-01 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates` |
+| TC-F8.0.1-01b | AC-F8.0.1-01 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-01b, TC-F8.0.1-04b: khách xem giờ Việt Nam và đăng` |
+| TC-F8.0.1-02a | AC-F8.0.1-02 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates` |
+| TC-F8.0.1-02b | AC-F8.0.1-02 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-02b, TC-F8.0.1-03b: lịch rỗng và bộ lọc từ chối kh` |
+| TC-F8.0.1-03a | AC-F8.0.1-03 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates` |
+| TC-F8.0.1-03b | AC-F8.0.1-03 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-02b, TC-F8.0.1-03b: lịch rỗng và bộ lọc từ chối kh` |
+| TC-F8.0.1-04a | AC-F8.0.1-04 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `ClassApiIntegrationTest#publicCalendarShowsOnlyPublicInformationWithVietnameseDates` |
+| TC-F8.0.1-04b | AC-F8.0.1-04 | US-F8.0.1 | UC-F8.0 | BR-F8.0-01, BR-F8.0-02 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.0.1-01b, TC-F8.0.1-04b: khách xem giờ Việt Nam và đăng` |
 | TC-F8.1.1-01a | AC-F8.1.1-01 | US-F8.1.1 | UC-F8.1 | BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#apiAuthorizationValidationAndPersistence` |
 | TC-F8.1.1-01b | AC-F8.1.1-01 | US-F8.1.1 | UC-F8.1 | BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#receptionistIsRecordedWhenBookingForMember` |
+| TC-F8.1.1-01c | AC-F8.1.1-01 | US-F8.1.1 | UC-F8.1 | BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#memberCalendarReturnsOwnBookingAndAvailability` |
+| TC-F8.1.1-01d | AC-F8.1.1-01 | US-F8.1.1 | UC-F8.1 | BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02, BR-F8.1-04 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.1.1-01d, TC-F8.1.1-03d: đặt đúng hội viên, làm mới sĩ ` |
 | TC-F8.1.1-02a | AC-F8.1.1-02 | US-F8.1.1 | UC-F8.1 | BR-F8.1-01, BR-F8.3-02, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.1-04 | `ClassApiIntegrationTest#rejectsIneligibleMemberships` |
+| TC-F8.1.1-02b | AC-F8.1.1-02 | US-F8.1.1 | UC-F8.1 | BR-F8.1-01, BR-F8.3-02, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.1-04 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.1.1-02b: hiển thị nguyên nhân server từ chối đặt chỗ` |
 | TC-F8.1.1-03a | AC-F8.1.1-03 | US-F8.1.1 | UC-F8.1 | BR-F8.1-03, BR-F8-01, BR-F8.1-01, BR-F8.1-02, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#fullClassRejectsBookingAndCancellationReleasesSeat` |
 | TC-F8.1.1-03b | AC-F8.1.1-03 | US-F8.1.1 | UC-F8.1 | BR-F8.1-03, BR-F8-01, BR-F8.1-01, BR-F8.1-02, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#occupiedStatusesCountTowardsCapacity` |
+| TC-F8.1.1-03c | AC-F8.1.1-03 | US-F8.1.1 | UC-F8.1 | BR-F8.1-03, BR-F8-01, BR-F8.1-01, BR-F8.1-02, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#memberCalendarReturnsOwnBookingAndAvailability` |
+| TC-F8.1.1-03d | AC-F8.1.1-03 | US-F8.1.1 | UC-F8.1 | BR-F8.1-03, BR-F8-01, BR-F8.1-01, BR-F8.1-02, BR-F8.3-02, BR-F8.1-04 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.1.1-01d, TC-F8.1.1-03d: đặt đúng hội viên, làm mới sĩ ` |
 | TC-F8.1.1-04a | AC-F8.1.1-04 | US-F8.1.1 | UC-F8.1 | BR-F8.1-03, BR-F8.1-01, BR-F8.1-02, BR-F8-01, BR-F8.3-02, BR-F8.1-04 | `ClassApiIntegrationTest#concurrentRequestsDoNotExceedCapacity` |
 | TC-F8.1.1-05a | AC-F8.1.1-05 | US-F8.1.1 | UC-F8.1 | BR-F8.1-04, BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02 | `ClassApiIntegrationTest#concurrentOverlappingRequestsRespectMemberLock` |
 | TC-F8.1.1-05b | AC-F8.1.1-05 | US-F8.1.1 | UC-F8.1 | BR-F8.1-04, BR-F8.1-01, BR-F8.1-02, BR-F8.1-03, BR-F8-01, BR-F8.3-02 | `ClassApiIntegrationTest#apiAuthorizationValidationAndPersistence` |
@@ -1512,16 +1540,24 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F8.3.1-01b | AC-F8.3.1-01 | US-F8.3.1 | UC-F8.3 | BR-F8.3-01, BR-F8.3-04, BR-F8.3-02, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#receptionistIsRecordedWhenBookingForMember` |
 | TC-F8.3.1-02a | AC-F8.3.1-02 | US-F8.3.1 | UC-F8.3 | BR-F8.3-01, BR-F8.3-02, BR-F8.3-04, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#violationsLockOnceAndExpiredLockDoesNotReuseOldViolations` |
 | TC-F8.3.1-03a | AC-F8.3.1-03 | US-F8.3.1 | UC-F8.3 | BR-F8.3-01, BR-F8-03, BR-F8.3-04, BR-F8.3-02, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#cancellationAfterRescheduleIsNotLate` |
+| TC-F8.3.1-03b | AC-F8.3.1-03 | US-F8.3.1 | UC-F8.3 | BR-F8.3-01, BR-F8-03, BR-F8.3-04, BR-F8.3-02, BR-F8.1-03, BR-F8.7-05 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.3.1-03b: xác nhận hủy chỗ đã đổi giờ và hiển thị trạng` |
 | TC-F8.3.1-04a | AC-F8.3.1-04 | US-F8.3.1 | UC-F8.3 | BR-F8.3-04, BR-F8.1-03, BR-F8.3-01, BR-F8.3-02, BR-F8-03, BR-F8.7-05 | `ClassApiIntegrationTest#fullClassRejectsBookingAndCancellationReleasesSeat` |
 | TC-F8.3.1-05a | AC-F8.3.1-05 | US-F8.3.1 | UC-F8.3 | BR-F8.3-02, BR-F8.3-01, BR-F8.3-04, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#oldCalendarMonthViolationsDoNotCountAtVietnamMidnight` |
 | TC-F8.3.1-06a | AC-F8.3.1-06 | US-F8.3.1 | UC-F8.3 | BR-F8.3-02, BR-F8.3-01, BR-F8.3-04, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#violationsLockOnceAndExpiredLockDoesNotReuseOldViolations` |
 | TC-F8.3.1-07a | AC-F8.3.1-07 | US-F8.3.1 | UC-F8.3 | BR-F8.3-02, BR-F8.3-04, BR-F8.3-01, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#doubleCancellationOnlyRecordsOneViolation` |
 | TC-F8.3.1-08a | AC-F8.3.1-08 | US-F8.3.1 | UC-F8.3 | BR-F8.3-04, BR-F8.3-01, BR-F8.3-02, BR-F8-03, BR-F8.1-03, BR-F8.7-05 | `ClassApiIntegrationTest#staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings` |
 | TC-F8.3.1-09a | AC-F8.3.1-09 | US-F8.3.1 | UC-F8.3 | BR-F8.7-05, BR-F8.3-01, BR-F8.3-04, BR-F8.3-02, BR-F8-03, BR-F8.1-03 | `ClassApiIntegrationTest#changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot` |
+| TC-F8.5.1-01a | AC-F8.5.1-01 | US-F8.5.1 | UC-F8.5 | BR-F8.5-01, BR-F8.5-02, BR-F8.5-03 | `ClassApiIntegrationTest#trainerCalendarUsesActualSessionAssignment` |
+| TC-F8.5.1-01b | AC-F8.5.1-01 | US-F8.5.1 | UC-F8.5 | BR-F8.5-01, BR-F8.5-02, BR-F8.5-03 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.5.1-01b, TC-F8.6.1-01b, TC-F8.6.1-03b: đi vào buổi đượ` |
+| TC-F8.5.1-02a | AC-F8.5.1-02 | US-F8.5.1 | UC-F8.5 | BR-F8.5-01, BR-F8.5-02, BR-F8.5-03 | `ClassApiIntegrationTest#trainerCalendarUsesActualSessionAssignment` |
+| TC-F8.5.1-03a | AC-F8.5.1-03 | US-F8.5.1 | UC-F8.5 | BR-F8.5-01, BR-F8.5-02, BR-F8.5-03 | `ClassApiIntegrationTest#trainerCalendarUsesActualSessionAssignment` |
+| TC-F8.5.1-04a | AC-F8.5.1-04 | US-F8.5.1 | UC-F8.5 | BR-F8.5-02, BR-F8.5-01, BR-F8.5-03 | `ClassApiIntegrationTest#trainerCalendarUsesActualSessionAssignment` |
 | TC-F8.6.1-01a | AC-F8.6.1-01 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
+| TC-F8.6.1-01b | AC-F8.6.1-01 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.5.1-01b, TC-F8.6.1-01b, TC-F8.6.1-03b: đi vào buổi đượ` |
 | TC-F8.6.1-01c | AC-F8.6.1-01 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#noShowOfSoftDeletedMemberIsRecordedWithoutPenalty` |
 | TC-F8.6.1-02a | AC-F8.6.1-02 | US-F8.6.1 | UC-F8.6 | BR-F8.6-03, BR-F8.3-02, BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#firstNoShowLocksAndCorrectionDoesNotReevaluateLock` |
 | TC-F8.6.1-03a | AC-F8.6.1-03 | US-F8.6.1 | UC-F8.6 | BR-F8.6-02, BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
+| TC-F8.6.1-03b | AC-F8.6.1-03 | US-F8.6.1 | UC-F8.6 | BR-F8.6-02, BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-06, BR-F8-02 | `features/classes/ClassCalendarPages.test.tsx › TC-F8.5.1-01b, TC-F8.6.1-01b, TC-F8.6.1-03b: đi vào buổi đượ` |
 | TC-F8.6.1-04a | AC-F8.6.1-04 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-04, BR-F8.6-05, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
 | TC-F8.6.1-05a | AC-F8.6.1-05 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-05, BR-F8.6-04, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
 | TC-F8.6.1-06a | AC-F8.6.1-06 | US-F8.6.1 | UC-F8.6 | BR-F8.6-01, BR-F8.6-05, BR-F8.6-04, BR-F8.6-03, BR-F8.3-02, BR-F8.6-02, BR-F8.6-06, BR-F8-02 | `ClassApiIntegrationTest#attendanceHonorsAssignmentAndVietnameseDay` |
@@ -1537,6 +1573,8 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F8.7.1-03c | AC-F8.7.1-03 | US-F8.7.1 | UC-F8.7 | BR-F8.7-06, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#scheduleRejectsConcreteRoomTrainerAndPtConflicts` |
 | TC-F8.7.1-04a | AC-F8.7.1-04 | US-F8.7.1 | UC-F8.7 | BR-F8.7-06, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8-04, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#recurringOverlapUsesActualWeekdaysNotJustIntersectingDateRanges` |
 | TC-F8.7.1-05a | AC-F8.7.1-05 | US-F8.7.1 | UC-F8.7 | BR-F8.7-02, BR-F8.7-04, BR-F8.7-01, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#scheduleGenerationIsIdempotentSnapshotsAndDeactivationPreserveSessions` |
+| TC-F8.7.1-05b | AC-F8.7.1-05 | US-F8.7.1 | UC-F8.7 | BR-F8.7-02, BR-F8.7-04, BR-F8.7-01, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#calendarsPreserveGeneratedClassTypeAfterScheduleEdit` |
+| TC-F8.7.1-05c | AC-F8.7.1-05 | US-F8.7.1 | UC-F8.7 | BR-F8.7-02, BR-F8.7-04, BR-F8.7-01, BR-F8.7-03, BR-F8-04, BR-F8.7-06, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassSessionTypeMigrationIntegrationTest#migrationBackfillsExistingSessionsAndAcceptsInsertsFromPreviousBackend` |
 | TC-F8.7.1-08a | AC-F8.7.1-08 | US-F8.7.1 | UC-F8.7 | BR-F8-04, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#staffCannotCrossBranchesAndMemberCannotReadOrCancelOthersBookings` |
 | TC-F8.7.1-08b | AC-F8.7.1-08 | US-F8.7.1 | UC-F8.7 | BR-F8-04, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#scheduleApiDistinguishesMissingOutOfScopeAndIneligibleResources` |
 | TC-F8.7.1-08c | AC-F8.7.1-08 | US-F8.7.1 | UC-F8.7 | BR-F8-04, BR-F8.7-01, BR-F8.7-02, BR-F8.7-03, BR-F8.7-06, BR-F8.7-04, BR-F8.1-03, BR-F8.4-03, BR-F8-03, BR-F8.8-02, BR-F8.7-05 | `ClassApiIntegrationTest#changesPreserveBookingsUntilCancellationAndPublishRecipientSnapshot` |
@@ -1554,7 +1592,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 
 ## 6. Kiểm thử chưa mang mã TC
 
-Có 176 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
+Có 263 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật (JWT, cấu hình, ràng buộc database; được phép ghi mã `S…` hay `BR-…` thay mã TC) và kiểm thử của chức năng chưa gắn mã.
 
 | File | Số kiểm thử |
 | --- | --- |
@@ -1569,6 +1607,11 @@ Có 176 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthControllerTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/AuthServiceTest.java` | 1 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/auth/JwtTokenServiceTest.java` | 5 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/checkin/CheckinApiIntegrationTest.java` | 36 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/checkin/CheckinCheckoutConcurrencyIntegrationTest.java` | 2 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/checkin/CheckinCheckoutHistoryIntegrationTest.java` | 10 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/checkin/CheckinConcurrencyIntegrationTest.java` | 3 |
+| `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/dashboard/DashboardApiIntegrationTest.java` | 13 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/groupclass/ClassApiIntegrationTest.java` | 2 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/invoice/InvoiceSaleIntegrationTest.java` | 2 |
 | `backend/src/test/java/vn/edu/hust/nhom6/gym/feature/member/F1RegistrationIntegrationTest.java` | 1 |
@@ -1593,6 +1636,10 @@ Có 176 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `frontend/src/features/auth/api/validation.test.ts` | 1 |
 | `frontend/src/features/auth/pages/LoginPage.test.tsx` | 5 |
 | `frontend/src/features/auth/pages/RegisterPage.test.tsx` | 1 |
+| `frontend/src/features/checkins/api/checkins.test.ts` | 1 |
+| `frontend/src/features/checkins/pages/CheckinPage.test.tsx` | 12 |
+| `frontend/src/features/dashboard/api/dashboard.test.ts` | 1 |
+| `frontend/src/features/dashboard/pages/DashboardPage.test.tsx` | 9 |
 | `frontend/src/features/members/api/members.test.ts` | 6 |
 | `frontend/src/features/members/components/MemberAvatar.test.tsx` | 2 |
 | `frontend/src/features/members/components/MemberFormModal.test.tsx` | 1 |
