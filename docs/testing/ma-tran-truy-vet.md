@@ -9,16 +9,16 @@
 | Chức năng | UC | US | AC | AC đã có TC | AC chưa có TC | TC |
 | --- | --- | --- | --- | --- | --- | --- |
 | F1 | 6 | 6 | 29 | 24 | 5 | 118 |
-| F2 | 5 | 6 | 31 | 25 | 6 | 93 |
+| F2 | 5 | 6 | 31 | 27 | 4 | 110 |
 | F3 | 5 | 6 | 45 | 44 | 1 | 136 |
 | F4 | 5 | 5 | 37 | 0 | 37 | 0 |
 | F5 | 5 | 5 | 49 | 49 | 0 | 154 |
 | F6 | 5 | 5 | 16 | 0 | 16 | 0 |
-| F7 | 5 | 0 | 0 | 0 | 0 | 0 |
+| F7 | 5 | 5 | 34 | 0 | 34 | 0 |
 | F8 | 9 | 9 | 55 | 53 | 2 | 81 |
-| F9 | 7 | 0 | 0 | 0 | 0 | 0 |
-| F10 | 5 | 0 | 0 | 0 | 0 | 0 |
-| **Tổng** | **57** | **42** | **262** | **195** | **67** | **582** |
+| F9 | 7 | 7 | 63 | 0 | 63 | 0 |
+| F10 | 5 | 4 | 25 | 0 | 25 | 0 |
+| **Tổng** | **57** | **58** | **384** | **197** | **187** | **599** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -47,8 +47,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F1.4.1-02 | Từ chối khi mật khẩu hiện tại sai hoặc mật khẩu mới trùng mật khẩu cũ | US-F1.4.1 |
 | AC-F1.4.1-03 | Từ chối khi dữ liệu đầu vào sai định dạng hoặc mật khẩu mới không đạt chuẩn bảo mật | US-F1.4.1 |
 | AC-F1.4.1-04 | Chặn truy cập khi chưa đăng nhập và mở đúng khung giao diện cho mọi vai trò đã đăng nhập | US-F1.4.1 |
-| AC-F2.2.1-02 | Hội viên đặt mật khẩu lần đầu rồi đăng nhập; quá 72 giờ liên kết hết hạn | US-F2.2.1 |
-| AC-F2.2.1-06 | Gửi email gặp lỗi vẫn giữ tài khoản và ghi log không chứa token | US-F2.2.1 |
 | AC-F2.5.1-01 | Ghi chỉ số cơ thể thành công với ít nhất một chỉ số | US-F2.5.1 |
 | AC-F2.5.1-02 | Từ chối dữ liệu chỉ số cơ thể không hợp lệ | US-F2.5.1 |
 | AC-F2.5.1-03 | Xem lịch sử chỉ số cơ thể sắp xếp mới nhất trước | US-F2.5.1 |
@@ -107,8 +105,130 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F6.4.1-06 | Thao tác Gia hạn nhanh trên giao diện | US-F6.4.1 |
 | AC-F6.5.1-01 | Danh sách các lượt check-in mới nhất trong ngày | US-F6.5.1 |
 | AC-F6.5.1-02 | Thao tác Check-out nhanh từ danh sách Live Feed | US-F6.5.1 |
+| AC-F7.1.1-01 | Hội viên thấy đủ thông tin các gói của mình | US-F7.1.1 |
+| AC-F7.1.1-02 | Chỉ thấy gói của chính mình | US-F7.1.1 |
+| AC-F7.1.1-03 | Hội viên chưa có gói nào | US-F7.1.1 |
+| AC-F7.1.1-04 | Gói đã hủy không có nút Gia hạn, gói hết hạn vẫn có | US-F7.1.1 |
+| AC-F7.1.1-05 | Từ chối người không được xem | US-F7.1.1 |
+| AC-F7.2.1-01 | Xem lịch sử mới nhất trước, có phân trang | US-F7.2.1 |
+| AC-F7.2.1-02 | Hội viên chưa check-in lần nào | US-F7.2.1 |
+| AC-F7.2.1-03 | Chỉ thấy lượt của chính mình | US-F7.2.1 |
+| AC-F7.2.1-04 | Tham số phân trang | US-F7.2.1 |
+| AC-F7.2.1-05 | Tải trang dưới 2 giây | US-F7.2.1 |
+| AC-F7.2.1-06 | Từ chối người không được xem | US-F7.2.1 |
+| AC-F7.3.1-01 | Xem hóa đơn của mình, mới nhất trước | US-F7.3.1 |
+| AC-F7.3.1-02 | Hóa đơn chờ do cổng hội viên kèm hạn tự hủy | US-F7.3.1 |
+| AC-F7.3.1-03 | Chỉ thấy hóa đơn của chính mình | US-F7.3.1 |
+| AC-F7.3.1-04 | Hội viên chưa có hóa đơn nào | US-F7.3.1 |
+| AC-F7.3.1-05 | Tham số phân trang | US-F7.3.1 |
+| AC-F7.3.1-06 | Từ chối người không được xem | US-F7.3.1 |
+| AC-F7.4.1-01 | Gửi yêu cầu mua tạo hóa đơn chờ và gói chờ, giá lấy ở server | US-F7.4.1 |
+| AC-F7.4.1-02 | Gói chỉ hiệu lực sau khi lễ tân thu tiền | US-F7.4.1 |
+| AC-F7.4.1-03 | Hóa đơn chờ tự hủy sau `PENDING_INVOICE_TTL_DAYS`, kéo theo gói chờ | US-F7.4.1 |
+| AC-F7.4.1-04 | Số ngày tự hủy đọc từ cấu hình | US-F7.4.1 |
+| AC-F7.4.1-05 | Đã có gói cùng loại đang chờ | US-F7.4.1 |
+| AC-F7.4.1-06 | Hai yêu cầu gửi cùng lúc | US-F7.4.1 |
+| AC-F7.4.1-07 | Gói không hợp lệ để mua | US-F7.4.1 |
+| AC-F7.4.1-08 | Dữ liệu sai và người không được gửi | US-F7.4.1 |
+| AC-F7.5.1-01 | Gia hạn gói còn hiệu lực: tạo gói mới chờ, gói cũ không đổi | US-F7.5.1 |
+| AC-F7.5.1-02 | Gói đã hết hạn vẫn gia hạn được | US-F7.5.1 |
+| AC-F7.5.1-03 | Gói đã hủy không gia hạn được | US-F7.5.1 |
+| AC-F7.5.1-04 | Gói của hội viên khác hoặc không tồn tại: cùng một câu trả lời | US-F7.5.1 |
+| AC-F7.5.1-05 | Loại gói đã ngừng bán | US-F7.5.1 |
+| AC-F7.5.1-06 | Đã có gói cùng loại đang chờ | US-F7.5.1 |
+| AC-F7.5.1-07 | Hai yêu cầu gia hạn gửi cùng lúc | US-F7.5.1 |
+| AC-F7.5.1-08 | Hóa đơn gia hạn tự hủy kéo theo gói chờ | US-F7.5.1 |
+| AC-F7.5.1-09 | Dữ liệu sai và người không được gửi | US-F7.5.1 |
 | AC-F8.7.1-06 | Giảm sức chứa đúng biên | US-F8.7.1 |
 | AC-F8.7.1-07 | Buổi không cho sửa sức chứa | US-F8.7.1 |
+| AC-F9.1.1-01 | Khai báo khung rảnh hợp lệ | US-F9.1.1 |
+| AC-F9.1.1-02 | Dữ liệu sai bị từ chối | US-F9.1.1 |
+| AC-F9.1.1-03 | Hai khung của cùng một PT không chồng nhau | US-F9.1.1 |
+| AC-F9.1.1-04 | Khung liền kề hoặc khác thứ không bị coi là chồng | US-F9.1.1 |
+| AC-F9.1.1-05 | Hai PT khác nhau được trùng giờ | US-F9.1.1 |
+| AC-F9.1.1-06 | Sửa khung rảnh của mình | US-F9.1.1 |
+| AC-F9.1.1-07 | Không xóa hoặc thu hẹp khung đang có buổi đã đặt | US-F9.1.1 |
+| AC-F9.1.1-08 | Buổi đã xong hoặc đã hủy không chặn việc xóa khung | US-F9.1.1 |
+| AC-F9.1.1-09 | Xem lịch dạy gồm khung rảnh, buổi PT và lớp nhóm | US-F9.1.1 |
+| AC-F9.1.1-10 | PT chỉ thao tác trên lịch của mình | US-F9.1.1 |
+| AC-F9.1.1-11 | Từ chối người không phải PT | US-F9.1.1 |
+| AC-F9.2.1-01 | Đặt buổi hợp lệ chỉ giữ chỗ, không trừ buổi | US-F9.2.1 |
+| AC-F9.2.1-02 | Chỉ đặt trong giờ PT rảnh | US-F9.2.1 |
+| AC-F9.2.1-03 | Đặt sát giờ bị từ chối, đúng mốc thì được | US-F9.2.1 |
+| AC-F9.2.1-04 | Số giờ tối thiểu đọc từ cấu hình | US-F9.2.1 |
+| AC-F9.2.1-05 | Không trùng lịch của PT | US-F9.2.1 |
+| AC-F9.2.1-06 | Không trùng lịch của hội viên | US-F9.2.1 |
+| AC-F9.2.1-07 | Phải có gói PT đang hiệu lực | US-F9.2.1 |
+| AC-F9.2.1-08 | Không đặt quá số buổi còn lại, kể cả buổi đã qua giờ chưa xác nhận | US-F9.2.1 |
+| AC-F9.2.1-09 | Còn chỗ khi số buổi `BOOKED` ít hơn số buổi còn lại | US-F9.2.1 |
+| AC-F9.2.1-10 | Hai yêu cầu cùng lúc cho một giờ | US-F9.2.1 |
+| AC-F9.2.1-11 | Dữ liệu sai, PT không tồn tại | US-F9.2.1 |
+| AC-F9.2.1-12 | Từ chối người không được đặt | US-F9.2.1 |
+| AC-F9.3.1-01 | Xác nhận buổi đã diễn ra, trừ một buổi | US-F9.3.1 |
+| AC-F9.3.1-02 | Hoa hồng chốt lúc xác nhận và không đổi về sau | US-F9.3.1 |
+| AC-F9.3.1-03 | Chưa tới giờ bắt đầu thì không xác nhận được | US-F9.3.1 |
+| AC-F9.3.1-04 | Không xác nhận hai lần | US-F9.3.1 |
+| AC-F9.3.1-05 | Hai thao tác cùng lúc chỉ trừ một lần | US-F9.3.1 |
+| AC-F9.3.1-06 | Buổi cuối thì gói hết hạn và gói nối tiếp được kích hoạt ngay | US-F9.3.1 |
+| AC-F9.3.1-07 | Buổi cuối nhưng không có gói nối tiếp | US-F9.3.1 |
+| AC-F9.3.1-08 | Hội viên vắng mặt vẫn bị trừ buổi, không có hoa hồng | US-F9.3.1 |
+| AC-F9.3.1-09 | Hạn xác nhận 23:59 cùng ngày | US-F9.3.1 |
+| AC-F9.3.1-10 | Chỉ PT được phân công mới xác nhận | US-F9.3.1 |
+| AC-F9.4.1-01 | Soạn giáo án cho học viên có buổi PT với mình | US-F9.4.1 |
+| AC-F9.4.1-02 | Soạn giáo án cho học viên có đặt chỗ lớp do mình dạy | US-F9.4.1 |
+| AC-F9.4.1-03 | Không soạn cho học viên mình không dạy | US-F9.4.1 |
+| AC-F9.4.1-04 | Hội viên không tồn tại | US-F9.4.1 |
+| AC-F9.4.1-05 | Dữ liệu sai bị từ chối | US-F9.4.1 |
+| AC-F9.4.1-06 | Từ chối người không phải PT | US-F9.4.1 |
+| AC-F9.5.1-01 | Ghi nhật ký tập cho học viên của mình | US-F9.5.1 |
+| AC-F9.5.1-02 | Ghi chỉ số cơ thể, người ghi lấy từ token | US-F9.5.1 |
+| AC-F9.5.1-03 | Nhật ký gắn buổi PT phải thuộc đúng PT và hội viên | US-F9.5.1 |
+| AC-F9.5.1-04 | Dữ liệu sai bị từ chối | US-F9.5.1 |
+| AC-F9.5.1-05 | Không ghi cho học viên mình không dạy, hội viên không tồn tại | US-F9.5.1 |
+| AC-F9.5.1-06 | Từ chối người không phải PT | US-F9.5.1 |
+| AC-F9.6.1-01 | Hội viên xem tiến độ của chính mình | US-F9.6.1 |
+| AC-F9.6.1-02 | PT xem tiến độ học viên mình dạy | US-F9.6.1 |
+| AC-F9.6.1-03 | Không xem tiến độ của người khác | US-F9.6.1 |
+| AC-F9.6.1-04 | Chưa có dữ liệu | US-F9.6.1 |
+| AC-F9.6.1-05 | Khoảng thời gian sai | US-F9.6.1 |
+| AC-F9.6.1-06 | Chỉ dựa trên dữ liệu thực, không có gợi ý AI | US-F9.6.1 |
+| AC-F9.6.1-07 | Từ chối người chưa đăng nhập hoặc vai trò khác | US-F9.6.1 |
+| AC-F9.7.1-01 | Hội viên hủy trước hạn, không mất buổi | US-F9.7.1 |
+| AC-F9.7.1-02 | Hủy sát giờ bị từ chối, đúng mốc thì được | US-F9.7.1 |
+| AC-F9.7.1-03 | Mốc hủy đọc từ cấu hình | US-F9.7.1 |
+| AC-F9.7.1-04 | Lễ tân hủy hộ theo đúng quy tắc của hội viên | US-F9.7.1 |
+| AC-F9.7.1-05 | Quản lý chi nhánh hủy hộ, có lý do, có dấu vết | US-F9.7.1 |
+| AC-F9.7.1-06 | Quản lý hủy hộ phải nhập lý do | US-F9.7.1 |
+| AC-F9.7.1-07 | Quản lý không hủy buổi đã tới giờ bắt đầu | US-F9.7.1 |
+| AC-F9.7.1-08 | Chỉ hủy được buổi đang `BOOKED` | US-F9.7.1 |
+| AC-F9.7.1-09 | PT không tự hủy buổi đã có khách | US-F9.7.1 |
+| AC-F9.7.1-10 | Phân quyền theo chủ buổi và chi nhánh | US-F9.7.1 |
+| AC-F9.7.1-11 | Hai yêu cầu hủy cùng lúc | US-F9.7.1 |
+| AC-F10.1.1-01 | Thông báo khi gói TIME hoặc gói ACTIVE sắp hết hạn | US-F10.1.1 |
+| AC-F10.1.1-02 | Thông báo khi gói SESSION sắp hết buổi | US-F10.1.1 |
+| AC-F10.1.1-03 | Không gửi thông báo trùng cho cùng một gói | US-F10.1.1 |
+| AC-F10.1.1-04 | Không gửi thông báo khi hội viên đã có gói nối tiếp | US-F10.1.1 |
+| AC-F10.1.1-05 | Không tạo thông báo cho hội viên chưa có tài khoản | US-F10.1.1 |
+| AC-F10.1.1-06 | Hiển thị thông báo trong web và gửi email đúng thời gian | US-F10.1.1 |
+| AC-F10.1.1-07 | Hẹn gửi email khi phát sinh ngoài giờ mở cửa và xử lý lỗi gửi | US-F10.1.1 |
+| AC-F10.2.1-01 | Tạo thông báo nhắc cho lượt đặt chỗ BOOKED | US-F10.2.1 |
+| AC-F10.2.1-02 | Không gửi thông báo nhắc trùng cho cùng lượt đặt chỗ | US-F10.2.1 |
+| AC-F10.2.1-03 | Không gửi nhắc khi hội viên đã hủy chỗ hoặc lớp bị hủy | US-F10.2.1 |
+| AC-F10.2.1-04 | Không tạo thông báo cho hội viên chưa có tài khoản | US-F10.2.1 |
+| AC-F10.2.1-05 | Hiển thị thông báo trong web và gửi email nhắc lịch | US-F10.2.1 |
+| AC-F10.2.1-06 | Xử lý email phát sinh ngoài giờ và lỗi gửi email | US-F10.2.1 |
+| AC-F10.4.1-01 | Tạo thông báo khi nhận sự kiện đổi giờ từ F8 | US-F10.4.1 |
+| AC-F10.4.1-02 | Nội dung thông báo có giờ cũ và giờ mới | US-F10.4.1 |
+| AC-F10.4.1-03 | Không tạo thông báo khi buổi lớp không có hội viên đặt chỗ | US-F10.4.1 |
+| AC-F10.4.1-04 | Chỉ báo hội viên còn giữ chỗ | US-F10.4.1 |
+| AC-F10.4.1-05 | Không tạo thông báo cho hội viên chưa có tài khoản | US-F10.4.1 |
+| AC-F10.4.1-06 | Gửi thông báo qua hai kênh và xử lý lỗi email | US-F10.4.1 |
+| AC-F10.5.1-01 | Xem danh sách thông báo của tài khoản đang đăng nhập | US-F10.5.1 |
+| AC-F10.5.1-02 | Sắp xếp và phân trang danh sách thông báo | US-F10.5.1 |
+| AC-F10.5.1-03 | Hiển thị đầy đủ nội dung và trạng thái đã đọc | US-F10.5.1 |
+| AC-F10.5.1-04 | Đánh dấu thông báo đã đọc | US-F10.5.1 |
+| AC-F10.5.1-05 | Không cho phép xem hoặc đánh dấu thông báo của người khác | US-F10.5.1 |
+| AC-F10.5.1-06 | Xử lý dữ liệu đầu vào sai và thông báo không tồn tại | US-F10.5.1 |
 
 ## 4. Cây xuôi: chức năng → UC → US → AC → TC
 
@@ -298,23 +418,40 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F2.1.1-03a `F1RegistrationIntegrationTest#realReceptionistJwtWithoutStaffAssignmentCannotCreateOrListMembers`
       - TC-F2.1.1-03b `MemberApiIntegrationTest#validatesEndpointAndRecordPermissions`
 - **UC-F2.2** Tạo tài khoản đăng nhập cho hồ sơ hội viên có sẵn
-  - **US-F2.2.1** Tạo tài khoản cho hồ sơ có sẵn (#124)
+  - **US-F2.2.1** Tạo tài khoản cho hồ sơ có sẵn (#124) ✅ mọi AC có TC
     - AC-F2.2.1-01 Tạo tài khoản và gửi email đặt mật khẩu hạn 72 giờ (BR-F2-06, BR-F2-11)
       - TC-F2.2.1-01a `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-01a: tạo tài khoản thành công báo đã gửi email, tả`
       - TC-F2.2.1-01b `features/members/pages/MembersPage.test.tsx › TC-F2.2.1-01b: chỉ tạo tài khoản cho hồ sơ ACTIVE chưa có em`
-    - AC-F2.2.1-02 Hội viên đặt mật khẩu lần đầu rồi đăng nhập; quá 72 giờ liên kết hết hạn (BR-F2-11) ❌ chưa có TC
+      - TC-F2.2.1-01c `AccountServiceTest#createMemberAccountChuanHoaEmailVaBamMatKhauNgauNhien`
+      - TC-F2.2.1-01d `MemberServiceTest#linkAccountAttachesNewUserToActiveUnlinkedMember`
+      - TC-F2.2.1-01e `MemberAccountServiceTest#createAccountIssues72HourTokenAndSendsActivationEmail`
+      - TC-F2.2.1-01f `MemberAccountIntegrationTest#createAccountPersistsUserLinkTokenAndSendsActivationEmail`
+    - AC-F2.2.1-02 Hội viên đặt mật khẩu lần đầu rồi đăng nhập; quá 72 giờ liên kết hết hạn (BR-F2-11)
+      - TC-F2.2.1-02a `MemberAccountIntegrationTest#resetPasswordWithin72HoursAndLoginSucceedsWhileExpiredReturns422`
     - AC-F2.2.1-03 Từ chối khi hồ sơ đã có tài khoản (BR-F2-11)
       - TC-F2.2.1-03a `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03a, TC-F2.2.1-05a: hồ sơ đã có tài khoản hiện ema`
       - TC-F2.2.1-03b `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03b, TC-F2.2.1-04a, TC-F2.2.1-05b, TC-F2.2.1-07c: `
+      - TC-F2.2.1-03c `MemberServiceTest#linkAccountRejectsAlreadyLinkedMemberWith409`
+      - TC-F2.2.1-03d `MemberAccountIntegrationTest#memberAlreadyHasAccountReturns409`
+      - TC-F2.2.1-03e `MemberAccountIntegrationTest#concurrentCreateAccountForSameMemberCreatesSingleUser`
     - AC-F2.2.1-04 Từ chối khi email đã được sử dụng (kể cả đồng thời) (BR-F2-06, BR-F2-11)
       - TC-F2.2.1-04a `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03b, TC-F2.2.1-04a, TC-F2.2.1-05b, TC-F2.2.1-07c: `
+      - TC-F2.2.1-04b `AccountServiceTest#createMemberAccountTrungEmailTra409`
+      - TC-F2.2.1-04c `MemberAccountIntegrationTest#emailAlreadyUsedByAnotherAccountReturns409`
+      - TC-F2.2.1-04d `MemberAccountIntegrationTest#concurrentCreateAccountWithSameEmailRejectsSecondWith409`
     - AC-F2.2.1-05 Từ chối khi hồ sơ đang ngừng hoạt động (BR-F2-11)
       - TC-F2.2.1-05a `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03a, TC-F2.2.1-05a: hồ sơ đã có tài khoản hiện ema`
       - TC-F2.2.1-05b `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03b, TC-F2.2.1-04a, TC-F2.2.1-05b, TC-F2.2.1-07c: `
-    - AC-F2.2.1-06 Gửi email gặp lỗi vẫn giữ tài khoản và ghi log không chứa token (BR-F2-11) ❌ chưa có TC
+      - TC-F2.2.1-05c `MemberServiceTest#linkAccountRejectsInactiveMemberWith422`
+      - TC-F2.2.1-05d `MemberAccountIntegrationTest#inactiveMemberReturns422`
+    - AC-F2.2.1-06 Gửi email gặp lỗi vẫn giữ tài khoản và ghi log không chứa token (BR-F2-11)
+      - TC-F2.2.1-06a `MemberAccountServiceTest#emailFailureDoesNotFailAccountCreationAndDoesNotLogToken`
+      - TC-F2.2.1-06b `MemberAccountIntegrationTest#emailProviderFailureStillReturns200AndCommitsAccount`
     - AC-F2.2.1-07 Kiểm tra quyền theo vai trò, chi nhánh và dữ liệu đầu vào (BR-F2-10, BR-F2-11)
       - TC-F2.2.1-07b `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-07b: kiểm tra định dạng email ở trình duyệt trước `
       - TC-F2.2.1-07c `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03b, TC-F2.2.1-04a, TC-F2.2.1-05b, TC-F2.2.1-07c: `
+      - TC-F2.2.1-07d `MemberAccountIntegrationTest#enforcesRoleAndBranchPermissions`
+      - TC-F2.2.1-07e `MemberAccountIntegrationTest#invalidEmailOrNonPositiveMemberIdReturns400`
 - **UC-F2.3** Tra cứu, lọc và xem chi tiết hồ sơ hội viên
   - **US-F2.3.1** Tra cứu và xem hồ sơ hội viên (#125) ✅ mọi AC có TC
     - AC-F2.3.1-01 Tìm kiếm, lọc, phân trang trong chi nhánh mình đạt hiệu năng dưới 2 giây (BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10)
@@ -902,6 +1039,53 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F6.5.1-01 Danh sách các lượt check-in mới nhất trong ngày ❌ chưa có TC
     - AC-F6.5.1-02 Thao tác Check-out nhanh từ danh sách Live Feed ❌ chưa có TC
 
+### F7
+
+- **UC-F7.1** Xem gói tập
+  - **US-F7.1.1** Xem gói của tôi (#150)
+    - AC-F7.1.1-01 Hội viên thấy đủ thông tin các gói của mình ❌ chưa có TC
+    - AC-F7.1.1-02 Chỉ thấy gói của chính mình ❌ chưa có TC
+    - AC-F7.1.1-03 Hội viên chưa có gói nào ❌ chưa có TC
+    - AC-F7.1.1-04 Gói đã hủy không có nút Gia hạn, gói hết hạn vẫn có ❌ chưa có TC
+    - AC-F7.1.1-05 Từ chối người không được xem ❌ chưa có TC
+- **UC-F7.2** Xem lịch sử check-in
+  - **US-F7.2.1** Lịch sử check-in của tôi (#151)
+    - AC-F7.2.1-01 Xem lịch sử mới nhất trước, có phân trang ❌ chưa có TC
+    - AC-F7.2.1-02 Hội viên chưa check-in lần nào ❌ chưa có TC
+    - AC-F7.2.1-03 Chỉ thấy lượt của chính mình ❌ chưa có TC
+    - AC-F7.2.1-04 Tham số phân trang ❌ chưa có TC
+    - AC-F7.2.1-05 Tải trang dưới 2 giây ❌ chưa có TC
+    - AC-F7.2.1-06 Từ chối người không được xem ❌ chưa có TC
+- **UC-F7.3** Xem hóa đơn
+  - **US-F7.3.1** Hóa đơn của tôi (#152)
+    - AC-F7.3.1-01 Xem hóa đơn của mình, mới nhất trước ❌ chưa có TC
+    - AC-F7.3.1-02 Hóa đơn chờ do cổng hội viên kèm hạn tự hủy ❌ chưa có TC
+    - AC-F7.3.1-03 Chỉ thấy hóa đơn của chính mình ❌ chưa có TC
+    - AC-F7.3.1-04 Hội viên chưa có hóa đơn nào ❌ chưa có TC
+    - AC-F7.3.1-05 Tham số phân trang ❌ chưa có TC
+    - AC-F7.3.1-06 Từ chối người không được xem ❌ chưa có TC
+- **UC-F7.4** Gửi yêu cầu mua gói
+  - **US-F7.4.1** Gửi yêu cầu mua gói (#153)
+    - AC-F7.4.1-01 Gửi yêu cầu mua tạo hóa đơn chờ và gói chờ, giá lấy ở server ❌ chưa có TC
+    - AC-F7.4.1-02 Gói chỉ hiệu lực sau khi lễ tân thu tiền ❌ chưa có TC
+    - AC-F7.4.1-03 Hóa đơn chờ tự hủy sau `PENDING_INVOICE_TTL_DAYS`, kéo theo gói chờ ❌ chưa có TC
+    - AC-F7.4.1-04 Số ngày tự hủy đọc từ cấu hình ❌ chưa có TC
+    - AC-F7.4.1-05 Đã có gói cùng loại đang chờ ❌ chưa có TC
+    - AC-F7.4.1-06 Hai yêu cầu gửi cùng lúc ❌ chưa có TC
+    - AC-F7.4.1-07 Gói không hợp lệ để mua ❌ chưa có TC
+    - AC-F7.4.1-08 Dữ liệu sai và người không được gửi ❌ chưa có TC
+- **UC-F7.5** Gửi yêu cầu gia hạn gói
+  - **US-F7.5.1** Gửi yêu cầu gia hạn (#154)
+    - AC-F7.5.1-01 Gia hạn gói còn hiệu lực: tạo gói mới chờ, gói cũ không đổi ❌ chưa có TC
+    - AC-F7.5.1-02 Gói đã hết hạn vẫn gia hạn được ❌ chưa có TC
+    - AC-F7.5.1-03 Gói đã hủy không gia hạn được ❌ chưa có TC
+    - AC-F7.5.1-04 Gói của hội viên khác hoặc không tồn tại: cùng một câu trả lời ❌ chưa có TC
+    - AC-F7.5.1-05 Loại gói đã ngừng bán ❌ chưa có TC
+    - AC-F7.5.1-06 Đã có gói cùng loại đang chờ ❌ chưa có TC
+    - AC-F7.5.1-07 Hai yêu cầu gia hạn gửi cùng lúc ❌ chưa có TC
+    - AC-F7.5.1-08 Hóa đơn gia hạn tự hủy kéo theo gói chờ ❌ chưa có TC
+    - AC-F7.5.1-09 Dữ liệu sai và người không được gửi ❌ chưa có TC
+
 ### F8
 
 - **UC-F8.0** Xem lịch lớp học nhóm công khai
@@ -1059,6 +1243,123 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F8.8.1-05 Tài nguyên không còn dùng được (BR-F8.8-01, BR-F8.8-03, BR-F8.7-06)
       - TC-F8.8.1-05a `ClassApiIntegrationTest#generationRejectsInactiveRoomOrConflictingSession`
 
+### F9
+
+- **UC-F9.1** Khai báo lịch rảnh và xem lịch dạy
+  - **US-F9.1.1** Lịch rảnh và lịch dạy (#164)
+    - AC-F9.1.1-01 Khai báo khung rảnh hợp lệ ❌ chưa có TC
+    - AC-F9.1.1-02 Dữ liệu sai bị từ chối ❌ chưa có TC
+    - AC-F9.1.1-03 Hai khung của cùng một PT không chồng nhau (BR-F9.14) ❌ chưa có TC
+    - AC-F9.1.1-04 Khung liền kề hoặc khác thứ không bị coi là chồng (BR-F9.14) ❌ chưa có TC
+    - AC-F9.1.1-05 Hai PT khác nhau được trùng giờ (BR-F9.14) ❌ chưa có TC
+    - AC-F9.1.1-06 Sửa khung rảnh của mình ❌ chưa có TC
+    - AC-F9.1.1-07 Không xóa hoặc thu hẹp khung đang có buổi đã đặt (BR-F9.15) ❌ chưa có TC
+    - AC-F9.1.1-08 Buổi đã xong hoặc đã hủy không chặn việc xóa khung (BR-F9.15) ❌ chưa có TC
+    - AC-F9.1.1-09 Xem lịch dạy gồm khung rảnh, buổi PT và lớp nhóm ❌ chưa có TC
+    - AC-F9.1.1-10 PT chỉ thao tác trên lịch của mình ❌ chưa có TC
+    - AC-F9.1.1-11 Từ chối người không phải PT ❌ chưa có TC
+- **UC-F9.2** Đặt buổi PT
+  - **US-F9.2.1** Đặt buổi PT (#165)
+    - AC-F9.2.1-01 Đặt buổi hợp lệ chỉ giữ chỗ, không trừ buổi ❌ chưa có TC
+    - AC-F9.2.1-02 Chỉ đặt trong giờ PT rảnh ❌ chưa có TC
+    - AC-F9.2.1-03 Đặt sát giờ bị từ chối, đúng mốc thì được ❌ chưa có TC
+    - AC-F9.2.1-04 Số giờ tối thiểu đọc từ cấu hình ❌ chưa có TC
+    - AC-F9.2.1-05 Không trùng lịch của PT ❌ chưa có TC
+    - AC-F9.2.1-06 Không trùng lịch của hội viên ❌ chưa có TC
+    - AC-F9.2.1-07 Phải có gói PT đang hiệu lực ❌ chưa có TC
+    - AC-F9.2.1-08 Không đặt quá số buổi còn lại, kể cả buổi đã qua giờ chưa xác nhận ❌ chưa có TC
+    - AC-F9.2.1-09 Còn chỗ khi số buổi `BOOKED` ít hơn số buổi còn lại ❌ chưa có TC
+    - AC-F9.2.1-10 Hai yêu cầu cùng lúc cho một giờ ❌ chưa có TC
+    - AC-F9.2.1-11 Dữ liệu sai, PT không tồn tại ❌ chưa có TC
+    - AC-F9.2.1-12 Từ chối người không được đặt ❌ chưa có TC
+- **UC-F9.3** Xác nhận buổi PT đã diễn ra
+  - **US-F9.3.1** Xác nhận buổi PT đã diễn ra (#166)
+    - AC-F9.3.1-01 Xác nhận buổi đã diễn ra, trừ một buổi ❌ chưa có TC
+    - AC-F9.3.1-02 Hoa hồng chốt lúc xác nhận và không đổi về sau ❌ chưa có TC
+    - AC-F9.3.1-03 Chưa tới giờ bắt đầu thì không xác nhận được ❌ chưa có TC
+    - AC-F9.3.1-04 Không xác nhận hai lần ❌ chưa có TC
+    - AC-F9.3.1-05 Hai thao tác cùng lúc chỉ trừ một lần ❌ chưa có TC
+    - AC-F9.3.1-06 Buổi cuối thì gói hết hạn và gói nối tiếp được kích hoạt ngay ❌ chưa có TC
+    - AC-F9.3.1-07 Buổi cuối nhưng không có gói nối tiếp ❌ chưa có TC
+    - AC-F9.3.1-08 Hội viên vắng mặt vẫn bị trừ buổi, không có hoa hồng (BR-F9.18) ❌ chưa có TC
+    - AC-F9.3.1-09 Hạn xác nhận 23:59 cùng ngày (BR-F9.19) ❌ chưa có TC
+    - AC-F9.3.1-10 Chỉ PT được phân công mới xác nhận ❌ chưa có TC
+- **UC-F9.4** Soạn giáo án
+  - **US-F9.4.1** Soạn giáo án (#167)
+    - AC-F9.4.1-01 Soạn giáo án cho học viên có buổi PT với mình (BR-F9.10) ❌ chưa có TC
+    - AC-F9.4.1-02 Soạn giáo án cho học viên có đặt chỗ lớp do mình dạy (BR-F9.10) ❌ chưa có TC
+    - AC-F9.4.1-03 Không soạn cho học viên mình không dạy (BR-F9.10) ❌ chưa có TC
+    - AC-F9.4.1-04 Hội viên không tồn tại ❌ chưa có TC
+    - AC-F9.4.1-05 Dữ liệu sai bị từ chối ❌ chưa có TC
+    - AC-F9.4.1-06 Từ chối người không phải PT ❌ chưa có TC
+- **UC-F9.5** Ghi nhật ký tập và chỉ số cơ thể
+  - **US-F9.5.1** Nhật ký tập (#168)
+    - AC-F9.5.1-01 Ghi nhật ký tập cho học viên của mình (BR-F9.10, BR-F9.11) ❌ chưa có TC
+    - AC-F9.5.1-02 Ghi chỉ số cơ thể, người ghi lấy từ token (BR-F9.10) ❌ chưa có TC
+    - AC-F9.5.1-03 Nhật ký gắn buổi PT phải thuộc đúng PT và hội viên (BR-F9.10) ❌ chưa có TC
+    - AC-F9.5.1-04 Dữ liệu sai bị từ chối ❌ chưa có TC
+    - AC-F9.5.1-05 Không ghi cho học viên mình không dạy, hội viên không tồn tại (BR-F9.10) ❌ chưa có TC
+    - AC-F9.5.1-06 Từ chối người không phải PT ❌ chưa có TC
+- **UC-F9.6** Xem tiến độ học viên
+  - **US-F9.6.1** Xem tiến độ học viên (#169)
+    - AC-F9.6.1-01 Hội viên xem tiến độ của chính mình (BR-F9.12) ❌ chưa có TC
+    - AC-F9.6.1-02 PT xem tiến độ học viên mình dạy (BR-F9.10) ❌ chưa có TC
+    - AC-F9.6.1-03 Không xem tiến độ của người khác (BR-F9.10, BR-F9.12) ❌ chưa có TC
+    - AC-F9.6.1-04 Chưa có dữ liệu ❌ chưa có TC
+    - AC-F9.6.1-05 Khoảng thời gian sai ❌ chưa có TC
+    - AC-F9.6.1-06 Chỉ dựa trên dữ liệu thực, không có gợi ý AI (BR-F9.13) ❌ chưa có TC
+    - AC-F9.6.1-07 Từ chối người chưa đăng nhập hoặc vai trò khác ❌ chưa có TC
+- **UC-F9.7** Hủy buổi PT
+  - **US-F9.7.1** Hủy buổi PT (*(chưa có, cần trưởng nhóm tạo issue cho US-F9.7.1)*)
+    - AC-F9.7.1-01 Hội viên hủy trước hạn, không mất buổi (BR-F9.16) ❌ chưa có TC
+    - AC-F9.7.1-02 Hủy sát giờ bị từ chối, đúng mốc thì được (BR-F9.16) ❌ chưa có TC
+    - AC-F9.7.1-03 Mốc hủy đọc từ cấu hình ❌ chưa có TC
+    - AC-F9.7.1-04 Lễ tân hủy hộ theo đúng quy tắc của hội viên (BR-F9.16) ❌ chưa có TC
+    - AC-F9.7.1-05 Quản lý chi nhánh hủy hộ, có lý do, có dấu vết (BR-F9.17) ❌ chưa có TC
+    - AC-F9.7.1-06 Quản lý hủy hộ phải nhập lý do (BR-F9.17) ❌ chưa có TC
+    - AC-F9.7.1-07 Quản lý không hủy buổi đã tới giờ bắt đầu ❌ chưa có TC
+    - AC-F9.7.1-08 Chỉ hủy được buổi đang `BOOKED` ❌ chưa có TC
+    - AC-F9.7.1-09 PT không tự hủy buổi đã có khách (BR-F9.17) ❌ chưa có TC
+    - AC-F9.7.1-10 Phân quyền theo chủ buổi và chi nhánh ❌ chưa có TC
+    - AC-F9.7.1-11 Hai yêu cầu hủy cùng lúc ❌ chưa có TC
+
+### F10
+
+- **UC-F10.1** Gửi thông báo sắp hết hạn gói
+  - **US-F10.1.1** Nhận thông báo khi gói tập sắp hết hạn hoặc sắp hết buổi
+    - AC-F10.1.1-01 Thông báo khi gói TIME hoặc gói ACTIVE sắp hết hạn ❌ chưa có TC
+    - AC-F10.1.1-02 Thông báo khi gói SESSION sắp hết buổi ❌ chưa có TC
+    - AC-F10.1.1-03 Không gửi thông báo trùng cho cùng một gói ❌ chưa có TC
+    - AC-F10.1.1-04 Không gửi thông báo khi hội viên đã có gói nối tiếp ❌ chưa có TC
+    - AC-F10.1.1-05 Không tạo thông báo cho hội viên chưa có tài khoản ❌ chưa có TC
+    - AC-F10.1.1-06 Hiển thị thông báo trong web và gửi email đúng thời gian ❌ chưa có TC
+    - AC-F10.1.1-07 Hẹn gửi email khi phát sinh ngoài giờ mở cửa và xử lý lỗi gửi ❌ chưa có TC
+- **UC-F10.2** Gửi thông báo nhắc lịch lớp
+  - **US-F10.2.1** Nhận thông báo nhắc lịch lớp học nhóm
+    - AC-F10.2.1-01 Tạo thông báo nhắc cho lượt đặt chỗ BOOKED ❌ chưa có TC
+    - AC-F10.2.1-02 Không gửi thông báo nhắc trùng cho cùng lượt đặt chỗ ❌ chưa có TC
+    - AC-F10.2.1-03 Không gửi nhắc khi hội viên đã hủy chỗ hoặc lớp bị hủy ❌ chưa có TC
+    - AC-F10.2.1-04 Không tạo thông báo cho hội viên chưa có tài khoản ❌ chưa có TC
+    - AC-F10.2.1-05 Hiển thị thông báo trong web và gửi email nhắc lịch ❌ chưa có TC
+    - AC-F10.2.1-06 Xử lý email phát sinh ngoài giờ và lỗi gửi email ❌ chưa có TC
+- **UC-F10.3** Đã bỏ (ADR 0014)
+- **UC-F10.4** Gửi thông báo đổi giờ lớp
+  - **US-F10.4.1** Nhận thông báo khi lịch lớp học nhóm thay đổi
+    - AC-F10.4.1-01 Tạo thông báo khi nhận sự kiện đổi giờ từ F8 ❌ chưa có TC
+    - AC-F10.4.1-02 Nội dung thông báo có giờ cũ và giờ mới ❌ chưa có TC
+    - AC-F10.4.1-03 Không tạo thông báo khi buổi lớp không có hội viên đặt chỗ ❌ chưa có TC
+    - AC-F10.4.1-04 Chỉ báo hội viên còn giữ chỗ ❌ chưa có TC
+    - AC-F10.4.1-05 Không tạo thông báo cho hội viên chưa có tài khoản ❌ chưa có TC
+    - AC-F10.4.1-06 Gửi thông báo qua hai kênh và xử lý lỗi email ❌ chưa có TC
+- **UC-F10.5** Xem thông báo trong web
+  - **US-F10.5.1** Xem và quản lý trạng thái đã đọc của thông báo
+    - AC-F10.5.1-01 Xem danh sách thông báo của tài khoản đang đăng nhập ❌ chưa có TC
+    - AC-F10.5.1-02 Sắp xếp và phân trang danh sách thông báo ❌ chưa có TC
+    - AC-F10.5.1-03 Hiển thị đầy đủ nội dung và trạng thái đã đọc ❌ chưa có TC
+    - AC-F10.5.1-04 Đánh dấu thông báo đã đọc ❌ chưa có TC
+    - AC-F10.5.1-05 Không cho phép xem hoặc đánh dấu thông báo của người khác ❌ chưa có TC
+    - AC-F10.5.1-06 Xử lý dữ liệu đầu vào sai và thông báo không tồn tại ❌ chưa có TC
+
 ## 5. Bảng ngược: TC → AC → US → UC → BR
 
 Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm AC, US và quy tắc nghiệp vụ nào.
@@ -1201,13 +1502,30 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F2.1.1-03b | AC-F2.1.1-03 | US-F2.1.1 | UC-F2.1 | BR-F2-10, BR-F2-05, BR-F2-06, BR-F2-07 | `MemberApiIntegrationTest#validatesEndpointAndRecordPermissions` |
 | TC-F2.2.1-01a | AC-F2.2.1-01 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-01a: tạo tài khoản thành công báo đã gửi email, tả` |
 | TC-F2.2.1-01b | AC-F2.2.1-01 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/pages/MembersPage.test.tsx › TC-F2.2.1-01b: chỉ tạo tài khoản cho hồ sơ ACTIVE chưa có em` |
+| TC-F2.2.1-01c | AC-F2.2.1-01 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `AccountServiceTest#createMemberAccountChuanHoaEmailVaBamMatKhauNgauNhien` |
+| TC-F2.2.1-01d | AC-F2.2.1-01 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberServiceTest#linkAccountAttachesNewUserToActiveUnlinkedMember` |
+| TC-F2.2.1-01e | AC-F2.2.1-01 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountServiceTest#createAccountIssues72HourTokenAndSendsActivationEmail` |
+| TC-F2.2.1-01f | AC-F2.2.1-01 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#createAccountPersistsUserLinkTokenAndSendsActivationEmail` |
+| TC-F2.2.1-02a | AC-F2.2.1-02 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#resetPasswordWithin72HoursAndLoginSucceedsWhileExpiredReturns422` |
 | TC-F2.2.1-03a | AC-F2.2.1-03 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03a, TC-F2.2.1-05a: hồ sơ đã có tài khoản hiện ema` |
 | TC-F2.2.1-03b | AC-F2.2.1-03 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03b, TC-F2.2.1-04a, TC-F2.2.1-05b, TC-F2.2.1-07c: ` |
+| TC-F2.2.1-03c | AC-F2.2.1-03 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberServiceTest#linkAccountRejectsAlreadyLinkedMemberWith409` |
+| TC-F2.2.1-03d | AC-F2.2.1-03 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#memberAlreadyHasAccountReturns409` |
+| TC-F2.2.1-03e | AC-F2.2.1-03 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#concurrentCreateAccountForSameMemberCreatesSingleUser` |
 | TC-F2.2.1-04a | AC-F2.2.1-04 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03b, TC-F2.2.1-04a, TC-F2.2.1-05b, TC-F2.2.1-07c: ` |
+| TC-F2.2.1-04b | AC-F2.2.1-04 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `AccountServiceTest#createMemberAccountTrungEmailTra409` |
+| TC-F2.2.1-04c | AC-F2.2.1-04 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#emailAlreadyUsedByAnotherAccountReturns409` |
+| TC-F2.2.1-04d | AC-F2.2.1-04 | US-F2.2.1 | UC-F2.2 | BR-F2-06, BR-F2-11, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#concurrentCreateAccountWithSameEmailRejectsSecondWith409` |
 | TC-F2.2.1-05a | AC-F2.2.1-05 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03a, TC-F2.2.1-05a: hồ sơ đã có tài khoản hiện ema` |
 | TC-F2.2.1-05b | AC-F2.2.1-05 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03b, TC-F2.2.1-04a, TC-F2.2.1-05b, TC-F2.2.1-07c: ` |
+| TC-F2.2.1-05c | AC-F2.2.1-05 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberServiceTest#linkAccountRejectsInactiveMemberWith422` |
+| TC-F2.2.1-05d | AC-F2.2.1-05 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#inactiveMemberReturns422` |
+| TC-F2.2.1-06a | AC-F2.2.1-06 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountServiceTest#emailFailureDoesNotFailAccountCreationAndDoesNotLogToken` |
+| TC-F2.2.1-06b | AC-F2.2.1-06 | US-F2.2.1 | UC-F2.2 | BR-F2-11, BR-F2-06, BR-F2-10, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#emailProviderFailureStillReturns200AndCommitsAccount` |
 | TC-F2.2.1-07b | AC-F2.2.1-07 | US-F2.2.1 | UC-F2.2 | BR-F2-10, BR-F2-11, BR-F2-06, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-07b: kiểm tra định dạng email ở trình duyệt trước ` |
 | TC-F2.2.1-07c | AC-F2.2.1-07 | US-F2.2.1 | UC-F2.2 | BR-F2-10, BR-F2-11, BR-F2-06, BR-F1-01, BR-F1-03, BR-F1-08 | `features/members/components/MemberFormModal.test.tsx › TC-F2.2.1-03b, TC-F2.2.1-04a, TC-F2.2.1-05b, TC-F2.2.1-07c: ` |
+| TC-F2.2.1-07d | AC-F2.2.1-07 | US-F2.2.1 | UC-F2.2 | BR-F2-10, BR-F2-11, BR-F2-06, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#enforcesRoleAndBranchPermissions` |
+| TC-F2.2.1-07e | AC-F2.2.1-07 | US-F2.2.1 | UC-F2.2 | BR-F2-10, BR-F2-11, BR-F2-06, BR-F1-01, BR-F1-03, BR-F1-08 | `MemberAccountIntegrationTest#invalidEmailOrNonPositiveMemberIdReturns400` |
 | TC-F2.3.1-01a | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `F1RegistrationIntegrationTest#listGetsBatchEmailsThroughRealF1AndIncludesUnlinkedProfile` |
 | TC-F2.3.1-01b | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#searchScopesBothRowsAndCountAndIncludesUnlinkedProfiles` |
 | TC-F2.3.1-01c | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#memberCodeSearchIsExactAndIgnoresCase` |
