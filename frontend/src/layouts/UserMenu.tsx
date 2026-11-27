@@ -1,4 +1,4 @@
-import { LogoutOutlined } from '@ant-design/icons'
+import { KeyOutlined, LogoutOutlined } from '@ant-design/icons'
 import { App, Button, Space, Typography } from 'antd'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -36,12 +36,24 @@ export function UserMenu() {
           </Typography.Text>
           <Button
             size="small"
+            icon={<KeyOutlined />}
+            aria-label="Đổi mật khẩu"
+            onClick={() => navigate('/doi-mat-khau')}
+          >
+            {/* Màn 360px: chỉ hiện biểu tượng để thanh tiêu đề không vỡ; tên nút đọc qua aria-label. */}
+            <span className="hide-on-mobile">Đổi mật khẩu</span>
+          </Button>
+          <Button
+            size="small"
             icon={<LogoutOutlined />}
             loading={pending}
             aria-label={logoutFailed ? 'Thử đăng xuất lại' : 'Đăng xuất'}
             onClick={() => void handleLogout()}
           >
-            {logoutFailed ? 'Thử lại' : 'Đăng xuất'}
+            {/* Đăng xuất lỗi thì luôn hiện chữ "Thử lại", kể cả màn 360px, để người dùng thấy nút đã đổi. */}
+            <span className={logoutFailed ? undefined : 'hide-on-mobile'}>
+              {logoutFailed ? 'Thử lại' : 'Đăng xuất'}
+            </span>
           </Button>
         </>
       )}

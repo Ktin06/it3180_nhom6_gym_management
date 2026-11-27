@@ -21,6 +21,7 @@ function renderWithRole(role: Role, api: PackagesGateway) {
           register: vi.fn(),
           logout: vi.fn(),
           retrySession: vi.fn(),
+          completePasswordChange: vi.fn(),
         }}
       >
         <PackagesPage api={api} />

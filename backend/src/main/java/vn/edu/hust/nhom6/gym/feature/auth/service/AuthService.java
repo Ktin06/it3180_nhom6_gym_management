@@ -14,9 +14,11 @@ import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
 import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
 import vn.edu.hust.nhom6.gym.common.exception.ForbiddenException;
 import vn.edu.hust.nhom6.gym.common.exception.UnauthorizedException;
+import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.common.time.VnTime;
 import vn.edu.hust.nhom6.gym.common.util.PhoneUtils;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.AuthMeResponse;
+import vn.edu.hust.nhom6.gym.feature.auth.dto.ChangePasswordRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.LoginRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.dto.RegisterRequest;
 import vn.edu.hust.nhom6.gym.feature.auth.entity.RefreshToken;
@@ -135,26 +137,12 @@ public class AuthService {
         OffsetDateTime now = vnTime.now();
 
         // Bước 2: Đang khóa tạm thì trả 403 E2 kèm số phút còn lại, không tăng bộ đếm (G12)
-        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(now)) {
-            long remainingSeconds = Duration.between(now, user.getLockedUntil()).toSeconds();
-            long remainingMinutes = Math.max(1L, (long) Math.ceil(remainingSeconds / 60.0));
-            throw new ForbiddenException(
-                "Tài khoản đang bị khóa tạm thời do nhập sai mật khẩu nhiều lần. Vui lòng thử lại sau "
-                    + remainingMinutes + " phút.");
-        }
+        rejectIfTemporarilyLocked(user, now);
 
         // Bước 3: So mật khẩu (luôn chạy passwordEncoder.matches); sai thì tăng bộ đếm rồi trả 401
         boolean passwordMatched = passwordEncoder.matches(passwordToMatch, user.getPasswordHash());
         if (passwordTooLong || !passwordMatched) {
-            boolean hadExpiredLock = user.getLockedUntil() != null && !user.getLockedUntil().isAfter(now);
-            int nextFailedCount = hadExpiredLock ? 1 : user.getFailedLoginCount() + 1;
-            user.setFailedLoginCount(nextFailedCount);
-            if (nextFailedCount >= MAX_FAILED) {
-                user.setLockedUntil(now.plusMinutes(LOCK_MINUTES));
-            } else if (hadExpiredLock) {
-                user.setLockedUntil(null);
-            }
-            userRepository.save(user);
+            recordFailedPassword(user, now);
             throw new UnauthorizedException("Email hoặc mật khẩu không chính xác.");
         }
 
@@ -185,13 +173,13 @@ public class AuthService {
         }
 
         String tokenHash = TokenHashUtil.sha256Hex(rawRefreshToken);
+        User user = userRepository.findByRefreshTokenHashForUpdate(tokenHash)
+            .orElseThrow(() -> new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ."));
         RefreshToken refreshToken = refreshTokenRepository.findByTokenHashForUpdate(tokenHash)
             .orElseThrow(() -> new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ."));
 
         if (refreshToken.getRevokedAt() != null) {
-            if (refreshToken.getUser() != null) {
-                refreshTokenRepository.revokeAllByUserId(refreshToken.getUser().getId(), OffsetDateTime.now());
-            }
+            refreshTokenRepository.revokeAllByUserId(user.getId(), OffsetDateTime.now());
             throw new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ.");
         }
 
@@ -199,7 +187,6 @@ public class AuthService {
             throw new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ.");
         }
 
-        User user = refreshToken.getUser();
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new UnauthorizedException("Phiên đăng nhập đã hết hạn hoặc không hợp lệ.");
         }
@@ -273,6 +260,73 @@ public class AuthService {
             refreshTokenRepository.save(token);
         }
         return true;
+    }
+
+    /**
+     * Đổi mật khẩu và thu hồi toàn bộ các phiên đăng nhập hiện có của người dùng (UC-F1.4).
+     *
+     * <p>Nhập sai mật khẩu hiện tại dùng chung bộ đếm và khóa tạm với đăng nhập (S4, AC-F1.4.1-05), để người cầm
+     * access token không thử mật khẩu được không giới hạn. Vì vậy giao dịch không rollback khi trả 422: bộ đếm phải
+     * được lưu. Thành công thì đặt lại bộ đếm và khóa tạm như đăng nhập thành công (AC-F1.4.1-06).
+     */
+    @Transactional(noRollbackFor = BusinessRuleException.class)
+    public void changePassword(CurrentUser me, ChangePasswordRequest request) {
+        User user = userRepository.findByIdForUpdate(me.userId())
+            .orElseThrow(() -> new UnauthorizedException("Token không hợp lệ."));
+
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new ForbiddenException("Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên.");
+        }
+
+        OffsetDateTime now = vnTime.now();
+        rejectIfTemporarilyLocked(user, now);
+
+        validatePasswordLength(request.newPassword());
+
+        String currentPassword = request.currentPassword();
+        boolean currentTooLong = currentPassword == null
+            || currentPassword.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES;
+        if (currentTooLong || !passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            recordFailedPassword(user, now);
+            throw new BusinessRuleException("Mật khẩu hiện tại không đúng.");
+        }
+
+        if (currentPassword.equals(request.newPassword())) {
+            throw new BusinessRuleException("Mật khẩu mới phải khác mật khẩu hiện tại.");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
+        user.setFailedLoginCount(0);
+        user.setLockedUntil(null);
+        userRepository.save(user);
+        refreshTokenRepository.revokeAllByUserId(me.userId(), now);
+    }
+
+    /** Đang khóa tạm (S4) thì trả 403 kèm số phút còn lại, không tăng bộ đếm (G12). */
+    private static void rejectIfTemporarilyLocked(User user, OffsetDateTime now) {
+        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(now)) {
+            long remainingSeconds = Duration.between(now, user.getLockedUntil()).toSeconds();
+            long remainingMinutes = Math.max(1L, (long) Math.ceil(remainingSeconds / 60.0));
+            throw new ForbiddenException(
+                "Tài khoản đang bị khóa tạm thời do nhập sai mật khẩu nhiều lần. Vui lòng thử lại sau "
+                    + remainingMinutes + " phút.");
+        }
+    }
+
+    /**
+     * Ghi một lần nhập sai mật khẩu (đăng nhập hoặc đổi mật khẩu): khóa cũ đã hết hạn thì đếm lại từ 1; đủ
+     * {@link #MAX_FAILED} lần thì khóa tạm {@link #LOCK_MINUTES} phút (S4).
+     */
+    private void recordFailedPassword(User user, OffsetDateTime now) {
+        boolean hadExpiredLock = user.getLockedUntil() != null && !user.getLockedUntil().isAfter(now);
+        int nextFailedCount = hadExpiredLock ? 1 : user.getFailedLoginCount() + 1;
+        user.setFailedLoginCount(nextFailedCount);
+        if (nextFailedCount >= MAX_FAILED) {
+            user.setLockedUntil(now.plusMinutes(LOCK_MINUTES));
+        } else if (hadExpiredLock) {
+            user.setLockedUntil(null);
+        }
+        userRepository.save(user);
     }
 
     private String issueRefreshToken(User user) {

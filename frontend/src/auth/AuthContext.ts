@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 import type { Role } from './roles'
-import type { LoginRequest, RegisterRequest } from '../features/auth/types/auth'
+import type { ChangePasswordRequest, LoginRequest, RegisterRequest } from '../features/auth/types/auth'
 
 export interface AuthUser {
   email: string
@@ -40,6 +40,7 @@ export interface AuthContextValue {
   register: (request: RegisterRequest) => Promise<AuthUser>
   logout: () => Promise<void>
   retrySession: () => Promise<AuthUser>
+  completePasswordChange: (request: ChangePasswordRequest) => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

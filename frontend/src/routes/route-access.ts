@@ -1,5 +1,5 @@
 import { matchPath } from 'react-router-dom'
-import { MEMBER_MANAGEMENT_ROLES, type Role } from '../auth/roles'
+import { MEMBER_MANAGEMENT_ROLES, ROLES, type Role } from '../auth/roles'
 
 export interface RouteAccessRule {
   /** Vai trò được mở trang. */
@@ -29,6 +29,7 @@ export const ROUTE_ACCESS = {
   '/checkins': { roles: ['RECEPTIONIST', 'BRANCH_MANAGER'] }, // F4
   '/members': { roles: MEMBER_MANAGEMENT_ROLES }, // F2
   '/packages': { roles: MEMBER_MANAGEMENT_ROLES }, // F3
+  '/doi-mat-khau': { roles: ROLES }, // F1
   '/member/classes': { roles: ['MEMBER'] },
   '/trainer/classes': { roles: ['TRAINER'] },
   '/trainer/classes/:sessionId/attendance': { roles: ['TRAINER'] },

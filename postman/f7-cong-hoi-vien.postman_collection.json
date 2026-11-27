@@ -1,0 +1,578 @@
+{
+  "info": {
+    "name": "F7 – Cổng hội viên: yêu cầu mua, gia hạn gói",
+    "description": "API của thẻ S2-14.1 (UC-F7.4, UC-F7.5). baseUrl gồm /api/v1. Chạy tuần tự từng thư mục. Nhập token tại máy, không lưu lên Git. memberToken: hội viên CN01 có tài khoản; portalPackageId: gói đang bán ở CN01 mà hội viên chưa có gói cùng loại chờ. Hóa đơn tạo ra tự hủy sau PENDING_INVOICE_TTL_DAYS (tác vụ chạy mỗi giờ); muốn chạy lại thì hủy hóa đơn ở quầy (PUT /invoices/{id}/cancel).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Mua gói – US-F7.4.1 (chạy tuần tự)",
+      "item": [
+        {
+          "name": "US-F7.4.1 KB 201 – Gửi yêu cầu mua",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/me/purchase-requests",
+            "description": "Hội viên lấy từ token. Trả mã hóa đơn, tổng tiền và hạn tự hủy expiresAt = created_at + PENDING_INVOICE_TTL_DAYS.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"packageId\": {{portalPackageId}} }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "pm.test('có invoiceCode, expiresAt', () => { const b = pm.response.json(); pm.expect(b.invoiceCode).to.match(/^HD\\d{6}$/); pm.expect(b.expiresAt).to.be.a('string'); pm.expect(b.status).to.eql('PENDING'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F7.4.1 E4 422 – Gửi lại đúng gói đó",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/me/purchase-requests",
+            "description": "Đã có hóa đơn chờ cho gói này (bước trước).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"packageId\": {{portalPackageId}} }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => pm.response.to.have.status(422));",
+                  "pm.test('thông báo WAITING_EXISTS', () => pm.expect(pm.response.json().detail).to.eql('Hội viên đã có gói cùng loại đang chờ thanh toán hoặc chờ kích hoạt. Không thể tạo thêm gói mới.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F7.4.1 E1 400 – Thiếu packageId",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/me/purchase-requests",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => pm.response.to.have.status(400));",
+                  "pm.test('lỗi trường packageId', () => pm.expect(pm.response.json().errors).to.have.property('packageId'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F7.4.1 E3 404 – Gói không tồn tại",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/me/purchase-requests",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"packageId\": 999999 }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F7.4.1 E2 403 – Token lễ tân",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/me/purchase-requests",
+            "description": "Chỉ vai trò MEMBER được gọi API cổng hội viên.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"packageId\": {{portalPackageId}} }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Gia hạn – US-F7.5.1 (chạy tuần tự)",
+      "item": [
+        {
+          "name": "US-F7.5.1 KB 201 – Gia hạn gói của mình",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/me/renewal-requests",
+            "description": "renewMembershipId: gói ACTIVE của chính hội viên, chưa có gói cùng loại PENDING/UPCOMING. Gói mới PENDING, ngày dự kiến nối sau end_date gói cũ.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"membershipId\": {{renewMembershipId}} }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F7.5.1 E4 422 – Gia hạn lần hai",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/me/renewal-requests",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"membershipId\": {{renewMembershipId}} }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => pm.response.to.have.status(422));",
+                  "pm.test('thông báo WAITING_EXISTS', () => pm.expect(pm.response.json().detail).to.eql('Hội viên đã có gói cùng loại đang chờ thanh toán hoặc chờ kích hoạt. Không thể tạo thêm gói mới.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F7.5.1 VD30 404 – Gói của hội viên khác",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/me/renewal-requests",
+            "description": "otherMembershipId: một gói của hội viên khác.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"membershipId\": {{otherMembershipId}} }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F7.5.1 E3 404 – Gói không tồn tại",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/me/renewal-requests",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"membershipId\": 999999 }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "F7 xem",
+      "item": [
+        {
+          "name": "US-F7.1.1 KB 200 – Xem gói tập của tôi",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/me/memberships",
+            "description": "Hội viên lấy từ token. Trả toàn bộ gói của chính mình ở mọi trạng thái.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('trả mảng gói', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F7.1.1 E2 403 – Lễ tân xem gói của tôi",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/me/memberships",
+            "description": "Chỉ vai trò MEMBER được gọi API cổng hội viên.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F7.2.1 KB 200 – Xem lịch sử check-in của tôi",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/me/checkins?page=0&size=20",
+            "description": "Hội viên lấy từ token. Phân trang PageResponse, mới nhất trước.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('có PageResponse', () => { const b = pm.response.json(); pm.expect(b.content).to.be.an('array'); pm.expect(b.page).to.eql(0); pm.expect(b.size).to.eql(20); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F7.2.1 E1 400 – Tham số phân trang check-in sai",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/me/checkins?page=-1&size=0",
+            "description": "page < 0 hoặc size ngoài 1..100 trả 400.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F7.3.1 KB 200 – Xem hóa đơn của tôi",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/me/invoices?page=0&size=20",
+            "description": "Hội viên lấy từ token. Hóa đơn PENDING + MEMBER_PORTAL có hạn tự hủy expiresAt = created_at + PENDING_INVOICE_TTL_DAYS.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('có PageResponse', () => { const b = pm.response.json(); pm.expect(b.content).to.be.an('array'); pm.expect(b.page).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F7.3.1 E2 403 – Lễ tân xem hóa đơn của tôi",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/me/invoices?page=0&size=20",
+            "description": "Chỉ vai trò MEMBER được gọi API cổng hội viên.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "memberToken",
+      "value": ""
+    },
+    {
+      "key": "receptionistToken",
+      "value": ""
+    },
+    {
+      "key": "portalPackageId",
+      "value": ""
+    },
+    {
+      "key": "renewMembershipId",
+      "value": ""
+    },
+    {
+      "key": "otherMembershipId",
+      "value": ""
+    }
+  ]
+}

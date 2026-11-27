@@ -205,6 +205,7 @@ describe('danh sách hội viên', () => {
           register: vi.fn(),
           logout: vi.fn(),
           retrySession: vi.fn(),
+          completePasswordChange: vi.fn(),
         }}
       >
         <App>
