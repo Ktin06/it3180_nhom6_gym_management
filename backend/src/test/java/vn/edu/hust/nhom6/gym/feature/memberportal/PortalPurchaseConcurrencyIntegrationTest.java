@@ -62,7 +62,7 @@ class PortalPurchaseConcurrencyIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.4.1 NF6: Hai yêu cầu mua cùng gói gửi cùng lúc: một 201, một 409; chỉ một hóa đơn và một gói")
+    @DisplayName("US-F7.4.1 NF6: Hai yêu cầu mua cùng gói gửi cùng lúc: một 201, một 422; chỉ một hóa đơn và một gói")
     void twoPurchasesAtOnceCreateExactlyOne() throws Exception {
         Long timePkg = f.pkg("TIME_30", "TIME", null, 500_000, f.cn01, "ACTIVE");
         String body = "{\"packageId\": " + timePkg + "}";
@@ -91,11 +91,11 @@ class PortalPurchaseConcurrencyIntegrationTest {
                     responses.add(future.get(20, TimeUnit.SECONDS));
                 }
                 assertThat(responses).extracting(MockHttpServletResponse::getStatus)
-                    .containsExactlyInAnyOrder(201, 409);
-                MockHttpServletResponse rejected = responses.stream().filter(r -> r.getStatus() == 409)
+                    .containsExactlyInAnyOrder(201, 422);
+                MockHttpServletResponse rejected = responses.stream().filter(r -> r.getStatus() == 422)
                     .findFirst().orElseThrow();
                 assertThat(json.readTree(rejected.getContentAsString()).get("detail").asString())
-                    .isEqualTo(PortalPurchaseIntegrationTest.DUPLICATE);
+                    .isEqualTo(PortalPurchaseIntegrationTest.WAITING);
                 assertThat(jdbc.queryForObject("SELECT count(*) FROM invoices WHERE member_id = ?", Long.class,
                     me.memberId())).isEqualTo(1);
                 assertThat(jdbc.queryForObject("SELECT count(*) FROM memberships WHERE member_id = ?", Long.class,

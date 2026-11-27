@@ -37,7 +37,6 @@ public class PurchaseRequestController {
     @ApiResponse(responseCode = "400", description = "Thiếu hoặc sai packageId")
     @ApiResponse(responseCode = "403", description = "Không phải hội viên, hoặc tài khoản chưa gắn hồ sơ")
     @ApiResponse(responseCode = "404", description = "Gói không tồn tại")
-    @ApiResponse(responseCode = "409", description = "Đã có hóa đơn chờ cho gói này")
     @ApiResponse(responseCode = "422", description = "Gói ngừng bán hoặc không áp dụng tại chi nhánh, hội viên ngừng "
         + "hoạt động, hoặc đã có gói cùng loại đang chờ thanh toán/kích hoạt")
     public ResponseEntity<PortalInvoiceDto> purchase(Authentication auth,
@@ -52,7 +51,6 @@ public class PurchaseRequestController {
     @ApiResponse(responseCode = "400", description = "Thiếu hoặc sai membershipId")
     @ApiResponse(responseCode = "403", description = "Không phải hội viên, hoặc gói không thuộc hội viên này")
     @ApiResponse(responseCode = "404", description = "Gói của hội viên không tồn tại")
-    @ApiResponse(responseCode = "409", description = "Đã có hóa đơn chờ cho gói này")
     @ApiResponse(responseCode = "422", description = "Gói đã ngừng bán, hoặc đã có gói cùng loại đang chờ")
     public ResponseEntity<PortalInvoiceDto> renew(Authentication auth, @Valid @RequestBody RenewalRequest request) {
         return created(requests.renew(CurrentUser.from(auth), request.membershipId()));

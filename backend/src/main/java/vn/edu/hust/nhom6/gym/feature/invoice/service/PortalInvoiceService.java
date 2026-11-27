@@ -13,8 +13,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import vn.edu.hust.nhom6.gym.common.exception.BusinessRuleException;
-import vn.edu.hust.nhom6.gym.common.exception.ConflictException;
-import vn.edu.hust.nhom6.gym.common.exception.NotFoundException;
 import vn.edu.hust.nhom6.gym.common.time.VnTime;
 import vn.edu.hust.nhom6.gym.feature.invoice.dto.PackageInvoiceDto;
 import vn.edu.hust.nhom6.gym.feature.invoice.dto.PortalInvoiceDto;
@@ -38,9 +36,6 @@ import vn.edu.hust.nhom6.gym.feature.systemconfig.service.SystemConfigService;
 @Service
 @RequiredArgsConstructor
 public class PortalInvoiceService {
-    /** Không hứa "chờ tự hủy": hóa đơn chờ lập tại quầy cũng chặn mà không bao giờ tự hủy (AC-F3.5.1-09). */
-    static final String DUPLICATE_PENDING =
-        "Bạn đã có hóa đơn chờ thanh toán cho gói này. Vui lòng thanh toán hóa đơn đó tại quầy lễ tân.";
     private static final String MEMBER_INACTIVE = "Hội viên đã ngừng hoạt động, không thể bán gói tập.";
 
     private final InvoiceRepository invoices;
@@ -60,27 +55,22 @@ public class PortalInvoiceService {
      * <ol>
      *   <li>Khóa dòng hội viên (NF6): hai yêu cầu cùng lúc chạy lần lượt, yêu cầu sau thấy hóa đơn của yêu cầu trước.</li>
      *   <li>Gói tồn tại, đang bán, dùng được ở chi nhánh gốc: 404 E3, 422 E5.</li>
-     *   <li>Đã có hóa đơn chờ chứa đúng gói này: 409 E4.</li>
-     *   <li>Gói khác nhưng cùng loại đang PENDING hoặc UPCOMING: 422 như AC-F3.5.1-06 (trong {@code createPackageInvoice}).</li>
+     *   <li>Đã có gói cùng loại đang PENDING hoặc UPCOMING hoặc hóa đơn chờ: 422 như AC-F3.5.1-06
+     *       (trong {@code createPackageInvoice}).</li>
      * </ol>
      *
      * @param userId tài khoản hội viên, ghi vào {@code invoices.created_by}
      * @param homeBranchId chi nhánh gốc của hội viên, cũng là chi nhánh của hóa đơn (G11)
-     * @throws NotFoundException (404) gói không tồn tại
-     * @throws ConflictException (409) đã có hóa đơn chờ cho gói này
      * @throws BusinessRuleException (422) gói ngừng bán hoặc khác chi nhánh, hội viên ngừng hoạt động, đã có gói
      *     cùng loại đang chờ
      */
     @Transactional
     public PortalInvoiceDto createForMember(Long userId, Long memberId, Long homeBranchId, Long packageId) {
         if (members.lockForUpdate(memberId).getStatus() != MemberStatus.ACTIVE) {
-            // Kiểm tra trước 409: hội viên ngừng hoạt động nhận đúng lý do (cùng câu với createPackageInvoice).
+            // Kiểm tra trước: hội viên ngừng hoạt động nhận đúng lý do (cùng câu với createPackageInvoice).
             throw new BusinessRuleException(MEMBER_INACTIVE);
         }
         packages.requireSellable(packageId, homeBranchId);
-        if (invoices.existsPendingWithPackage(memberId, packageId)) {
-            throw new ConflictException(DUPLICATE_PENDING);
-        }
         PackageInvoiceDto sale = invoiceService.createPackageInvoice(userId, homeBranchId, memberId, packageId,
             InvoiceSource.MEMBER_PORTAL);
         Invoice invoice = invoices.findById(sale.invoiceId()).orElseThrow();

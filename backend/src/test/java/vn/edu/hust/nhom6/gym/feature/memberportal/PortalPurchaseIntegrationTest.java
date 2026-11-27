@@ -37,14 +37,12 @@ import vn.edu.hust.nhom6.gym.feature.memberportal.PortalFixtures.MemberAccount;
 
 /**
  * {@code POST /api/v1/me/purchase-requests}, {@code POST /api/v1/me/renewal-requests} (UC-F7.4, UC-F7.5, S2-14.1).
- * SRS F7 chưa có mã AC nên tên kiểm thử theo US và kịch bản; quy tắc chặn trùng theo Q4 = C.
+ * Quy tắc chặn trùng gói đang chờ trả 422 thống nhất theo SRS F7 (#249) và mẫu F3.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import({TestcontainersConfiguration.class, MutableClockConfiguration.class})
 class PortalPurchaseIntegrationTest {
-    static final String DUPLICATE =
-        "Bạn đã có hóa đơn chờ thanh toán cho gói này. Vui lòng thanh toán hóa đơn đó tại quầy lễ tân.";
     static final String WAITING =
         "Hội viên đã có gói cùng loại đang chờ thanh toán hoặc chờ kích hoạt. Không thể tạo thêm gói mới.";
 
@@ -148,22 +146,22 @@ class PortalPurchaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.4.1 E4: Đã có hóa đơn chờ cho đúng gói này thì 409; vẫn chỉ một hóa đơn")
-    void duplicatePendingForSamePackageIs409() throws Exception {
+    @DisplayName("US-F7.4.1 E4: Đã có gói chờ cho đúng gói này thì 422; vẫn chỉ một hóa đơn")
+    void duplicatePendingForSamePackageIs422() throws Exception {
         purchase(me, "{\"packageId\": " + timePkg + "}").andExpect(status().isCreated());
-        purchase(me, "{\"packageId\": " + timePkg + "}").andExpect(status().isConflict())
-            .andExpect(jsonPath("$.detail").value(DUPLICATE));
+        purchase(me, "{\"packageId\": " + timePkg + "}").andExpect(status().isUnprocessableContent())
+            .andExpect(jsonPath("$.detail").value(WAITING));
         assertThat(f.count("invoices")).isEqualTo(1);
         assertThat(f.count("memberships")).isEqualTo(1);
     }
 
     @Test
-    @DisplayName("US-F7.4.1 E4: Hóa đơn chờ cùng gói do lễ tân lập tại quầy cũng chặn 409")
-    void counterPendingForSamePackageIs409() throws Exception {
+    @DisplayName("US-F7.4.1 E4: Hóa đơn chờ cùng gói do lễ tân lập tại quầy cũng chặn 422")
+    void counterPendingForSamePackageIs422() throws Exception {
         Long receptionist = f.staff("le-tan@example.com", UserRole.RECEPTIONIST, f.cn01);
         invoiceService.createPackageInvoice(receptionist, f.cn01, me.memberId(), timePkg, InvoiceSource.COUNTER);
-        purchase(me, "{\"packageId\": " + timePkg + "}").andExpect(status().isConflict())
-            .andExpect(jsonPath("$.detail").value(DUPLICATE));
+        purchase(me, "{\"packageId\": " + timePkg + "}").andExpect(status().isUnprocessableContent())
+            .andExpect(jsonPath("$.detail").value(WAITING));
         assertThat(f.count("invoices")).isEqualTo(1);
     }
 
@@ -221,8 +219,8 @@ class PortalPurchaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.4.1: Hội viên ngừng hoạt động mà còn hóa đơn chờ cùng gói thì vẫn 422 ngừng hoạt động, không phải 409")
-    void inactiveMemberWithPendingIs422Not409() throws Exception {
+    @DisplayName("US-F7.4.1: Hội viên ngừng hoạt động mà còn hóa đơn chờ cùng gói thì vẫn 422 ngừng hoạt động")
+    void inactiveMemberWithPendingIs422() throws Exception {
         purchase(me, "{\"packageId\": " + timePkg + "}").andExpect(status().isCreated());
         jdbc.update("UPDATE members SET status = 'INACTIVE' WHERE id = ?", me.memberId());
         purchase(me, "{\"packageId\": " + timePkg + "}").andExpect(status().isUnprocessableContent())
@@ -291,13 +289,13 @@ class PortalPurchaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.5.1 E4: Gửi gia hạn hai lần thì lần hai 409")
-    void renewTwiceIs409() throws Exception {
+    @DisplayName("US-F7.5.1 E4: Gửi gia hạn hai lần thì lần hai 422")
+    void renewTwiceIs422() throws Exception {
         Long current = f.membership(me.memberId(), timePkg, "TIME", f.cn01, "ACTIVE", LocalDate.of(2026, 11, 1),
             LocalDate.of(2026, 11, 30), null);
         renew(me, "{\"membershipId\": " + current + "}").andExpect(status().isCreated());
-        renew(me, "{\"membershipId\": " + current + "}").andExpect(status().isConflict())
-            .andExpect(jsonPath("$.detail").value(DUPLICATE));
+        renew(me, "{\"membershipId\": " + current + "}").andExpect(status().isUnprocessableContent())
+            .andExpect(jsonPath("$.detail").value(WAITING));
         assertThat(f.count("invoices")).isEqualTo(1);
     }
 
