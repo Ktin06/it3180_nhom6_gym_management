@@ -174,4 +174,15 @@ public class Membership extends BaseEntity {
             throw new IllegalStateException("Trạng thái gói không hợp lệ: " + status);
         }
     }
+
+    /**
+     * Hoàn tiền hóa đơn bán nhầm (UC-F5.5, S2-38.1): ACTIVE hoặc UPCOMING → CANCELLED. Ngày, số buổi giữ nguyên để tra
+     * cứu. Nơi gọi đã kiểm tra gói chưa dùng (BR-F5-14) và trả 422; ở đây chỉ chặn lỗi lập trình.
+     */
+    public void cancelForRefund() {
+        if (status != MembershipStatus.ACTIVE && status != MembershipStatus.UPCOMING) {
+            throw new IllegalStateException("Gói " + getId() + " đang " + status + ", không hoàn tiền được");
+        }
+        this.status = MembershipStatus.CANCELLED;
+    }
 }

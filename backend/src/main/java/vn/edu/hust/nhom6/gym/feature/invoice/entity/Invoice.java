@@ -129,6 +129,23 @@ public class Invoice extends BaseEntity {
         this.status = InvoiceStatus.CANCELLED;
     }
 
+    /**
+     * PAID → REFUNDED (UC-F5.5 bước 5b). Nơi gọi đã kiểm tra trạng thái và trả 422 E6; ở đây chỉ chặn lỗi lập trình.
+     *
+     * @param refundedBy {@code users.id} quản lý duyệt hoàn tiền
+     * @param refundedAt thời điểm hoàn tiền, UTC
+     * @param reason lý do đã cắt khoảng trắng, không rỗng
+     */
+    public void markRefunded(Long refundedBy, OffsetDateTime refundedAt, String reason) {
+        if (status != InvoiceStatus.PAID) {
+            throw new IllegalStateException("Hóa đơn " + code + " không ở trạng thái PAID: " + status);
+        }
+        this.status = InvoiceStatus.REFUNDED;
+        this.refundedBy = refundedBy;
+        this.refundedAt = refundedAt;
+        this.refundReason = reason;
+    }
+
     public boolean isPending() {
         return status == InvoiceStatus.PENDING;
     }
