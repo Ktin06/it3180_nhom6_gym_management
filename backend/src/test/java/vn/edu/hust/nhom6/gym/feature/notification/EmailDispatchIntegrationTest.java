@@ -76,7 +76,7 @@ class EmailDispatchIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.1.1 BR-F10.3: tạo lúc 23:00, chưa tới giờ hẹn thì không gửi; tới 05:30 hôm sau thì gửi, dòng EMAIL thành SENT")
+    @DisplayName("TC-F10.1.1-07b: tạo lúc 23:00, chưa tới giờ hẹn thì không gửi; tới 05:30 hôm sau thì gửi, dòng EMAIL thành SENT")
     void sendsOnlyWhenDue() {
         clock.setVn(LocalDateTime.of(2026, 11, 21, 23, 0));
         create(1L);
@@ -97,7 +97,7 @@ class EmailDispatchIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.1.1 BR-F10.3: dòng đã tới hạn nhưng lúc gửi đã ngoài giờ mở cửa (máy chủ tắt) thì không gửi, hẹn lại giờ mở cửa kế tiếp")
+    @DisplayName("TC-F10.1.1-07c: dòng đã tới hạn nhưng lúc gửi đã ngoài giờ mở cửa (máy chủ tắt) thì không gửi, hẹn lại giờ mở cửa kế tiếp")
     void outsideHoursAtDispatchReschedules() {
         create(2L);
 
@@ -111,7 +111,7 @@ class EmailDispatchIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.1.1 E1: gửi lỗi thì dòng EMAIL thành FAILED, không thử lại, dòng trong web vẫn còn")
+    @DisplayName("TC-F10.1.1-07e: gửi lỗi thì dòng EMAIL thành FAILED, không thử lại, dòng trong web vẫn còn")
     void sendErrorMarksFailed() {
         doThrow(new IllegalStateException("Brevo 500")).when(emailSender).send(anyString(), anyString(), anyString());
         create(3L);
@@ -125,7 +125,7 @@ class EmailDispatchIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.1.1 ADR0013: ngoài profile local không gửi tới địa chỉ @example.com, dòng EMAIL thành FAILED; tài khoản DISABLED cũng không gửi")
+    @DisplayName("TC-F10.1.1-07f: ngoài profile local không gửi tới địa chỉ @example.com, dòng EMAIL thành FAILED; tài khoản DISABLED cũng không gửi")
     void blockedAddressAndDisabledAccount() {
         jdbc.update("UPDATE users SET email = 'hv-mau@example.com' WHERE id = ?", member.userId());
         create(4L);
@@ -142,7 +142,7 @@ class EmailDispatchIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.2.1 E5: email nhắc lớp đang chờ giờ mở cửa thì không gửi nếu hội viên đã hủy chỗ, buổi bị hủy hoặc lớp đã bắt đầu")
+    @DisplayName("TC-F10.2.1-03b: email nhắc lớp đang chờ giờ mở cửa thì không gửi nếu hội viên đã hủy chỗ, buổi bị hủy hoặc lớp đã bắt đầu")
     void classReminderRecheckedAtDispatch() {
         clock.setVn(LocalDateTime.of(2026, 11, 21, 23, 0));
         Account b = f.account(f.cn01);
@@ -166,7 +166,7 @@ class EmailDispatchIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.1.1 E5: email nhắc gói đang chờ thì không gửi nếu hội viên đã gia hạn (có gói UPCOMING cùng loại)")
+    @DisplayName("TC-F10.1.1-04b: email nhắc gói đang chờ thì không gửi nếu hội viên đã gia hạn (có gói UPCOMING cùng loại)")
     void membershipReminderRecheckedAtDispatch() {
         clock.setVn(LocalDateTime.of(2026, 11, 21, 0, 10));
         LocalDate today = LocalDate.of(2026, 11, 21);
@@ -181,7 +181,7 @@ class EmailDispatchIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F10.2.1 BR-F10.3: chi nhánh của nhắc lớp lấy từ buổi lớp, của nhắc gói lấy từ gói (gói toàn chuỗi theo chi nhánh gốc)")
+    @DisplayName("TC-F10.2.1-06a: chi nhánh của nhắc lớp lấy từ buổi lớp, của nhắc gói lấy từ gói (gói toàn chuỗi theo chi nhánh gốc)")
     void branchDerivedFromRelatedEntity() {
         f.setHours(f.cn01, "05:30", "21:00");
         Account cn02Member = f.account(f.cn02);
@@ -200,5 +200,29 @@ class EmailDispatchIntegrationTest {
         assertThat(f.rows("class_bookings", booking).get(1)).containsEntry("status", "SENT");
         assertThat(f.rows("memberships", chainPkg).get(1)).containsEntry("status", "SENT");
         assertThat(email(6L)).containsEntry("status", "PENDING");
+    }
+
+    @Test
+    @DisplayName("TC-F10.2.1-05a: buổi lớp bị dời giờ trong lúc email nhắc chờ mở cửa thì lúc gửi dựng lại nội dung theo giờ mới")
+    void classReminderRebuildsContentWhenSessionRescheduledBeforeDispatch() {
+        clock.setVn(LocalDateTime.of(2026, 11, 21, 23, 0));
+        Long session = f.session(f.cn01, LocalDateTime.of(2026, 11, 22, 9, 0), "SCHEDULED");
+        Long booking = f.booking(session, member.memberId(), "BOOKED");
+        assertThat(classReminders.run(time.now())).containsExactly(booking);
+        assertThat((String) f.rows("class_bookings", booking).get(1).get("content"))
+            .contains("09:00 ngày 22/11/2026");
+
+        jdbc.update("UPDATE class_sessions SET start_at = ?, end_at = ?, status = 'RESCHEDULED' WHERE id = ?",
+            NotificationFixtures.utc(LocalDateTime.of(2026, 11, 22, 11, 30)),
+            NotificationFixtures.utc(LocalDateTime.of(2026, 11, 22, 12, 30)),
+            session);
+
+        clock.setVn(LocalDateTime.of(2026, 11, 22, 5, 30));
+        assertThat(dispatcher.dispatchDue(time.now())).isEqualTo(new DispatchResult(1, 0, 0));
+        Map<String, Object> emailRow = f.rows("class_bookings", booking).get(1);
+        assertThat(emailRow).containsEntry("status", "SENT");
+        String updatedContent = (String) emailRow.get("content");
+        assertThat(updatedContent).contains("11:30 ngày 22/11/2026").doesNotContain("09:00 ngày 22/11/2026");
+        verify(emailSender).send("hv" + member.userId() + "@gym-test.vn", "Nhắc lịch lớp Yoga", updatedContent);
     }
 }

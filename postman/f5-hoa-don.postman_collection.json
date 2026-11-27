@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "F5 – Hóa đơn, thu tiền tại quầy, VietQR và PDF (S2-09)",
-    "description": "API của thẻ S2-09.1 (UC-F5.2, UC-F5.3 luồng A1). baseUrl gồm /api/v1. Chạy tuần tự từng thư mục. Nhập token tại máy, không lưu lên Git. saleMemberId và cancelMemberId là hai hội viên CN01 chưa có gói cùng loại với salePackageId (dữ liệu mẫu: HV999010 và một hội viên khác chưa có gói); salePackageId là gói TIME đang bán ở CN01. Phạm vi S2-09: sáu endpoint hóa đơn; hoàn tiền thuộc S2-38. Hai thư mục thu tiền/hủy chạy tuần tự. Thư mục kiểm tra số tiền dùng amountMemberId và freeMemberId riêng (chưa có gói chờ cùng loại); freePackageId phải có giá 0. Các token để trống trong file, nhập tại máy.",
+    "description": "API của thẻ S2-09.1 (UC-F5.2, UC-F5.3 luồng A1). baseUrl gồm /api/v1. Chạy tuần tự từng thư mục. Nhập token tại máy, không lưu lên Git. saleMemberId và cancelMemberId là hai hội viên CN01 chưa có gói cùng loại với salePackageId (dữ liệu mẫu: HV999010 và một hội viên khác chưa có gói); salePackageId là gói TIME đang bán ở CN01. Phạm vi S2-09: sáu endpoint hóa đơn; hoàn tiền thuộc S2-38. Hai thư mục thu tiền/hủy chạy tuần tự. Thư mục kiểm tra số tiền dùng amountMemberId và freeMemberId riêng (chưa có gói chờ cùng loại); freePackageId phải có giá 0. Các token để trống trong file, nhập tại máy. Hoàn tiền S2-38: dùng managerToken của quản lý CN01, refundMemberId chưa có gói cùng loại và usedInvoiceId là hóa đơn PAID có gói đã check-in.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -983,6 +983,438 @@
           ]
         }
       ]
+    },
+    {
+      "name": "S2-10 – Danh mục chi nhánh lọc hóa đơn",
+      "item": [
+        {
+          "name": "AC-F5.3.1-04 – Chủ chuỗi đọc danh mục chi nhánh",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices/branches",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200, danh mục chi nhánh',()=>{pm.response.to.have.status(200); const rows=pm.response.json(); pm.expect(rows).to.be.an('array'); rows.forEach(b=>{pm.expect(b.id).to.be.above(0);pm.expect(b.code).to.be.a('string');pm.expect(b.name).to.be.a('string');});});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AC-F5.3.1-08 – Lễ tân không được đọc danh mục toàn chuỗi",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices/branches",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403',()=>pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AC-F5.3.1-08 – Chưa đăng nhập",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/invoices/branches",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401',()=>pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Hoàn tiền – US-F5.5.1 (S2-38.1, chạy tuần tự)",
+      "item": [
+        {
+          "name": "Bước 1 – Bán gói (tạo hóa đơn để hoàn tiền)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices",
+            "description": "Hội viên refundMemberId chưa có gói cùng loại, chưa check-in, không có chỗ đặt lớp BOOKED sắp tới. Lưu invoiceId vào refundInvoiceId.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{refundMemberId}},\n  \"items\": [{ \"itemType\": \"PACKAGE\", \"packageId\": {{salePackageId}} }]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('refundInvoiceId', pm.response.json().invoiceId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bước 2 – Thu tiền (hóa đơn PAID, gói ACTIVE)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices/{{refundInvoiceId}}/payments",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"method\": \"CASH\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.5.1 KB2 403 – Lễ tân hoàn tiền",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices/{{refundInvoiceId}}/refund",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"refundReason\": \"Lễ tân bán nhầm gói TIME 3 tháng, hội viên mua gói 1 tháng\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403 đúng câu SRS', () => { pm.response.to.have.status(403); pm.expect(pm.response.json().detail).to.eql('Chỉ quản lý chi nhánh mới có quyền hoàn tiền hóa đơn.'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.5.1 E1 400 – Thiếu lý do hoàn tiền",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices/{{refundInvoiceId}}/refund",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{managerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"refundReason\": \"   \" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 lỗi trường refundReason', () => { pm.response.to.have.status(400); pm.expect(pm.response.json().errors.refundReason).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.5.1 E4 404 – Hóa đơn không tồn tại",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices/999999999/refund",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{managerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"refundReason\": \"Lễ tân bán nhầm gói TIME 3 tháng, hội viên mua gói 1 tháng\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.5.1 KB1 200 – Quản lý hoàn tiền hóa đơn PAID chưa dùng",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices/{{refundInvoiceId}}/refund",
+            "description": "Sau bước này: GET /invoices/{{refundInvoiceId}} thấy status REFUNDED, phiếu thu CANCELLED; gói của hóa đơn CANCELLED.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{managerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"refundReason\": \"Lễ tân bán nhầm gói TIME 3 tháng, hội viên mua gói 1 tháng\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200, hóa đơn REFUNDED', () => { pm.response.to.have.status(200); const r = pm.response.json(); pm.expect(r.status).to.eql('REFUNDED'); pm.expect(r.invoiceId).to.eql(Number(pm.collectionVariables.get('refundInvoiceId'))); pm.expect(r.refundedBy).to.be.a('number'); pm.expect(r.refundedAt).to.be.a('string'); pm.expect(r.refundReason).to.include('bán nhầm'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.5.1 E6 422 – Hoàn lần hai hóa đơn đã REFUNDED",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices/{{refundInvoiceId}}/refund",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{managerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"refundReason\": \"Lễ tân bán nhầm gói TIME 3 tháng, hội viên mua gói 1 tháng\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().detail).to.eql('Chỉ có thể hoàn tiền cho hóa đơn đã thanh toán thành công.'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.5.1 E7 422 – Gói đã check-in thì không hoàn được",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices/{{usedInvoiceId}}/refund",
+            "description": "usedInvoiceId: hóa đơn PAID CN01 mà gói đã có ít nhất một lượt check-in (thu tiền rồi check-in hội viên đó qua F4).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{managerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"refundReason\": \"Lễ tân bán nhầm gói TIME 3 tháng, hội viên mua gói 1 tháng\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422 gói đã dùng', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().detail).to.include('đã được sử dụng'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F5.5.1 E2 401 – Không có token",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/invoices/{{refundInvoiceId}}/refund",
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"refundReason\": \"Lễ tân bán nhầm gói TIME 3 tháng, hội viên mua gói 1 tháng\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "variable": [
@@ -1052,6 +1484,22 @@
     },
     {
       "key": "freeInvoiceId",
+      "value": ""
+    },
+    {
+      "key": "managerToken",
+      "value": ""
+    },
+    {
+      "key": "refundMemberId",
+      "value": ""
+    },
+    {
+      "key": "refundInvoiceId",
+      "value": ""
+    },
+    {
+      "key": "usedInvoiceId",
       "value": ""
     }
   ]

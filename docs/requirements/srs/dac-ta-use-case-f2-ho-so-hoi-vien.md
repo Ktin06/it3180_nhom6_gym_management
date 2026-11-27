@@ -96,7 +96,7 @@ Chức năng **F2 – Hồ sơ hội viên** giúp lễ tân, quản lý chi nh�
   2. Hệ thống kiểm tra định dạng `id` (`> 0`) và `email` bằng Bean Validation (S5), chuẩn hóa `email` về chữ thường.
   3. Hệ thống kiểm tra vai trò và phạm vi chi nhánh (S3), khóa dòng hồ sơ `members` (`SELECT ... FOR UPDATE`).
   4. Hệ thống kiểm tra hồ sơ đang `ACTIVE`, `user_id IS NULL`, và `email` chưa tồn tại trong bảng `users`.
-  5. Trong cùng giao dịch, hệ thống tạo bản ghi `users` (`role = 'MEMBER'`, mật khẩu ngẫu nhiên băm bcrypt), gắn `members.user_id`, phát hành token đặt mật khẩu hạn **72 giờ** và gửi email *"Kích hoạt tài khoản"*.
+  5. Trong cùng giao dịch, hệ thống tạo bản ghi `users` (`role = 'MEMBER'`, mật khẩu ngẫu nhiên băm bcrypt), gắn `members.user_id` và phát hành token đặt mật khẩu hạn **72 giờ**. Sau khi giao dịch hoàn tất thành công, hệ thống gửi email *"Kích hoạt tài khoản"*.
   6. Trả `200 OK` kèm `memberId`, `userId`, `email` (không trả token). Giao diện thông báo đã gửi email, tải lại hồ sơ và ẩn nút "Tạo tài khoản".
 - **Luồng thay thế và ngoại lệ (Alternative / Exception Flows):**
   - **A1 – Gửi email gặp lỗi (200 OK):** Nếu dịch vụ gửi email gặp lỗi, hệ thống ghi log mức `ERROR` **không chứa token**, vẫn giữ tài khoản và trả `200 OK`; hội viên dùng chức năng "Quên mật khẩu" (UC-F1.5) để nhận lại liên kết.

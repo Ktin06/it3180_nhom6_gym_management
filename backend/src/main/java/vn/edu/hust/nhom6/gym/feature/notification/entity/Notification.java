@@ -114,6 +114,13 @@ public class Notification extends BaseEntity {
         this.scheduledAt = at;
     }
 
+    /** Cập nhật lại tiêu đề và nội dung email trước lúc gửi (ví dụ buổi lớp vừa dời giờ). */
+    public void updateContent(String title, String content) {
+        requirePendingEmail();
+        this.title = title;
+        this.content = content;
+    }
+
     private void requirePendingEmail() {
         if (channel != NotificationChannel.EMAIL || status != NotificationStatus.PENDING) {
             throw new IllegalStateException("Chỉ đổi được dòng EMAIL đang PENDING, dòng " + getId());

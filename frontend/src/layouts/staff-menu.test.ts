@@ -22,6 +22,14 @@ describe('menu quản lý F2/F3', () => {
 })
 
 describe('menu nhân viên đọc quyền từ ROUTE_ACCESS', () => {
+  it('TC-F5.3.1-08i: menu Thanh toán bật đúng vai trò theo quyền route', () => {
+    for (const role of ['SUPER_ADMIN', 'BRANCH_MANAGER', 'RECEPTIONIST'] as const) {
+      expect(menuForRole(role).some((item) => item.path === '/hoa-don' && item.ready)).toBe(true)
+    }
+    for (const role of ['TRAINER', 'MEMBER'] as const) {
+      expect(menuForRole(role).some((item) => item.path === '/hoa-don')).toBe(false)
+    }
+  })
   it('mục đã bật (ready) nào cũng có ít nhất một vai trò được mở trong ROUTE_ACCESS', () => {
     for (const item of STAFF_MENU.filter((i) => i.ready)) {
       expect(
