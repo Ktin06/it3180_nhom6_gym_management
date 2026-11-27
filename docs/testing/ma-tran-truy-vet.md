@@ -17,8 +17,8 @@
 | F7 | 5 | 5 | 34 | 14 | 20 | 31 |
 | F8 | 9 | 9 | 55 | 53 | 2 | 81 |
 | F9 | 7 | 7 | 63 | 0 | 63 | 0 |
-| F10 | 5 | 4 | 25 | 0 | 25 | 0 |
-| **Tổng** | **57** | **58** | **386** | **218** | **168** | **657** |
+| F10 | 5 | 4 | 25 | 6 | 19 | 7 |
+| **Tổng** | **57** | **58** | **386** | **224** | **162** | **664** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -196,20 +196,14 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F10.2.1-02 | Không gửi thông báo nhắc trùng cho cùng lượt đặt chỗ | US-F10.2.1 |
 | AC-F10.2.1-03 | Không gửi nhắc khi hội viên đã hủy chỗ hoặc lớp bị hủy | US-F10.2.1 |
 | AC-F10.2.1-04 | Không tạo thông báo cho hội viên chưa có tài khoản | US-F10.2.1 |
-| AC-F10.2.1-05 | Hiển thị thông báo trong web và gửi email nhắc lịch | US-F10.2.1 |
 | AC-F10.2.1-06 | Xử lý email phát sinh ngoài giờ và lỗi gửi email | US-F10.2.1 |
 | AC-F10.4.1-01 | Tạo thông báo khi nhận sự kiện đổi giờ từ F8 | US-F10.4.1 |
 | AC-F10.4.1-02 | Nội dung thông báo có giờ cũ và giờ mới | US-F10.4.1 |
 | AC-F10.4.1-03 | Không tạo thông báo khi buổi lớp không có hội viên đặt chỗ | US-F10.4.1 |
 | AC-F10.4.1-04 | Chỉ báo hội viên còn giữ chỗ | US-F10.4.1 |
 | AC-F10.4.1-05 | Không tạo thông báo cho hội viên chưa có tài khoản | US-F10.4.1 |
-| AC-F10.4.1-06 | Gửi thông báo qua hai kênh và xử lý lỗi email | US-F10.4.1 |
 | AC-F10.5.1-01 | Xem danh sách thông báo của tài khoản đang đăng nhập | US-F10.5.1 |
-| AC-F10.5.1-02 | Sắp xếp và phân trang danh sách thông báo | US-F10.5.1 |
-| AC-F10.5.1-03 | Hiển thị đầy đủ nội dung và trạng thái đã đọc | US-F10.5.1 |
-| AC-F10.5.1-04 | Đánh dấu thông báo đã đọc | US-F10.5.1 |
 | AC-F10.5.1-05 | Không cho phép xem hoặc đánh dấu thông báo của người khác | US-F10.5.1 |
-| AC-F10.5.1-06 | Xử lý dữ liệu đầu vào sai và thông báo không tồn tại | US-F10.5.1 |
 
 ## 4. Cây xuôi: chức năng → UC → US → AC → TC
 
@@ -1381,7 +1375,8 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F10.2.1-02 Không gửi thông báo nhắc trùng cho cùng lượt đặt chỗ ❌ chưa có TC
     - AC-F10.2.1-03 Không gửi nhắc khi hội viên đã hủy chỗ hoặc lớp bị hủy ❌ chưa có TC
     - AC-F10.2.1-04 Không tạo thông báo cho hội viên chưa có tài khoản ❌ chưa có TC
-    - AC-F10.2.1-05 Hiển thị thông báo trong web và gửi email nhắc lịch ❌ chưa có TC
+    - AC-F10.2.1-05 Hiển thị thông báo trong web và gửi email nhắc lịch
+      - TC-F10.2.1-05f `features/notifications/api/notification-stream.test.ts › TC-F10.2.1-05f: dùng access token trong CONNECT, đăng ký kên`
     - AC-F10.2.1-06 Xử lý email phát sinh ngoài giờ và lỗi gửi email ❌ chưa có TC
 - **UC-F10.3** Đã bỏ (ADR 0014)
 - **UC-F10.4** Gửi thông báo đổi giờ lớp
@@ -1391,15 +1386,21 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F10.4.1-03 Không tạo thông báo khi buổi lớp không có hội viên đặt chỗ ❌ chưa có TC
     - AC-F10.4.1-04 Chỉ báo hội viên còn giữ chỗ ❌ chưa có TC
     - AC-F10.4.1-05 Không tạo thông báo cho hội viên chưa có tài khoản ❌ chưa có TC
-    - AC-F10.4.1-06 Gửi thông báo qua hai kênh và xử lý lỗi email ❌ chưa có TC
+    - AC-F10.4.1-06 Gửi thông báo qua hai kênh và xử lý lỗi email
+      - TC-F10.4.1-06f `features/notifications/components/NotificationBell.test.tsx › TC-F10.4.1-06f: cập nhật chuông và danh sách đang mở khi nhậ`
 - **UC-F10.5** Xem thông báo trong web
   - **US-F10.5.1** Xem và quản lý trạng thái đã đọc của thông báo
     - AC-F10.5.1-01 Xem danh sách thông báo của tài khoản đang đăng nhập ❌ chưa có TC
-    - AC-F10.5.1-02 Sắp xếp và phân trang danh sách thông báo ❌ chưa có TC
-    - AC-F10.5.1-03 Hiển thị đầy đủ nội dung và trạng thái đã đọc ❌ chưa có TC
-    - AC-F10.5.1-04 Đánh dấu thông báo đã đọc ❌ chưa có TC
+    - AC-F10.5.1-02 Sắp xếp và phân trang danh sách thông báo
+      - TC-F10.5.1-02f `features/notifications/components/NotificationBell.test.tsx › TC-F10.5.1-02f: dùng trang bắt đầu từ 0 và phân trang 20 bản`
+    - AC-F10.5.1-03 Hiển thị đầy đủ nội dung và trạng thái đã đọc
+      - TC-F10.5.1-03f `features/notifications/components/NotificationBell.test.tsx › TC-F10.5.1-03f, TC-F10.5.1-04f: mở nội dung, chuyển trạng th`
+    - AC-F10.5.1-04 Đánh dấu thông báo đã đọc
+      - TC-F10.5.1-04f `features/notifications/components/NotificationBell.test.tsx › TC-F10.5.1-03f, TC-F10.5.1-04f: mở nội dung, chuyển trạng th`
+      - TC-F10.5.1-04g `features/notifications/components/NotificationBell.test.tsx › TC-F10.5.1-04g: giữ trạng thái chưa đọc khi máy chủ từ chối `
     - AC-F10.5.1-05 Không cho phép xem hoặc đánh dấu thông báo của người khác ❌ chưa có TC
-    - AC-F10.5.1-06 Xử lý dữ liệu đầu vào sai và thông báo không tồn tại ❌ chưa có TC
+    - AC-F10.5.1-06 Xử lý dữ liệu đầu vào sai và thông báo không tồn tại
+      - TC-F10.5.1-06f `features/notifications/components/NotificationBell.test.tsx › TC-F10.5.1-06f: cho tải lại sau lỗi và chỉ hiện danh sách rỗ`
 
 ## 5. Bảng ngược: TC → AC → US → UC → BR
 
@@ -2064,6 +2065,13 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F8.8.1-03a | AC-F8.8.1-03 | US-F8.8.1 | UC-F8.8 | BR-F8.8-01, BR-F8.8-03, BR-F8.8-02, BR-F8.7-06 | `ClassApiIntegrationTest#generationSkipsInactiveAndOutOfValidityDates` |
 | TC-F8.8.1-04a | AC-F8.8.1-04 | US-F8.8.1 | UC-F8.8 | BR-F8.8-02, BR-F8.8-01, BR-F8.8-03, BR-F8.7-06 | `ClassApiIntegrationTest#concurrentGenerationAndChangedSessionDoNotCreateDuplicates` |
 | TC-F8.8.1-05a | AC-F8.8.1-05 | US-F8.8.1 | UC-F8.8 | BR-F8.8-01, BR-F8.8-03, BR-F8.7-06, BR-F8.8-02 | `ClassApiIntegrationTest#generationRejectsInactiveRoomOrConflictingSession` |
+| TC-F10.2.1-05f | AC-F10.2.1-05 | US-F10.2.1 | UC-F10.2 |  | `features/notifications/api/notification-stream.test.ts › TC-F10.2.1-05f: dùng access token trong CONNECT, đăng ký kên` |
+| TC-F10.4.1-06f | AC-F10.4.1-06 | US-F10.4.1 | UC-F10.4 |  | `features/notifications/components/NotificationBell.test.tsx › TC-F10.4.1-06f: cập nhật chuông và danh sách đang mở khi nhậ` |
+| TC-F10.5.1-02f | AC-F10.5.1-02 | US-F10.5.1 | UC-F10.5 |  | `features/notifications/components/NotificationBell.test.tsx › TC-F10.5.1-02f: dùng trang bắt đầu từ 0 và phân trang 20 bản` |
+| TC-F10.5.1-03f | AC-F10.5.1-03 | US-F10.5.1 | UC-F10.5 |  | `features/notifications/components/NotificationBell.test.tsx › TC-F10.5.1-03f, TC-F10.5.1-04f: mở nội dung, chuyển trạng th` |
+| TC-F10.5.1-04f | AC-F10.5.1-04 | US-F10.5.1 | UC-F10.5 |  | `features/notifications/components/NotificationBell.test.tsx › TC-F10.5.1-03f, TC-F10.5.1-04f: mở nội dung, chuyển trạng th` |
+| TC-F10.5.1-04g | AC-F10.5.1-04 | US-F10.5.1 | UC-F10.5 |  | `features/notifications/components/NotificationBell.test.tsx › TC-F10.5.1-04g: giữ trạng thái chưa đọc khi máy chủ từ chối ` |
+| TC-F10.5.1-06f | AC-F10.5.1-06 | US-F10.5.1 | UC-F10.5 |  | `features/notifications/components/NotificationBell.test.tsx › TC-F10.5.1-06f: cho tải lại sau lỗi và chỉ hiện danh sách rỗ` |
 
 ## 6. Kiểm thử chưa mang mã TC
 
