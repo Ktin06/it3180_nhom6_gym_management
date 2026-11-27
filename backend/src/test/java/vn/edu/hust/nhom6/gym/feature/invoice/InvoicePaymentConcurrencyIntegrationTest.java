@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -29,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import tools.jackson.databind.json.JsonMapper;
 import vn.edu.hust.nhom6.gym.TestcontainersConfiguration;
@@ -58,6 +60,7 @@ class InvoicePaymentConcurrencyIntegrationTest {
     @Autowired JsonMapper json;
     @Autowired MutableClock clock;
     @Autowired InvoiceService invoiceService;
+    @Autowired TransactionTemplate tx;
     @MockitoSpyBean MemberService memberService;
 
     SaleFixtures f;
@@ -138,6 +141,52 @@ class InvoicePaymentConcurrencyIntegrationTest {
         }
     }
 
+    @Test
+    @DisplayName("TC-F5.2.1-13b: Giao dịch cập nhật hội viên giữ khóa trước, thu tiền chờ rồi đọc trạng thái sau commit và trả 422")
+    void payWaitsForMemberUpdateLockAndRejectsInactiveOrDeletedMember() throws Exception {
+        for (boolean softDelete : new boolean[] { false, true }) {
+            Long member = f.member("HV00050" + (softDelete ? "1" : "2"),
+                "091200050" + (softDelete ? "1" : "2"), f.cn01, "ACTIVE");
+            PackageInvoiceDto sale = sell(member, timePkg);
+
+            CountDownLatch memberLocked = new CountDownLatch(1);
+            CountDownLatch releaseUpdater = new CountDownLatch(1);
+            Future<?> updater = pool.submit(() -> tx.executeWithoutResult(status -> {
+                jdbc.queryForObject("SELECT id FROM members WHERE id = ? FOR UPDATE", Long.class, member);
+                memberLocked.countDown();
+                try {
+                    assertThat(releaseUpdater.await(5, TimeUnit.SECONDS)).isTrue();
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException(ex);
+                }
+                if (softDelete) {
+                    jdbc.update("UPDATE members SET deleted_at = ? WHERE id = ?", OffsetDateTime.now(), member);
+                } else {
+                    jdbc.update("UPDATE members SET status = 'INACTIVE' WHERE id = ?", member);
+                }
+            }));
+
+            assertThat(memberLocked.await(5, TimeUnit.SECONDS)).isTrue();
+            Future<MockHttpServletResponse> payFuture = pool.submit(() -> pay(first, sale.invoiceId()));
+            // Cho payFuture bước vào transaction và chờ khóa dòng members trước khi nhả giao dịch cập nhật.
+            Thread.sleep(150);
+            releaseUpdater.countDown();
+            updater.get(10, TimeUnit.SECONDS);
+
+            MockHttpServletResponse payRes = payFuture.get(10, TimeUnit.SECONDS);
+            assertThat(payRes.getStatus()).isEqualTo(422);
+            assertThat(json.readTree(payRes.getContentAsString()).get("detail").asString())
+                .isEqualTo("Hội viên đã ngừng hoạt động, không thể thu tiền.");
+            assertThat(jdbc.queryForObject("SELECT status FROM invoices WHERE id = ?", String.class,
+                sale.invoiceId())).isEqualTo("PENDING");
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM payments WHERE invoice_id = ?", Long.class,
+                sale.invoiceId())).isZero();
+            assertThat(jdbc.queryForObject("SELECT status FROM memberships WHERE id = ?", String.class,
+                sale.membershipId())).isEqualTo("PENDING");
+        }
+    }
+
     private List<MockHttpServletResponse> race(Callable<MockHttpServletResponse> a,
             Callable<MockHttpServletResponse> b) throws Exception {
         CountDownLatch ready = new CountDownLatch(2);
@@ -165,7 +214,7 @@ class InvoicePaymentConcurrencyIntegrationTest {
         doAnswer(invocation -> {
             bothReadPending.await(10, TimeUnit.SECONDS);
             return invocation.callRealMethod();
-        }).when(memberService).lockForUpdate(memberId);
+        }).when(memberService).lockForUpdateIncludingDeleted(memberId);
     }
 
     private MockHttpServletResponse pay(Long userId, Long invoiceId) throws Exception {

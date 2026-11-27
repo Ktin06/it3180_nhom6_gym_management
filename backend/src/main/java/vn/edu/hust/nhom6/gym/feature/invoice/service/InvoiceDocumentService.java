@@ -82,6 +82,9 @@ public class InvoiceDocumentService {
             throw new BusinessRuleException("Hóa đơn này không ở trạng thái chờ thanh toán.");
         }
         invoiceService.requireWithinPaymentDeadline(invoice);
+        if (invoice.getTotal() <= 0) {
+            throw new BusinessRuleException("Hóa đơn 0 đồng không cần chuyển khoản, vui lòng xác nhận tại quầy.");
+        }
 
         Long branchId = invoice.getBranchId();
         String bankId = requireBankConfig(branchId, BANK_ID_KEY);
@@ -147,7 +150,8 @@ public class InvoiceDocumentService {
 
     private Invoice resolvePdfInvoiceInScope(CurrentUser me, Long invoiceId) {
         if (me.is(UserRole.MEMBER)) {
-            Member member = members.requireByUserId(me.userId());
+            Member member = members.findByUserId(me.userId())
+                .orElseThrow(() -> new NotFoundException(INVOICE_NOT_FOUND));
             Invoice invoice = invoices.findById(invoiceId)
                 .orElseThrow(() -> new NotFoundException(INVOICE_NOT_FOUND));
             if (invoice.getMemberId() == null || !member.getId().equals(invoice.getMemberId())) {

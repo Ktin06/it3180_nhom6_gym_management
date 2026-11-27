@@ -17,6 +17,14 @@ public interface MemberRepository extends JpaRepository<Member, Long>, JpaSpecif
     Optional<Member> findForUpdate(Long id);
 
     /**
+     * Khóa dòng hội viên kể cả hồ sơ đã xóa mềm ({@code deletedAt IS NOT NULL}), phục vụ thu tiền hóa đơn chờ (F5)
+     * để phân biệt hồ sơ ngừng hoạt động/xóa mềm (422) với bản ghi không tồn tại (404).
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT m FROM Member m WHERE m.id = :id")
+    Optional<Member> findForUpdateIncludingDeleted(Long id);
+
+    /**
      * Như {@link #findForUpdate} nhưng không chờ ({@code FOR ... NOWAIT}, thời hạn khóa 0): dòng đang bị giao dịch khác
      * khóa thì PostgreSQL báo ngay SQLSTATE 55P03, Spring đổi thành {@code PessimisticLockingFailureException}.
      */

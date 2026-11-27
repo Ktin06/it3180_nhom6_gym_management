@@ -570,6 +570,21 @@ class InvoiceQueryIntegrationTest {
             .andExpect(jsonPath("$.errors.id").isString());
     }
 
+    @Test
+    @DisplayName("TC-F5.3.1-09b: keyword 100 ký tự hợp lệ (200); 101 ký tự trả 400 kèm errors.keyword")
+    void keywordLengthBoundary100And101() throws Exception {
+        mvc.perform(get("/api/v1/invoices")
+                .param("keyword", "a".repeat(100))
+                .with(f.bearer(receptionistCn01, UserRole.RECEPTIONIST)))
+            .andExpect(status().isOk());
+
+        mvc.perform(get("/api/v1/invoices")
+                .param("keyword", "a".repeat(101))
+                .with(f.bearer(receptionistCn01, UserRole.RECEPTIONIST)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errors.keyword").isString());
+    }
+
     private Long createMember(String code, String fullName, String phone, Long branchId) {
         return jdbc.queryForObject("""
             INSERT INTO members (home_branch_id, member_code, full_name, phone, status)

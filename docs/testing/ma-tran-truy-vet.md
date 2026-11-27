@@ -12,13 +12,13 @@
 | F2 | 5 | 6 | 31 | 27 | 4 | 110 |
 | F3 | 5 | 6 | 45 | 45 | 0 | 137 |
 | F4 | 5 | 5 | 37 | 0 | 37 | 0 |
-| F5 | 5 | 5 | 49 | 49 | 0 | 154 |
+| F5 | 5 | 5 | 51 | 51 | 0 | 158 |
 | F6 | 5 | 5 | 16 | 0 | 16 | 0 |
 | F7 | 5 | 5 | 34 | 29 | 5 | 48 |
 | F8 | 9 | 9 | 55 | 53 | 2 | 81 |
 | F9 | 7 | 7 | 63 | 0 | 63 | 0 |
 | F10 | 5 | 4 | 25 | 0 | 25 | 0 |
-| **Tổng** | **57** | **58** | **386** | **233** | **153** | **674** |
+| **Tổng** | **57** | **58** | **388** | **235** | **153** | **678** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -819,6 +819,8 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F5.1.1-08 Không sinh VietQR cho hóa đơn cổng hội viên quá hạn (BR-F5-07)
       - TC-F5.1.1-08a `InvoiceExpiryIntegrationTest#paymentAndVietQrRespectPortalDeadline`
       - TC-F5.1.1-08b `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.1.1-08b: hóa đơn portal quá hạn hiện lỗi VietQR và khô`
+    - AC-F5.1.1-09 Không sinh VietQR cho hóa đơn 0 đồng (BR-F5-01)
+      - TC-F5.1.1-09a `InvoiceDocumentIntegrationTest#vietQrForZeroTotalInvoiceIs422`
 - **UC-F5.2** Ghi nhận thanh toán tại quầy và kích hoạt dịch vụ
   - **US-F5.2.1** Ghi nhận thanh toán, kích hoạt gói (#141) ✅ mọi AC có TC
     - AC-F5.2.1-01 Thu tiền mặt kích hoạt gói mới đúng ngày và giữ thời hạn đã chốt (BR-F5-03, BR-F5-04, BR-F3-06)
@@ -872,6 +874,9 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F5.2.1-12 Không thu tiền hóa đơn cổng hội viên quá hạn (BR-F5-07)
       - TC-F5.2.1-12a `InvoiceExpiryIntegrationTest#paymentAndVietQrRespectPortalDeadline`
       - TC-F5.2.1-12b `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-12b: hóa đơn portal quá hạn hiện lỗi server và khô`
+    - AC-F5.2.1-13 Không thu tiền khi hội viên ngừng hoạt động hoặc đã xóa mềm (BR-F5-03)
+      - TC-F5.2.1-13a `InvoicePaymentIntegrationTest#cannotPayWhenMemberIsInactiveOrSoftDeleted`
+      - TC-F5.2.1-13b `InvoicePaymentConcurrencyIntegrationTest#payWaitsForMemberUpdateLockAndRejectsInactiveOrDeletedMember`
 - **UC-F5.3** Tra cứu và quản lý hóa đơn tại quầy (và toàn chuỗi)
   - **US-F5.3.1** Tra cứu và hủy hóa đơn chờ (#142) ✅ mọi AC có TC
     - AC-F5.3.1-01 Danh sách hóa đơn theo chi nhánh của nhân viên (BR-F5-06)
@@ -921,6 +926,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
     - AC-F5.3.1-09 Bộ lọc và phân trang không hợp lệ
       - TC-F5.3.1-09a `InvoiceQueryIntegrationTest#invalidQueryParamsAndIdReturn400`
       - TC-F5.3.1-09b `InvoiceCancelIntegrationTest#invalidCancelIdIs400`
+      - TC-F5.3.1-09b `InvoiceQueryIntegrationTest#keywordLengthBoundary100And101`
       - TC-F5.3.1-09c `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-09c: khoảng ngày ngược báo lỗi và không gửi bộ lọc`
       - TC-F5.3.1-09d `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.3.1-09d: mã route không hợp lệ %s không gọi API`
     - AC-F5.3.1-10 Nhân viên không có phân công chi nhánh hoạt động
@@ -1818,6 +1824,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F5.1.1-07b | AC-F5.1.1-07 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#invalidDocumentIdsReturnFieldErrors` |
 | TC-F5.1.1-08a | AC-F5.1.1-08 | US-F5.1.1 | UC-F5.1 | BR-F5-07, BR-F5-01, BR-F5-02 | `InvoiceExpiryIntegrationTest#paymentAndVietQrRespectPortalDeadline` |
 | TC-F5.1.1-08b | AC-F5.1.1-08 | US-F5.1.1 | UC-F5.1 | BR-F5-07, BR-F5-01, BR-F5-02 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.1.1-08b: hóa đơn portal quá hạn hiện lỗi VietQR và khô` |
+| TC-F5.1.1-09a | AC-F5.1.1-09 | US-F5.1.1 | UC-F5.1 | BR-F5-01, BR-F5-02, BR-F5-07 | `InvoiceDocumentIntegrationTest#vietQrForZeroTotalInvoiceIs422` |
 | TC-F5.2.1-01a | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F5-07, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payActivatesWithDatesRecomputedAtPaymentTime` |
 | TC-F5.2.1-01b | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F5-07, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#payPtWhileHoldingTimeActivatesPt` |
 | TC-F5.2.1-01c | AC-F5.2.1-01 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F3-06, BR-F5-05, BR-F5-07, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#paysPortalInvoiceAtCounter` |
@@ -1857,6 +1864,8 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F5.2.1-11a | AC-F5.2.1-11 | US-F5.2.1 | UC-F5.2 | BR-F3-11, BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-12 | `InvoicePaymentIntegrationTest#zeroSessionPtStillHeldSchedulesAfterOldEndDate` |
 | TC-F5.2.1-12a | AC-F5.2.1-12 | US-F5.2.1 | UC-F5.2 | BR-F5-07, BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoiceExpiryIntegrationTest#paymentAndVietQrRespectPortalDeadline` |
 | TC-F5.2.1-12b | AC-F5.2.1-12 | US-F5.2.1 | UC-F5.2 | BR-F5-07, BR-F5-03, BR-F5-04, BR-F5-05, BR-F3-06, BR-F3-11, BR-F3-12 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.2.1-12b: hóa đơn portal quá hạn hiện lỗi server và khô` |
+| TC-F5.2.1-13a | AC-F5.2.1-13 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentIntegrationTest#cannotPayWhenMemberIsInactiveOrSoftDeleted` |
+| TC-F5.2.1-13b | AC-F5.2.1-13 | US-F5.2.1 | UC-F5.2 | BR-F5-03, BR-F5-04, BR-F5-05, BR-F5-07, BR-F3-06, BR-F3-11, BR-F3-12 | `InvoicePaymentConcurrencyIntegrationTest#payWaitsForMemberUpdateLockAndRejectsInactiveOrDeletedMember` |
 | TC-F5.3.1-01a | AC-F5.3.1-01 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#receptionistListsOwnBranchNewestFirstWithPaging` |
 | TC-F5.3.1-01b | AC-F5.3.1-01 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#staffCannotOverrideBranchFilter` |
 | TC-F5.3.1-01c | AC-F5.3.1-01 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-01c: %s không tải danh mục hoặc chọn chi nhánh khá` |
@@ -1895,6 +1904,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F5.3.1-08k | AC-F5.3.1-08 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `routes/route-access.test.ts › TC-F5.3.1-08k: %s không mở được trang hóa đơn của nhân viên` |
 | TC-F5.3.1-09a | AC-F5.3.1-09 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#invalidQueryParamsAndIdReturn400` |
 | TC-F5.3.1-09b | AC-F5.3.1-09 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceCancelIntegrationTest#invalidCancelIdIs400` |
+| TC-F5.3.1-09b | AC-F5.3.1-09 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#keywordLengthBoundary100And101` |
 | TC-F5.3.1-09c | AC-F5.3.1-09 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `features/invoices/pages/InvoicesPage.test.tsx › TC-F5.3.1-09c: khoảng ngày ngược báo lỗi và không gửi bộ lọc` |
 | TC-F5.3.1-09d | AC-F5.3.1-09 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `features/invoices/pages/InvoiceDetailPage.test.tsx › TC-F5.3.1-09d: mã route không hợp lệ %s không gọi API` |
 | TC-F5.3.1-10a | AC-F5.3.1-10 | US-F5.3.1 | UC-F5.3 | BR-F5-06, BR-F5-07, BR-F5-08 | `InvoiceQueryIntegrationTest#staffWithoutActiveBranchIs403` |
