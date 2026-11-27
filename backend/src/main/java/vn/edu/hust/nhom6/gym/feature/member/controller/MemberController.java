@@ -27,6 +27,7 @@ import vn.edu.hust.nhom6.gym.feature.member.service.*;
 public class MemberController {
     private final MemberService members;
     private final MemberAvatarService avatars;
+    private final MemberAccountService memberAccounts;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_MANAGER','RECEPTIONIST')")
@@ -88,5 +89,14 @@ public class MemberController {
             @RequestParam("file") MultipartFile file) {
         avatars.uploadAvatar(CurrentUser.from(auth), id, file);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/account")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_MANAGER','RECEPTIONIST')")
+    @Operation(summary = "Tạo tài khoản đăng nhập cho hồ sơ hội viên có sẵn và gửi email đặt mật khẩu")
+    public CreateMemberAccountResponse createAccount(Authentication auth,
+            @PathVariable @Positive(message = "ID hội viên phải lớn hơn 0") Long id,
+            @Valid @RequestBody CreateMemberAccountRequest request) {
+        return memberAccounts.createAccount(CurrentUser.from(auth), id, request);
     }
 }
