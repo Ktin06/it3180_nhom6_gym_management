@@ -1,0 +1,295 @@
+{
+  "info": {
+    "name": "F10 – Thông báo trong web (S2-22)",
+    "description": "3 API thông báo trong web cho hội viên (UC-F10.5, BR-F10.7, BR-F10.8). baseUrl gồm /api/v1. Nhập memberToken (hội viên), otherMemberToken (hội viên khác) và staffToken (nhân viên) tại máy, không lưu token thật lên Git. Biến notificationId tự điền sau request lấy danh sách.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Xem và đánh dấu đã đọc – US-F10.5.1 (chạy tuần tự)",
+      "item": [
+        {
+          "name": "US-F10.5.1 KB1 200 – Xem danh sách thông báo IN_APP của tôi",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/me/notifications?page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "me",
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Hội viên lấy từ JWT. Chỉ trả kênh IN_APP của chính mình, mới nhất trước, phân trang PageResponse.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('đúng dạng PageResponse', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.content).to.be.an('array');",
+                  "  pm.expect(b.page).to.eql(0);",
+                  "  pm.expect(b.size).to.eql(20);",
+                  "  if (b.content.length > 0) {",
+                  "    pm.collectionVariables.set('notificationId', String(b.content[0].id));",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F10.5.1 A1 200 – Đếm số thông báo chưa đọc",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/me/notifications/unread-count",
+            "description": "Đếm các dòng IN_APP có read_at rỗng của hội viên đang đăng nhập.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('có unreadCount là số không âm', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.unreadCount).to.be.a('number').and.at.least(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F10.5.1 A2 200 – Đánh dấu một thông báo của tôi đã đọc",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/me/notifications/{{notificationId}}/read",
+            "description": "Ghi read_at cho thông báo IN_APP của chính hội viên. Gọi lại vẫn trả 200 và giữ nguyên readAt cũ.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('read = true và có readAt', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.read).to.eql(true);",
+                  "  pm.expect(b.readAt).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F10.5.1 E2 403 – Đánh dấu đã đọc thông báo của người khác",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/me/notifications/{{notificationId}}/read",
+            "description": "Dùng token của hội viên khác đánh dấu thông báo của memberToken → 403 Forbidden (BR-F10.7).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{otherMemberToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F10.5.1 E3 404 – Đánh dấu đã đọc thông báo không tồn tại",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/me/notifications/999999/read",
+            "description": "ID thông báo không tồn tại → 404 Not Found.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F10.5.1 E1 400 – Tham số phân trang không hợp lệ",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/me/notifications?page=-1&size=200",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "me",
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "-1"
+                },
+                {
+                  "key": "size",
+                  "value": "200"
+                }
+              ]
+            },
+            "description": "page < 0 hoặc size > 100 → 400 Bad Request kèm ProblemDetail.errors.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "US-F10.5.1 E2 403 – Vai trò không phải hội viên gọi API",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/me/notifications",
+            "description": "Nhân viên (không phải MEMBER) gọi API thông báo hội viên → 403 Forbidden.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api/v1"
+    },
+    {
+      "key": "memberToken",
+      "value": ""
+    },
+    {
+      "key": "otherMemberToken",
+      "value": ""
+    },
+    {
+      "key": "staffToken",
+      "value": ""
+    },
+    {
+      "key": "notificationId",
+      "value": "1"
+    }
+  ]
+}

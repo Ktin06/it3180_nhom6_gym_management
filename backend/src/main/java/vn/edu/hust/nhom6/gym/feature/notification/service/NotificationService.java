@@ -4,14 +4,17 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import vn.edu.hust.nhom6.gym.common.time.VnTime;
+import vn.edu.hust.nhom6.gym.feature.notification.dto.NotificationDto;
 import vn.edu.hust.nhom6.gym.feature.notification.entity.Notification;
 import vn.edu.hust.nhom6.gym.feature.notification.entity.NotificationRelatedEntity;
 import vn.edu.hust.nhom6.gym.feature.notification.entity.NotificationType;
+import vn.edu.hust.nhom6.gym.feature.notification.event.InAppNotificationCreatedEvent;
 import vn.edu.hust.nhom6.gym.feature.notification.repository.NotificationQueryRepository;
 import vn.edu.hust.nhom6.gym.feature.notification.repository.NotificationRepository;
 
@@ -20,7 +23,8 @@ import vn.edu.hust.nhom6.gym.feature.notification.repository.NotificationReposit
  *
  * <p>Mỗi lần gọi {@link #create} luôn tạo hai dòng {@code notifications} trong cùng giao dịch:
  * dòng {@code IN_APP} ({@code SENT} ngay) và dòng {@code EMAIL} ({@code PENDING}, hẹn gửi trong giờ mở cửa
- * chi nhánh liên quan).
+ * chi nhánh liên quan). Sau khi lưu sẽ phát {@link InAppNotificationCreatedEvent} để
+ * {@link NotificationRealtimePublisher} đẩy qua WebSocket ở pha {@code AFTER_COMMIT}.
  */
 @Service
 @RequiredArgsConstructor
@@ -30,6 +34,7 @@ public class NotificationService {
     private final NotificationRepository notifications;
     private final NotificationQueryRepository queries;
     private final VnTime time;
+    private final ApplicationEventPublisher events;
 
     /** Cặp dòng thông báo vừa được lưu cho một sự kiện. */
     public record CreatedNotifications(Notification inApp, Notification email) { }
@@ -53,6 +58,7 @@ public class NotificationService {
         Notification email = Notification.email(userId, type, title, content, relatedEntity, relatedId,
             hours.nextSendAt(now));
         notifications.saveAll(List.of(inApp, email));
+        events.publishEvent(new InAppNotificationCreatedEvent(userId, NotificationDto.of(inApp)));
         return new CreatedNotifications(inApp, email);
     }
 }

@@ -81,6 +81,7 @@ public class SecurityConfig {
         "/api/v1/auth/forgot-password",
         "/api/v1/auth/reset-password",
         LOGOUT_PATH,
+        "/ws", // S2-22: handshake WebSocket (STOMP), xác thực JWT ở khung CONNECT/STOMP
     };
 
     /** Tiền tố API công khai chỉ để đọc, cho khách chưa đăng nhập (bảng giá F3, lịch lớp F8). Chỉ mở GET. */

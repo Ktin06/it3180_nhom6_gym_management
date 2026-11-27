@@ -4,7 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.hibernate.query.NativeQuery;
@@ -51,6 +54,9 @@ public class NotificationQueryRepository {
 
     /** Thông tin người nhận, khung giờ mở cửa và trạng thái còn hợp lệ tại thời điểm gửi email. */
     public record EmailTarget(String email, String userStatus, OpeningHours hours, boolean stillRelevant) { }
+
+    /** Ngữ cảnh hiển thị một buổi lớp nhóm khi tạo thông báo sự kiện F8. */
+    public record ClassSessionContext(String className, String roomName, String branchName) { }
 
     /** Giữ khóa tư vấn tới hết giao dịch hiện tại để tránh hai tiến trình cùng chạy một tác vụ nhắc. */
     public void lockForRun(long key) {
@@ -264,6 +270,86 @@ public class NotificationQueryRepository {
             (String) r[1],
             hours == null ? null : parseHours(hours),
             Boolean.TRUE.equals(r[3])));
+    }
+
+    /** Đọc tên lớp, tên phòng hiện tại và tên chi nhánh của một buổi lớp nhóm (chỉ đọc, phục vụ sự kiện F8). */
+    public Optional<ClassSessionContext> findClassSessionContext(Long sessionId) {
+        List<?> rows = entities.createNativeQuery("""
+            SELECT ct.name, r.name, b.name
+            FROM class_sessions cs
+            JOIN class_schedules sc ON sc.id = cs.class_schedule_id
+            JOIN class_types ct ON ct.id = sc.class_type_id
+            JOIN rooms r ON r.id = cs.room_id
+            JOIN branches b ON b.id = cs.branch_id
+            WHERE cs.id = :sessionId""")
+            .setParameter("sessionId", sessionId)
+            .getResultList();
+        if (rows.isEmpty()) {
+            return Optional.empty();
+        }
+        Object[] r = (Object[]) rows.getFirst();
+        return Optional.of(new ClassSessionContext((String) r[0], (String) r[1], (String) r[2]));
+    }
+
+    /** Ánh xạ {@code rooms.id -> rooms.name} phục vụ sự kiện đổi phòng buổi lớp (F8). */
+    public Map<Long, String> findRoomNames(Collection<Long> roomIds) {
+        if (roomIds == null || roomIds.isEmpty()) {
+            return Map.of();
+        }
+        List<?> rows = entities.createNativeQuery("""
+            SELECT id, name FROM rooms WHERE id IN (:ids)""")
+            .setParameter("ids", roomIds)
+            .getResultList();
+        Map<Long, String> result = new LinkedHashMap<>();
+        for (Object row : rows) {
+            Object[] r = (Object[]) row;
+            result.put(((Number) r[0]).longValue(), (String) r[1]);
+        }
+        return result;
+    }
+
+    /**
+     * Danh sách {@code users.id} (tăng dần, không trùng) của các hội viên nằm trong {@code memberIds},
+     * có tài khoản, hồ sơ chưa xóa mềm và vẫn đang giữ chỗ {@code BOOKED} trong buổi {@code sessionId}.
+     */
+    @SuppressWarnings("unchecked")
+    public List<Long> findBookedMemberUserIds(Long sessionId, Collection<Long> memberIds) {
+        if (memberIds == null || memberIds.isEmpty()) {
+            return List.of();
+        }
+        return entities.createNativeQuery("""
+            SELECT DISTINCT m.user_id
+            FROM members m
+            JOIN class_bookings cb ON cb.member_id = m.id
+            WHERE cb.class_session_id = :sessionId
+              AND cb.status = 'BOOKED'
+              AND m.id IN (:memberIds)
+              AND m.user_id IS NOT NULL
+              AND m.deleted_at IS NULL
+            ORDER BY m.user_id""", Long.class)
+            .setParameter("sessionId", sessionId)
+            .setParameter("memberIds", memberIds)
+            .getResultList();
+    }
+
+    /**
+     * Danh sách {@code users.id} (tăng dần, không trùng) của các hội viên nằm trong {@code memberIds},
+     * có tài khoản và hồ sơ chưa xóa mềm (dùng cho sự kiện hủy buổi lớp khi chỗ đã chuyển {@code CANCELLED}).
+     */
+    @SuppressWarnings("unchecked")
+    public List<Long> findMemberUserIds(Collection<Long> memberIds) {
+        if (memberIds == null || memberIds.isEmpty()) {
+            return List.of();
+        }
+        return entities.createNativeQuery("""
+            SELECT DISTINCT m.user_id
+            FROM members m
+            WHERE m.id IN (:memberIds)
+              AND m.user_id IS NOT NULL
+              AND m.deleted_at IS NULL
+            ORDER BY m.user_id""", Long.class)
+            .setParameter("memberIds", memberIds)
+            .getResultList();
     }
 
     private static OpeningHours parseHours(String text) {
