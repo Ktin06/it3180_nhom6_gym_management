@@ -1,6 +1,7 @@
 package vn.edu.hust.nhom6.gym.feature.memberportal.service;
 
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +14,6 @@ import vn.edu.hust.nhom6.gym.common.dto.PageResponse;
 import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 import vn.edu.hust.nhom6.gym.feature.invoice.entity.InvoiceSource;
 import vn.edu.hust.nhom6.gym.feature.invoice.entity.InvoiceStatus;
-import vn.edu.hust.nhom6.gym.feature.invoice.service.PortalInvoiceService;
 import vn.edu.hust.nhom6.gym.feature.member.entity.Member;
 import vn.edu.hust.nhom6.gym.feature.member.service.MemberService;
 import vn.edu.hust.nhom6.gym.feature.memberportal.dto.MyCheckinDto;
@@ -23,13 +23,16 @@ import vn.edu.hust.nhom6.gym.feature.memberportal.dto.MyMembershipDto;
 import vn.edu.hust.nhom6.gym.feature.memberportal.repository.MemberPortalQueryRepository;
 import vn.edu.hust.nhom6.gym.feature.memberportal.repository.MemberPortalQueryRepository.InvoiceItemRow;
 import vn.edu.hust.nhom6.gym.feature.memberportal.repository.MemberPortalQueryRepository.InvoiceRow;
+import vn.edu.hust.nhom6.gym.feature.systemconfig.service.SystemConfigKeys;
+import vn.edu.hust.nhom6.gym.feature.systemconfig.service.SystemConfigService;
 
 /**
  * Nghiệp vụ chỉ đọc cho cổng hội viên (F7 UC-F7.1–UC-F7.3): xem gói tập, lịch sử check-in, hóa đơn của chính mình.
  *
  * <p>Hội viên luôn xác định từ token qua {@link MemberService#requireByUserId}; không nhận {@code memberId} từ request
  * để hội viên không bao giờ xem được dữ liệu người khác (BR-F7.1, S3). Hạn tự hủy hóa đơn chờ từ cổng hội viên tính
- * qua {@link PortalInvoiceService#expiresAt} (đọc {@code PENDING_INVOICE_TTL_DAYS} từ {@code system_configs}, BR-F7.4).
+ * bằng {@code created_at + PENDING_INVOICE_TTL_DAYS} (đọc từ {@link SystemConfigService}, cache theo {@code branchId}
+ * trong một lần gọi {@link #myInvoices}, BR-F7.4).
  */
 @Service
 @RequiredArgsConstructor
@@ -37,7 +40,7 @@ import vn.edu.hust.nhom6.gym.feature.memberportal.repository.MemberPortalQueryRe
 public class MemberPortalQueryService {
     private final MemberService members;
     private final MemberPortalQueryRepository queries;
-    private final PortalInvoiceService portalInvoices;
+    private final SystemConfigService configs;
 
     /** {@code GET /api/v1/me/memberships} (UC-F7.1). */
     public List<MyMembershipDto> myMemberships(CurrentUser me) {
@@ -82,12 +85,15 @@ public class MemberPortalQueryService {
         Page<InvoiceRow> invoices = queries.findInvoices(member.getId(), page, size);
         List<Long> invoiceIds = invoices.getContent().stream().map(InvoiceRow::id).toList();
         Map<Long, List<InvoiceItemRow>> itemsByInvoice = queries.findInvoiceItems(invoiceIds);
+        Map<Long, Integer> ttlByBranch = new HashMap<>();
 
         return PageResponse.of(invoices, row -> {
-            OffsetDateTime expiresAt = (row.status() == InvoiceStatus.PENDING
-                    && row.source() == InvoiceSource.MEMBER_PORTAL)
-                ? portalInvoices.expiresAt(row.branchId(), row.createdAt())
-                : null;
+            OffsetDateTime expiresAt = null;
+            if (row.status() == InvoiceStatus.PENDING && row.source() == InvoiceSource.MEMBER_PORTAL) {
+                int ttlDays = ttlByBranch.computeIfAbsent(row.branchId(),
+                    branchId -> configs.getInt(branchId, SystemConfigKeys.PENDING_INVOICE_TTL_DAYS));
+                expiresAt = row.createdAt().plusDays(ttlDays);
+            }
             List<MyInvoiceItemDto> items = itemsByInvoice.getOrDefault(row.id(), List.of()).stream()
                 .map(item -> new MyInvoiceItemDto(
                     item.id(),

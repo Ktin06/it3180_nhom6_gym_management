@@ -42,9 +42,8 @@ import vn.edu.hust.nhom6.gym.feature.memberportal.PortalFixtures.MemberAccount;
  * {@code GET /api/v1/me/memberships}, {@code GET /api/v1/me/checkins}, {@code GET /api/v1/me/invoices}
  * (UC-F7.1, UC-F7.2, UC-F7.3, BR-F7.1–BR-F7.4, S2-13.1).
  *
- * <p>SRS F7 chưa có mã AC nên tên kiểm thử theo US và kịch bản/BR. Luôn gọi {@link PortalFixtures#resetTtl()} trong
- * {@code @BeforeEach} để bảo đảm {@code PENDING_INVOICE_TTL_DAYS} không bị mất sau {@code TRUNCATE users CASCADE}
- * (VD-11).
+ * <p>Luôn gọi {@link PortalFixtures#resetTtl()} trong {@code @BeforeEach} để bảo đảm {@code PENDING_INVOICE_TTL_DAYS}
+ * không bị mất sau {@code TRUNCATE users CASCADE} (VD-11).
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -90,7 +89,7 @@ class MemberPortalQueryIntegrationTest {
     // --- UC-F7.1: GET /api/v1/me/memberships -------------------------------------------------------
 
     @Test
-    @DisplayName("US-F7.1.1 KB: Hội viên xem mọi gói của mình kèm tên, loại, mã trạng thái, ngày, số buổi còn lại")
+    @DisplayName("TC-F7.1.1-01a: Hội viên xem mọi gói của mình kèm tên, loại, mã trạng thái, ngày, số buổi còn lại")
     void membershipsReturnsAllOwnMembershipsWithDetails() throws Exception {
         Long expiredSession = f.membership(me.memberId(), sessionChainPkg, "SESSION", null, "EXPIRED",
             LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30), 0);
@@ -145,7 +144,7 @@ class MemberPortalQueryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.1.1 A1: Hội viên chưa có gói nào trả danh sách rỗng")
+    @DisplayName("TC-F7.1.1-03a: Hội viên chưa có gói nào trả danh sách rỗng")
     void membershipsEmptyWhenMemberHasNone() throws Exception {
         f.membership(other.memberId(), timePkg, "TIME", f.cn01, "ACTIVE",
             LocalDate.of(2026, 11, 1), LocalDate.of(2026, 11, 30), null);
@@ -156,7 +155,7 @@ class MemberPortalQueryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.1.1 BR-F7.1: Không thấy gói của hội viên khác kể cả khi truyền tham số memberId")
+    @DisplayName("TC-F7.1.1-02a: Không thấy gói của hội viên khác kể cả khi truyền tham số memberId")
     void membershipsNeverLeaksOtherMembersData() throws Exception {
         Long ownId = f.membership(me.memberId(), timePkg, "TIME", f.cn01, "ACTIVE",
             LocalDate.of(2026, 11, 1), LocalDate.of(2026, 11, 30), null);
@@ -175,7 +174,7 @@ class MemberPortalQueryIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(value = UserRole.class, names = {"RECEPTIONIST", "BRANCH_MANAGER", "TRAINER", "SUPER_ADMIN"})
-    @DisplayName("US-F7.1.1 E2: Vai trò khác MEMBER xem gói của tôi trả 403")
+    @DisplayName("TC-F7.1.1-05a: Vai trò khác MEMBER xem gói của tôi trả 403")
     void membershipsForbiddenForNonMemberRoles(UserRole role) throws Exception {
         Long staffUser = f.staff("role-" + role.name().toLowerCase() + "@example.com", role,
             role == UserRole.SUPER_ADMIN ? null : f.cn01);
@@ -185,7 +184,7 @@ class MemberPortalQueryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.1.1 E2: Tài khoản MEMBER chưa gắn hồ sơ hoặc hồ sơ xóa mềm trả 403; không token trả 401")
+    @DisplayName("TC-F7.1.1-05b: Tài khoản MEMBER chưa gắn hồ sơ hoặc hồ sơ xóa mềm trả 403; không token trả 401")
     void membershipsForbiddenWithoutProfileAndUnauthorizedWithoutToken() throws Exception {
         Long orphan = createOrphanMemberUser("mo-coi-goi@example.com");
         mvc.perform(get("/api/v1/me/memberships").with(f.bearer(orphan, UserRole.MEMBER)))
@@ -202,7 +201,7 @@ class MemberPortalQueryIntegrationTest {
     // --- UC-F7.2: GET /api/v1/me/checkins ----------------------------------------------------------
 
     @Test
-    @DisplayName("US-F7.2.1 KB: Lịch sử check-in phân trang, mới nhất trước, có chi nhánh, giờ vào, giờ ra, ngày Việt Nam")
+    @DisplayName("TC-F7.2.1-01a: Lịch sử check-in phân trang, mới nhất trước, có chi nhánh, giờ vào, giờ ra, ngày Việt Nam")
     void checkinsPaginatedNewestFirstWithBranchAndTimes() throws Exception {
         Long ownMembership = f.membership(me.memberId(), sessionChainPkg, "SESSION", null, "ACTIVE",
             LocalDate.of(2026, 11, 1), LocalDate.of(2026, 11, 30), 8);
@@ -278,7 +277,7 @@ class MemberPortalQueryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.2.1 A1: Chưa có lượt check-in nào trả PageResponse rỗng")
+    @DisplayName("TC-F7.2.1-02a: Chưa có lượt check-in nào trả PageResponse rỗng")
     void checkinsEmptyWhenMemberHasNone() throws Exception {
         Long otherMembership = f.membership(other.memberId(), timePkg, "TIME", f.cn01, "ACTIVE",
             LocalDate.of(2026, 11, 1), LocalDate.of(2026, 11, 30), null);
@@ -293,7 +292,7 @@ class MemberPortalQueryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.2.1 BR-F7.1: Không thấy lịch sử check-in của hội viên khác kể cả khi truyền memberId")
+    @DisplayName("TC-F7.2.1-03a: Không thấy lịch sử check-in của hội viên khác kể cả khi truyền memberId")
     void checkinsNeverLeaksOtherMembersData() throws Exception {
         Long ownMembership = f.membership(me.memberId(), timePkg, "TIME", f.cn01, "ACTIVE",
             LocalDate.of(2026, 11, 1), LocalDate.of(2026, 11, 30), null);
@@ -317,7 +316,7 @@ class MemberPortalQueryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.2.1 E1: Tham số phân trang check-in không hợp lệ trả 400 kèm lỗi theo trường")
+    @DisplayName("TC-F7.2.1-04a: Tham số phân trang check-in không hợp lệ trả 400 kèm lỗi theo trường")
     void checkinsInvalidPagingReturns400() throws Exception {
         mvc.perform(get("/api/v1/me/checkins").param("page", "-1").with(f.bearer(me.userId(), UserRole.MEMBER)))
             .andExpect(status().isBadRequest())
@@ -337,7 +336,7 @@ class MemberPortalQueryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.2.1 E2: Vai trò khác hoặc MEMBER chưa gắn hồ sơ xem check-in trả 403; không token trả 401")
+    @DisplayName("TC-F7.2.1-06a: Vai trò khác hoặc MEMBER chưa gắn hồ sơ xem check-in trả 403; không token trả 401")
     void checkinsForbiddenAndUnauthorized() throws Exception {
         mvc.perform(get("/api/v1/me/checkins").with(f.bearer(receptionist, UserRole.RECEPTIONIST)))
             .andExpect(status().isForbidden());
@@ -353,7 +352,7 @@ class MemberPortalQueryIntegrationTest {
     // --- UC-F7.3: GET /api/v1/me/invoices ----------------------------------------------------------
 
     @Test
-    @DisplayName("US-F7.3.1 BR-F7.4: Hóa đơn mới nhất trước, phân trang, có dòng hóa đơn và hạn tự hủy cho hóa đơn chờ MEMBER_PORTAL")
+    @DisplayName("TC-F7.3.1-01a, TC-F7.3.1-02a: Hóa đơn mới nhất trước, phân trang, có dòng hóa đơn và hạn tự hủy cho hóa đơn chờ MEMBER_PORTAL")
     void invoicesPaginatedNewestFirstWithExpiresAtOnlyForPendingPortal() throws Exception {
         // 1. Cũ nhất: COUNTER + PAID
         clock.setVn(LocalDateTime.of(2026, 11, 18, 8, 0));
@@ -450,7 +449,7 @@ class MemberPortalQueryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.3.1 BR-F7.4: Hạn tự hủy đọc PENDING_INVOICE_TTL_DAYS theo chi nhánh từ system_configs, không viết cứng")
+    @DisplayName("TC-F7.3.1-02b: Hạn tự hủy đọc PENDING_INVOICE_TTL_DAYS theo chi nhánh từ system_configs, không viết cứng")
     void invoicesExpiresAtUsesBranchConfigAndNullForPaidPortal() throws Exception {
         p.branchTtl(f.cn01, 5); // CN01 = 5 ngày, CN02 dùng toàn chuỗi = 3 ngày
         MemberAccount meCn02 = p.memberAccount("HV000403", "0912000403", f.cn02, "ACTIVE");
@@ -500,7 +499,7 @@ class MemberPortalQueryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.3.1 A1: Chưa có hóa đơn nào trả PageResponse rỗng")
+    @DisplayName("TC-F7.3.1-04a: Chưa có hóa đơn nào trả PageResponse rỗng")
     void invoicesEmptyWhenMemberHasNone() throws Exception {
         invoiceService.createPackageInvoice(other.userId(), f.cn01, other.memberId(), timePkg,
             InvoiceSource.MEMBER_PORTAL);
@@ -513,7 +512,7 @@ class MemberPortalQueryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.3.1 BR-F7.1: Không thấy hóa đơn của hội viên khác và hóa đơn khách lẻ kể cả khi truyền memberId")
+    @DisplayName("TC-F7.3.1-03a: Không thấy hóa đơn của hội viên khác và hóa đơn khách lẻ kể cả khi truyền memberId")
     void invoicesNeverLeaksOtherMembersOrWalkInInvoices() throws Exception {
         PackageInvoiceDto ownInv = invoiceService.createPackageInvoice(
             me.userId(), f.cn01, me.memberId(), timePkg, InvoiceSource.MEMBER_PORTAL);
@@ -535,7 +534,7 @@ class MemberPortalQueryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.3.1 E1: Tham số phân trang hóa đơn không hợp lệ trả 400 kèm lỗi theo trường")
+    @DisplayName("TC-F7.3.1-05a: Tham số phân trang hóa đơn không hợp lệ trả 400 kèm lỗi theo trường")
     void invoicesInvalidPagingReturns400() throws Exception {
         mvc.perform(get("/api/v1/me/invoices").param("page", "-1").with(f.bearer(me.userId(), UserRole.MEMBER)))
             .andExpect(status().isBadRequest())
@@ -555,7 +554,7 @@ class MemberPortalQueryIntegrationTest {
     }
 
     @Test
-    @DisplayName("US-F7.3.1 E2: Vai trò khác hoặc MEMBER chưa gắn hồ sơ xem hóa đơn trả 403; không token trả 401")
+    @DisplayName("TC-F7.3.1-06a: Vai trò khác hoặc MEMBER chưa gắn hồ sơ xem hóa đơn trả 403; không token trả 401")
     void invoicesForbiddenAndUnauthorized() throws Exception {
         mvc.perform(get("/api/v1/me/invoices").with(f.bearer(receptionist, UserRole.RECEPTIONIST)))
             .andExpect(status().isForbidden());
