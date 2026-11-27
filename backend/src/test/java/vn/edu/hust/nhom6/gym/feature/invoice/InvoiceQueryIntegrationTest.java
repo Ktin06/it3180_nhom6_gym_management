@@ -89,6 +89,37 @@ class InvoiceQueryIntegrationTest {
     }
 
     @Test
+    @DisplayName("TC-F5.3.1-04b: Chủ chuỗi đọc danh mục chi nhánh kể cả ngừng hoạt động để lọc hóa đơn lịch sử")
+    void ownerListsBranchOptionsIncludingInactiveBranches() throws Exception {
+        jdbc.update("UPDATE branches SET status = 'INACTIVE' WHERE id = ?", f.cn02);
+        try {
+            mvc.perform(get("/api/v1/invoices/branches").with(f.bearer(owner, UserRole.SUPER_ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].code").value(jdbc.queryForList(
+                    "SELECT code FROM branches ORDER BY code, id", String.class)))
+                .andExpect(jsonPath("$[?(@.code == 'CN02')].name").value(
+                    org.hamcrest.Matchers.hasItem("Chi nhánh 2")));
+        } finally {
+            jdbc.update("UPDATE branches SET status = 'ACTIVE' WHERE id = ?", f.cn02);
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = UserRole.class, names = {"RECEPTIONIST", "BRANCH_MANAGER", "TRAINER", "MEMBER"})
+    @DisplayName("TC-F5.3.1-08g: danh mục chi nhánh hóa đơn chỉ dành cho Chủ chuỗi")
+    void nonOwnerCannotReadBranchOptions(UserRole role) throws Exception {
+        Long userId = f.staff("branch-options-" + role.name().toLowerCase(java.util.Locale.ROOT) + "@example.com", role, null);
+        mvc.perform(get("/api/v1/invoices/branches").with(f.bearer(userId, role)))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("TC-F5.3.1-08h: chưa đăng nhập không được đọc danh mục chi nhánh hóa đơn")
+    void anonymousCannotReadBranchOptions() throws Exception {
+        mvc.perform(get("/api/v1/invoices/branches")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("TC-F5.3.1-01a: lễ tân xem danh sách hóa đơn chi nhánh mình, mới nhất trước, phân trang PageResponse")
     void receptionistListsOwnBranchNewestFirstWithPaging() throws Exception {
         clock.setVn(LocalDateTime.of(2026, 11, 20, 8, 0));

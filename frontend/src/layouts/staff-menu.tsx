@@ -55,11 +55,10 @@ export const STAFF_MENU: StaffMenuItem[] = [
     ready: true,
   },
   {
-    path: '/invoices',
+    path: '/hoa-don',
     label: 'Thanh toán (F5)',
     icon: <DollarOutlined />,
-    roles: ['BRANCH_MANAGER', 'RECEPTIONIST'],
-    ready: false,
+    ready: true,
   },
   // S2-12.2: giao diện dashboard cơ bản (F6)
   {

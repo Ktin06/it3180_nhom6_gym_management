@@ -36,6 +36,9 @@ export const ROUTE_ACCESS = {
   '/ban-goi': { roles: ['RECEPTIONIST'] }, // F3
   // S2-12.2: giao diện dashboard cơ bản (F6)
   '/dashboard': { roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'RECEPTIONIST'] }, // F6
+  '/hoa-don': { roles: MEMBER_MANAGEMENT_ROLES }, // F5
+  '/hoa-don/:id': { roles: MEMBER_MANAGEMENT_ROLES }, // F5
+  '/member/invoices/:id/pdf': { roles: ['MEMBER'] }, // F5, điểm vào từ lịch sử F7
 } satisfies RouteAccessTable
 
 /** Đường dẫn đã khai báo quyền; viết sai tên thì TypeScript báo lỗi. */
