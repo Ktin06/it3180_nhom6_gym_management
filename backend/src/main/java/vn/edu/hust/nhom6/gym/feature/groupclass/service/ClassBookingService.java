@@ -1,6 +1,7 @@
 package vn.edu.hust.nhom6.gym.feature.groupclass.service;
 
 import java.time.*;
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,9 @@ import static vn.edu.hust.nhom6.gym.feature.systemconfig.service.SystemConfigKey
 import vn.edu.hust.nhom6.gym.feature.groupclass.dto.ClassDtos.*;
 import vn.edu.hust.nhom6.gym.feature.groupclass.repository.ClassRepository;
 
+/**
+ * Quản lý chỗ đặt lớp học nhóm (F8) và phục vụ check-in tại quầy (F4).
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -24,6 +28,21 @@ public class ClassBookingService {
     private final VnTime time;
     private final SystemConfigService configs;
     private static final Set<String> OPEN = Set.of("SCHEDULED", "RESCHEDULED");
+
+    /**
+     * Ghi {@code arrived_at = now} cho các chỗ BOOKED của hội viên ở buổi thuộc chi nhánh {@code branchId}, bắt đầu trong
+     * {@code [from, to]} (S2-11.1, UC-F4.3). Khung giờ do F4 truyền vào; F8 chỉ ghi cột này, không đổi {@code status}.
+     * Chỗ đã NO_SHOW, ATTENDED, CANCELLED, hoặc đã có {@code arrived_at} không bị đụng (kể cả {@code updated_at}).
+     *
+     * <p>Nơi gọi giữ khóa {@code members} (và {@code memberships} nếu có) trước, đúng thứ tự members → memberships →
+     * class_bookings, và {@code UPDATE} khóa các dòng {@code class_bookings} khớp điều kiện. Gọi trong giao dịch của nơi gọi.
+     *
+     * @return id các chỗ vừa ghi, tăng dần; rỗng nếu không có
+     */
+    public List<Long> markArrived(Long memberId, Long branchId, OffsetDateTime from, OffsetDateTime to,
+            OffsetDateTime now) {
+        return classes.markArrived(memberId, branchId, from, to, now);
+    }
 
     private ClassRepository.MemberRow authorize(CurrentUser actor, long memberId, Session session) {
         var member = classes.member(memberId);
@@ -106,8 +125,11 @@ public class ClassBookingService {
         return value;
     }
 
-    private void applyPenalty(long memberId, long branch, long actor, OffsetDateTime now) {
-        var member = classes.member(memberId);
+    void applyPenalty(long memberId, long branch, long actor, OffsetDateTime now) {
+        var found = classes.findMember(memberId);
+        // Hội viên đã xóa mềm không đặt lớp được nữa: bỏ qua phạt để kết quả vắng vẫn được ghi.
+        if (found.isEmpty()) { return; }
+        var member = found.get();
         if (member.bookingLockedUntil() != null && member.bookingLockedUntil().isAfter(now)) { return; }
         var month = time.dayStart(time.toVnDate(now).withDayOfMonth(1));
         var last = classes.latestLock(memberId);

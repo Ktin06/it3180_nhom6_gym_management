@@ -19,6 +19,8 @@ public class ClassRepository {
     public record MemberRow(Long id, Long userId, Long homeBranchId, String status,
         OffsetDateTime deletedAt, OffsetDateTime bookingLockedUntil) {}
 
+    public record Room(Long branchId, int capacity, String status) {}
+
     public record Resources(Long roomBranchId, Long trainerBranchId, Integer roomCapacity,
         boolean active, boolean trainerRole) {}
 
@@ -41,9 +43,14 @@ public class ClassRepository {
             .orElseThrow(() -> new NotFoundException("Không tìm thấy buổi học."));
     }
 
-    public MemberRow member(long id) {
+    /** Rỗng khi hội viên không tồn tại hoặc đã xóa mềm. */
+    public Optional<MemberRow> findMember(long id) {
         return rows("SELECT * FROM members WHERE id=:id AND deleted_at IS NULL", Map.of("id", id), MemberRow.class)
-            .stream().findFirst().orElseThrow(() -> new NotFoundException("Không tìm thấy hội viên."));
+            .stream().findFirst();
+    }
+
+    public MemberRow member(long id) {
+        return findMember(id).orElseThrow(() -> new NotFoundException("Không tìm thấy hội viên."));
     }
 
     public void lockMember(long id) {
@@ -52,6 +59,11 @@ public class ClassRepository {
 
     public void lockBranch(long branchId) {
         jdbc.queryForList("SELECT id FROM branches WHERE id=:id FOR UPDATE", Map.of("id", branchId), Long.class);
+    }
+
+    /** Khóa dòng huấn luyện viên ({@code FOR NO KEY UPDATE}) để đồng bộ với luồng đặt buổi PT (NF6). */
+    public void lockTrainer(long trainerId) {
+        jdbc.queryForList("SELECT id FROM staff WHERE id=:id FOR NO KEY UPDATE", Map.of("id", trainerId), Long.class);
     }
 
     public Resources resources(long branchId, ScheduleRequest request) {
@@ -117,11 +129,14 @@ public class ClassRepository {
     }
 
     public boolean resourceConflict(long trainer, long room, OffsetDateTime start, OffsetDateTime end) {
-        var p = new MapSqlParameterSource().addValue("trainer", trainer).addValue("room", room)
-            .addValue("start", start).addValue("end", end);
+        return resourceConflict(trainer, room, start, end, 0);
+    }
+
+    public boolean resourceConflict(long trainer, long room, OffsetDateTime start, OffsetDateTime end, long excludedId) {
+        var p = Map.of("trainer", trainer, "room", room, "start", start, "end", end, "excludedId", excludedId);
         // Khoảng nửa mở: giờ kết thúc bằng giờ bắt đầu tiếp theo không trùng.
         return Boolean.TRUE.equals(jdbc.queryForObject("""
-            SELECT EXISTS(SELECT 1 FROM class_sessions WHERE status<>'CANCELLED'
+            SELECT EXISTS(SELECT 1 FROM class_sessions WHERE status<>'CANCELLED' AND id<>:excludedId
                 AND (trainer_id=:trainer OR room_id=:room) AND start_at<:end AND end_at>:start)
               OR EXISTS(SELECT 1 FROM pt_sessions WHERE status<>'CANCELLED' AND trainer_id=:trainer
                 AND start_at<:end AND end_at>:start)
@@ -150,10 +165,11 @@ public class ClassRepository {
 
     public int insertSession(Schedule s, LocalDate date, OffsetDateTime start, OffsetDateTime end) {
         return jdbc.update("""
-            INSERT INTO class_sessions(class_schedule_id,branch_id,trainer_id,room_id,occurrence_date,start_at,end_at,capacity)
-            VALUES (:id,:branch,:trainer,:room,:date,:start,:end,:capacity)
+            INSERT INTO class_sessions(class_schedule_id,class_type_id,branch_id,trainer_id,room_id,occurrence_date,
+                                       start_at,end_at,capacity)
+            VALUES (:id,:type,:branch,:trainer,:room,:date,:start,:end,:capacity)
             ON CONFLICT (class_schedule_id,occurrence_date) DO NOTHING
-            """, Map.of("id", s.id(), "branch", s.branchId(), "trainer", s.trainerId(), "room", s.roomId(),
+            """, Map.of("id", s.id(), "type", s.classTypeId(), "branch", s.branchId(), "trainer", s.trainerId(), "room", s.roomId(),
                 "date", date, "start", start, "end", end, "capacity", s.capacity()));
     }
 
@@ -207,6 +223,95 @@ public class ClassRepository {
             """, Map.of("id", id, "now", now, "reason", staff ? "BY_STAFF" : "BY_MEMBER", "late", late));
     }
 
+    public Room room(long id) {
+        return rows("SELECT branch_id, capacity, status FROM rooms WHERE id=:id", Map.of("id", id), Room.class)
+            .stream().findFirst().orElseThrow(() -> new NotFoundException("Không tìm thấy phòng."));
+    }
+
+    public void reschedule(long id, OffsetDateTime start, OffsetDateTime end) {
+        jdbc.update("""
+            UPDATE class_sessions SET original_start_at=COALESCE(original_start_at,start_at),
+                start_at=:start,end_at=:end,status='RESCHEDULED',updated_at=clock_timestamp()
+            WHERE id=:id
+            """, Map.of("id", id, "start", start, "end", end));
+    }
+
+    public void changeRoom(long id, long room) {
+        jdbc.update("UPDATE class_sessions SET room_id=:room,updated_at=clock_timestamp() WHERE id=:id",
+            Map.of("id", id, "room", room));
+    }
+
+    public List<Long> bookedMemberIds(long sessionId) {
+        return jdbc.queryForList("""
+            SELECT member_id FROM class_bookings WHERE class_session_id=:id AND status='BOOKED' ORDER BY member_id
+            """, Map.of("id", sessionId), Long.class);
+    }
+
+    public void cancelSession(long id, OffsetDateTime now) {
+        var params = Map.of("id", id, "now", now);
+        jdbc.update("UPDATE class_sessions SET status='CANCELLED',updated_at=:now WHERE id=:id", params);
+        jdbc.update("""
+            UPDATE class_bookings SET status='CANCELLED',cancelled_at=:now,cancel_reason='SESSION_CANCELLED',
+                is_late_cancel=false,updated_at=:now WHERE class_session_id=:id AND status='BOOKED'
+            """, params);
+    }
+
+    public boolean teaches(long sessionId, long userId) {
+        return Boolean.TRUE.equals(jdbc.queryForObject("""
+            SELECT EXISTS(SELECT 1 FROM staff t JOIN class_sessions s ON s.trainer_id=t.id
+                WHERE s.id=:session AND t.user_id=:user AND t.status='ACTIVE' AND t.branch_id=s.branch_id)
+            """, Map.of("session", sessionId, "user", userId), Boolean.class));
+    }
+
+    private static final String ATTENDANCE_SELECT = """
+        SELECT b.id booking_id,b.member_id,m.member_code,m.full_name,b.status,b.arrived_at,
+            b.attendance_marked_by,b.updated_at
+        FROM class_bookings b JOIN members m ON m.id=b.member_id
+        """;
+
+    public List<AttendanceRow> attendance(long sessionId) {
+        return rows(ATTENDANCE_SELECT + """
+            WHERE b.class_session_id=:session AND b.status<>'CANCELLED' ORDER BY b.id
+            """, Map.of("session", sessionId), AttendanceRow.class);
+    }
+
+    public AttendanceRow attendanceRow(long sessionId, long bookingId) {
+        return rows(ATTENDANCE_SELECT + "WHERE b.class_session_id=:session AND b.id=:id",
+            Map.of("session", sessionId, "id", bookingId), AttendanceRow.class).stream().findFirst()
+            .orElseThrow(() -> new NotFoundException("Không tìm thấy chỗ đặt trong buổi học."));
+    }
+
+    public boolean markAttendance(AttendanceRow old, AttendanceStatus status, long actor) {
+        return jdbc.update("""
+            UPDATE class_bookings SET status=:status,attendance_marked_by=:actor,
+                updated_at=GREATEST(clock_timestamp(),updated_at + interval '1 microsecond')
+            WHERE id=:id AND updated_at=:version
+            """, Map.of("status", status.name(), "actor", actor, "id", old.bookingId(), "version", old.updatedAt())) == 1;
+    }
+
+    public void auditAttendance(AttendanceRow old, AttendanceStatus status, long branch, long actor, OffsetDateTime now) {
+        var params = new MapSqlParameterSource()
+            .addValue("actor", actor).addValue("branch", branch).addValue("id", old.bookingId())
+            .addValue("oldStatus", old.status()).addValue("oldMarker", old.attendanceMarkedBy(), java.sql.Types.BIGINT)
+            .addValue("status", status.name()).addValue("now", now);
+        jdbc.update("""
+            INSERT INTO audit_logs(user_id,branch_id,action,entity,entity_id,old_value,new_value,created_at,updated_at)
+            VALUES (:actor,:branch,'CLASS_ATTENDANCE_CORRECT','class_bookings',:id,
+                jsonb_build_object('status',:oldStatus::text,'attendanceMarkedBy',:oldMarker::bigint),
+                jsonb_build_object('status',:status::text,'attendanceMarkedBy',:actor::bigint),:now,:now)
+            """, params);
+    }
+
+    public void unlockBooking(long member, long branch, long actor, OffsetDateTime oldUntil, OffsetDateTime now) {
+        var params = Map.of("actor", actor, "branch", branch, "id", member, "oldUntil", oldUntil, "now", now);
+        jdbc.update("UPDATE members SET booking_locked_until=NULL,updated_at=:now WHERE id=:id", params);
+        jdbc.update("""
+            INSERT INTO audit_logs(user_id,branch_id,action,entity,entity_id,old_value,new_value,created_at,updated_at)
+            VALUES (:actor,:branch,'CLASS_BOOKING_UNLOCK','members',:id,
+                jsonb_build_object('lockedUntil',:oldUntil::text),jsonb_build_object('lockedUntil',NULL),:now,:now)
+            """, params);
+    }
+
     public OffsetDateTime latestLock(long member) {
         var times = jdbc.queryForList("""
             SELECT created_at FROM audit_logs WHERE entity='members' AND entity_id=:id
@@ -231,5 +336,29 @@ public class ClassRepository {
             VALUES (:actor,:branch,'CLASS_BOOKING_LOCK','members',:member,
                 jsonb_build_object('lockedUntil',:until::text),:now,:now)
             """, Map.of("actor", actor, "branch", branch, "member", member, "until", until, "now", now));
+    }
+
+    /**
+     * Ghi {@code arrived_at = now} cho các chỗ BOOKED chưa có arrived_at của hội viên ở buổi chưa hủy thuộc chi nhánh
+     * {@code branchId}, bắt đầu trong {@code [from, to]} (S2-11.1, UC-F4.3).
+     *
+     * @return danh sách id các chỗ vừa ghi, tăng dần
+     */
+    public List<Long> markArrived(long memberId, long branchId, OffsetDateTime from, OffsetDateTime to, OffsetDateTime now) {
+        return jdbc.queryForList("""
+            UPDATE class_bookings b
+            SET arrived_at = :now
+            FROM class_sessions s
+            WHERE b.class_session_id = s.id
+              AND b.member_id = :memberId
+              AND s.branch_id = :branchId
+              AND b.status = 'BOOKED'
+              AND b.arrived_at IS NULL
+              AND s.status <> 'CANCELLED'
+              AND s.start_at >= :from
+              AND s.start_at <= :to
+            RETURNING b.id
+            """, Map.of("memberId", memberId, "branchId", branchId, "from", from, "to", to, "now", now), Long.class)
+            .stream().sorted().toList();
     }
 }

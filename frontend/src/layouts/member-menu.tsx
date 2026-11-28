@@ -9,15 +9,13 @@ export const MEMBER_MENU: MenuItem[] = [
     path: '/member/memberships',
     label: 'Gói tập',
     icon: <IdcardOutlined />,
-    ready: false,
-    roles: ['MEMBER'],
+    ready: true,
   }, // F7
   {
     path: '/member/classes',
     label: 'Lớp học',
     icon: <CalendarOutlined />,
-    ready: false,
-    roles: ['MEMBER'],
+    ready: true,
   }, // F8
   { path: '/member/pt', label: 'PT', icon: <UserOutlined />, ready: false, roles: ['MEMBER'] }, // F9
 ]

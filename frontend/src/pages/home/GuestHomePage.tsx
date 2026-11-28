@@ -1,7 +1,7 @@
 import { Button, Space, Typography } from 'antd'
 import { Link } from 'react-router-dom'
 
-/** Trang chủ tạm cho khách. Lịch lớp (F8) sẽ bổ sung. */
+/** Trang chủ cho khách. */
 export function GuestHomePage() {
   return (
     <>
@@ -12,6 +12,9 @@ export function GuestHomePage() {
       <Space wrap>
         <Link to="/bang-gia">
           <Button>Xem bảng giá</Button>
+        </Link>
+        <Link to="/lich-lop">
+          <Button>Xem lịch lớp</Button>
         </Link>
         <Link to="/register">
           <Button type="primary">Đăng ký hội viên</Button>

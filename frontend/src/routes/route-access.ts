@@ -1,5 +1,5 @@
 import { matchPath } from 'react-router-dom'
-import { MEMBER_MANAGEMENT_ROLES, type Role } from '../auth/roles'
+import { MEMBER_MANAGEMENT_ROLES, ROLES, type Role } from '../auth/roles'
 
 export interface RouteAccessRule {
   /** Vai trò được mở trang. */
@@ -26,9 +26,22 @@ export const ROUTE_ACCESS = {
   '/trainer': { roles: ['TRAINER'], includeChildren: true },
   '/member': { roles: ['MEMBER'], includeChildren: true },
   // Trang chức năng của nhân viên.
+  '/checkins': { roles: ['RECEPTIONIST', 'BRANCH_MANAGER'] }, // F4
   '/members': { roles: MEMBER_MANAGEMENT_ROLES }, // F2
   '/packages': { roles: MEMBER_MANAGEMENT_ROLES }, // F3
+  '/doi-mat-khau': { roles: ROLES }, // F1
+  '/member/classes': { roles: ['MEMBER'] },
+  '/trainer/classes': { roles: ['TRAINER'] },
+  '/trainer/classes/:sessionId/attendance': { roles: ['TRAINER'] },
   '/ban-goi': { roles: ['RECEPTIONIST'] }, // F3
+  // S2-12.2: giao diện dashboard cơ bản (F6)
+  '/dashboard': { roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'RECEPTIONIST'] }, // F6
+  '/hoa-don': { roles: MEMBER_MANAGEMENT_ROLES }, // F5
+  '/hoa-don/:id': { roles: MEMBER_MANAGEMENT_ROLES }, // F5
+  '/member/invoices/:id/pdf': { roles: ['MEMBER'] }, // F5, điểm vào từ lịch sử F7
+  '/member/memberships': { roles: ['MEMBER'] }, // F7
+  // S2-20.2: giao diện học viên của huấn luyện viên (F9)
+  '/pt/hoc-vien': { roles: ['TRAINER'] }, // F9
 } satisfies RouteAccessTable
 
 /** Đường dẫn đã khai báo quyền; viết sai tên thì TypeScript báo lỗi. */

@@ -112,6 +112,50 @@ public class Invoice extends BaseEntity {
         return item;
     }
 
+    /**
+     * PENDING → PAID (UC-F5.2 bước 5c). Nơi gọi đã kiểm tra trạng thái và trả 422; ở đây chỉ chặn lỗi lập trình.
+     *
+     * @param paidAt thời điểm xác nhận thu tiền, UTC
+     */
+    public void markPaid(OffsetDateTime paidAt) {
+        requirePending();
+        this.status = InvoiceStatus.PAID;
+        this.paidAt = paidAt;
+    }
+
+    /** PENDING → CANCELLED (UC-F5.3 luồng A1). Gói PENDING đi kèm do {@code MembershipService} hủy. */
+    public void cancel() {
+        requirePending();
+        this.status = InvoiceStatus.CANCELLED;
+    }
+
+    /**
+     * PAID → REFUNDED (UC-F5.5 bước 5b). Nơi gọi đã kiểm tra trạng thái và trả 422 E6; ở đây chỉ chặn lỗi lập trình.
+     *
+     * @param refundedBy {@code users.id} quản lý duyệt hoàn tiền
+     * @param refundedAt thời điểm hoàn tiền, UTC
+     * @param reason lý do đã cắt khoảng trắng, không rỗng
+     */
+    public void markRefunded(Long refundedBy, OffsetDateTime refundedAt, String reason) {
+        if (status != InvoiceStatus.PAID) {
+            throw new IllegalStateException("Hóa đơn " + code + " không ở trạng thái PAID: " + status);
+        }
+        this.status = InvoiceStatus.REFUNDED;
+        this.refundedBy = refundedBy;
+        this.refundedAt = refundedAt;
+        this.refundReason = reason;
+    }
+
+    public boolean isPending() {
+        return status == InvoiceStatus.PENDING;
+    }
+
+    private void requirePending() {
+        if (!isPending()) {
+            throw new IllegalStateException("Hóa đơn " + code + " không ở trạng thái PENDING: " + status);
+        }
+    }
+
     public List<InvoiceItem> getItems() {
         return Collections.unmodifiableList(items);
     }

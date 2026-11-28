@@ -1,5 +1,7 @@
 package vn.edu.hust.nhom6.gym.feature.staff.service;
 
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,36 @@ public class StaffService {
             throw new AccessDeniedException("Chi nhánh làm việc không tồn tại hoặc đã ngừng hoạt động.");
         }
         return branchId;
+    }
+
+    /** Họ tên nhân viên theo {@code users.id}, ví dụ người thu tiền trên phiếu thu; rỗng nếu không có dòng staff. */
+    public Optional<String> findFullName(Long userId) {
+        return staff.findFullNameByUserId(userId);
+    }
+
+    /** Thông tin nhân viên ACTIVE gắn với tài khoản đăng nhập ({@code staff.id} và {@code branch_id}). */
+    public record StaffIdentity(Long staffId, Long branchId) { }
+
+    /**
+     * Lấy {@code staff.id} và {@code branch_id} của nhân viên đang hoạt động (ví dụ PT khai báo lịch rảnh).
+     *
+     * @throws AccessDeniedException (403) khi không có dòng staff ACTIVE hoặc chi nhánh đã ngừng hoạt động
+     */
+    public StaffIdentity requireActiveStaff(Long userId) {
+        if (userId == null || userId <= 0) {
+            throw missingAssignment();
+        }
+        StaffLookupRepository.StaffIdentityRow row = staff.findActiveIdentityByUserId(userId)
+            .orElseThrow(StaffService::missingAssignment);
+        if (!branches.isActive(row.branchId())) {
+            throw new AccessDeniedException("Chi nhánh làm việc không tồn tại hoặc đã ngừng hoạt động.");
+        }
+        return new StaffIdentity(row.staffId(), row.branchId());
+    }
+
+    /** Lấy {@code staff.id} của nhân viên đang hoạt động gắn với {@code users.id}. */
+    public Long requireStaffId(Long userId) {
+        return requireActiveStaff(userId).staffId();
     }
 
     private static AccessDeniedException missingAssignment() {

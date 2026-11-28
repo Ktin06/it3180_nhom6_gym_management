@@ -38,6 +38,9 @@ import vn.edu.hust.nhom6.gym.feature.staff.service.StaffService;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MemberService {
+    public static final String MEMBER_ALREADY_HAS_ACCOUNT = "Hội viên này đã có tài khoản đăng nhập.";
+    public static final String INACTIVE_MEMBER_CANNOT_CREATE_ACCOUNT =
+        "Chỉ có thể tạo tài khoản cho hồ sơ hội viên đang hoạt động.";
     private static final String PHONE_HAS_PROFILE =
         "Số điện thoại đã có hồ sơ hội viên. Vui lòng liên hệ quầy lễ tân.";
     private static final String PHONE_TAKEN_BY_OTHER = "Số điện thoại đã được đăng ký cho hội viên khác.";
@@ -120,6 +123,20 @@ public class MemberService {
             new NotFoundException("Hội viên không tồn tại trên hệ thống."));
     }
 
+    /**
+     * Khóa dòng hội viên như {@link #lockForUpdate} nhưng <b>không chờ</b>: dòng đang bị giao dịch khác khóa (check-in,
+     * đặt lớp, đặt PT của cùng hội viên) thì ném ngay {@link org.springframework.dao.PessimisticLockingFailureException}.
+     * Chỉ dùng cho check-in tại quầy (SRS F4 Scenario 7: bên đến sau nhận 409 ngay); F8, F9 vẫn dùng
+     * {@link #lockForUpdate} (chờ).
+     *
+     * @throws NotFoundException (404) khi không có hồ sơ hoặc hồ sơ đã xóa mềm
+     */
+    @Transactional
+    public Member lockForUpdateNoWait(Long memberId) {
+        return members.findForUpdateNoWait(memberId).orElseThrow(() ->
+            new NotFoundException("Hội viên không tồn tại trên hệ thống."));
+    }
+
     /** Chức năng khác đọc hồ sơ theo cùng phạm vi chi nhánh với F2. */
     public Member requireInStaffScope(CurrentUser actor, Long memberId) {
         Member member = findMember(memberId);
@@ -138,7 +155,7 @@ public class MemberService {
         return member;
     }
 
-    /** Khóa dòng cha trước khi thay hồ sơ hoặc ảnh, kể cả khi ảnh chưa tồn tại (NF6). */
+    /** Khóa dòng cha và kiểm tra phạm vi chi nhánh trước khi thay hồ sơ, ảnh hoặc gắn tài khoản (NF6, S3). */
     @Transactional
     public Member requireEditableForUpdate(CurrentUser actor, Long id) {
         Member member = members.findForUpdate(id).orElseThrow(MemberService::notFound);
@@ -212,6 +229,26 @@ public class MemberService {
         Set<Long> withAvatar = memberIds.isEmpty() ? Set.of() : avatars.findMemberIdsWithAvatar(memberIds);
         return PageResponse.of(result, m -> mapper.summary(m,
             m.getUserId() == null ? null : emails.get(m.getUserId()), withAvatar.contains(m.getId())));
+    }
+
+    /**
+     * Khóa dòng hội viên, kiểm tra phạm vi chi nhánh, trạng thái {@code ACTIVE} và chưa gắn tài khoản,
+     * rồi tạo bản ghi {@code users} qua {@link AccountService} và gắn {@code members.user_id} trong cùng giao dịch (UC-F2.2).
+     */
+    @Transactional
+    public CreateMemberAccountResponse linkAccount(CurrentUser actor, Long memberId, String rawEmail) {
+        Member member = requireEditableForUpdate(actor, memberId);
+        if (member.getStatus() != MemberStatus.ACTIVE) {
+            throw new BusinessRuleException(INACTIVE_MEMBER_CANNOT_CREATE_ACCOUNT);
+        }
+        if (member.getUserId() != null) {
+            throw new ConflictException(MEMBER_ALREADY_HAS_ACCOUNT);
+        }
+        String email = rawEmail.trim().toLowerCase(Locale.ROOT);
+        Long userId = accounts.createMemberAccount(email);
+        member.setUserId(userId);
+        members.saveAndFlush(member);
+        return new CreateMemberAccountResponse(member.getId(), userId, email);
     }
 
     private MemberDetailResponse response(Member member) {

@@ -32,5 +32,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.id = :id")
     Optional<User> findByIdForUpdate(@Param("id") Long id);
 
+    /** Khóa tài khoản trước khi khóa dòng refresh token, cùng thứ tự với đổi và đặt lại mật khẩu. */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM User u WHERE u.id = (SELECT r.user.id FROM RefreshToken r WHERE r.tokenHash = :tokenHash)")
+    Optional<User> findByRefreshTokenHashForUpdate(@Param("tokenHash") String tokenHash);
+
     boolean existsByEmail(String email);
 }

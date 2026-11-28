@@ -1,9 +1,12 @@
 package vn.edu.hust.nhom6.gym.feature.groupclass.controller;
 
 import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -21,7 +24,42 @@ import vn.edu.hust.nhom6.gym.common.security.CurrentUser;
 @RequiredArgsConstructor
 public class ClassController {
     private final ClassScheduleService schedules;
+    private final ClassCalendarService calendars;
     private final ClassBookingService bookings;
+    private final ClassSessionService sessions;
+    private final ClassAttendanceService attendance;
+
+    @GetMapping("/public/class-branches")
+    @Operation(summary = "Danh sách chi nhánh đang hoạt động để lọc lịch lớp")
+    public List<BranchOption> publicBranches() {
+        return calendars.branches();
+    }
+
+    @GetMapping("/public/class-sessions")
+    @Operation(summary = "Lịch lớp công khai theo chi nhánh và khoảng ngày Việt Nam")
+    public List<CalendarSession> publicCalendar(@RequestParam(required = false) @Positive Long branchId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return calendars.publicSessions(branchId, from, to);
+    }
+
+    @GetMapping("/members/me/class-sessions")
+    @PreAuthorize("hasRole('MEMBER')")
+    @Operation(summary = "Lịch lớp, chỗ trống và trạng thái chỗ đặt của hội viên đang đăng nhập")
+    public MemberCalendar memberCalendar(Authentication auth, @RequestParam(required = false) @Positive Long branchId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return calendars.memberSessions(CurrentUser.from(auth), branchId, from, to);
+    }
+
+    @GetMapping("/trainers/me/class-sessions")
+    @PreAuthorize("hasRole('TRAINER')")
+    @Operation(summary = "Lịch dạy lớp nhóm theo phân công từng buổi của huấn luyện viên")
+    public List<CalendarSession> trainerCalendar(Authentication auth,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return calendars.trainerSessions(CurrentUser.from(auth), from, to);
+    }
 
     @GetMapping("/class-schedules")
     @PreAuthorize("hasRole('BRANCH_MANAGER')")
@@ -84,5 +122,51 @@ public class ClassController {
     @Operation(summary = "Hủy chỗ trước giờ học; buổi đã đổi giờ hủy không phạt")
     public Booking cancel(Authentication auth, @PathVariable @Positive Long id) {
         return bookings.cancel(CurrentUser.from(auth), id);
+    }
+
+    @PutMapping("/class-sessions/{id}/time")
+    @PreAuthorize("hasAnyRole('BRANCH_MANAGER','SUPER_ADMIN')")
+    @Operation(summary = "Đổi giờ buổi học và giữ chỗ đã đặt")
+    public Session changeTime(Authentication auth, @PathVariable @Positive Long id,
+            @Valid @RequestBody SessionTimeRequest request) {
+        return sessions.changeTime(CurrentUser.from(auth), id, request);
+    }
+
+    @PutMapping("/class-sessions/{id}/room")
+    @PreAuthorize("hasAnyRole('BRANCH_MANAGER','SUPER_ADMIN')")
+    @Operation(summary = "Đổi phòng buổi học và giữ chỗ đã đặt")
+    public Session changeRoom(Authentication auth, @PathVariable @Positive Long id,
+            @Valid @RequestBody SessionRoomRequest request) {
+        return sessions.changeRoom(CurrentUser.from(auth), id, request.roomId());
+    }
+
+    @PutMapping("/class-sessions/{id}/cancel")
+    @PreAuthorize("hasAnyRole('BRANCH_MANAGER','SUPER_ADMIN')")
+    @Operation(summary = "Hủy buổi và các chỗ đang đặt, không ghi vi phạm")
+    public Session cancelSession(Authentication auth, @PathVariable @Positive Long id) {
+        return sessions.cancel(CurrentUser.from(auth), id);
+    }
+
+    @GetMapping("/class-sessions/{id}/attendance")
+    @PreAuthorize("hasAnyRole('TRAINER','BRANCH_MANAGER')")
+    @Operation(summary = "Xem chỗ đặt và trạng thái check-in để điểm danh")
+    public AttendanceRoster roster(Authentication auth, @PathVariable @Positive Long id) {
+        return attendance.roster(CurrentUser.from(auth), id);
+    }
+
+    @PutMapping("/class-sessions/{id}/attendance")
+    @PreAuthorize("hasAnyRole('TRAINER','BRANCH_MANAGER')")
+    @Operation(summary = "Điểm danh hoặc sửa kết quả theo phạm vi và thời hạn của vai trò")
+    public AttendanceRow markAttendance(Authentication auth, @PathVariable @Positive Long id,
+            @Valid @RequestBody AttendanceRequest request) {
+        return attendance.mark(CurrentUser.from(auth), id, request);
+    }
+
+    @DeleteMapping("/members/{id}/class-booking-lock")
+    @PreAuthorize("hasRole('BRANCH_MANAGER')")
+    @Operation(summary = "Gỡ khóa đặt lớp của hội viên thuộc chi nhánh và ghi audit")
+    public ResponseEntity<Void> unlockClassBooking(Authentication auth, @PathVariable @Positive Long id) {
+        attendance.unlock(CurrentUser.from(auth), id);
+        return ResponseEntity.noContent().build();
     }
 }
