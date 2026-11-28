@@ -1,6 +1,7 @@
 package vn.edu.hust.nhom6.gym.feature.notification.entity;
 
 import java.time.OffsetDateTime;
+import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -112,6 +113,20 @@ public class Notification extends BaseEntity {
     public void reschedule(OffsetDateTime at) {
         requirePendingEmail();
         this.scheduledAt = at;
+    }
+
+    /**
+     * Đánh dấu thông báo kênh {@code IN_APP} đã đọc (BR-F10.8). Nếu đã có {@code read_at} thì giữ nguyên
+     * thời điểm đọc ban đầu (idempotent).
+     */
+    public void markRead(OffsetDateTime at) {
+        Objects.requireNonNull(at, "at");
+        if (channel != NotificationChannel.IN_APP) {
+            throw new IllegalStateException("Chỉ đánh dấu đã đọc cho dòng IN_APP, dòng " + getId());
+        }
+        if (this.readAt == null) {
+            this.readAt = at;
+        }
     }
 
     /** Cập nhật lại tiêu đề và nội dung email trước lúc gửi (ví dụ buổi lớp vừa dời giờ). */

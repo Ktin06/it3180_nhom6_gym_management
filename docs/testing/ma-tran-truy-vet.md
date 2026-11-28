@@ -17,8 +17,8 @@
 | F7 | 5 | 5 | 34 | 30 | 4 | 73 |
 | F8 | 9 | 9 | 55 | 53 | 2 | 81 |
 | F9 | 7 | 7 | 63 | 61 | 2 | 163 |
-| F10 | 5 | 4 | 25 | 12 | 13 | 29 |
-| **Tổng** | **57** | **58** | **386** | **311** | **75** | **902** |
+| F10 | 5 | 4 | 25 | 22 | 3 | 49 |
+| **Tổng** | **57** | **58** | **386** | **321** | **65** | **922** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -105,18 +105,8 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F9.4.1-02 | Soạn giáo án cho học viên có đặt chỗ lớp do mình dạy | US-F9.4.1 |
 | AC-F9.5.1-02 | Ghi chỉ số cơ thể, người ghi lấy từ token | US-F9.5.1 |
 | AC-F10.2.1-04 | Không tạo thông báo cho hội viên chưa có tài khoản | US-F10.2.1 |
-| AC-F10.4.1-01 | Tạo thông báo khi nhận sự kiện đổi giờ từ F8 | US-F10.4.1 |
-| AC-F10.4.1-02 | Nội dung thông báo có giờ cũ và giờ mới | US-F10.4.1 |
 | AC-F10.4.1-03 | Không tạo thông báo khi buổi lớp không có hội viên đặt chỗ | US-F10.4.1 |
-| AC-F10.4.1-04 | Chỉ báo hội viên còn giữ chỗ | US-F10.4.1 |
 | AC-F10.4.1-05 | Không tạo thông báo cho hội viên chưa có tài khoản | US-F10.4.1 |
-| AC-F10.4.1-06 | Gửi thông báo qua hai kênh và xử lý lỗi email | US-F10.4.1 |
-| AC-F10.5.1-01 | Xem danh sách thông báo của tài khoản đang đăng nhập | US-F10.5.1 |
-| AC-F10.5.1-02 | Sắp xếp và phân trang danh sách thông báo | US-F10.5.1 |
-| AC-F10.5.1-03 | Hiển thị đầy đủ nội dung và trạng thái đã đọc | US-F10.5.1 |
-| AC-F10.5.1-04 | Đánh dấu thông báo đã đọc | US-F10.5.1 |
-| AC-F10.5.1-05 | Không cho phép xem hoặc đánh dấu thông báo của người khác | US-F10.5.1 |
-| AC-F10.5.1-06 | Xử lý dữ liệu đầu vào sai và thông báo không tồn tại | US-F10.5.1 |
 
 ## 4. Cây xuôi: chức năng → UC → US → AC → TC
 
@@ -1538,20 +1528,40 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 - **UC-F10.3** Đã bỏ (ADR 0014)
 - **UC-F10.4** Gửi thông báo đổi giờ lớp
   - **US-F10.4.1** Nhận thông báo khi lịch lớp học nhóm thay đổi
-    - AC-F10.4.1-01 Tạo thông báo khi nhận sự kiện đổi giờ từ F8 ❌ chưa có TC
-    - AC-F10.4.1-02 Nội dung thông báo có giờ cũ và giờ mới ❌ chưa có TC
+    - AC-F10.4.1-01 Tạo thông báo khi nhận sự kiện đổi giờ từ F8
+      - TC-F10.4.1-01a `NotificationEventListenerIntegrationTest#changeRoomCreatesNotificationsWithRoomNames`
+      - TC-F10.4.1-01b `NotificationEventListenerIntegrationTest#cancelClassCreatesNotifications`
+      - TC-F10.4.1-01c `NotificationEventListenerIntegrationTest#eventNotificationUsesSessionClassTypeNotSchedule`
+    - AC-F10.4.1-02 Nội dung thông báo có giờ cũ và giờ mới
+      - TC-F10.4.1-02a `NotificationEventListenerIntegrationTest#rescheduleCreatesNotificationsWithOldAndNewVietnamTimes`
     - AC-F10.4.1-03 Không tạo thông báo khi buổi lớp không có hội viên đặt chỗ ❌ chưa có TC
-    - AC-F10.4.1-04 Chỉ báo hội viên còn giữ chỗ ❌ chưa có TC
+    - AC-F10.4.1-04 Chỉ báo hội viên còn giữ chỗ
+      - TC-F10.4.1-04a `NotificationEventListenerIntegrationTest#nonBookedOrNoAccountMembersReceiveNothing`
     - AC-F10.4.1-05 Không tạo thông báo cho hội viên chưa có tài khoản ❌ chưa có TC
-    - AC-F10.4.1-06 Gửi thông báo qua hai kênh và xử lý lỗi email ❌ chưa có TC
+    - AC-F10.4.1-06 Gửi thông báo qua hai kênh và xử lý lỗi email
+      - TC-F10.4.1-06a `NotificationEventListenerIntegrationTest#notificationFailureDoesNotRollbackF8OrBlockOtherRecipients`
 - **UC-F10.5** Xem thông báo trong web
-  - **US-F10.5.1** Xem và quản lý trạng thái đã đọc của thông báo
-    - AC-F10.5.1-01 Xem danh sách thông báo của tài khoản đang đăng nhập ❌ chưa có TC
-    - AC-F10.5.1-02 Sắp xếp và phân trang danh sách thông báo ❌ chưa có TC
-    - AC-F10.5.1-03 Hiển thị đầy đủ nội dung và trạng thái đã đọc ❌ chưa có TC
-    - AC-F10.5.1-04 Đánh dấu thông báo đã đọc ❌ chưa có TC
-    - AC-F10.5.1-05 Không cho phép xem hoặc đánh dấu thông báo của người khác ❌ chưa có TC
-    - AC-F10.5.1-06 Xử lý dữ liệu đầu vào sai và thông báo không tồn tại ❌ chưa có TC
+  - **US-F10.5.1** Xem và quản lý trạng thái đã đọc của thông báo ✅ mọi AC có TC
+    - AC-F10.5.1-01 Xem danh sách thông báo của tài khoản đang đăng nhập
+      - TC-F10.5.1-01a `StompJwtChannelInterceptorTest#connectAndStompAuthenticateJwt`
+      - TC-F10.5.1-01b `NotificationApiIntegrationTest#emptyNotificationsAndZeroUnreadCount`
+      - TC-F10.5.1-01c `NotificationWebSocketIntegrationTest#stompConnectRejectsMissingOrInvalidTokens`
+      - TC-F10.5.1-01d `NotificationWebSocketIntegrationTest#stomp12FrameRequiresValidJwt`
+    - AC-F10.5.1-02 Sắp xếp và phân trang danh sách thông báo
+      - TC-F10.5.1-02a `NotificationApiIntegrationTest#listReturnsOnlyOwnInAppNewestFirstPaginated`
+    - AC-F10.5.1-03 Hiển thị đầy đủ nội dung và trạng thái đã đọc
+      - TC-F10.5.1-03a `NotificationWebSocketIntegrationTest#notificationPushedOnlyToIntendedUserAfterCommit`
+    - AC-F10.5.1-04 Đánh dấu thông báo đã đọc
+      - TC-F10.5.1-04a `NotificationApiIntegrationTest#markReadSetsReadAtAndUpdatesUnreadCount`
+    - AC-F10.5.1-05 Không cho phép xem hoặc đánh dấu thông báo của người khác
+      - TC-F10.5.1-05a `StompJwtChannelInterceptorTest#subscribeAndSendRules`
+      - TC-F10.5.1-05b `StompJwtChannelInterceptorTest#expiredSessionRejectsInboundAndDropsOutboundAndClosesSocket`
+      - TC-F10.5.1-05c `NotificationApiIntegrationTest#markReadOfAnotherMemberIsForbidden`
+      - TC-F10.5.1-05d `NotificationWebSocketIntegrationTest#stompSubscribeOutsideUserQueueIsRejected`
+      - TC-F10.5.1-05e `NotificationWebSocketIntegrationTest#expiredTokenSessionDoesNotReceiveNotificationsAndCloses`
+    - AC-F10.5.1-06 Xử lý dữ liệu đầu vào sai và thông báo không tồn tại
+      - TC-F10.5.1-06a `NotificationApiIntegrationTest#markReadNotFoundOrEmailChannelReturns404`
+      - TC-F10.5.1-06b `NotificationApiIntegrationTest#authAndValidationChecks`
 
 ## 5. Bảng ngược: TC → AC → US → UC → BR
 
@@ -2461,6 +2471,26 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F10.2.1-03b | AC-F10.2.1-03 | US-F10.2.1 | UC-F10.2 |  | `EmailDispatchIntegrationTest#classReminderRecheckedAtDispatch` |
 | TC-F10.2.1-05a | AC-F10.2.1-05 | US-F10.2.1 | UC-F10.2 |  | `EmailDispatchIntegrationTest#classReminderRebuildsContentWhenSessionRescheduledBeforeDispatch` |
 | TC-F10.2.1-06a | AC-F10.2.1-06 | US-F10.2.1 | UC-F10.2 |  | `EmailDispatchIntegrationTest#branchDerivedFromRelatedEntity` |
+| TC-F10.4.1-01a | AC-F10.4.1-01 | US-F10.4.1 | UC-F10.4 |  | `NotificationEventListenerIntegrationTest#changeRoomCreatesNotificationsWithRoomNames` |
+| TC-F10.4.1-01b | AC-F10.4.1-01 | US-F10.4.1 | UC-F10.4 |  | `NotificationEventListenerIntegrationTest#cancelClassCreatesNotifications` |
+| TC-F10.4.1-01c | AC-F10.4.1-01 | US-F10.4.1 | UC-F10.4 |  | `NotificationEventListenerIntegrationTest#eventNotificationUsesSessionClassTypeNotSchedule` |
+| TC-F10.4.1-02a | AC-F10.4.1-02 | US-F10.4.1 | UC-F10.4 |  | `NotificationEventListenerIntegrationTest#rescheduleCreatesNotificationsWithOldAndNewVietnamTimes` |
+| TC-F10.4.1-04a | AC-F10.4.1-04 | US-F10.4.1 | UC-F10.4 |  | `NotificationEventListenerIntegrationTest#nonBookedOrNoAccountMembersReceiveNothing` |
+| TC-F10.4.1-06a | AC-F10.4.1-06 | US-F10.4.1 | UC-F10.4 |  | `NotificationEventListenerIntegrationTest#notificationFailureDoesNotRollbackF8OrBlockOtherRecipients` |
+| TC-F10.5.1-01a | AC-F10.5.1-01 | US-F10.5.1 | UC-F10.5 |  | `StompJwtChannelInterceptorTest#connectAndStompAuthenticateJwt` |
+| TC-F10.5.1-01b | AC-F10.5.1-01 | US-F10.5.1 | UC-F10.5 |  | `NotificationApiIntegrationTest#emptyNotificationsAndZeroUnreadCount` |
+| TC-F10.5.1-01c | AC-F10.5.1-01 | US-F10.5.1 | UC-F10.5 |  | `NotificationWebSocketIntegrationTest#stompConnectRejectsMissingOrInvalidTokens` |
+| TC-F10.5.1-01d | AC-F10.5.1-01 | US-F10.5.1 | UC-F10.5 |  | `NotificationWebSocketIntegrationTest#stomp12FrameRequiresValidJwt` |
+| TC-F10.5.1-02a | AC-F10.5.1-02 | US-F10.5.1 | UC-F10.5 |  | `NotificationApiIntegrationTest#listReturnsOnlyOwnInAppNewestFirstPaginated` |
+| TC-F10.5.1-03a | AC-F10.5.1-03 | US-F10.5.1 | UC-F10.5 |  | `NotificationWebSocketIntegrationTest#notificationPushedOnlyToIntendedUserAfterCommit` |
+| TC-F10.5.1-04a | AC-F10.5.1-04 | US-F10.5.1 | UC-F10.5 |  | `NotificationApiIntegrationTest#markReadSetsReadAtAndUpdatesUnreadCount` |
+| TC-F10.5.1-05a | AC-F10.5.1-05 | US-F10.5.1 | UC-F10.5 |  | `StompJwtChannelInterceptorTest#subscribeAndSendRules` |
+| TC-F10.5.1-05b | AC-F10.5.1-05 | US-F10.5.1 | UC-F10.5 |  | `StompJwtChannelInterceptorTest#expiredSessionRejectsInboundAndDropsOutboundAndClosesSocket` |
+| TC-F10.5.1-05c | AC-F10.5.1-05 | US-F10.5.1 | UC-F10.5 |  | `NotificationApiIntegrationTest#markReadOfAnotherMemberIsForbidden` |
+| TC-F10.5.1-05d | AC-F10.5.1-05 | US-F10.5.1 | UC-F10.5 |  | `NotificationWebSocketIntegrationTest#stompSubscribeOutsideUserQueueIsRejected` |
+| TC-F10.5.1-05e | AC-F10.5.1-05 | US-F10.5.1 | UC-F10.5 |  | `NotificationWebSocketIntegrationTest#expiredTokenSessionDoesNotReceiveNotificationsAndCloses` |
+| TC-F10.5.1-06a | AC-F10.5.1-06 | US-F10.5.1 | UC-F10.5 |  | `NotificationApiIntegrationTest#markReadNotFoundOrEmailChannelReturns404` |
+| TC-F10.5.1-06b | AC-F10.5.1-06 | US-F10.5.1 | UC-F10.5 |  | `NotificationApiIntegrationTest#authAndValidationChecks` |
 
 ## 6. Kiểm thử chưa mang mã TC
 
