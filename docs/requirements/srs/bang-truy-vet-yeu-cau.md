@@ -226,7 +226,7 @@ Cột chức năng gốc lấy theo thiết kế dữ liệu. Cột use case đ�
 | TV-09 | F11–F20 | Theo dõi khi có đặc tả. Cập nhật hai chiều sau khi từng nhóm bổ sung UC. |
 | TV-10 | UC-F1.6 · quản lý trạng thái tài khoản | Còn mở. Tên UC nhắc quản lý trạng thái, còn đặc tả hiện tập trung vào phân quyền. Nhóm F1 và trưởng nhóm cần thống nhất phạm vi của UC. |
 | TV-11 | UC-F2.1 · nguồn chi nhánh của chủ chuỗi | Đã đồng bộ. §3.1 của F2 dùng CN01 trong v1–v3 cho chủ chuỗi và dùng `staff.branch_id` cho nhân viên gắn với chi nhánh. |
-| TV-12 | UC-F10.2 · mốc gửi nhắc lịch lớp | Còn mở trong SRS. Backend ở [PR #270](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/270) dùng mốc 24 giờ. Trưởng nhóm và nhóm F10 cần xác nhận và ghi cùng một mốc vào SRS. |
+| TV-12 | UC-F10.2 · mốc gửi nhắc lịch lớp | Còn mở trong SRS. [PR #269](https://github.com/Ktin06/it3180_nhom6_gym_management/pull/269) triển khai mốc 24 giờ. Trưởng nhóm và nhóm F10 cần xác nhận và ghi cùng một mốc vào SRS. |
 | TV-13 | UC-F8.1, UC-F8.2 · thứ tự danh sách chờ | Đóng theo ADR 0014. Lớp đầy từ chối đặt chỗ và đã bỏ hàng chờ FIFO. |
 | TV-14 | UC-F8.7, UC-F10.4 · thông báo đổi phòng và hủy buổi | Đã đồng bộ hai SRS theo ADR 0014. F8 phát sự kiện và F10 tạo, gửi thông báo. Tiêu chí đổi phòng và hủy buổi được dẫn từ UC-F8.7. |
 
