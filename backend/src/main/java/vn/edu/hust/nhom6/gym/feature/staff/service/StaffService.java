@@ -50,6 +50,31 @@ public class StaffService {
         return staff.findFullNameByUserId(userId);
     }
 
+    /** Thông tin nhân viên ACTIVE gắn với tài khoản đăng nhập ({@code staff.id} và {@code branch_id}). */
+    public record StaffIdentity(Long staffId, Long branchId) { }
+
+    /**
+     * Lấy {@code staff.id} và {@code branch_id} của nhân viên đang hoạt động (ví dụ PT khai báo lịch rảnh).
+     *
+     * @throws AccessDeniedException (403) khi không có dòng staff ACTIVE hoặc chi nhánh đã ngừng hoạt động
+     */
+    public StaffIdentity requireActiveStaff(Long userId) {
+        if (userId == null || userId <= 0) {
+            throw missingAssignment();
+        }
+        StaffLookupRepository.StaffIdentityRow row = staff.findActiveIdentityByUserId(userId)
+            .orElseThrow(StaffService::missingAssignment);
+        if (!branches.isActive(row.branchId())) {
+            throw new AccessDeniedException("Chi nhánh làm việc không tồn tại hoặc đã ngừng hoạt động.");
+        }
+        return new StaffIdentity(row.staffId(), row.branchId());
+    }
+
+    /** Lấy {@code staff.id} của nhân viên đang hoạt động gắn với {@code users.id}. */
+    public Long requireStaffId(Long userId) {
+        return requireActiveStaff(userId).staffId();
+    }
+
     private static AccessDeniedException missingAssignment() {
         return new AccessDeniedException("Nhân viên chưa có chi nhánh làm việc hợp lệ.");
     }
