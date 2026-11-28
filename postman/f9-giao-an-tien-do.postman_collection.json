@@ -1,0 +1,469 @@
+{
+  "info": {
+    "name": "F9 – Giáo án, nhật ký tập, tiến độ học viên (S2-20)",
+    "description": "API của S2-20 (UC-F9.4, UC-F9.5, UC-F9.6). baseUrl gồm /api/v1. Nhập token tại máy, không lưu lên Git. Chỉ số cơ thể (UC-F2.5) nằm ở bộ F2.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api/v1"
+    },
+    {
+      "key": "trainer1Token",
+      "value": ""
+    },
+    {
+      "key": "trainer2Token",
+      "value": ""
+    },
+    {
+      "key": "memberToken",
+      "value": ""
+    },
+    {
+      "key": "receptionistToken",
+      "value": ""
+    },
+    {
+      "key": "ptSessionId",
+      "value": ""
+    },
+    {
+      "key": "studentId",
+      "value": ""
+    },
+    {
+      "key": "workoutPlanId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Giáo án, nhật ký tập, tiến độ – US-F9.4.1, US-F9.5.1, US-F9.6.1 (S2-20.1, chạy tuần tự)",
+      "description": "Cần trainer1 có ít nhất một buổi PT chưa hủy với học viên. Chỉ số cơ thể nằm ở bộ F2.",
+      "item": [
+        {
+          "name": "TC-F9.4.1-01g 200 – Danh sách học viên của PT",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/pt/students",
+            "description": "Học viên có buổi PT (BOOKED, DONE, NO_SHOW) với trainer1. Lưu học viên đầu tiên vào studentId cho các request sau.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{trainer1Token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "const list = pm.response.json();",
+                  "pm.test('có ít nhất một học viên', () => pm.expect(list.length).to.be.above(0));",
+                  "if (list.length) { pm.collectionVariables.set('studentId', list[0].memberId); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F9.4.1-01a 201 – Soạn giáo án",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/pt/members/{{studentId}}/workout-plans",
+            "description": "PT lấy từ token; nội dung lưu jsonb. Lưu id vào workoutPlanId.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{trainer1Token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Giáo án tăng cơ 4 tuần\",\n  \"content\": [\n    {\n      \"session\": 1,\n      \"exercises\": [\n        {\n          \"name\": \"Squat\",\n          \"sets\": 4,\n          \"reps\": 10\n        }\n      ]\n    },\n    {\n      \"session\": 2,\n      \"exercises\": [\n        {\n          \"name\": \"Deadlift\",\n          \"sets\": 3,\n          \"reps\": 8\n        }\n      ]\n    }\n  ],\n  \"startDate\": \"2026-11-23\",\n  \"endDate\": \"2026-12-20\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('workoutPlanId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F9.4.1-05a 400 – Giáo án không có buổi nào",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/pt/members/{{studentId}}/workout-plans",
+            "description": "content rỗng → 400, errors.content.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{trainer1Token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Rỗng\",\n  \"content\": []\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F9.4.1-03a 403 – PT không dạy hội viên",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/pt/members/{{studentId}}/workout-plans",
+            "description": "trainer2 chưa có buổi PT với studentId và cùng chi nhánh → 403. Nếu học viên ở chi nhánh khác trainer2 thì nhận 404.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{trainer2Token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Giáo án tăng cơ 4 tuần\",\n  \"content\": [\n    {\n      \"session\": 1,\n      \"exercises\": [\n        {\n          \"name\": \"Squat\",\n          \"sets\": 4,\n          \"reps\": 10\n        }\n      ]\n    }\n  ],\n  \"startDate\": \"2026-11-23\",\n  \"endDate\": \"2026-12-20\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F9.4.1-01c 200 – Xem các giáo án của học viên",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/pt/members/{{studentId}}/workout-plans",
+            "description": "Mới nhất trước; gồm cả giáo án PT khác soạn.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{trainer1Token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F9.5.1-01a 201 – Ghi nhật ký tập ngoài buổi PT",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/pt/members/{{studentId}}/workout-logs",
+            "description": "Không gửi ptSessionId. Ghi kèm audit_logs CREATE workout_logs. Đổi loggedAt thành hôm nay hoặc ngày đã qua.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{trainer1Token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loggedAt\": \"2026-11-21\",\n  \"exercise\": \"Squat\",\n  \"sets\": 4,\n  \"reps\": 10,\n  \"weight\": 60.5\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F9.5.1-03c 422 – Gắn buổi PT chưa DONE",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/pt/members/{{studentId}}/workout-logs",
+            "description": "Buổi tương lai hoặc đã hủy → 422.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{trainer1Token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loggedAt\": \"2026-11-21\",\n  \"exercise\": \"Squat\",\n  \"sets\": 4,\n  \"reps\": 10,\n  \"weight\": 60.5,\n  \"ptSessionId\": {{ptSessionId}}\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F9.5.1-04a 400 – Ngày tập sau hôm nay",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/pt/members/{{studentId}}/workout-logs",
+            "description": "Ngày tính theo giờ Việt Nam.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{trainer1Token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loggedAt\": \"2099-01-01\",\n  \"exercise\": \"Squat\",\n  \"sets\": 4,\n  \"reps\": 10,\n  \"weight\": 60.5\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F9.6.1-02a 200 – PT xem tiến độ học viên",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/members/{{studentId}}/progress?from=2026-11-01&to=2026-11-30",
+            "description": "Dữ liệu thô: bodyMetrics, workoutLogs sắp ngày tăng dần; không có gợi ý (BR-F9.13).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{trainer1Token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('có hai danh sách', () => { pm.expect(b.bodyMetrics).to.be.an('array'); pm.expect(b.workoutLogs).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F9.6.1-01a 200 – Hội viên xem tiến độ của mình",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/me/progress",
+            "description": "Hội viên lấy từ token; bỏ trống from, to thì 90 ngày đến hôm nay.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F9.6.1-05a 400 – from sau to",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/me/progress?from=2026-11-30&to=2026-11-01",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{memberToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-F9.6.1-07a 403 – Lễ tân không xem tiến độ",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/members/{{studentId}}/progress",
+            "description": "UC-F9.6 chỉ cho PT và hội viên.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{receptionistToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

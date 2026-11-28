@@ -9,8 +9,7 @@ export const MEMBER_MENU: MenuItem[] = [
     path: '/member/memberships',
     label: 'Gói tập',
     icon: <IdcardOutlined />,
-    ready: false,
-    roles: ['MEMBER'],
+    ready: true,
   }, // F7
   {
     path: '/member/classes',

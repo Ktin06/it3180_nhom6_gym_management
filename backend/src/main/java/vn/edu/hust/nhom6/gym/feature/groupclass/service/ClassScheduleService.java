@@ -2,9 +2,15 @@ package vn.edu.hust.nhom6.gym.feature.groupclass.service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hust.nhom6.gym.common.dto.PageResponse;
@@ -20,9 +26,13 @@ import vn.edu.hust.nhom6.gym.feature.groupclass.repository.ClassRepository;
 @RequiredArgsConstructor
 @Transactional
 public class ClassScheduleService {
+    private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm");
+
     private final ClassRepository classes;
     private final StaffService staff;
     private final VnTime time;
+    @Value("${app.classes.generation.days:14}") private int generationDays;
 
     public long managerBranch(CurrentUser actor) {
         if (actor.role() != UserRole.BRANCH_MANAGER) { throw new ForbiddenException("Chỉ quản lý chi nhánh được quản lý lịch lặp."); }
@@ -119,5 +129,52 @@ public class ClassScheduleService {
             inserted += classes.insertSession(s, date, start, end);
         }
         return inserted;
+    }
+
+    /**
+     * Giờ dạy lớp nhóm của huấn luyện viên {@code trainerId} chồng với {@code [start, end)} (F9 đặt buổi PT, BR-F9.3):
+     * buổi lớp chưa hủy được phân công cho người này, hoặc lần lặp của lịch ACTIVE ngoài cửa sổ sinh buổi
+     * ({@code today + generationDays} trở đi) chưa sinh buổi cho ngày đó.
+     */
+    @Transactional(readOnly = true)
+    public Optional<String> findTrainerTeachingConflict(Long trainerId, OffsetDateTime start, OffsetDateTime end) {
+        if (trainerId == null || start == null || end == null || !end.isAfter(start)) {
+            return Optional.empty();
+        }
+        Stream<String> withSessions = classes.rows("""
+            SELECT * FROM class_sessions
+            WHERE status<>'CANCELLED' AND trainer_id=:trainer AND start_at<:end AND end_at>:start
+            ORDER BY start_at LIMIT 1
+            """, Map.of("trainer", trainerId, "start", start, "end", end), Session.class).stream()
+            .map(other -> "Trùng huấn luyện viên với buổi #%d (%s).".formatted(other.id(), span(other.startAt(), other.endAt())));
+        LocalDate firstUngenerated = time.today().plusDays(generationDays);
+        Stream<String> withSchedules = time.toVnDate(start).datesUntil(time.toVnDate(end).plusDays(1))
+            .filter(day -> !day.isBefore(firstUngenerated))
+            .flatMap(day -> classes.rows("""
+                SELECT * FROM class_schedules
+                WHERE status='ACTIVE' AND trainer_id=:trainer AND day_of_week=:day
+                ORDER BY id
+                """, Map.of("trainer", trainerId, "day", day.getDayOfWeek().getValue()), Schedule.class).stream()
+                .filter(other -> occursOn(other, day))
+                .filter(other -> time.at(day, other.startTime()).isBefore(end)
+                    && start.isBefore(time.at(day, other.endTime())))
+                .filter(other -> !classes.occurrenceExists(other.id(), day))
+                .map(other -> "Trùng huấn luyện viên với lịch #%d (%s %s–%s).".formatted(
+                    other.id(), dayName(other.dayOfWeek()), other.startTime().format(TIME), other.endTime().format(TIME))));
+        return Stream.of(withSessions, withSchedules).flatMap(s -> s).findFirst();
+    }
+
+    private static boolean occursOn(Schedule s, LocalDate day) {
+        return !day.isBefore(s.validFrom()) && (s.validTo() == null || !day.isAfter(s.validTo()));
+    }
+
+    private static String dayName(int isoDayOfWeek) {
+        return isoDayOfWeek == 7 ? "Chủ nhật" : "thứ " + (isoDayOfWeek + 1);
+    }
+
+    private static String span(OffsetDateTime start, OffsetDateTime end) {
+        var vnStart = start.atZoneSameInstant(VnTime.ZONE);
+        var vnEnd = end.atZoneSameInstant(VnTime.ZONE);
+        return vnStart.format(DATE) + " " + vnStart.format(TIME) + "–" + vnEnd.format(TIME);
     }
 }
