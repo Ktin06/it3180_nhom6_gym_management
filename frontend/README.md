@@ -23,6 +23,8 @@ Frontend gọi API theo đường dẫn cùng domain `/api/v1` ([ADR 0008](../do
 
 Biến môi trường (nếu có) đọc từ file `.env` ở **thư mục gốc repo** (`envDir: '..'`). `VITE_API_URL` chỉ dùng khi muốn gọi thẳng một backend khác.
 
+Thông báo F10 dùng STOMP qua WebSocket. Vite chuyển tiếp `/ws` đến backend cục bộ. Bản build dùng WebSocket thẳng tới backend trong `vercel.json`, hoặc backend tuyệt đối từ `VITE_API_URL` nếu có cấu hình riêng. Đặt `VITE_WS_URL` để chỉ định URL WebSocket riêng, ví dụ `wss://backend.example.com/ws`. Backend cần cho phép origin của frontend qua `CORS_ALLOWED_ORIGINS`.
+
 ## Xác thực F1
 
 Frontend có trang đăng ký và đăng nhập; access token chỉ giữ trong bộ nhớ tab, refresh token do backend đặt vào cookie `HttpOnly`. Adapter dùng hợp đồng JSON F1 mục 6.1 (`/me` gồm `userId`, `email`, `role`). Nếu refresh trả token của tài khoản khác, tab kết thúc phiên và yêu cầu đăng nhập lại để tránh hiển thị người A nhưng gửi thao tác bằng người B. Xem [ghi chú tích hợp](../docs/guides/tich-hop-frontend-f1.md) cho hợp đồng, cách chạy lại và bằng chứng kiểm chứng. Vitest không thay thế kiểm tra backend hoặc staging.

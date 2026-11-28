@@ -1,6 +1,8 @@
-import { Layout, Typography } from 'antd'
+import { Layout, Space, Typography } from 'antd'
 import type { CSSProperties } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
+import { getSessionEpoch } from '../auth/session-store'
+import { NotificationBell } from '../features/notifications/components/NotificationBell'
 import { memberMenu } from './member-menu'
 import { UserMenu } from './UserMenu'
 
@@ -8,6 +10,7 @@ const { Header, Content } = Layout
 
 /** Giao diện hội viên, ưu tiên điện thoại: nội dung một cột, thanh điều hướng cố định ở đáy. */
 export function MemberLayout() {
+  const authEpoch = getSessionEpoch()
   return (
     <Layout style={{ minHeight: '100vh', paddingBottom: 64 }}>
       <Header
@@ -21,7 +24,10 @@ export function MemberLayout() {
         }}
       >
         <Typography.Text strong>Gym Nhóm 6</Typography.Text>
-        <UserMenu />
+        <Space size="middle">
+          <NotificationBell key={authEpoch} authEpoch={authEpoch} />
+          <UserMenu />
+        </Space>
       </Header>
       <Content style={{ padding: 16, width: '100%', maxWidth: 720, margin: '0 auto' }}>
         <Outlet />
