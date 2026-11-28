@@ -1009,6 +1009,7 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 | `pt_sessions` | `trainer_id`, `member_id`, `status` | Có buổi PT giữa PT và hội viên thì có quan hệ dạy |
 | `class_sessions` | `id`, `trainer_id` | Tìm các buổi lớp nhóm do PT dạy |
 | `class_bookings` | `class_session_id`, `member_id`, `status` | Hội viên có đặt chỗ ở buổi lớp do PT dạy (booking chưa `CANCELLED`) thì có quan hệ dạy |
+| `audit_logs` | `user_id`, `action`, `entity`, `entity_id` | Lưu tài khoản PT tạo nhật ký tập, kể cả khi nhật ký không gắn buổi PT |
 
 - **Ràng buộc và kiểm tra áp dụng:**
 
@@ -1020,13 +1021,13 @@ Vai trò liên quan: **PT** và **Hội viên**. Dữ liệu huấn luyện viê
 
   - Dữ liệu không xóa cứng; nếu cần sửa thì cập nhật dòng cũ hoặc ghi dòng mới.
 
-  - Có thể ghi `audit_logs` với `entity` = `workout_logs` hoặc `body_metrics`, `action` = `CREATE`.
+  - Khi tạo nhật ký tập, hệ thống ghi `audit_logs` trong cùng giao dịch với `workout_logs`. Bản ghi có `action = CREATE`, `entity = workout_logs`, `entity_id = workout_logs.id` và `user_id` là tài khoản PT đang đăng nhập.
 
 - **Lưu ý (khớp mục "[Cần chốt với nhóm]" ở phần E):**
 
   - `body_metrics` dùng chung cho PT ghi (UC này) và hội viên tự nhập (F2). Hai nguồn phân biệt qua `recorded_by` (là `users.id` của PT hay của chính hội viên). Bảng không có ràng buộc duy nhất `(member_id, measured_at)`, nên một ngày có thể có nhiều dòng; cần chốt biểu đồ tiến độ (UC-F9.6) lấy dòng nào hoặc hiển thị cả hai.
 
-  - `workout_logs` không có cột người ghi, chỉ có `pt_session_id`. Với nhật ký PT ghi ngoài buổi PT, dấu vết PT nào ghi chỉ còn trong `audit_logs`. Nếu cần hiển thị "PT nào ghi", nên đề xuất thêm cột `recorded_by` vào ERD; nếu không thì chấp nhận tra qua `audit_logs`.
+  - Tra người tạo nhật ký qua `audit_logs.user_id` của bản ghi `CREATE` theo `workout_logs.id`. Cách này áp dụng cả khi `pt_session_id` rỗng. Việc có bổ sung cột `workout_logs.recorded_by` vào ERD hay không vẫn cần chốt nếu muốn hiển thị người ghi.
 
 #### G. Thiết kế giao diện và API liên quan
 

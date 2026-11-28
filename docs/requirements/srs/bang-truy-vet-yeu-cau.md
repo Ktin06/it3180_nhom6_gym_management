@@ -21,8 +21,8 @@ Bảng nối 20 chức năng với 57 mã use case (54 còn hiệu lực, 3 đã
 | F5 – Thanh toán tại quầy | v1 | UC-F5.1, UC-F5.2, UC-F5.3, UC-F5.4, UC-F5.5 ([đặc tả](dac-ta-use-case-f5-thanh-toan-tai-quay.md)) | `invoices`, `invoice_items`, `payments` |
 | F6 – Dashboard cơ bản | v1 | UC-F6.1, UC-F6.2, UC-F6.3, UC-F6.4, UC-F6.5 ([đặc tả](dac-ta-use-case-f6-dashboard-co-ban.md)) | `system_configs`, `checkins` |
 | F7 – Cổng hội viên | v2 | UC-F7.1, UC-F7.2, UC-F7.3, UC-F7.4, UC-F7.5 ([đặc tả](dac-ta-use-case-f7-cong-hoi-vien.md)) | `memberships`, `invoices` |
-| F8 – Lớp học nhóm | v2 | UC-F8.0, UC-F8.1, UC-F8.2, UC-F8.3, UC-F8.4, UC-F8.5, UC-F8.6, UC-F8.7, UC-F8.8 ([đặc tả](dac-ta-use-case-f8-lop-hoc-nhom.md)) | `system_configs`, `rooms`, `class_types`, `class_schedules`, `class_sessions`, `class_bookings` |
-| F9 – Huấn luyện viên (PT) | v2 | UC-F9.1, UC-F9.2, UC-F9.3, UC-F9.4, UC-F9.5, UC-F9.6, UC-F9.7 ([đặc tả](dac-ta-use-case-f9-huan-luyen-vien.md)) | `system_configs`, `body_metrics`, `trainer_availabilities`, `pt_sessions`, `workout_plans`, `workout_logs`, `staff` |
+| F8 – Lớp học nhóm | v2 | UC-F8.0, UC-F8.1, UC-F8.2, UC-F8.3, UC-F8.4, UC-F8.5, UC-F8.6, UC-F8.7, UC-F8.8 ([đặc tả](dac-ta-use-case-f8-lop-hoc-nhom.md)) | `system_configs`, `rooms`, `class_types`, `class_schedules`, `class_sessions`, `class_bookings`, `pt_sessions` |
+| F9 – Huấn luyện viên (PT) | v2 | UC-F9.1, UC-F9.2, UC-F9.3, UC-F9.4, UC-F9.5, UC-F9.6, UC-F9.7 ([đặc tả](dac-ta-use-case-f9-huan-luyen-vien.md)) | `system_configs`, `body_metrics`, `trainer_availabilities`, `pt_sessions`, `workout_plans`, `workout_logs`, `staff`, `audit_logs` |
 | F10 – Thông báo | v2 | UC-F10.1, UC-F10.2, UC-F10.3, UC-F10.4, UC-F10.5 ([đặc tả](dac-ta-use-case-f10-thong-bao.md)) | `notifications`, `class_bookings` |
 | F11 – Thiết bị | v3 | Chưa đặc tả (TV-09) | `equipment`, `maintenance_logs` |
 | F12 – Bán hàng tại quầy (POS) và kho | v3 | Chưa đặc tả (TV-09) | `products`, `inventories`, `stock_movements`, `invoices`, `invoice_items` |
@@ -129,14 +129,14 @@ Xem [đặc tả F8](dac-ta-use-case-f8-lop-hoc-nhom.md).
 | Mã UC · mục nguồn | Nội dung | Mã US | Bảng liên quan | Ghi chú truy vết |
 | --- | --- | --- | --- | --- |
 | UC-F8.0 · 3.1 | Xem lịch lớp học nhóm công khai | US-F8.0.1 | `class_sessions`, `class_types`, `class_schedules`, `branches`, `rooms`, `staff` | Đọc lịch công khai, tên lớp, phòng và huấn luyện viên. |
-| UC-F8.1 · 3.2 | Đặt chỗ lớp nhóm | US-F8.1.1 | `class_bookings`, `class_sessions`, `class_schedules`, `class_types`, `members`, `memberships`, `packages`, `rooms`, `system_configs`, `staff`, `users` | Lớp đầy thì từ chối. Đặt thành công tạo BOOKED và ghi tài khoản thao tác (TV-02). |
+| UC-F8.1 · 3.2 | Đặt chỗ lớp nhóm | US-F8.1.1 | `class_bookings`, `class_sessions`, `class_schedules`, `class_types`, `members`, `memberships`, `packages`, `rooms`, `system_configs`, `staff`, `users`, `pt_sessions` | Đọc lịch PT của hội viên để chặn trùng giờ. Lớp đầy thì từ chối. Đặt thành công tạo BOOKED và ghi tài khoản thao tác (TV-02). |
 | UC-F8.2 · 3.3 | Đã bỏ (ADR 0014) | US-F8.2.1 (đã bỏ) | — | Giữ mã theo [ADR 0014](../../decisions/0014-bo-danh-sach-cho-lop-hoc-nhom.md). |
 | UC-F8.3 · 3.4 | Hủy chỗ lớp nhóm | US-F8.3.1 | `class_bookings`, `class_sessions`, `members`, `system_configs`, `audit_logs` | Hủy chỗ và cập nhật khóa khi đủ ngưỡng. Lấy lần khóa gần nhất từ nhật ký (TV-03). |
 | UC-F8.4 · 3.5 | Đã bỏ (ADR 0014) | US-F8.4.1 (đã bỏ) | — | Giữ mã theo [ADR 0014](../../decisions/0014-bo-danh-sach-cho-lop-hoc-nhom.md). |
 | UC-F8.5 · 3.6 | Xem lịch dạy lớp nhóm | US-F8.5.1 | `class_sessions`, `class_schedules`, `class_types`, `rooms`, `staff`, `users` | Đọc lịch dạy của huấn luyện viên. |
 | UC-F8.6 · 3.7 | Điểm danh học viên lớp học nhóm | US-F8.6.1 | `class_bookings`, `members`, `class_sessions`, `staff`, `users`, `system_configs`, `audit_logs` | Ghi người điểm danh và lưu nhật ký khi sửa điểm danh hoặc gỡ khóa (TV-03, TV-05). |
-| UC-F8.7 · 3.8 | Quản lý lịch lặp lớp học và phân công huấn luyện viên | US-F8.7.1 | `class_types`, `class_schedules`, `class_sessions`, `class_bookings`, `branches`, `rooms`, `staff`, `users` | Khi đổi giờ, đổi phòng hoặc hủy buổi, F8 phát sự kiện và F10 ghi notifications. Sĩ số theo TV-06. |
-| UC-F8.8 · 3.9 | Sinh buổi học từ lịch lặp | US-F8.8.1 | `class_sessions`, `class_schedules`, `class_types`, `branches`, `rooms`, `staff` | Sinh buổi từ lịch lặp theo chi nhánh và phòng. |
+| UC-F8.7 · 3.8 | Quản lý lịch lặp lớp học và phân công huấn luyện viên | US-F8.7.1 | `class_types`, `class_schedules`, `class_sessions`, `class_bookings`, `branches`, `rooms`, `staff`, `users`, `pt_sessions` | Đọc lịch PT của huấn luyện viên để chặn trùng giờ khi lưu lịch lặp hoặc đổi lịch buổi lớp. Khi đổi giờ, đổi phòng hoặc hủy buổi, F8 phát sự kiện và F10 ghi notifications. Sĩ số theo TV-06. |
+| UC-F8.8 · 3.9 | Sinh buổi học từ lịch lặp | US-F8.8.1 | `class_sessions`, `class_schedules`, `class_types`, `branches`, `rooms`, `staff`, `pt_sessions` | Sinh buổi từ lịch lặp theo chi nhánh và phòng. Đọc lịch PT của huấn luyện viên để từ chối sinh buổi khi trùng giờ. |
 
 ### F9 – Huấn luyện viên (PT)
 
@@ -148,7 +148,7 @@ Xem [đặc tả F9](dac-ta-use-case-f9-huan-luyen-vien.md).
 | UC-F9.2 · 3.2 | Đặt buổi PT | US-F9.2.1 | `pt_sessions`, `trainer_availabilities`, `memberships`, `staff`, `members`, `class_sessions`, `system_configs` | Theo mục dữ liệu của đặc tả. |
 | UC-F9.3 · 3.3 | Xác nhận buổi PT đã diễn ra | US-F9.3.1 | `pt_sessions`, `memberships`, `staff`, `invoice_items` | Đọc staff.commission_rate và invoice_items.amount/discount_amount qua memberships.invoice_item_id để chốt hoa hồng. |
 | UC-F9.4 · 3.4 | Soạn giáo án | US-F9.4.1 | `workout_plans`, `members`, `pt_sessions`, `class_sessions`, `staff`, `class_bookings` | Ghi giáo án và kiểm tra quan hệ dạy theo đặc tả. |
-| UC-F9.5 · 3.5 | Ghi nhật ký tập và chỉ số cơ thể | US-F9.5.1 | `workout_logs`, `body_metrics`, `members`, `staff`, `pt_sessions`, `class_sessions`, `class_bookings` | audit_logs chỉ là phương án lưu dấu người ghi được đặc tả đề cập, chưa coi là thay thế bắt buộc cho cột người ghi. TV-07, TV-08. |
+| UC-F9.5 · 3.5 | Ghi nhật ký tập và chỉ số cơ thể | US-F9.5.1 | `workout_logs`, `body_metrics`, `members`, `staff`, `pt_sessions`, `class_sessions`, `class_bookings`, `audit_logs` | Khi tạo nhật ký tập, ghi tài khoản PT vào `audit_logs.user_id` trong cùng giao dịch, kể cả khi `pt_session_id` rỗng. Cách tra người tạo theo TV-07. Chỉ số cơ thể theo TV-08. |
 | UC-F9.6 · 3.6 | Xem tiến độ học viên | US-F9.6.1 | `workout_logs`, `body_metrics`, `members`, `staff`, `pt_sessions`, `class_sessions`, `class_bookings` | Chỉ đọc để vẽ tiến độ; kiểm tra quan hệ dạy qua PT/lớp. TV-08. |
 | UC-F9.7 · 3.7 | Hủy buổi PT | US-F9.7.1 | `pt_sessions`, `staff`, `members`, `audit_logs`, `notifications`, `system_configs` | Hủy theo quyền và hạn quy định, ghi nhật ký và phát thông báo theo đặc tả. |
 
@@ -173,7 +173,7 @@ Cột chức năng gốc lấy theo thiết kế dữ liệu. Cột use case đ�
 | `users` | F1 | UC-F1.1, UC-F1.2, UC-F1.3, UC-F1.4, UC-F1.5, UC-F1.6, UC-F2.1, UC-F2.2, UC-F2.3, UC-F2.4, UC-F2.5, UC-F4.1, UC-F4.2, UC-F4.5, UC-F5.2, UC-F8.1, UC-F8.5, UC-F8.6, UC-F8.7, UC-F10.1, UC-F10.2, UC-F10.4 |
 | `refresh_tokens` | F1 | UC-F1.1, UC-F1.2, UC-F1.3, UC-F1.4, UC-F1.5, UC-F2.4 |
 | `password_resets` | F1 | UC-F1.5, UC-F2.2 |
-| `audit_logs` | F17 | UC-F5.5, UC-F8.3, UC-F8.6, UC-F9.7 |
+| `audit_logs` | F17 | UC-F5.5, UC-F8.3, UC-F8.6, UC-F9.5, UC-F9.7 |
 | `notifications` | F10 | UC-F9.7, UC-F10.1, UC-F10.2, UC-F10.4, UC-F10.5 |
 | `system_configs` | F6, F8, F9, F15, F18 | UC-F5.1, UC-F6.4, UC-F7.3, UC-F7.4, UC-F7.5, UC-F8.1, UC-F8.3, UC-F8.6, UC-F9.2, UC-F9.7, UC-F10.1 |
 | `branches` | F18, F4 | UC-F1.1, UC-F2.1, UC-F4.2, UC-F5.1, UC-F5.3, UC-F5.4, UC-F6.1, UC-F6.2, UC-F6.3, UC-F6.4, UC-F6.5, UC-F7.2, UC-F8.0, UC-F8.7, UC-F8.8, UC-F10.1, UC-F10.2, UC-F10.4 |
@@ -194,7 +194,7 @@ Cột chức năng gốc lấy theo thiết kế dữ liệu. Cột use case đ�
 | `class_sessions` | F8 | UC-F4.1, UC-F4.2, UC-F4.3, UC-F5.5, UC-F8.0, UC-F8.1, UC-F8.3, UC-F8.5, UC-F8.6, UC-F8.7, UC-F8.8, UC-F9.1, UC-F9.2, UC-F9.4, UC-F9.5, UC-F9.6, UC-F10.2, UC-F10.4 |
 | `class_bookings` | F8, F10 | UC-F4.1, UC-F4.2, UC-F4.3, UC-F5.5, UC-F8.1, UC-F8.3, UC-F8.6, UC-F8.7, UC-F9.4, UC-F9.5, UC-F9.6, UC-F10.2, UC-F10.4 |
 | `trainer_availabilities` | F9 | UC-F9.1, UC-F9.2 |
-| `pt_sessions` | F9, F13 | UC-F4.2, UC-F5.5, UC-F9.1, UC-F9.2, UC-F9.3, UC-F9.4, UC-F9.5, UC-F9.6, UC-F9.7 |
+| `pt_sessions` | F9, F13 | UC-F4.2, UC-F5.5, UC-F8.1, UC-F8.7, UC-F8.8, UC-F9.1, UC-F9.2, UC-F9.3, UC-F9.4, UC-F9.5, UC-F9.6, UC-F9.7 |
 | `workout_plans` | F9 | UC-F9.4 |
 | `workout_logs` | F9 | UC-F9.5, UC-F9.6 |
 | `products` | F12 | Chưa có UC trong F1–F10 (TV-09). |
@@ -221,7 +221,7 @@ Cột chức năng gốc lấy theo thiết kế dữ liệu. Cột use case đ�
 | TV-04 | UC-F8.2, UC-F10.3 · `notifications.user_id` | Đóng theo ADR 0014. Hai UC bị bỏ nên không còn trường hợp phải xác định ân hạn từ thông báo cho hồ sơ chưa có tài khoản. |
 | TV-05 | UC-F8.6 · `class_bookings.attendance_marked_by` | Đã đồng bộ. BR-F8.6-01 và ERD ghi người điểm danh hoặc sửa gần nhất, đồng thời lưu giá trị cũ và mới vào `audit_logs` khi sửa. |
 | TV-06 | UC-F8.7 · sức chứa buổi lớp | Đã đồng bộ theo ADR 0014. Sức chứa của buổi cụ thể không giảm dưới số chỗ `BOOKED`, `ATTENDED`, `NO_SHOW`. Sửa lịch lặp và sửa buổi cụ thể là hai thao tác riêng trong UC-F8.7. |
-| TV-07 | UC-F9.5 · người ghi `workout_logs` | Còn mở. Khi `pt_session_id` rỗng, SRS F9 đề cập `audit_logs` như một phương án. Nhóm F9 và trưởng nhóm cần chốt cách truy ra PT đã ghi nhật ký. |
+| TV-07 | UC-F9.5 · người ghi `workout_logs` | Đã có cách tra người tạo trong triển khai F9. Lấy `audit_logs.user_id` từ bản ghi có `action = CREATE`, `entity = workout_logs` và `entity_id = workout_logs.id`, kể cả khi `pt_session_id` rỗng. Nhóm F9 và trưởng nhóm còn cần chốt có bổ sung cột `workout_logs.recorded_by` vào ERD hay không. |
 | TV-08 | UC-F2.5, UC-F9.5, UC-F9.6 · `body_metrics` | Còn mở. ERD cho phép nhiều số đo trong cùng ngày. Nhóm F2/F9 và trưởng nhóm cần thống nhất cách hiện trên biểu đồ. |
 | TV-09 | F11–F20 | Theo dõi khi có đặc tả. Cập nhật hai chiều sau khi từng nhóm bổ sung UC. |
 | TV-10 | UC-F1.6 · quản lý trạng thái tài khoản | Còn mở. Tên UC nhắc quản lý trạng thái, còn đặc tả hiện tập trung vào phân quyền. Nhóm F1 và trưởng nhóm cần thống nhất phạm vi của UC. |
