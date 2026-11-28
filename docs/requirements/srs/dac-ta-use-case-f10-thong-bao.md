@@ -4,6 +4,7 @@
 - **Version:** v2 (Bắt buộc)
 - **Người biên soạn:** Nguyễn Trọng Việt
 - **Người duyệt chéo:** Lê Phước Minh Quân
+- **Cập nhật 27/11/2026 (S2-32):** đồng bộ phạm vi thông báo khi đổi phòng và hủy buổi theo ADR 0014.
 - **Cập nhật 24/11/2026 (Nguyễn Trọng Việt):** viết lại mục H của UC-F10.1, UC-F10.2, UC-F10.4, UC-F10.5 theo cây truy vết ([ADR 0012](../../decisions/0012-quy-uoc-ma-truy-vet.md)): 4 user story, 25 AC có mã. Áp ADR 0014 (bỏ danh sách chờ lớp học nhóm): bỏ UC-F10.3, bỏ hạn xác nhận lại ở UC-F10.4. Áp ADR 0013: gửi email qua Brevo. Các mã UC-F10.3, BR-F10.5, CONFIG-F10.2, CONFIG-F10.3 không dùng lại; các mã còn lại giữ nguyên.
 - **Tài liệu chuẩn tham chiếu:**
   - [Bản chốt phạm vi](../ban-chot-pham-vi.md)
@@ -21,7 +22,7 @@ Thông báo giúp hội viên nắm kịp các sự kiện liên quan đến gó
 - **Trong web (`IN_APP`):** hiển thị ngay trong cổng hội viên theo thời gian thực, đẩy tới trình duyệt đang mở qua WebSocket (STOMP).
 - **Email (`EMAIL`):** gửi qua Brevo (ADR 0013) tới địa chỉ `users.email` của hội viên, chỉ trong giờ mở cửa của chi nhánh liên quan (`branches.open_time` đến `close_time`); thông báo email phát sinh ngoài giờ được hẹn gửi vào giờ mở cửa (`scheduled_at`).
 
-Có 3 loại thông báo: sắp hết hạn gói (`MEMBERSHIP_EXPIRING`), nhắc lịch lớp (`CLASS_REMINDER`), đổi giờ lớp (`CLASS_RESCHEDULED`). ERD còn khai báo loại `CLASS_CANCELLED` (hủy buổi lớp); loại này không nằm trong danh sách yêu cầu của F10, được coi là thuộc phạm vi F8. Thông báo "được đưa vào lớp từ danh sách chờ" đã bỏ theo ADR 0014.
+F10 thông báo khi gói sắp hết hạn hoặc hết buổi, khi cần nhắc lịch lớp và khi buổi lớp đổi giờ, đổi phòng hoặc bị hủy. Theo [ADR 0014](../../decisions/0014-bo-danh-sach-cho-lop-hoc-nhom.md), F8 phát sự kiện thay đổi buổi và F10 tạo, gửi thông báo ngoài giao dịch F8. Luồng đổi phòng và hủy buổi được đặc tả tại [UC-F8.7](dac-ta-use-case-f8-lop-hoc-nhom.md#38-uc-f87-quản-lý-lịch-lặp-lớp-học-và-phân-công-huấn-luyện-viên), gồm AC-F8.7.1-09, AC-F8.7.1-11 và AC-F8.7.1-12. Thông báo đưa vào lớp từ danh sách chờ đã bỏ theo ADR 0014.
 
 Người nhận là **Hội viên có tài khoản** (thông báo gắn với `users.id`). Ở Sprint 1, tài liệu này chỉ đặc tả; phần hiện thực làm ở Sprint 2.
 
