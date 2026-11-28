@@ -71,19 +71,16 @@ public class MemberController {
 
     @GetMapping(value = "/{id}/avatar", produces = MediaType.IMAGE_JPEG_VALUE)
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_MANAGER','RECEPTIONIST','MEMBER')")
-    @Operation(summary = "Xem ảnh đại diện hội viên (US-F2.4.2)",
-        description = "Cùng phạm vi quyền với xem hồ sơ; trả JPEG, chưa có ảnh hoặc ngoài phạm vi trả 404.")
+    @Operation(summary = "Xem ảnh đại diện hội viên (image/jpeg); cùng phạm vi quyền với xem hồ sơ, chưa có ảnh trả 404")
     public ResponseEntity<byte[]> getAvatar(Authentication auth,
             @PathVariable @Positive(message = "ID hội viên phải lớn hơn 0") Long id) {
-        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG)
-            .body(avatars.getAvatar(CurrentUser.from(auth), id));
+        byte[] content = avatars.getAvatar(CurrentUser.from(auth), id);
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(content);
     }
 
     @PutMapping(value = "/{id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_MANAGER','RECEPTIONIST')")
-    @Operation(summary = "Tải lên hoặc thay ảnh đại diện hội viên (US-F2.4.2)",
-        description = "Multipart trường file: JPEG/PNG tối đa 5 MiB, mỗi cạnh tối đa 8000 px; "
-            + "thu nhỏ cạnh dài nhất tối đa 256 px, lưu JPEG tối đa 100 KiB. Trả 200 với body rỗng.")
+    @Operation(summary = "Tải lên hoặc ghi đè ảnh đại diện hội viên (JPEG/PNG tối đa 5 MB, thu nhỏ tối đa 256 px)")
     public ResponseEntity<Void> uploadAvatar(Authentication auth,
             @PathVariable @Positive(message = "ID hội viên phải lớn hơn 0") Long id,
             @RequestParam("file") MultipartFile file) {
@@ -98,5 +95,31 @@ public class MemberController {
             @PathVariable @Positive(message = "ID hội viên phải lớn hơn 0") Long id,
             @Valid @RequestBody CreateMemberAccountRequest request) {
         return memberAccounts.createAccount(CurrentUser.from(auth), id, request);
+    }
+    // --- Chỉ số cơ thể (UC-F2.5, S2-20.1). Thêm ở cuối file, không sửa endpoint có sẵn. ---
+
+    private final BodyMetricService bodyMetrics;
+
+    @GetMapping("/{id}/body-metrics")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_MANAGER','RECEPTIONIST','TRAINER','MEMBER')")
+    @Operation(summary = "Xem lịch sử chỉ số cơ thể, mới nhất trước",
+        description = "Cùng phạm vi với xem hồ sơ: nhân viên trong chi nhánh, chủ chuỗi mọi chi nhánh, hội viên chỉ của "
+            + "mình (người khác 404). PT chỉ xem học viên mình dạy (không dạy, cùng chi nhánh 403).")
+    public java.util.List<BodyMetricDto> bodyMetricHistory(Authentication auth,
+            @PathVariable @Positive(message = "ID hội viên phải lớn hơn 0") Long id) {
+        return bodyMetrics.history(CurrentUser.from(auth), id);
+    }
+
+    @PostMapping("/{id}/body-metrics")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_MANAGER','RECEPTIONIST','TRAINER')")
+    @Operation(summary = "Ghi một lần đo chỉ số cơ thể; người ghi lấy từ token",
+        description = "Phải có ít nhất một chỉ số; ngày đo không sau hôm nay (giờ Việt Nam). PT chỉ ghi cho học viên "
+            + "mình dạy; nhân viên chỉ trong chi nhánh của mình.")
+    public ResponseEntity<BodyMetricDto> recordBodyMetric(Authentication auth,
+            @PathVariable @Positive(message = "ID hội viên phải lớn hơn 0") Long id,
+            @Valid @RequestBody BodyMetricRequest request) {
+        // Không gửi Location: chưa có API xem một lần đo theo id.
+        return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED)
+            .body(bodyMetrics.record(CurrentUser.from(auth), id, request));
     }
 }

@@ -32,6 +32,9 @@ import { DashboardPage } from '../features/dashboard/pages/DashboardPage'
 import { InvoicesPage } from '../features/invoices/pages/InvoicesPage'
 import { InvoiceDetailPage } from '../features/invoices/pages/InvoiceDetailPage'
 import { MemberInvoicePdfPage } from '../features/invoices/pages/MemberInvoicePdfPage'
+import { MemberPortalPage } from '../features/member-portal/pages/MemberPortalPage'
+// S2-20.2: giao diện học viên của huấn luyện viên (F9)
+import { TrainerStudentsPage } from '../features/trainer/pages/TrainerStudentsPage'
 
 /** Route cần đăng nhập; vai trò được vào đọc từ ROUTE_ACCESS (routes/route-access.ts). */
 function guarded(path: ProtectedPath, element: ReactNode): RouteObject {
@@ -78,6 +81,8 @@ export const routes: RouteObject[] = [
       guarded('/dashboard', <DashboardPage />),
       guarded('/hoa-don', <InvoicesPage />),
       guarded('/hoa-don/:id', <InvoiceDetailPage />),
+      // S2-20.2: giao diện học viên của huấn luyện viên (F9)
+      guarded('/pt/hoc-vien', <TrainerStudentsPage />),
       // Trang mới của nhân viên: thêm một dòng guarded(...) ở đây.
     ],
   },
@@ -91,6 +96,7 @@ export const routes: RouteObject[] = [
       guarded(HOME_PATH_BY_ROLE.MEMBER, <RoleHomePage role="MEMBER" />),
       guarded('/member/classes', <MemberClassCalendarPage />),
       guarded('/member/invoices/:id/pdf', <MemberInvoicePdfPage />),
+      guarded('/member/memberships', <MemberPortalPage />),
       // Trang mới của hội viên: thêm một dòng guarded(...) ở đây.
     ],
   },
