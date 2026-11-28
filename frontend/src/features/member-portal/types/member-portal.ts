@@ -1,6 +1,6 @@
 import type { InvoiceSource, InvoiceStatus } from '../../invoices/types/invoice'
 import type { PackageType, PublicPackage } from '../../packages/types/package'
-import type { PageQuery, PageResponse } from '../../shared/types'
+import type { PageQuery, PageResponse } from '../../../services/list-types'
 
 export type MembershipStatus =
   'PENDING' | 'UPCOMING' | 'ACTIVE' | 'FROZEN' | 'EXPIRED' | 'TRANSFERRED' | 'CANCELLED'

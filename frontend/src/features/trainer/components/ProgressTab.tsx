@@ -1,6 +1,6 @@
 import { Alert, Button, Card, Empty, Input, Skeleton, Space, Typography } from 'antd'
 import { useCallback, useState } from 'react'
-import { useRemoteQuery } from '../../shared/use-remote-query'
+import { useRemoteQuery } from '../../../services/use-remote-query'
 import { trainerApiDetailMessage } from '../api/trainer-api'
 import { formatVnDate } from '../trainer-time'
 import type { ProgressQuery, TrainerStudentsGateway } from '../types/trainer'

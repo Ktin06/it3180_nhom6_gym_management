@@ -15,8 +15,8 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import { membersApi } from '../../members/api/members'
 import type { MemberQuery, MembersGateway, MemberSummary } from '../../members/types/member'
-import { errorMessage } from '../../shared/api-error'
-import { useRemoteQuery } from '../../shared/use-remote-query'
+import { errorMessage } from '../../../services/api-error'
+import { useRemoteQuery } from '../../../services/use-remote-query'
 import { packagesApi } from '../api/packages'
 import { packageSalesApi } from '../api/package-sales'
 import { formatVnDate, packageTypeLabels, vndFormat } from '../package-format'
@@ -29,7 +29,7 @@ import type {
   PackageInvoice,
   PackageSalesGateway,
 } from '../types/sale'
-import '../../shared/feature-pages.css'
+import '../../../components/feature-pages.css'
 
 const initialMemberQuery: MemberQuery = { page: 0, size: 10, status: 'ACTIVE' }
 const initialPackageQuery: PackageQuery = { page: 0, size: 50, status: 'ACTIVE' }

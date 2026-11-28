@@ -4,7 +4,7 @@ import { invoicesApi } from '../api/invoices'
 import { parseInvoiceId } from '../invoice-format'
 import type { InvoicesGateway } from '../types/invoice'
 import { useInvoicePdf } from '../use-invoice-pdf'
-import '../../shared/feature-pages.css'
+import '../../../components/feature-pages.css'
 
 export function MemberInvoicePdfPage({
   api = invoicesApi,

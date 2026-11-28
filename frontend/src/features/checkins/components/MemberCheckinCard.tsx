@@ -1,7 +1,7 @@
 import { CalendarOutlined, CheckCircleOutlined, ReloadOutlined } from '@ant-design/icons'
 import { Alert, Button, Card, Empty, Space, Tag, Typography } from 'antd'
 import { MemberAvatar } from '../../members/components/MemberAvatar'
-import { errorMessage } from '../../shared/api-error'
+import { errorMessage } from '../../../services/api-error'
 import { isConflictError } from '../api/checkins'
 import {
   formatGender,

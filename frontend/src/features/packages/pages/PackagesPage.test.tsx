@@ -43,6 +43,23 @@ function axiosProblem(status: number, data: Record<string, unknown>) {
 }
 
 describe('danh mục gói', () => {
+  it('TC-F3.1.1-01b: chỉ hiện danh mục rỗng sau khi tải xong', async () => {
+    const api = {
+      ...mockPackagesApi,
+      list: vi.fn().mockResolvedValue({
+        content: [],
+        page: 0,
+        size: 20,
+        totalElements: 0,
+        totalPages: 0,
+      }),
+    }
+    renderWithRole('RECEPTIONIST', api)
+    expect(screen.getByText(/Đang tải danh mục gói tập/)).toBeInTheDocument()
+    expect(screen.queryByText('Không có gói tập phù hợp.')).not.toBeInTheDocument()
+    expect(await screen.findByText('Không có gói tập phù hợp.')).toBeInTheDocument()
+  })
+
   it('TC-F3.1.1-02e: mặc định lấy gói đang bán; chọn loại PT giữ nguyên lọc trạng thái', async () => {
     const user = userEvent.setup()
     const api = { ...mockPackagesApi, list: vi.fn(mockPackagesApi.list) }

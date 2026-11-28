@@ -26,8 +26,8 @@ import axios from 'axios'
 import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { AuthContext } from '../../../auth/AuthContext'
-import { errorMessage } from '../../shared/api-error'
-import { useRemoteQuery } from '../../shared/use-remote-query'
+import { errorMessage } from '../../../services/api-error'
+import { useRemoteQuery } from '../../../services/use-remote-query'
 import { invoicesApi } from '../api/invoices'
 import { ActivatedMemberships } from '../components/ActivatedMemberships'
 import { invoiceFieldErrors } from '../invoice-errors'
@@ -50,7 +50,7 @@ import type {
   RefundResult,
   VietQrPayment,
 } from '../types/invoice'
-import '../../shared/feature-pages.css'
+import '../../../components/feature-pages.css'
 
 /**
  * Trích xuất đúng thông báo lỗi của API hoàn tiền:

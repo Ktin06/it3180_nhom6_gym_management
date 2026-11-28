@@ -6,7 +6,7 @@ import { AuthContext } from '../../../auth/AuthContext'
 import type { Role } from '../../../auth/roles'
 import { canOpen } from '../../../routes/route-access'
 import { checkinsApi } from '../../checkins/api/checkins'
-import { errorMessage } from '../../shared/api-error'
+import { errorMessage } from '../../../services/api-error'
 import { dashboardApi } from '../api/dashboard'
 import { ExpiringMembershipsTable } from '../components/ExpiringMembershipsTable'
 import { HourlyCheckinChart } from '../components/HourlyCheckinChart'
@@ -21,7 +21,7 @@ import type {
   HourlyCheckin,
   LatestCheckin,
 } from '../types/dashboard'
-import '../../shared/feature-pages.css'
+import '../../../components/feature-pages.css'
 import './DashboardPage.css'
 
 interface DashboardSnapshot {

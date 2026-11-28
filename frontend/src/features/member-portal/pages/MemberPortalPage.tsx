@@ -20,9 +20,9 @@ import {
 } from '../../invoices/invoice-format'
 import { formatVnDate, packageTypeLabels, vndFormat } from '../../packages/package-format'
 import type { PublicPackage } from '../../packages/types/package'
-import { errorMessage } from '../../shared/api-error'
-import type { PageQuery, PageResponse } from '../../shared/types'
-import { useRemoteQuery } from '../../shared/use-remote-query'
+import { errorMessage } from '../../../services/api-error'
+import type { PageQuery, PageResponse } from '../../../services/list-types'
+import { useRemoteQuery } from '../../../services/use-remote-query'
 import { memberPortalApi } from '../api/member-portal'
 import {
   CHECKIN_METHOD_LABELS,
@@ -36,7 +36,7 @@ import type {
   MyMembership,
   PortalInvoiceResult,
 } from '../types/member-portal'
-import '../../shared/feature-pages.css'
+import '../../../components/feature-pages.css'
 
 type PortalTabKey = 'memberships' | 'buy' | 'checkins' | 'invoices'
 

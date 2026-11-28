@@ -3,14 +3,14 @@ import { Alert, App, Button, Input, Select, Space, Table, Tag } from 'antd'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { AuthContext } from '../../../auth/AuthContext'
 import { canManageMembers } from '../../../auth/roles'
-import type { Status } from '../../shared/types'
-import { errorMessage } from '../../shared/api-error'
-import { DemoNotice } from '../../shared/DemoNotice'
-import { useRemoteQuery } from '../../shared/use-remote-query'
+import type { Status } from '../../../services/list-types'
+import { errorMessage } from '../../../services/api-error'
+import { DemoNotice } from '../../../components/DemoNotice'
+import { useRemoteQuery } from '../../../services/use-remote-query'
 import { membersApi } from '../api/members'
 import { MemberFormModal } from '../components/MemberFormModal'
 import type { MemberDetail, MemberQuery, MembersGateway } from '../types/member'
-import '../../shared/feature-pages.css'
+import '../../../components/feature-pages.css'
 
 const initialQuery: MemberQuery = { page: 0, size: 20 }
 
@@ -250,7 +250,8 @@ export function MembersPage({ api = membersApi }: { api?: MembersGateway }) {
           onAccountCreated={list.reload}
           onSaved={() => {
             closeEditor()
-            list.changeQuery({ ...list.query, page: 0 })
+            if (editing) list.reload()
+            else list.changeQuery({ ...list.query, page: 0 })
             void message.success('Đã lưu hồ sơ hội viên.')
           }}
         />

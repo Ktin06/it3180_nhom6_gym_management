@@ -1,7 +1,7 @@
 import { Alert, Button, Form, Input, Modal, Select } from 'antd'
 import axios from 'axios'
 import { useState } from 'react'
-import { errorMessage } from '../../shared/api-error'
+import { errorMessage } from '../../../services/api-error'
 import { packageTypeLabels } from '../package-format'
 import type {
   GymPackage,

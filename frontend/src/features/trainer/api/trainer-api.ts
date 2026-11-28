@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { http } from '../../../services/http'
-import { errorMessage } from '../../shared/api-error'
+import { errorMessage } from '../../../services/api-error'
 import type {
   BodyMetric,
   ProgressResponse,

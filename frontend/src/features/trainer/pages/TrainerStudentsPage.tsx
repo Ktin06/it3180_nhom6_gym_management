@@ -1,7 +1,7 @@
 import { ReloadOutlined, TeamOutlined } from '@ant-design/icons'
 import { Alert, Button, Card, Col, Empty, Row, Skeleton, Space, Tabs, Tag, Typography } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useRemoteQuery } from '../../shared/use-remote-query'
+import { useRemoteQuery } from '../../../services/use-remote-query'
 import { trainerApi, trainerApiDetailMessage } from '../api/trainer-api'
 import { BodyMetricsTab } from '../components/BodyMetricsTab'
 import { ProgressTab } from '../components/ProgressTab'
@@ -9,7 +9,7 @@ import { WorkoutLogsTab } from '../components/WorkoutLogsTab'
 import { WorkoutPlansTab } from '../components/WorkoutPlansTab'
 import { addIsoDays, vnDateIso } from '../trainer-time'
 import type { PtSessionScheduleItem, TrainerStudentsGateway } from '../types/trainer'
-import '../../shared/feature-pages.css'
+import '../../../components/feature-pages.css'
 import '../trainer.css'
 
 export interface TrainerStudentsPageProps {

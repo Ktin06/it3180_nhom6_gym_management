@@ -3,8 +3,8 @@ import { Alert, Button, Input, Select, Table, Tag, Typography } from 'antd'
 import { useCallback, useContext, useState } from 'react'
 import { AuthContext } from '../../../auth/AuthContext'
 import { Link } from 'react-router-dom'
-import { errorMessage } from '../../shared/api-error'
-import { useRemoteQuery } from '../../shared/use-remote-query'
+import { errorMessage } from '../../../services/api-error'
+import { useRemoteQuery } from '../../../services/use-remote-query'
 import { invoicesApi } from '../api/invoices'
 import {
   formatVnDateTime,
@@ -19,7 +19,7 @@ import type {
   InvoiceStatus,
   InvoiceSummary,
 } from '../types/invoice'
-import '../../shared/feature-pages.css'
+import '../../../components/feature-pages.css'
 
 const initialQuery: InvoiceQuery = { page: 0, size: 20 }
 

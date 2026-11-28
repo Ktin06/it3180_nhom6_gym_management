@@ -1,4 +1,4 @@
-import type { PageQuery, PageResponse, Status } from '../../shared/types'
+import type { PageQuery, PageResponse, Status } from '../../../services/list-types'
 
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER'
 

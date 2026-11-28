@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { http } from '../../../services/http'
 import { liveInvoicesApi } from './invoices'
 import { AxiosError, AxiosHeaders } from 'axios'
-import { errorMessage } from '../../shared/api-error'
+import { errorMessage } from '../../../services/api-error'
 
 afterEach(() => {
   vi.restoreAllMocks()

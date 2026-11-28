@@ -1,6 +1,6 @@
 import { Alert, Button, Card, Empty, Input, Skeleton, Space, Typography } from 'antd'
 import { type FormEvent, useCallback, useState } from 'react'
-import { useRemoteQuery } from '../../shared/use-remote-query'
+import { useRemoteQuery } from '../../../services/use-remote-query'
 import { trainerApiDetailMessage, trainerApiFieldErrors } from '../api/trainer-api'
 import { formatVnDate, vnDateIso } from '../trainer-time'
 import type { BodyMetricInput, TrainerStudentsGateway } from '../types/trainer'

@@ -8,6 +8,33 @@ import { MembersPage } from './MembersPage'
 import type { MemberDetail } from '../types/member'
 
 describe('danh sách hội viên', () => {
+  it('TC-F2.3.1-01l, TC-F2.4.1-01f: giữ trang khi sửa và về trang đầu khi thêm hồ sơ', async () => {
+    const user = userEvent.setup()
+    const api = createMockMembersApi()
+    const list = vi.spyOn(api, 'list')
+    render(
+      <App>
+        <MembersPage api={api} />
+      </App>,
+    )
+    await screen.findByText('HV000030')
+    await user.click(screen.getByTitle('2'))
+    const edit = await screen.findByRole('button', { name: 'Sửa HV000010' })
+    await user.click(edit)
+    await screen.findByRole('dialog')
+    await user.click(screen.getByRole('button', { name: 'Lưu hồ sơ' }))
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(3))
+    expect(list).toHaveBeenLastCalledWith({ page: 1, size: 20, keyword: undefined })
+    await screen.findByText('HV000010')
+
+    await user.click(screen.getByRole('button', { name: /Thêm hội viên/ }))
+    await user.type(screen.getByLabelText('Họ và tên'), 'Hồ sơ trang đầu')
+    await user.type(screen.getByLabelText('Số điện thoại'), '0912009999')
+    await user.click(screen.getByRole('button', { name: 'Lưu hồ sơ' }))
+    await screen.findByText('Hồ sơ trang đầu')
+    expect(list).toHaveBeenLastCalledWith({ page: 0, size: 20, keyword: undefined })
+  })
+
   it('giữ form thêm mới khi phản hồi tải hồ sơ sửa cũ đến muộn', async () => {
     const user = userEvent.setup()
     const api = createMockMembersApi()

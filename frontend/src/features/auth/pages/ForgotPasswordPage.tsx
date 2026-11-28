@@ -2,7 +2,7 @@ import { MailOutlined } from '@ant-design/icons'
 import { Alert, Button, Form, Input, Typography } from 'antd'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { errorMessage } from '../../shared/api-error'
+import { errorMessage } from '../../../services/api-error'
 import { forgotPassword, getProblemDetail } from '../api/auth-api'
 import { normalizeEmail } from '../api/validation'
 

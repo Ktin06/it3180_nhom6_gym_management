@@ -1,4 +1,4 @@
-import type { PageQuery, PageResponse } from '../../shared/types'
+import type { PageQuery, PageResponse } from '../../../services/list-types'
 
 export type InvoiceStatus = 'PENDING' | 'PAID' | 'CANCELLED' | 'REFUNDED'
 export type InvoiceSource = 'COUNTER' | 'MEMBER_PORTAL'

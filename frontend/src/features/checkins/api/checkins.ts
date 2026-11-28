@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { http } from '../../../services/http'
-import type { PageResponse } from '../../shared/types'
+import type { PageResponse } from '../../../services/list-types'
 import type {
   CheckinGateway,
   CheckinHistoryItem,

@@ -1,7 +1,7 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
 import { Alert, Button, Card, Empty, Input, Skeleton, Space, Tag, Typography } from 'antd'
 import { type FormEvent, useCallback, useState } from 'react'
-import { useRemoteQuery } from '../../shared/use-remote-query'
+import { useRemoteQuery } from '../../../services/use-remote-query'
 import { trainerApiDetailMessage, trainerApiFieldErrors } from '../api/trainer-api'
 import { formatVnDate, formatVnDateTime } from '../trainer-time'
 import type { TrainerStudentsGateway, WorkoutPlanInput } from '../types/trainer'

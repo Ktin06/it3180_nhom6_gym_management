@@ -1,8 +1,8 @@
 import { Alert, Card, Empty, Input, Tabs } from 'antd'
 import { isAxiosError } from 'axios'
 import { useCallback, useRef, useState } from 'react'
-import { errorMessage } from '../../shared/api-error'
-import { useRemoteQuery } from '../../shared/use-remote-query'
+import { errorMessage } from '../../../services/api-error'
+import { useRemoteQuery } from '../../../services/use-remote-query'
 import { checkinsApi } from '../api/checkins'
 import { ActiveCheckinsPanel } from '../components/ActiveCheckinsPanel'
 import { CheckinHistoryTab } from '../components/CheckinHistoryTab'
@@ -14,7 +14,7 @@ import type {
   CheckoutResult,
   MemberSearchResult,
 } from '../types/checkin'
-import '../../shared/feature-pages.css'
+import '../../../components/feature-pages.css'
 import './CheckinPage.css'
 
 const initialActiveQuery: CheckinHistoryQuery = {

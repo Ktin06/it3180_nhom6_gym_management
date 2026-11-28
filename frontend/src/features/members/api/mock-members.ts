@@ -1,6 +1,7 @@
 import { AxiosError, AxiosHeaders } from 'axios'
 import type { MemberDetail, MemberInput, MembersGateway } from '../types/member'
-import { normalizePhone, normalizePhoneSearch } from '../phone'
+import { normalizePhone } from '../../../services/phone'
+import { normalizePhoneSearch } from '../phone'
 
 /** Dữ liệu hư cấu, trong bộ nhớ; không dùng làm xác thực hoặc thay backend. */
 export function createMockMembersApi(): MembersGateway {

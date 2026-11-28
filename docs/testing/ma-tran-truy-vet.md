@@ -9,16 +9,16 @@
 | Chức năng | UC | US | AC | AC đã có TC | AC chưa có TC | TC |
 | --- | --- | --- | --- | --- | --- | --- |
 | F1 | 6 | 6 | 31 | 30 | 1 | 144 |
-| F2 | 5 | 6 | 31 | 27 | 4 | 110 |
-| F3 | 5 | 6 | 45 | 45 | 0 | 137 |
+| F2 | 5 | 6 | 31 | 31 | 0 | 124 |
+| F3 | 5 | 6 | 45 | 45 | 0 | 138 |
 | F4 | 5 | 5 | 37 | 0 | 37 | 0 |
 | F5 | 5 | 5 | 49 | 49 | 0 | 154 |
 | F6 | 5 | 5 | 16 | 0 | 16 | 0 |
 | F7 | 5 | 5 | 34 | 30 | 4 | 73 |
 | F8 | 9 | 9 | 55 | 53 | 2 | 81 |
-| F9 | 7 | 7 | 63 | 44 | 19 | 119 |
+| F9 | 7 | 7 | 63 | 61 | 2 | 163 |
 | F10 | 5 | 4 | 25 | 0 | 25 | 0 |
-| **Tổng** | **57** | **58** | **386** | **278** | **108** | **818** |
+| **Tổng** | **57** | **58** | **386** | **299** | **87** | **877** |
 
 Chức năng có US = 0 là chức năng chưa viết lại SRS theo ADR 0012 (chưa có mã US, AC).
 
@@ -43,10 +43,6 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC | Tên | US |
 | --- | --- | --- |
 | AC-F1.2.1-06 | Từ chối dữ liệu đăng nhập sai định dạng (không hỗ trợ đăng nhập bằng số điện thoại) | US-F1.2.1 |
-| AC-F2.5.1-01 | Ghi chỉ số cơ thể thành công với ít nhất một chỉ số | US-F2.5.1 |
-| AC-F2.5.1-02 | Từ chối dữ liệu chỉ số cơ thể không hợp lệ | US-F2.5.1 |
-| AC-F2.5.1-03 | Xem lịch sử chỉ số cơ thể sắp xếp mới nhất trước | US-F2.5.1 |
-| AC-F2.5.1-04 | Phân quyền ghi và xem chỉ số cơ thể theo vai trò, chi nhánh và quan hệ PT | US-F2.5.1 |
 | AC-F4.1.1-01 | Tìm theo mã hội viên hoặc số điện thoại | US-F4.1.1 |
 | AC-F4.1.1-02 | Hiển thị ảnh đại diện và thông tin lớp học sắp diễn ra | US-F4.1.1 |
 | AC-F4.1.1-03 | Từ khóa tìm kiếm sai định dạng | US-F4.1.1 |
@@ -106,25 +102,8 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
 | AC-F7.5.1-08 | Hóa đơn gia hạn tự hủy kéo theo gói chờ | US-F7.5.1 |
 | AC-F8.7.1-06 | Giảm sức chứa đúng biên | US-F8.7.1 |
 | AC-F8.7.1-07 | Buổi không cho sửa sức chứa | US-F8.7.1 |
-| AC-F9.4.1-01 | Soạn giáo án cho học viên có buổi PT với mình | US-F9.4.1 |
 | AC-F9.4.1-02 | Soạn giáo án cho học viên có đặt chỗ lớp do mình dạy | US-F9.4.1 |
-| AC-F9.4.1-03 | Không soạn cho học viên mình không dạy | US-F9.4.1 |
-| AC-F9.4.1-04 | Hội viên không tồn tại | US-F9.4.1 |
-| AC-F9.4.1-05 | Dữ liệu sai bị từ chối | US-F9.4.1 |
-| AC-F9.4.1-06 | Từ chối người không phải PT | US-F9.4.1 |
-| AC-F9.5.1-01 | Ghi nhật ký tập cho học viên của mình | US-F9.5.1 |
 | AC-F9.5.1-02 | Ghi chỉ số cơ thể, người ghi lấy từ token | US-F9.5.1 |
-| AC-F9.5.1-03 | Nhật ký gắn buổi PT phải thuộc đúng PT và hội viên | US-F9.5.1 |
-| AC-F9.5.1-04 | Dữ liệu sai bị từ chối | US-F9.5.1 |
-| AC-F9.5.1-05 | Không ghi cho học viên mình không dạy, hội viên không tồn tại | US-F9.5.1 |
-| AC-F9.5.1-06 | Từ chối người không phải PT | US-F9.5.1 |
-| AC-F9.6.1-01 | Hội viên xem tiến độ của chính mình | US-F9.6.1 |
-| AC-F9.6.1-02 | PT xem tiến độ học viên mình dạy | US-F9.6.1 |
-| AC-F9.6.1-03 | Không xem tiến độ của người khác | US-F9.6.1 |
-| AC-F9.6.1-04 | Chưa có dữ liệu | US-F9.6.1 |
-| AC-F9.6.1-05 | Khoảng thời gian sai | US-F9.6.1 |
-| AC-F9.6.1-06 | Chỉ dựa trên dữ liệu thực, không có gợi ý AI | US-F9.6.1 |
-| AC-F9.6.1-07 | Từ chối người chưa đăng nhập hoặc vai trò khác | US-F9.6.1 |
 | AC-F10.1.1-01 | Thông báo khi gói TIME hoặc gói ACTIVE sắp hết hạn | US-F10.1.1 |
 | AC-F10.1.1-02 | Thông báo khi gói SESSION sắp hết buổi | US-F10.1.1 |
 | AC-F10.1.1-03 | Không gửi thông báo trùng cho cùng một gói | US-F10.1.1 |
@@ -415,6 +394,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F2.3.1-01i `MemberApiIntegrationTest#measuresSearchOnTenThousandProfiles`
       - TC-F2.3.1-01j `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01j: đổi trang gọi API từ 0, tìm kiếm mới trở về t`
       - TC-F2.3.1-01k `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01k: áp dụng từ khóa đang nhập khi đổi trạng thái `
+      - TC-F2.3.1-01l `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01l, TC-F2.4.1-01f: giữ trang khi sửa và về trang `
     - AC-F2.3.1-02 Chủ chuỗi tra cứu và xem chi tiết hồ sơ mọi chi nhánh (BR-F2-10)
       - TC-F2.3.1-02a `F1RegistrationIntegrationTest#listGetsBatchEmailsThroughRealF1AndIncludesUnlinkedProfile`
       - TC-F2.3.1-02b `MemberApiIntegrationTest#searchScopesBothRowsAndCountAndIncludesUnlinkedProfiles`
@@ -432,6 +412,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F2.4.1-01c `MemberApiIntegrationTest#updateSamePhoneAndDisableRevokeAndActivate`
       - TC-F2.4.1-01d `MemberServiceTest#editingProfileWithoutStatusTransitionDoesNotDisableOrActivateAccount`
       - TC-F2.4.1-01e `features/members/components/MemberFormModal.test.tsx › TC-F2.4.1-01e: sửa hồ sơ gửi đầy đủ trạng thái và giữ giá tr`
+      - TC-F2.4.1-01f `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01l, TC-F2.4.1-01f: giữ trang khi sửa và về trang `
     - AC-F2.4.1-02 Từ chối trùng số điện thoại, thiếu trạng thái hoặc hồ sơ ngoài phạm vi (BR-F2-06, BR-F2-10)
       - TC-F2.4.1-02a `MemberApiIntegrationTest#createAndUpdateRejectTodayOrFutureBirthDateWithoutChanges`
       - TC-F2.4.1-02b `MemberApiIntegrationTest#invalidNamesAreRejectedByRequestValidationOnCreateAndUpdate`
@@ -447,6 +428,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F2.4.1-03e `MemberApiIntegrationTest#updateSamePhoneAndDisableRevokeAndActivate`
       - TC-F2.4.1-03f `MemberApiIntegrationTest#failedAccountOperationRollsBackMemberUserAndTokens`
       - TC-F2.4.1-03g `MemberServiceTest#failedAccountTransitionDoesNotMutateNamePhoneOrStatus`
+      - TC-F2.4.1-03h `features/members/components/MemberFormModal.test.tsx › TC-F2.4.1-03h: hiện cảnh báo khi ngừng hồ sơ đang hoạt động `
     - AC-F2.4.1-04 Kích hoạt lại hồ sơ khôi phục tài khoản nhưng không khôi phục token cũ và không gỡ khóa tạm (BR-F2-08)
       - TC-F2.4.1-04a `AccountServiceTest#activateAccountIfDisabledChiMoTaiKhoanDisabledKhongMoLocked`
       - TC-F2.4.1-04b `F1RegistrationIntegrationTest#disablingRevokesAllMemberSessionsAndReactivationDoesNotRestoreOldTokens`
@@ -492,11 +474,22 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F2.4.2-08b `MemberAvatarIntegrationTest#profileResponsesReflectAvatarPresence`
       - TC-F2.4.2-08b `features/members/components/MemberFormModal.test.tsx › TC-F2.4.2-08b: mở hồ sơ chưa có ảnh thì hiện chữ cái đầu và `
 - **UC-F2.5** Ghi nhận và xem lịch sử chỉ số cơ thể (`body_metrics`)
-  - **US-F2.5.1** Chỉ số cơ thể (#128)
-    - AC-F2.5.1-01 Ghi chỉ số cơ thể thành công với ít nhất một chỉ số (BR-F2-12) ❌ chưa có TC
-    - AC-F2.5.1-02 Từ chối dữ liệu chỉ số cơ thể không hợp lệ (BR-F2-12) ❌ chưa có TC
-    - AC-F2.5.1-03 Xem lịch sử chỉ số cơ thể sắp xếp mới nhất trước (BR-F2-12) ❌ chưa có TC
-    - AC-F2.5.1-04 Phân quyền ghi và xem chỉ số cơ thể theo vai trò, chi nhánh và quan hệ PT (BR-F2-10, BR-F2-12) ❌ chưa có TC
+  - **US-F2.5.1** Chỉ số cơ thể (#128) ✅ mọi AC có TC
+    - AC-F2.5.1-01 Ghi chỉ số cơ thể thành công với ít nhất một chỉ số (BR-F2-12)
+      - TC-F2.5.1-01a `BodyMetricApiIntegrationTest#receptionistRecords`
+      - TC-F2.5.1-01b `BodyMetricApiIntegrationTest#trainerRecordsForStudent`
+      - TC-F2.5.1-01c `features/trainer/pages/TrainerStudentsPage.test.tsx › TC-F2.5.1-01c: xem lịch sử và thêm chỉ số cơ thể, lỗi 400 dư`
+    - AC-F2.5.1-02 Từ chối dữ liệu chỉ số cơ thể không hợp lệ (BR-F2-12)
+      - TC-F2.5.1-02a `BodyMetricApiIntegrationTest#noMetric`
+      - TC-F2.5.1-02b `BodyMetricApiIntegrationTest#futureDate`
+      - TC-F2.5.1-02c `BodyMetricApiIntegrationTest#invalidInput`
+    - AC-F2.5.1-03 Xem lịch sử chỉ số cơ thể sắp xếp mới nhất trước (BR-F2-12)
+      - TC-F2.5.1-03a `BodyMetricApiIntegrationTest#historySorted`
+    - AC-F2.5.1-04 Phân quyền ghi và xem chỉ số cơ thể theo vai trò, chi nhánh và quan hệ PT (BR-F2-10, BR-F2-12)
+      - TC-F2.5.1-04a `BodyMetricApiIntegrationTest#trainerNotTeaching`
+      - TC-F2.5.1-04b `BodyMetricApiIntegrationTest#staffScope`
+      - TC-F2.5.1-04c `BodyMetricApiIntegrationTest#memberSeesOnlyOwn`
+      - TC-F2.5.1-04d `BodyMetricApiIntegrationTest#historyScopes`
 
 ### F3
 
@@ -504,6 +497,7 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
   - **US-F3.1.1** Xem danh mục gói (nội bộ) (#129) ✅ mọi AC có TC
     - AC-F3.1.1-01 Nhân viên chi nhánh chỉ thấy gói của chi nhánh mình và gói toàn chuỗi (BR-F3-01)
       - TC-F3.1.1-01a `PackageCatalogIntegrationTest#scopesRowsAndCountAndIgnoresClientBranch`
+      - TC-F3.1.1-01b `features/packages/pages/PackagesPage.test.tsx › TC-F3.1.1-01b: chỉ hiện danh mục rỗng sau khi tải xong`
     - AC-F3.1.1-02 Lọc, sắp xếp và phân trang
       - TC-F3.1.1-02a `PackageCatalogIntegrationTest#defaultActiveAndOrderingMatchContract`
       - TC-F3.1.1-02b `PackageCatalogIntegrationTest#inactiveFilterAndEmptyResults`
@@ -1408,29 +1402,73 @@ Một US chỉ đủ điều kiện nghiệm thu và đóng khi không còn AC n
       - TC-F9.3.1-10c `PtSessionCompletionApiIntegrationTest#otherRolesForbidden`
 - **UC-F9.4** Soạn giáo án
   - **US-F9.4.1** Soạn giáo án (#167)
-    - AC-F9.4.1-01 Soạn giáo án cho học viên có buổi PT với mình (BR-F9.10) ❌ chưa có TC
+    - AC-F9.4.1-01 Soạn giáo án cho học viên có buổi PT với mình (BR-F9.10)
+      - TC-F9.4.1-01a `WorkoutPlanApiIntegrationTest#createSuccess`
+      - TC-F9.4.1-01b `WorkoutPlanApiIntegrationTest#datesAreOptional`
+      - TC-F9.4.1-01c `WorkoutPlanApiIntegrationTest#listPlans`
+      - TC-F9.4.1-01d `TrainerStudentAccessIntegrationTest#ptSessionNotCancelledCounts`
+      - TC-F9.4.1-01e `TrainerStudentAccessIntegrationTest#futureBookedPtSessionAllowsAccessAndListsStudent`
+      - TC-F9.4.1-01f `TrainerStudentAccessIntegrationTest#otherBranchButTaughtIsAllowed`
+      - TC-F9.4.1-01g `TrainerStudentAccessIntegrationTest#myStudents`
+      - TC-F9.4.1-01h `features/trainer/pages/TrainerStudentsPage.test.tsx › TC-F9.4.1-01h: chọn học viên, xem và tạo giáo án, lỗi 400 dư`
+      - TC-F9.4.1-01i `features/trainer/pages/TrainerStudentsPage.test.tsx › TC-F9.4.1-01i: phụ đề nói đúng phạm vi học viên là người có `
     - AC-F9.4.1-02 Soạn giáo án cho học viên có đặt chỗ lớp do mình dạy (BR-F9.10) ❌ chưa có TC
-    - AC-F9.4.1-03 Không soạn cho học viên mình không dạy (BR-F9.10) ❌ chưa có TC
-    - AC-F9.4.1-04 Hội viên không tồn tại ❌ chưa có TC
-    - AC-F9.4.1-05 Dữ liệu sai bị từ chối ❌ chưa có TC
-    - AC-F9.4.1-06 Từ chối người không phải PT ❌ chưa có TC
+    - AC-F9.4.1-03 Không soạn cho học viên mình không dạy (BR-F9.10)
+      - TC-F9.4.1-03a `WorkoutPlanApiIntegrationTest#notTeachingIs403`
+      - TC-F9.4.1-03b `WorkoutPlanApiIntegrationTest#listForbidden`
+      - TC-F9.4.1-03c `TrainerStudentAccessIntegrationTest#cancelledPtSessionDoesNotCount`
+      - TC-F9.4.1-03d `TrainerStudentAccessIntegrationTest#classBookingDoesNotGrantAccess`
+      - TC-F9.4.1-03e `TrainerStudentAccessIntegrationTest#substituteClassTeacherDoesNotGrantAccess`
+      - TC-F9.4.1-03f `TrainerStudentAccessIntegrationTest#classOnlyStudentForbiddenAcrossAllHealthApis`
+      - TC-F9.4.1-03g `TrainerStudentAccessIntegrationTest#otherTrainersStudentIsForbidden`
+    - AC-F9.4.1-04 Hội viên không tồn tại
+      - TC-F9.4.1-04a `WorkoutPlanApiIntegrationTest#notFoundAndOtherBranch`
+      - TC-F9.4.1-04b `TrainerStudentAccessIntegrationTest#missingOrSoftDeletedIs404`
+      - TC-F9.4.1-04c `TrainerStudentAccessIntegrationTest#otherBranchNotTaughtIs404`
+    - AC-F9.4.1-05 Dữ liệu sai bị từ chối
+      - TC-F9.4.1-05a `WorkoutPlanApiIntegrationTest#invalidInput`
+      - TC-F9.4.1-05b `WorkoutPlanApiIntegrationTest#endBeforeStart`
+    - AC-F9.4.1-06 Từ chối người không phải PT
+      - TC-F9.4.1-06a `WorkoutPlanApiIntegrationTest#otherRolesForbidden`
+      - TC-F9.4.1-06b `TrainerStudentAccessIntegrationTest#studentsEmptyAndRoles`
 - **UC-F9.5** Ghi nhật ký tập và chỉ số cơ thể
   - **US-F9.5.1** Nhật ký tập (#168)
-    - AC-F9.5.1-01 Ghi nhật ký tập cho học viên của mình (BR-F9.10, BR-F9.11) ❌ chưa có TC
+    - AC-F9.5.1-01 Ghi nhật ký tập cho học viên của mình (BR-F9.10, BR-F9.11)
+      - TC-F9.5.1-01a `WorkoutLogApiIntegrationTest#createWithoutSession`
+      - TC-F9.5.1-01b `WorkoutLogApiIntegrationTest#minimalValid`
+      - TC-F9.5.1-01c `features/trainer/pages/TrainerStudentsPage.test.tsx › TC-F9.5.1-01c: thêm nhật ký tập, hiển thị lỗi 400 dưới đúng `
     - AC-F9.5.1-02 Ghi chỉ số cơ thể, người ghi lấy từ token (BR-F9.10) ❌ chưa có TC
-    - AC-F9.5.1-03 Nhật ký gắn buổi PT phải thuộc đúng PT và hội viên (BR-F9.10) ❌ chưa có TC
-    - AC-F9.5.1-04 Dữ liệu sai bị từ chối ❌ chưa có TC
-    - AC-F9.5.1-05 Không ghi cho học viên mình không dạy, hội viên không tồn tại (BR-F9.10) ❌ chưa có TC
-    - AC-F9.5.1-06 Từ chối người không phải PT ❌ chưa có TC
+    - AC-F9.5.1-03 Nhật ký gắn buổi PT phải thuộc đúng PT và hội viên (BR-F9.10)
+      - TC-F9.5.1-03a `WorkoutLogApiIntegrationTest#createWithDoneSessionSameVnDay`
+      - TC-F9.5.1-03b `WorkoutLogApiIntegrationTest#sessionDateMismatch`
+      - TC-F9.5.1-03c `WorkoutLogApiIntegrationTest#sessionNotDone`
+      - TC-F9.5.1-03d `WorkoutLogApiIntegrationTest#sessionNotBelonging`
+      - TC-F9.5.1-03e `features/trainer/pages/TrainerStudentsPage.test.tsx › TC-F9.5.1-03e: mở trang không truyền now thì chỉ tải lịch bu`
+    - AC-F9.5.1-04 Dữ liệu sai bị từ chối
+      - TC-F9.5.1-04a `WorkoutLogApiIntegrationTest#futureDate`
+      - TC-F9.5.1-04b `WorkoutLogApiIntegrationTest#invalidInput`
+    - AC-F9.5.1-05 Không ghi cho học viên mình không dạy, hội viên không tồn tại (BR-F9.10)
+      - TC-F9.5.1-05a `WorkoutLogApiIntegrationTest#forbiddenAndNotFound`
+    - AC-F9.5.1-06 Từ chối người không phải PT
+      - TC-F9.5.1-06a `WorkoutLogApiIntegrationTest#otherRolesForbidden`
 - **UC-F9.6** Xem tiến độ học viên
-  - **US-F9.6.1** Xem tiến độ học viên (#169)
-    - AC-F9.6.1-01 Hội viên xem tiến độ của chính mình (BR-F9.12) ❌ chưa có TC
-    - AC-F9.6.1-02 PT xem tiến độ học viên mình dạy (BR-F9.10) ❌ chưa có TC
-    - AC-F9.6.1-03 Không xem tiến độ của người khác (BR-F9.10, BR-F9.12) ❌ chưa có TC
-    - AC-F9.6.1-04 Chưa có dữ liệu ❌ chưa có TC
-    - AC-F9.6.1-05 Khoảng thời gian sai ❌ chưa có TC
-    - AC-F9.6.1-06 Chỉ dựa trên dữ liệu thực, không có gợi ý AI (BR-F9.13) ❌ chưa có TC
-    - AC-F9.6.1-07 Từ chối người chưa đăng nhập hoặc vai trò khác ❌ chưa có TC
+  - **US-F9.6.1** Xem tiến độ học viên (#169) ✅ mọi AC có TC
+    - AC-F9.6.1-01 Hội viên xem tiến độ của chính mình (BR-F9.12)
+      - TC-F9.6.1-01a `ProgressApiIntegrationTest#memberSeesOnlyOwn`
+    - AC-F9.6.1-02 PT xem tiến độ học viên mình dạy (BR-F9.10)
+      - TC-F9.6.1-02a `ProgressApiIntegrationTest#trainerSeesStudentProgress`
+      - TC-F9.6.1-02b `ProgressApiIntegrationTest#defaultRange`
+    - AC-F9.6.1-03 Không xem tiến độ của người khác (BR-F9.10, BR-F9.12)
+      - TC-F9.6.1-03a `ProgressApiIntegrationTest#trainerScope`
+    - AC-F9.6.1-04 Chưa có dữ liệu
+      - TC-F9.6.1-04a `ProgressApiIntegrationTest#emptyProgress`
+      - TC-F9.6.1-04b `features/trainer/pages/TrainerStudentsPage.test.tsx › TC-F9.6.1-04b: biểu đồ tiến độ rỗng hiện chưa có dữ liệu, có`
+    - AC-F9.6.1-05 Khoảng thời gian sai
+      - TC-F9.6.1-05a `ProgressApiIntegrationTest#invalidRange`
+    - AC-F9.6.1-06 Chỉ dựa trên dữ liệu thực, không có gợi ý AI (BR-F9.13)
+      - TC-F9.6.1-06a `ProgressApiIntegrationTest#rawDataOnly`
+    - AC-F9.6.1-07 Từ chối người chưa đăng nhập hoặc vai trò khác
+      - TC-F9.6.1-07a `ProgressApiIntegrationTest#otherRoles`
 - **UC-F9.7** Hủy buổi PT
   - **US-F9.7.1** Hủy buổi PT (*(chưa có, cần trưởng nhóm tạo issue cho US-F9.7.1)*) ✅ mọi AC có TC
     - AC-F9.7.1-01 Hội viên hủy trước hạn, không mất buổi (BR-F9.16)
@@ -1705,6 +1743,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F2.3.1-01i | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `MemberApiIntegrationTest#measuresSearchOnTenThousandProfiles` |
 | TC-F2.3.1-01j | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01j: đổi trang gọi API từ 0, tìm kiếm mới trở về t` |
 | TC-F2.3.1-01k | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01k: áp dụng từ khóa đang nhập khi đổi trạng thái ` |
+| TC-F2.3.1-01l | AC-F2.3.1-01 | US-F2.3.1 | UC-F2.3 | BR-F2-05, BR-F2-06, BR-F2-09, BR-F2-10 | `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01l, TC-F2.4.1-01f: giữ trang khi sửa và về trang ` |
 | TC-F2.3.1-02a | AC-F2.3.1-02 | US-F2.3.1 | UC-F2.3 | BR-F2-10, BR-F2-05, BR-F2-06, BR-F2-09 | `F1RegistrationIntegrationTest#listGetsBatchEmailsThroughRealF1AndIncludesUnlinkedProfile` |
 | TC-F2.3.1-02b | AC-F2.3.1-02 | US-F2.3.1 | UC-F2.3 | BR-F2-10, BR-F2-05, BR-F2-06, BR-F2-09 | `MemberApiIntegrationTest#searchScopesBothRowsAndCountAndIncludesUnlinkedProfiles` |
 | TC-F2.3.1-03a | AC-F2.3.1-03 | US-F2.3.1 | UC-F2.3 | BR-F2-09, BR-F2-10, BR-F2-05, BR-F2-06 | `F1RegistrationIntegrationTest#realF1RegistrationCreatesProfileAndJwtCanReadOwnF2Profile` |
@@ -1716,6 +1755,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F2.4.1-01c | AC-F2.4.1-01 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberApiIntegrationTest#updateSamePhoneAndDisableRevokeAndActivate` |
 | TC-F2.4.1-01d | AC-F2.4.1-01 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberServiceTest#editingProfileWithoutStatusTransitionDoesNotDisableOrActivateAccount` |
 | TC-F2.4.1-01e | AC-F2.4.1-01 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `features/members/components/MemberFormModal.test.tsx › TC-F2.4.1-01e: sửa hồ sơ gửi đầy đủ trạng thái và giữ giá tr` |
+| TC-F2.4.1-01f | AC-F2.4.1-01 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `features/members/pages/MembersPage.test.tsx › TC-F2.3.1-01l, TC-F2.4.1-01f: giữ trang khi sửa và về trang ` |
 | TC-F2.4.1-02a | AC-F2.4.1-02 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberApiIntegrationTest#createAndUpdateRejectTodayOrFutureBirthDateWithoutChanges` |
 | TC-F2.4.1-02b | AC-F2.4.1-02 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberApiIntegrationTest#invalidNamesAreRejectedByRequestValidationOnCreateAndUpdate` |
 | TC-F2.4.1-02c | AC-F2.4.1-02 | US-F2.4.1 | UC-F2.4 | BR-F2-06, BR-F2-10, BR-F2-08, BR-F2-09 | `MemberApiIntegrationTest#missingUpdateStatusIsRejectedByRequestValidation` |
@@ -1729,6 +1769,7 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F2.4.1-03e | AC-F2.4.1-03 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-09, BR-F2-06, BR-F2-10 | `MemberApiIntegrationTest#updateSamePhoneAndDisableRevokeAndActivate` |
 | TC-F2.4.1-03f | AC-F2.4.1-03 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-09, BR-F2-06, BR-F2-10 | `MemberApiIntegrationTest#failedAccountOperationRollsBackMemberUserAndTokens` |
 | TC-F2.4.1-03g | AC-F2.4.1-03 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-09, BR-F2-06, BR-F2-10 | `MemberServiceTest#failedAccountTransitionDoesNotMutateNamePhoneOrStatus` |
+| TC-F2.4.1-03h | AC-F2.4.1-03 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-09, BR-F2-06, BR-F2-10 | `features/members/components/MemberFormModal.test.tsx › TC-F2.4.1-03h: hiện cảnh báo khi ngừng hồ sơ đang hoạt động ` |
 | TC-F2.4.1-04a | AC-F2.4.1-04 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-06, BR-F2-09, BR-F2-10 | `AccountServiceTest#activateAccountIfDisabledChiMoTaiKhoanDisabledKhongMoLocked` |
 | TC-F2.4.1-04b | AC-F2.4.1-04 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-06, BR-F2-09, BR-F2-10 | `F1RegistrationIntegrationTest#disablingRevokesAllMemberSessionsAndReactivationDoesNotRestoreOldTokens` |
 | TC-F2.4.1-04c | AC-F2.4.1-04 | US-F2.4.1 | UC-F2.4 | BR-F2-08, BR-F2-06, BR-F2-09, BR-F2-10 | `F1RegistrationIntegrationTest#activatingMemberDoesNotUnlockCurrentlyLockedAccount` |
@@ -1762,7 +1803,19 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F2.4.2-08a | AC-F2.4.2-08 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `features/members/components/MemberAvatar.test.tsx › TC-F2.4.2-08a: hiện chữ cái đầu của tên khi hasAvatar là fal` |
 | TC-F2.4.2-08b | AC-F2.4.2-08 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `MemberAvatarIntegrationTest#profileResponsesReflectAvatarPresence` |
 | TC-F2.4.2-08b | AC-F2.4.2-08 | US-F2.4.2 | UC-F2.4 | BR-F2-04, BR-F2-01, BR-F2-02, BR-F2-03 | `features/members/components/MemberFormModal.test.tsx › TC-F2.4.2-08b: mở hồ sơ chưa có ảnh thì hiện chữ cái đầu và ` |
+| TC-F2.5.1-01a | AC-F2.5.1-01 | US-F2.5.1 | UC-F2.5 | BR-F2-12, BR-F2-10 | `BodyMetricApiIntegrationTest#receptionistRecords` |
+| TC-F2.5.1-01b | AC-F2.5.1-01 | US-F2.5.1 | UC-F2.5 | BR-F2-12, BR-F2-10 | `BodyMetricApiIntegrationTest#trainerRecordsForStudent` |
+| TC-F2.5.1-01c | AC-F2.5.1-01 | US-F2.5.1 | UC-F2.5 | BR-F2-12, BR-F2-10 | `features/trainer/pages/TrainerStudentsPage.test.tsx › TC-F2.5.1-01c: xem lịch sử và thêm chỉ số cơ thể, lỗi 400 dư` |
+| TC-F2.5.1-02a | AC-F2.5.1-02 | US-F2.5.1 | UC-F2.5 | BR-F2-12, BR-F2-10 | `BodyMetricApiIntegrationTest#noMetric` |
+| TC-F2.5.1-02b | AC-F2.5.1-02 | US-F2.5.1 | UC-F2.5 | BR-F2-12, BR-F2-10 | `BodyMetricApiIntegrationTest#futureDate` |
+| TC-F2.5.1-02c | AC-F2.5.1-02 | US-F2.5.1 | UC-F2.5 | BR-F2-12, BR-F2-10 | `BodyMetricApiIntegrationTest#invalidInput` |
+| TC-F2.5.1-03a | AC-F2.5.1-03 | US-F2.5.1 | UC-F2.5 | BR-F2-12, BR-F2-10 | `BodyMetricApiIntegrationTest#historySorted` |
+| TC-F2.5.1-04a | AC-F2.5.1-04 | US-F2.5.1 | UC-F2.5 | BR-F2-10, BR-F2-12 | `BodyMetricApiIntegrationTest#trainerNotTeaching` |
+| TC-F2.5.1-04b | AC-F2.5.1-04 | US-F2.5.1 | UC-F2.5 | BR-F2-10, BR-F2-12 | `BodyMetricApiIntegrationTest#staffScope` |
+| TC-F2.5.1-04c | AC-F2.5.1-04 | US-F2.5.1 | UC-F2.5 | BR-F2-10, BR-F2-12 | `BodyMetricApiIntegrationTest#memberSeesOnlyOwn` |
+| TC-F2.5.1-04d | AC-F2.5.1-04 | US-F2.5.1 | UC-F2.5 | BR-F2-10, BR-F2-12 | `BodyMetricApiIntegrationTest#historyScopes` |
 | TC-F3.1.1-01a | AC-F3.1.1-01 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#scopesRowsAndCountAndIgnoresClientBranch` |
+| TC-F3.1.1-01b | AC-F3.1.1-01 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `features/packages/pages/PackagesPage.test.tsx › TC-F3.1.1-01b: chỉ hiện danh mục rỗng sau khi tải xong` |
 | TC-F3.1.1-02a | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#defaultActiveAndOrderingMatchContract` |
 | TC-F3.1.1-02b | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#inactiveFilterAndEmptyResults` |
 | TC-F3.1.1-02c | AC-F3.1.1-02 | US-F3.1.1 | UC-F3.1 | BR-F3-01 | `PackageCatalogIntegrationTest#maximumSizeAndPagePastEndAreValid` |
@@ -2306,6 +2359,50 @@ Dùng khi một kiểm thử báo lỗi: tìm mã TC để biết nó vi phạm 
 | TC-F9.3.1-10a | AC-F9.3.1-10 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#otherTrainerForbidden` |
 | TC-F9.3.1-10b | AC-F9.3.1-10 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#otherBranchManagerForbidden` |
 | TC-F9.3.1-10c | AC-F9.3.1-10 | US-F9.3.1 | UC-F9.3 | BR-F9.18, BR-F9.19 | `PtSessionCompletionApiIntegrationTest#otherRolesForbidden` |
+| TC-F9.4.1-01a | AC-F9.4.1-01 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `WorkoutPlanApiIntegrationTest#createSuccess` |
+| TC-F9.4.1-01b | AC-F9.4.1-01 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `WorkoutPlanApiIntegrationTest#datesAreOptional` |
+| TC-F9.4.1-01c | AC-F9.4.1-01 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `WorkoutPlanApiIntegrationTest#listPlans` |
+| TC-F9.4.1-01d | AC-F9.4.1-01 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `TrainerStudentAccessIntegrationTest#ptSessionNotCancelledCounts` |
+| TC-F9.4.1-01e | AC-F9.4.1-01 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `TrainerStudentAccessIntegrationTest#futureBookedPtSessionAllowsAccessAndListsStudent` |
+| TC-F9.4.1-01f | AC-F9.4.1-01 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `TrainerStudentAccessIntegrationTest#otherBranchButTaughtIsAllowed` |
+| TC-F9.4.1-01g | AC-F9.4.1-01 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `TrainerStudentAccessIntegrationTest#myStudents` |
+| TC-F9.4.1-01h | AC-F9.4.1-01 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `features/trainer/pages/TrainerStudentsPage.test.tsx › TC-F9.4.1-01h: chọn học viên, xem và tạo giáo án, lỗi 400 dư` |
+| TC-F9.4.1-01i | AC-F9.4.1-01 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `features/trainer/pages/TrainerStudentsPage.test.tsx › TC-F9.4.1-01i: phụ đề nói đúng phạm vi học viên là người có ` |
+| TC-F9.4.1-03a | AC-F9.4.1-03 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `WorkoutPlanApiIntegrationTest#notTeachingIs403` |
+| TC-F9.4.1-03b | AC-F9.4.1-03 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `WorkoutPlanApiIntegrationTest#listForbidden` |
+| TC-F9.4.1-03c | AC-F9.4.1-03 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `TrainerStudentAccessIntegrationTest#cancelledPtSessionDoesNotCount` |
+| TC-F9.4.1-03d | AC-F9.4.1-03 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `TrainerStudentAccessIntegrationTest#classBookingDoesNotGrantAccess` |
+| TC-F9.4.1-03e | AC-F9.4.1-03 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `TrainerStudentAccessIntegrationTest#substituteClassTeacherDoesNotGrantAccess` |
+| TC-F9.4.1-03f | AC-F9.4.1-03 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `TrainerStudentAccessIntegrationTest#classOnlyStudentForbiddenAcrossAllHealthApis` |
+| TC-F9.4.1-03g | AC-F9.4.1-03 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `TrainerStudentAccessIntegrationTest#otherTrainersStudentIsForbidden` |
+| TC-F9.4.1-04a | AC-F9.4.1-04 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `WorkoutPlanApiIntegrationTest#notFoundAndOtherBranch` |
+| TC-F9.4.1-04b | AC-F9.4.1-04 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `TrainerStudentAccessIntegrationTest#missingOrSoftDeletedIs404` |
+| TC-F9.4.1-04c | AC-F9.4.1-04 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `TrainerStudentAccessIntegrationTest#otherBranchNotTaughtIs404` |
+| TC-F9.4.1-05a | AC-F9.4.1-05 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `WorkoutPlanApiIntegrationTest#invalidInput` |
+| TC-F9.4.1-05b | AC-F9.4.1-05 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `WorkoutPlanApiIntegrationTest#endBeforeStart` |
+| TC-F9.4.1-06a | AC-F9.4.1-06 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `WorkoutPlanApiIntegrationTest#otherRolesForbidden` |
+| TC-F9.4.1-06b | AC-F9.4.1-06 | US-F9.4.1 | UC-F9.4 | BR-F9.10 | `TrainerStudentAccessIntegrationTest#studentsEmptyAndRoles` |
+| TC-F9.5.1-01a | AC-F9.5.1-01 | US-F9.5.1 | UC-F9.5 | BR-F9.10, BR-F9.11 | `WorkoutLogApiIntegrationTest#createWithoutSession` |
+| TC-F9.5.1-01b | AC-F9.5.1-01 | US-F9.5.1 | UC-F9.5 | BR-F9.10, BR-F9.11 | `WorkoutLogApiIntegrationTest#minimalValid` |
+| TC-F9.5.1-01c | AC-F9.5.1-01 | US-F9.5.1 | UC-F9.5 | BR-F9.10, BR-F9.11 | `features/trainer/pages/TrainerStudentsPage.test.tsx › TC-F9.5.1-01c: thêm nhật ký tập, hiển thị lỗi 400 dưới đúng ` |
+| TC-F9.5.1-03a | AC-F9.5.1-03 | US-F9.5.1 | UC-F9.5 | BR-F9.10, BR-F9.11 | `WorkoutLogApiIntegrationTest#createWithDoneSessionSameVnDay` |
+| TC-F9.5.1-03b | AC-F9.5.1-03 | US-F9.5.1 | UC-F9.5 | BR-F9.10, BR-F9.11 | `WorkoutLogApiIntegrationTest#sessionDateMismatch` |
+| TC-F9.5.1-03c | AC-F9.5.1-03 | US-F9.5.1 | UC-F9.5 | BR-F9.10, BR-F9.11 | `WorkoutLogApiIntegrationTest#sessionNotDone` |
+| TC-F9.5.1-03d | AC-F9.5.1-03 | US-F9.5.1 | UC-F9.5 | BR-F9.10, BR-F9.11 | `WorkoutLogApiIntegrationTest#sessionNotBelonging` |
+| TC-F9.5.1-03e | AC-F9.5.1-03 | US-F9.5.1 | UC-F9.5 | BR-F9.10, BR-F9.11 | `features/trainer/pages/TrainerStudentsPage.test.tsx › TC-F9.5.1-03e: mở trang không truyền now thì chỉ tải lịch bu` |
+| TC-F9.5.1-04a | AC-F9.5.1-04 | US-F9.5.1 | UC-F9.5 | BR-F9.10, BR-F9.11 | `WorkoutLogApiIntegrationTest#futureDate` |
+| TC-F9.5.1-04b | AC-F9.5.1-04 | US-F9.5.1 | UC-F9.5 | BR-F9.10, BR-F9.11 | `WorkoutLogApiIntegrationTest#invalidInput` |
+| TC-F9.5.1-05a | AC-F9.5.1-05 | US-F9.5.1 | UC-F9.5 | BR-F9.10, BR-F9.11 | `WorkoutLogApiIntegrationTest#forbiddenAndNotFound` |
+| TC-F9.5.1-06a | AC-F9.5.1-06 | US-F9.5.1 | UC-F9.5 | BR-F9.10, BR-F9.11 | `WorkoutLogApiIntegrationTest#otherRolesForbidden` |
+| TC-F9.6.1-01a | AC-F9.6.1-01 | US-F9.6.1 | UC-F9.6 | BR-F9.12, BR-F9.10, BR-F9.13 | `ProgressApiIntegrationTest#memberSeesOnlyOwn` |
+| TC-F9.6.1-02a | AC-F9.6.1-02 | US-F9.6.1 | UC-F9.6 | BR-F9.10, BR-F9.12, BR-F9.13 | `ProgressApiIntegrationTest#trainerSeesStudentProgress` |
+| TC-F9.6.1-02b | AC-F9.6.1-02 | US-F9.6.1 | UC-F9.6 | BR-F9.10, BR-F9.12, BR-F9.13 | `ProgressApiIntegrationTest#defaultRange` |
+| TC-F9.6.1-03a | AC-F9.6.1-03 | US-F9.6.1 | UC-F9.6 | BR-F9.10, BR-F9.12, BR-F9.13 | `ProgressApiIntegrationTest#trainerScope` |
+| TC-F9.6.1-04a | AC-F9.6.1-04 | US-F9.6.1 | UC-F9.6 | BR-F9.10, BR-F9.12, BR-F9.13 | `ProgressApiIntegrationTest#emptyProgress` |
+| TC-F9.6.1-04b | AC-F9.6.1-04 | US-F9.6.1 | UC-F9.6 | BR-F9.10, BR-F9.12, BR-F9.13 | `features/trainer/pages/TrainerStudentsPage.test.tsx › TC-F9.6.1-04b: biểu đồ tiến độ rỗng hiện chưa có dữ liệu, có` |
+| TC-F9.6.1-05a | AC-F9.6.1-05 | US-F9.6.1 | UC-F9.6 | BR-F9.10, BR-F9.12, BR-F9.13 | `ProgressApiIntegrationTest#invalidRange` |
+| TC-F9.6.1-06a | AC-F9.6.1-06 | US-F9.6.1 | UC-F9.6 | BR-F9.13, BR-F9.10, BR-F9.12 | `ProgressApiIntegrationTest#rawDataOnly` |
+| TC-F9.6.1-07a | AC-F9.6.1-07 | US-F9.6.1 | UC-F9.6 | BR-F9.10, BR-F9.12, BR-F9.13 | `ProgressApiIntegrationTest#otherRoles` |
 | TC-F9.7.1-01a | AC-F9.7.1-01 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#memberCancelsAtExactlyTwelveHours` |
 | TC-F9.7.1-02a | AC-F9.7.1-02 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#memberCancelsAtExactlyTwelveHours` |
 | TC-F9.7.1-02b | AC-F9.7.1-02 | US-F9.7.1 | UC-F9.7 | BR-F9.16, BR-F9.17 | `PtSessionCancelApiIntegrationTest#memberCancelsTooLate` |
@@ -2383,10 +2480,10 @@ Có 265 kiểm thử chưa mang mã TC. Gồm kiểm thử thuần kỹ thuật 
 | `frontend/src/features/members/pages/MembersPage.test.tsx` | 4 |
 | `frontend/src/features/packages/api/packages.test.ts` | 2 |
 | `frontend/src/features/packages/pages/SellPackagePage.test.tsx` | 3 |
-| `frontend/src/features/shared/use-remote-query.test.ts` | 2 |
 | `frontend/src/layouts/member-menu.test.ts` | 2 |
 | `frontend/src/layouts/staff-menu.test.ts` | 2 |
 | `frontend/src/layouts/UserMenu.test.tsx` | 1 |
 | `frontend/src/routes/ProtectedRoute.test.tsx` | 2 |
 | `frontend/src/routes/route-access.test.ts` | 5 |
 | `frontend/src/services/http.test.ts` | 12 |
+| `frontend/src/services/use-remote-query.test.ts` | 2 |

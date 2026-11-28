@@ -1,4 +1,4 @@
-import type { PageResponse } from '../../shared/types'
+import type { PageResponse } from '../../../services/list-types'
 
 export type CheckinPackageType = 'TIME' | 'SESSION' | 'PT'
 

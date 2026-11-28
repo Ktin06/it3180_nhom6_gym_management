@@ -4,9 +4,9 @@ import { type ChangeEvent, useCallback, useContext, useEffect, useRef, useState 
 import axios from 'axios'
 import { AuthContext } from '../../../auth/AuthContext'
 import { canManageMembers } from '../../../auth/roles'
-import { errorMessage } from '../../shared/api-error'
+import { errorMessage } from '../../../services/api-error'
 import type { Gender, MemberDetail, MembersGateway } from '../types/member'
-import { normalizePhone } from '../phone'
+import { isValidPhone } from '../../../services/phone'
 import { MemberAvatar } from './MemberAvatar'
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024
@@ -448,8 +448,7 @@ export function MemberFormModal({
             { required: true, message: 'Vui lòng nhập số điện thoại.' },
             {
               validator: (_, value: string | undefined) => {
-                const phone = normalizePhone(value ?? '')
-                return !value || /^0\d{9}$/.test(phone)
+                return !value || isValidPhone(value)
                   ? Promise.resolve()
                   : Promise.reject(new Error('Số điện thoại không hợp lệ.'))
               },
@@ -484,7 +483,7 @@ export function MemberFormModal({
             />
           </Form.Item>
         )}
-        {member && status === 'INACTIVE' && (
+        {member?.status === 'ACTIVE' && status === 'INACTIVE' && accountInfo.userId !== null && (
           <Alert
             type="warning"
             showIcon

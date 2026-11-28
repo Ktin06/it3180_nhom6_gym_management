@@ -37,6 +37,39 @@ afterEach(() => {
 })
 
 describe('form hồ sơ hội viên', () => {
+  it('TC-F2.4.1-03h: hiện cảnh báo khi ngừng hồ sơ đang hoạt động có tài khoản', async () => {
+    const user = userEvent.setup()
+    const api = createMockMembersApi()
+    const member = { ...(await api.detail(30)), status: 'ACTIVE' as const, userId: 42 }
+    render(<MemberFormModal member={member} api={api} onClose={vi.fn()} onSaved={vi.fn()} />)
+    const warning = /sẽ đồng thời vô hiệu hóa tài khoản liên kết/
+    expect(screen.queryByText(warning)).not.toBeInTheDocument()
+
+    await user.click(screen.getByLabelText('Trạng thái'))
+    await user.click(await screen.findByTitle('Ngừng hoạt động'))
+    expect(await screen.findByText(warning)).toBeInTheDocument()
+  })
+
+  it.each([
+    ['ACTIVE', null],
+    ['INACTIVE', 42],
+  ] as const)(
+    'ẩn cảnh báo liên kết khi hồ sơ có trạng thái %s và tài khoản %s',
+    async (status, userId) => {
+      const user = userEvent.setup()
+      const api = createMockMembersApi()
+      const member = { ...(await api.detail(30)), status, userId }
+      render(<MemberFormModal member={member} api={api} onClose={vi.fn()} onSaved={vi.fn()} />)
+      const warning = /sẽ đồng thời vô hiệu hóa tài khoản liên kết/
+      expect(screen.queryByText(warning)).not.toBeInTheDocument()
+      if (status === 'ACTIVE') {
+        await user.click(screen.getByLabelText('Trạng thái'))
+        await user.click(await screen.findByTitle('Ngừng hoạt động'))
+      }
+      expect(screen.queryByText(warning)).not.toBeInTheDocument()
+    },
+  )
+
   it('TC-F2.1.1-02h: hiển thị lỗi validation do backend trả về ngay dưới trường tương ứng', async () => {
     const user = userEvent.setup()
     const api = createMockMembersApi()
@@ -107,7 +140,7 @@ describe('form hồ sơ hội viên', () => {
     const update = vi.spyOn(api, 'update')
     const member = { ...(await api.detail(1)), dob: '2000-02-20', gender: 'OTHER' as const }
     render(<MemberFormModal member={member} api={api} onClose={vi.fn()} onSaved={vi.fn()} />)
-    expect(screen.getByText(/đồng thời vô hiệu hóa/)).toBeInTheDocument()
+    expect(screen.queryByText(/đồng thời vô hiệu hóa/)).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Lưu hồ sơ' }))
     await waitFor(() =>
       expect(update).toHaveBeenCalledWith(1, {
