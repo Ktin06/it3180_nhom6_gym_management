@@ -63,4 +63,32 @@ class StaffServiceTest {
         assertThatThrownBy(() -> service.requireBranchId(0L)).isInstanceOf(AccessDeniedException.class);
         verifyNoInteractions(repository, branches);
     }
+
+    @Test
+    @DisplayName("US-F9.1.1 KB1: nhân viên ACTIVE ở chi nhánh ACTIVE lấy được staffId và branchId qua StaffService")
+    void requireActiveStaffReturnsIdentity() {
+        when(repository.findActiveIdentityByUserId(12L))
+            .thenReturn(Optional.of(new StaffLookupRepository.StaffIdentityRow(34L, 7L)));
+        when(branches.isActive(7L)).thenReturn(true);
+
+        StaffService.StaffIdentity identity = service.requireActiveStaff(12L);
+        assertThat(identity.staffId()).isEqualTo(34L);
+        assertThat(identity.branchId()).isEqualTo(7L);
+        assertThat(service.requireStaffId(12L)).isEqualTo(34L);
+    }
+
+    @Test
+    @DisplayName("US-F9.1.1 E2: thiếu dòng staff ACTIVE hoặc chi nhánh ngừng thì requireActiveStaff trả 403")
+    void requireActiveStaffRejectsMissingOrInactiveBranch() {
+        when(repository.findActiveIdentityByUserId(1L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> service.requireActiveStaff(1L)).isInstanceOf(AccessDeniedException.class);
+
+        when(repository.findActiveIdentityByUserId(5L))
+            .thenReturn(Optional.of(new StaffLookupRepository.StaffIdentityRow(9L, 7L)));
+        when(branches.isActive(7L)).thenReturn(false);
+        assertThatThrownBy(() -> service.requireActiveStaff(5L)).isInstanceOf(AccessDeniedException.class);
+
+        assertThatThrownBy(() -> service.requireActiveStaff(null)).isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> service.requireActiveStaff(0L)).isInstanceOf(AccessDeniedException.class);
+    }
 }

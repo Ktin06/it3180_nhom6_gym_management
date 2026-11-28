@@ -80,6 +80,13 @@ export const STAFF_MENU: StaffMenuItem[] = [
     icon: <CalendarOutlined />,
     ready: true,
   },
+  // S2-20.2: giao diện học viên của huấn luyện viên (F9)
+  {
+    path: '/pt/hoc-vien',
+    label: 'Học viên (F9)',
+    icon: <TeamOutlined />,
+    ready: true,
+  },
   {
     path: '/branches',
     label: 'Chi nhánh (F18)',
